@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { NativeEventEmitter, NativeModules, StatusBar } from 'react-native';
 import WebView from 'react-native-webview';
 import color from 'color';
@@ -67,13 +67,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
     webViewRef,
   } = useChapterContext();
   const theme = useTheme();
-  const readerSettings = useMemo(
+  // Use state for settings so they update when MMKV changes
+  const [readerSettings, setReaderSettings] = useState<ChapterReaderSettings>(
     () =>
       getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
       initialChapterReaderSettings,
-    // needed to preserve settings during chapter change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
   );
   const chapterGeneralSettings = useMemo(
     () =>
@@ -83,6 +81,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
   );
+  
+  // Update readerSettings when chapter changes
+  useEffect(() => {
+    setReaderSettings(
+      getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
+        initialChapterReaderSettings,
+    );
+  }, [chapter.id]);
   const batteryLevel = useMemo(() => getBatteryLevelSync(), []);
   const plugin = getPlugin(novel?.pluginId);
   const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
@@ -151,10 +157,33 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
     const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
       switch (key) {
         case CHAPTER_READER_SETTINGS:
+          // Update local state with new settings
+          const newSettings =
+            getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
+            initialChapterReaderSettings;
+          setReaderSettings(newSettings);
+          
+          // Stop any currently playing speech
+          Speech.stop();
+          
+          // Update WebView settings
           webViewRef.current?.injectJavaScript(
-            `reader.readerSettings.val = ${MMKVStorage.getString(
+            `
+            reader.readerSettings.val = ${MMKVStorage.getString(
               CHAPTER_READER_SETTINGS,
-            )}`,
+            )};
+            // Auto-restart TTS if currently reading
+            if (window.tts && tts.reading) {
+              const currentElement = tts.currentElement;
+              const wasReading = tts.reading;
+              tts.stop();
+              if (wasReading) {
+                setTimeout(() => {
+                  tts.start(currentElement);
+                }, 100);
+              }
+            }
+            `,
           );
           break;
         case CHAPTER_GENERAL_SETTINGS:

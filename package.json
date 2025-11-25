@@ -1,6 +1,6 @@
 {
   "name": "lnreader",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "scripts": {
     "dev:android": "pnpm run generate:env:debug && react-native run-android --appIdSuffix \"debug\" --active-arch-only",

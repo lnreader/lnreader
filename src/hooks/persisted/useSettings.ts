@@ -110,6 +110,8 @@ export interface ChapterReaderSettings {
     voice?: Voice;
     rate?: number;
     pitch?: number;
+    autoPageAdvance?: boolean;
+    scrollToTop?: boolean;
   };
   epubLocation: string;
   epubUseAppTheme: boolean;
@@ -180,7 +182,7 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   removeExtraParagraphSpacing: false,
   bionicReading: false,
   tapToScroll: false,
-  TTSEnable: false,
+  TTSEnable: true,
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
@@ -197,6 +199,8 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   tts: {
     rate: 1,
     pitch: 1,
+    autoPageAdvance: false,
+    scrollToTop: true,
   },
   epubLocation: '',
   epubUseAppTheme: false,
@@ -268,8 +272,22 @@ export const useChapterGeneralSettings = () => {
 };
 
 export const useChapterReaderSettings = () => {
-  const [chapterReaderSettings = initialChapterReaderSettings, setSettings] =
+  const [storedSettings = initialChapterReaderSettings, setSettings] =
     useMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+
+  // Ensure TTS settings have proper defaults (migration for existing users)
+  const chapterReaderSettings = {
+    ...storedSettings,
+    tts: {
+      ...initialChapterReaderSettings.tts,
+      ...storedSettings.tts,
+      // Explicitly ensure these defaults if undefined
+      autoPageAdvance: storedSettings.tts?.autoPageAdvance ?? false,
+      scrollToTop: storedSettings.tts?.scrollToTop ?? true,
+      rate: storedSettings.tts?.rate ?? 1,
+      pitch: storedSettings.tts?.pitch ?? 1,
+    },
+  };
 
   const setChapterReaderSettings = (values: Partial<ChapterReaderSettings>) =>
     setSettings({ ...chapterReaderSettings, ...values });

@@ -24,27 +24,10 @@ const AccessibilityTab: React.FC = () => {
     showBatteryAndTime = false,
     keepScreenOn = true,
     bionicReading = false,
-    TTSEnable = true,
     setChapterGeneralSettings,
   } = useChapterGeneralSettings();
 
-  const { tts, setChapterReaderSettings } = useChapterReaderSettings();
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const {
-    value: voiceModalVisible,
-    setTrue: showVoiceModal,
-    setFalse: hideVoiceModal,
-  } = useBoolean();
-
-  useEffect(() => {
-    getAvailableVoicesAsync().then(res => {
-      res.sort((a, b) => a.name.localeCompare(b.name));
-      setVoices([{ name: 'System', language: 'System' } as Voice, ...res]);
-    });
-  }, []);
-
   return (
-    <>
       <BottomSheetScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -104,93 +87,8 @@ const AccessibilityTab: React.FC = () => {
           />
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.ttsHeader}>
-            <List.SubHeader theme={theme}>Text to Speech</List.SubHeader>
-            <Switch
-              value={TTSEnable}
-              onValueChange={() => {
-                setChapterGeneralSettings({
-                  TTSEnable: !TTSEnable,
-                });
-              }}
-            />
-          </View>
-          {TTSEnable && (
-            <>
-              <List.Item
-                title="TTS voice"
-                description={tts?.voice?.name || 'System'}
-                onPress={showVoiceModal}
-                theme={theme}
-              />
-              <View style={styles.sliderSection}>
-                <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Voice rate: {tts?.rate?.toFixed(1) || '1.0'}
-                </Text>
-                <Slider
-                  style={styles.slider}
-                  value={tts?.rate || 1}
-                  minimumValue={0.1}
-                  maximumValue={5}
-                  step={0.1}
-                  minimumTrackTintColor={theme.primary}
-                  maximumTrackTintColor={theme.surfaceVariant}
-                  thumbTintColor={theme.primary}
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, rate: value } })
-                  }
-                />
-              </View>
-              <View style={styles.sliderSection}>
-                <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Voice pitch: {tts?.pitch?.toFixed(1) || '1.0'}
-                </Text>
-                <Slider
-                  style={styles.slider}
-                  value={tts?.pitch || 1}
-                  minimumValue={0.1}
-                  maximumValue={5}
-                  step={0.1}
-                  minimumTrackTintColor={theme.primary}
-                  maximumTrackTintColor={theme.surfaceVariant}
-                  thumbTintColor={theme.primary}
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, pitch: value } })
-                  }
-                />
-              </View>
-              <View style={styles.resetButtonContainer}>
-                <Button
-                  title={getString('common.reset')}
-                  mode="outlined"
-                  onPress={() => {
-                    setChapterReaderSettings({
-                      tts: {
-                        pitch: 1,
-                        rate: 1,
-                        voice: { name: 'System', language: 'System' } as Voice,
-                      },
-                    });
-                  }}
-                  style={styles.resetButton}
-                />
-              </View>
-            </>
-          )}
-        </View>
-
         <View style={styles.bottomSpacing} />
       </BottomSheetScrollView>
-
-      <Portal>
-        <VoicePickerModal
-          visible={voiceModalVisible}
-          onDismiss={hideVoiceModal}
-          voices={voices}
-        />
-      </Portal>
-    </>
   );
 };
 
@@ -205,30 +103,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginVertical: 8,
-  },
-  ttsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: 16,
-  },
-  sliderSection: {
-    paddingVertical: 12,
-  },
-  sliderLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-    paddingHorizontal: 16,
-  },
-  slider: {
-    height: 40,
-  },
-  resetButtonContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  resetButton: {
-    alignSelf: 'flex-start',
   },
   bottomSpacing: {
     height: 24,
