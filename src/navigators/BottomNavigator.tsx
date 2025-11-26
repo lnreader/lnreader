@@ -1,8 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import {
-  BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Library from '../screens/library/LibraryScreen';
 import Updates from '../screens/updates/UpdatesScreen';
@@ -15,8 +12,7 @@ import { useAppSettings, usePlugins, useTheme } from '@hooks/persisted';
 import { BottomNavigatorParamList } from './types';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { MaterialDesignIconName } from '@type/icon';
-import { CommonActions } from '@react-navigation/native';
-import { BottomNavigation } from 'react-native-paper';
+import { BottomTabBar } from '@components';
 
 const Tab = createBottomTabNavigator<BottomNavigatorParamList>();
 
@@ -63,55 +59,6 @@ const BottomNavigator = () => {
     [],
   );
 
-  const renderBottomBar = useCallback(
-    ({ navigation, state, descriptors, insets }: BottomTabBarProps) => (
-      <BottomNavigation.Bar
-        theme={{ colors: theme }}
-        style={{
-          backgroundColor: theme.surface2,
-        }}
-        navigationState={state}
-        safeAreaInsets={insets}
-        onTabPress={({ route, preventDefault }) => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (event.defaultPrevented) {
-            preventDefault();
-          } else {
-            navigation.dispatch({
-              ...CommonActions.navigate(route.name, route.params),
-              target: state.key,
-            });
-          }
-        }}
-        renderIcon={renderIcon}
-        getLabelText={({ route }) => {
-          if (
-            !showLabelsInNav &&
-            route.name !== state.routeNames[state.index]
-          ) {
-            return '';
-          }
-
-          const { options } = descriptors[route.key];
-          const label =
-            typeof options.tabBarLabel === 'string'
-              ? options.tabBarLabel
-              : typeof options.title === 'string'
-              ? options.title
-              : route.name;
-
-          return label;
-        }}
-      />
-    ),
-    [renderIcon, showLabelsInNav, theme],
-  );
-
   return (
     <Tab.Navigator
       screenOptions={() => ({
@@ -123,7 +70,14 @@ const BottomNavigator = () => {
           color: theme.onError,
         },
       })}
-      tabBar={renderBottomBar}
+      tabBar={props => (
+        <BottomTabBar
+          {...props}
+          theme={theme}
+          showLabelsInNav={showLabelsInNav}
+          renderIcon={renderIcon}
+        />
+      )}
     >
       <Tab.Screen
         name="Library"
