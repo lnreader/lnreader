@@ -3,10 +3,10 @@ import { Pressable, StyleSheet, View, TextInput } from 'react-native';
 
 import IconButtonV2 from '../IconButtonV2/IconButtonV2';
 import { ThemeColors } from '../../theme/types';
-import { Menu } from 'react-native-paper';
+import { Menu } from '@components';
 import { MaterialDesignIconName } from '@type/icon';
 
-interface RightIcon {
+export interface RightIcon {
   iconName: MaterialDesignIconName;
   color?: string;
   onPress: () => void;
@@ -112,7 +112,6 @@ const Searchbar: React.FC<SearcbarProps> = ({
           <Menu
             visible={extraMenu}
             onDismiss={() => showExtraMenu(false)}
-            anchorPosition="bottom"
             anchor={
               <IconButtonV2
                 name="dots-vertical"
@@ -135,7 +134,9 @@ const Searchbar: React.FC<SearcbarProps> = ({
                 }}
                 onPress={() => {
                   showExtraMenu(false);
-                  button.onPress();
+                  setTimeout(() => {
+                    button.onPress();
+                  }, 0);
                 }}
               />
             ))}

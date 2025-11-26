@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getString } from '@strings/translations';
-import { Appbar, Menu as DefaultMenu } from 'react-native-paper';
+import { Appbar } from 'react-native-paper';
+import { Menu as DefaultMenu } from '@components';
 import { ThemeColors } from '@theme/types';
 import Animated, {
   FadeIn,
@@ -35,7 +36,7 @@ const Menu = React.memo(
         visible={visible}
         onDismiss={onDismiss}
         anchor={anchor}
-        anchorPosition="bottom"
+        // anchorPosition="bottom"
         contentStyle={{ backgroundColor: theme.surface2 }}
       >
         {items.map((item, index) => (

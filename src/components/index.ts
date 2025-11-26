@@ -18,3 +18,5 @@ export { default as SafeAreaView } from './SafeAreaView/SafeAreaView';
 export { default as Modal } from './Modal/Modal';
 export { SegmentedControl } from './SegmentedControl';
 export { DialogTitle } from './DialogTitle';
+// export { default as CustomBottomTabBar } from './CustomBottomTabBar/CustomBottomTabBar';
+export { default as Menu } from './Menu';
