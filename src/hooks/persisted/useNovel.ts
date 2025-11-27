@@ -322,6 +322,46 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     settingsSort,
   ]);
 
+  const loadUpToBatch = useCallback(
+    async (targetBatch: number) => {
+      const page = pages[pageIndex];
+      if (!novel || !page || targetBatch <= batchInformation.batch) {
+        return;
+      }
+
+      // Load all batches from current + 1 up to targetBatch
+      for (let batch = batchInformation.batch + 1; batch <= targetBatch; batch++) {
+        if (batch > batchInformation.total) break;
+
+        let newChapters: ChapterInfo[] = [];
+        try {
+          newChapters =
+            getPageChaptersBatched(
+              novel.id,
+              settingsSort,
+              novelSettings.filter,
+              page,
+              batch,
+            ) || [];
+        } catch (error) {
+          console.error('Error loading batch', batch, error);
+        }
+
+        setBatchInformation(prev => ({ ...prev, batch }));
+        extendChapters(newChapters);
+      }
+    },
+    [
+      batchInformation,
+      extendChapters,
+      novel,
+      novelSettings.filter,
+      pageIndex,
+      pages,
+      settingsSort,
+    ],
+  );
+
   // #endregion
   // #region Mark chapters
 
@@ -566,6 +606,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       novelSettings,
       batchInformation,
       getNextChapterBatch,
+      loadUpToBatch,
       getNovel,
       setPageIndex,
       openPage,
@@ -597,6 +638,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       novelSettings,
       batchInformation,
       getNextChapterBatch,
+      loadUpToBatch,
       getNovel,
       setPageIndex,
       openPage,
