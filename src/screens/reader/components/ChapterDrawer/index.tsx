@@ -16,6 +16,7 @@ import renderListChapter from './RenderListChapter';
 import { useChapterContext } from '@screens/reader/ChapterContext';
 import { useNovelContext } from '@screens/novel/NovelContext';
 import { LegendList, LegendListRef, ViewToken } from '@legendapp/list';
+import { noop } from 'lodash-es';
 
 type ButtonProperties = {
   text: string;
@@ -29,7 +30,15 @@ type ButtonsProperties = {
 
 const ChapterDrawer = () => {
   const { chapter, getChapter, setLoading } = useChapterContext();
-  const { chapters, novelSettings, pages, setPageIndex } = useNovelContext();
+  const {
+    chapters,
+    novelSettings,
+    pages,
+    fetching,
+    batchInformation,
+    getNextChapterBatch,
+    setPageIndex,
+  } = useNovelContext();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { defaultChapterSort } = useAppSettings();
@@ -179,6 +188,12 @@ const ChapterDrawer = () => {
           }
           estimatedItemSize={60}
           initialScrollIndex={scrollToIndex.current}
+          onEndReached={
+            batchInformation.batch < batchInformation.total && !fetching
+              ? getNextChapterBatch
+              : noop
+          }
+          onEndReachedThreshold={6}
         />
       )}
       <View style={styles.footer}>
