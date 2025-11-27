@@ -136,7 +136,10 @@ const ChapterDrawer = () => {
   useEffect(() => {
     const next = calculateScrollToIndex();
     if (next !== undefined) {
-      if (scrollToIndex.current === undefined) {
+      if (
+        scrollToIndex.current === undefined ||
+        next !== scrollToIndex.current
+      ) {
         scroll(next);
       }
       scrollToIndex.current = next;
