@@ -37,7 +37,7 @@
   "appearanceScreen": {
     "accentColor": "لون مميز",
     "alwaysShowNavLabels": "إظهار تسميات التنقل دائمًا",
-    "appLanguage": "App language",
+    "appLanguage": "",
     "languagePickerModal": {
       "title": "Select Language",
       "restartNote": "You will need to restart the app for the language change to take full effect."
