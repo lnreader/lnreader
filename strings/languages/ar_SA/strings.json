@@ -21,7 +21,7 @@
     "clearupdatesTabDesc": "مسح إدخالات الفصول في علامة تبويب التحديثات",
     "dataManagement": "إدارة البيانات",
     "deleteReadChapters": "حذف الفصول المقروءة",
-    "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
+    "deleteReadChaptersDialogTitle": "حذف جميع الفصول التي تم قراءتها",
     "importEpub": "استيراد EPUB",
     "importNovel": "استيراد رواية",
     "importStaticFiles": "استيراد الملفات الثابتة",
