@@ -39,7 +39,7 @@
     "alwaysShowNavLabels": "",
     "appLanguage": "",
     "languagePickerModal": {
-      "title": "Select Language",
+      "title": "",
       "restartNote": "You will need to restart the app for the language change to take full effect."
     },
     "appLanguageDefault": "Default",
