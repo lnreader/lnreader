@@ -40,7 +40,7 @@
     "appLanguage": "",
     "languagePickerModal": {
       "title": "",
-      "restartNote": "You will need to restart the app for the language change to take full effect."
+      "restartNote": "."
     },
     "appLanguageDefault": "Default",
     "appTheme": "Indonesian\n",
