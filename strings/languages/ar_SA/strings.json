@@ -75,7 +75,7 @@
     "backupCreated": "Backup created successfully",
     "backupRestored": "Backup restored successfully",
     "savingBackup": "Saving Backup",
-    "categoriesRestored": "Restored %{count} categories",
+    "categoriesRestored": "",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
