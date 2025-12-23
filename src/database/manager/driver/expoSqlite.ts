@@ -1,9 +1,11 @@
 import { migrations } from '@database/migrations';
 import { MigrationRunner } from '@database/utils/migrationRunner';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
+import {migrate} from 'drizzle-orm/expo-sqlite/migrator';
 import * as SQLite from 'expo-sqlite';
-import type { SQLiteBindParams, SQLiteDatabase } from 'expo-sqlite';
+import type { SQLiteDatabase } from 'expo-sqlite';
 import type { DriverFactory } from '../types';
+import { schema } from '../schema';
 
 export interface ExpoSqliteDriverOptions {
   dbName?: string;
@@ -41,8 +43,9 @@ export const createExpoSqliteDriver: DriverFactory<ExpoSqliteDriverOptions> = (
 
   const runner = new MigrationRunner(migrations);
   runner.runMigrations(sqlite);
+  
 
-  const db = drizzle(sqlite);
+  const db = drizzle(sqlite, { schema });
 
   return {
     db,

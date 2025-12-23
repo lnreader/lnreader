@@ -4,6 +4,8 @@ import {
   type ListenerHandle,
   type QueryCatalog,
   type QueryId,
+  type QueryParams,
+  type QueryResult,
 } from './types';
 
 export class QueryEventBus<TCatalog extends QueryCatalog> {
@@ -16,12 +18,8 @@ export class QueryEventBus<TCatalog extends QueryCatalog> {
     queryId: TId,
     event: ListenerEvent,
     listener: ListenerFn<
-      TCatalog[TId] extends { run: (ctx: any, params: infer P) => any }
-        ? P
-        : never,
-      TCatalog[TId] extends { run: (ctx: any, params: any) => Promise<infer R> }
-        ? R
-        : unknown
+      QueryParams<TCatalog, TId>,
+      QueryResult<TCatalog, TId>
     >,
   ): ListenerHandle {
     const events =
@@ -29,14 +27,14 @@ export class QueryEventBus<TCatalog extends QueryCatalog> {
       new Map<ListenerEvent, Set<ListenerFn<any, any>>>();
 
     const set = events.get(event) ?? new Set<ListenerFn<any, any>>();
-    set.add(listener);
+    set.add(listener as ListenerFn<any, any>);
 
     events.set(event, set);
     this.listeners.set(queryId, events);
 
     return {
       off: () => {
-        set.delete(listener);
+        set.delete(listener as ListenerFn<any, any>);
       },
     };
   }
@@ -44,19 +42,13 @@ export class QueryEventBus<TCatalog extends QueryCatalog> {
   async emit<TId extends QueryId<TCatalog>>(
     queryId: TId,
     event: ListenerEvent,
-    payload: Parameters<
-      ListenerFn<
-        TCatalog[TId] extends { run: (ctx: any, params: infer P) => any }
-          ? P
-          : never,
-        TCatalog[TId] extends {
-          run: (ctx: any, params: any) => Promise<infer R>;
-        }
-          ? R
-          : unknown
-      >
-    >[0],
-  ) {
+    payload: {
+      queryId: string;
+      params: QueryParams<TCatalog, TId>;
+      result?: QueryResult<TCatalog, TId>;
+      error?: unknown;
+    },
+  ): Promise<void> {
     const events = this.listeners.get(queryId);
     const listeners = events?.get(event);
     if (!listeners?.size) {
@@ -68,4 +60,3 @@ export class QueryEventBus<TCatalog extends QueryCatalog> {
     );
   }
 }
-

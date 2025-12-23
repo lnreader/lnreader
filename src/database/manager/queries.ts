@@ -13,15 +13,9 @@ import {
   type RepositoryInsert,
   type RepositoryRow,
 } from './schema';
-import {
-  type QueryCatalog,
-  type QueryId,
-  type QuerySpec,
-} from './types';
+import { type QueryCatalog, type QueryId, type QuerySpec } from './types';
 
-const defineQuery = <P, R>(
-  spec: QuerySpec<P, R>,
-): QuerySpec<P, R> => spec;
+const defineQuery = <P, R>(spec: QuerySpec<P, R>): QuerySpec<P, R> => spec;
 
 export const queryCatalog = {
   createCategory: defineQuery<{ name: string }, CategoryRow>({
@@ -29,39 +23,40 @@ export const queryCatalog = {
     kind: 'write',
     description: 'Insert a new category',
     run: async ({ db }, params) => {
-      const [row] = await db.insert(category).values({ name: params.name }).returning();
+      const [row] = await db
+        .insert(category)
+        .values({ name: params.name })
+        .returning();
       return row;
     },
   }),
 
-  listCategories: defineQuery<void, Array<CategoryRow & { novelsCount: number }>>(
-    {
-      id: 'listCategories',
-      kind: 'read',
-      description: 'List categories with aggregated novel counts',
-      run: async ({ db }) => {
-        const rows = await db
-          .select({
-            id: category.id,
-            name: category.name,
-            sort: category.sort,
-            novelsCount: sql<number>`count(${novelCategory.novelId})`,
-          })
-          .from(category)
-          .leftJoin(
-            novelCategory,
-            eq(novelCategory.categoryId, category.id),
-          )
-          .groupBy(category.id)
-          .orderBy(category.sort, category.id);
+  listCategories: defineQuery<
+    void,
+    Array<CategoryRow & { novelsCount: number }>
+  >({
+    id: 'listCategories',
+    kind: 'read',
+    description: 'List categories with aggregated novel counts',
+    run: async ({ db }) => {
+      const rows = await db
+        .select({
+          id: category.id,
+          name: category.name,
+          sort: category.sort,
+          novelsCount: sql<number>`count(${novelCategory.novelId})`,
+        })
+        .from(category)
+        .leftJoin(novelCategory, eq(novelCategory.categoryId, category.id))
+        .groupBy(category.id)
+        .orderBy(category.sort, category.id);
 
-        return rows.map(row => ({
-          ...row,
-          novelsCount: Number(row.novelsCount ?? 0),
-        }));
-      },
+      return rows.map((row: any) => ({
+        ...row,
+        novelsCount: Number(row.novelsCount ?? 0),
+      }));
     },
-  ),
+  }),
 
   upsertNovel: defineQuery<NovelInsert, NovelRow>({
     id: 'upsertNovel',
@@ -113,34 +108,36 @@ export const queryCatalog = {
         });
 
       const changes =
-        typeof result.rowsAffected === 'number'
-          ? result.rowsAffected
+        typeof result.changes === 'number'
+          ? result.changes
           : Array.isArray(result)
-            ? result.length
-            : 0;
+          ? result.length
+          : 0;
 
       return { inserted: changes };
     },
   }),
 
-  chaptersByNovel: defineQuery<
-    { novelId: number },
-    ChapterRow[]
-  >({
+  chaptersByNovel: defineQuery<{ novelId: number }, ChapterRow[]>({
     id: 'chaptersByNovel',
     kind: 'read',
     description: 'Fetch chapters for a novel ordered by position then id',
     run: async ({ db }, { novelId }) => {
-        return db
-          .select()
-          .from(chapter)
-          .where(eq(chapter.novelId, novelId))
-          .orderBy(chapter.position, chapter.id);
+      return db
+        .select()
+        .from(chapter)
+        .where(eq(chapter.novelId, novelId))
+        .orderBy(chapter.position, chapter.id);
     },
   }),
 
   markChapterProgress: defineQuery<
-    { chapterId: number; progress: number; position?: number; unread?: boolean },
+    {
+      chapterId: number;
+      progress: number;
+      position?: number;
+      unread?: boolean;
+    },
     { updated: number }
   >({
     id: 'markChapterProgress',
@@ -165,11 +162,11 @@ export const queryCatalog = {
         .where(eq(chapter.id, chapterId));
 
       const updated =
-        typeof result.rowsAffected === 'number'
-          ? result.rowsAffected
+        typeof result.changes === 'number'
+          ? result.changes
           : Array.isArray(result)
-            ? result.length
-            : 0;
+          ? result.length
+          : 0;
 
       return { updated };
     },
@@ -194,11 +191,11 @@ export const queryCatalog = {
         });
 
       const inserted =
-        typeof result.rowsAffected === 'number'
-          ? result.rowsAffected
+        typeof result.changes === 'number'
+          ? result.changes
           : Array.isArray(result)
-            ? result.length
-            : 0;
+          ? result.length
+          : 0;
 
       return { inserted };
     },
@@ -235,4 +232,3 @@ export const queryCatalog = {
 
 export type DatabaseQueryCatalog = typeof queryCatalog;
 export type DatabaseQueryId = QueryId<DatabaseQueryCatalog>;
-

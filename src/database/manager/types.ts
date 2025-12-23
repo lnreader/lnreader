@@ -1,7 +1,7 @@
-import type { SQLiteProxyDatabase } from 'drizzle-orm/sqlite-proxy';
+import type { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import type { schema } from './schema';
 
-export type DrizzleDb = SQLiteProxyDatabase<typeof schema>;
+export type DrizzleDb = ExpoSQLiteDatabase<typeof schema>;
 
 export interface DriverInitResult {
   db: DrizzleDb;
@@ -37,11 +37,15 @@ export type QueryId<TCatalog extends QueryCatalog> = Extract<
   string
 >;
 
-export type QueryParams<TCatalog extends QueryCatalog, TId extends QueryId<TCatalog>> =
-  TCatalog[TId] extends QuerySpec<infer P, any> ? P : never;
+export type QueryParams<
+  TCatalog extends QueryCatalog,
+  TId extends QueryId<TCatalog>,
+> = TCatalog[TId] extends QuerySpec<infer P, any> ? P : never;
 
-export type QueryResult<TCatalog extends QueryCatalog, TId extends QueryId<TCatalog>> =
-  TCatalog[TId] extends QuerySpec<any, infer R> ? R : never;
+export type QueryResult<
+  TCatalog extends QueryCatalog,
+  TId extends QueryId<TCatalog>,
+> = TCatalog[TId] extends QuerySpec<any, infer R> ? R : never;
 
 export interface QueueRetryOptions {
   maxRetries: number;
@@ -74,4 +78,3 @@ export type ListenerFn<TParams, TResult> = (
 export interface ListenerHandle {
   off: () => void;
 }
-
