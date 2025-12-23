@@ -14,10 +14,13 @@ import * as Notifications from 'expo-notifications';
 import AppErrorBoundary, {
   ErrorFallback,
 } from '@components/AppErrorBoundary/AppErrorBoundary';
-import { useDatabaseInitialization } from '@hooks';
+
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from './drizzle/migrations';
 
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { drizzleDb, useInitDatabase } from '@database/db';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -64,14 +67,13 @@ Notifications.setNotificationChannelAsync('tts-controls', {
 });
 
 const App = () => {
-  const { isDbReady, dbError, retryInitialization } =
-    useDatabaseInitialization();
+  const { success, error } = useInitDatabase();
 
   useEffect(() => {
-    if (isDbReady || dbError) {
+    if (success || error) {
       LottieSplashScreen.hide();
     }
-  }, [isDbReady, dbError]);
+  }, [success, error]);
 
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
@@ -89,11 +91,11 @@ const App = () => {
     };
   }, []);
 
-  if (dbError) {
-    return <ErrorFallback error={dbError} resetError={retryInitialization} />;
+  if (error) {
+    return <ErrorFallback error={error} resetError={() => null} />;
   }
 
-  if (!isDbReady) {
+  if (!success) {
     return null;
   }
 

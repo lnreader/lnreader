@@ -1,34 +1,71 @@
+import * as SQLite from 'expo-sqlite';
+import { eq, sql } from 'drizzle-orm';
 import { BackupCategory, Category, NovelCategory, CCategory } from '../types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
-import { db } from '@database/db';
+import { db, drizzleDb } from '@database/db';
+import { getAllSync, runSync } from '@database/utils/helpers';
+import {
+  category as categorySchema,
+  novelCategory as novelCategorySchema,
+  type CategoryRow,
+} from '@database/schema';
 
 const getCategoriesQuery = `
-    SELECT 
-        Category.id, 
-        Category.name, 
-        Category.sort, 
+    SELECT
+        Category.id,
+        Category.name,
+        Category.sort,
         GROUP_CONCAT(NovelCategory.novelId ORDER BY NovelCategory.novelId) AS novelIds
-    FROM Category 
-    LEFT JOIN NovelCategory ON NovelCategory.categoryId = Category.id 
+    FROM Category
+    LEFT JOIN NovelCategory ON NovelCategory.categoryId = Category.id
     GROUP BY Category.id, Category.name, Category.sort
     ORDER BY Category.sort;
 	`;
 
 type NumberList = `${number}` | `${number},${number}` | undefined;
+/**
+ * Get all categories with their novel IDs
+ * @deprecated Use getCategoriesFromDbDrizzle for new code
+ */
 export const getCategoriesFromDb = () => {
   return db.getAllSync<Category & { novelIds: NumberList }>(getCategoriesQuery);
 };
 
+/**
+ * Get all categories with their novel IDs using Drizzle ORM
+ */
+export const getCategoriesFromDbDrizzle = (): Array<
+  CategoryRow & { novelIds: string | null }
+> => {
+  return drizzleDb
+    .select({
+      id: categorySchema.id,
+      name: categorySchema.name,
+      sort: categorySchema.sort,
+      novelIds: sql<
+        string | null
+      >`GROUP_CONCAT(${novelCategorySchema.novelId} ORDER BY ${novelCategorySchema.novelId})`,
+    })
+    .from(categorySchema)
+    .leftJoin(
+      novelCategorySchema,
+      eq(novelCategorySchema.categoryId, categorySchema.id),
+    )
+    .groupBy(categorySchema.id, categorySchema.name, categorySchema.sort)
+    .orderBy(categorySchema.sort)
+    .all();
+};
+
 export const getCategoriesWithCount = (novelIds: number[]) => {
   const getCategoriesWithCountQuery = `
-  SELECT *, novelsCount 
-  FROM Category LEFT JOIN 
+  SELECT *, novelsCount
+  FROM Category LEFT JOIN
   (
-    SELECT categoryId, COUNT(novelId) as novelsCount 
+    SELECT categoryId, COUNT(novelId) as novelsCount
     FROM NovelCategory WHERE novelId in (${novelIds.join(
       ',',
-    )}) GROUP BY categoryId 
+    )}) GROUP BY categoryId
   ) as NC ON Category.id = NC.categoryId
   WHERE Category.id != 2
   ORDER BY sort
@@ -38,8 +75,23 @@ export const getCategoriesWithCount = (novelIds: number[]) => {
 
 const createCategoryQuery = 'INSERT INTO Category (name) VALUES (?)';
 
-export const createCategory = (categoryName: string): void => {
-  db.runSync(createCategoryQuery, categoryName);
+/**
+ * Create a new category
+ * @deprecated Use createCategoryDrizzle for new code
+ */
+export const createCategory = (categoryName: string): void =>
+  runSync([[createCategoryQuery, [categoryName]]]);
+
+/**
+ * Create a new category using Drizzle ORM
+ */
+export const createCategoryDrizzle = (categoryName: string): CategoryRow => {
+  const [row] = drizzleDb
+    .insert(categorySchema)
+    .values({ name: categoryName })
+    .returning()
+    .all();
+  return row;
 };
 
 const beforeDeleteCategoryQuery = `
@@ -63,6 +115,10 @@ export const deleteCategoryById = (category: Category): void => {
 
 const updateCategoryQuery = 'UPDATE Category SET name = ? WHERE id = ?';
 
+/**
+ * Update a category name
+ * @deprecated Use updateCategoryDrizzle for new code
+ */
 export const updateCategory = (
   categoryId: number,
   categoryName: string,
@@ -70,10 +126,28 @@ export const updateCategory = (
   db.runSync(updateCategoryQuery, categoryName, categoryId);
 };
 
+/**
+ * Update a category name using Drizzle ORM
+ */
+export const updateCategoryDrizzle = (
+  categoryId: number,
+  categoryName: string,
+): void => {
+  drizzleDb
+    .update(categorySchema)
+    .set({ name: categoryName })
+    .where(eq(categorySchema.id, categoryId))
+    .run();
+};
+
 const isCategoryNameDuplicateQuery = `
   SELECT COUNT(*) as isDuplicate FROM Category WHERE name = ?
 	`;
 
+/**
+ * Check if a category name already exists
+ * @deprecated Use isCategoryNameDuplicateDrizzle for new code
+ */
 export const isCategoryNameDuplicate = (categoryName: string): boolean => {
   const res = db.getFirstSync(isCategoryNameDuplicateQuery, [categoryName]);
 
@@ -82,6 +156,21 @@ export const isCategoryNameDuplicate = (categoryName: string): boolean => {
   } else {
     throw 'isCategoryNameDuplicate return type does not match.';
   }
+};
+
+/**
+ * Check if a category name already exists using Drizzle ORM
+ */
+export const isCategoryNameDuplicateDrizzle = (
+  categoryName: string,
+): boolean => {
+  const result = drizzleDb
+    .select({ id: categorySchema.id })
+    .from(categorySchema)
+    .where(eq(categorySchema.name, categoryName))
+    .get();
+
+  return !!result;
 };
 
 const updateCategoryOrderQuery = 'UPDATE Category SET sort = ? WHERE id = ?';

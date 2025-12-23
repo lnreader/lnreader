@@ -1,94 +1,80 @@
 import * as SQLite from 'expo-sqlite';
-import {
-  createCategoriesTableQuery,
-  createCategoryDefaultQuery,
-  createCategoryTriggerQuery,
-} from './tables/CategoryTable';
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { createCategoryDefaultQuery } from './tables/CategoryTable';
 import {
   createNovelIndexQuery,
-  createNovelTableQuery,
-  createNovelTriggerQueryDelete,
-  createNovelTriggerQueryInsert,
-  createNovelTriggerQueryUpdate,
   dropNovelIndexQuery,
 } from './tables/NovelTable';
-import { createNovelCategoryTableQuery } from './tables/NovelCategoryTable';
 import {
-  createChapterTableQuery,
   createChapterIndexQuery,
   dropChapterIndexQuery,
 } from './tables/ChapterTable';
 
-import { createRepositoryTableQuery } from './tables/RepositoryTable';
 import { getErrorMessage } from '@utils/error';
 import { showToast } from '@utils/showToast';
-import { MigrationRunner } from './utils/migrationRunner';
-import { migrations } from './migrations';
 
-const dbName = 'lnreader.db';
+import { schema } from './schema';
+import { Logger } from 'drizzle-orm';
 
-export const db = SQLite.openDatabaseSync(dbName);
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from '../../drizzle/migrations';
+
+class MyLogger implements Logger {
+  logQuery(query: string, params: unknown[]): void {
+    console.log({ query, params });
+  }
+}
+
+const DB_NAME = 'lnreader.db';
 
 /**
- * Creates the initial database schema for fresh installations
- * Sets up all tables, indexes, triggers and sets version to 2
+ * Raw SQLite database instance
+ * @deprecated Use `drizzleDb` for new code
  */
-const createInitialSchema = () => {
-  db.execSync('PRAGMA journal_mode = WAL');
-  db.execSync('PRAGMA synchronous = NORMAL');
-  db.execSync('PRAGMA temp_store = MEMORY');
+export const db = SQLite.openDatabaseSync(DB_NAME);
 
-  db.withTransactionSync(() => {
-    db.runSync(createNovelTableQuery);
-    db.runSync(createNovelIndexQuery);
-    db.runSync(createCategoriesTableQuery);
-    db.runSync(createCategoryDefaultQuery);
-    db.runSync(createNovelCategoryTableQuery);
-    db.runSync(createChapterTableQuery);
-    db.runSync(createCategoryTriggerQuery);
-    db.runSync(createChapterIndexQuery);
-    db.runSync(createRepositoryTableQuery);
-    db.runSync(createNovelTriggerQueryInsert);
-    db.runSync(createNovelTriggerQueryUpdate);
-    db.runSync(createNovelTriggerQueryDelete);
+/**
+ * Drizzle ORM database instance with type-safe query builder
+ * Use this for all new database operations
+ */
+export const drizzleDb = drizzle(db, {
+  schema,
+  logger: __DEV__ ? new MyLogger() : false,
+});
 
-    db.execSync('PRAGMA user_version = 2');
-  });
+const setPragmas = () => {
+  console.log('Setting database Pragmas');
+  const queries = [
+    'PRAGMA journal_mode = WAL',
+    'PRAGMA synchronous = NORMAL',
+    'PRAGMA temp_store = MEMORY',
+    'PRAGMA busy_timeout = 5000',
+    'PRAGMA cache_size = 10000',
+    'PRAGMA foreign_keys = ON',
+  ];
+  db.execSync(queries.join(';\n'));
+};
+const populateDatabase = () => {
+  console.log('Populating database');
+  db.runSync(createCategoryDefaultQuery);
 };
 
-/**
- * Initializes the database with optimal settings and runs any pending migrations
- * Handles both fresh installations and existing databases
- */
-export const initializeDatabase = () => {
-  db.execSync('PRAGMA busy_timeout = 5000');
-  db.execSync('PRAGMA cache_size = 10000');
-  db.execSync('PRAGMA foreign_keys = ON');
-
-  let userVersion = 0;
+export const useInitDatabase = () => {
   try {
-    const result = db.getFirstSync<{ user_version: number }>(
-      'PRAGMA user_version',
-    );
-    userVersion = result?.user_version ?? 0;
-  } catch (error) {
-    // If PRAGMA query fails, assume fresh database
-    if (__DEV__) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Failed to get database version, assuming fresh install:',
-        error,
-      );
-    }
-    userVersion = 0;
+    setPragmas();
+  } catch (e) {
+    console.log(e);
+  }
+  console.log('Using migrations');
+  const returnValue = useMigrations(drizzleDb, migrations);
+
+  try {
+    populateDatabase();
+  } catch (e) {
+    console.log(e);
   }
 
-  if (userVersion === 0) {
-    createInitialSchema();
-  }
-
-  const migrationRunner = new MigrationRunner(migrations);
-  migrationRunner.runMigrations(db);
+  return returnValue;
 };
 
 export const recreateDatabaseIndexes = () => {
