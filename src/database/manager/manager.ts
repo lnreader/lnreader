@@ -1,92 +1,58 @@
-import { schema } from './schema';
-import { DbTaskQueue } from './queue';
-import { QueryEventBus } from './events';
-import {
-  type QueryCatalog,
-  type QueryId,
-  type QueryParams,
-  type QueryResult,
-  type QueueOptions,
-  type DriverFactory,
-  type QueryContext,
-  type ListenerEvent,
-  type ListenerFn,
-  type ListenerHandle,
-} from './types';
+import { drizzleDb } from '@database/db';
+import { IDbManager } from './manager.d';
 
-export interface DbManagerOptions {
-  queue?: Partial<QueueOptions>;
-}
+type DrizzleDb = typeof drizzleDb;
+type TransactionParameter = Parameters<
+  Parameters<DrizzleDb['transaction']>[0]
+>[0];
 
-export class DbManager<TCatalog extends QueryCatalog> {
-  private readonly driverFactory: DriverFactory;
-  private readonly catalog: TCatalog;
-  private readonly queue: DbTaskQueue;
-  private readonly events: QueryEventBus<TCatalog>;
-  private ctx: QueryContext | null = null;
+let _dbManager: DbManager;
 
-  constructor(
-    catalog: TCatalog,
-    driverFactory: DriverFactory,
-    options?: DbManagerOptions,
-  ) {
-    this.catalog = catalog;
-    this.driverFactory = driverFactory;
-    this.queue = new DbTaskQueue(options?.queue);
-    this.events = new QueryEventBus<TCatalog>();
+class DbManager implements IDbManager {
+  private readonly db: DrizzleDb;
+
+  public readonly select: DrizzleDb['select'];
+  public readonly selectDistinct: DrizzleDb['selectDistinct'];
+  public readonly $count: DrizzleDb['$count'];
+  public readonly query: DrizzleDb['query'];
+  public readonly run: DrizzleDb['run'];
+  public readonly transaction: DrizzleDb['transaction'];
+  public readonly with: DrizzleDb['with'];
+  public readonly $with: DrizzleDb['$with'];
+  public readonly all: DrizzleDb['all'];
+  public readonly get: DrizzleDb['get'];
+  public readonly values: DrizzleDb['values'];
+
+  private constructor(db: DrizzleDb) {
+    this.db = db;
+    this.select = this.db.select.bind(this.db);
+    this.selectDistinct = this.db.selectDistinct.bind(this.db);
+    this.$count = this.db.$count.bind(this.db);
+    this.query = this.db.query;
+    this.run = this.db.run.bind(this.db);
+    this.transaction = this.db.transaction.bind(this.db);
+    this.with = this.db.with.bind(this.db);
+    this.$with = this.db.$with.bind(this.db);
+    this.all = this.db.all.bind(this.db);
+    this.get = this.db.get.bind(this.db);
+    this.values = this.db.values.bind(this.db);
   }
 
-  async init(): Promise<void> {
-    if (this.ctx) return;
-    const { db } = await this.driverFactory();
-    this.ctx = { db, schema };
+  public static create(db: DrizzleDb): DbManager {
+    if (_dbManager) return _dbManager;
+    _dbManager = new DbManager(db);
+    return _dbManager;
   }
 
-  on<TId extends QueryId<TCatalog>>(
-    queryId: TId,
-    event: ListenerEvent,
-    listener: ListenerFn<
-      QueryParams<TCatalog, TId>,
-      QueryResult<TCatalog, TId>
-    >,
-  ): ListenerHandle {
-    return this.events.on(queryId, event, listener);
-  }
-
-  async execute<TId extends QueryId<TCatalog>>(
-    queryId: TId,
-    params: QueryParams<TCatalog, TId>,
-  ): Promise<QueryResult<TCatalog, TId>> {
-    await this.init();
-    return this.queue.enqueue({
-      id: queryId,
-      run: () => this.runQuery(queryId, params),
+  public async write<T>(
+    fn: (tx: TransactionParameter) => Promise<T>,
+  ): Promise<T> {
+    return await this.db.transaction(async tx => {
+      return await fn(tx);
     });
   }
-
-  private async runQuery<TId extends QueryId<TCatalog>>(
-    queryId: TId,
-    params: QueryParams<TCatalog, TId>,
-  ): Promise<QueryResult<TCatalog, TId>> {
-    if (!this.ctx) {
-      await this.init();
-    }
-
-    const spec = this.catalog[queryId];
-    if (!spec) {
-      throw new Error(`Unknown queryId: ${String(queryId)}`);
-    }
-
-    await this.events.emit(queryId, 'before', { queryId, params });
-
-    try {
-      const result = await spec.run(this.ctx as QueryContext, params);
-      await this.events.emit(queryId, 'after', { queryId, params, result });
-      return result as QueryResult<TCatalog, TId>;
-    } catch (error) {
-      await this.events.emit(queryId, 'error', { queryId, params, error });
-      throw error;
-    }
-  }
 }
 
+export const createDbManager = (db: DrizzleDb) => {
+  return DbManager.create(db);
+};

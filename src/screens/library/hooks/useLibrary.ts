@@ -45,13 +45,14 @@ export const useLibrary = (): UseLibraryReturnType => {
   const refreshCategories = useCallback(async () => {
     const dbCategories = getCategoriesFromDb();
 
-    const res = dbCategories.map(c => ({
+    const res = dbCategories.map((c, i) => ({
       ...c,
+      sort: c.sort ?? i,
       novelIds: (c.novelIds ?? '').split(',').map(Number),
     }));
 
     const filteredCategories = res.filter((cat, index) => {
-      if (index !== 0) {
+      if (cat.id !== 1) {
         return true;
       }
 

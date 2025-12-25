@@ -18,10 +18,11 @@ import { Logger } from 'drizzle-orm';
 
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '../../drizzle/migrations';
+import { createDbManager } from './manager/manager';
 
 class MyLogger implements Logger {
   logQuery(query: string, params: unknown[]): void {
-    console.log({ query, params });
+    console.trace('DB Query: ', { query, params });
   }
 }
 
@@ -41,6 +42,8 @@ export const drizzleDb = drizzle(db, {
   schema,
   logger: __DEV__ ? new MyLogger() : false,
 });
+
+export const dbManager = createDbManager(drizzleDb);
 
 const setPragmas = () => {
   console.log('Setting database Pragmas');
