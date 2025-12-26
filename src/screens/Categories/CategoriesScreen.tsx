@@ -43,7 +43,7 @@ const CategoriesScreen = () => {
       return [];
     }
 
-    return categories.filter(cat => cat.id !== 1);
+    return categories;
   }, [categories]);
 
   const onDragEnd = ({ data }: { data: ExtendedCategory[] }) => {
@@ -51,14 +51,10 @@ const CategoriesScreen = () => {
       return;
     }
 
-    const systemCategories = categories.filter(cat => cat.id === 1);
-
-    const updatedOrderCategories = [...systemCategories, ...data].map(
-      (category, index) => ({
-        ...category,
-        sort: index,
-      }),
-    );
+    const updatedOrderCategories = data.map((category, index) => ({
+      ...category,
+      sort: index,
+    }));
 
     setCategories(updatedOrderCategories);
     updateCategoryOrderInDb(updatedOrderCategories);

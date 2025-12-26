@@ -81,7 +81,7 @@ export interface UpdateOverview {
 export interface Category {
   id: number;
   name: string;
-  sort: number;
+  sort: number | null;
 }
 
 export interface NovelCategory {
