@@ -37,12 +37,12 @@
   "appearanceScreen": {
     "accentColor": "强调色",
     "alwaysShowNavLabels": "始终显示导航标签",
-    "appLanguage": "App language",
+    "appLanguage": "应用语言",
     "languagePickerModal": {
-      "title": "Select Language",
-      "restartNote": "You will need to restart the app for the language change to take full effect."
+      "title": "选择语言",
+      "restartNote": "您需要重启应用才能使语言更改完全生效。"
     },
-    "appLanguageDefault": "Default",
+    "appLanguageDefault": "默认",
     "appTheme": "主题",
     "darkTheme": "深色",
     "hideBackdrop": "隐藏背景",
@@ -52,7 +52,7 @@
     "pureBlackDarkMode": "纯黑深色模式",
     "showHistoryInTheNav": "在导航中显示历史",
     "showUpdatesInTheNav": "在导航中显示更新",
-    "themeMode": "Theme mode",
+    "themeMode": "主题模式",
     "themeModeLight": "Light",
     "themeModeDark": "Dark",
     "themeModeSystem": "System",
