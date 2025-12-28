@@ -35,16 +35,16 @@ export interface ChapterInfo {
   novelId: number;
   path: string;
   name: string;
-  releaseTime?: string;
+  releaseTime?: string | null;
   readTime: string | null;
-  bookmark: boolean;
-  unread: boolean;
-  isDownloaded: boolean;
+  bookmark: boolean | null;
+  unread: boolean | null;
+  isDownloaded: boolean | null;
   updatedTime: string | null;
-  chapterNumber?: number;
-  page: string;
+  chapterNumber?: number | null;
+  page: string | null;
   progress: number | null;
-  position?: number;
+  position?: number | null;
 }
 
 export interface DownloadedChapter extends ChapterInfo {
@@ -63,11 +63,11 @@ export interface History extends ChapterInfo {
 }
 
 export interface Update extends ChapterInfo {
-  updatedTime: string;
+  updatedTime: string | null;
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface UpdateOverview {

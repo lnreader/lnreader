@@ -27,11 +27,8 @@ import {
   novel as novelSchema,
 } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
-import {
-  CHAPTER_ORDER,
-  ChapterOrder,
-  ChapterOrderKey,
-} from '@database/constants';
+import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
+import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 
 // #region Mutations
 
@@ -45,7 +42,6 @@ export const insertChapters = async (
   if (!chapters?.length) {
     return;
   }
-
   await dbManager.write(async tx => {
     for (let index = 0; index < chapters.length; index++) {
       const chapter = chapters[index];
@@ -364,8 +360,8 @@ export const getChapter = async (
 
 export const getPageChapters = async (
   novelId: number,
-  sort?: string,
-  filter?: string,
+  sort?: ChapterOrderKey,
+  filter?: ChapterFilterKey,
   page?: string,
   offset?: number,
   limit?: number,
@@ -377,13 +373,13 @@ export const getPageChapters = async (
       and(
         eq(chapterSchema.novelId, novelId),
         eq(chapterSchema.page, page || '1'),
-        filter ? sql.raw(filter) : undefined,
+        chapterFilterToSQL(filter),
       ),
     )
     .$dynamic();
 
   if (sort) {
-    query.orderBy(sql.raw(sort));
+    query.orderBy(chapterOrderToSQL(sort));
   }
   if (limit !== undefined) {
     query.limit(limit);
@@ -412,7 +408,7 @@ export const getChapterCount = (
 export const getPageChaptersBatched = (
   novelId: number,
   sort?: ChapterOrderKey,
-  filter?: string,
+  filter?: ChapterFilterKey,
   page?: string,
   batch: number = 0,
 ): ChapterInfo[] => {
@@ -425,7 +421,7 @@ export const getPageChaptersBatched = (
       and(
         eq(chapterSchema.novelId, novelId),
         eq(chapterSchema.page, page || '1'),
-        filter ? sql.raw(filter) : undefined,
+        chapterFilterToSQL(filter),
       ),
     )
     .limit(limit)
@@ -433,7 +429,7 @@ export const getPageChaptersBatched = (
     .$dynamic();
 
   if (sort) {
-    query.orderBy(sql.raw(CHAPTER_ORDER[sort] ?? CHAPTER_ORDER.positionAsc));
+    query.orderBy(chapterOrderToSQL(sort));
   }
   return query.all();
 };
@@ -592,7 +588,7 @@ export const getDetailedUpdatesFromDb = async (
       ),
     )
     .orderBy(desc(chapterSchema.updatedTime))
-    .all() as Update[];
+    .all();
 };
 
 export const isChapterDownloaded = (chapterId: number): boolean => {

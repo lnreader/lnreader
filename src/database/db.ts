@@ -22,7 +22,7 @@ import { createDbManager } from './manager/manager';
 
 class MyLogger implements Logger {
   logQuery(query: string, params: unknown[]): void {
-    console.trace('DB Query: ', { query, params });
+    //console.trace('DB Query: ', { query, params });
   }
 }
 
