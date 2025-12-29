@@ -41,12 +41,12 @@
   "dependencies": {
     "@cd-z/react-native-epub-creator": "^3.0.0",
     "@gorhom/bottom-sheet": "^5.2.8",
-    "@legendapp/list": "^2.0.18",
+    "@legendapp/list": "^2.0.19",
     "@noble/ciphers": "^2.1.1",
     "@react-native-community/slider": "^5.1.1",
     "@react-native-cookies/cookies": "^6.2.1",
     "@react-native-documents/picker": "^10.1.7",
-    "@react-native-google-signin/google-signin": "^16.1.0",
+    "@react-native-google-signin/google-signin": "^16.1.1",
     "@react-native-vector-icons/common": "^12.4.0",
     "@react-native-vector-icons/material-design-icons": "^12.4.0",
     "@react-native/codegen": "^0.81.5",
@@ -144,5 +144,5 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@10.26.1"
+  "packageManager": "pnpm@10.26.2"
 }
