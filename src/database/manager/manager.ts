@@ -1,5 +1,6 @@
 import { drizzleDb } from '@database/db';
 import { IDbManager } from './manager.d';
+import { DbTaskQueue } from './queue';
 
 type DrizzleDb = typeof drizzleDb;
 type TransactionParameter = Parameters<
@@ -10,6 +11,7 @@ let _dbManager: DbManager;
 
 class DbManager implements IDbManager {
   private readonly db: DrizzleDb;
+  private readonly queue: DbTaskQueue;
 
   public readonly select: DrizzleDb['select'];
   public readonly selectDistinct: DrizzleDb['selectDistinct'];
@@ -25,6 +27,7 @@ class DbManager implements IDbManager {
 
   private constructor(db: DrizzleDb) {
     this.db = db;
+    this.queue = new DbTaskQueue();
     this.select = this.db.select.bind(this.db);
     this.selectDistinct = this.db.selectDistinct.bind(this.db);
     this.$count = this.db.$count.bind(this.db);
@@ -47,8 +50,12 @@ class DbManager implements IDbManager {
   public async write<T>(
     fn: (tx: TransactionParameter) => Promise<T>,
   ): Promise<T> {
-    return await this.db.transaction(async tx => {
-      return await fn(tx);
+    return await this.queue.enqueue({
+      id: 'write',
+      run: async () =>
+        await this.db.transaction(async tx => {
+          return await fn(tx);
+        }),
     });
   }
 }

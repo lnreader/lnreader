@@ -1,5 +1,5 @@
 import { sleep } from '@utils/sleep';
-import type { QueueOptions } from './types';
+import { QueueOptions } from './types';
 
 type TaskRunner<TResult> = () => Promise<TResult>;
 
@@ -7,7 +7,7 @@ interface DbTask<TResult = unknown> {
   id: string;
   attempt: number;
   run: TaskRunner<TResult>;
-  resolve: (value: TResult | Promise<TResult>) => void;
+  resolve: (value: TResult) => void;
   reject: (reason?: unknown) => void;
 }
 
@@ -15,7 +15,7 @@ const DEFAULT_RETRY_ON = ['SQLITE_BUSY', 'database is locked'];
 
 export class DbTaskQueue {
   private readonly options: QueueOptions;
-  private readonly queue: DbTask[] = [];
+  private readonly queue: DbTask<any>[] = [];
   private active = false;
 
   constructor(options?: Partial<QueueOptions>) {
@@ -31,10 +31,23 @@ export class DbTaskQueue {
     };
   }
 
-  enqueue<TResult>(task: Pick<DbTask<TResult>, 'id' | 'run'>): Promise<TResult> {
-    return new Promise((resolve, reject) => {
-      this.queue.push({ ...task, attempt: 0, resolve, reject });
-      void this.drain();
+  enqueue<TResult>(
+    task: Pick<DbTask<TResult>, 'id' | 'run'>,
+  ): Promise<TResult> {
+    if (__DEV__) {
+      if (this.queue.length >= 1) {
+        // eslint-disable-next-line no-console
+        console.warn('[db-queue] One or more tasks are already queued');
+      }
+    }
+    return new Promise<TResult>((resolve, reject) => {
+      this.queue.push({
+        ...task,
+        attempt: 0,
+        resolve,
+        reject,
+      } as DbTask<TResult>);
+      this.drain();
     });
   }
 
@@ -75,9 +88,8 @@ export class DbTaskQueue {
     const message =
       error instanceof Error ? error.message : String(error ?? '');
 
-    return (retryCfg.retryOnMessageIncludes ?? DEFAULT_RETRY_ON).some(pattern =>
-      message.includes(pattern),
+    return (retryCfg.retryOnMessageIncludes ?? DEFAULT_RETRY_ON).some(
+      (pattern: string) => message.includes(pattern),
     );
   }
 }
-
