@@ -295,7 +295,10 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       routes: categories.map(category => ({
         key: String(category.id),
         title: category.name,
-        ...category,
+        id: category.id,
+        name: category.name,
+        sort: category.sort ?? 0,
+        novelIds: category.novelIds,
       })),
     }),
     [categories, index],

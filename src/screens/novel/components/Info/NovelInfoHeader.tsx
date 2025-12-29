@@ -39,12 +39,13 @@ import {
   VerticalBarSkeleton,
 } from '@components/Skeleton/Skeleton';
 import { useNovelContext } from '@screens/novel/NovelContext';
+import { ChapterFilterKey } from '@database/constants';
 
 interface NovelInfoHeaderProps {
   chapters: ChapterInfo[];
   deleteDownloadsSnackbar: UseBooleanReturnType;
   fetching: boolean;
-  filter: string;
+  filter: ChapterFilterKey[];
   isLoading: boolean;
   lastRead?: ChapterInfo;
   navigateToChapter: (chapter: ChapterInfo) => void;
@@ -243,7 +244,11 @@ const NovelInfoHeader = ({
               </View>
               <IconButton
                 icon="filter-variant"
-                iconColor={filter ? filterColor(theme.isDark) : theme.onSurface}
+                iconColor={
+                  filter.length >= 1
+                    ? filterColor(theme.isDark)
+                    : theme.onSurface
+                }
                 size={24}
                 onPress={() => novelBottomSheetRef.current?.present()}
               />

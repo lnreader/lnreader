@@ -13,36 +13,27 @@ import { overlay } from 'react-native-paper';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ThemeColors } from '@theme/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
 
 interface ChaptersSettingsSheetProps {
   bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
-  sortAndFilterChapters: (sort?: string, filter?: string) => Promise<void>;
-  sort: string;
-  filter: string;
   theme: ThemeColors;
-  showChapterTitles: boolean;
-  setShowChapterTitles: (v: boolean) => void;
 }
 
 const ChaptersSettingsSheet = ({
   bottomSheetRef,
-  sortAndFilterChapters,
-  sort,
-  filter,
   theme,
-  showChapterTitles,
-  setShowChapterTitles,
 }: ChaptersSettingsSheetProps) => {
-  const { left, right } = useSafeAreaInsets();
-  const sortChapters = useCallback(
-    (val: string) => sortAndFilterChapters(val, filter),
-    [filter, sortAndFilterChapters],
-  );
+  const {
+    setChapterSort,
+    getChapterFilterState,
+    cycleChapterFilter,
+    setShowChapterTitles,
+    sort,
+    showChapterTitles,
+  } = useNovelSettings();
 
-  const filterChapters = useCallback(
-    (val: string) => sortAndFilterChapters(sort, val),
-    [sort, sortAndFilterChapters],
-  );
+  const { left, right } = useSafeAreaInsets();
 
   const FirstRoute = useCallback(
     () => (
@@ -50,62 +41,30 @@ const ChaptersSettingsSheet = ({
         <Checkbox
           theme={theme}
           label={getString('novelScreen.bottomSheet.filters.downloaded')}
-          status={
-            filter.match('AND isDownloaded=1')
-              ? true
-              : filter.match('AND isDownloaded=0')
-              ? 'indeterminate'
-              : false
-          }
+          status={getChapterFilterState('downloaded')}
           onPress={() => {
-            if (filter.match('AND isDownloaded=1')) {
-              filterChapters(
-                filter.replace(' AND isDownloaded=1', ' AND isDownloaded=0'),
-              );
-            } else if (filter.match('AND isDownloaded=0')) {
-              filterChapters(filter.replace(' AND isDownloaded=0', ''));
-            } else {
-              filterChapters(filter + ' AND isDownloaded=1');
-            }
+            cycleChapterFilter('downloaded');
           }}
         />
         <Checkbox
           theme={theme}
           label={getString('novelScreen.bottomSheet.filters.unread')}
-          status={
-            filter.match('AND `unread`=1')
-              ? true
-              : filter.match('AND `unread`=0')
-              ? 'indeterminate'
-              : false
-          }
+          status={getChapterFilterState('read')}
           onPress={() => {
-            if (filter.match(' AND `unread`=1')) {
-              filterChapters(
-                filter.replace(' AND `unread`=1', ' AND `unread`=0'),
-              );
-            } else if (filter.match(' AND `unread`=0')) {
-              filterChapters(filter.replace(' AND `unread`=0', ''));
-            } else {
-              filterChapters(filter + ' AND `unread`=1');
-            }
+            cycleChapterFilter('read');
           }}
         />
         <Checkbox
           theme={theme}
           label={getString('novelScreen.bottomSheet.filters.bookmarked')}
-          status={!!filter.match('AND bookmark=1')}
+          status={getChapterFilterState('bookmarked')}
           onPress={() => {
-            filterChapters(
-              filter.match('AND bookmark=1')
-                ? filter.replace(' AND bookmark=1', '')
-                : filter + ' AND bookmark=1',
-            );
+            cycleChapterFilter('bookmarked');
           }}
         />
       </View>
     ),
-    [filter, filterChapters, theme],
+    [cycleChapterFilter, getChapterFilterState, theme],
   );
 
   const SecondRoute = useCallback(
@@ -114,45 +73,45 @@ const ChaptersSettingsSheet = ({
         <SortItem
           label={getString('novelScreen.bottomSheet.order.bySource')}
           status={
-            sort === 'ORDER BY position ASC'
+            sort === 'positionAsc'
               ? 'asc'
-              : sort === 'ORDER BY position DESC'
+              : sort === 'positionDesc'
               ? 'desc'
               : undefined
           }
           onPress={() =>
-            sort === 'ORDER BY position ASC'
-              ? sortChapters('ORDER BY position DESC')
-              : sortChapters('ORDER BY position ASC')
+            sort === 'positionAsc'
+              ? setChapterSort('positionDesc')
+              : setChapterSort('positionAsc')
           }
           theme={theme}
         />
         <SortItem
           label={getString('novelScreen.bottomSheet.order.byChapterName')}
           status={
-            sort === 'ORDER BY name ASC'
+            sort === 'nameAsc'
               ? 'asc'
-              : sort === 'ORDER BY name DESC'
+              : sort === 'nameDesc'
               ? 'desc'
               : undefined
           }
           onPress={() =>
-            sort === 'ORDER BY name ASC'
-              ? sortChapters('ORDER BY name DESC')
-              : sortChapters('ORDER BY name ASC')
+            sort === 'nameAsc'
+              ? setChapterSort('nameDesc')
+              : setChapterSort('nameAsc')
           }
           theme={theme}
         />
       </View>
     ),
-    [sort, sortChapters, theme],
+    [sort, setChapterSort, theme],
   );
 
   const ThirdRoute = useCallback(
     () => (
       <View style={styles.flex}>
         <Checkbox
-          status={showChapterTitles}
+          status={showChapterTitles ?? true}
           label={getString('novelScreen.bottomSheet.displays.sourceTitle')}
           onPress={() => setShowChapterTitles(true)}
           theme={theme}

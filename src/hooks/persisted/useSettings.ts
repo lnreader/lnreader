@@ -1,10 +1,11 @@
+import { ChapterOrderKey } from '@database/constants';
 import {
   DisplayModes,
   LibraryFilter,
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
-import { useMMKVObject } from 'react-native-mmkv';
 import { Voice } from 'expo-speech';
+import { useMMKVObject } from 'react-native-mmkv';
 
 export const APP_SETTINGS = 'APP_SETTINGS';
 export const BROWSE_SETTINGS = 'BROWSE_SETTINGS';
@@ -51,7 +52,7 @@ export interface AppSettings {
    */
 
   hideBackdrop: boolean;
-  defaultChapterSort: string;
+  defaultChapterSort: ChapterOrderKey;
 }
 
 export interface BrowseSettings {
@@ -159,7 +160,7 @@ const initialAppSettings: AppSettings = {
    */
 
   hideBackdrop: false,
-  defaultChapterSort: 'ORDER BY position ASC',
+  defaultChapterSort: 'positionAsc',
 };
 
 const initialBrowseSettings: BrowseSettings = {

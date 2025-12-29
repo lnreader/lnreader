@@ -361,7 +361,7 @@ export const getChapter = async (
 export const getPageChapters = async (
   novelId: number,
   sort?: ChapterOrderKey,
-  filter?: ChapterFilterKey,
+  filter?: ChapterFilterKey[],
   page?: string,
   offset?: number,
   limit?: number,
@@ -408,7 +408,7 @@ export const getChapterCount = (
 export const getPageChaptersBatched = (
   novelId: number,
   sort?: ChapterOrderKey,
-  filter?: ChapterFilterKey,
+  filter?: ChapterFilterKey[],
   page?: string,
   batch: number = 0,
 ): ChapterInfo[] => {

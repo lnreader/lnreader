@@ -118,8 +118,8 @@ export default function useChapter(
         const cachedText = chapterTextCache.get(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
         const [nextChap, prevChap, awaitedText] = await Promise.all([
-          getNextChapter(chap.novelId, chap.position!, chap.page),
-          getPrevChapter(chap.novelId, chap.position!, chap.page),
+          getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
+          getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
           text,
         ]);
         if (nextChap && !chapterTextCache.get(nextChap.id)) {

@@ -1,7 +1,6 @@
 module.exports = {
   root: true,
-  plugins: ['react-native'],
-  extends: 'plugin:react-native/recommended',
+  extends: '@react-native',
   overrides: [
     {
       files: ['*.js', '*.jsx', '*.ts', '*.tsx'],

@@ -15,12 +15,9 @@ import AppErrorBoundary, {
   ErrorFallback,
 } from '@components/AppErrorBoundary/AppErrorBoundary';
 
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from './drizzle/migrations';
-
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { drizzleDb, useInitDatabase } from '@database/db';
+import { useInitDatabase } from '@database/db';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {

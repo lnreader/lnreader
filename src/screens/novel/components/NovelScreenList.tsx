@@ -72,8 +72,6 @@ const NovelScreenList = ({
     novelSettings,
     pages,
     setNovel,
-    sortAndFilterChapters,
-    setShowChapterTitles,
     updateChapter,
     novel: fetchedNovel,
     batchInformation,
@@ -93,17 +91,12 @@ const NovelScreenList = ({
   const [updating, setUpdating] = useState(false);
   const {
     useFabForContinueReading,
-    defaultChapterSort,
     disableHapticFeedback,
     downloadNewChapters,
     refreshNovelMetadata,
   } = useAppSettings();
 
-  const {
-    sort = defaultChapterSort,
-    filter = '',
-    showChapterTitles = false,
-  } = novelSettings;
+  const { filter, showChapterTitles = false } = novelSettings;
 
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
@@ -406,12 +399,7 @@ const NovelScreenList = ({
         <>
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}
-            sortAndFilterChapters={sortAndFilterChapters}
-            setShowChapterTitles={setShowChapterTitles}
-            sort={sort}
             theme={theme}
-            filter={filter}
-            showChapterTitles={showChapterTitles}
           />
           <TrackSheet bottomSheetRef={trackerSheetRef} novel={novel} />
           {(novel.totalPages ?? 0) > 1 || pages.length > 1 ? (
