@@ -44,7 +44,7 @@ const ListView = ({
     >
       <Image
         source={{
-          uri: item.cover,
+          uri: item.cover ?? undefined,
         }}
         style={[styles.extensionIcon, fadedImage]}
       />

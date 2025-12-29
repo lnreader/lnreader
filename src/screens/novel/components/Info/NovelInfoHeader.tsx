@@ -109,13 +109,13 @@ const NovelInfoHeader = ({
   return (
     <>
       <CoverImage
-        source={{ uri: novel.cover }}
+        source={{ uri: novel.cover ?? undefined }}
         theme={theme}
         hideBackdrop={hideBackdrop}
       >
         <NovelInfoContainer>
           <NovelThumbnail
-            source={{ uri: novel.cover }}
+            source={{ uri: novel.cover ?? undefined }}
             theme={theme}
             setCustomNovelCover={
               isLoading ? showNotAvailable : setCustomNovelCover
@@ -169,7 +169,7 @@ const NovelInfoHeader = ({
             <Row>
               <MaterialCommunityIcons
                 name={getStatusIcon(
-                  novel.id !== 'NO_ID' ? novel.status : undefined,
+                  novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined,
                 )}
                 size={14}
                 color={theme.onSurfaceVariant}
@@ -177,7 +177,7 @@ const NovelInfoHeader = ({
               />
               <NovelInfo theme={theme}>
                 {(novel.id !== 'NO_ID'
-                  ? translateNovelStatus(novel.status)
+                  ? translateNovelStatus(novel.status ?? undefined)
                   : getString('novelScreen.unknownStatus')) +
                   ' • ' +
                   pluginName}

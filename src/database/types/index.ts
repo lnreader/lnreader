@@ -5,15 +5,15 @@ export interface NovelInfo {
   path: string;
   pluginId: string;
   name: string;
-  cover?: string;
-  summary?: string;
-  author?: string;
-  artist?: string;
-  status?: NovelStatus | string;
-  genres?: string;
-  inLibrary: boolean;
-  isLocal: boolean;
-  totalPages: number;
+  cover?: string | null;
+  summary?: string | null;
+  author?: string | null;
+  artist?: string | null;
+  status?: NovelStatus | string | null;
+  genres?: string | null;
+  inLibrary: boolean | null;
+  isLocal: boolean | null;
+  totalPages: number | null;
 }
 
 export interface DBNovelInfo extends NovelInfo {

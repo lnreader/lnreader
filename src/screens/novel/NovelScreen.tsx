@@ -247,7 +247,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               showJumpToChapterModal={showJumpToChapterModal}
               shareNovel={shareNovel}
               theme={theme}
-              isLocal={novel?.isLocal ?? route.params?.isLocal}
+              isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
               headerOpacity={headerOpacity}
             />

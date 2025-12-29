@@ -47,7 +47,7 @@ type NovelScreenListProps = {
     name: string;
     path: string;
     pluginId: string;
-    cover?: string;
+    cover?: string | null;
   };
 };
 
@@ -346,7 +346,7 @@ const NovelScreenList = ({
                 c => c.task.data.chapterId === item.id,
               )}
               isBookmarked={!!item.bookmark}
-              isLocal={novel.isLocal}
+              isLocal={novel.isLocal ?? false}
               theme={theme}
               chapter={item}
               showChapterTitles={showChapterTitles}
