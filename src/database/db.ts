@@ -1,8 +1,15 @@
+/* eslint-disable no-console */
 import * as SQLite from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { createCategoryDefaultQuery } from './tables/CategoryTable';
+import {
+  createCategoryDefaultQuery,
+  createCategoryTriggerQuery,
+} from './tables/CategoryTable';
 import {
   createNovelIndexQuery,
+  createNovelTriggerQueryDelete,
+  createNovelTriggerQueryInsert,
+  createNovelTriggerQueryUpdate,
   dropNovelIndexQuery,
 } from './tables/NovelTable';
 import {
@@ -62,19 +69,33 @@ const populateDatabase = () => {
   db.runSync(createCategoryDefaultQuery);
 };
 
+const createDbTriggers = () => {
+  console.log('Creating database triggers');
+  db.runSync(createCategoryTriggerQuery);
+  db.runSync(createNovelTriggerQueryDelete);
+  db.runSync(createNovelTriggerQueryInsert);
+  db.runSync(createNovelTriggerQueryUpdate);
+};
+
 export const useInitDatabase = () => {
   try {
     setPragmas();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
   console.log('Using migrations');
   const returnValue = useMigrations(drizzleDb, migrations);
 
   try {
+    createDbTriggers();
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
     populateDatabase();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   return returnValue;
