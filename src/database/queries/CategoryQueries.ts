@@ -4,8 +4,8 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { dbManager } from '@database/db';
 import {
-  category as categorySchema,
-  novelCategory as novelCategorySchema,
+  categorySchema,
+  novelCategorySchema,
   type CategoryRow,
 } from '@database/schema';
 

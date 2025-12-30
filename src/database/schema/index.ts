@@ -1,13 +1,21 @@
-export { category, type CategoryRow, type CategoryInsert } from './category';
-export { novel, type NovelRow, type NovelInsert } from './novel';
-export { chapter, type ChapterRow, type ChapterInsert } from './chapter';
 export {
-  novelCategory,
+  category as categorySchema,
+  type CategoryRow,
+  type CategoryInsert,
+} from './category';
+export { novel as novelSchema, type NovelRow, type NovelInsert } from './novel';
+export {
+  chapter as chapterSchema,
+  type ChapterRow,
+  type ChapterInsert,
+} from './chapter';
+export {
+  novelCategory as novelCategorySchema,
   type NovelCategoryRow,
   type NovelCategoryInsert,
 } from './novelCategory';
 export {
-  repository,
+  repository as repositorySchema,
   type RepositoryRow,
   type RepositoryInsert,
 } from './repository';

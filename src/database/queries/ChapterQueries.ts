@@ -22,10 +22,7 @@ import { ChapterItem } from '@plugins/types';
 import { getString } from '@strings/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
-import {
-  chapter as chapterSchema,
-  novel as novelSchema,
-} from '@database/schema';
+import { chapterSchema, novelSchema } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';

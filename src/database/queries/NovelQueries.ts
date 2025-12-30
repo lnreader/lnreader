@@ -13,10 +13,10 @@ import { downloadFile } from '@plugins/helpers/fetch';
 import { getPlugin } from '@plugins/pluginManager';
 import { dbManager } from '@database/db';
 import {
-  novel as novelSchema,
-  novelCategory as novelCategorySchema,
-  category as categorySchema,
-  chapter as chapterSchema,
+  novelSchema,
+  novelCategorySchema,
+  categorySchema,
+  chapterSchema,
 } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
 

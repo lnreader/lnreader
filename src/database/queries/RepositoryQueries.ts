@@ -1,16 +1,16 @@
 import { eq } from 'drizzle-orm';
 import { drizzleDb } from '@database/db';
-import { repository, type RepositoryRow } from '@database/schema';
+import { repositorySchema, type RepositoryRow } from '@database/schema';
 
 export const getRepositoriesFromDb = (): RepositoryRow[] => {
-  return drizzleDb.select().from(repository).all();
+  return drizzleDb.select().from(repositorySchema).all();
 };
 
 export const isRepoUrlDuplicated = (repoUrl: string): boolean => {
   const result = drizzleDb
-    .select({ count: repository.id })
-    .from(repository)
-    .where(eq(repository.url, repoUrl))
+    .select({ count: repositorySchema.id })
+    .from(repositorySchema)
+    .where(eq(repositorySchema.url, repoUrl))
     .get();
 
   return !!result;
@@ -18,7 +18,7 @@ export const isRepoUrlDuplicated = (repoUrl: string): boolean => {
 
 export const createRepository = (repoUrl: string): RepositoryRow => {
   const [row] = drizzleDb
-    .insert(repository)
+    .insert(repositorySchema)
     .values({ url: repoUrl })
     .returning()
     .all();
@@ -26,9 +26,13 @@ export const createRepository = (repoUrl: string): RepositoryRow => {
 };
 
 export const deleteRepositoryById = (id: number): void => {
-  drizzleDb.delete(repository).where(eq(repository.id, id)).run();
+  drizzleDb.delete(repositorySchema).where(eq(repositorySchema.id, id)).run();
 };
 
 export const updateRepository = (id: number, url: string): void => {
-  drizzleDb.update(repository).set({ url }).where(eq(repository.id, id)).run();
+  drizzleDb
+    .update(repositorySchema)
+    .set({ url })
+    .where(eq(repositorySchema.id, id))
+    .run();
 };

@@ -3,10 +3,7 @@ import { History } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { dbManager } from '@database/db';
-import {
-  chapter as chapterSchema,
-  novel as novelSchema,
-} from '@database/schema';
+import { chapterSchema, novelSchema } from '@database/schema';
 
 /**
  * Get reading history from the database using Drizzle ORM.
