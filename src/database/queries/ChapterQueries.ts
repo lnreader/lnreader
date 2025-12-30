@@ -551,14 +551,16 @@ export const getUpdatedOverviewFromDb = async (): Promise<UpdateOverview[]> =>
       novelName: novelSchema.name,
       novelCover: novelSchema.cover,
       novelPath: novelSchema.path,
-      updateDate: sql<string>`DATE(${chapterSchema.updatedTime})`,
+      updateDate: sql<string>`DATE(${chapterSchema.updatedTime})`.as(
+        'update_date',
+      ),
       updatesPerDay: count(),
     })
     .from(chapterSchema)
     .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
     .where(isNotNull(chapterSchema.updatedTime))
-    .groupBy(novelSchema.id, sql`DATE(${chapterSchema.updatedTime})`)
-    .orderBy(desc(sql`updateDate`), novelSchema.id)
+    .groupBy(novelSchema.id, sql`update_date`)
+    .orderBy(desc(sql`update_date`), novelSchema.id)
     .all() as UpdateOverview[];
 
 export const getDetailedUpdatesFromDb = async (
