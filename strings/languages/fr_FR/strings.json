@@ -134,7 +134,7 @@
   "browseScreen": {
     "addedToLibrary": "Ajouté à la bibliothèque",
     "available": "Disponible",
-    "deletePluginMessage": "Are you sure you want to uninstall %{name}?",
+    "deletePluginMessage": "Êtes-vous sûr de vouloir désinstaller %{name}?",
     "discover": "Découvrir",
     "globalSearch": "Recherche globale",
     "installFailed": "L'installation a échoué: %{name}",
@@ -147,22 +147,22 @@
     "migration": {
       "dialogMessage": "Migrate %{url}?",
       "novelAlreadyInLibrary": "Novel already in library",
-      "selectSource": "Select Source",
-      "selectSourceDesc": "Select a Source To Migrate From"
+      "selectSource": "Sélectionner la source",
+      "selectSourceDesc": "Sélectionnez une source à partir de laquelle migrer"
     },
     "noSource": "Your library does not have any novels from this source",
-    "pinnedPlugin": "Pinned %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugin": "Épinglé %{name}",
+    "pinnedPlugins": "Plugins épinglés",
     "removeFromLibrary": "Supprimé de la bibliothèque",
     "searchbar": "Rechercher des sources",
-    "searchResults": "Search results",
+    "searchResults": "Résultats de la recherche",
     "selectNovel": "Sélectionnez un roman",
     "uninstalledPlugin": "Désinstallé %{name}",
     "unpinnedPlugin": "Unpinned %{name}",
     "updateFailed": "Mise à jour échouée",
     "updatedTo": "Mis à jour %{version}",
     "settings": {
-      "title": "Plugin Settings",
+      "title": "Paramètres des plugins",
       "description": "Fill in the plugin settings. Restart app to apply the settings."
     }
   },
@@ -201,12 +201,12 @@
     "categories": "Catégories",
     "chapters": "Chapitres",
     "clear": "Nettoyez",
-    "copiedToClipboard": "Copié dans le presse-papier: %{name}",
+    "copiedToClipboard": "Copié dans le presse-papier : %{name}",
     "delete": "Supprimer",
     "deleted": "Supprimer %{name}",
     "deprecated": "Obsolète",
     "display": "Afficher",
-    "done": "Done",
+    "done": "Terminé",
     "downloads": "Téléchargements",
     "edit": "Modifier",
     "example": "Exemple",
@@ -217,7 +217,7 @@
     "name": "Nom",
     "newUpdateAvailable": "Nouvelle mise à jour disponible",
     "ok": "Ok",
-    "pause": "Pause",
+    "pause": "Mettre en pause",
     "preparing": "Preparing",
     "remove": "Retirer",
     "reset": "Réinitialiser",
@@ -265,7 +265,7 @@
     "downloadingNovel": "Téléchargement : %{name}",
     "downloadsLower": "télécharger",
     "noDownloads": "Aucun téléchargement",
-    "pluginNotFound": "Plugin not found!",
+    "pluginNotFound": "Plugin introuvable!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
   },
   "generalSettings": "Général",
@@ -291,7 +291,7 @@
     "itemsPerRowLibrary": "Éléments par ligne dans la bibliothèque",
     "jumpToLastReadChapter": "Jump to last read chapter in list",
     "novel": "Roman",
-    "novelBadges": "Badges de Novel",
+    "novelBadges": "Badges de roman",
     "novelSort": "Trier les romans",
     "refreshMetadata": "Rafraîchir automatiquement les métadonnées",
     "refreshMetadataDescription": "Vérifier la nouvelle couverture et les détails lors de la mise à jour de la bibliothèque",
@@ -351,7 +351,7 @@
     "extraMenu": {
       "importEpub": "Importer un Epub",
       "openRandom": "Ouvrir une série au hasard",
-      "updateCategory": "Update Category",
+      "updateCategory": "Mettre à jour la catégorie",
       "updateLibrary": "Mettre à jour la bibliothèque"
     },
     "searchbar": "Rechercher dans la bibliothèque"
