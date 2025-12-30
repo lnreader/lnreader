@@ -17,18 +17,19 @@ import { sleep } from '@utils/sleep';
 import ServiceManager, {
   BackgroundTaskMetadata,
 } from '@services/ServiceManager';
-import { db } from '@database/db';
+import { dbManager } from '@database/db';
+import {
+  chapterSchema,
+  novelCategorySchema,
+  novelSchema,
+} from '@database/schema';
+import { eq } from 'drizzle-orm';
 
 export interface MigrateNovelData {
   pluginId: string;
   fromNovel: NovelInfo;
   toNovelPath: string;
 }
-
-const migrateNovelMetaDataQuery =
-  'UPDATE Novel SET cover = ?, summary = ?, author = ?, artist = ?, status = ?, genres = ?, inLibrary = 1  WHERE id = ?';
-const migrateChapterQuery =
-  'UPDATE Chapter SET bookmark = ?, unread = ?, readTime = ?, progress = ? WHERE id = ?';
 
 const sortChaptersByNumber = (novelName: string, chapters: ChapterInfo[]) => {
   for (let i = 0; i < chapters.length; ++i) {
@@ -73,24 +74,26 @@ export const migrateNovel = async (
     toChapters = await getNovelChapters(toNovel.id);
   }
 
-  await db.withExclusiveTransactionAsync(async tx => {
-    await tx.runAsync(
-      migrateNovelMetaDataQuery,
-      fromNovel.cover || toNovel!.cover || '',
-      fromNovel.summary || toNovel!.summary || '',
-      fromNovel.author || toNovel!.author || '',
-      fromNovel.artist || toNovel!.artist || '',
-      fromNovel.status || toNovel!.status || '',
-      fromNovel.genres || toNovel!.genres || '',
-      toNovel!.id,
-    );
-
-    await tx.runAsync(
-      'UPDATE OR IGNORE NovelCategory SET novelId = ? WHERE novelId = ?',
-      toNovel!.id,
-      fromNovel.id,
-    );
-    await tx.runAsync('DELETE FROM Novel WHERE id = ?', fromNovel.id);
+  await dbManager.write(async tx => {
+    await tx
+      .update(novelSchema)
+      .set({
+        cover: fromNovel.cover || toNovel!.cover || '',
+        summary: fromNovel.summary || toNovel!.summary || '',
+        author: fromNovel.author || toNovel!.author || '',
+        artist: fromNovel.artist || toNovel!.artist || '',
+        status: fromNovel.status || toNovel!.status || '',
+        genres: fromNovel.genres || toNovel!.genres || '',
+        inLibrary: true,
+      })
+      .where(eq(novelSchema.id, toNovel!.id));
+    await tx
+      .update(novelCategorySchema)
+      .set({
+        novelId: toNovel!.id,
+      })
+      .where(eq(novelCategorySchema.novelId, fromNovel.id));
+    await tx.delete(novelSchema).where(eq(novelSchema.id, fromNovel.id));
   });
 
   setMMKVObject(
@@ -133,14 +136,18 @@ export const migrateNovel = async (
       ++toPointer;
       continue;
     }
-    await db.runAsync(
-      migrateChapterQuery,
-      Number(fromChapter.bookmark),
-      Number(fromChapter.unread),
-      fromChapter.readTime,
-      fromChapter.progress,
-      toChapter.id,
-    );
+
+    await dbManager.write(async tx => {
+      await tx
+        .update(chapterSchema)
+        .set({
+          bookmark: fromChapter.bookmark,
+          unread: fromChapter.unread,
+          readTime: fromChapter.readTime,
+          progress: fromChapter.progress,
+        })
+        .where(eq(chapterSchema.id, toChapter.id));
+    });
 
     if (fromChapter.isDownloaded) {
       ServiceManager.manager.addTask({

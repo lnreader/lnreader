@@ -6,7 +6,8 @@ import {
 import { LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
 import { getString } from '@strings/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
-import { db } from '@database/db';
+import { dbManager } from '@database/db';
+import { novelSchema, chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import NativeFile from '@specs/NativeFile';
 import NativeZipArchive from '@specs/NativeZipArchive';
@@ -28,14 +29,13 @@ const insertLocalNovel = async (
   artist?: string,
   summary?: string,
 ) => {
-  const insertedNovel = await db.runAsync(
-    `
-      INSERT INTO 
-        Novel(name, path, pluginId, inLibrary, isLocal) 
-        VALUES(?, ?, 'local', 1, 1)`,
-    name,
-    path,
-  );
+  const insertedNovel = await dbManager.write(async tx => {
+    return tx
+      .insert(novelSchema)
+      .values({ name, path, pluginId: 'local', inLibrary: true, isLocal: true })
+      .run();
+  });
+
   if (insertedNovel.lastInsertRowId && insertedNovel.lastInsertRowId >= 0) {
     await updateNovelCategoryById(insertedNovel.lastInsertRowId, [2]);
     const novelDir = NOVEL_STORAGE + '/local/' + insertedNovel.lastInsertRowId;
@@ -74,15 +74,20 @@ const insertLocalChapter = async (
   path: string,
   releaseTime: string,
 ) => {
-  const insertedChapter = await db.runAsync(
-    'INSERT INTO Chapter(novelId, name, path, releaseTime, position, isDownloaded) VALUES(?, ?, ?, ?, ?, ?)',
-    novelId,
-    name,
-    NOVEL_STORAGE + '/local/' + novelId + '/' + fakeId,
-    releaseTime,
-    fakeId,
-    1,
-  );
+  const insertedChapter = await dbManager.write(async tx => {
+    return tx
+      .insert(chapterSchema)
+      .values({
+        novelId,
+        name,
+        path: NOVEL_STORAGE + '/local/' + novelId + '/' + fakeId,
+        releaseTime,
+        position: fakeId,
+        isDownloaded: true,
+      })
+      .run();
+  });
+
   if (insertedChapter.lastInsertRowId && insertedChapter.lastInsertRowId >= 0) {
     let chapterText: string = '';
     chapterText = NativeFile.readFile(decodePath(path));

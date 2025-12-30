@@ -54,6 +54,7 @@ class DbManager implements IDbManager {
       id: 'write',
       run: async () =>
         await this.db.transaction(async tx => {
+          console.log('Transaction started');
           return await fn(tx);
         }),
     });

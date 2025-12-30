@@ -7,9 +7,11 @@ import { getString } from '@strings/translations';
 import { getChapter } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
 import { getNovelById } from '@database/queries/NovelQueries';
-import { db } from '@database/db';
+import { dbManager } from '@database/db';
+import { chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import NativeFile from '@specs/NativeFile';
+import { eq } from 'drizzle-orm';
 
 const createChapterFolder = async (
   path: string,
@@ -86,9 +88,13 @@ export const downloadChapter = async (
   const chapterText = await plugin.parseChapter(chapter.path);
   if (chapterText && chapterText.length) {
     await downloadFiles(chapterText, plugin, novel.id, chapter.id);
-    db.runSync('UPDATE Chapter SET isDownloaded = 1 WHERE id = ?', [
-      chapter.id,
-    ]);
+
+    await dbManager.write(async tx => {
+      tx.update(chapterSchema)
+        .set({ isDownloaded: true })
+        .where(eq(chapterSchema.id, chapter.id))
+        .run();
+    });
 
     await sleep(1000);
   } else {
