@@ -1,31 +1,23 @@
 /* eslint-disable no-console */
-import * as SQLite from 'expo-sqlite';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import {
-  createCategoryDefaultQuery,
-  createCategoryTriggerQuery,
-} from './tables/CategoryTable';
-import {
-  createNovelIndexQuery,
-  createNovelTriggerQueryDelete,
-  createNovelTriggerQueryInsert,
-  createNovelTriggerQueryUpdate,
-  dropNovelIndexQuery,
-} from './tables/NovelTable';
-import {
-  createChapterIndexQuery,
-  dropChapterIndexQuery,
-} from './tables/ChapterTable';
+import { drizzle } from 'drizzle-orm/op-sqlite';
 
 import { getErrorMessage } from '@utils/error';
 import { showToast } from '@utils/showToast';
 
-import { schema } from './schema';
+import { categorySchema, schema } from './schema';
 import { Logger } from 'drizzle-orm';
 
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import { useMigrations } from 'drizzle-orm/op-sqlite/migrator';
 import migrations from '../../drizzle/migrations';
 import { createDbManager } from './manager/manager';
+import { open } from '@op-engineering/op-sqlite';
+import { createCategoryDefaultQuery } from './queryStrings/populate';
+import {
+  createCategoryTriggerQuery,
+  createNovelTriggerQueryDelete,
+  createNovelTriggerQueryInsert,
+  createNovelTriggerQueryUpdate,
+} from './queryStrings/triggers';
 
 class MyLogger implements Logger {
   logQuery(query: string, params: unknown[]): void {
@@ -39,7 +31,8 @@ const DB_NAME = 'lnreader.db';
  * Raw SQLite database instance
  * @deprecated Use `drizzleDb` for new code
  */
-export const db = SQLite.openDatabaseSync(DB_NAME);
+//export const db = SQLite.openDatabaseSync(DB_NAME);
+export const db = open({ name: DB_NAME });
 
 /**
  * Drizzle ORM database instance with type-safe query builder
@@ -62,19 +55,19 @@ const setPragmas = () => {
     'PRAGMA cache_size = 10000',
     'PRAGMA foreign_keys = ON',
   ];
-  db.execSync(queries.join(';\n'));
+  db.executeSync(queries.join(';\n'));
 };
 const populateDatabase = () => {
   console.log('Populating database');
-  db.runSync(createCategoryDefaultQuery);
+  db.executeSync(createCategoryDefaultQuery);
 };
 
 const createDbTriggers = () => {
   console.log('Creating database triggers');
-  db.runSync(createCategoryTriggerQuery);
-  db.runSync(createNovelTriggerQueryDelete);
-  db.runSync(createNovelTriggerQueryInsert);
-  db.runSync(createNovelTriggerQueryUpdate);
+  db.executeSync(createCategoryTriggerQuery);
+  db.executeSync(createNovelTriggerQueryDelete);
+  db.executeSync(createNovelTriggerQueryInsert);
+  db.executeSync(createNovelTriggerQueryUpdate);
 };
 
 export const useInitDatabase = () => {
@@ -97,29 +90,12 @@ export const useInitDatabase = () => {
   } catch (e) {
     console.error(e);
   }
+  setTimeout(async () => {
+    const c = dbManager.select().from(categorySchema).prepare().all();
+    console.log(await c);
+  }, 1000);
 
   return returnValue;
 };
 
-export const recreateDatabaseIndexes = () => {
-  try {
-    db.execSync('PRAGMA analysis_limit=4000');
-    db.execSync('PRAGMA optimize');
-
-    db.execSync('PRAGMA journal_mode = WAL');
-    db.execSync('PRAGMA foreign_keys = ON');
-    db.execSync('PRAGMA synchronous = NORMAL');
-    db.execSync('PRAGMA cache_size = 10000');
-    db.execSync('PRAGMA temp_store = MEMORY');
-    db.execSync('PRAGMA busy_timeout = 5000');
-
-    db.withTransactionSync(() => {
-      db.runSync(dropNovelIndexQuery);
-      db.runSync(dropChapterIndexQuery);
-      db.runSync(createNovelIndexQuery);
-      db.runSync(createChapterIndexQuery);
-    });
-  } catch (error: unknown) {
-    showToast(getErrorMessage(error));
-  }
-};
+export const recreateDatabaseIndexes = () => {};

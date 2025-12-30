@@ -39,6 +39,7 @@ export const insertChapters = async (
   if (!chapters?.length) {
     return;
   }
+  console.time('insertChapters');
   await dbManager.write(async tx => {
     for (let index = 0; index < chapters.length; index++) {
       const chapter = chapters[index];
@@ -68,6 +69,7 @@ export const insertChapters = async (
         .run();
     }
   });
+  console.timeEnd('insertChapters');
 };
 
 export const markChapterRead = async (chapterId: number): Promise<void> => {
