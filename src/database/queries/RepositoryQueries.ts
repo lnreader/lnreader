@@ -1,13 +1,13 @@
 import { eq } from 'drizzle-orm';
-import { drizzleDb } from '@database/db';
+import { dbManager } from '@database/db';
 import { repositorySchema, type RepositoryRow } from '@database/schema';
 
-export const getRepositoriesFromDb = (): RepositoryRow[] => {
-  return drizzleDb.select().from(repositorySchema).all();
+export const getRepositoriesFromDb = async (): Promise<RepositoryRow[]> => {
+  return dbManager.select().from(repositorySchema).all();
 };
 
-export const isRepoUrlDuplicated = (repoUrl: string): boolean => {
-  const result = drizzleDb
+export const isRepoUrlDuplicated = async (repoUrl: string) => {
+  const result = await dbManager
     .select({ count: repositorySchema.id })
     .from(repositorySchema)
     .where(eq(repositorySchema.url, repoUrl))
@@ -16,23 +16,35 @@ export const isRepoUrlDuplicated = (repoUrl: string): boolean => {
   return !!result;
 };
 
-export const createRepository = (repoUrl: string): RepositoryRow => {
-  const [row] = drizzleDb
-    .insert(repositorySchema)
-    .values({ url: repoUrl })
-    .returning()
-    .all();
+export const createRepository = async (
+  repoUrl: string,
+): Promise<RepositoryRow> => {
+  const row = await dbManager.write(
+    async tx =>
+      await tx
+        .insert(repositorySchema)
+        .values({ url: repoUrl })
+        .returning()
+        .get(),
+  );
   return row;
 };
 
-export const deleteRepositoryById = (id: number): void => {
-  drizzleDb.delete(repositorySchema).where(eq(repositorySchema.id, id)).run();
+export const deleteRepositoryById = async (id: number): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx.delete(repositorySchema).where(eq(repositorySchema.id, id)).run();
+  });
 };
 
-export const updateRepository = (id: number, url: string): void => {
-  drizzleDb
-    .update(repositorySchema)
-    .set({ url })
-    .where(eq(repositorySchema.id, id))
-    .run();
+export const updateRepository = async (
+  id: number,
+  url: string,
+): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx
+      .update(repositorySchema)
+      .set({ url })
+      .where(eq(repositorySchema.id, id))
+      .run();
+  });
 };

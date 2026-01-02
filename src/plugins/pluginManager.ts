@@ -55,8 +55,8 @@ const initPlugin = (pluginId: string, rawCode: string) => {
     const plugin: Plugin = Function(
       'require',
       'module',
-      `const exports = module.exports = {}; 
-      ${rawCode}; 
+      `const exports = module.exports = {};
+      ${rawCode};
       return exports.default`,
     )(_require, {});
 
@@ -141,7 +141,7 @@ const updatePlugin = async (plugin: PluginItem) => {
 
 const fetchPlugins = async (): Promise<PluginItem[]> => {
   const allPlugins: PluginItem[] = [];
-  const allRepositories = getRepositoriesFromDb();
+  const allRepositories = await getRepositoriesFromDb();
 
   const repoPluginsRes = await Promise.allSettled(
     allRepositories.map(({ url }) => fetch(url).then(res => res.json())),

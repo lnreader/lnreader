@@ -6,7 +6,6 @@ import { Appbar, EmptyView, SafeAreaView } from '@components';
 
 import {
   createRepository,
-  getRepositoriesFromDb,
   isRepoUrlDuplicated,
   updateRepository,
 } from '@database/queries/RepositoryQueries';
@@ -23,6 +22,9 @@ import {
   RootStackParamList,
 } from '@navigators/types';
 import { showToast } from '@utils/showToast';
+import { useLiveQueryy } from '@database/manager/manager';
+import { repositorySchema } from '@database/schema';
+import { dbManager } from '@database/db';
 
 const SettingsBrowseScreen = ({
   route: { params },
@@ -32,12 +34,10 @@ const SettingsBrowseScreen = ({
   const { bottom, right } = useSafeAreaInsets();
   const { refreshPlugins } = usePlugins();
 
-  const [repositories, setRepositories] = useState<Repository[]>(
-    getRepositoriesFromDb(),
+  const repositories = useLiveQueryy(
+    dbManager.select().from(repositorySchema),
+    [{ table: 'Repository' }],
   );
-  const getRepositories = () => {
-    setRepositories(getRepositoriesFromDb());
-  };
 
   const {
     value: addRepositoryModalVisible,
@@ -46,7 +46,7 @@ const SettingsBrowseScreen = ({
   } = useBoolean();
 
   const upsertRepository = useCallback(
-    (repositoryUrl: string, repository?: Repository) => {
+    async (repositoryUrl: string, repository?: Repository) => {
       if (
         !new RegExp(/https?:\/\/(.*)plugins\.min\.json/).test(repositoryUrl)
       ) {
@@ -54,15 +54,14 @@ const SettingsBrowseScreen = ({
         return;
       }
 
-      if (isRepoUrlDuplicated(repositoryUrl)) {
+      if (await isRepoUrlDuplicated(repositoryUrl)) {
         showToast('A respository with this url already exists!');
       } else {
         if (repository) {
-          updateRepository(repository.id, repositoryUrl);
+          await updateRepository(repository.id, repositoryUrl);
         } else {
-          createRepository(repositoryUrl);
+          await createRepository(repositoryUrl);
         }
-        getRepositories();
         refreshPlugins();
       }
     },
@@ -102,7 +101,7 @@ const SettingsBrowseScreen = ({
         renderItem={({ item }) => (
           <RepositoryCard
             repository={item}
-            refetchRepositories={getRepositories}
+            refetchRepositories={() => {}}
             upsertRepository={upsertRepository}
           />
         )}
