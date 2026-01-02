@@ -75,8 +75,8 @@ importers:
         specifier: ^1.11.19
         version: 1.11.19
       drizzle-orm:
-        specifier: 1.0.0-beta.6-4414a19
-        version: 1.0.0-beta.6-4414a19(97df02c193649f4e20ac0ece310a3c8b)
+        specifier: 1.0.0-beta.8-734e789
+        version: 1.0.0-beta.8-734e789(97df02c193649f4e20ac0ece310a3c8b)
       expo:
         specifier: ^54.0.30
         version: 54.0.30(@babel/core@7.28.5)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.81.5(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.81.5(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -2887,8 +2887,8 @@ packages:
     resolution: {integrity: sha512-hOzRGSdyKIU4FcTSFYGKdXEjFsncVwHZ43gY3WU5Bz9j5Iadp6Rh6hxLSQ1IWXpKLBKt/d5y1cpSPcV+FcoQ1A==}
     hasBin: true
 
-  drizzle-orm@1.0.0-beta.6-4414a19:
-    resolution: {integrity: sha512-UGpd61ZVeo1Myz0qzdRIpJoRMTzju6y2S25OTI5/nf6mdyAounZbqsoQtAkfms6wv9LLwOCnTtGhlskkgSfjcw==}
+  drizzle-orm@1.0.0-beta.8-734e789:
+    resolution: {integrity: sha512-5WZVn/bVFCDrmFkaMUpsBE0Xqje+86uTjba7CuKFpjn6MtAr0jBzhN/KBboien8mEWzBVKGJCpMnJ8QapGDtZQ==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -9352,7 +9352,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@1.0.0-beta.6-4414a19(97df02c193649f4e20ac0ece310a3c8b):
+  drizzle-orm@1.0.0-beta.8-734e789(97df02c193649f4e20ac0ece310a3c8b):
     dependencies:
       '@types/mssql': 9.1.9
       mssql: 11.0.1

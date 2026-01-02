@@ -61,7 +61,7 @@
     "cheerio": "1.0.0-rc.12",
     "color": "^5.0.3",
     "dayjs": "^1.11.19",
-    "drizzle-orm": "1.0.0-beta.6-4414a19",
+    "drizzle-orm": "1.0.0-beta.8-734e789",
     "expo": "^54.0.30",
     "expo-clipboard": "~8.0.8",
     "expo-document-picker": "~14.0.8",
@@ -144,5 +144,5 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@10.26.2"
+  "packageManager": "pnpm@10.27.0"
 }
