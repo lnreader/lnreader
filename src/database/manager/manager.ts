@@ -1,6 +1,22 @@
-import { drizzleDb } from '@database/db';
+import { db, dbManager, drizzleDb } from '@database/db';
 import { IDbManager } from './manager.d';
 import { DbTaskQueue } from './queue';
+import { repositorySchema, Schema } from '../schema';
+import {
+  SQLiteDeleteBase,
+  SQLiteInsertBase,
+  SQLiteSelectBase,
+  SQLiteUpdateBase,
+} from 'drizzle-orm/sqlite-core';
+import { useEffect, useState } from 'react';
+import { GetSelectTableName } from 'drizzle-orm/query-builders/select.types';
+import { SQLBatchTuple } from 'node_modules/@op-engineering/op-sqlite/lib/typescript/src';
+
+type SQLiteBase =
+  | SQLiteSelectBase<any, any, any, any>
+  | SQLiteDeleteBase<any, any, any, any>
+  | SQLiteUpdateBase<any, any, any, any>
+  | SQLiteInsertBase<any, any, any, any>;
 
 type DrizzleDb = typeof drizzleDb;
 type TransactionParameter = Parameters<
@@ -47,6 +63,28 @@ class DbManager implements IDbManager {
     return _dbManager;
   }
 
+  public getSync<T extends SQLiteSelectBase<any, any, any, any>>(
+    query: T,
+  ): Awaited<ReturnType<T['get']>> {
+    const { sql, params } = query.toSQL();
+    return db.executeSync(sql, params as any[]).rows[0] as Awaited<
+      ReturnType<T['get']>
+    >;
+  }
+
+  public async allSync<T extends SQLiteSelectBase<any, any, any, any>>(
+    query: T,
+  ): Promise<Awaited<ReturnType<T['all']>>> {
+    const { sql, params } = query.toSQL();
+    return db.executeSync(sql, params as any[]).rows as Awaited<
+      ReturnType<T['all']>
+    >;
+  }
+
+  public async batch(commands: SQLBatchTuple[]) {
+    return await db.executeBatch(commands);
+  }
+
   public async write<T>(
     fn: (tx: TransactionParameter) => Promise<T>,
   ): Promise<T> {
@@ -55,7 +93,9 @@ class DbManager implements IDbManager {
       run: async () =>
         await this.db.transaction(async tx => {
           console.log('Transaction started');
-          return await fn(tx);
+          const result = await fn(tx);
+          db?.flushPendingReactiveQueries();
+          return result;
         }),
     });
   }
@@ -64,3 +104,37 @@ class DbManager implements IDbManager {
 export const createDbManager = (db: DrizzleDb) => {
   return DbManager.create(db);
 };
+
+type TableNames = GetSelectTableName<Schema[keyof Schema]>;
+type FireOn = Array<{ table: TableNames; ids?: number[] }>;
+export function useLiveQueryy<T extends SQLiteSelectBase<any, any, any, any>>(
+  query: T,
+  fireOn: FireOn,
+) {
+  type ReturnValue = Awaited<ReturnType<T['all']>>;
+  const { sql, params } = query.toSQL();
+  const [data, setData] = useState<ReturnValue | []>(
+    db.executeSync(sql, params as any[]).rows as ReturnValue,
+  );
+
+  const unsub = db.reactiveExecute({
+    query: sql,
+    arguments: params,
+    fireOn,
+    callback: result => {
+      console.log('result', result);
+      setData(result.rows);
+    },
+  });
+
+  useEffect(() => {
+    return () => {
+      console.log('unsub');
+      unsub();
+    };
+  }, []);
+  return data;
+}
+dbManager.batch(() => {
+  dbManager.w;
+});
