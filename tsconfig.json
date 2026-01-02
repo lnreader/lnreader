@@ -33,6 +33,6 @@
       "@type/*": ["./src/type/*"],
       "@specs/*": ["./specs/*"]
     },
-    "types": ["react-native"]
-  },
+    "types": ["react-native", "jest"]
+  }
 }
