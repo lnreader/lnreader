@@ -33,10 +33,10 @@ export const getCategoriesFromDb = () => {
 /**
  * Get all categories with their novel IDs using Drizzle ORM
  */
-export const getCategoriesFromDb = (): Array<
-  CategoryRow & { novelIds: string | null }
+export const getCategoriesFromDb = async (): Promise<
+  Array<CategoryRow & { novelIds: string | null }>
 > => {
-  return dbManager
+  return await dbManager
     .select({
       id: categorySchema.id,
       name: categorySchema.name,
@@ -80,7 +80,7 @@ export const getCategoriesWithCount = async (
   novelIds: number[],
 ): Promise<CCategory[]> => {
   if (!novelIds.length) {
-    return dbManager
+    return await dbManager
       .select({
         id: categorySchema.id,
         name: categorySchema.name,
@@ -90,7 +90,7 @@ export const getCategoriesWithCount = async (
       .from(categorySchema)
       .where(ne(categorySchema.id, 2))
       .orderBy(categorySchema.sort)
-      .all() as CCategory[];
+      .all();
   }
 
   // Use subquery to count novels per category
@@ -129,16 +129,13 @@ export const getCategoriesWithCount = async (
 export const createCategory = async (
   categoryName: string,
 ): Promise<CategoryRow> => {
-  return dbManager.write(async tx => {
-    const { count: categoryCount } = tx
-      .select({ count: count() })
-      .from(categorySchema)
-      .get() ?? { count: 0 };
-    const [row] = tx
+  return await dbManager.write(async tx => {
+    const categoryCount = await tx.$count(categorySchema);
+    const row = await tx
       .insert(categorySchema)
       .values({ name: categoryName, sort: categoryCount + 1 })
       .returning()
-      .all();
+      .get();
     return row;
   });
 };
@@ -147,15 +144,16 @@ export const createCategory = async (
  * Delete a category by ID with proper handling of novels
  * Before deletion, reassigns novels that only belong to this category to the default category
  */
-export const deleteCategoryById = (category: Category): void => {
+export const deleteCategoryById = async (category: Category): Promise<void> => {
   if (category.id <= 2) {
     return showToast(getString('categories.cantDeleteDefault'));
   }
-  dbManager.write(async tx => {
+
+  await dbManager.write(async tx => {
     const defaultCategoryId = 1;
 
     // Find novels that only belong to this category
-    const novelsWithOnlyThisCategory = tx
+    const novelsWithOnlyThisCategory = await tx
       .select({ novelId: novelCategorySchema.novelId })
       .from(novelCategorySchema)
       .groupBy(novelCategorySchema.novelId)
@@ -166,7 +164,8 @@ export const deleteCategoryById = (category: Category): void => {
 
     // Update those novels to belong to the default category
     if (novelIds.length > 0) {
-      tx.update(novelCategorySchema)
+      await tx
+        .update(novelCategorySchema)
         .set({ categoryId: defaultCategoryId })
         .where(
           and(
@@ -178,14 +177,17 @@ export const deleteCategoryById = (category: Category): void => {
     }
 
     // Delete the category
-    tx.delete(categorySchema).where(eq(categorySchema.id, category.id)).run();
+    await tx
+      .delete(categorySchema)
+      .where(eq(categorySchema.id, category.id))
+      .run();
   });
 };
 
 /**
  * Update a category name using Drizzle ORM
  */
-export const updateCategory = (
+export const updateCategory = async (
   categoryId: number,
   categoryName: string,
 ): void => {
@@ -198,8 +200,8 @@ export const updateCategory = (
 export const updateCategoryDrizzle = (
   categoryId: number,
   categoryName: string,
-): void => {
-  dbManager.write(async tx => {
+): Promise<void> => {
+  await dbManager.write(async tx => {
     await tx
       .update(categorySchema)
       .set({ name: categoryName })
@@ -211,11 +213,12 @@ export const updateCategoryDrizzle = (
  * Check if a category name already exists using Drizzle ORM
  */
 export const isCategoryNameDuplicate = (categoryName: string): boolean => {
-  const result = dbManager
-    .select({ id: categorySchema.id })
-    .from(categorySchema)
-    .where(eq(categorySchema.name, categoryName))
-    .get();
+  const result = dbManager.getSync(
+    dbManager
+      .select({ id: categorySchema.id })
+      .from(categorySchema)
+      .where(eq(categorySchema.name, categoryName)),
+  );
 
   return !!result;
 };
@@ -223,7 +226,9 @@ export const isCategoryNameDuplicate = (categoryName: string): boolean => {
 /**
  * Update the sort order of categories
  */
-export const updateCategoryOrderInDb = (categories: Category[]): void => {
+export const updateCategoryOrderInDb = async (
+  categories: Category[],
+): Promise<void> => {
   if (!categories.length) {
     return;
   }
@@ -256,7 +261,7 @@ export const _restoreCategory = (category: BackupCategory) => {
     );
   }
 
-  dbManager.write(async tx => {
+  await dbManager.write(async tx => {
     for (const category of categories) {
       tx.update(categorySchema)
         .set({ sort: category.sort })
@@ -269,25 +274,29 @@ export const _restoreCategory = (category: BackupCategory) => {
 /**
  * Get all novel-category associations
  */
-export const getAllNovelCategories = (): NovelCategory[] => {
-  return dbManager.select().from(novelCategorySchema).all();
+export const getAllNovelCategories = async (): Promise<NovelCategory[]> => {
+  return await dbManager.select().from(novelCategorySchema).all();
 };
 
 /**
  * Restore a category from backup
  * Used during the restore process
  */
-export const _restoreCategory = (category: BackupCategory): void => {
-  dbManager.write(async tx => {
+export const _restoreCategory = async (
+  category: BackupCategory,
+): Promise<void> => {
+  await dbManager.write(async tx => {
     // Delete existing category with same id or sort
-    tx.delete(categorySchema)
+    await tx
+      .delete(categorySchema)
       .where(
         sql`${categorySchema.id} = ${category.id} OR ${categorySchema.sort} = ${category.sort}`,
       )
       .run();
 
     // Insert the category
-    tx.insert(categorySchema)
+    await tx
+      .insert(categorySchema)
       .values({
         id: category.id,
         name: category.name,
