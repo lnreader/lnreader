@@ -79,7 +79,7 @@ export const insertNovelAndChapters = async (
 };
 
 export const getAllNovels = async (): Promise<NovelInfo[]> => {
-  return dbManager.select().from(novelSchema).all() as NovelInfo[];
+  return dbManager.select().from(novelSchema).all();
 };
 
 export const getNovelById = async (
@@ -90,21 +90,25 @@ export const getNovelById = async (
     .from(novelSchema)
     .where(eq(novelSchema.id, novelId))
     .get();
-  return res as NovelInfo | undefined;
+  return res;
 };
 
 export const getNovelByPath = (
   novelPath: string,
   pluginId: string,
 ): NovelInfo | undefined => {
-  const res = dbManager
-    .select()
-    .from(novelSchema)
-    .where(
-      and(eq(novelSchema.path, novelPath), eq(novelSchema.pluginId, pluginId)),
-    )
-    .get();
-  return res as NovelInfo | undefined;
+  const res = dbManager.getSync(
+    dbManager
+      .select()
+      .from(novelSchema)
+      .where(
+        and(
+          eq(novelSchema.path, novelPath),
+          eq(novelSchema.pluginId, pluginId),
+        ),
+      ),
+  );
+  return res;
 };
 
 /**
@@ -119,27 +123,30 @@ export const switchNovelToLibraryQuery = async (
   if (novel) {
     const newInLibrary = !novel.inLibrary;
     await dbManager.write(async tx => {
-      tx.update(novelSchema)
+      await tx
+        .update(novelSchema)
         .set({ inLibrary: newInLibrary })
         .where(eq(novelSchema.id, novel.id))
         .run();
 
-      if (novel.inLibrary) {
+      if (!newInLibrary) {
         // Remove from library: delete categories
-        tx.delete(novelCategorySchema)
+        await tx
+          .delete(novelCategorySchema)
           .where(eq(novelCategorySchema.novelId, novel.id))
           .run();
         showToast(getString('browseScreen.removeFromLibrary'));
       } else {
         // Add to library: add to default category
-        const defaultCategory = tx
+        const defaultCategory = await tx
           .select({ id: categorySchema.id })
           .from(categorySchema)
           .where(eq(categorySchema.sort, 1))
           .get();
 
         if (defaultCategory) {
-          tx.insert(novelCategorySchema)
+          await tx
+            .insert(novelCategorySchema)
             .values({
               novelId: novel.id,
               categoryId: defaultCategory.id,
@@ -148,7 +155,8 @@ export const switchNovelToLibraryQuery = async (
         }
 
         if (novel.pluginId === 'local') {
-          tx.insert(novelCategorySchema)
+          await tx
+            .insert(novelCategorySchema)
             .values({
               novelId: novel.id,
               categoryId: 2,
@@ -165,19 +173,21 @@ export const switchNovelToLibraryQuery = async (
     const novelId = await insertNovelAndChapters(pluginId, sourceNovel);
     if (novelId) {
       await dbManager.write(async tx => {
-        tx.update(novelSchema)
+        await tx
+          .update(novelSchema)
           .set({ inLibrary: true })
           .where(eq(novelSchema.id, novelId))
           .run();
 
-        const defaultCategory = tx
+        const defaultCategory = await tx
           .select({ id: categorySchema.id })
           .from(categorySchema)
           .where(eq(categorySchema.sort, 1))
           .get();
 
         if (defaultCategory) {
-          tx.insert(novelCategorySchema)
+          await tx
+            .insert(novelCategorySchema)
             .values({
               novelId: novelId,
               categoryId: defaultCategory.id,
@@ -215,7 +225,7 @@ export const getCachedNovels = async (): Promise<NovelInfo[]> => {
     .select()
     .from(novelSchema)
     .where(eq(novelSchema.inLibrary, false))
-    .all() as NovelInfo[];
+    .all();
 };
 
 export const deleteCachedNovels = async () => {
@@ -234,7 +244,7 @@ export const restoreLibrary = async (novel: NovelInfo) => {
   });
 
   const novelId = await dbManager.write(async tx => {
-    const [row] = tx
+    const row = await tx
       .insert(novelSchema)
       .values({
         path: sourceNovel.path,
@@ -264,17 +274,18 @@ export const restoreLibrary = async (novel: NovelInfo) => {
         },
       })
       .returning()
-      .all();
+      .get();
 
     if (row) {
-      const defaultCategory = tx
+      const defaultCategory = await tx
         .select({ id: categorySchema.id })
         .from(categorySchema)
         .where(eq(categorySchema.sort, 1))
         .get();
 
       if (defaultCategory) {
-        tx.insert(novelCategorySchema)
+        await tx
+          .insert(novelCategorySchema)
           .values({
             novelId: row.id,
             categoryId: defaultCategory.id,
@@ -358,7 +369,8 @@ export const updateNovelCategories = async (
 
   await dbManager.write(async tx => {
     // Delete existing categories (keeping local category if present)
-    tx.delete(novelCategorySchema)
+    await tx
+      .delete(novelCategorySchema)
       .where(
         and(
           inArray(novelCategorySchema.novelId, novelIds),
@@ -378,7 +390,7 @@ export const updateNovelCategories = async (
       }
     } else {
       // If no category is selected, set to the default category (sort = 1)
-      const defaultCategory = tx
+      const defaultCategory = await tx
         .select({ id: categorySchema.id })
         .from(categorySchema)
         .where(eq(categorySchema.sort, 1))
@@ -387,7 +399,7 @@ export const updateNovelCategories = async (
       if (defaultCategory) {
         for (const novelId of novelIds) {
           // Check if it already has some category (e.g. local)
-          const hasCategory = tx
+          const hasCategory = await tx
             .select({ count: sql<number>`count(*)` })
             .from(novelCategorySchema)
             .where(eq(novelCategorySchema.novelId, novelId))

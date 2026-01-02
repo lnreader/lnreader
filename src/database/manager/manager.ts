@@ -1,27 +1,22 @@
-import { db, dbManager, drizzleDb } from '@database/db';
+import { db, drizzleDb } from '@database/db';
 import { IDbManager } from './manager.d';
 import { DbTaskQueue } from './queue';
-import { repositorySchema, Schema } from '../schema';
-import {
-  SQLiteDeleteBase,
-  SQLiteInsertBase,
-  SQLiteSelectBase,
-  SQLiteUpdateBase,
-} from 'drizzle-orm/sqlite-core';
+import { Schema } from '../schema';
 import { useEffect, useState } from 'react';
 import { GetSelectTableName } from 'drizzle-orm/query-builders/select.types';
 import { SQLBatchTuple } from 'node_modules/@op-engineering/op-sqlite/lib/typescript/src';
-
-type SQLiteBase =
-  | SQLiteSelectBase<any, any, any, any>
-  | SQLiteDeleteBase<any, any, any, any>
-  | SQLiteUpdateBase<any, any, any, any>
-  | SQLiteInsertBase<any, any, any, any>;
+import { Query, SQL } from 'node_modules/drizzle-orm';
 
 type DrizzleDb = typeof drizzleDb;
 type TransactionParameter = Parameters<
   Parameters<DrizzleDb['transaction']>[0]
 >[0];
+
+interface ExecutableSelect<TResult = any> {
+  toSQL(): Query;
+  all(): Promise<TResult[]>; // Or TResult[] if you are using a synchronous driver
+  get(): Promise<TResult | undefined>;
+}
 
 let _dbManager: DbManager;
 
@@ -63,7 +58,7 @@ class DbManager implements IDbManager {
     return _dbManager;
   }
 
-  public getSync<T extends SQLiteSelectBase<any, any, any, any>>(
+  public getSync<T extends ExecutableSelect>(
     query: T,
   ): Awaited<ReturnType<T['get']>> {
     const { sql, params } = query.toSQL();
@@ -72,7 +67,7 @@ class DbManager implements IDbManager {
     >;
   }
 
-  public async allSync<T extends SQLiteSelectBase<any, any, any, any>>(
+  public async allSync<T extends ExecutableSelect>(
     query: T,
   ): Promise<Awaited<ReturnType<T['all']>>> {
     const { sql, params } = query.toSQL();
@@ -107,7 +102,8 @@ export const createDbManager = (db: DrizzleDb) => {
 
 type TableNames = GetSelectTableName<Schema[keyof Schema]>;
 type FireOn = Array<{ table: TableNames; ids?: number[] }>;
-export function useLiveQueryy<T extends SQLiteSelectBase<any, any, any, any>>(
+
+export function useLiveQueryy<T extends ExecutableSelect>(
   query: T,
   fireOn: FireOn,
 ) {
@@ -135,6 +131,3 @@ export function useLiveQueryy<T extends SQLiteSelectBase<any, any, any, any>>(
   }, []);
   return data;
 }
-dbManager.batch(() => {
-  dbManager.w;
-});
