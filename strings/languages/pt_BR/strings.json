@@ -115,55 +115,55 @@
     "noBackupFound": "Nenhum backup encontrado",
     "preparingData": "Preparando os dados",
     "remote": {
-      "backup": "Self Host Backup",
-      "host": "Host",
-      "unknownHost": "Unknown host"
+      "backup": "“Backup” do servidor pessoal",
+      "host": "Servidor",
+      "unknownHost": "Servidor desconhecido"
     },
     "remoteBackup": "Backup remoto",
     "restoreBackup": "Restaurar backup",
     "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup ",
-    "restoreLargeBackupsWarning": "Restoring large backups may freeze the app until restoring is finished",
-    "restorinBackup": "Restoring backup",
-    "restoringData": "Restoring Data",
-    "selfHost": "Self Host",
-    "selfHostDesc": "Backup to your server",
-    "uploadingData": "Uploading Data",
-    "uploadingDownloadedFiles": "Uploading Downloaded Files"
+    "restoreLargeBackupsWarning": "Restaurar “backups” grandes pode congelar o aplicativo até que a restauração seja concluída",
+    "restorinBackup": "Restaurando cópia de segurança",
+    "restoringData": "Restaurando dados",
+    "selfHost": "Auto hospedar",
+    "selfHostDesc": "Fazer “backup” em seu servidor",
+    "uploadingData": "Enviando dados",
+    "uploadingDownloadedFiles": "Baixando arquivos salvos"
   },
   "browse": "Navegar",
   "browseScreen": {
     "addedToLibrary": "Adicionado à biblioteca",
-    "available": "Available",
-    "deletePluginMessage": "Are you sure you want to uninstall %{name}?",
+    "available": "Disponível",
+    "deletePluginMessage": "Tem certeza de que deseja desinstalar o %{name}?",
     "discover": "Descubra",
     "globalSearch": "Pesquisa global",
-    "installFailed": "Installation failed: %{name}",
-    "installed": "Installed",
-    "installedPlugin": "Installed %{name}",
-    "installedPlugins": "Installed plugins",
+    "installFailed": "A instalação falhou: %{name}",
+    "installed": "Instalado",
+    "installedPlugin": "%{name} Instalado",
+    "installedPlugins": "Extensões Instalado",
     "lastUsed": "Usado por último",
     "latest": "Mais recentes",
     "listEmpty": "Habilitar idiomas a partir das configurações",
     "migration": {
-      "dialogMessage": "Migrate %{url}?",
-      "novelAlreadyInLibrary": "Novel already in library",
-      "selectSource": "Select Source",
-      "selectSourceDesc": "Select a Source To Migrate From"
+      "dialogMessage": "Migrar %{url}?",
+      "novelAlreadyInLibrary": "Novel já está na biblioteca",
+      "selectSource": "Selecionar fonte",
+      "selectSourceDesc": "Selecione uma fonte para migrar"
     },
-    "noSource": "Your library does not have any novels from this source",
-    "pinnedPlugin": "Pinned %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "noSource": "Sua biblioteca não tem nenhuma novel desta fonte",
+    "pinnedPlugin": "%{name} fixado",
+    "pinnedPlugins": "Extensões fixadas",
     "removeFromLibrary": "Removido da biblioteca",
     "searchbar": "Pesquisar nas fontes",
-    "searchResults": "Search results",
-    "selectNovel": "Select Novel",
-    "uninstalledPlugin": "Uninstalled %{name}",
-    "unpinnedPlugin": "Unpinned %{name}",
-    "updateFailed": "Update failed",
-    "updatedTo": "Updated to %{version}",
+    "searchResults": "Resultados da pesquisa",
+    "selectNovel": "Selecionar novel",
+    "uninstalledPlugin": "%{name} desinstalada",
+    "unpinnedPlugin": "%{name} desfixada",
+    "updateFailed": "Atualização falhou",
+    "updatedTo": "Atualizado para %{version}",
     "settings": {
-      "title": "Plugin Settings",
-      "description": "Fill in the plugin settings. Restart app to apply the settings."
+      "title": "Configurações da extensão",
+      "description": "Preencha as configurações da extensão. Reinicie o aplicativo para confirmar as mudanças"
     }
   },
   "browseSettings": "Configurações de navegação",
@@ -174,7 +174,7 @@
   },
   "categories": {
     "addCategories": "Adicionar categoria",
-    "cantDeleteDefault": "You cant delete default category",
+    "cantDeleteDefault": "Categoria padrão não pode ser deletada",
     "default": "Padrão",
     "defaultCategory": "Categoria padrão",
     "deleteModal": {
@@ -234,8 +234,8 @@
     "signOut": "Sair do cadastro",
     "sort": "Ordenar por",
     "submit": "Aplicar",
-    "loading": "Loading ...",
-    "warning": "Warning"
+    "loading": "Carregando...",
+    "warning": "Aviso"
   },
   "webview": {
     "refresh": "Rever",
@@ -243,8 +243,8 @@
     "openInBrowser": "Abrir na internet",
     "clearCookies": "Limpar dados temporários",
     "cookiesCleared": "Dados temporários limpos",
-    "clearData": "Clear WebView data",
-    "dataDeleted": "WebView data cleared"
+    "clearData": "Limpar dados do WebView",
+    "dataDeleted": "Dados do WebView limpos"
   },
   "date": {
     "calendar": {
@@ -255,18 +255,18 @@
     }
   },
   "downloadScreen": {
-    "cancelDownloads": "Cancel downloads",
-    "cancelled": "Downloads cancelled.",
+    "cancelDownloads": "Cancelar transferências",
+    "cancelled": "Transferências canceladas",
     "chapterEmptyOrScrapeError": "Either chapter is empty or the app couldn't scrape it",
-    "chapterName": "Chapter: %{name}",
-    "completed": "Download completed",
+    "chapterName": "Capítulo: %{name}",
+    "completed": "Transferência completa",
     "dbInfo": "Downloads são salvos em banco de dados SQLite.",
-    "downloading": "Downloading",
-    "downloadingNovel": "Downloading: %{name}",
+    "downloading": "Transferindo",
+    "downloadingNovel": "Transferindo: %{name}",
     "downloadsLower": "baixados",
     "noDownloads": "Sem transferências",
-    "pluginNotFound": "Plugin not found!",
-    "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
+    "pluginNotFound": "Extensão não encontrada!",
+    "removeDownloadsWarning": "Tem certeza? Todos os capítulos transferidos serão deletados"
   },
   "generalSettings": "Geral",
   "generalSettingsScreen": {
@@ -275,8 +275,8 @@
     "bySource": "Por fonte",
     "chapterSort": "Ordem padrão dos capítulos",
     "desc": "(Decrescente)",
-    "disableLoadingAnimations": "Disable loading animations",
-    "disableLoadingAnimationsDesc": "May improve performance on slower devices",
+    "disableLoadingAnimations": "Desabilitar animações de carregamento",
+    "disableLoadingAnimationsDesc": "Pode aumentar o desempenho em dispositivos mais lentos",
     "disableHapticFeedback": "Desativar o feedback tátil",
     "disableHapticFeedbackDescription": "Turn off vibrations for touch interactions.",
     "displayMode": "Modo de exibição",
@@ -289,13 +289,13 @@
     "gridSizeDesc": "%{num} per row",
     "itemsPerRow": "Itens por linha",
     "itemsPerRowLibrary": "Itens por linha na biblioteca",
-    "jumpToLastReadChapter": "Jump to last read chapter in list",
+    "jumpToLastReadChapter": "Pular para último capítulo lido da lista",
     "novel": "Novel",
     "novelBadges": "Insígnias da Novel",
     "novelSort": "Ordenar Novel",
     "refreshMetadata": "Atualizar os metadados automaticamente",
     "refreshMetadataDescription": "Verificar por novas capas e detalhes durante a atualização da biblioteca",
-    "sortOrder": "Sort Order",
+    "sortOrder": "Ordenar",
     "updateLibrary": "Atualizar biblioteca ao iniciar",
     "updateLibraryDesc": "Not recommended for low devices",
     "updateOngoing": "Atualizar somente novels em andamento",
@@ -308,9 +308,9 @@
   },
   "history": "Histórico",
   "historyScreen": {
-    "chapter": "Chapter",
+    "chapter": "Capítulo",
     "clearHistorWarning": "Você tem certeza? Todo o histórico será perdido.",
-    "deleted": "History deleted.",
+    "deleted": "Histórico deletado",
     "nothingReadRecently": "Nothing read recently",
     "searchbar": "Histórico de pesquisa"
   },
@@ -322,13 +322,13 @@
         "comfortable": "Grade confortável",
         "compact": "Grade compacta",
         "displayMode": "Modo de exibição",
-        "download": "Download",
+        "download": "Transferência",
         "downloadBadges": "Baixar emblemas",
         "list": "Lista",
         "noTitle": "Grade de capas apenas",
-        "numberOfItems": "Number of Items",
+        "numberOfItems": "Número de itens",
         "showNoOfItems": "Mostrar número de itens",
-        "unread": "Unread",
+        "unread": "Não lido",
         "unreadBadges": "Emblemas não lidos"
       },
       "filters": {
@@ -349,52 +349,52 @@
     },
     "empty": "Sua biblioteca está vazia. Adicione séries à sua biblioteca pelo Navegador.",
     "extraMenu": {
-      "importEpub": "Import Epub",
+      "importEpub": "Importar EPUB",
       "openRandom": "Open Random Entry",
-      "updateCategory": "Update Category",
-      "updateLibrary": "Update Library"
+      "updateCategory": "Atualizar categoria",
+      "updateLibrary": "Atualizar biblioteca"
     },
     "searchbar": "Pesquisar na biblioteca"
   },
   "more": "Mais",
   "moreScreen": {
     "downloadOnly": "Apenas baixados",
-    "downloadOnlyDesc": "Filters all novels in your library",
-    "downloadQueue": "Download queue",
+    "downloadOnlyDesc": "Filtrar todas as novels na biblioteca",
+    "downloadQueue": "Fila de transferências",
     "incognitoMode": "Modo anônimo",
-    "incognitoModeDesc": "Pauses reading history"
+    "incognitoModeDesc": "Interromper histórico de leitura"
   },
   "novelScreen": {
     "addToLibaray": "Adicionar à biblioteca",
     "bottomSheet": {
       "displays": {
-        "chapterNumber": "Chapter number",
+        "chapterNumber": "Número do capítulo",
         "sourceTitle": "Source title"
       },
       "filters": {
-        "bookmarked": "Bookmarked",
-        "downloaded": "Downloaded",
-        "unread": "Unread"
+        "bookmarked": "Favoritado",
+        "downloaded": "Transferido",
+        "unread": "Não lido"
       },
       "order": {
-        "byChapterName": "By chapter name",
-        "bySource": "By source"
+        "byChapterName": "Por nome do capítulo",
+        "bySource": "Por fonte"
       }
     },
-    "chapterChapnum": "Chapter %{num}",
+    "chapterChapnum": "Capítulo %{num}",
     "chapters": "Capítulos",
     "continueReading": "Continuar lendo",
     "exportEpubModal": {
       "applyReaderTheme": "Apply reader theme to EPUB",
       "customJSWarning": "Custom JS may not be supported by all EPUB readers",
       "downloadedChaptersOnly": "Only downloaded chapters will be included in the EPUB file",
-      "endChapter": "End Chapter",
-      "exportAll": "Export All Chapters",
-      "includeCustomCSS": "Include Custom CSS",
-      "includeCustomJS": "Include Custom JS",
+      "endChapter": "Finalizar capítulo",
+      "exportAll": "Exportar todos os capítulos",
+      "includeCustomCSS": "Incluir CSS personalizado",
+      "includeCustomJS": "Incluir JS personalizado",
       "invalidRange": "Please enter valid chapter numbers",
       "selectFolder": "Select destination folder for EPUB file",
-      "startChapter": "Start Chapter",
+      "startChapter": "Iniciar capítulo",
       "startGreaterThanEnd": "Start chapter must be less than or equal to end chapter",
       "title": "Export Novel as EPUB"
     },
