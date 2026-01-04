@@ -88,7 +88,7 @@ export const getChaptersDownloadedCountFromDb =
  * Get genre distribution for all novels in library
  */
 export const getNovelGenresFromDb = async (): Promise<LibraryStats> => {
-  const res = dbManager
+  const res = await dbManager
     .select({ genres: novelSchema.genres })
     .from(novelSchema)
     .where(eq(novelSchema.inLibrary, true))
@@ -110,7 +110,7 @@ export const getNovelGenresFromDb = async (): Promise<LibraryStats> => {
  * Get status distribution for all novels in library
  */
 export const getNovelStatusFromDb = async (): Promise<LibraryStats> => {
-  const res = dbManager
+  const res = await dbManager
     .select({ status: novelSchema.status })
     .from(novelSchema)
     .where(eq(novelSchema.inLibrary, true))

@@ -11,23 +11,17 @@ export interface NovelInfo {
   artist?: string | null;
   status?: NovelStatus | string | null;
   genres?: string | null;
-  inLibrary: boolean | null;
-  isLocal: boolean | null;
-  totalPages: number | null;
+  inLibrary?: boolean | null;
+  isLocal?: boolean | null;
+  totalPages?: number | null;
 }
 
 export interface DBNovelInfo extends NovelInfo {
-  totalChapters: number;
-  chaptersDownloaded: number;
-  chaptersUnread: number;
-  lastReadAt: string;
-  lastUpdatedAt: string;
-}
-
-export interface LibraryNovelInfo extends DBNovelInfo {
-  category: string;
-  chaptersUnread: number;
-  chaptersDownloaded: number;
+  totalChapters: number | null;
+  chaptersDownloaded: number | null;
+  chaptersUnread: number | null;
+  lastReadAt: string | null;
+  lastUpdatedAt: string | null;
 }
 
 export interface ChapterInfo {
@@ -51,15 +45,15 @@ export interface DownloadedChapter extends ChapterInfo {
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface History extends ChapterInfo {
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
-  readTime: string;
+  novelCover: string | null;
+  readTime: string | null;
 }
 
 export interface Update extends ChapterInfo {
@@ -75,7 +69,7 @@ export interface UpdateOverview {
   novelName: string;
   updateDate: string;
   updatesPerDay: number;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface Category {
@@ -116,5 +110,3 @@ export interface Repository {
   id: number;
   url: string;
 }
-
-export * from './migration';

@@ -47,6 +47,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const groupHistoryByDate = (rawHistory: History[]) => {
     const dateGroups = rawHistory.reduce<Record<string, History[]>>(
       (groups, item) => {
+        if (!item.readTime) return groups;
         const date = convertDateToISOString(item.readTime);
 
         if (!groups[date]) {

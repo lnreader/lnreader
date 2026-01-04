@@ -29,19 +29,18 @@ const insertLocalNovel = async (
   artist?: string,
   summary?: string,
 ) => {
-  const insertedNovel = await dbManager.write(async tx => {
+  const { insertId } = await dbManager.write(async tx => {
     return tx
       .insert(novelSchema)
       .values({ name, path, pluginId: 'local', inLibrary: true, isLocal: true })
       .run();
   });
 
-  if (insertedNovel.lastInsertRowId && insertedNovel.lastInsertRowId >= 0) {
-    await updateNovelCategoryById(insertedNovel.lastInsertRowId, [2]);
-    const novelDir = NOVEL_STORAGE + '/local/' + insertedNovel.lastInsertRowId;
+  if (insertId !== undefined && insertId >= 0) {
+    await updateNovelCategoryById(insertId, [2]);
+    const novelDir = NOVEL_STORAGE + '/local/' + insertId;
     NativeFile.mkdir(novelDir);
-    const newCoverPath =
-      'file://' + novelDir + '/' + cover?.split(/[/\\]/).pop();
+    const newCoverPath = `file://${novelDir}/${cover?.split(/[/\\]/).pop()}`;
 
     if (cover) {
       const decodedPath = decodePath(cover);
@@ -50,19 +49,19 @@ const insertLocalNovel = async (
       }
     }
     await updateNovelInfo({
-      id: insertedNovel.lastInsertRowId,
+      id: insertId,
       pluginId: LOCAL_PLUGIN_ID,
       author: author,
       artist: artist,
       summary: summary,
-      path: NOVEL_STORAGE + '/local/' + insertedNovel.lastInsertRowId,
+      path: NOVEL_STORAGE + '/local/' + insertId,
       cover: newCoverPath,
       name: name,
       inLibrary: true,
       isLocal: true,
       totalPages: 0,
     });
-    return insertedNovel.lastInsertRowId;
+    return insertId;
   }
   throw new Error(getString('advancedSettingsScreen.novelInsertFailed'));
 };
@@ -74,7 +73,7 @@ const insertLocalChapter = async (
   path: string,
   releaseTime: string,
 ) => {
-  const insertedChapter = await dbManager.write(async tx => {
+  const { insertId } = await dbManager.write(async tx => {
     return tx
       .insert(chapterSchema)
       .values({
@@ -88,24 +87,21 @@ const insertLocalChapter = async (
       .run();
   });
 
-  if (insertedChapter.lastInsertRowId && insertedChapter.lastInsertRowId >= 0) {
+  if (insertId !== undefined && insertId >= 0) {
     let chapterText: string = '';
     chapterText = NativeFile.readFile(decodePath(path));
     if (!chapterText) {
       return [];
     }
-    const novelDir = NOVEL_STORAGE + '/local/' + novelId;
+    const novelDir = `${NOVEL_STORAGE}/local/${novelId}`;
     chapterText = chapterText.replace(
       /[=](?<= href=| src=)(["'])([^]*?)\1/g,
       (_, __, $2: string) => {
         return `="file://${novelDir}/${$2.split(/[/\\]/).pop()}"`;
       },
     );
-    NativeFile.mkdir(novelDir + '/' + insertedChapter.lastInsertRowId);
-    NativeFile.writeFile(
-      novelDir + '/' + insertedChapter.lastInsertRowId + '/index.html',
-      chapterText,
-    );
+    NativeFile.mkdir(novelDir + '/' + insertId);
+    NativeFile.writeFile(`${novelDir}/${insertId}/index.html`, chapterText);
     return;
   }
   throw new Error(getString('advancedSettingsScreen.chapterInsertFailed'));

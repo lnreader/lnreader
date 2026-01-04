@@ -14,8 +14,8 @@
     "module": "ES2022",
     "lib": ["ES2022", "DOM"],
     "target": "ES2022",
+    "baseUrl": ".",
     "paths": {
-      "*": ["./*"],
       "@components": ["./src/components/index"],
       "@components/*": ["./src/components/*"],
       "@database/*": ["./src/database/*"],

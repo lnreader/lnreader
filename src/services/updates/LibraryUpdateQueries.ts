@@ -94,7 +94,7 @@ const updateNovelChapters = async (
       const chapterPage = page || customPage || '1';
 
       // Check if chapter already exists
-      const existing = tx
+      const existing = await tx
         .select({ id: chapterSchema.id })
         .from(chapterSchema)
         .where(
@@ -104,7 +104,7 @@ const updateNovelChapters = async (
 
       if (!existing) {
         // Insert new chapter
-        const [newChapter] = tx
+        const newChapter = await tx
           .insert(chapterSchema)
           .values({
             path,
@@ -117,7 +117,7 @@ const updateNovelChapters = async (
             position: position,
           })
           .returning()
-          .all();
+          .get();
 
         if (newChapter && downloadNewChapters) {
           ServiceManager.manager.addTask({

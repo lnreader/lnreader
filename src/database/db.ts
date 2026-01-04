@@ -1,13 +1,10 @@
 /* eslint-disable no-console */
 import { drizzle } from 'drizzle-orm/op-sqlite';
 
-import { getErrorMessage } from '@utils/error';
-import { showToast } from '@utils/showToast';
-
-import { categorySchema, schema } from './schema';
+import { schema } from './schema';
 import { Logger } from 'drizzle-orm';
 
-import { useMigrations } from 'drizzle-orm/op-sqlite/migrator';
+import { migrate } from 'drizzle-orm/op-sqlite/migrator';
 import migrations from '../../drizzle/migrations';
 import { createDbManager } from './manager/manager';
 import { open } from '@op-engineering/op-sqlite';
@@ -18,6 +15,7 @@ import {
   createNovelTriggerQueryInsert,
   createNovelTriggerQueryUpdate,
 } from './queryStrings/triggers';
+import { useRef, useState } from 'react';
 
 class MyLogger implements Logger {
   logQuery(query: string, params: unknown[]): void {
@@ -70,32 +68,43 @@ const createDbTriggers = () => {
   db.executeSync(createNovelTriggerQueryUpdate);
 };
 
-export const useInitDatabase = () => {
+type InitDbState = {
+  success: boolean;
+  error?: Error;
+};
+
+const initDatabase = async (): Promise<InitDbState> => {
+  const res: InitDbState = { success: false, error: undefined };
+  console.count('Using migrations');
   try {
     setPragmas();
-  } catch (e) {
-    console.error(e);
-  }
-  console.log('Using migrations');
-  const returnValue = useMigrations(drizzleDb, migrations);
 
-  try {
+    await migrate(drizzleDb, migrations);
+
     createDbTriggers();
-  } catch (e) {
-    console.error(e);
-  }
 
-  try {
     populateDatabase();
+    res.success = true;
   } catch (e) {
     console.error(e);
+    res.error = e as Error;
   }
-  setTimeout(async () => {
-    const c = dbManager.select().from(categorySchema).prepare().all();
-    console.log(await c);
-  }, 1000);
 
-  return returnValue;
+  return res;
+};
+export const useInitDatabase = () => {
+  const started = useRef(false);
+  const [res, setRes] = useState<InitDbState>({
+    success: false,
+    error: undefined,
+  });
+  if (started.current) return res;
+  started.current = true;
+  initDatabase().then(res => {
+    setRes(res);
+  });
+
+  return res;
 };
 
 export const recreateDatabaseIndexes = () => {};

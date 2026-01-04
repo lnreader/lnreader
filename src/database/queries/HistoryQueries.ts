@@ -1,5 +1,4 @@
 import { eq, sql, isNotNull, desc, getTableColumns } from 'drizzle-orm';
-import { History } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { dbManager } from '@database/db';
@@ -9,7 +8,7 @@ import { chapterSchema, novelSchema } from '@database/schema';
  * Get reading history from the database using Drizzle ORM.
  * Groups by novelId and takes the latest read chapter for each novel.
  */
-export const getHistoryFromDb = async (): Promise<History[]> => {
+export const getHistoryFromDb = async () => {
   return dbManager
     .select({
       ...getTableColumns(chapterSchema),
@@ -25,7 +24,7 @@ export const getHistoryFromDb = async (): Promise<History[]> => {
     .groupBy(chapterSchema.novelId)
     .having(sql`${chapterSchema.readTime} = MAX(${chapterSchema.readTime})`)
     .orderBy(desc(chapterSchema.readTime))
-    .all() as History[];
+    .all();
 };
 
 /**

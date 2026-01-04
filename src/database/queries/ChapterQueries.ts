@@ -1,5 +1,6 @@
 import {
   eq,
+  getTableColumns,
   sql,
   inArray,
   and,
@@ -8,15 +9,9 @@ import {
   desc,
   asc,
   count,
-  getTableColumns,
 } from 'drizzle-orm';
 import { showToast } from '@utils/showToast';
-import {
-  ChapterInfo,
-  DownloadedChapter,
-  UpdateOverview,
-  Update,
-} from '../types';
+import { ChapterInfo, DownloadedChapter, Update } from '../types';
 import { ChapterItem } from '@plugins/types';
 
 import { getString } from '@strings/translations';
@@ -26,6 +21,7 @@ import { chapterSchema, novelSchema } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
+import { SQLBatchTuple } from 'node_modules/@op-engineering/op-sqlite/lib/typescript/src';
 
 // #region Mutations
 
@@ -40,35 +36,33 @@ export const insertChapters = async (
     return;
   }
   console.time('insertChapters');
-  await dbManager.write(async tx => {
-    for (let index = 0; index < chapters.length; index++) {
-      const chapter = chapters[index];
-      const chapterName = chapter.name ?? 'Chapter ' + (index + 1);
-      const chapterPage = chapter.page || '1';
+  const sqlString = `insert into "Chapter" ("id", "novelId", "path", "name", "releaseTime", "bookmark", "unread", "readTime", "isDownloaded", "updatedTime", "chapterNumber", "page", "position", "progress")
+    values (null, ?, ?, ?, ?, ?, ?, null, ?, null, ?, ?, ?, null)
+    on conflict ("Chapter"."novelId", "Chapter"."path")
+    do update set "name" = ?, "releaseTime" = ?, "chapterNumber" = ?, "page" = ?, "position" = ?`;
+  const batchValues = [];
+  for (let index = 0; index < chapters.length; index++) {
+    batchValues.push([
+      novelId, // novelId
+      chapters[index].path, // path
+      chapters[index].name ?? 'Chapter ' + (index + 1), // name
+      chapters[index].releaseTime || '', // releaseTime
+      0, // bookmark
+      1, // unread
+      0, // isDownloaded
+      chapters[index].chapterNumber ?? null, // chapterNumber
+      chapters[index].page || '1', // page
+      index, // position  || update values
+      chapters[index].name ?? 'Chapter ' + (index + 1),
+      chapters[index].releaseTime || '',
+      chapters[index].chapterNumber ?? null,
+      chapters[index].page || '1',
+      index,
+    ]);
+  }
+  const commands: SQLBatchTuple[] = [[sqlString, batchValues]];
+  await dbManager.batch(commands);
 
-      tx.insert(chapterSchema)
-        .values({
-          path: chapter.path,
-          name: chapterName,
-          releaseTime: chapter.releaseTime || '',
-          novelId,
-          chapterNumber: chapter.chapterNumber || null,
-          page: chapterPage,
-          position: index,
-        })
-        .onConflictDoUpdate({
-          target: [chapterSchema.novelId, chapterSchema.path],
-          set: {
-            page: chapterPage,
-            position: index,
-            name: chapterName,
-            releaseTime: chapter.releaseTime || '',
-            chapterNumber: chapter.chapterNumber || null,
-          },
-        })
-        .run();
-    }
-  });
   console.timeEnd('insertChapters');
 };
 
@@ -199,7 +193,7 @@ export const deleteDownloads = async (
 };
 
 export const deleteReadChaptersFromDb = async (): Promise<void> => {
-  const chapters = getReadDownloadedChapters();
+  const chapters = await getReadDownloadedChapters();
   chapters?.forEach(chapter => {
     deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id);
   });
@@ -294,8 +288,8 @@ export const clearUpdates = async (): Promise<void> => {
 // #endregion
 // #region Selectors
 
-export const getCustomPages = (novelId: number): { page: string | null }[] => {
-  return dbManager
+export const getCustomPages = async (novelId: number) => {
+  return await dbManager
     .selectDistinct({ page: chapterSchema.page })
     .from(chapterSchema)
     .where(eq(chapterSchema.novelId, novelId))
@@ -346,16 +340,14 @@ export const getAllUndownloadedAndUnreadChapters = async (
         eq(chapterSchema.unread, true),
       ),
     )
-    .all() as ChapterInfo[];
+    .all();
 
-export const getChapter = async (
-  chapterId: number,
-): Promise<ChapterInfo | null> =>
+export const getChapter = async (chapterId: number) =>
   dbManager
     .select()
     .from(chapterSchema)
     .where(eq(chapterSchema.id, chapterId))
-    .get() as ChapterInfo | null;
+    .get();
 
 export const getPageChapters = async (
   novelId: number,
@@ -387,30 +379,22 @@ export const getPageChapters = async (
     query.offset(offset);
   }
 
-  return query.all() as ChapterInfo[];
+  return query.all();
 };
 
-export const getChapterCount = (
-  novelId: number,
-  page: string = '1',
-): number => {
-  const result = dbManager
-    .select({ count: count() })
-    .from(chapterSchema)
-    .where(
-      and(eq(chapterSchema.novelId, novelId), eq(chapterSchema.page, page)),
-    )
-    .get();
-  return result?.count ?? 0;
-};
+export const getChapterCount = async (novelId: number, page: string = '1') =>
+  await dbManager.$count(
+    chapterSchema,
+    and(eq(chapterSchema.novelId, novelId), eq(chapterSchema.page, page)),
+  );
 
-export const getPageChaptersBatched = (
+export const getPageChaptersBatched = async (
   novelId: number,
   sort?: ChapterOrderKey,
   filter?: ChapterFilterKey[],
   page?: string,
   batch: number = 0,
-): ChapterInfo[] => {
+) => {
   const limit = 300;
   const offset = 300 * batch;
   const query = dbManager
@@ -456,7 +440,7 @@ export const getPrevChapter = async (
   novelId: number,
   chapterPosition: number,
   page: string,
-): Promise<ChapterInfo | null> =>
+) =>
   dbManager
     .select()
     .from(chapterSchema)
@@ -467,13 +451,13 @@ export const getPrevChapter = async (
       ),
     )
     .orderBy(desc(chapterSchema.position), desc(chapterSchema.page))
-    .get() as ChapterInfo | null;
+    .get();
 
 export const getNextChapter = async (
   novelId: number,
   chapterPosition: number,
   page: string,
-): Promise<ChapterInfo | null> =>
+) =>
   dbManager
     .select()
     .from(chapterSchema)
@@ -484,13 +468,9 @@ export const getNextChapter = async (
       ),
     )
     .orderBy(asc(chapterSchema.position), asc(chapterSchema.page))
-    .get() as ChapterInfo | null;
+    .get();
 
-const getReadDownloadedChapters = (): Array<{
-  id: number;
-  novelId: number;
-  pluginId: string;
-}> =>
+const getReadDownloadedChapters = async () =>
   dbManager
     .select({
       id: chapterSchema.id,
@@ -505,9 +485,9 @@ const getReadDownloadedChapters = (): Array<{
         eq(chapterSchema.isDownloaded, true),
       ),
     )
-    .all() as Array<{ id: number; novelId: number; pluginId: string }>;
+    .all();
 
-export const getDownloadedChapters = async (): Promise<DownloadedChapter[]> =>
+export const getDownloadedChapters = async () =>
   dbManager
     .select({
       ...getTableColumns(chapterSchema),
@@ -519,7 +499,7 @@ export const getDownloadedChapters = async (): Promise<DownloadedChapter[]> =>
     .from(chapterSchema)
     .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
     .where(eq(chapterSchema.isDownloaded, true))
-    .all() as DownloadedChapter[];
+    .all();
 
 export const getNovelDownloadedChapters = async (
   novelId: number,
@@ -543,10 +523,10 @@ export const getNovelDownloadedChapters = async (
     .from(chapterSchema)
     .where(and(...whereConditions))
     .orderBy(asc(chapterSchema.position))
-    .all() as ChapterInfo[];
+    .all();
 };
 
-export const getUpdatedOverviewFromDb = async (): Promise<UpdateOverview[]> =>
+export const getUpdatedOverviewFromDb = async () =>
   dbManager
     .select({
       novelId: novelSchema.id,
@@ -563,7 +543,7 @@ export const getUpdatedOverviewFromDb = async (): Promise<UpdateOverview[]> =>
     .where(isNotNull(chapterSchema.updatedTime))
     .groupBy(novelSchema.id, sql`update_date`)
     .orderBy(desc(sql`update_date`), novelSchema.id)
-    .all() as UpdateOverview[];
+    .all();
 
 export const getDetailedUpdatesFromDb = async (
   novelId: number,

@@ -2,7 +2,6 @@ import { LibraryNovelInfo, NovelInfo } from '../types';
 import { eq, sql, and, like, or, inArray } from 'drizzle-orm';
 import { dbManager } from '@database/db';
 import { novelSchema, novelCategorySchema } from '@database/schema';
-import { NovelInfo, LibraryNovelInfo } from '../types';
 
 /**
  * Get library novels with optional filtering and sorting using Drizzle ORM
@@ -13,7 +12,7 @@ export const getLibraryNovelsFromDb = (
   searchText?: string,
   downloadedOnlyMode?: boolean,
   excludeLocalNovels?: boolean,
-): NovelInfo[] => {
+) => {
   const query = dbManager
     .select()
     .from(novelSchema)
@@ -43,11 +42,11 @@ export const getLibraryNovelsFromDb = (
 /**
  * Get library novels associated with a specific category using Drizzle ORM
  */
-export const getLibraryWithCategory = (
+export const getLibraryWithCategory = async (
   categoryId?: number | null,
   onlyUpdateOngoingNovels?: boolean,
   excludeLocalNovels?: boolean,
-): LibraryNovelInfo[] => {
+) => {
   // First, get novel IDs associated with the specified category
   const categoryIdQuery = dbManager
     .selectDistinct({ novelId: novelCategorySchema.novelId })
@@ -58,7 +57,7 @@ export const getLibraryWithCategory = (
     categoryIdQuery.where(eq(novelCategorySchema.categoryId, categoryId));
   }
 
-  const idRows = categoryIdQuery.all();
+  const idRows = await categoryIdQuery.all();
 
   if (!idRows || idRows.length === 0) {
     return [];
@@ -80,5 +79,5 @@ export const getLibraryWithCategory = (
     )
     .all();
 
-  return result as LibraryNovelInfo[];
+  return result;
 };

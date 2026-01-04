@@ -29,13 +29,13 @@ describe('RepositoryQueries', () => {
     it('should return all repositories', async () => {
       const testDb = getTestDb();
 
-      const id1 = await insertTestRepository(testDb, {
+      await insertTestRepository(testDb, {
         url: 'https://repo1.example.com',
       });
-      const id2 = await insertTestRepository(testDb, {
+      await insertTestRepository(testDb, {
         url: 'https://repo2.example.com',
       });
-      const id3 = await insertTestRepository(testDb, {
+      await insertTestRepository(testDb, {
         url: 'https://repo3.example.com',
       });
 

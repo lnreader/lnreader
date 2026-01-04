@@ -83,7 +83,7 @@ export function createTestDbManager(
         return result;
       });
     },
-  } as IDbManager;
+  };
 
   return dbManager;
 }

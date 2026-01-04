@@ -5,7 +5,7 @@ import { Schema } from '../schema';
 import { useEffect, useState } from 'react';
 import { GetSelectTableName } from 'drizzle-orm/query-builders/select.types';
 import { SQLBatchTuple } from 'node_modules/@op-engineering/op-sqlite/lib/typescript/src';
-import { Query, SQL } from 'node_modules/drizzle-orm';
+import { Query } from 'node_modules/drizzle-orm';
 
 type DrizzleDb = typeof drizzleDb;
 type TransactionParameter = Parameters<
