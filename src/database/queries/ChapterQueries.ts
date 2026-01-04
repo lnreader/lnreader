@@ -45,7 +45,7 @@ export const insertChapters = async (
     batchValues.push([
       novelId, // novelId
       chapters[index].path, // path
-      chapters[index].name ?? 'Chapter ' + (index + 1), // name
+      chapters[index].name || 'Chapter ' + (index + 1), // name
       chapters[index].releaseTime || '', // releaseTime
       0, // bookmark
       1, // unread
@@ -53,7 +53,7 @@ export const insertChapters = async (
       chapters[index].chapterNumber ?? null, // chapterNumber
       chapters[index].page || '1', // page
       index, // position  || update values
-      chapters[index].name ?? 'Chapter ' + (index + 1),
+      chapters[index].name || 'Chapter ' + (index + 1),
       chapters[index].releaseTime || '',
       chapters[index].chapterNumber ?? null,
       chapters[index].page || '1',

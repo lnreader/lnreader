@@ -33,7 +33,6 @@ export function createTestDbManager(
     $count: drizzleDb.$count.bind(drizzleDb),
     query: drizzleDb.query,
     run: drizzleDb.run.bind(drizzleDb),
-    transaction: drizzleDb.transaction.bind(drizzleDb),
     with: drizzleDb.with.bind(drizzleDb),
     $with: drizzleDb.$with.bind(drizzleDb),
     all: drizzleDb.all.bind(drizzleDb),
@@ -61,27 +60,33 @@ export function createTestDbManager(
       return results;
     },
 
-    async batch(commands: Array<{ sql: string; args: unknown[] }>) {
+    async batch(commands: [[string, unknown[] | unknown[][]]]) {
       // better-sqlite3 doesn't have executeBatch, so we execute sequentially
       const transaction = sqlite.transaction((cmds: typeof commands) => {
         for (const cmd of cmds) {
-          const stmt = sqlite.prepare(cmd.sql);
-          stmt.run(cmd.args as any[]);
+          const stmt = sqlite.prepare(cmd[0]);
+          if (Array.isArray(cmd[1])) {
+            for (const arg of cmd[1]) {
+              stmt.run(arg as any[]);
+            }
+          } else {
+            stmt.run(cmd[1] as any[]);
+          }
         }
       });
       transaction(commands);
     },
 
+    // better-sqlite3 can't handle an async transaction function
     async write<T>(fn: (tx: TransactionParameter) => Promise<T>): Promise<T> {
       const result = await fn(drizzleDb as any);
-      // No-op for better-sqlite3 (no reactive queries)
+
       return result;
-      // For tests, we can use transactions directly without the queue
-      return await drizzleDb.transaction(async tx => {
-        const result = await fn(tx);
-        // No-op for better-sqlite3 (no reactive queries)
-        return result;
-      });
+    },
+    async transaction<T>(
+      fn: (tx: TransactionParameter) => Promise<T>,
+    ): Promise<T> {
+      return await this.write(fn);
     },
   };
 

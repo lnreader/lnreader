@@ -17,7 +17,7 @@ import AppErrorBoundary, {
 
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { initDatabase, useInitDatabase } from '@database/db';
+import { useInitDatabase } from '@database/db';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
