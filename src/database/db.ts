@@ -30,7 +30,7 @@ const DB_NAME = 'lnreader.db';
  * @deprecated Use `drizzleDb` for new code
  */
 //export const db = SQLite.openDatabaseSync(DB_NAME);
-export const db = open({ name: DB_NAME });
+export const db = open({ name: DB_NAME, location: '../files/SQLite' });
 
 /**
  * Drizzle ORM database instance with type-safe query builder
