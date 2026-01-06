@@ -14,7 +14,7 @@
     "chapterInsertFailed": "章节插入失败",
     "clearCachedNovels": "清除缓存的小说",
     "clearCachedNovelsDesc": "删除不在您的书库中的缓存小说",
-    "clearDatabaseWarning": "非书库小说的阅读，已下载章节和进度将会丢失。",
+    "clearDatabaseWarning": "不在书库中的阅读进度和下载章节将会丢失。",
     "clearUpdatesMessage": "更新页面已清除。",
     "clearUpdatesTab": "清除更新页面",
     "clearUpdatesWarning": "更新页面将被清除。",
