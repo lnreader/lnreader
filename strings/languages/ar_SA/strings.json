@@ -17,7 +17,7 @@
     "clearDatabaseWarning": "هل أنت متيقِّن؟ سيتم فقدان الفصول المقروءة والمُنزّلة، بالإضافة إلى تقدم الروايات غير المُدرجة في المكتبة.",
     "clearUpdatesMessage": "تمت إزالة التحديثات.",
     "clearUpdatesTab": "مسح علامة تبويب التحديثات",
-    "clearUpdatesWarning": "Updates tab will be cleared.",
+    "clearUpdatesWarning": ".",
     "clearupdatesTabDesc": "مسح إدخالات الفصول في علامة تبويب التحديثات",
     "dataManagement": "إدارة البيانات",
     "deleteReadChapters": "حذف الفصول المقروءة",
