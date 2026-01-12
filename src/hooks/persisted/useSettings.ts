@@ -100,7 +100,7 @@ export interface ChapterReaderSettings {
   theme: string;
   textColor: string;
   textSize: number;
-  textAlign: string;
+  textAlign: 'left' | 'center' | 'right' | 'justify';
   padding: number;
   fontFamily: string;
   lineHeight: number;
