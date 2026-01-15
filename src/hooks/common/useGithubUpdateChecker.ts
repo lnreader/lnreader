@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { version } from '../../../package.json';
 import { newer } from '@utils/compareVersion';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
@@ -30,7 +30,7 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
     return timeSinceLastCheck >= ONE_DAY_MS;
   };
 
-  const checkForRelease = async () => {
+  const checkForRelease = useCallback(async () => {
     if (!shouldCheckForUpdate()) {
       setChecking(false);
       return;
@@ -65,11 +65,11 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
       // Silently fail in offline mode or on network errors
       setChecking(false);
     }
-  };
+  }, []);
 
   const isNewVersion = (versionTag: string) => {
     const currentVersion = `${version}`;
-    const regex = /[^\\d.]/;
+    const regex = /[^\d.]/;
 
     const newVersion = versionTag.replace(regex, '');
 
@@ -78,7 +78,7 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
 
   useEffect(() => {
     checkForRelease();
-  }, []);
+  }, [checkForRelease]);
 
   if (!checking && latestRelease?.tag_name) {
     return {

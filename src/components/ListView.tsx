@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: 'wrap',
     fontSize: 15,
-    marginLeft: 16,
-    paddingRight: 8,
+    marginStart: 16,
+    paddingEnd: 8,
   },
 });

@@ -130,9 +130,8 @@ const SettingsReaderScreen = () => {
       
       @font-face {
         font-family: ${readerSettings.fontFamily};
-        src: url("file:///android_asset/fonts/${
-          readerSettings.fontFamily
-        }.ttf");
+        src: url("file:///android_asset/fonts/${readerSettings.fontFamily
+    }.ttf");
       }
     </style>
 
@@ -171,7 +170,7 @@ const SettingsReaderScreen = () => {
   return (
     <SafeAreaView
       excludeTop
-      style={{ flex: 1, backgroundColor: readerBackgroundColor }}
+      style={[styles.container, { backgroundColor: readerBackgroundColor }]}
     >
       <Appbar
         mode="small"
@@ -181,7 +180,7 @@ const SettingsReaderScreen = () => {
       />
 
       {/* Large Preview Area */}
-      <View style={{ flex: 1 }}>
+      <View style={styles.previewContainer}>
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}
@@ -189,7 +188,7 @@ const SettingsReaderScreen = () => {
           scalesPageToFit={true}
           showsVerticalScrollIndicator={false}
           javaScriptEnabled={true}
-          style={{ flex: 1, backgroundColor: readerBackgroundColor }}
+          style={[styles.webView, { backgroundColor: readerBackgroundColor }]}
           nestedScrollEnabled={true}
           onMessage={(ev: { nativeEvent: { data: string } }) => {
             const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
@@ -232,8 +231,7 @@ const SettingsReaderScreen = () => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
                 ${webViewCSS}
               </head>
-              <body class="${
-                chapterGeneralSettings.pageReader ? 'page-reader' : ''
+              <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
               }"> 
                 <div id="LNReader-chapter">
                 ${dummyHTML}
@@ -242,24 +240,24 @@ const SettingsReaderScreen = () => {
               </body>
               <script>
                 var initialReaderConfig = ${JSON.stringify({
-                  readerSettings,
-                  chapterGeneralSettings,
-                  novel,
-                  chapter,
-                  nextChapter: chapter,
-                  batteryLevel,
-                  autoSaveInterval: 2222,
-                  DEBUG: __DEV__,
-                  strings: {
-                    finished: `${getString(
-                      'readerScreen.finished',
-                    )}: ${chapter.name.trim()}`,
-                    nextChapter: getString('readerScreen.nextChapter', {
-                      name: chapter.name,
-                    }),
-                    noNextChapter: getString('readerScreen.noNextChapter'),
-                  },
-                })}
+                readerSettings,
+                chapterGeneralSettings,
+                novel,
+                chapter,
+                nextChapter: chapter,
+                batteryLevel,
+                autoSaveInterval: 2222,
+                DEBUG: __DEV__,
+                strings: {
+                  finished: `${getString(
+                    'readerScreen.finished',
+                  )}: ${chapter.name.trim()}`,
+                  nextChapter: getString('readerScreen.nextChapter', {
+                    name: chapter.name,
+                  }),
+                  noNextChapter: getString('readerScreen.noNextChapter'),
+                },
+              })}
               </script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
               <script src="${assetsUriPrefix}/js/van.js"></script>
@@ -349,6 +347,15 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   tabContent: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  previewContainer: {
+    flex: 1,
+  },
+  webView: {
     flex: 1,
   },
 });

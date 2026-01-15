@@ -57,6 +57,6 @@ const styles = StyleSheet.create({
   },
   radioButtonLabel: {
     fontSize: 16,
-    marginLeft: 16,
+    marginStart: 16,
   },
 });

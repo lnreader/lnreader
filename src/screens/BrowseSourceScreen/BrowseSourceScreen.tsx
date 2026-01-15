@@ -169,7 +169,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
               {
                 backgroundColor: theme.primary,
                 marginBottom: bottom + 16,
-                marginRight: right + 16,
+                marginEnd: right + 16,
               },
             ]}
             label={getString('common.filter')}
@@ -196,6 +196,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     margin: 16,
     position: 'absolute',
-    right: 0,
+    end: 0,
   },
 });

@@ -45,11 +45,14 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
     bottomSheetRef.current?.close();
   }, [bottomSheetRef]);
 
-  const handleSetSearchTrackDialog = useCallback((tracker: TrackerMetadata) => {
-    closeBottomSheet();
-    setActiveTracker(tracker);
-    setTrackSearchDialog(true);
-  }, []);
+  const handleSetSearchTrackDialog = useCallback(
+    (tracker: TrackerMetadata) => {
+      closeBottomSheet();
+      setActiveTracker(tracker);
+      setTrackSearchDialog(true);
+    },
+    [closeBottomSheet],
+  );
 
   const handleSetStatusDialog = useCallback(
     (tracker: TrackerMetadata) => {

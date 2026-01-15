@@ -136,7 +136,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       getLibrary();
     }
     prevRestoreTasksCountRef.current = restoreTasksCount;
-  }, [restoreTasksCount]);
+  }, [getLibrary, restoreTasksCount]);
 
   return {
     library,

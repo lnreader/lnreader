@@ -22,18 +22,18 @@ interface VoicePickerModalProps {
   currentVoice?: Voice;
 }
 
-const VoicePickerModal: React.FC<VoicePickerModalProps> = ({ 
-  visible, 
-  onDismiss, 
-  voices, 
-  onSelect, 
-  currentVoice 
+const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
+  visible,
+  onDismiss,
+  voices,
+  onSelect,
+  currentVoice
 }) => {
   const theme = useTheme();
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   // Get system language safely using getLocales()
   const systemLocale = getLocales()[0]?.languageCode || 'en';
-  
+
   // Get unique languages from voices
   const availableLanguages = useMemo(() => {
     const languages = new Set<string>();
@@ -61,7 +61,7 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
         return lang === systemLocale;
       });
     }
-    
+
     return voices.filter(voice => {
       if (voice.name === 'System') return true;
       const lang = voice.language?.split('-')[0];
@@ -99,14 +99,14 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
         <Text style={[styles.modalTitle, { color: theme.onSurface }]}>
           Select Voice
         </Text>
-        
+
         {/* Language Filter */}
         <View style={styles.languageFilterContainer}>
           <Text style={[styles.filterLabel, { color: theme.onSurfaceVariant }]}>
             Filter by language:
           </Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.languageChipsScroll}
           >
@@ -115,7 +115,7 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
               const isSystemLang = lang === systemLocale;
               const showingSystemOnly = selectedLanguages.length === 0;
               const isActive = isSelected || (showingSystemOnly && isSystemLang);
-              
+
               return (
                 <Chip
                   key={lang}
@@ -125,10 +125,10 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
                     styles.languageChip,
                     isActive && { backgroundColor: theme.primary }
                   ]}
-                  textStyle={{ 
-                    color: isActive ? theme.onPrimary : theme.onSurface,
-                    fontSize: 12
-                  }}
+                  textStyle={[
+                    styles.languageChipText,
+                    { color: isActive ? theme.onPrimary : theme.onSurface }
+                  ]}
                 >
                   {lang.toUpperCase()}
                   {isSystemLang && ' (System)'}
@@ -170,7 +170,7 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
                   )}
                 </View>
                 {currentVoice?.identifier === voice.identifier && (
-                  <Text style={{ color: theme.primary, fontSize: 16 }}>✓</Text>
+                  <Text style={[styles.checkIcon, { color: theme.primary }]}>✓</Text>
                 )}
               </TouchableOpacity>
             ))
@@ -194,7 +194,7 @@ const TTSTab: React.FC = () => {
     TTSEnable = true,
     setChapterGeneralSettings,
   } = useChapterGeneralSettings();
-  
+
   const { tts, setChapterReaderSettings } = useChapterReaderSettings();
   const [voices, setVoices] = useState<Voice[]>([]);
   const [voiceModalVisible, setVoiceModalVisible] = useState(false);
@@ -219,7 +219,7 @@ const TTSTab: React.FC = () => {
       >
         <View style={styles.section}>
           <List.SubHeader theme={theme}>Text to Speech</List.SubHeader>
-          
+
           <ReaderSheetPreferenceItem
             label="Enable TTS"
             value={TTSEnable}
@@ -228,7 +228,7 @@ const TTSTab: React.FC = () => {
             }
             theme={theme}
           />
-          
+
           {TTSEnable && (
             <>
               <TouchableOpacity
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   languageChip: {
-    marginRight: 8,
+    marginEnd: 8,
     marginBottom: 8,
   },
   voiceList: {
@@ -439,5 +439,11 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     marginTop: 16,
+  },
+  languageChipText: {
+    fontSize: 12,
+  },
+  checkIcon: {
+    fontSize: 16,
   },
 });

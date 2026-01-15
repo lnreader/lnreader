@@ -42,8 +42,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         status === 'indeterminate'
           ? 'indeterminate'
           : status
-          ? 'checked'
-          : 'unchecked'
+            ? 'checked'
+            : 'unchecked'
       }
       onPress={onPress}
       color={theme.primary}
@@ -85,11 +85,11 @@ export const SortItem = ({ label, status, onPress, theme }: SortItemProps) => (
 
 const styles = StyleSheet.create({
   defaultLabel: {
-    marginLeft: 12,
+    marginStart: 12,
   },
   icon: {
     alignSelf: 'center',
-    left: 24,
+    start: 24,
     position: 'absolute',
   },
   pressable: {
@@ -98,5 +98,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
   },
-  sortItem: { paddingVertical: 16, paddingLeft: 64 },
+  sortItem: { paddingVertical: 16, paddingStart: 64 },
 });

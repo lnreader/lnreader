@@ -34,12 +34,10 @@ export default function PageNavigationBottomSheet({
       <View
         style={[
           styles.pageItemContainer,
-          {
-            backgroundColor: isSelected
-              ? theme.isDark
-                ? color(theme.primary).alpha(0.2).string()
-                : color(theme.primaryContainer).alpha(0.5).string()
-              : 'transparent',
+          isSelected && {
+            backgroundColor: theme.isDark
+              ? color(theme.primary).alpha(0.2).string()
+              : color(theme.primaryContainer).alpha(0.5).string(),
           },
         ]}
       >
@@ -83,8 +81,8 @@ export default function PageNavigationBottomSheet({
           styles.contentContainer,
           {
             backgroundColor: overlay(2, theme.surface),
-            marginLeft: left,
-            marginRight: right,
+            marginStart: left,
+            marginEnd: right,
             paddingBottom: insets.bottom,
           },
         ]}

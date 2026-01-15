@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginLeft: 16,
+    marginStart: 16,
   },
   sourceIcon: {
     borderRadius: 4,

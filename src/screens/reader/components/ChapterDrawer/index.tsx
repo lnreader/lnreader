@@ -222,8 +222,7 @@ const createStylesheet = (theme: ThemeColors, insets: EdgeInsets) => {
     drawerElementContainer: {
       borderRadius: 50,
       margin: 4,
-      marginLeft: 16,
-      marginRight: 16,
+      marginHorizontal: 16,
       minHeight: 48,
       overflow: 'hidden',
     },

@@ -72,13 +72,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             {history.novelName}
           </Text>
           <Text style={{ color: theme.onSurfaceVariant }}>
-            {`${getString('historyScreen.chapter')} ${
-              history.chapterNumber
-            } • ${dayjs(history.readTime).format('LT').toUpperCase()}` +
-              `${
-                history.progress && history.progress > 0
-                  ? ' • ' + history.progress + '%'
-                  : ''
+            {`${getString('historyScreen.chapter')} ${history.chapterNumber
+              } • ${dayjs(history.readTime).format('LT').toUpperCase()}` +
+              `${history.progress && history.progress > 0
+                ? ' • ' + history.progress + '%'
+                : ''
               }`}
           </Text>
         </View>
@@ -118,7 +116,7 @@ const styles = StyleSheet.create({
   detailsContainer: {
     flex: 1,
     justifyContent: 'center',
-    marginLeft: 16,
+    marginStart: 16,
   },
   imageAndNameContainer: {
     alignItems: 'center',

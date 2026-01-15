@@ -175,24 +175,24 @@ const FilterItem: React.FC<FilterItemProps> = ({
         </Pressable>
         {isVisible
           ? filter.options.map(val => {
-              return (
-                <Checkbox
-                  key={val.label}
-                  label={val.label}
-                  theme={theme}
-                  status={value.includes(val.value)}
-                  onPress={() =>
-                    setSelectedFilters(prevFilters => ({
-                      ...prevFilters,
-                      [filterKey]: {
-                        type: FilterTypes.CheckboxGroup,
-                        value: insertOrRemoveIntoArray(value, val.value),
-                      },
-                    }))
-                  }
-                />
-              );
-            })
+            return (
+              <Checkbox
+                key={val.label}
+                label={val.label}
+                theme={theme}
+                status={value.includes(val.value)}
+                onPress={() =>
+                  setSelectedFilters(prevFilters => ({
+                    ...prevFilters,
+                    [filterKey]: {
+                      type: FilterTypes.CheckboxGroup,
+                      value: insertOrRemoveIntoArray(value, val.value),
+                    },
+                  }))
+                }
+              />
+            );
+          })
           : null}
       </View>
     );
@@ -255,71 +255,71 @@ const FilterItem: React.FC<FilterItemProps> = ({
         </Pressable>
         {isVisible
           ? filter.options.map(val => {
-              return (
-                <Checkbox
-                  key={val.label}
-                  label={val.label}
-                  theme={theme}
-                  status={
-                    value.include?.includes(val.value)
-                      ? true
-                      : value.exclude?.includes(val.value)
+            return (
+              <Checkbox
+                key={val.label}
+                label={val.label}
+                theme={theme}
+                status={
+                  value.include?.includes(val.value)
+                    ? true
+                    : value.exclude?.includes(val.value)
                       ? 'indeterminate'
                       : false
+                }
+                onPress={() => {
+                  if (value.exclude?.includes(val.value)) {
+                    setSelectedFilters(prev => {
+                      return {
+                        ...prev,
+                        [filterKey]: {
+                          type: FilterTypes.ExcludableCheckboxGroup,
+                          value: {
+                            include: [...(value.include || [])],
+                            exclude: [
+                              ...(value.exclude?.filter(
+                                f => f !== val.value,
+                              ) || []),
+                            ],
+                          },
+                        },
+                      };
+                    });
+                  } else if (value.include?.includes(val.value)) {
+                    setSelectedFilters(prev => {
+                      return {
+                        ...prev,
+                        [filterKey]: {
+                          type: FilterTypes.ExcludableCheckboxGroup,
+                          value: {
+                            include: [
+                              ...(value.include?.filter(
+                                f => f !== val.value,
+                              ) || []),
+                            ],
+                            exclude: [...(value.exclude || []), val.value],
+                          },
+                        },
+                      };
+                    });
+                  } else {
+                    setSelectedFilters(prev => {
+                      return {
+                        ...prev,
+                        [filterKey]: {
+                          type: FilterTypes.ExcludableCheckboxGroup,
+                          value: {
+                            include: [...(value.include || []), val.value],
+                            exclude: value.exclude,
+                          },
+                        },
+                      };
+                    });
                   }
-                  onPress={() => {
-                    if (value.exclude?.includes(val.value)) {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [...(value.include || [])],
-                              exclude: [
-                                ...(value.exclude?.filter(
-                                  f => f !== val.value,
-                                ) || []),
-                              ],
-                            },
-                          },
-                        };
-                      });
-                    } else if (value.include?.includes(val.value)) {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [
-                                ...(value.include?.filter(
-                                  f => f !== val.value,
-                                ) || []),
-                              ],
-                              exclude: [...(value.exclude || []), val.value],
-                            },
-                          },
-                        };
-                      });
-                    } else {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [...(value.include || []), val.value],
-                              exclude: value.exclude,
-                            },
-                          },
-                        };
-                      });
-                    }
-                  }}
-                />
-              );
-            })
+                }}
+              />
+            );
+          })
           : null}
       </View>
     );
@@ -350,45 +350,48 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
       bottomSheetRef={filterSheetRef}
       snapPoints={[400, 600]}
       bottomInset={bottom}
-      backgroundStyle={styles.transparent}
-      style={[styles.container, { backgroundColor: overlay(2, theme.surface) }]}
-      handleComponent={() => (
-        <View
-          style={[styles.buttonContainer, { borderBottomColor: theme.outline }]}
-        >
-          <Button
-            title={getString('common.reset')}
-            onPress={() => {
-              setSelectedFilters(filters);
-              clearFilters(filters);
-            }}
-          />
-          <Button
-            title={getString('common.filter')}
-            textColor={theme.onPrimary}
-            onPress={() => {
-              setFilters(selectedFilters);
-              filterSheetRef?.current?.close();
-            }}
-            mode="contained"
+      handleComponent={null}
+      children={
+        <View style={styles.flex}>
+          <View
+            style={[
+              styles.buttonContainer,
+              { borderBottomColor: theme.outline },
+            ]}
+          >
+            <Button
+              title={getString('common.reset')}
+              onPress={() => {
+                setSelectedFilters(filters);
+                clearFilters(filters);
+              }}
+            />
+            <Button
+              title={getString('common.filter')}
+              textColor={theme.onPrimary}
+              onPress={() => {
+                setFilters(selectedFilters);
+                filterSheetRef?.current?.close();
+              }}
+              mode="contained"
+            />
+          </View>
+          <BottomSheetFlatList
+            data={filters && (Object.entries(filters) as [string, Filters[string]][])}
+            keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+            renderItem={({ item }: { item: [string, Filters[string]] }) => (
+              <FilterItem
+                theme={theme}
+                filter={item[1]}
+                filterKey={item[0]}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+              />
+            )}
           />
         </View>
-      )}
-    >
-      <BottomSheetFlatList
-        data={filters && Object.entries(filters)}
-        keyExtractor={item => 'filter' + item[0]}
-        renderItem={({ item }) => (
-          <FilterItem
-            theme={theme}
-            filter={item[1]}
-            filterKey={item[0]}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-          />
-        )}
-      />
-    </BottomSheet>
+      }
+    />
   );
 };
 

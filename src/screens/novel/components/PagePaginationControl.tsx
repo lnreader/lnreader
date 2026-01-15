@@ -134,9 +134,9 @@ const PagePaginationControl: React.FC<PagePaginationControlProps> = ({
               style={[
                 styles.button,
                 {
-                  borderColor: isActive ? 'transparent' : borderColor,
                   backgroundColor: isActive ? theme.primary : theme.surface,
                 },
+                isActive ? styles.activeButton : styles.inactiveButton,
               ]}
               onPress={() => handlePagePress(pageIndex)}
               android_ripple={{
@@ -150,8 +150,8 @@ const PagePaginationControl: React.FC<PagePaginationControlProps> = ({
                   styles.pageText,
                   {
                     color: isActive ? theme.onPrimary : theme.onSurface,
-                    fontWeight: isActive ? '600' : '400',
                   },
+                  isActive ? styles.activePageText : styles.inactivePageText,
                 ]}
                 numberOfLines={1}
               >
@@ -231,6 +231,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 0.15,
     maxWidth: 100,
+  },
+  activeButton: {
+    borderColor: 'transparent',
+  },
+  inactiveButton: {
+    borderColor: borderColor,
+  },
+  activePageText: {
+    fontWeight: '600',
+  },
+  inactivePageText: {
+    fontWeight: '400',
   },
 });
 

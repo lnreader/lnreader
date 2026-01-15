@@ -317,18 +317,18 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
         rightIcons={
           selectedNovelIds.length
             ? [
-                {
-                  iconName: 'select-all',
-                  onPress: () =>
-                    setSelectedNovelIds(currentNovels.map(novel => novel.id)),
-                },
-              ]
+              {
+                iconName: 'select-all',
+                onPress: () =>
+                  setSelectedNovelIds(currentNovels.map(novel => novel.id)),
+              },
+            ]
             : [
-                {
-                  iconName: 'filter-variant',
-                  onPress: () => bottomSheetRef.current?.present(),
-                },
-              ]
+              {
+                iconName: 'filter-variant',
+                onPress: () => bottomSheetRef.current?.present(),
+              },
+            ]
         }
         menuButtons={[
           {
@@ -392,14 +392,14 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       />
 
       {useLibraryFAB &&
-      !isHistoryLoading &&
-      history &&
-      history.length !== 0 &&
-      !error ? (
+        !isHistoryLoading &&
+        history &&
+        history.length !== 0 &&
+        !error ? (
         <FAB
           style={[
             styles.fab,
-            { backgroundColor: theme.primary, marginRight: rightInset + 16 },
+            { backgroundColor: theme.primary, marginEnd: rightInset + 16 },
           ]}
           color={theme.onPrimary}
           uppercase={false}
@@ -432,11 +432,11 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       />
       <LibraryBottomSheet
         bottomSheetRef={bottomSheetRef}
-        style={{ marginLeft: leftInset, marginRight: rightInset }}
+        style={{ marginStart: leftInset, marginEnd: rightInset }}
       />
       <Portal>
         <Actionbar
-          viewStyle={{ paddingLeft: leftInset, paddingRight: rightInset }}
+          viewStyle={{ paddingStart: leftInset, paddingEnd: rightInset }}
           active={selectedNovelIds.length > 0}
           actions={[
             {
@@ -488,7 +488,7 @@ function createStyles(theme: ThemeColors) {
   return StyleSheet.create({
     badgeCtn: {
       borderRadius: 50,
-      marginLeft: 2,
+      marginStart: 2,
       paddingHorizontal: 6,
       paddingVertical: 2,
       position: 'relative',
@@ -500,7 +500,7 @@ function createStyles(theme: ThemeColors) {
       bottom: 0,
       margin: 16,
       position: 'absolute',
-      right: 0,
+      end: 0,
     },
     fontWeight500: {
       fontWeight: 500,

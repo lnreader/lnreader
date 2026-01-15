@@ -38,7 +38,7 @@ export const PluginListItem = memo(
 
     const rightActionStyle = useMemo(
       () => [styles.buttonGroup, { backgroundColor: theme.primary }],
-      [theme.error],
+      [theme.primary],
     );
     const containerStyle = useMemo(
       () => [styles.container, { backgroundColor: theme.surface }],
@@ -155,6 +155,7 @@ export const PluginListItem = memo(
         theme,
         handlePinPress,
         handleDeletePress,
+        handleWebviewPress,
         isPluginPinned,
       ],
     );
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   details: {
-    marginLeft: 16,
+    marginStart: 16,
   },
   flex: { flex: 1 },
   icon: {
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   pinnedIndicator: {
-    marginRight: -8,
+    marginEnd: -8,
   },
   rightActionsContainer: {
     flexDirection: 'row',

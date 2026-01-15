@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   chipContainer: {
     borderRadius: 8,
     height: 32,
-    marginRight: 8,
+    marginEnd: 8,
     overflow: 'hidden',
   },
   label: {

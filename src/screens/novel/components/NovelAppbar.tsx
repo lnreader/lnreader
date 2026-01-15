@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     position: 'absolute',
-    right: 0,
+    end: 0,
   },
 });
 

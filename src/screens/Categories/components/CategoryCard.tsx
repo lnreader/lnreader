@@ -44,9 +44,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           styles.cardCtn,
           {
             backgroundColor: theme.secondaryContainer,
-            opacity: isActive ? 0.8 : 1,
-            elevation: isActive ? 8 : 2,
           },
+          isActive && styles.activeCard,
         ]}
       >
         <View style={styles.buttonsCtn}>
@@ -77,17 +76,19 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             </Text>
             {category.id === 2 && (
               <Badge
-                style={{
-                  backgroundColor: theme.primary,
-                  paddingHorizontal: 8,
-                }}
+                style={[
+                  styles.badge,
+                  {
+                    backgroundColor: theme.primary,
+                  },
+                ]}
               >
                 System
               </Badge>
             )}
           </View>
           <View style={styles.flex} />
-          <View style={{ opacity: category.id === 2 ? 0.4 : 1 }}>
+          <View style={[category.id === 2 && styles.disabledOpacity]}>
             <IconButton
               name="pencil-outline"
               color={category.id === 2 ? theme.outline : theme.onSurface}
@@ -97,7 +98,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               disabled={category.id === 2}
             />
           </View>
-          <View style={{ opacity: category.id === 2 ? 0.4 : 1 }}>
+          <View style={[category.id === 2 && styles.disabledOpacity]}>
             <IconButton
               name="delete-outline"
               color={category.id === 2 ? theme.outline : theme.onSurface}
@@ -143,24 +144,34 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   dragHandle: {
-    marginRight: 4,
+    marginEnd: 4,
   },
   flex: {
     flex: 1,
   },
   manageBtn: {
-    marginLeft: 16,
+    marginStart: 16,
   },
   name: {
-    marginLeft: 16,
-    marginRight: 8,
+    marginStart: 16,
+    marginEnd: 8,
   },
   nameCtn: {
     alignItems: 'center',
     flexGrow: 1,
     flexDirection: 'row',
-    marginLeft: 8,
-    paddingRight: 16,
+    marginStart: 8,
+    paddingEnd: 16,
     paddingVertical: 4,
+  },
+  activeCard: {
+    opacity: 0.8,
+    elevation: 8,
+  },
+  badge: {
+    paddingHorizontal: 8,
+  },
+  disabledOpacity: {
+    opacity: 0.4,
   },
 });

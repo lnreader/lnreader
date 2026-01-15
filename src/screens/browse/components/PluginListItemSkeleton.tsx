@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   details: {
-    marginLeft: 16,
+    marginStart: 16,
   },
   flex: { flex: 1 },
   icon: {
