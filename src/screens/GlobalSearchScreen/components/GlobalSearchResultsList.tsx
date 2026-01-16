@@ -175,6 +175,7 @@ const GlobalSearchSourceResults: React.FC<{ item: GlobalSearchResult }> = ({
       item.plugin.site,
       navigateToNovel,
       navigation,
+      imageRequestInit,
       noResultsColor,
       novelInLibrary,
       switchNovelToLibrary,

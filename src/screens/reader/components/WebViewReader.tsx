@@ -92,12 +92,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   useEffect(() => {
     setReaderSettings(
       getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-        initialChapterReaderSettings,
+      initialChapterReaderSettings,
     );
   }, [chapter.id]);
 
   // Update battery level when chapter changes to ensure fresh value on navigation
-  const batteryLevel = useMemo(() => getBatteryLevelSync(), [chapter.id]);
+  const batteryLevel = useMemo(() => getBatteryLevelSync(), []);
   const plugin = getPlugin(novel?.pluginId);
   const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
@@ -286,6 +286,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
       rate: readerSettingsRef.current.tts?.rate || 1,
     });
   };
+  const isRTL = plugin?.lang === 'Arabic' || plugin?.lang === 'Hebrew';
+  const readerDir = isRTL ? 'rtl' : 'ltr';
+
   return (
     <WebView
       ref={webViewRef}
@@ -334,9 +337,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               | undefined;
             const queue = Array.isArray(payload?.queue)
               ? payload?.queue.filter(
-                  (item): item is string =>
-                    typeof item === 'string' && item.trim().length > 0,
-                )
+                (item): item is string =>
+                  typeof item === 'string' && item.trim().length > 0,
+              )
               : [];
             ttsQueueRef.current = queue;
             if (typeof payload?.startIndex === 'number') {
@@ -416,7 +419,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
         body: plugin?.imageRequestInit?.body,
         html: ` 
         <!DOCTYPE html>
-          <html>
+          <html dir="${readerDir}">
             <head>
               <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
               <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
@@ -441,8 +444,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 --theme-onSecondary: ${theme.onSecondary};
                 --theme-surface: ${theme.surface};
                 --theme-surface-0-9: ${color(theme.surface)
-                  .alpha(0.9)
-                  .toString()};
+            .alpha(0.9)
+            .toString()};
                 --theme-onSurface: ${theme.onSurface};
                 --theme-surfaceVariant: ${theme.surfaceVariant};
                 --theme-onSurfaceVariant: ${theme.onSurfaceVariant};
@@ -452,23 +455,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 
                 @font-face {
                   font-family: ${readerSettings.fontFamily};
-                  src: url("file:///android_asset/fonts/${
-                    readerSettings.fontFamily
-                  }.ttf");
+                  src: url("file:///android_asset/fonts/${readerSettings.fontFamily
+          }.ttf");
                 }
                 </style>
-
+ 
               <link rel="stylesheet" href="${pluginCustomCSS}">
               <style>${readerSettings.customCSS}</style>
             </head>
-            <body class="${
-              chapterGeneralSettings.pageReader ? 'page-reader' : ''
-            }">
-              <div class="transition-chapter" style="transform: ${
-                nextChapterScreenVisible.current
-                  ? 'translateX(-100%)'
-                  : 'translateX(0%)'
-              };
+            <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
+          }">
+              <div class="transition-chapter" style="transform: ${nextChapterScreenVisible.current
+            ? 'translateX(-100%)'
+            : 'translateX(0%)'
+          };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
               ">${chapter.name}</div>
               <div id="LNReader-chapter">
@@ -478,30 +478,28 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-                  nextChapterScreenVisible: nextChapterScreenVisible.current,
-                })};
-
-
+            nextChapterScreenVisible: nextChapterScreenVisible.current,
+          })};
+ 
+ 
                 var initialReaderConfig = ${JSON.stringify({
-                  readerSettings,
-                  chapterGeneralSettings,
-                  novel,
-                  chapter,
-                  nextChapter,
-                  prevChapter,
-                  batteryLevel,
-                  autoSaveInterval: 2222,
-                  DEBUG: __DEV__,
-                  strings: {
-                    finished: `${getString(
-                      'readerScreen.finished',
-                    )}: ${chapter.name.trim()}`,
-                    nextChapter: getString('readerScreen.nextChapter', {
-                      name: nextChapter?.name,
-                    }),
-                    noNextChapter: getString('readerScreen.noNextChapter'),
-                  },
-                })}
+            readerSettings,
+            chapterGeneralSettings,
+            novel,
+            chapter,
+            nextChapter,
+            prevChapter,
+            batteryLevel,
+            autoSaveInterval: 2222,
+            DEBUG: __DEV__,
+            strings: {
+              finished: getString('readerScreen.finished') + ': ' + chapter.name.trim(),
+              nextChapter: getString('readerScreen.nextChapter', {
+                name: nextChapter?.name,
+              }),
+              noNextChapter: getString('readerScreen.noNextChapter'),
+            },
+          })}
               </script>
               <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>

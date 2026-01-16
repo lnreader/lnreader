@@ -107,11 +107,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
             <Animated.View
               style={[
                 styles.backdrop,
-                {
-                  backgroundColor: theme.isDark
-                    ? 'rgba(0, 0, 0, 0.2)'
-                    : 'rgba(0, 0, 0, 0.1)',
-                },
+                theme.isDark ? styles.backdropDark : styles.backdropLight,
               ]}
               entering={backdropEntering}
               exiting={backdropExiting}
@@ -186,6 +182,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  backdropDark: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  backdropLight: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   menuItem: {
     paddingHorizontal: 16,

@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     height: 24,
     width: 24,
     borderRadius: 50,
-    marginRight: 16,
+    marginEnd: 16,
   },
   description: {
     fontSize: 12,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   iconCtn: {
-    paddingLeft: 16,
+    paddingStart: 16,
   },
   infoCtn: {
     paddingHorizontal: 16,

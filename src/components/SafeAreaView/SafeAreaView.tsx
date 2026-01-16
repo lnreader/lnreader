@@ -22,8 +22,8 @@ const SafeAreaView: React.FC<SafeAreaViewProps> = ({
     },
     padding: {
       paddingBottom: excludeBottom ? 0 : bottom,
-      paddingLeft: left,
-      paddingRight: right,
+      paddingStart: left,
+      paddingEnd: right,
       paddingTop: excludeTop ? 0 : top,
     },
   });

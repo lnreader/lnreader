@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   switch: {
-    marginLeft: 8,
+    marginStart: 8,
   },
 });

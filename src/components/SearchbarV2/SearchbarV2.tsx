@@ -49,8 +49,6 @@ const Searchbar: React.FC<SearcbarProps> = ({
   const [extraMenu, showExtraMenu] = useState(false);
 
   const marginTop = 8;
-  const marginRight = 16;
-  const marginLeft = 16;
 
   return (
     <View
@@ -58,8 +56,6 @@ const Searchbar: React.FC<SearcbarProps> = ({
         styles.searchbarContainer,
         {
           marginTop,
-          marginRight,
-          marginLeft,
           backgroundColor: theme.surface2,
         },
       ]}

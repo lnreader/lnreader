@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   bookmark: {
-    marginRight: 4,
+    marginEnd: 4,
   },
   container: {
     flex: 1,

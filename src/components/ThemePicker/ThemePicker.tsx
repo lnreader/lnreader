@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   checkIcon: {
     position: 'absolute',
     top: 5,
-    right: 5,
+    end: 5,
     borderRadius: 50,
     padding: 1.6,
     zIndex: 1,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   topBarAccent: {
     width: 44,
     height: 10,
-    marginLeft: 8,
+    marginStart: 8,
     borderRadius: 50,
   },
   content: {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   rowAccentSmall: {
     height: 10,
     width: 16,
-    marginLeft: 4,
+    marginStart: 4,
     borderRadius: 50,
   },
   rowAccentShort: {
@@ -221,5 +221,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingVertical: 4,
   },
-  marginLeft: { marginLeft: 4 },
+  marginLeft: { marginStart: 4 },
 });

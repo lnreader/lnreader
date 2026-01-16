@@ -36,7 +36,7 @@ const ReaderFontPicker = () => {
         />
       );
     },
-    [isSelected, setChapterReaderSettings],
+    [isSelected, setChapterReaderSettings, theme],
   );
 
   return (
@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   title: {
-    marginRight: 16,
+    marginEnd: 16,
   },
 });

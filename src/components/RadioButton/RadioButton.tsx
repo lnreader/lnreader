@@ -48,11 +48,11 @@ export const RadioButton: React.FC<Props> = ({
 const styles = StyleSheet.create({
   icon: {
     alignSelf: 'center',
-    left: 24,
+    start: 24,
     position: 'absolute',
   },
   label: {
-    marginLeft: 12,
+    marginStart: 12,
   },
   pressable: {
     alignItems: 'center',

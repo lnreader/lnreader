@@ -109,8 +109,8 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                   color: !unread
                     ? theme.outline
                     : bookmark
-                    ? theme.primary
-                    : theme.onSurface,
+                      ? theme.primary
+                      : theme.onSurface,
                   flex: 1,
                 }}
                 numberOfLines={1}
@@ -119,8 +119,8 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                 {showChapterTitles
                   ? name
                   : getString('novelScreen.chapterChapnum', {
-                      num: chapterNumber,
-                    })}
+                    num: chapterNumber,
+                  })}
               </Text>
             </View>
             <View
@@ -136,8 +136,8 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                       color: !unread
                         ? theme.outline
                         : bookmark
-                        ? theme.primary
-                        : theme.onSurfaceVariant,
+                          ? theme.primary
+                          : theme.onSurfaceVariant,
                       marginTop: 4,
                     },
                     styles.text,
@@ -151,7 +151,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                 <Text
                   style={{
                     color: theme.outline,
-                    marginLeft: chapter.releaseTime ? 5 : 0,
+                    marginStart: chapter.releaseTime ? 5 : 0,
                     fontSize: 12,
                     marginTop: 4,
                   }}
@@ -200,6 +200,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   unreadIcon: {
-    marginRight: 4,
+    marginEnd: 4,
   },
 });

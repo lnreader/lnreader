@@ -59,6 +59,18 @@ const BottomNavigator = () => {
     [],
   );
 
+  const renderTabBar = useCallback(
+    (props: any) => (
+      <BottomTabBar
+        {...props}
+        theme={theme}
+        showLabelsInNav={showLabelsInNav}
+        renderIcon={renderIcon}
+      />
+    ),
+    [theme, showLabelsInNav, renderIcon],
+  );
+
   return (
     <Tab.Navigator
       screenOptions={() => ({
@@ -70,14 +82,7 @@ const BottomNavigator = () => {
           color: theme.onError,
         },
       })}
-      tabBar={props => (
-        <BottomTabBar
-          {...props}
-          theme={theme}
-          showLabelsInNav={showLabelsInNav}
-          renderIcon={renderIcon}
-        />
-      )}
+      tabBar={renderTabBar}
     >
       <Tab.Screen
         name="Library"

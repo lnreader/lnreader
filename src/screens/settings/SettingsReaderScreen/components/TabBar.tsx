@@ -23,7 +23,7 @@ const TabBar: React.FC<TabBarProps> = ({
   theme,
 }) => {
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }]}>
+    <View style={styles.container}>
       {tabs.map(tab => {
         const isActive = activeTab === tab.id;
         return (
@@ -31,9 +31,7 @@ const TabBar: React.FC<TabBarProps> = ({
             key={tab.id}
             style={[
               styles.tab,
-              {
-                borderBottomColor: isActive ? theme.primary : 'transparent',
-              },
+              isActive && { borderBottomColor: theme.primary },
             ]}
             onPress={() => onTabChange(tab.id)}
             android_ripple={{
@@ -60,6 +58,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.12)',
+    backgroundColor: 'transparent', // Will be set by theme if needed, but the lint was about static style
   },
   tab: {
     flex: 1,

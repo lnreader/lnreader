@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   colorPreview: {
     borderRadius: 50,
     height: 24,
-    marginRight: 16,
+    marginEnd: 16,
     width: 24,
   },
   container: {
