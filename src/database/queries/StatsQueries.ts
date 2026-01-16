@@ -1,6 +1,6 @@
 import { countBy } from 'lodash-es';
+import { db } from '@database/db';
 import { LibraryStats } from '../types';
-import { getAllAsync, getFirstAsync } from '../utils/helpers';
 
 const getLibraryStatsQuery = `
   SELECT COUNT(*) as novelsCount, COUNT(DISTINCT pluginId) as sourcesCount
@@ -52,51 +52,48 @@ const getNovelStatusQuery = `
   WHERE Novel.inLibrary = 1
   `;
 
-export const getLibraryStatsFromDb = async (): Promise<LibraryStats> => {
-  return getFirstAsync([getLibraryStatsQuery]) as any;
+export const getLibraryStatsFromDb = (): Promise<LibraryStats | null> => {
+  return db.getFirstAsync<LibraryStats>(getLibraryStatsQuery);
 };
 
-export const getChaptersTotalCountFromDb = async (): Promise<LibraryStats> => {
-  return getFirstAsync([getChaptersTotalCountQuery]) as any;
+export const getChaptersTotalCountFromDb = (): Promise<LibraryStats | null> => {
+  return db.getFirstAsync<LibraryStats>(getChaptersTotalCountQuery);
 };
 
-export const getChaptersReadCountFromDb = async (): Promise<LibraryStats> => {
-  return getFirstAsync([getChaptersReadCountQuery]) as any;
+export const getChaptersReadCountFromDb = (): Promise<LibraryStats | null> => {
+  return db.getFirstAsync<LibraryStats>(getChaptersReadCountQuery);
 };
 
-export const getChaptersUnreadCountFromDb = async (): Promise<LibraryStats> => {
-  return getFirstAsync([getChaptersUnreadCountQuery]) as any;
-};
+export const getChaptersUnreadCountFromDb =
+  (): Promise<LibraryStats | null> => {
+    return db.getFirstAsync<LibraryStats>(getChaptersUnreadCountQuery);
+  };
 
 export const getChaptersDownloadedCountFromDb =
-  async (): Promise<LibraryStats> => {
-    return getFirstAsync([getChaptersDownloadedCountQuery]) as any;
+  (): Promise<LibraryStats | null> => {
+    return db.getFirstAsync<LibraryStats>(getChaptersDownloadedCountQuery);
   };
 
 export const getNovelGenresFromDb = async (): Promise<LibraryStats> => {
   const genres: string[] = [];
-  await getAllAsync([getNovelGenresQuery]).then(res => {
-    (res as any).forEach((item: { genres: string }) => {
-      const novelGenres = item.genres?.split(/\s*,\s*/);
-
-      if (novelGenres?.length) {
-        genres.push(...novelGenres);
-      }
-    });
+  const res = await db.getAllAsync<{ genres: string }>(getNovelGenresQuery);
+  res.forEach(item => {
+    const novelGenres = item.genres?.split(/\s*,\s*/);
+    if (novelGenres?.length) {
+      genres.push(...novelGenres);
+    }
   });
   return { genres: countBy(genres) };
 };
 
 export const getNovelStatusFromDb = async (): Promise<LibraryStats> => {
   const status: string[] = [];
-  await getAllAsync([getNovelStatusQuery]).then(res => {
-    (res as any).forEach((item: { status: string }) => {
-      const novelStatus = item.status?.split(/\s*,\s*/);
-
-      if (novelStatus?.length) {
-        status.push(...novelStatus);
-      }
-    });
+  const res = await db.getAllAsync<{ status: string }>(getNovelStatusQuery);
+  res.forEach(item => {
+    const novelStatus = item.status?.split(/\s*,\s*/);
+    if (novelStatus?.length) {
+      status.push(...novelStatus);
+    }
   });
   return { status: countBy(status) };
 };

@@ -1,9 +1,7 @@
-import * as SQLite from 'expo-sqlite';
 import { BackupCategory, Category, NovelCategory, CCategory } from '../types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { db } from '@database/db';
-import { getAllSync, runSync } from '@database/utils/helpers';
 
 const getCategoriesQuery = `
     SELECT 
@@ -19,7 +17,7 @@ const getCategoriesQuery = `
 
 type NumberList = `${number}` | `${number},${number}` | undefined;
 export const getCategoriesFromDb = () => {
-  return getAllSync<Category & { novelIds: NumberList }>([getCategoriesQuery]);
+  return db.getAllSync<Category & { novelIds: NumberList }>(getCategoriesQuery);
 };
 
 export const getCategoriesWithCount = (novelIds: number[]) => {
@@ -35,13 +33,14 @@ export const getCategoriesWithCount = (novelIds: number[]) => {
   WHERE Category.id != 2
   ORDER BY sort
 	`;
-  return getAllSync<CCategory>([getCategoriesWithCountQuery]);
+  return db.getAllSync<CCategory>(getCategoriesWithCountQuery);
 };
 
 const createCategoryQuery = 'INSERT INTO Category (name) VALUES (?)';
 
-export const createCategory = (categoryName: string): void =>
-  runSync([[createCategoryQuery, [categoryName]]]);
+export const createCategory = (categoryName: string): void => {
+  db.runSync(createCategoryQuery, categoryName);
+};
 
 const beforeDeleteCategoryQuery = `
     UPDATE NovelCategory SET categoryId = (SELECT id FROM Category WHERE sort = 1)
@@ -58,10 +57,8 @@ export const deleteCategoryById = (category: Category): void => {
   if (category.sort === 1 || category.id === 2) {
     return showToast(getString('categories.cantDeleteDefault'));
   }
-  runSync([
-    [beforeDeleteCategoryQuery, [category.id]],
-    [deleteCategoryQuery, [category.id]],
-  ]);
+  db.runSync(beforeDeleteCategoryQuery, category.id);
+  db.runSync(deleteCategoryQuery, category.id);
 };
 
 const updateCategoryQuery = 'UPDATE Category SET name = ? WHERE id = ?';
@@ -69,7 +66,9 @@ const updateCategoryQuery = 'UPDATE Category SET name = ? WHERE id = ?';
 export const updateCategory = (
   categoryId: number,
   categoryName: string,
-): void => runSync([[updateCategoryQuery, [categoryName, categoryId]]]);
+): void => {
+  db.runSync(updateCategoryQuery, categoryName, categoryId);
+};
 
 const isCategoryNameDuplicateQuery = `
   SELECT COUNT(*) as isDuplicate FROM Category WHERE name = ?
@@ -92,31 +91,31 @@ export const updateCategoryOrderInDb = (categories: Category[]): void => {
   if (categories.length && categories[0].id === 2) {
     return;
   }
-  runSync(
-    categories.map(c => {
-      return [updateCategoryOrderQuery, [c.sort, c.id]];
-    }),
-  );
+  for (const c of categories) {
+    db.runSync(updateCategoryOrderQuery, c.sort, c.id);
+  }
 };
 
 export const getAllNovelCategories = () =>
-  getAllSync<NovelCategory>(['SELECT * FROM NovelCategory']);
+  db.getAllSync<NovelCategory>('SELECT * FROM NovelCategory');
 
 export const _restoreCategory = (category: BackupCategory) => {
-  const d = category.novelIds.map(novelId => [
-    'INSERT OR IGNORE INTO NovelCategory (categoryId, novelId) VALUES (?, ?)',
-    [category.id, novelId],
-  ]) as Array<[string, SQLite.SQLiteBindParams]>;
-
-  runSync([
-    [
-      'DELETE FROM Category WHERE id = ? OR sort = ?',
-      [category.id, category.sort],
-    ],
-    [
-      'INSERT OR IGNORE INTO Category (id, name, sort) VALUES (?, ?, ?)',
-      [category.id, category.name, category.sort],
-    ],
-    ...d,
-  ]);
+  db.runSync(
+    'DELETE FROM Category WHERE id = ? OR sort = ?',
+    category.id,
+    category.sort,
+  );
+  db.runSync(
+    'INSERT OR IGNORE INTO Category (id, name, sort) VALUES (?, ?, ?)',
+    category.id,
+    category.name,
+    category.sort,
+  );
+  for (const novelId of category.novelIds) {
+    db.runSync(
+      'INSERT OR IGNORE INTO NovelCategory (categoryId, novelId) VALUES (?, ?)',
+      category.id,
+      novelId,
+    );
+  }
 };

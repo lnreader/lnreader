@@ -1,5 +1,5 @@
+import { db } from '@database/db';
 import { LibraryNovelInfo, NovelInfo } from '../types';
-import { getAllSync } from '../utils/helpers';
 
 export const getLibraryNovelsFromDb = (
   sortOrder?: string,
@@ -30,7 +30,7 @@ export const getLibraryNovelsFromDb = (
     query += ` ORDER BY ${sortOrder}`;
   }
 
-  return getAllSync<NovelInfo>([query, [searchText ?? '']]);
+  return db.getAllSync<NovelInfo>(query, searchText ? `%${searchText}%` : '');
 };
 
 const getNovelOfCategoryQuery =
@@ -48,7 +48,7 @@ export const getLibraryWithCategory = (
     categoryQuery += ` AND categoryId = ${categoryId}`;
   }
 
-  const idRows = getAllSync<{ novelId: number }>([categoryQuery, []]);
+  const idRows = db.getAllSync<{ novelId: number }>(categoryQuery);
 
   if (!idRows || idRows.length === 0) return [];
 
@@ -66,7 +66,5 @@ export const getLibraryWithCategory = (
     novelQuery += " AND status = 'Ongoing'";
   }
 
-  const res = getAllSync<LibraryNovelInfo>([novelQuery, []]);
-
-  return res;
+  return db.getAllSync<LibraryNovelInfo>(novelQuery);
 };

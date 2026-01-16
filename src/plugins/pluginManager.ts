@@ -1,27 +1,29 @@
+import { gcm } from '@noble/ciphers/aes.js';
+import { utf8ToBytes, bytesToUtf8 } from '@noble/ciphers/utils.js';
+import dayjs from 'dayjs';
+import { load } from 'cheerio';
+import { Parser } from 'htmlparser2';
 import { reverse, uniqBy } from 'lodash-es';
-import { newer } from '@utils/compareVersion';
+import { encode, decode } from 'urlencode';
 
-// packages for plugins
+import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
+import { getUserAgent } from '@hooks/persisted/useUserAgent';
+import { newer } from '@utils/compareVersion';
+import NativeFile from '@specs/NativeFile';
+import { showToast } from '@utils/showToast';
+import { PLUGIN_STORAGE } from '@utils/Storages';
+
 import {
   store,
   Storage,
   LocalStorage,
   SessionStorage,
 } from './helpers/storage';
-import { load } from 'cheerio';
-import dayjs from 'dayjs';
 import { NovelStatus, Plugin, PluginItem } from './types';
+import { defaultCover } from './helpers/constants';
+import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
 import { FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
-import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
-import { defaultCover } from './helpers/constants';
-import { encode, decode } from 'urlencode';
-import { Parser } from 'htmlparser2';
-import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
-import { showToast } from '@utils/showToast';
-import { PLUGIN_STORAGE } from '@utils/Storages';
-import NativeFile from '@specs/NativeFile';
-import { getUserAgent } from '@hooks/persisted/useUserAgent';
 
 const packages: Record<string, any> = {
   'htmlparser2': { Parser },
@@ -33,6 +35,8 @@ const packages: Record<string, any> = {
   '@libs/isAbsoluteUrl': { isUrlAbsolute },
   '@libs/filterInputs': { FilterTypes },
   '@libs/defaultCover': { defaultCover },
+  '@libs/aes': { gcm },
+  '@libs/utils': { utf8ToBytes, bytesToUtf8 },
 };
 
 const initPlugin = (pluginId: string, rawCode: string) => {

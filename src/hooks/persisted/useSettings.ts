@@ -79,6 +79,7 @@ export interface ChapterGeneralSettings {
   swipeGestures: boolean;
   showScrollPercentage: boolean;
   useVolumeButtons: boolean;
+  volumeButtonsOffset: number | null;
   showBatteryAndTime: boolean;
   autoScroll: boolean;
   autoScrollInterval: number;
@@ -174,6 +175,7 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   swipeGestures: false,
   showScrollPercentage: true,
   useVolumeButtons: false,
+  volumeButtonsOffset: null,
   showBatteryAndTime: false,
   autoScroll: false,
   autoScrollInterval: 10,

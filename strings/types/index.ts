@@ -409,6 +409,7 @@ export interface StringMap {
   'readerScreen.noPreviousChapter': 'string';
   'readerSettings.autoScrollInterval': 'string';
   'readerSettings.autoScrollOffset': 'string';
+  'readerSettings.volumeButtonsOffset': 'string';
   'readerSettings.backgroundColor': 'string';
   'readerSettings.backgroundColorModal': 'string';
   'readerSettings.clearCustomCSS': 'string';
