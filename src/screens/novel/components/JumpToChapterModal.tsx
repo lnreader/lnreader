@@ -13,6 +13,10 @@ import { useTheme } from '@hooks/persisted';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { NovelScreenProps } from '@navigators/types';
 import {
+  getNovelChaptersByNumber,
+  getNovelChaptersByName,
+} from '@database/queries/ChapterQueries';
+import {
   LegendList,
   LegendListRef,
   LegendListRenderItemProps,
@@ -25,15 +29,22 @@ interface JumpToChapterModalProps {
   navigation: NovelScreenProps['navigation'];
   novel: NovelInfo;
   chapterListRef: React.RefObject<LegendListRef | null>;
+  loadUpToBatch: (batch: number) => Promise<void>;
+  totalChapters?: number;
 }
 
 const JumpToChapterModal = ({
   hideModal,
   modalVisible,
+  chapters: loadedChapters,
   navigation,
   novel,
   chapterListRef,
+  loadUpToBatch,
+  totalChapters,
 }: JumpToChapterModalProps) => {
+  const minNumber = 1;
+  const maxNumber = totalChapters ?? -1;
   const theme = useTheme();
   const [mode, setMode] = useState(false);
   const [openChapter, setOpenChapter] = useState(false);
@@ -87,22 +98,28 @@ const JumpToChapterModal = ({
     });
   };
 
-  const scrollToChapter = (chap: ChapterInfo) => {
+  const scrollToChapter = async (chap: ChapterInfo) => {
     onDismiss();
-    const index = allChapters.findIndex(c => c.id === chap.id);
-
-    if (index !== -1) {
+    const loadedIndex = loadedChapters.findIndex(c => c.id === chap.id);
+    if (loadedIndex >= 0) {
       chapterListRef.current?.scrollToIndex({
         animated: true,
-        index: index,
+        index: loadedIndex,
         viewPosition: 0.5,
       });
-    } else {
-      chapterListRef.current?.scrollToItem({
-        animated: true,
-        item: chap,
-        viewPosition: 0.5,
-      });
+      return;
+    }
+
+    if ((chap.position ?? -1) >= 0) {
+      const targetBatch = Math.floor(chap.position! / 300);
+      await loadUpToBatch(targetBatch);
+      setTimeout(() => {
+        chapterListRef.current?.scrollToIndex({
+          animated: true,
+          index: chap.position!,
+          viewPosition: 0.5,
+        });
+      }, 0);
     }
   };
 
@@ -136,46 +153,48 @@ const JumpToChapterModal = ({
     );
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!mode) {
+      // Number search
       const num = Number(text);
       if (num && num >= minNumber && num <= maxNumber) {
-        if (openChapter) {
-          const chapter = allChapters.find(c => c.chapterNumber === num);
-          if (chapter) {
+        const chapters = await getNovelChaptersByNumber(novel!.id, num);
+        if (chapters.length > 0) {
+          const chapter = chapters[0];
+          if (openChapter) {
             return navigateToChapter(chapter);
-          }
-        } else {
-          const chapter = allChapters.find(c => c.chapterNumber === num);
-          if (chapter) {
+          } else {
             return scrollToChapter(chapter);
           }
         }
       }
+
       return setError(
         getString('novelScreen.jumpToChapterModal.error.validChapterNumber') +
           ` (${num < minNumber ? '≥ ' + minNumber : '≤ ' + maxNumber})`,
       );
     } else {
-      const searchedChapters = allChapters.filter(chap =>
-        chap.name.toLowerCase().includes(text?.toLowerCase()),
+      // Text search
+      const chapters = await getNovelChaptersByName(
+        novel!.id,
+        text.toLowerCase(),
       );
-
-      if (!searchedChapters.length) {
+      if (!chapters.length) {
         setError(
           getString('novelScreen.jumpToChapterModal.error.validChapterName'),
         );
         return;
       }
 
-      if (searchedChapters.length === 1) {
+      if (chapters.length === 1) {
         if (openChapter) {
-          return navigateToChapter(searchedChapters[0]);
+          return navigateToChapter(chapters[0]);
+        } else {
+          return scrollToChapter(chapters[0]);
         }
-        return scrollToChapter(searchedChapters[0]);
       }
 
-      return setResult(searchedChapters);
+      return setResult(chapters);
     }
   };
 
