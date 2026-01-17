@@ -18,6 +18,7 @@ import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
+import NativeReader from './components/NativeReader';
 
 const Chapter = ({ route, navigation }: ChapterScreenProps) => {
   const [open, setOpen] = useState(false);
@@ -128,7 +129,7 @@ export const ChapterContent = ({
       {loading ? (
         <ChapterLoadingScreen />
       ) : (
-        <WebViewReader onPress={hideHeader} />
+        <NativeReader onPress={hideHeader} />
       )}
       <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
       {!hidden ? (
