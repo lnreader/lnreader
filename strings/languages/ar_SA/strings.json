@@ -17,7 +17,7 @@
     "clearDatabaseWarning": "هل أنت متيقِّن؟ سيتم فقدان الفصول المقروءة والمُنزّلة، بالإضافة إلى تقدم الروايات غير المُدرجة في المكتبة.",
     "clearUpdatesMessage": "تمت إزالة التحديثات.",
     "clearUpdatesTab": "مسح علامة تبويب التحديثات",
-    "clearUpdatesWarning": "Updates tab will be cleared.",
+    "clearUpdatesWarning": ".",
     "clearupdatesTabDesc": "مسح إدخالات الفصول في علامة تبويب التحديثات",
     "dataManagement": "إدارة البيانات",
     "deleteReadChapters": "حذف الفصول المقروءة",
@@ -66,8 +66,8 @@
       "teal": "Teal",
       "turquoise": "Turquoise",
       "yotsuba": "Yotsuba",
-      "catppuccin": "Catppuccin",
-      "yinyang": "Yin & Yang"
+      "catppuccin": "",
+      "yinyang": ""
     }
   },
   "backupScreen": {
@@ -75,7 +75,7 @@
     "backupCreated": "Backup created successfully",
     "backupRestored": "Backup restored successfully",
     "savingBackup": "Saving Backup",
-    "categoriesRestored": "Restored %{count} categories",
+    "categoriesRestored": "",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",

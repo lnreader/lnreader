@@ -35,14 +35,14 @@
   },
   "appearance": "Appearance",
   "appearanceScreen": {
-    "accentColor": "Accent Color",
+    "accentColor": "Akzentfarbe",
     "alwaysShowNavLabels": "Always show nav labels",
-    "appLanguage": "App language",
+    "appLanguage": "App Sprache",
     "languagePickerModal": {
-      "title": "Select Language",
-      "restartNote": "You will need to restart the app for the language change to take full effect."
+      "title": "Sprache auswählen",
+      "restartNote": "Um die Sprachänderung vollständig wirksam werden zu lassen, müssen Sie die App neu starten."
     },
-    "appLanguageDefault": "Default",
+    "appLanguageDefault": "Standard",
     "appTheme": "App theme",
     "darkTheme": "Dark Theme",
     "hideBackdrop": "Hide backdrop",
@@ -57,7 +57,7 @@
     "themeModeDark": "Dark",
     "themeModeSystem": "System",
     "theme": {
-      "default": "Default",
+      "default": "Standard",
       "lavender": "Lavender",
       "midnightDusk": "Midnight Dusk",
       "daybreakBloom": "Daybreak Bloom",
