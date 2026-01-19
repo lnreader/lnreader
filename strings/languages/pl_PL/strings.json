@@ -1,14 +1,14 @@
 {
   "aboutScreen": {
-    "website": "Website",
+    "website": "Strona",
     "discord": "Discord",
     "github": "Github",
-    "helpTranslate": "Help translate",
-    "sources": "Sources",
-    "version": "Version",
-    "whatsNew": "What's new"
+    "helpTranslate": "Pomóż przetłumaczyć",
+    "sources": "Źródła",
+    "version": "Wersja",
+    "whatsNew": "Nowości"
   },
-  "advancedSettings": "Advanced",
+  "advancedSettings": "Zaawansowane",
   "advancedSettingsScreen": {
     "cachedNovelsDeletedToast": "Cached novels deleted",
     "chapterInsertFailed": "chapter insert failed",
