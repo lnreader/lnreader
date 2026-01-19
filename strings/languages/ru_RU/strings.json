@@ -394,7 +394,7 @@
       "includeCustomJS": "Включить пользовательские JS",
       "invalidRange": "Пожалуйста, введите правильный номер главы",
       "selectFolder": "Выберите папку для файла EPUB",
-      "startChapter": "Start Chapter",
+      "startChapter": "Начать главу",
       "startGreaterThanEnd": "Start chapter must be less than or equal to end chapter",
       "title": "Экспорт новеллы как EPUB"
     },
@@ -460,7 +460,7 @@
   },
   "readerScreen": {
     "bottomSheet": {
-      "allowTextSelection": "Text selection",
+      "allowTextSelection": "Выбор текста",
       "autoscroll": "Автопрокрутка",
       "bionicReading": "Бионическое чтение",
       "tapToScroll": "Коснитесь для прокрутки",
