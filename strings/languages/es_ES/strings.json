@@ -4,7 +4,7 @@
     "discord": "Discord",
     "github": "GitHub",
     "helpTranslate": "Ayuda a traducir",
-    "sources": "Fuentes",
+    "plugins": "Plugins",
     "version": "Versión",
     "whatsNew": "Novedades"
   },
@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "Desplazar al capítulo actual",
       "scrollToTop": "Desplazar a arriba"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/LNReader/lnreader-sources/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Finalizado",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "No hay próximo capítulo",
