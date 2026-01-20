@@ -4,7 +4,7 @@
     "discord": "ديس كورد",
     "github": "كيت هاب",
     "helpTranslate": "المساعدة في الترجَمة",
-    "sources": "المصدر",
+    "plugins": "Plugins",
     "version": "آلإصدار",
     "whatsNew": "ما الجديد"
   },
@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "التمرير إلى الفصل الحالي",
       "scrollToTop": "التمرير إلى الأعلى"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/LNReader/lnreader-sources/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "انتهى",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "لا يوجد فصل اخر",
