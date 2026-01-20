@@ -4,7 +4,7 @@
     "discord": "Discord",
     "github": "Github",
     "helpTranslate": "Çevirmeye Yardım Et",
-    "sources": "Kaynaklar",
+    "plugins": "Plugins",
     "version": "Versiyon",
     "whatsNew": "Yenilikler"
   },
@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "Mevcut bölüme kaydır",
       "scrollToTop": "Yukarı kaydır"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/LNReader/lnreader-sources/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Biten",
     "nextChapter": "Sonraki: %{name}",
     "noNextChapter": "Başka bölüm yok",
