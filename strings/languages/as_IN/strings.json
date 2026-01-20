@@ -4,7 +4,7 @@
     "discord": "Discord",
     "github": "Github",
     "helpTranslate": "Help translate",
-    "sources": "Sources",
+    "plugins": "Plugins",
     "version": "Version",
     "whatsNew": "What's new"
   },
@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "বৰ্তমান অধ্যায়লৈ স্ক্ৰল কৰক",
       "scrollToTop": "শীৰ্ষলৈ স্ক্ৰল কৰক"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/LNReader/lnreader-sources/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "শেষ",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "পৰবর্তী অধ্যায় নাই",
