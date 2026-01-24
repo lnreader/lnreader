@@ -4,7 +4,7 @@
     "discord": "Discord",
     "github": "Github",
     "helpTranslate": "协助翻译",
-    "plugins": "Plugins",
+    "plugins": "插件",
     "version": "版本",
     "whatsNew": "新增内容"
   },
@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "滚动到当前章节",
       "scrollToTop": "滚动到顶部"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>章节为空。</p><p>如果在Webview中不可访问请在 <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> 上报告。</p><p>插件名: %{pluginId}</p><p>小说: %{novelName}</p><p>章节: %{chapterName}</p>",
     "finished": "已完成",
     "nextChapter": "下一章: %{name}",
     "noNextChapter": "没有下一章节",
