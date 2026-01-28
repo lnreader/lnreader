@@ -293,6 +293,25 @@ export const getPageChaptersBatched = (
   );
 };
 
+export const getNovelChaptersByNumber = (
+  novelId: number,
+  chapterNumber: number,
+) => {
+  return db.getAllAsync<ChapterInfo>(
+    'SELECT * FROM Chapter WHERE novelId = ? AND position = ?',
+    novelId,
+    chapterNumber - 1,
+  );
+};
+
+export const getNovelChaptersByName = (novelId: number, searchText: string) => {
+  return db.getAllAsync<ChapterInfo>(
+    'SELECT * FROM Chapter WHERE novelId = ? AND name LIKE ?',
+    novelId,
+    `%${searchText}%`,
+  );
+};
+
 export const getPrevChapter = (
   novelId: number,
   chapterPosition: number,
