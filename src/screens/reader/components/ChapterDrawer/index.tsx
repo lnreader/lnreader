@@ -98,9 +98,9 @@ const ChapterDrawer = () => {
       const newBtnLayout = Object.create(defaultButtonLayout);
 
       if (viewableItems.length === 0) return;
-      const cKey = (scrollToIndex.current ?? 0) + 2;
-      const vKey = parseInt(viewableItems[0].key, 10);
-      const visible = vKey <= cKey && cKey <= vKey + viewableItems.length - 1;
+      const visible = viewableItems
+        .map(v => v.index)
+        .includes((scrollToIndex.current ?? 0) + 2);
 
       if (!visible && scrollToIndex.current !== undefined) {
         if (
@@ -119,12 +119,7 @@ const ChapterDrawer = () => {
           };
         }
       }
-      if (cKey <= 2 && vKey <= 4) {
-        newBtnLayout.up = {
-          text: curChapter,
-          index: scrollToIndex.current,
-        };
-      }
+
       setButtonProperties(newBtnLayout);
     },
     [defaultButtonLayout, listAscending],
@@ -166,7 +161,7 @@ const ChapterDrawer = () => {
           recycleItems
           viewabilityConfig={{
             minimumViewTime: 100,
-            viewAreaCoveragePercentThreshold: 95,
+            itemVisiblePercentThreshold: 90,
           }}
           onViewableItemsChanged={checkViewableItems}
           data={chapters}
