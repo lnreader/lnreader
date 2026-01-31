@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -21,13 +21,13 @@ import {
   LegendListRef,
   LegendListRenderItemProps,
 } from '@legendapp/list';
-import { getNovelChapters } from '@database/queries/ChapterQueries';
 
 interface JumpToChapterModalProps {
   hideModal: () => void;
   modalVisible: boolean;
   navigation: NovelScreenProps['navigation'];
   novel: NovelInfo;
+  chapters: ChapterInfo[];
   chapterListRef: React.RefObject<LegendListRef | null>;
   loadUpToBatch: (batch: number) => Promise<void>;
   totalChapters?: number;
@@ -48,7 +48,6 @@ const JumpToChapterModal = ({
   const theme = useTheme();
   const [mode, setMode] = useState(false);
   const [openChapter, setOpenChapter] = useState(false);
-  const [allChapters, setAllChapters] = useState<ChapterInfo[]>([]);
 
   const [text, setText] = useState('');
   const [error, setError] = useState('');
@@ -56,30 +55,6 @@ const JumpToChapterModal = ({
 
   const inputRef = useRef<RNTextInput>(null);
   const [inputFocused, setInputFocused] = useState(false);
-
-  useEffect(() => {
-    if (modalVisible && novel?.id) {
-      getNovelChapters(novel.id).then(chapters => {
-        setAllChapters(chapters);
-      });
-    }
-  }, [modalVisible, novel?.id]);
-
-  const minNumber = useMemo(() => {
-    if (allChapters.length === 0) {
-      return 1;
-    }
-
-    return Math.min(...allChapters.map(c => c.chapterNumber || -1));
-  }, [allChapters]);
-
-  const maxNumber = useMemo(() => {
-    if (allChapters.length === 0) {
-      return 1;
-    }
-
-    return Math.max(...allChapters.map(c => c.chapterNumber || -1));
-  }, [allChapters]);
 
   const onDismiss = () => {
     hideModal();
