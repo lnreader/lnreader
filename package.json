@@ -124,7 +124,7 @@
     "@types/sanitize-html": "^2.16.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "eslint": "^8.57.1",
+    "eslint": "^9.26.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.5.0",
     "prettier": "2.8.8",
