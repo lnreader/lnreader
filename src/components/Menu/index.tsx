@@ -1,30 +1,46 @@
 import { useTheme } from '@hooks/persisted';
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, Dimensions } from 'react-native';
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  LayoutRectangle,
+} from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Portal } from 'react-native-paper';
 import Animated, {
   FadeIn,
-  FadeInUp,
   FadeOut,
-  FadeOutUp,
-  useAnimatedStyle,
+  withTiming,
+  ExitAnimationsValues,
+  EntryAnimationsValues,
+  withDelay,
 } from 'react-native-reanimated';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 interface MenuProps {
   visible: boolean;
   onDismiss: () => void;
   anchor: React.ReactNode;
-  contentStyle?: any;
+  contentStyle?: StyleProp<ViewStyle>;
   children: React.ReactNode;
+  fullWidth?: boolean; // Full width of the anchor
 }
 
 interface MenuItemProps {
   title: string;
   onPress: () => void;
-  style?: any;
-  titleStyle?: any;
+  style?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
 }
 
 const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
@@ -33,74 +49,112 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   anchor,
   contentStyle,
   children,
+  fullWidth,
 }) => {
   const theme = useTheme();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const anchorRef = useRef<View>(null);
-  const [anchorLayout, setAnchorLayout] = useState({
+  const duration = 250;
+
+  const [menuLayout, setMenuLayout] = useState<LayoutRectangle | null>(null);
+  const [anchorLayout, setAnchorLayout] = useState<LayoutRectangle>({
     x: 0,
     y: 0,
     width: 0,
     height: 0,
   });
-  const [isMeasured, setIsMeasured] = useState(false);
 
-  const menuAnimatedStyle = useAnimatedStyle(() => ({
-    shadowColor: theme.isDark ? '#000' : theme.shadow,
-    position: 'absolute' as const,
-    left: Math.max(16, Math.min(anchorLayout.x, screenWidth - 220)),
-    top: anchorLayout.y + anchorLayout.height + 8,
-    width: Math.min(200, screenWidth - 32),
-    zIndex: 1001,
-  }));
+  const backdropEntering = FadeIn.duration(duration);
+  const menuEntering = (values: EntryAnimationsValues) => {
+    'worklet';
+    const animations = {
+      height: withTiming(values.targetHeight, { duration }),
+      opacity: withTiming(1, { duration: duration - 100 }),
+    };
+    const initialValues = {
+      height: 0,
+      opacity: 0,
+    };
+    return {
+      initialValues,
+      animations,
+    };
+  };
 
-  // Create entering animations
-  const backdropEntering = FadeIn.duration(150);
-  const menuEntering = FadeInUp.duration(150)
-    .springify()
-    .damping(30)
-    .stiffness(500)
-    .mass(0.3)
-    .withInitialValues({
-      transform: [{ translateY: -10 }],
+  const backdropExiting = FadeOut.duration(duration);
+  const menuExiting = (values: ExitAnimationsValues) => {
+    'worklet';
+    const initialValues = {
+      height: values.currentHeight,
+      opacity: 1,
+    };
+    const animations = {
+      height: withTiming(0, { duration }),
+      opacity: withDelay(100, withTiming(0, { duration: duration - 100 })),
+    };
+    return {
+      initialValues,
+      animations,
+    };
+  };
+  const measureAnchor = useCallback(() => {
+    anchorRef.current?.measureInWindow((x, y, width, height) => {
+      setAnchorLayout({ x, y, width, height });
     });
-
-  // Create exiting animations
-  const backdropExiting = FadeOut.duration(150);
-  const menuExiting = FadeOutUp.duration(150)
-    .springify()
-    .damping(30)
-    .stiffness(500)
-    .mass(0.3);
-
-  const measureAnchor = React.useCallback(() => {
-    if (anchorRef.current) {
-      anchorRef.current.measure((x, y, width, height, pageX, pageY) => {
-        setAnchorLayout({ x: pageX, y: pageY, width, height });
-        setIsMeasured(true);
-      });
-    }
   }, []);
 
-  // Measure anchor on mount
-  useEffect(() => {
-    setTimeout(measureAnchor, 0);
-  }, [measureAnchor]);
+  useLayoutEffect(() => {
+    if (visible) {
+      measureAnchor();
+    } else {
+      setMenuLayout(null); // Reset layout when closed
+    }
+  }, [measureAnchor, visible]);
 
-  if (!visible) {
-    return (
-      <View ref={anchorRef} collapsable={false} onLayout={measureAnchor}>
-        {anchor}
-      </View>
+  const menuPosition = useMemo(() => {
+    if (!menuLayout) return { opacity: 0 };
+    const leftPos = Math.max(
+      16,
+      Math.min(anchorLayout.x, screenWidth - menuLayout.width - 16),
     );
-  }
+
+    let topPos = anchorLayout.y + anchorLayout.height + 24;
+
+    const showAbove = topPos + menuLayout.height > screenHeight;
+    if (showAbove) {
+      topPos -= anchorLayout.height + menuLayout.height;
+    }
+
+    const maxWidth = fullWidth
+      ? anchorLayout.width
+      : Math.min(250, screenWidth - 32);
+
+    return {
+      left: leftPos,
+      top: topPos,
+      shadowColor: theme.isDark ? '#000' : theme.shadow,
+      [fullWidth ? 'width' : 'maxWidth']: maxWidth,
+    };
+  }, [
+    anchorLayout.height,
+    anchorLayout.width,
+    anchorLayout.x,
+    anchorLayout.y,
+    fullWidth,
+    menuLayout,
+    screenHeight,
+    screenWidth,
+    theme.isDark,
+    theme.shadow,
+  ]);
 
   return (
     <>
-      <View ref={anchorRef} collapsable={false} onLayout={measureAnchor}>
+      <View ref={anchorRef} collapsable={false}>
         {anchor}
       </View>
 
-      {visible && isMeasured && (
+      {visible && (
         <Portal>
           {/* Backdrop */}
           <Pressable style={StyleSheet.absoluteFillObject} onPress={onDismiss}>
@@ -116,16 +170,22 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
 
           {/* Menu */}
           <Animated.View
+            key={menuLayout ? 'ready' : 'measuring'}
             style={[
               styles.menuContainer,
-              menuAnimatedStyle,
               { backgroundColor: theme.surface },
               contentStyle,
+              menuPosition,
             ]}
-            entering={menuEntering}
-            exiting={menuExiting}
+            onLayout={e => {
+              setMenuLayout(e.nativeEvent.layout);
+            }}
+            entering={menuLayout ? menuEntering : undefined}
+            exiting={menuLayout ? menuExiting : undefined}
           >
-            {children}
+            <ScrollView style={{ maxHeight: screenHeight * 0.6 }}>
+              {children}
+            </ScrollView>
           </Animated.View>
         </Portal>
       )}
@@ -148,13 +208,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       android_ripple={{ color: theme.rippleColor, foreground: true }}
     >
       <Animated.Text
-        style={[
-          styles.menuItemText,
-          {
-            color: theme.onSurface,
-          },
-          titleStyle,
-        ]}
+        style={[styles.menuItemText, { color: theme.onSurface }, titleStyle]}
       >
         {title}
       </Animated.Text>
@@ -175,9 +229,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 6,
     overflow: 'hidden',
+    position: 'absolute',
+    zIndex: 1001,
   },
   backdrop: {
-    position: 'absolute' as const,
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
