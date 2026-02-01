@@ -4,7 +4,6 @@ import {
   FAB,
   ProgressBar,
   Appbar as MaterialAppbar,
-  Menu,
   overlay,
 } from 'react-native-paper';
 
@@ -12,7 +11,7 @@ import { useTheme } from '@hooks/persisted';
 
 import { showToast } from '../../utils/showToast';
 import { getString } from '@strings/translations';
-import { Appbar, EmptyView, SafeAreaView } from '@components';
+import { Appbar, EmptyView, Menu, SafeAreaView } from '@components';
 import { TaskQueueScreenProps } from '@navigators/types';
 import ServiceManager, { QueuedBackgroundTask } from '@services/ServiceManager';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

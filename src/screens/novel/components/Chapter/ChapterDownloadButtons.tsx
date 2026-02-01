@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { MD3ThemeType } from '@theme/types';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
-import { Menu, overlay } from 'react-native-paper';
+import { overlay } from 'react-native-paper';
 import { getString } from '@strings/translations';
 import { isChapterDownloaded } from '@database/queries/ChapterQueries';
 import { useBoolean } from '@hooks/index';
-import { IconButtonV2 } from '@components';
+import { IconButtonV2, Menu } from '@components';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Color from 'color';
 

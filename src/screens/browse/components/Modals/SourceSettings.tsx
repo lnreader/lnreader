@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { TextInput, Menu, overlay } from 'react-native-paper';
-import { Button, Modal, SwitchItem, Checkbox } from '@components/index';
+import { TextInput, overlay } from 'react-native-paper';
+import { Button, Modal, SwitchItem, Checkbox, Menu } from '@components/index';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 import { Storage } from '@plugins/helpers/storage';
@@ -118,6 +118,7 @@ const SourceSettingsModal: React.FC<SourceSettingsModal> = ({
           return (
             <View key={key} style={styles.selectContainer}>
               <Menu
+                fullWidth
                 visible={isMenuOpen}
                 contentStyle={{ backgroundColor: theme.surfaceVariant }}
                 anchor={

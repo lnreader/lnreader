@@ -16,11 +16,11 @@ import {
   FilterToValues,
   Filters,
 } from '@plugins/types/filterTypes';
-import { Button } from '@components/index';
+import { Button, Menu } from '@components/index';
 import { Checkbox } from '@components/Checkbox/Checkbox';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useBoolean } from '@hooks';
-import { Menu, TextInput, overlay } from 'react-native-paper';
+import { TextInput, overlay } from 'react-native-paper';
 import { getValueFor } from './filterUtils';
 import { getString } from '@strings/translations';
 import { ThemeColors } from '@theme/types';
@@ -100,7 +100,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
     return (
       <View style={styles.pickerContainer}>
         <Menu
-          style={styles.flex}
+          fullWidth
           visible={isVisible}
           contentStyle={{ backgroundColor: theme.surfaceVariant }}
           anchor={
@@ -175,24 +175,24 @@ const FilterItem: React.FC<FilterItemProps> = ({
         </Pressable>
         {isVisible
           ? filter.options.map(val => {
-            return (
-              <Checkbox
-                key={val.label}
-                label={val.label}
-                theme={theme}
-                status={value.includes(val.value)}
-                onPress={() =>
-                  setSelectedFilters(prevFilters => ({
-                    ...prevFilters,
-                    [filterKey]: {
-                      type: FilterTypes.CheckboxGroup,
-                      value: insertOrRemoveIntoArray(value, val.value),
-                    },
-                  }))
-                }
-              />
-            );
-          })
+              return (
+                <Checkbox
+                  key={val.label}
+                  label={val.label}
+                  theme={theme}
+                  status={value.includes(val.value)}
+                  onPress={() =>
+                    setSelectedFilters(prevFilters => ({
+                      ...prevFilters,
+                      [filterKey]: {
+                        type: FilterTypes.CheckboxGroup,
+                        value: insertOrRemoveIntoArray(value, val.value),
+                      },
+                    }))
+                  }
+                />
+              );
+            })
           : null}
       </View>
     );
@@ -255,71 +255,71 @@ const FilterItem: React.FC<FilterItemProps> = ({
         </Pressable>
         {isVisible
           ? filter.options.map(val => {
-            return (
-              <Checkbox
-                key={val.label}
-                label={val.label}
-                theme={theme}
-                status={
-                  value.include?.includes(val.value)
-                    ? true
-                    : value.exclude?.includes(val.value)
+              return (
+                <Checkbox
+                  key={val.label}
+                  label={val.label}
+                  theme={theme}
+                  status={
+                    value.include?.includes(val.value)
+                      ? true
+                      : value.exclude?.includes(val.value)
                       ? 'indeterminate'
                       : false
-                }
-                onPress={() => {
-                  if (value.exclude?.includes(val.value)) {
-                    setSelectedFilters(prev => {
-                      return {
-                        ...prev,
-                        [filterKey]: {
-                          type: FilterTypes.ExcludableCheckboxGroup,
-                          value: {
-                            include: [...(value.include || [])],
-                            exclude: [
-                              ...(value.exclude?.filter(
-                                f => f !== val.value,
-                              ) || []),
-                            ],
-                          },
-                        },
-                      };
-                    });
-                  } else if (value.include?.includes(val.value)) {
-                    setSelectedFilters(prev => {
-                      return {
-                        ...prev,
-                        [filterKey]: {
-                          type: FilterTypes.ExcludableCheckboxGroup,
-                          value: {
-                            include: [
-                              ...(value.include?.filter(
-                                f => f !== val.value,
-                              ) || []),
-                            ],
-                            exclude: [...(value.exclude || []), val.value],
-                          },
-                        },
-                      };
-                    });
-                  } else {
-                    setSelectedFilters(prev => {
-                      return {
-                        ...prev,
-                        [filterKey]: {
-                          type: FilterTypes.ExcludableCheckboxGroup,
-                          value: {
-                            include: [...(value.include || []), val.value],
-                            exclude: value.exclude,
-                          },
-                        },
-                      };
-                    });
                   }
-                }}
-              />
-            );
-          })
+                  onPress={() => {
+                    if (value.exclude?.includes(val.value)) {
+                      setSelectedFilters(prev => {
+                        return {
+                          ...prev,
+                          [filterKey]: {
+                            type: FilterTypes.ExcludableCheckboxGroup,
+                            value: {
+                              include: [...(value.include || [])],
+                              exclude: [
+                                ...(value.exclude?.filter(
+                                  f => f !== val.value,
+                                ) || []),
+                              ],
+                            },
+                          },
+                        };
+                      });
+                    } else if (value.include?.includes(val.value)) {
+                      setSelectedFilters(prev => {
+                        return {
+                          ...prev,
+                          [filterKey]: {
+                            type: FilterTypes.ExcludableCheckboxGroup,
+                            value: {
+                              include: [
+                                ...(value.include?.filter(
+                                  f => f !== val.value,
+                                ) || []),
+                              ],
+                              exclude: [...(value.exclude || []), val.value],
+                            },
+                          },
+                        };
+                      });
+                    } else {
+                      setSelectedFilters(prev => {
+                        return {
+                          ...prev,
+                          [filterKey]: {
+                            type: FilterTypes.ExcludableCheckboxGroup,
+                            value: {
+                              include: [...(value.include || []), val.value],
+                              exclude: value.exclude,
+                            },
+                          },
+                        };
+                      });
+                    }
+                  }}
+                />
+              );
+            })
           : null}
       </View>
     );
@@ -377,8 +377,13 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             />
           </View>
           <BottomSheetFlatList
-            data={filters && (Object.entries(filters) as [string, Filters[string]][])}
-            keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+            data={
+              filters &&
+              (Object.entries(filters) as [string, Filters[string]][])
+            }
+            keyExtractor={(item: [string, Filters[string]]) =>
+              'filter' + item[0]
+            }
             renderItem={({ item }: { item: [string, Filters[string]] }) => (
               <FilterItem
                 theme={theme}
