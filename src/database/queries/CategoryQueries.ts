@@ -9,27 +9,6 @@ import {
   type CategoryRow,
 } from '@database/schema';
 
-const getCategoriesQuery = `
-     SELECT
-         Category.id,
-         Category.name,
-         Category.sort,
-         GROUP_CONCAT(NovelCategory.novelId ORDER BY NovelCategory.novelId) AS novelIds
-     FROM Category
-     LEFT JOIN NovelCategory ON NovelCategory.categoryId = Category.id
-     GROUP BY Category.id, Category.name, Category.sort
-     ORDER BY Category.sort;
- 	`;
-
-type NumberList = `${number}` | `${number},${number}` | undefined;
-/**
- * Get all categories with their novel IDs
- * @deprecated Use getCategoriesFromDbDrizzle for new code
- */
-export const getCategoriesFromDb = () => {
-  return getAllSync<Category & { novelIds: NumberList }>([getCategoriesQuery]);
-};
-
 /**
  * Get all categories with their novel IDs using Drizzle ORM
  */
@@ -54,24 +33,6 @@ export const getCategoriesFromDb = async (): Promise<
     .orderBy(categorySchema.sort)
     .all();
 };
-
-export const getCategoriesWithCount = (novelIds: number[]) => {
-  const getCategoriesWithCountQuery = `
-   SELECT *, novelsCount
-   FROM Category LEFT JOIN
-   (
-     SELECT categoryId, COUNT(novelId) as novelsCount
-     FROM NovelCategory WHERE novelId in (${novelIds.join(
-       ',',
-     )}) GROUP BY categoryId
-   ) as NC ON Category.id = NC.categoryId
-   WHERE Category.id != 2
-   ORDER BY sort
- 	`;
-  return getAllSync<CCategory>([getCategoriesWithCountQuery]);
-};
-
-const createCategoryQuery = 'INSERT INTO Category (name) VALUES (?)';
 
 /**
  * Get categories with novel count for the specified novels
@@ -190,16 +151,6 @@ export const deleteCategoryById = async (category: Category): Promise<void> => {
 export const updateCategory = async (
   categoryId: number,
   categoryName: string,
-): void => {
-  db.runSync(updateCategoryQuery, categoryName, categoryId);
-};
-
-/**
- * Update a category name using Drizzle ORM
- */
-export const updateCategoryDrizzle = (
-  categoryId: number,
-  categoryName: string,
 ): Promise<void> => {
   await dbManager.write(async tx => {
     await tx
@@ -231,34 +182,6 @@ export const updateCategoryOrderInDb = async (
 ): Promise<void> => {
   if (!categories.length) {
     return;
-  }
-
-  for (const c of categories) {
-    db.runSync(updateCategoryOrderQuery, c.sort, c.id);
-  }
-};
-
-export const getAllNovelCategories = () =>
-  db.getAllSync<NovelCategory>('SELECT * FROM NovelCategory');
-
-export const _restoreCategory = (category: BackupCategory) => {
-  db.runSync(
-    'DELETE FROM Category WHERE id = ? OR sort = ?',
-    category.id,
-    category.sort,
-  );
-  db.runSync(
-    'INSERT OR IGNORE INTO Category (id, name, sort) VALUES (?, ?, ?)',
-    category.id,
-    category.name,
-    category.sort,
-  );
-  for (const novelId of category.novelIds) {
-    db.runSync(
-      'INSERT OR IGNORE INTO NovelCategory (categoryId, novelId) VALUES (?, ?)',
-      category.id,
-      novelId,
-    );
   }
 
   await dbManager.write(async tx => {
