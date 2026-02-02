@@ -22,7 +22,7 @@ import {
   RootStackParamList,
 } from '@navigators/types';
 import { showToast } from '@utils/showToast';
-import { useLiveQueryy } from '@database/manager/manager';
+import { useLiveQuery } from '@database/manager/manager';
 import { repositorySchema } from '@database/schema';
 import { dbManager } from '@database/db';
 
@@ -34,10 +34,9 @@ const SettingsBrowseScreen = ({
   const { bottom, right } = useSafeAreaInsets();
   const { refreshPlugins } = usePlugins();
 
-  const repositories = useLiveQueryy(
-    dbManager.select().from(repositorySchema),
-    [{ table: 'Repository' }],
-  );
+  const repositories = useLiveQuery(dbManager.select().from(repositorySchema), [
+    { table: 'Repository' },
+  ]);
 
   const {
     value: addRepositoryModalVisible,

@@ -217,7 +217,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
   }, [novelPath, pluginId]);
 
   const getChapters = useCallback(async () => {
-    const page = pages[pageIndex];
+    const page = pages[pageIndex] ?? 1;
 
     if (novel && page) {
       let newChapters: ChapterInfo[] = [];

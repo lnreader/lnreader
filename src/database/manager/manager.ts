@@ -103,7 +103,7 @@ export const createDbManager = (db: DrizzleDb) => {
 type TableNames = GetSelectTableName<Schema[keyof Schema]>;
 type FireOn = Array<{ table: TableNames; ids?: number[] }>;
 
-export function useLiveQueryy<T extends ExecutableSelect>(
+export function useLiveQuery<T extends ExecutableSelect>(
   query: T,
   fireOn: FireOn,
 ) {

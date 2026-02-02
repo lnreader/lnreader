@@ -9,6 +9,10 @@ import { useBoolean } from '@hooks/index';
 import { IconButtonV2, Menu } from '@components';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Color from 'color';
+import { useLiveQuery } from '@database/manager/manager';
+import { dbManager } from '@database/db';
+import { chapterSchema } from '@database/schema';
+import { and, eq } from 'drizzle-orm';
 
 interface DownloadButtonProps {
   chapterId: number;

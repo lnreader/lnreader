@@ -573,15 +573,19 @@ export const getDetailedUpdatesFromDb = async (
 };
 
 export const isChapterDownloaded = (chapterId: number): boolean => {
-  const result = dbManager
-    .select({ id: chapterSchema.id })
-    .from(chapterSchema)
-    .where(
-      and(
-        eq(chapterSchema.id, chapterId),
-        eq(chapterSchema.isDownloaded, true),
+  const result = dbManager.getSync(
+    dbManager
+      .select({ id: chapterSchema.id })
+      .from(chapterSchema)
+      .where(
+        and(
+          eq(chapterSchema.id, chapterId),
+          eq(chapterSchema.isDownloaded, true),
+        ),
       ),
-    )
-    .get();
+  );
+
+  console.info(result);
+
   return !!result;
 };
