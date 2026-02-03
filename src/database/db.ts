@@ -24,19 +24,19 @@ class MyLogger implements Logger {
 }
 
 const DB_NAME = 'lnreader.db';
+const _db = open({ name: DB_NAME, location: '../files/SQLite' });
 
 /**
  * Raw SQLite database instance
  * @deprecated Use `drizzleDb` for new code
  */
-//export const db = SQLite.openDatabaseSync(DB_NAME);
-export const db = open({ name: DB_NAME, location: '../files/SQLite' });
+export const db = _db;
 
 /**
  * Drizzle ORM database instance with type-safe query builder
  * Use this for all new database operations
  */
-export const drizzleDb = drizzle(db, {
+export const drizzleDb = drizzle(_db, {
   schema,
   logger: __DEV__ ? new MyLogger() : false,
 });
@@ -46,7 +46,7 @@ export const dbManager = createDbManager(drizzleDb);
 type SqlExecutor = {
   executeSync: (
     sql: string,
-    params?: Parameters<typeof db.executeSync>[1],
+    params?: Parameters<typeof _db.executeSync>[1],
   ) => void;
 };
 
@@ -90,13 +90,13 @@ const initDatabase = async (): Promise<InitDbState> => {
   const res: InitDbState = { success: false, error: undefined };
   console.count('Using migrations');
   try {
-    setPragmas(db);
+    setPragmas(_db);
 
     await migrate(drizzleDb, migrations);
 
-    createDbTriggers(db);
+    createDbTriggers(_db);
 
-    populateDatabase(db);
+    populateDatabase(_db);
     res.success = true;
   } catch (e) {
     console.error(e);
