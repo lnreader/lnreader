@@ -145,6 +145,53 @@ const createOpSqliteAdapter = (sqlite: Database.Database) => {
   };
 };
 
+describe('new database initialization', () => {
+  it('creates schema, triggers, and default data', async () => {
+    const sqlite = new Database(':memory:');
+    try {
+      const adapter = createOpSqliteAdapter(sqlite);
+      const drizzleDb = drizzle(adapter, { schema });
+
+      await migrate(drizzleDb, migrations);
+      runDatabaseBootstrap(createExecutor(sqlite));
+
+      const tables = sqlite
+        .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+        .all() as Array<{ name: string }>;
+      const tableNames = tables.map(table => table.name);
+      expect(tableNames).toEqual(
+        expect.arrayContaining([
+          'Category',
+          'Chapter',
+          'Novel',
+          'NovelCategory',
+          'Repository',
+        ]),
+      );
+
+      const triggers = sqlite
+        .prepare("SELECT name FROM sqlite_master WHERE type='trigger'")
+        .all() as Array<{ name: string }>;
+      const triggerNames = triggers.map(trigger => trigger.name);
+      expect(triggerNames).toEqual(
+        expect.arrayContaining([
+          'update_novel_stats',
+          'update_novel_stats_on_update',
+          'update_novel_stats_on_delete',
+          'add_category',
+        ]),
+      );
+
+      const categories = sqlite
+        .prepare('SELECT id, name FROM Category ORDER BY id')
+        .all() as Array<{ id: number; name: string }>;
+      expect(categories.map(category => category.id)).toEqual([1, 2]);
+    } finally {
+      sqlite.close();
+    }
+  });
+});
+
 describe('runDatabaseBootstrap', () => {
   it('applies pragmas, triggers, and default categories', () => {
     const sqlite = new Database(':memory:');
