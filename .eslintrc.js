@@ -1,7 +1,12 @@
 module.exports = {
   root: true,
-  extends: '@react-native',
+  plugins: ['jest'],
+  extends: ['@react-native', 'plugin:jest/recommended'],
+
   overrides: [
+    {
+      files: ['**/__tests__/**', '**/*.test.*', '**/*.spec.*'],
+    },
     {
       files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
       rules: {

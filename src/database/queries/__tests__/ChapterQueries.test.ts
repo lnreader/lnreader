@@ -364,16 +364,20 @@ describe('ChapterQueries', () => {
       });
 
       const chapters = await getNovelChapters(novelId);
+      const chapter1b = chapters.find(c => c.id === chapterId1);
+      const chapter2b = chapters.find(c => c.id === chapterId2);
+      expect(chapter1b?.isDownloaded).toBe(true);
+      expect(chapter2b?.isDownloaded).toBe(true);
       await deleteChapters('test-plugin', novelId, [
         { id: chapterId1 } as any,
         { id: chapterId2 } as any,
       ]);
 
       const updatedChapters = await getNovelChapters(novelId);
-      const chapter1 = updatedChapters.find(c => c.id === chapterId1);
-      const chapter2 = updatedChapters.find(c => c.id === chapterId2);
-      expect(chapter1?.isDownloaded).toBe(false);
-      expect(chapter2?.isDownloaded).toBe(false);
+      const chapter1a = updatedChapters.find(c => c.id === chapterId1);
+      const chapter2a = updatedChapters.find(c => c.id === chapterId2);
+      expect(chapter1a?.isDownloaded).toBe(false);
+      expect(chapter2a?.isDownloaded).toBe(false);
     });
   });
 

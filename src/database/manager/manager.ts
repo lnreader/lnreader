@@ -36,8 +36,8 @@ class DbManager implements IDbManager {
   public readonly get: DrizzleDb['get'];
   public readonly values: DrizzleDb['values'];
 
-  private constructor(db: DrizzleDb) {
-    this.db = db;
+  private constructor(dbInstance: DrizzleDb) {
+    this.db = dbInstance;
     this.queue = new DbTaskQueue();
     this.select = this.db.select.bind(this.db);
     this.selectDistinct = this.db.selectDistinct.bind(this.db);
@@ -52,9 +52,9 @@ class DbManager implements IDbManager {
     this.values = this.db.values.bind(this.db);
   }
 
-  public static create(db: DrizzleDb): DbManager {
+  public static create(dbInstance: DrizzleDb): DbManager {
     if (_dbManager) return _dbManager;
-    _dbManager = new DbManager(db);
+    _dbManager = new DbManager(dbInstance);
     return _dbManager;
   }
 
@@ -87,7 +87,6 @@ class DbManager implements IDbManager {
       id: 'write',
       run: async () =>
         await this.db.transaction(async tx => {
-          console.log('Transaction started');
           const result = await fn(tx);
           db?.flushPendingReactiveQueries();
           return result;
@@ -96,8 +95,8 @@ class DbManager implements IDbManager {
   }
 }
 
-export const createDbManager = (db: DrizzleDb) => {
-  return DbManager.create(db);
+export const createDbManager = (dbInstance: DrizzleDb) => {
+  return DbManager.create(dbInstance);
 };
 
 type TableNames = GetSelectTableName<Schema[keyof Schema]>;
@@ -118,16 +117,14 @@ export function useLiveQuery<T extends ExecutableSelect>(
     arguments: params,
     fireOn,
     callback: result => {
-      console.log('result', result);
       setData(result.rows);
     },
   });
 
   useEffect(() => {
     return () => {
-      console.log('unsub');
       unsub();
     };
-  }, []);
+  }, [unsub]);
   return data;
 }

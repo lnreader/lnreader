@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Test database factory for creating in-memory SQLite databases
  * Uses better-sqlite3 for Node.js testing environment
@@ -132,7 +133,7 @@ export function createTestDb() {
 
   // Populate default categories
   sqlite.exec(`
-    INSERT OR IGNORE INTO Category (id, name, sort) VALUES 
+    INSERT OR IGNORE INTO Category (id, name, sort) VALUES
       (1, 'Default', 1),
       (2, 'Local', 2)
   `);

@@ -305,19 +305,23 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       }
 
       // Load all batches from current + 1 up to targetBatch
-      for (let batch = batchInformation.batch + 1; batch <= targetBatch; batch++) {
+      for (
+        let batch = batchInformation.batch + 1;
+        batch <= targetBatch;
+        batch++
+      ) {
         if (batch > batchInformation.total) break;
 
         let newChapters: ChapterInfo[] = [];
         try {
           newChapters =
-            getPageChaptersBatched(
+            (await getPageChaptersBatched(
               novel.id,
               settingsSort,
               novelSettings.filter,
               page,
               batch,
-            ) || [];
+            )) || [];
         } catch (error) {
           console.error('Error loading batch', batch, error);
         }

@@ -36,7 +36,6 @@ export const insertChapters = async (
   if (!chapters?.length) {
     return;
   }
-  console.time('insertChapters');
   const sqlString = `insert into "Chapter" ("id", "novelId", "path", "name", "releaseTime", "bookmark", "unread", "readTime", "isDownloaded", "updatedTime", "chapterNumber", "page", "position", "progress")
     values (null, ?, ?, ?, ?, ?, ?, null, ?, null, ?, ?, ?, null)
     on conflict ("Chapter"."novelId", "Chapter"."path")
@@ -63,8 +62,6 @@ export const insertChapters = async (
   }
   const commands: SQLBatchTuple[] = [[sqlString, batchValues]];
   await dbManager.batch(commands);
-
-  console.timeEnd('insertChapters');
 };
 
 export const markChapterRead = async (chapterId: number): Promise<void> => {

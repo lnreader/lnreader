@@ -18,7 +18,7 @@ import {
 import { useRef, useState } from 'react';
 
 class MyLogger implements Logger {
-  logQuery(query: string, params: unknown[]): void {
+  logQuery(_query: string, _params: unknown[]): void {
     //console.trace('DB Query: ', { query, params });
   }
 }
@@ -113,8 +113,8 @@ export const useInitDatabase = () => {
   });
   if (started.current) return res;
   started.current = true;
-  initDatabase().then(res => {
-    setRes(res);
+  initDatabase().then(r => {
+    setRes(r);
   });
 
   return res;

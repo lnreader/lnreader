@@ -51,7 +51,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       novelIds: (c.novelIds ?? '').split(',').map(Number),
     }));
 
-    const filteredCategories = res.filter((cat, index) => {
+    const filteredCategories = res.filter(cat => {
       if (cat.id !== 1) {
         return true;
       }
