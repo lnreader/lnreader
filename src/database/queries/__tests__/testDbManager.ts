@@ -18,6 +18,38 @@ type TransactionParameter = Parameters<
   Parameters<DrizzleDb['transaction']>[0]
 >[0];
 
+const isBuilderLike = (value: unknown): value is Record<string, unknown> => {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    typeof (value as { get?: unknown }).get === 'function' &&
+    typeof (value as { all?: unknown }).all === 'function'
+  );
+};
+
+const wrapBuilder = <T extends object>(builder: T): T => {
+  return new Proxy(builder, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (prop === 'get' && typeof value === 'function') {
+        return (...args: unknown[]) =>
+          Promise.resolve(value.apply(target, args as never[]));
+      }
+      if (prop === 'all' && typeof value === 'function') {
+        return (...args: unknown[]) =>
+          Promise.resolve(value.apply(target, args as never[]));
+      }
+      if (typeof value === 'function') {
+        return (...args: unknown[]) => {
+          const result = value.apply(target, args as never[]);
+          return isBuilderLike(result) ? wrapBuilder(result as object) : result;
+        };
+      }
+      return value;
+    },
+  });
+};
+
 /**
  * Creates a test-compatible dbManager that works with better-sqlite3
  */
@@ -28,16 +60,23 @@ export function createTestDbManager(
   // Create a wrapper that implements the IDbManager interface
   const dbManager = {
     // Drizzle methods - delegate to drizzleDb
-    select: drizzleDb.select.bind(drizzleDb),
-    selectDistinct: drizzleDb.selectDistinct.bind(drizzleDb),
+    select: (...args: Parameters<DrizzleDb['select']>) =>
+      wrapBuilder(drizzleDb.select(...args)),
+    selectDistinct: (...args: Parameters<DrizzleDb['selectDistinct']>) =>
+      wrapBuilder(drizzleDb.selectDistinct(...args)),
     $count: drizzleDb.$count.bind(drizzleDb),
     query: drizzleDb.query,
     run: drizzleDb.run.bind(drizzleDb),
-    with: drizzleDb.with.bind(drizzleDb),
-    $with: drizzleDb.$with.bind(drizzleDb),
-    all: drizzleDb.all.bind(drizzleDb),
-    get: drizzleDb.get.bind(drizzleDb),
-    values: drizzleDb.values.bind(drizzleDb),
+    with: (...args: Parameters<DrizzleDb['with']>) =>
+      wrapBuilder(drizzleDb.with(...args)),
+    $with: (...args: Parameters<DrizzleDb['$with']>) =>
+      wrapBuilder(drizzleDb.$with(...args)),
+    all: (...args: Parameters<DrizzleDb['all']>) =>
+      Promise.resolve(drizzleDb.all(...args)),
+    get: (...args: Parameters<DrizzleDb['get']>) =>
+      Promise.resolve(drizzleDb.get(...args)),
+    values: (...args: Parameters<DrizzleDb['values']>) =>
+      Promise.resolve(drizzleDb.values(...args)),
 
     // Test-compatible implementations of op-sqlite specific methods
     getSync<T extends ExecutableSelect>(
