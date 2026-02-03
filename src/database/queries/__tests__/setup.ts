@@ -48,30 +48,6 @@ export function teardownTestDatabase() {
   }
 }
 
-// Mock @database/db to use our test database
-// Using 'mock' prefix for the variable so Jest allows it in the factory
-jest.mock('@database/db', () => {
-  return {
-    __esModule: true,
-    get db() {
-      return mockTestDbInstance?.sqlite;
-    },
-    get drizzleDb() {
-      return mockTestDbInstance?.drizzleDb;
-    },
-    get dbManager() {
-      if (!mockTestDbInstance) {
-        throw new Error(
-          'Test database not initialized. Call setupTestDatabase() in beforeEach.',
-        );
-      }
-      return mockTestDbInstance.dbManager;
-    },
-    useInitDatabase: jest.fn(),
-    recreateDatabaseIndexes: jest.fn(),
-  };
-});
-
 // Mock utility functions (still needed for tests)
 jest.mock('@utils/showToast', () => ({
   showToast: jest.fn(),

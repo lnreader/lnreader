@@ -4,6 +4,7 @@
  * These tests use a real in-memory database to verify actual data returned by queries.
  */
 
+import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
 import { insertTestRepository, clearAllTables } from './testData';
 

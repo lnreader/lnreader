@@ -1,3 +1,4 @@
+import './mockDb';
 import { clearAllTables, insertTestNovel } from './testData';
 import {
   getLibraryNovelsFromDb,

@@ -43,7 +43,14 @@ export const drizzleDb = drizzle(db, {
 
 export const dbManager = createDbManager(drizzleDb);
 
-const setPragmas = () => {
+type SqlExecutor = {
+  executeSync: (
+    sql: string,
+    params?: Parameters<typeof db.executeSync>[1],
+  ) => void;
+};
+
+const setPragmas = (executor: SqlExecutor) => {
   console.log('Setting database Pragmas');
   const queries = [
     'PRAGMA journal_mode = WAL',
@@ -53,19 +60,25 @@ const setPragmas = () => {
     'PRAGMA cache_size = 10000',
     'PRAGMA foreign_keys = ON',
   ];
-  db.executeSync(queries.join(';\n'));
+  executor.executeSync(queries.join(';\n'));
 };
-const populateDatabase = () => {
+const populateDatabase = (executor: SqlExecutor) => {
   console.log('Populating database');
-  db.executeSync(createCategoryDefaultQuery);
+  executor.executeSync(createCategoryDefaultQuery);
 };
 
-const createDbTriggers = () => {
+const createDbTriggers = (executor: SqlExecutor) => {
   console.log('Creating database triggers');
-  db.executeSync(createCategoryTriggerQuery);
-  db.executeSync(createNovelTriggerQueryDelete);
-  db.executeSync(createNovelTriggerQueryInsert);
-  db.executeSync(createNovelTriggerQueryUpdate);
+  executor.executeSync(createCategoryTriggerQuery);
+  executor.executeSync(createNovelTriggerQueryDelete);
+  executor.executeSync(createNovelTriggerQueryInsert);
+  executor.executeSync(createNovelTriggerQueryUpdate);
+};
+
+export const runDatabaseBootstrap = (executor: SqlExecutor) => {
+  setPragmas(executor);
+  createDbTriggers(executor);
+  populateDatabase(executor);
 };
 
 type InitDbState = {
@@ -77,13 +90,13 @@ const initDatabase = async (): Promise<InitDbState> => {
   const res: InitDbState = { success: false, error: undefined };
   console.count('Using migrations');
   try {
-    setPragmas();
+    setPragmas(db);
 
     await migrate(drizzleDb, migrations);
 
-    createDbTriggers();
+    createDbTriggers(db);
 
-    populateDatabase();
+    populateDatabase(db);
     res.success = true;
   } catch (e) {
     console.error(e);

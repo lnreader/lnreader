@@ -1,4 +1,3 @@
-import { LibraryNovelInfo, NovelInfo } from '../types';
 import { eq, sql, and, like, or, inArray } from 'drizzle-orm';
 import { dbManager } from '@database/db';
 import { novelSchema, novelCategorySchema } from '@database/schema';

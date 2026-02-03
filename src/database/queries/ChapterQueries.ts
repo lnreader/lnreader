@@ -9,6 +9,7 @@ import {
   desc,
   asc,
   count,
+  like,
 } from 'drizzle-orm';
 import { showToast } from '@utils/showToast';
 import { ChapterInfo, DownloadedChapter, Update } from '../types';
@@ -417,23 +418,36 @@ export const getPageChaptersBatched = async (
   return query.all();
 };
 
-export const getNovelChaptersByNumber = (
+export const getNovelChaptersByNumber = async (
   novelId: number,
   chapterNumber: number,
 ) => {
-  return db.getAllAsync<ChapterInfo>(
-    'SELECT * FROM Chapter WHERE novelId = ? AND position = ?',
-    novelId,
-    chapterNumber - 1,
-  );
+  return dbManager
+    .select()
+    .from(chapterSchema)
+    .where(
+      and(
+        eq(chapterSchema.novelId, novelId),
+        eq(chapterSchema.position, chapterNumber - 1),
+      ),
+    )
+    .all();
 };
 
-export const getNovelChaptersByName = (novelId: number, searchText: string) => {
-  return db.getAllAsync<ChapterInfo>(
-    'SELECT * FROM Chapter WHERE novelId = ? AND name LIKE ?',
-    novelId,
-    `%${searchText}%`,
-  );
+export const getNovelChaptersByName = async (
+  novelId: number,
+  searchText: string,
+) => {
+  return dbManager
+    .select()
+    .from(chapterSchema)
+    .where(
+      and(
+        eq(chapterSchema.novelId, novelId),
+        like(chapterSchema.name, `%${searchText}%`),
+      ),
+    )
+    .all();
 };
 
 export const getPrevChapter = async (
