@@ -392,7 +392,7 @@
       "exportAll": "Exportar todos os capítulos",
       "includeCustomCSS": "Incluir CSS personalizado",
       "includeCustomJS": "Incluir JS personalizado",
-      "invalidRange": "Please enter valid chapter numbers",
+      "invalidRange": "Por favor, insira um número válido de capítulos",
       "selectFolder": "Select destination folder for EPUB file",
       "startChapter": "Iniciar capítulo",
       "startGreaterThanEnd": "Start chapter must be less than or equal to end chapter",
