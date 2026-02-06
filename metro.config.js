@@ -24,6 +24,7 @@ const map = {
 const customConfig = {
   resolver: {
     unstable_enableSymlinks: true,
+    sourceExts: [...defaultConfig.resolver.sourceExts, 'sql'],
   },
   server: {
     port: 8081,

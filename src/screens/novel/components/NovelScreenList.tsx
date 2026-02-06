@@ -47,7 +47,7 @@ type NovelScreenListProps = {
     name: string;
     path: string;
     pluginId: string;
-    cover?: string;
+    cover?: string | null;
   };
 };
 
@@ -72,8 +72,6 @@ const NovelScreenList = ({
     novelSettings,
     pages,
     setNovel,
-    sortAndFilterChapters,
-    setShowChapterTitles,
     updateChapter,
     novel: fetchedNovel,
     batchInformation,
@@ -93,17 +91,12 @@ const NovelScreenList = ({
   const [updating, setUpdating] = useState(false);
   const {
     useFabForContinueReading,
-    defaultChapterSort,
     disableHapticFeedback,
     downloadNewChapters,
     refreshNovelMetadata,
   } = useAppSettings();
 
-  const {
-    sort = defaultChapterSort,
-    filter = '',
-    showChapterTitles = false,
-  } = novelSettings;
+  const { filter, showChapterTitles = false } = novelSettings;
 
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
@@ -161,7 +154,7 @@ const NovelScreenList = ({
   const onRefreshPage = async (page: string) => {
     if (novel.id !== 'NO_ID') {
       setUpdating(true);
-      updateNovelPage(pluginId, novel.path, novel.id, page, {
+      updateNovelPage(pluginId, novel.path, novel.path, novel.id, page, {
         downloadNewChapters,
       })
         .then(() => getNovel())
@@ -355,7 +348,7 @@ const NovelScreenList = ({
                 c => c.task.data.chapterId === item.id,
               )}
               isBookmarked={!!item.bookmark}
-              isLocal={novel.isLocal}
+              isLocal={novel.isLocal ?? false}
               theme={theme}
               chapter={item}
               showChapterTitles={showChapterTitles}
@@ -409,12 +402,7 @@ const NovelScreenList = ({
         <>
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}
-            sortAndFilterChapters={sortAndFilterChapters}
-            setShowChapterTitles={setShowChapterTitles}
-            sort={sort}
             theme={theme}
-            filter={filter}
-            showChapterTitles={showChapterTitles}
           />
           <TrackSheet bottomSheetRef={trackerSheetRef} novel={novel} />
           {(novel.totalPages ?? 0) > 1 || pages.length > 1 ? (

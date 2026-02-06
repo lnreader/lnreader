@@ -39,12 +39,13 @@ import {
   VerticalBarSkeleton,
 } from '@components/Skeleton/Skeleton';
 import { useNovelContext } from '@screens/novel/NovelContext';
+import { ChapterFilterKey } from '@database/constants';
 
 interface NovelInfoHeaderProps {
   chapters: ChapterInfo[];
   deleteDownloadsSnackbar: UseBooleanReturnType;
   fetching: boolean;
-  filter: string;
+  filter: ChapterFilterKey[];
   isLoading: boolean;
   lastRead?: ChapterInfo;
   navigateToChapter: (chapter: ChapterInfo) => void;
@@ -108,13 +109,13 @@ const NovelInfoHeader = ({
   return (
     <>
       <CoverImage
-        source={{ uri: novel.cover }}
+        source={{ uri: novel.cover ?? undefined }}
         theme={theme}
         hideBackdrop={hideBackdrop}
       >
         <NovelInfoContainer>
           <NovelThumbnail
-            source={{ uri: novel.cover }}
+            source={{ uri: novel.cover ?? undefined }}
             theme={theme}
             setCustomNovelCover={
               isLoading ? showNotAvailable : setCustomNovelCover
@@ -168,7 +169,7 @@ const NovelInfoHeader = ({
             <Row>
               <MaterialCommunityIcons
                 name={getStatusIcon(
-                  novel.id !== 'NO_ID' ? novel.status : undefined,
+                  novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined,
                 )}
                 size={14}
                 color={theme.onSurfaceVariant}
@@ -176,7 +177,7 @@ const NovelInfoHeader = ({
               />
               <NovelInfo theme={theme}>
                 {(novel.id !== 'NO_ID'
-                  ? translateNovelStatus(novel.status)
+                  ? translateNovelStatus(novel.status ?? undefined)
                   : getString('novelScreen.unknownStatus')) +
                   ' • ' +
                   pluginName}
@@ -243,7 +244,11 @@ const NovelInfoHeader = ({
               </View>
               <IconButton
                 icon="filter-variant"
-                iconColor={filter ? filterColor(theme.isDark) : theme.onSurface}
+                iconColor={
+                  filter.length >= 1
+                    ? filterColor(theme.isDark)
+                    : theme.onSurface
+                }
                 size={24}
                 onPress={() => novelBottomSheetRef.current?.present()}
               />

@@ -43,15 +43,16 @@ export const useLibrary = (): UseLibraryReturnType => {
   const [searchText, setSearchText] = useState('');
 
   const refreshCategories = useCallback(async () => {
-    const dbCategories = getCategoriesFromDb();
+    const dbCategories = await getCategoriesFromDb();
 
-    const res = dbCategories.map(c => ({
+    const res = dbCategories.map((c, i) => ({
       ...c,
+      sort: c.sort ?? i,
       novelIds: (c.novelIds ?? '').split(',').map(Number),
     }));
 
-    const filteredCategories = res.filter((cat, index) => {
-      if (index !== 0) {
+    const filteredCategories = res.filter(cat => {
+      if (cat.id !== 1) {
         return true;
       }
 
@@ -93,7 +94,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       // Important to get correct chapters count
       // Count is set by sql trigger
       refreshCategories();
-      const novels = getLibraryNovelsFromDb(
+      const novels = await getLibraryNovelsFromDb(
         sortOrder,
         filter,
         searchText,
@@ -156,7 +157,7 @@ export const useLibraryNovels = () => {
   const [library, setLibrary] = useState<NovelInfo[]>([]);
 
   const getLibrary = async () => {
-    const novels = getLibraryNovelsFromDb();
+    const novels = await getLibraryNovelsFromDb();
 
     setLibrary(novels);
   };

@@ -8,29 +8,31 @@
     "metro.config.js"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "incremental": true,
     "module": "ES2022",
     "lib": ["ES2022", "DOM"],
     "target": "ES2022",
+    "baseUrl": ".",
     "paths": {
-      "@components": ["src/components/index"],
-      "@components/*": ["src/components/*"],
-      "@database/*": ["src/database/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@hooks": ["src/hooks/index"],
-      "@screens/*": ["src/screens/*"],
-      "@strings/*": ["strings/*"],
-      "@theme/*": ["src/theme/*"],
-      "@utils/*": ["src/utils/*"],
-      "@plugins/*": ["src/plugins/*"],
-      "@services/*": ["src/services/*"],
-      "@navigators/*": ["src/navigators/*"],
-      "@native/*": ["src/native/*"],
-      "@api/*": ["src/api/*"],
-      "@type/*": ["src/type/*"],
-      "@specs/*": ["specs/*"]
+      "@components": ["./src/components/index"],
+      "@components/*": ["./src/components/*"],
+      "@database/*": ["./src/database/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@hooks": ["./src/hooks/index"],
+      "@screens/*": ["./src/screens/*"],
+      "@strings/*": ["./strings/*"],
+      "@theme/*": ["./src/theme/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@plugins/*": ["./src/plugins/*"],
+      "@services/*": ["./src/services/*"],
+      "@navigators/*": ["./src/navigators/*"],
+      "@native/*": ["./src/native/*"],
+      "@api/*": ["./src/api/*"],
+      "@type/*": ["./src/type/*"],
+      "@specs/*": ["./specs/*"]
     },
-    "types": ["react-native"]
+    "types": ["react-native", "jest"]
   }
 }

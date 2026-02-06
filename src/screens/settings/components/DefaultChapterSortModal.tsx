@@ -7,11 +7,12 @@ import { ThemeColors } from '@theme/types';
 import { AppSettings } from '@hooks/persisted/useSettings';
 import { getString } from '@strings/translations';
 import { Modal } from '@components';
+import { ChapterOrderKey } from '@database/constants';
 
 interface DefaultChapterSortModalProps {
   theme: ThemeColors;
   setAppSettings: (values: Partial<AppSettings>) => void;
-  defaultChapterSort: string;
+  defaultChapterSort: ChapterOrderKey;
   hideDisplayModal: () => void;
   displayModalVisible: boolean;
 }
@@ -29,15 +30,15 @@ const DefaultChapterSortModal = ({
         <SortItem
           label={getString('generalSettingsScreen.bySource')}
           theme={theme}
-          status={
-            defaultChapterSort === 'ORDER BY position ASC' ? 'asc' : 'desc'
-          }
+          status={defaultChapterSort === 'positionAsc' ? 'asc' : 'desc'}
           onPress={() =>
-            defaultChapterSort === 'ORDER BY position ASC'
+            defaultChapterSort === 'positionAsc'
               ? setAppSettings({
-                  defaultChapterSort: 'ORDER BY position DESC',
+                  defaultChapterSort: 'positionDesc',
                 })
-              : setAppSettings({ defaultChapterSort: 'ORDER BY position ASC' })
+              : setAppSettings({
+                  defaultChapterSort: 'positionAsc',
+                })
           }
         />
       </Modal>

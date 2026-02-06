@@ -36,8 +36,8 @@ const DeleteRepositoryModal: React.FC<DeleteRepositoryModalProps> = ({
         <View style={styles.btnContainer}>
           <Button
             title={getString('common.ok')}
-            onPress={() => {
-              deleteRepositoryById(repository.id);
+            onPress={async () => {
+              await deleteRepositoryById(repository.id);
               closeModal();
               onSuccess();
             }}

@@ -5,29 +5,23 @@ export interface NovelInfo {
   path: string;
   pluginId: string;
   name: string;
-  cover?: string;
-  summary?: string;
-  author?: string;
-  artist?: string;
-  status?: NovelStatus | string;
-  genres?: string;
-  inLibrary: boolean;
-  isLocal: boolean;
-  totalPages: number;
+  cover?: string | null;
+  summary?: string | null;
+  author?: string | null;
+  artist?: string | null;
+  status?: NovelStatus | string | null;
+  genres?: string | null;
+  inLibrary?: boolean | null;
+  isLocal?: boolean | null;
+  totalPages?: number | null;
 }
 
 export interface DBNovelInfo extends NovelInfo {
-  totalChapters: number;
-  chaptersDownloaded: number;
-  chaptersUnread: number;
-  lastReadAt: string;
-  lastUpdatedAt: string;
-}
-
-export interface LibraryNovelInfo extends DBNovelInfo {
-  category: string;
-  chaptersUnread: number;
-  chaptersDownloaded: number;
+  totalChapters: number | null;
+  chaptersDownloaded: number | null;
+  chaptersUnread: number | null;
+  lastReadAt: string | null;
+  lastUpdatedAt: string | null;
 }
 
 export interface ChapterInfo {
@@ -35,39 +29,39 @@ export interface ChapterInfo {
   novelId: number;
   path: string;
   name: string;
-  releaseTime?: string;
+  releaseTime?: string | null;
   readTime: string | null;
-  bookmark: boolean;
-  unread: boolean;
-  isDownloaded: boolean;
+  bookmark: boolean | null;
+  unread: boolean | null;
+  isDownloaded: boolean | null;
   updatedTime: string | null;
-  chapterNumber?: number;
-  page: string;
+  chapterNumber?: number | null;
+  page: string | null;
   progress: number | null;
-  position?: number;
+  position?: number | null;
 }
 
 export interface DownloadedChapter extends ChapterInfo {
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface History extends ChapterInfo {
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
-  readTime: string;
+  novelCover: string | null;
+  readTime: string | null;
 }
 
 export interface Update extends ChapterInfo {
-  updatedTime: string;
+  updatedTime: string | null;
   pluginId: string;
   novelName: string;
   novelPath: string;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface UpdateOverview {
@@ -75,13 +69,13 @@ export interface UpdateOverview {
   novelName: string;
   updateDate: string;
   updatesPerDay: number;
-  novelCover: string;
+  novelCover: string | null;
 }
 
 export interface Category {
   id: number;
   name: string;
-  sort: number;
+  sort: number | null;
 }
 
 export interface NovelCategory {
@@ -116,5 +110,3 @@ export interface Repository {
   id: number;
   url: string;
 }
-
-export * from './migration';

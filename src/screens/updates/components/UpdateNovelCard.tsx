@@ -106,7 +106,7 @@ const UpdateNovelCard: React.FC<UpdateCardProps> = ({
         params: {
           pluginId: chapterList[0].pluginId,
           path: chapterList[0].novelPath,
-          cover: chapterList[0].novelCover,
+          cover: chapterList[0].novelCover ?? undefined,
           name: chapterList[0].novelName,
         },
       });

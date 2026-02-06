@@ -51,7 +51,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   const { id, name, unread, releaseTime, bookmark, chapterNumber, progress } =
     chapter;
 
-  isBookmarked ??= bookmark;
+  isBookmarked ??= bookmark ?? false;
 
   return (
     <View key={'chapterItem' + id}>
@@ -167,7 +167,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         {!isLocal ? (
           <DownloadButton
             isDownloading={isDownloading}
-            isDownloaded={chapter.isDownloaded}
+            isDownloaded={chapter.isDownloaded ?? false}
             chapterId={chapter.id}
             theme={theme}
             setChapterDownloaded={setChapterDownloaded}

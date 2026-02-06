@@ -1,99 +1,129 @@
 import { countBy } from 'lodash-es';
-import { db } from '@database/db';
+import { eq, count, and, sql } from 'drizzle-orm';
 import { LibraryStats } from '../types';
+import { dbManager } from '@database/db';
+import { novelSchema, chapterSchema } from '@database/schema';
 
-const getLibraryStatsQuery = `
-  SELECT COUNT(*) as novelsCount, COUNT(DISTINCT pluginId) as sourcesCount
-  FROM Novel
-  WHERE inLibrary = 1
-  `;
+/**
+ * Get library statistics (novel count and distinct sources) using Drizzle ORM
+ */
+export const getLibraryStatsFromDb = async (): Promise<LibraryStats> => {
+  const result = dbManager
+    .select({
+      novelsCount: count(),
+      sourcesCount: sql<number>`COUNT(DISTINCT ${novelSchema.pluginId})`,
+    })
+    .from(novelSchema)
+    .where(eq(novelSchema.inLibrary, true))
+    .get();
 
-const getChaptersReadCountQuery = `
-  SELECT COUNT(*) as chaptersRead
-  FROM Chapter
-  JOIN Novel
-  ON Chapter.novelId = Novel.id
-  WHERE Chapter.unread = 0 AND Novel.inLibrary = 1
-  `;
-
-const getChaptersTotalCountQuery = `
-  SELECT COUNT(*) as chaptersCount
-  FROM Chapter
-  JOIN Novel
-  ON Chapter.novelId = Novel.id
-  WHERE Novel.inLibrary = 1
-  `;
-
-const getChaptersUnreadCountQuery = `
-  SELECT COUNT(*) as chaptersUnread
-  FROM Chapter
-  JOIN Novel
-  ON Chapter.novelId = Novel.id
-  WHERE Chapter.unread = 1 AND Novel.inLibrary = 1
-  `;
-
-const getChaptersDownloadedCountQuery = `
-  SELECT COUNT(*) as chaptersDownloaded
-  FROM Chapter
-  JOIN Novel
-  ON Chapter.novelId = Novel.id
-  WHERE Chapter.isDownloaded = 1 AND Novel.inLibrary = 1
-  `;
-
-const getNovelGenresQuery = `
-  SELECT genres
-  FROM Novel
-  WHERE Novel.inLibrary = 1
-  `;
-
-const getNovelStatusQuery = `
-  SELECT status
-  FROM Novel
-  WHERE Novel.inLibrary = 1
-  `;
-
-export const getLibraryStatsFromDb = (): Promise<LibraryStats | null> => {
-  return db.getFirstAsync<LibraryStats>(getLibraryStatsQuery);
+  return (result as LibraryStats) ?? { novelsCount: 0, sourcesCount: 0 };
 };
 
-export const getChaptersTotalCountFromDb = (): Promise<LibraryStats | null> => {
-  return db.getFirstAsync<LibraryStats>(getChaptersTotalCountQuery);
+/**
+ * Get total chapters count for all novels in library
+ */
+export const getChaptersTotalCountFromDb = async (): Promise<LibraryStats> => {
+  const result = dbManager
+    .select({ chaptersCount: count() })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(eq(novelSchema.inLibrary, true))
+    .get();
+
+  return (result as LibraryStats) ?? { chaptersCount: 0 };
 };
 
-export const getChaptersReadCountFromDb = (): Promise<LibraryStats | null> => {
-  return db.getFirstAsync<LibraryStats>(getChaptersReadCountQuery);
+/**
+ * Get total read chapters count for all novels in library
+ */
+export const getChaptersReadCountFromDb = async (): Promise<LibraryStats> => {
+  const result = dbManager
+    .select({ chaptersRead: count() })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(
+      and(eq(novelSchema.inLibrary, true), eq(chapterSchema.unread, false)),
+    )
+    .get();
+
+  return (result as LibraryStats) ?? { chaptersRead: 0 };
 };
 
-export const getChaptersUnreadCountFromDb =
-  (): Promise<LibraryStats | null> => {
-    return db.getFirstAsync<LibraryStats>(getChaptersUnreadCountQuery);
-  };
+/**
+ * Get total unread chapters count for all novels in library
+ */
+export const getChaptersUnreadCountFromDb = async (): Promise<LibraryStats> => {
+  const result = dbManager
+    .select({ chaptersUnread: count() })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(and(eq(novelSchema.inLibrary, true), eq(chapterSchema.unread, true)))
+    .get();
 
+  return (result as LibraryStats) ?? { chaptersUnread: 0 };
+};
+
+/**
+ * Get total downloaded chapters count for all novels in library
+ */
 export const getChaptersDownloadedCountFromDb =
-  (): Promise<LibraryStats | null> => {
-    return db.getFirstAsync<LibraryStats>(getChaptersDownloadedCountQuery);
+  async (): Promise<LibraryStats> => {
+    const result = dbManager
+      .select({ chaptersDownloaded: count() })
+      .from(chapterSchema)
+      .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+      .where(
+        and(
+          eq(novelSchema.inLibrary, true),
+          eq(chapterSchema.isDownloaded, true),
+        ),
+      )
+      .get();
+
+    return (result as LibraryStats) ?? { chaptersDownloaded: 0 };
   };
 
+/**
+ * Get genre distribution for all novels in library
+ */
 export const getNovelGenresFromDb = async (): Promise<LibraryStats> => {
+  const res = await dbManager
+    .select({ genres: novelSchema.genres })
+    .from(novelSchema)
+    .where(eq(novelSchema.inLibrary, true))
+    .all();
+
   const genres: string[] = [];
-  const res = await db.getAllAsync<{ genres: string }>(getNovelGenresQuery);
   res.forEach(item => {
     const novelGenres = item.genres?.split(/\s*,\s*/);
+
     if (novelGenres?.length) {
       genres.push(...novelGenres);
     }
   });
+
   return { genres: countBy(genres) };
 };
 
+/**
+ * Get status distribution for all novels in library
+ */
 export const getNovelStatusFromDb = async (): Promise<LibraryStats> => {
-  const status: string[] = [];
-  const res = await db.getAllAsync<{ status: string }>(getNovelStatusQuery);
+  const res = await dbManager
+    .select({ status: novelSchema.status })
+    .from(novelSchema)
+    .where(eq(novelSchema.inLibrary, true))
+    .all();
+
+  const statusList: string[] = [];
   res.forEach(item => {
     const novelStatus = item.status?.split(/\s*,\s*/);
+
     if (novelStatus?.length) {
-      status.push(...novelStatus);
+      statusList.push(...novelStatus);
     }
   });
-  return { status: countBy(status) };
+
+  return { status: countBy(statusList) };
 };

@@ -3,6 +3,7 @@ import { useMMKVNumber, useMMKVObject } from 'react-native-mmkv';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import { TRACKED_NOVEL_PREFIX } from './useTrackedNovel';
+import { ChapterOrderKey, ChapterFilterKey } from '@database/constants';
 import {
   getNovelByPath,
   deleteCachedNovels as _deleteCachedNovels,
@@ -44,6 +45,7 @@ export const LAST_READ_PREFIX = 'LAST_READ_PREFIX';
 
 const defaultNovelSettings: NovelSettings = {
   showChapterTitles: true,
+  filter: [],
 };
 const defaultPageIndex = 0;
 
@@ -51,8 +53,8 @@ const defaultPageIndex = 0;
 // #region types
 
 export interface NovelSettings {
-  sort?: string;
-  filter?: string;
+  sort?: ChapterOrderKey;
+  filter: ChapterFilterKey[];
   showChapterTitles?: boolean;
 }
 
@@ -66,9 +68,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
   const [novel, setNovel] = useState<NovelInfo | undefined>(
     typeof novelOrPath === 'object' ? novelOrPath : undefined,
   );
-  const [pages, setPages] = useState<string[]>(
-    novel ? calculatePages(novel) : [],
-  );
+  const [pages, setPages] = useState<string[]>([]);
 
   const { defaultChapterSort } = useAppSettings();
 
@@ -82,7 +82,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
   const [lastRead, setLastRead] = useMMKVObject<ChapterInfo>(
     `${LAST_READ_PREFIX}_${pluginId}_${novelPath}`,
   );
-  const [novelSettings = defaultNovelSettings, setNovelSettings] =
+  const [novelSettings = defaultNovelSettings, _setNovelSettings] =
     useMMKVObject<NovelSettings>(
       `${NOVEL_SETTINSG_PREFIX}_${pluginId}_${novelPath}`,
     );
@@ -92,28 +92,28 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     batch: number;
     total: number;
     totalChapters?: number;
-  }>(
-    typeof novelOrPath === 'object'
-      ? {
-          batch: 0,
-          total: 0,
-          totalChapters: getChapterCount(novelOrPath.id, pages[pageIndex]),
-        }
-      : { batch: 0, total: 0 },
+  }>({ batch: 0, total: 0 });
+
+  const settingsSort: ChapterOrderKey =
+    novelSettings.sort || defaultChapterSort;
+  const settingsFilter: ChapterFilterKey[] = useMemo(
+    () => novelSettings.filter ?? [],
+    [novelSettings.filter],
   );
 
-  const settingsSort = novelSettings.sort || defaultChapterSort;
   // #endregion
   // #region setters
 
-  function calculatePages(tmpNovel: NovelInfo) {
+  async function calculatePages(tmpNovel: NovelInfo) {
     let tmpPages: string[];
-    if (tmpNovel.totalPages > 0) {
+    if ((tmpNovel.totalPages ?? 0) > 0) {
       tmpPages = Array(tmpNovel.totalPages)
         .fill(0)
         .map((_, idx) => String(idx + 1));
     } else {
-      tmpPages = getCustomPages(tmpNovel.id).map(c => c.page);
+      tmpPages = (await getCustomPages(tmpNovel.id))
+        .map(c => c.page)
+        .filter((page): page is string => page !== null);
     }
 
     return tmpPages.length > 1 ? tmpPages : ['1'];
@@ -183,26 +183,6 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     [transformChapters],
   );
 
-  const sortAndFilterChapters = useCallback(
-    async (sort?: string, filter?: string) => {
-      if (novel) {
-        setNovelSettings({
-          showChapterTitles: novelSettings?.showChapterTitles,
-          sort,
-          filter,
-        });
-      }
-    },
-    [novel, novelSettings?.showChapterTitles, setNovelSettings],
-  );
-
-  const setShowChapterTitles = useCallback(
-    (v: boolean) => {
-      setNovelSettings({ ...novelSettings, showChapterTitles: v });
-    },
-    [novelSettings, setNovelSettings],
-  );
-
   const followNovel = useCallback(() => {
     switchNovelToLibrary(novelPath, pluginId).then(() => {
       if (novel) {
@@ -231,29 +211,24 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
         return;
       }
     }
-    setPages(calculatePages(tmpNovel));
+    setPages(await calculatePages(tmpNovel));
 
     setNovel(tmpNovel);
   }, [novelPath, pluginId]);
 
   const getChapters = useCallback(async () => {
-    const page = pages[pageIndex];
+    const page = pages[pageIndex] ?? 1;
 
     if (novel && page) {
       let newChapters: ChapterInfo[] = [];
 
-      const config = [
-        novel.id,
-        settingsSort,
-        novelSettings.filter,
-        page,
-      ] as const;
+      const config = [novel.id, settingsSort, settingsFilter, page] as const;
 
-      let chapterCount = getChapterCount(novel.id, page);
+      let chapterCount = await getChapterCount(novel.id, page);
 
       if (chapterCount) {
         try {
-          newChapters = getPageChaptersBatched(...config) || [];
+          newChapters = (await getPageChaptersBatched(...config)) || [];
         } catch (error) {
           console.error('teaser', error);
         }
@@ -270,7 +245,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
         });
         await insertChapters(novel.id, sourceChapters);
         newChapters = await _getPageChapters(...config);
-        chapterCount = getChapterCount(novel.id, page);
+        chapterCount = await getChapterCount(novel.id, page);
       }
 
       setBatchInformation({
@@ -283,7 +258,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
   }, [
     novel,
     novelPath,
-    novelSettings.filter,
+    settingsFilter,
     pageIndex,
     pages,
     pluginId,
@@ -291,7 +266,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     settingsSort,
   ]);
 
-  const getNextChapterBatch = useCallback(() => {
+  const getNextChapterBatch = useCallback(async () => {
     const page = pages[pageIndex];
     const nextBatch = batchInformation.batch + 1;
     if (novel && page && nextBatch <= batchInformation.total) {
@@ -299,13 +274,13 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
 
       try {
         newChapters =
-          getPageChaptersBatched(
+          (await getPageChaptersBatched(
             novel.id,
             settingsSort,
-            novelSettings.filter,
+            settingsFilter,
             page,
             nextBatch,
-          ) || [];
+          )) || [];
       } catch (error) {
         console.error('teaser', error);
       }
@@ -316,9 +291,9 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     batchInformation,
     extendChapters,
     novel,
-    novelSettings.filter,
     pageIndex,
     pages,
+    settingsFilter,
     settingsSort,
   ]);
 
@@ -330,19 +305,23 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       }
 
       // Load all batches from current + 1 up to targetBatch
-      for (let batch = batchInformation.batch + 1; batch <= targetBatch; batch++) {
+      for (
+        let batch = batchInformation.batch + 1;
+        batch <= targetBatch;
+        batch++
+      ) {
         if (batch > batchInformation.total) break;
 
         let newChapters: ChapterInfo[] = [];
         try {
           newChapters =
-            getPageChaptersBatched(
+            (await getPageChaptersBatched(
               novel.id,
               settingsSort,
               novelSettings.filter,
               page,
               batch,
-            ) || [];
+            )) || [];
         } catch (error) {
           console.error('Error loading batch', batch, error);
         }
@@ -547,7 +526,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       _getPageChapters(
         novel.id,
         settingsSort,
-        novelSettings.filter,
+        settingsFilter,
         currentPage,
       ).then(chs => {
         setChapters(chs);
@@ -557,7 +536,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
     novel?.id,
     fetching,
     settingsSort,
-    novelSettings.filter,
+    settingsFilter,
     currentPage,
     setChapters,
   ]);
@@ -612,7 +591,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       openPage,
       setNovel,
       setLastRead,
-      sortAndFilterChapters,
+
       followNovel,
       bookmarkChapters,
       markPreviouschaptersRead,
@@ -620,7 +599,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       markChaptersRead,
       markPreviousChaptersUnread,
       markChaptersUnread,
-      setShowChapterTitles,
+
       refreshChapters,
       updateChapter,
       updateChapterProgress,
@@ -643,7 +622,6 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       setPageIndex,
       openPage,
       setLastRead,
-      sortAndFilterChapters,
       followNovel,
       bookmarkChapters,
       markPreviouschaptersRead,
@@ -651,7 +629,6 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
       markChaptersRead,
       markPreviousChaptersUnread,
       markChaptersUnread,
-      setShowChapterTitles,
       refreshChapters,
       updateChapter,
       updateChapterProgress,

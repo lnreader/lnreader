@@ -71,7 +71,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                 if (isEditMode && category) {
                   updateCategory(category?.id, categoryName);
                 } else {
-                  createCategory(categoryName);
+                  await createCategory(categoryName);
                 }
                 finalize();
               }

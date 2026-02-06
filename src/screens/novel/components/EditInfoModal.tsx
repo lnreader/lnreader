@@ -120,8 +120,8 @@ const EditInfoModal = ({
           style={styles.inputWrapper}
         />
         <TextInput
-          defaultValue={initialNovelInfo.author}
-          value={novelInfo.author}
+          defaultValue={initialNovelInfo.author ?? undefined}
+          value={novelInfo.author ?? undefined}
           placeholder={getString('novelScreen.edit.author', {
             author: novel.author,
           })}
@@ -133,8 +133,8 @@ const EditInfoModal = ({
           style={styles.inputWrapper}
         />
         <TextInput
-          defaultValue={initialNovelInfo.artist}
-          value={novelInfo.artist}
+          defaultValue={initialNovelInfo.artist ?? undefined}
+          value={novelInfo.artist ?? undefined}
           placeholder={'Artist: ' + novel.artist}
           numberOfLines={1}
           mode="outlined"
@@ -144,8 +144,8 @@ const EditInfoModal = ({
           style={styles.inputWrapper}
         />
         <TextInput
-          defaultValue={initialNovelInfo.summary}
-          value={novelInfo.summary}
+          defaultValue={initialNovelInfo.summary ?? undefined}
+          value={novelInfo.summary ?? undefined}
           placeholder={getString('novelScreen.edit.summary', {
             summary: novel.summary?.substring(0, 16),
           })}

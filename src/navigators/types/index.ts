@@ -98,10 +98,10 @@ export type ReaderStackParamList = {
         name: string;
         path: string;
         pluginId: string;
-        cover?: string;
-        isLocal?: boolean;
+        cover: string | null;
+        isLocal?: boolean | null;
       }
-    | NovelInfo;
+    | Omit<NovelInfo, 'id'>;
   Chapter: {
     novel: NovelInfo;
     chapter: ChapterInfo;

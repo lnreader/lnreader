@@ -68,10 +68,10 @@ export const ChapterContent = ({
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
-  const [bookmarked, setBookmarked] = useState(chapter.bookmark);
+  const [bookmarked, setBookmarked] = useState<boolean>(chapter.bookmark ?? false);
 
   useEffect(() => {
-    setBookmarked(chapter.bookmark);
+    setBookmarked(chapter.bookmark ?? false);
   }, [chapter]);
 
   const { hidden, loading, error, webViewRef, hideHeader, refetch } =

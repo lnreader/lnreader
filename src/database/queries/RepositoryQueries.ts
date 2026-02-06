@@ -1,20 +1,50 @@
-import { Repository } from '@database/types';
-import { db } from '@database/db';
+import { eq } from 'drizzle-orm';
+import { dbManager } from '@database/db';
+import { repositorySchema, type RepositoryRow } from '@database/schema';
 
-export const getRepositoriesFromDb = () =>
-  db.getAllSync<Repository>('SELECT * FROM Repository');
+export const getRepositoriesFromDb = async (): Promise<RepositoryRow[]> => {
+  return dbManager.select().from(repositorySchema).all();
+};
 
-export const isRepoUrlDuplicated = (repoUrl: string) =>
-  (db.getFirstSync<{ isDuplicated: number }>(
-    'SELECT COUNT(*) as isDuplicated FROM Repository WHERE url = ?',
-    repoUrl,
-  )?.isDuplicated || 0) > 0;
+export const isRepoUrlDuplicated = async (repoUrl: string) => {
+  const result = await dbManager
+    .select({ count: repositorySchema.id })
+    .from(repositorySchema)
+    .where(eq(repositorySchema.url, repoUrl))
+    .get();
 
-export const createRepository = (repoUrl: string) =>
-  db.runSync('INSERT INTO Repository (url) VALUES (?)', repoUrl);
+  return !!result;
+};
 
-export const deleteRepositoryById = (id: number) =>
-  db.runSync('DELETE FROM Repository WHERE id = ?', id);
+export const createRepository = async (
+  repoUrl: string,
+): Promise<RepositoryRow> => {
+  const row = await dbManager.write(
+    async tx =>
+      await tx
+        .insert(repositorySchema)
+        .values({ url: repoUrl })
+        .returning()
+        .get(),
+  );
+  return row;
+};
 
-export const updateRepository = (id: number, url: string) =>
-  db.runSync('UPDATE Repository SET url = ? WHERE id = ?', url, id);
+export const deleteRepositoryById = async (id: number): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx.delete(repositorySchema).where(eq(repositorySchema.id, id)).run();
+  });
+};
+
+export const updateRepository = async (
+  id: number,
+  url: string,
+): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx
+      .update(repositorySchema)
+      .set({ url })
+      .where(eq(repositorySchema.id, id))
+      .run();
+  });
+};

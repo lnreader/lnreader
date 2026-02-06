@@ -105,8 +105,8 @@ export const prepareBackupData = async (cacheDirPath: string) => {
 
   // categories
   try {
-    const categories = getCategoriesFromDb();
-    const novelCategories = getAllNovelCategories();
+    const categories = await getCategoriesFromDb();
+    const novelCategories = await getAllNovelCategories();
     NativeFile.writeFile(
       cacheDirPath + '/' + BackupEntryName.CATEGORY,
       JSON.stringify(

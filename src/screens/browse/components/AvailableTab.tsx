@@ -42,6 +42,7 @@ const AvailablePluginCard = ({
   const textStyles = useAnimatedStyle(() => ({
     lineHeight: ratio.value * 20,
   }));
+
   return (
     <View>
       {plugin.header ? (

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Pressable } from 'react-native-gesture-handler';
 
 import { Category } from '@database/types';
 import { useTheme } from '@hooks/persisted';
@@ -49,10 +49,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         ]}
       >
         <View style={styles.buttonsCtn}>
-          <TouchableOpacity
-            onLongPress={drag}
+          <Pressable
+            onPressIn={drag}
             style={styles.dragHandle}
-            activeOpacity={0.6}
+            //activeOpacity={0.6}
           >
             <IconButton
               name="drag-horizontal-variant"
@@ -60,7 +60,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               theme={theme}
               padding={8}
             />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.nameCtn}>
             <Text
               style={[
@@ -74,7 +74,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             >
               {category.name}
             </Text>
-            {category.id === 2 && (
+            {category.id <= 2 && (
               <Badge
                 style={[
                   styles.badge,
@@ -88,24 +88,26 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             )}
           </View>
           <View style={styles.flex} />
-          <View style={[category.id === 2 && styles.disabledOpacity]}>
+
+          <View style={{ opacity: category.id <= 2 ? 0.4 : 1 }}>
             <IconButton
               name="pencil-outline"
-              color={category.id === 2 ? theme.outline : theme.onSurface}
+              color={category.id <= 2 ? theme.outline : theme.onSurface}
               style={styles.manageBtn}
               onPress={showCategoryModal}
               theme={theme}
-              disabled={category.id === 2}
+              disabled={category.id <= 2}
             />
           </View>
-          <View style={[category.id === 2 && styles.disabledOpacity]}>
+
+          <View style={{ opacity: category.id <= 2 ? 0.4 : 1 }}>
             <IconButton
               name="delete-outline"
-              color={category.id === 2 ? theme.outline : theme.onSurface}
+              color={category.id <= 2 ? theme.outline : theme.onSurface}
               style={styles.manageBtn}
               onPress={showDeleteCategoryModal}
               theme={theme}
-              disabled={category.id === 2}
+              disabled={category.id <= 2}
             />
           </View>
         </View>
