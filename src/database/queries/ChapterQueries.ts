@@ -22,7 +22,6 @@ import { chapterSchema, novelSchema } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
-import { SQLBatchTuple } from 'node_modules/@op-engineering/op-sqlite/lib/typescript/src';
 
 // #region Mutations
 
@@ -36,32 +35,39 @@ export const insertChapters = async (
   if (!chapters?.length) {
     return;
   }
-  const sqlString = `insert into "Chapter" ("id", "novelId", "path", "name", "releaseTime", "bookmark", "unread", "readTime", "isDownloaded", "updatedTime", "chapterNumber", "page", "position", "progress")
-    values (null, ?, ?, ?, ?, ?, ?, null, ?, null, ?, ?, ?, null)
-    on conflict ("Chapter"."novelId", "Chapter"."path")
-    do update set "name" = ?, "releaseTime" = ?, "chapterNumber" = ?, "page" = ?, "position" = ?`;
-  const batchValues = [];
-  for (let index = 0; index < chapters.length; index++) {
-    batchValues.push([
-      novelId, // novelId
-      chapters[index].path, // path
-      chapters[index].name || 'Chapter ' + (index + 1), // name
-      chapters[index].releaseTime || '', // releaseTime
-      0, // bookmark
-      1, // unread
-      0, // isDownloaded
-      chapters[index].chapterNumber ?? null, // chapterNumber
-      chapters[index].page || '1', // page
-      index, // position  || update values
-      chapters[index].name || 'Chapter ' + (index + 1),
-      chapters[index].releaseTime || '',
-      chapters[index].chapterNumber ?? null,
-      chapters[index].page || '1',
-      index,
-    ]);
-  }
-  const commands: SQLBatchTuple[] = [[sqlString, batchValues]];
-  await dbManager.batch(commands);
+  await dbManager.batch(
+    chapters.map((c, i) => ({
+      path: c.path,
+      name: c.name || 'Chapter ' + (i + 1),
+      releaseTime: c.releaseTime || '',
+      chapterNumber: c.chapterNumber ?? null,
+      page: c.page || '1',
+      position: i,
+    })),
+    (tx, ph) =>
+      tx
+        .insert(chapterSchema)
+        .values({
+          path: ph('path'),
+          name: ph('name'),
+          releaseTime: ph('releaseTime'),
+          novelId,
+          chapterNumber: ph('chapterNumber'),
+          page: ph('page'),
+          position: ph('position'),
+        })
+        .onConflictDoUpdate({
+          target: [chapterSchema.novelId, chapterSchema.path],
+          set: {
+            page: ph('page'),
+            position: ph('position'),
+            name: ph('name'),
+            releaseTime: ph('releaseTime'),
+            chapterNumber: ph('chapterNumber'),
+          },
+        })
+        .prepare(),
+  );
 };
 
 export const markChapterRead = async (chapterId: number): Promise<void> => {
