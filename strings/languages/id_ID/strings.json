@@ -80,7 +80,7 @@
     "categoryRestoreFailed": "%{categoryName}(indonesia) %{error}",
     "categoryFileNotFound": "Indonesia",
     "categoryFileReadFailed": "%{error}Indonesia",
-    "categoryFileWriteFailed": "Failed to write category file: %{error}",
+    "categoryFileWriteFailed": "",
     "createBackup": "",
     "createBackupDesc": "",
     "createBackupWarning": "",
