@@ -354,9 +354,10 @@ export const getNextChapter = (
       WHERE novelId = ?
       AND (
         (page = ? AND position > ?)
-        OR (position = 0 AND CAST(page AS INTEGER) > CAST(? AS INTEGER))
+        OR CAST(page AS INTEGER) > CAST(? AS INTEGER)
       )
-      ORDER BY CAST(page AS INTEGER) ASC, position ASC`,
+      ORDER BY CAST(page AS INTEGER) ASC, position ASC
+      LIMIT 1`,
     novelId,
     page,
     chapterPosition,
