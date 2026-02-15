@@ -7,6 +7,26 @@ import ServiceManager from '@services/ServiceManager';
 import { db } from '@database/db';
 import NativeFile from '@specs/NativeFile';
 
+/** Timeout (ms) for a single novel fetch from a source plugin */
+const FETCH_TIMEOUT_MS = 30_000;
+
+/**
+ * Wraps a promise with a timeout. If the promise doesn't resolve
+ * within `ms` milliseconds, rejects with a timeout error.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`Timeout after ${ms}ms fetching ${label}`)),
+        ms,
+      );
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
+
 const updateNovelMetadata = async (
   pluginId: string,
   novelId: number,
@@ -15,7 +35,7 @@ const updateNovelMetadata = async (
   const { name, summary, author, artist, genres, status, totalPages } = novel;
   let cover = novel.cover;
   const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
-  if (NativeFile.exists(novelDir)) {
+  if (!NativeFile.exists(novelDir)) {
     NativeFile.mkdir(novelDir);
   }
   if (cover) {
@@ -26,8 +46,8 @@ const updateNovelMetadata = async (
   }
 
   db.runSync(
-    `UPDATE Novel SET 
-          name = ?, cover = ?, summary = ?, author = ?, artist = ?, 
+    `UPDATE Novel SET
+          name = ?, cover = ?, summary = ?, author = ?, artist = ?,
           genres = ?, status = ?, totalPages = ?
           WHERE id = ?
         `,
@@ -52,6 +72,17 @@ const updateNovelTotalPages = (novelId: number, totalPages: number) => {
   ]);
 };
 
+const CHAPTER_BATCH_SIZE = 50;
+
+interface ChapterUpdateData {
+  name: string;
+  path: string;
+  releaseTime: string | null;
+  chapterPage: string;
+  position: number;
+  chapterNumber: number | null;
+}
+
 const updateNovelChapters = (
   novelName: string,
   novelId: number,
@@ -59,66 +90,104 @@ const updateNovelChapters = (
   downloadNewChapters?: boolean,
   page?: string,
 ) =>
-  db.withExclusiveTransactionAsync(async tx => {
-    for (let position = 0; position < chapters.length; position++) {
-      const {
-        name,
-        path,
-        releaseTime,
-        page: customPage,
-        chapterNumber,
-      } = chapters[position];
-      const chapterPage = page || customPage || '1';
+  db.withTransactionAsync(async () => {
+    // Mihon pattern: fetch existing chapters once, diff, then batch
+    const existing = await db.getAllAsync<{
+      id: number;
+      path: string;
+      name: string;
+      releaseTime: string | null;
+      chapterNumber: number | null;
+      page: string;
+      position: number;
+    }>(
+      'SELECT id, path, name, releaseTime, chapterNumber, page, position FROM Chapter WHERE novelId = ?',
+      novelId,
+    );
+    const existingByPath = new Map(existing.map(ch => [ch.path, ch]));
 
-      const result = await tx.runAsync(
-        `
-          INSERT INTO Chapter (path, name, releaseTime, novelId, updatedTime, chapterNumber, page, position)
-          SELECT ?, ?, ?, ?, datetime('now','localtime'), ?, ?, ?
-          WHERE NOT EXISTS (SELECT id FROM Chapter WHERE path = ? AND novelId = ?);
-        `,
-        path,
-        name,
-        releaseTime || null,
-        novelId,
-        chapterNumber || null,
-        chapterPage,
+    // Collect chapters for batch processing
+    const chapterData: ChapterUpdateData[] = chapters.map(
+      (chapter, position) => ({
+        name: chapter.name ?? `Chapter ${position + 1}`,
+        path: chapter.path,
+        releaseTime: chapter.releaseTime || null,
+        chapterPage: page || chapter.page || '1',
         position,
-        path,
-        novelId,
+        chapterNumber: chapter.chapterNumber || null,
+      }),
+    );
+
+    // Diff: separate new vs updated
+    const toInsert: ChapterUpdateData[] = [];
+    const toUpdate: Array<ChapterUpdateData & { id: number }> = [];
+
+    for (const chapter of chapterData) {
+      const ex = existingByPath.get(chapter.path);
+      if (!ex) {
+        toInsert.push(chapter);
+      } else if (
+        ex.name !== chapter.name ||
+        ex.releaseTime !== chapter.releaseTime ||
+        ex.page !== chapter.chapterPage ||
+        ex.position !== chapter.position
+      ) {
+        toUpdate.push({ ...chapter, id: ex.id });
+      }
+    }
+
+    // Batch INSERT new chapters using multi-value INSERT
+    const newChapterIds: Array<{ chapterId: number; chapterName: string }> = [];
+
+    for (let i = 0; i < toInsert.length; i += CHAPTER_BATCH_SIZE) {
+      const batch = toInsert.slice(i, i + CHAPTER_BATCH_SIZE);
+      const placeholders = batch
+        .map(() => '(?, ?, ?, ?, datetime(\'now\',\'localtime\'), ?, ?, ?)')
+        .join(', ');
+      const params = batch.flatMap(ch => [
+        ch.path, ch.name, ch.releaseTime, novelId,
+        ch.chapterNumber, ch.chapterPage, ch.position,
+      ]);
+
+      const result = await db.runAsync(
+        `INSERT INTO Chapter (path, name, releaseTime, novelId, updatedTime, chapterNumber, page, position) VALUES ${placeholders}`,
+        ...params,
       );
 
-      const insertId = result.lastInsertRowId;
-
-      if (insertId && insertId >= 0) {
-        if (downloadNewChapters) {
-          ServiceManager.manager.addTask({
-            name: 'DOWNLOAD_CHAPTER',
-            data: {
-              chapterId: insertId,
-              novelName: novelName,
-              chapterName: name,
-            },
+      // For multi-value INSERT, lastInsertRowId is the LAST inserted row.
+      // Rows are assigned sequential IDs, so we can calculate all of them.
+      if (result.lastInsertRowId && result.changes > 0 && downloadNewChapters) {
+        const firstId = result.lastInsertRowId - result.changes + 1;
+        for (let j = 0; j < batch.length; j++) {
+          newChapterIds.push({
+            chapterId: firstId + j,
+            chapterName: batch[j].name,
           });
         }
-      } else {
-        await tx.runAsync(
-          `
-            UPDATE Chapter SET
-              name = ?, releaseTime = ?, updatedTime = datetime('now','localtime'), page = ?, position = ?
-            WHERE path = ? AND novelId = ? AND (name != ? OR releaseTime != ? OR page != ? OR position != ?);
-          `,
-          name,
-          releaseTime || null,
-          chapterPage,
-          position,
-          path,
-          novelId,
-          name,
-          releaseTime || null,
-          chapterPage,
-          position,
-        );
       }
+    }
+
+    // Batch UPDATE changed chapters
+    for (let i = 0; i < toUpdate.length; i += CHAPTER_BATCH_SIZE) {
+      const batch = toUpdate.slice(i, i + CHAPTER_BATCH_SIZE);
+      await Promise.all(
+        batch.map(ch =>
+          db.runAsync(
+            `UPDATE Chapter SET
+              name = ?, releaseTime = ?, updatedTime = datetime('now','localtime'), page = ?, position = ?
+            WHERE id = ?`,
+            ch.name, ch.releaseTime, ch.chapterPage, ch.position, ch.id,
+          ),
+        ),
+      );
+    }
+
+    // Queue downloads for new chapters
+    for (const { chapterId, chapterName } of newChapterIds) {
+      ServiceManager.manager.addTask({
+        name: 'DOWNLOAD_CHAPTER',
+        data: { chapterId, novelName, chapterName },
+      });
     }
   });
 
@@ -137,7 +206,11 @@ const updateNovel = async (
     return;
   }
   const { downloadNewChapters, refreshNovelMetadata } = options;
-  const novel = await fetchNovel(pluginId, novelPath);
+  const novel = await withTimeout(
+    fetchNovel(pluginId, novelPath),
+    FETCH_TIMEOUT_MS,
+    `novel ${novelPath}`,
+  );
 
   if (refreshNovelMetadata) {
     await updateNovelMetadata(pluginId, novelId, novel);
@@ -157,14 +230,15 @@ const updateNovel = async (
 const updateNovelPage = async (
   pluginId: string,
   novelPath: string,
+  novelName: string,
   novelId: number,
   page: string,
   options: Pick<UpdateNovelOptions, 'downloadNewChapters'>,
 ) => {
   const { downloadNewChapters } = options;
   const sourcePage = await fetchPage(pluginId, novelPath, page);
-  updateNovelChapters(
-    pluginId,
+  await updateNovelChapters(
+    novelName,
     novelId,
     sourcePage.chapters || [],
     downloadNewChapters,

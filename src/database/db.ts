@@ -30,6 +30,14 @@ const dbName = 'lnreader.db';
 export const db = SQLite.openDatabaseSync(dbName);
 
 /**
+ * Read-only database connection.
+ * With WAL mode, readers do NOT block writers and writers do NOT block readers.
+ * Using a separate connection for reads prevents "database is locked" errors
+ * when the write connection is in the middle of a transaction.
+ */
+export const readDb = SQLite.openDatabaseSync(dbName);
+
+/**
  * Creates the initial database schema for fresh installations
  * Sets up all tables, indexes, triggers and sets version to 2
  */
@@ -61,9 +69,18 @@ const createInitialSchema = () => {
  * Handles both fresh installations and existing databases
  */
 export const initializeDatabase = () => {
-  db.execSync('PRAGMA busy_timeout = 5000');
+  // Write connection settings
+  db.execSync('PRAGMA busy_timeout = 15000');
   db.execSync('PRAGMA cache_size = 10000');
   db.execSync('PRAGMA foreign_keys = ON');
+
+  // Read connection settings — WAL mode allows concurrent reads
+  readDb.execSync('PRAGMA journal_mode = WAL');
+  readDb.execSync('PRAGMA busy_timeout = 5000');
+  readDb.execSync('PRAGMA cache_size = 5000');
+  readDb.execSync('PRAGMA synchronous = NORMAL');
+  readDb.execSync('PRAGMA temp_store = MEMORY');
+  readDb.execSync('PRAGMA query_only = ON');
 
   let userVersion = 0;
   try {

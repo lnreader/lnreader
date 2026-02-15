@@ -45,6 +45,10 @@ export interface AppSettings {
   updateLibraryOnLaunch: boolean;
   downloadNewChapters: boolean;
   refreshNovelMetadata: boolean;
+  /** Delay between novel updates in milliseconds (default: 1000ms) */
+  updateDelay: number;
+  /** Add random jitter (0-500ms) to delays to appear less bot-like */
+  useUpdateJitter: boolean;
 
   /**
    * Novel settings
@@ -153,6 +157,8 @@ const initialAppSettings: AppSettings = {
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,
+  updateDelay: 1000,
+  useUpdateJitter: true,
 
   /**
    * Novel settings

@@ -14,6 +14,21 @@ import NativeFile from '@specs/NativeFile';
 
 // #region Mutations
 
+/**
+ * Batch size for chapter INSERT/UPDATE operations.
+ * Matches Mihon's approach of chunking large chapter lists.
+ */
+const CHAPTER_BATCH_SIZE = 100;
+
+/**
+ * Insert or update chapters for a novel.
+ * Inspired by Mihon's SyncChaptersWithSource:
+ * 1. Fetch existing chapters by novelId in one query
+ * 2. Diff: determine which are new vs need updating
+ * 3. Batch INSERT new chapters
+ * 4. Batch UPDATE changed chapters
+ * This is dramatically faster than N individual INSERT+SELECT queries.
+ */
 export const insertChapters = async (
   novelId: number,
   chapters?: ChapterItem[],
@@ -22,52 +37,86 @@ export const insertChapters = async (
     return;
   }
 
-  await db.withExclusiveTransactionAsync(async tx => {
+  await db.withTransactionAsync(async () => {
+    // Step 1: Fetch all existing chapters for this novel in ONE query
+    const existing = await db.getAllAsync<{
+      id: number;
+      path: string;
+      name: string;
+      releaseTime: string;
+      chapterNumber: number | null;
+      page: string;
+      position: number;
+    }>(
+      'SELECT id, path, name, releaseTime, chapterNumber, page, position FROM Chapter WHERE novelId = ?',
+      novelId,
+    );
+    const existingByPath = new Map(existing.map(ch => [ch.path, ch]));
+
+    // Step 2: Diff — separate new chapters from updates
+    const toInsert: Array<{
+      path: string;
+      name: string;
+      releaseTime: string;
+      chapterNumber: number | null;
+      page: string;
+      position: number;
+    }> = [];
+    const toUpdate: Array<{
+      id: number;
+      name: string;
+      releaseTime: string;
+      chapterNumber: number | null;
+      page: string;
+      position: number;
+    }> = [];
+
     for (let index = 0; index < chapters.length; index++) {
       const chapter = chapters[index];
-      const chapterName = chapter.name ?? 'Chapter ' + (index + 1);
-      const chapterPage = chapter.page || '1';
+      const name = chapter.name ?? 'Chapter ' + (index + 1);
+      const page = chapter.page || '1';
+      const releaseTime = chapter.releaseTime || '';
+      const chapterNumber = chapter.chapterNumber || null;
 
-      const result = await tx.runAsync(
-        `
-          INSERT INTO Chapter (path, name, releaseTime, novelId, chapterNumber, page, position)
-          SELECT ?, ?, ?, ?, ?, ?, ?
-          WHERE NOT EXISTS (SELECT id FROM Chapter WHERE path = ? AND novelId = ?);
-        `,
-        chapter.path,
-        chapterName,
-        chapter.releaseTime || '',
-        novelId,
-        chapter.chapterNumber || null,
-        chapterPage,
-        index,
-        chapter.path,
-        novelId,
-      );
-
-      const insertId = result.lastInsertRowId;
-
-      if (!insertId || insertId < 0) {
-        await tx.runAsync(
-          `
-            UPDATE Chapter SET
-              page = ?, position = ?, name = ?, releaseTime = ?, chapterNumber = ?
-            WHERE path = ? AND novelId = ? AND (page != ? OR position != ? OR name != ? OR releaseTime != ? OR chapterNumber != ?);
-          `,
-          chapterPage,
-          index,
-          chapterName,
-          chapter.releaseTime || '',
-          chapter.chapterNumber || null,
-          chapter.path,
-          novelId,
-          chapterPage,
-          index,
-          chapterName,
-          chapter.releaseTime || '',
-          chapter.chapterNumber || null,
-        );
+      const ex = existingByPath.get(chapter.path);
+      if (!ex) {
+        toInsert.push({ path: chapter.path, name, releaseTime, chapterNumber, page, position: index });
+      } else if (
+        ex.name !== name ||
+        ex.releaseTime !== releaseTime ||
+        ex.chapterNumber !== chapterNumber ||
+        ex.page !== page ||
+        ex.position !== index
+      ) {
+        toUpdate.push({ id: ex.id, name, releaseTime, chapterNumber, page, position: index });
       }
+    }
+
+    // Step 3: Batch INSERT new chapters
+    for (let i = 0; i < toInsert.length; i += CHAPTER_BATCH_SIZE) {
+      const batch = toInsert.slice(i, i + CHAPTER_BATCH_SIZE);
+      const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ');
+      const params = batch.flatMap(ch => [
+        ch.path, ch.name, ch.releaseTime, novelId,
+        ch.chapterNumber, ch.page, ch.position,
+      ]);
+      await db.runAsync(
+        `INSERT INTO Chapter (path, name, releaseTime, novelId, chapterNumber, page, position) VALUES ${placeholders}`,
+        ...params,
+      );
+    }
+
+    // Step 4: Batch UPDATE changed chapters (individual updates but batched in Promise.all)
+    for (let i = 0; i < toUpdate.length; i += CHAPTER_BATCH_SIZE) {
+      const batch = toUpdate.slice(i, i + CHAPTER_BATCH_SIZE);
+      await Promise.all(
+        batch.map(ch =>
+          db.runAsync(
+            'UPDATE Chapter SET page = ?, position = ?, name = ?, releaseTime = ?, chapterNumber = ? WHERE id = ?',
+            ch.page, ch.position, ch.name, ch.releaseTime, ch.chapterNumber, ch.id,
+          ),
+        ),
+      );
     }
   });
 };
@@ -94,17 +143,48 @@ export const markAllChaptersRead = (novelId: number) =>
 export const markAllChaptersUnread = (novelId: number) =>
   db.runAsync('UPDATE Chapter SET `unread` = 1 WHERE novelId = ?', novelId);
 
-const deleteDownloadedFiles = async (
+/**
+ * Safely delete downloaded chapter files from disk.
+ * If the folder doesn't exist (already deleted or never downloaded),
+ * we silently skip — this is intentional and mirrors Mihon's behavior.
+ * File I/O errors should never crash the app or abort a batch operation.
+ */
+const deleteDownloadedFiles = (
   pluginId: string,
   novelId: number,
   chapterId: number,
-) => {
+): boolean => {
   try {
     const chapterFolder = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}`;
-    NativeFile.unlink(chapterFolder);
+    if (NativeFile.exists(chapterFolder)) {
+      NativeFile.unlink(chapterFolder);
+    }
+    return true;
   } catch {
-    throw new Error(getString('novelScreen.deleteChapterError'));
+    // Log but don't throw — one failed file deletion shouldn't abort the entire batch
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Failed to delete chapter files: ${pluginId}/${novelId}/${chapterId}`,
+    );
+    return false;
   }
+};
+
+/**
+ * Bulk-delete downloaded chapter files. Processes all chapters and
+ * collects failures instead of stopping at the first error.
+ * Returns the number of chapters whose files were successfully removed.
+ */
+const bulkDeleteDownloadedFiles = (
+  chapters: Array<{ pluginId: string; novelId: number; id: number }>,
+): number => {
+  let deleted = 0;
+  for (const ch of chapters) {
+    if (deleteDownloadedFiles(ch.pluginId, ch.novelId, ch.id)) {
+      deleted++;
+    }
+  }
+  return deleted;
 };
 
 // delete downloaded chapter
@@ -113,7 +193,7 @@ export const deleteChapter = async (
   novelId: number,
   chapterId: number,
 ) => {
-  await deleteDownloadedFiles(pluginId, novelId, chapterId);
+  deleteDownloadedFiles(pluginId, novelId, chapterId);
   await db.runAsync(
     'UPDATE Chapter SET isDownloaded = 0 WHERE id = ?',
     chapterId,
@@ -128,39 +208,52 @@ export const deleteChapters = async (
   if (!chapters?.length) {
     return;
   }
-  const chapterIdsString = chapters?.map(chapter => chapter.id).toString();
 
-  await Promise.all(
-    chapters?.map(chapter =>
-      deleteDownloadedFiles(pluginId, novelId, chapter.id),
-    ),
+  bulkDeleteDownloadedFiles(
+    chapters.map(ch => ({ pluginId, novelId, id: ch.id })),
   );
+
+  const chapterIdsString = chapters.map(chapter => chapter.id).join(',');
   await db.execAsync(
     `UPDATE Chapter SET isDownloaded = 0 WHERE id IN (${chapterIdsString})`,
   );
 };
 
 export const deleteDownloads = async (chapters: DownloadedChapter[]) => {
-  await Promise.all(
-    chapters?.map(chapter => {
-      deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id);
-    }),
-  );
+  if (!chapters?.length) {
+    return;
+  }
+
+  bulkDeleteDownloadedFiles(chapters);
   await db.execAsync('UPDATE Chapter SET isDownloaded = 0');
 };
 
 export const deleteReadChaptersFromDb = async () => {
-  const chapters = await getReadDownloadedChapters();
-  await Promise.all(
-    chapters?.map(chapter => {
-      deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.novelId);
-    }),
-  );
-  const chapterIdsString = chapters?.map(chapter => chapter.id).toString();
-  db.execAsync(
-    `UPDATE Chapter SET isDownloaded = 0 WHERE id IN (${chapterIdsString})`,
-  );
-  showToast(getString('novelScreen.readChaptersDeleted'));
+  try {
+    const chapters = await getReadDownloadedChapters();
+
+    if (!chapters?.length) {
+      showToast(getString('novelScreen.readChaptersDeleted'));
+      return;
+    }
+
+    // Delete files from disk (safe — won't throw)
+    bulkDeleteDownloadedFiles(chapters);
+
+    // Mark as not-downloaded in DB
+    const chapterIds = chapters.map(chapter => chapter.id).join(',');
+    await db.execAsync(
+      `UPDATE Chapter SET isDownloaded = 0 WHERE id IN (${chapterIds})`,
+    );
+
+    showToast(getString('novelScreen.readChaptersDeleted'));
+  } catch (error: any) {
+    showToast(
+      getString('novelScreen.deleteChapterError') +
+        ': ' +
+        (error?.message || String(error)),
+    );
+  }
 };
 
 export const updateChapterProgress = (chapterId: number, progress: number) =>

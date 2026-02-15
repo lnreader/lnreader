@@ -78,8 +78,8 @@ const App = () => {
       response => {
         const actionIdentifier = response.actionIdentifier;
         if (actionIdentifier.startsWith('TTS_')) {
-          const { setTTSAction } = require('@utils/ttsNotification');
-          setTTSAction(actionIdentifier);
+          const { emitTTSAction } = require('@utils/ttsNotification');
+          emitTTSAction(actionIdentifier);
         }
       },
     );

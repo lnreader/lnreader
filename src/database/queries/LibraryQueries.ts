@@ -1,5 +1,5 @@
 import { LibraryNovelInfo, NovelInfo } from '../types';
-import { getAllSync } from '../utils/helpers';
+import { getAllSync, getAllSyncReadOnly } from '../utils/helpers';
 
 export const getLibraryNovelsFromDb = (
   sortOrder?: string,
@@ -19,7 +19,7 @@ export const getLibraryNovelsFromDb = (
   }
 
   if (downloadedOnlyMode) {
-    query += ` AND (chaptersDownloaded = 1 OR isLocal = 1)`;
+    query += ` AND (chaptersDownloaded > 0 OR isLocal = 1)`;
   }
 
   if (searchText) {
@@ -30,43 +30,38 @@ export const getLibraryNovelsFromDb = (
     query += ` ORDER BY ${sortOrder}`;
   }
 
-  return getAllSync<NovelInfo>([query, [searchText ?? '']]);
+  return getAllSyncReadOnly<NovelInfo>([query, [searchText ?? '']]);
 };
 
-const getNovelOfCategoryQuery =
-  'SELECT DISTINCT novelId FROM NovelCategory WHERE 1 = 1';
-const getNovelsFromIDListQuery = 'SELECT * FROM Novel WHERE inLibrary = 1 ';
-
+/**
+ * Get library novels for a specific category.
+ * Uses a single JOIN query (inspired by Mihon's libraryView) instead of
+ * two separate queries, reducing DB round-trips.
+ */
 export const getLibraryWithCategory = (
   categoryId?: number | null,
   onlyUpdateOngoingNovels?: boolean,
   excludeLocalNovels?: boolean,
 ): LibraryNovelInfo[] => {
-  let categoryQuery = getNovelOfCategoryQuery;
+  let query = `
+    SELECT DISTINCT Novel.* FROM Novel
+    INNER JOIN NovelCategory ON NovelCategory.novelId = Novel.id
+    WHERE Novel.inLibrary = 1`;
+
+  const params: (string | number)[] = [];
 
   if (categoryId) {
-    categoryQuery += ` AND categoryId = ${categoryId}`;
+    query += ' AND NovelCategory.categoryId = ?';
+    params.push(categoryId);
   }
 
-  const idRows = getAllSync<{ novelId: number }>([categoryQuery, []]);
-
-  if (!idRows || idRows.length === 0) return [];
-
-  const novelIds = idRows.map(r => r.novelId).join(',');
-
-  let novelQuery = getNovelsFromIDListQuery;
-
-  novelQuery += ` AND id IN (${novelIds})`;
-
   if (excludeLocalNovels) {
-    novelQuery += ' AND isLocal = 0';
+    query += ' AND Novel.isLocal = 0';
   }
 
   if (onlyUpdateOngoingNovels) {
-    novelQuery += " AND status = 'Ongoing'";
+    query += " AND Novel.status = 'Ongoing'";
   }
 
-  const res = getAllSync<LibraryNovelInfo>([novelQuery, []]);
-
-  return res;
+  return getAllSyncReadOnly<LibraryNovelInfo>([query, params]);
 };

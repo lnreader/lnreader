@@ -75,6 +75,12 @@ const NovelList: React.FC<NovelListProps> = props => {
       numColumns={numColumns}
       key={numColumns}
       keyExtractor={(item, index) => index + '_' + item.path}
+      // Performance optimizations
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={5}
+      removeClippedSubviews={true}
+      updateCellsBatchingPeriod={50}
       {...props}
       data={extendedNovelList}
     />

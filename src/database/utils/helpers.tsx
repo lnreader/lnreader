@@ -1,4 +1,4 @@
-import { db } from '@database/db';
+import { db, readDb } from '@database/db';
 import {
   SQLiteBindParams,
   SQLiteBindValue,
@@ -90,13 +90,43 @@ export function getFirstSync<T = unknown>(queryObject: QueryObject<T>) {
   return defaultQuerySync<T, false>('getFirstSync', queryObject, null);
 }
 
+/**
+ * Read-only variants that use the separate read DB connection.
+ * These never contend with write transactions, preventing DB lock errors.
+ */
+function readOnlyQuerySync<T = unknown, Array extends boolean = false>(
+  fn: 'getAllSync' | 'getFirstSync',
+  queryObject: QueryObject<Array extends true ? T[] : T>,
+  errorReturn: Array extends true ? [] : null,
+) {
+  const [query, params = [], callback = noop, catchCallback = logError] =
+    queryObject;
+  try {
+    // @ts-ignore
+    const result = readDb[fn](query, params) as Array extends true ? T[] : T;
+    callback(result);
+    return result;
+  } catch (e) {
+    catchCallback(e);
+    return errorReturn;
+  }
+}
+
+export function getAllSyncReadOnly<T = unknown>(queryObject: QueryObject<T[]>) {
+  return readOnlyQuerySync<T, true>('getAllSync', queryObject, []);
+}
+
+export function getFirstSyncReadOnly<T = unknown>(queryObject: QueryObject<T>) {
+  return readOnlyQuerySync<T, false>('getFirstSync', queryObject, null);
+}
+
 type params = SQLiteBindValue[];
 type TransactionObject = [query, ...params];
 
 export async function transactionAsync(transactionObject: TransactionObject[]) {
   await db.withTransactionAsync(async () => {
     const promises = transactionObject.map(async ([query, ...params]) => {
-      db.runAsync(query, ...params);
+      await db.runAsync(query, ...params);
     });
     await Promise.all(promises);
   });

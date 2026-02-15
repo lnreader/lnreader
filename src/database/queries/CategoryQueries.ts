@@ -3,7 +3,7 @@ import { BackupCategory, Category, NovelCategory, CCategory } from '../types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { db } from '@database/db';
-import { getAllSync, runSync } from '@database/utils/helpers';
+import { getAllSync, getAllSyncReadOnly, runSync } from '@database/utils/helpers';
 
 const getCategoriesQuery = `
     SELECT 
@@ -19,7 +19,7 @@ const getCategoriesQuery = `
 
 type NumberList = `${number}` | `${number},${number}` | undefined;
 export const getCategoriesFromDb = () => {
-  return getAllSync<Category & { novelIds: NumberList }>([getCategoriesQuery]);
+  return getAllSyncReadOnly<Category & { novelIds: NumberList }>([getCategoriesQuery]);
 };
 
 export const getCategoriesWithCount = (novelIds: number[]) => {

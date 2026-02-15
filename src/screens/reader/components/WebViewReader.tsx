@@ -29,8 +29,7 @@ import {
   showTTSNotification,
   updateTTSNotification,
   dismissTTSNotification,
-  getTTSAction,
-  clearTTSAction,
+  subscribeTTSAction,
 } from '@utils/ttsNotification';
 
 type WebViewPostEvent = {
@@ -114,42 +113,38 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   }, [readerSettings]);
 
   useEffect(() => {
-    const checkNotificationActions = setInterval(() => {
-      const action = getTTSAction();
-      if (action) {
-        clearTTSAction();
-        switch (action) {
-          case 'TTS_PLAY_PAUSE':
-            webViewRef.current?.injectJavaScript(`
-              if (window.tts) {
-                if (tts.reading) {
-                  tts.pause();
-                } else {
-                  tts.resume();
-                }
+    const unsubscribe = subscribeTTSAction(action => {
+      switch (action) {
+        case 'TTS_PLAY_PAUSE':
+          webViewRef.current?.injectJavaScript(`
+            if (window.tts) {
+              if (tts.reading) {
+                tts.pause();
+              } else {
+                tts.resume();
               }
-            `);
-            break;
-          case 'TTS_STOP':
-            webViewRef.current?.injectJavaScript(`
-              if (window.tts) {
-                tts.stop();
-              }
-            `);
-            break;
-          case 'TTS_NEXT':
-            webViewRef.current?.injectJavaScript(`
-              if (window.tts && window.reader && window.reader.nextChapter) {
-                window.reader.post({ type: 'next', autoStartTTS: true });
-              }
-            `);
-            break;
-        }
+            }
+          `);
+          break;
+        case 'TTS_STOP':
+          webViewRef.current?.injectJavaScript(`
+            if (window.tts) {
+              tts.stop();
+            }
+          `);
+          break;
+        case 'TTS_NEXT':
+          webViewRef.current?.injectJavaScript(`
+            if (window.tts && window.reader && window.reader.nextChapter) {
+              window.reader.post({ type: 'next', autoStartTTS: true });
+            }
+          `);
+          break;
       }
-    }, 500);
+    });
 
     return () => {
-      clearInterval(checkNotificationActions);
+      unsubscribe();
     };
   }, [webViewRef]);
 
@@ -252,6 +247,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   }, [webViewRef]);
 
   const speakText = (text: string) => {
+    if (!text || !text.trim()) {
+      webViewRef.current?.injectJavaScript('tts.next?.()');
+      return;
+    }
     Speech.speak(text, {
       onDone() {
         const isBackground =
@@ -280,6 +279,23 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
         }
 
         webViewRef.current?.injectJavaScript('tts.next?.()');
+      },
+      onError(error) {
+        console.warn('TTS Speech.speak error:', error);
+        // Try to continue with next element instead of silently dying
+        const isBackground =
+          appStateRef.current === 'background' ||
+          appStateRef.current === 'inactive';
+        if (!isBackground) {
+          webViewRef.current?.injectJavaScript('tts.next?.()');
+        } else {
+          isTTSReadingRef.current = false;
+          dismissTTSNotification();
+        }
+      },
+      onStopped() {
+        // Speech was explicitly stopped (e.g. by Speech.stop())
+        // Don't advance to next — let the caller handle it
       },
       voice: readerSettingsRef.current.tts?.voice?.identifier,
       pitch: readerSettingsRef.current.tts?.pitch || 1,

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { InteractionManager } from 'react-native';
 
 import { getCategoriesFromDb } from '@database/queries/CategoryQueries';
 import { getLibraryNovelsFromDb } from '@database/queries/LibraryQueries';
@@ -105,9 +106,16 @@ export const useLibrary = (): UseLibraryReturnType => {
     [downloadedOnlyMode, filter, refreshCategories, searchText, sortOrder],
   );
 
-  useFocusEffect(() => {
-    getLibrary();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      // Wait for navigation animation to finish before querying DB
+      // This prevents UI jank and avoids competing with ongoing writes
+      const task = InteractionManager.runAfterInteractions(() => {
+        getLibrary();
+      });
+      return () => task.cancel();
+    }, [getLibrary]),
+  );
 
   const [taskQueue] = useMMKVObject<
     Array<BackgroundTask | QueuedBackgroundTask>
@@ -136,7 +144,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       getLibrary();
     }
     prevRestoreTasksCountRef.current = restoreTasksCount;
-  }, [restoreTasksCount]);
+  }, [restoreTasksCount, getLibrary]);
 
   return {
     library,

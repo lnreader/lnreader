@@ -12,7 +12,7 @@ interface ConfirmationDialogProps {
   message?: string;
   visible: boolean;
   theme: ThemeColors;
-  onSubmit: () => void;
+  onSubmit: () => void | Promise<void>;
   onDismiss: () => void;
 }
 
@@ -24,9 +24,15 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   theme,
   onSubmit,
 }) => {
-  const handleOnSubmit = () => {
-    onSubmit();
+  const handleOnSubmit = async () => {
     onDismiss();
+    try {
+      await onSubmit();
+    } catch (error: any) {
+      // Prevent unhandled promise rejections from crashing the app
+      // eslint-disable-next-line no-console
+      console.error('ConfirmationDialog onSubmit error:', error);
+    }
   };
 
   return (

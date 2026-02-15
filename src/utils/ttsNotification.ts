@@ -1,34 +1,22 @@
 import * as Notifications from 'expo-notifications';
-import { MMKVStorage } from '@utils/mmkv/mmkv';
 
 const TTS_NOTIFICATION_ID = 'tts-control';
-const TTS_ACTION_KEY = 'TTS_NOTIFICATION_ACTION';
 
-export const updateTTSCategory = async (isPlaying: boolean) => {
-  await Notifications.setNotificationCategoryAsync('TTS_CONTROLS', [
-    {
-      identifier: 'TTS_PLAY_PAUSE',
-      buttonTitle: isPlaying ? '⏸️ Pause' : '▶️ Play',
-      options: {
-        opensAppToForeground: false,
-      },
-    },
-    {
-      identifier: 'TTS_STOP',
-      buttonTitle: '⏹️ Stop',
-      options: {
-        opensAppToForeground: false,
-      },
-    },
-    {
-      identifier: 'TTS_NEXT',
-      buttonTitle: '⏭️ Next',
-      options: {
-        opensAppToForeground: false,
-      },
-    },
-  ]);
+// ---------- lightweight event bus for TTS actions ----------
+type TTSActionListener = (action: string) => void;
+const listeners = new Set<TTSActionListener>();
+
+export const emitTTSAction = (action: string) => {
+  listeners.forEach(fn => fn(action));
 };
+
+export const subscribeTTSAction = (fn: TTSActionListener) => {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+};
+// -----------------------------------------------------------
 
 export interface TTSNotificationData {
   novelName: string;
@@ -36,52 +24,65 @@ export interface TTSNotificationData {
   isPlaying: boolean;
 }
 
+/**
+ * Show or update the persistent TTS notification.
+ *
+ * Key fixes vs the old implementation:
+ *  – trigger uses `{ channelId }` (ChannelAwareTriggerInput) so the
+ *    notification appears *immediately* on the correct channel instead of
+ *    being delayed by 1 second.
+ *  – Category buttons are updated before scheduling so Play/Pause label
+ *    always matches the actual state.
+ *  – A single function replaces the previously‐duplicated
+ *    showTTSNotification / updateTTSNotification.
+ */
 export const showTTSNotification = async (data: TTSNotificationData) => {
-  await updateTTSCategory(data.isPlaying);
-  await Notifications.scheduleNotificationAsync({
-    identifier: TTS_NOTIFICATION_ID,
-    content: {
-      title: data.novelName,
-      subtitle: data.chapterName,
-      body: data.isPlaying ? 'Playing' : 'Paused',
-      categoryIdentifier: 'TTS_CONTROLS',
-      sticky: true,
-      sound: false,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
-    },
-    trigger: { seconds: 1, channelId: 'tts-controls' },
-  });
+  try {
+    // Update category so Play/Pause label matches current state
+    await Notifications.setNotificationCategoryAsync('TTS_CONTROLS', [
+      {
+        identifier: 'TTS_PLAY_PAUSE',
+        buttonTitle: data.isPlaying ? '⏸️ Pause' : '▶️ Play',
+        options: { opensAppToForeground: false },
+      },
+      {
+        identifier: 'TTS_STOP',
+        buttonTitle: '⏹️ Stop',
+        options: { opensAppToForeground: false },
+      },
+      {
+        identifier: 'TTS_NEXT',
+        buttonTitle: '⏭️ Next',
+        options: { opensAppToForeground: false },
+      },
+    ]);
+
+    await Notifications.scheduleNotificationAsync({
+      identifier: TTS_NOTIFICATION_ID,
+      content: {
+        title: data.novelName,
+        subtitle: data.chapterName,
+        body: data.isPlaying ? '▶ Playing' : '⏸ Paused',
+        categoryIdentifier: 'TTS_CONTROLS',
+        sticky: true,
+        sound: false,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      // ChannelAwareTriggerInput → immediate delivery on the right channel
+      trigger: { channelId: 'tts-controls' },
+    });
+  } catch (e) {
+    console.warn('TTS notification error:', e);
+  }
 };
 
-export const updateTTSNotification = async (data: TTSNotificationData) => {
-  await updateTTSCategory(data.isPlaying);
-  await Notifications.scheduleNotificationAsync({
-    identifier: TTS_NOTIFICATION_ID,
-    content: {
-      title: data.novelName,
-      subtitle: data.chapterName,
-      body: data.isPlaying ? 'Playing' : 'Paused',
-      categoryIdentifier: 'TTS_CONTROLS',
-      sticky: true,
-      sound: false,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
-    },
-    trigger: { seconds: 1, channelId: 'tts-controls' },
-  });
-};
+/** Alias kept for call-site readability – same behaviour. */
+export const updateTTSNotification = showTTSNotification;
 
 export const dismissTTSNotification = async () => {
-  await Notifications.dismissNotificationAsync(TTS_NOTIFICATION_ID);
-};
-
-export const setTTSAction = (action: string) => {
-  MMKVStorage.set(TTS_ACTION_KEY, action);
-};
-
-export const getTTSAction = (): string | undefined => {
-  return MMKVStorage.getString(TTS_ACTION_KEY);
-};
-
-export const clearTTSAction = () => {
-  MMKVStorage.delete(TTS_ACTION_KEY);
+  try {
+    await Notifications.dismissNotificationAsync(TTS_NOTIFICATION_ID);
+  } catch {
+    // notification may already be dismissed – safe to ignore
+  }
 };
