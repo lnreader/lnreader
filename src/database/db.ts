@@ -60,7 +60,7 @@ const setPragmas = (executor: SqlExecutor) => {
     'PRAGMA cache_size = 10000',
     'PRAGMA foreign_keys = ON',
   ];
-  executor.executeSync(queries.join(';\n'));
+  queries.forEach(query => executor.executeSync(query));
 };
 const populateDatabase = (executor: SqlExecutor) => {
   console.log('Populating database');
@@ -76,7 +76,6 @@ const createDbTriggers = (executor: SqlExecutor) => {
 };
 
 export const runDatabaseBootstrap = (executor: SqlExecutor) => {
-  setPragmas(executor);
   createDbTriggers(executor);
   populateDatabase(executor);
 };
@@ -85,44 +84,45 @@ type InitDbState = {
   success?: boolean;
   error?: Error;
 };
+const initialState = {
+  success: false,
+  error: undefined,
+};
+const fetchReducer = (
+  state$1: InitDbState,
+  action:
+    | {
+        type: 'migrating' | 'migrated';
+        payload?: boolean | undefined;
+      }
+    | {
+        type: 'error';
+        payload: Error;
+      },
+) => {
+  switch (action.type) {
+    case 'migrating':
+      return { ...initialState };
+    case 'migrated':
+      return {
+        ...initialState,
+        success: action.payload,
+      };
+    case 'error':
+      return {
+        ...initialState,
+        error: action.payload,
+      };
+    default:
+      return state$1;
+  }
+};
 
 export const useInitDatabase = () => {
-  const initialState = {
-    success: false,
-    error: undefined,
-  };
-  const fetchReducer = (
-    state$1: InitDbState,
-    action:
-      | {
-          type: 'migrating' | 'migrated';
-          payload?: boolean | undefined;
-        }
-      | {
-          type: 'error';
-          payload: Error;
-        },
-  ) => {
-    switch (action.type) {
-      case 'migrating':
-        return { ...initialState };
-      case 'migrated':
-        return {
-          ...initialState,
-          success: action.payload,
-        };
-      case 'error':
-        return {
-          ...initialState,
-          error: action.payload,
-        };
-      default:
-        return state$1;
-    }
-  };
   const [state, dispatch] = useReducer(fetchReducer, initialState);
   useEffect(() => {
     dispatch({ type: 'migrating' });
+    setPragmas(_db);
     migrate(drizzleDb, migrations)
       .then(() => {
         runDatabaseBootstrap(_db);
