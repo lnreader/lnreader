@@ -5,6 +5,7 @@
 #include <vector>
 #include <Epub.hpp>
 #include <sstream>
+#include <regex>
 
 std::string join(const std::string &folder_path, const std::string &child_path)
 {
@@ -60,6 +61,199 @@ std::string getParentPath(const std::string &path)
     }
 
     return path.substr(0, pos);
+}
+
+void clean_summary(std::string &summary)
+{
+    std::regex regx0("&nbsp;");
+    summary = std::regex_replace(summary, regx0, " ");
+    std::regex regx1("</div>\\s*|</p>\\s*");
+    summary = std::regex_replace(summary, regx1, "\n\n");
+    std::regex regx2("<br>\\s*");
+    summary = std::regex_replace(summary, regx2, "\n");
+    std::regex regx2a("<hr>");
+    summary = std::regex_replace(summary, regx2a, "\n———\n");
+    std::regex regxtags("<\/?(?:[abip]|h[0-9]|span|div|strong|em)>");
+    summary = std::regex_replace(summary, regxtags, "");
+    std::regex regx3("<");
+    summary = std::regex_replace(summary, regx3, "⟨");
+    std::regex regx3a(">");
+    summary = std::regex_replace(summary, regx3a, "⟩");
+    std::regex regx4("&lt;");
+    summary = std::regex_replace(summary, regx4, "<⁠");
+    std::regex regx5("&gt;");
+    summary = std::regex_replace(summary, regx5, "⁠>");
+    std::regex regx6("&amp;");
+    summary = std::regex_replace(summary, regx6, "&");
+        std::regex regx7("&Agrave;");
+    summary = std::regex_replace(summary, regx7, "À");
+    std::regex regx8("&Aacute;");
+    summary = std::regex_replace(summary, regx8, "Á");
+    std::regex regx9("&Acirc;");
+    summary = std::regex_replace(summary, regx9, "Â");
+    std::regex regx10("&Atilde;");
+    summary = std::regex_replace(summary, regx10, "Ã");
+    std::regex regx11("&Auml;");
+    summary = std::regex_replace(summary, regx11, "Ä");
+    std::regex regx12("&Aring;");
+    summary = std::regex_replace(summary, regx12, "Å");
+    std::regex regx13("&agrave;");
+    summary = std::regex_replace(summary, regx13, "à");
+    std::regex regx14("&aacute;");
+    summary = std::regex_replace(summary, regx14, "á");
+    std::regex regx15("&acirc;");
+    summary = std::regex_replace(summary, regx15, "â");
+    std::regex regx16("&atilde;");
+    summary = std::regex_replace(summary, regx16, "ã");
+    std::regex regx17("&auml;");
+    summary = std::regex_replace(summary, regx17, "ä");
+    std::regex regx18("&aring;");
+    summary = std::regex_replace(summary, regx18, "å");
+    std::regex regx19("&AElig;");
+    summary = std::regex_replace(summary, regx19, "Æ");
+    std::regex regx20("&aelig;");
+    summary = std::regex_replace(summary, regx20, "æ");
+    std::regex regx21("&szlig;");
+    summary = std::regex_replace(summary, regx21, "ß");
+    std::regex regx22("&Ccedil;");
+    summary = std::regex_replace(summary, regx22, "Ç");
+    std::regex regx23("&ccedil;");
+    summary = std::regex_replace(summary, regx23, "ç");
+    std::regex regx24("&Egrave;");
+    summary = std::regex_replace(summary, regx24, "È");
+    std::regex regx25("&Eacute;");
+    summary = std::regex_replace(summary, regx25, "É");
+    std::regex regx26("&Ecirc;");
+    summary = std::regex_replace(summary, regx26, "Ê");
+    std::regex regx27("&Euml;");
+    summary = std::regex_replace(summary, regx27, "Ë");
+    std::regex regx28("&egrave;");
+    summary = std::regex_replace(summary, regx28, "è");
+    std::regex regx29("&eacute;");
+    summary = std::regex_replace(summary, regx29, "é");
+    std::regex regx30("&ecirc;");
+    summary = std::regex_replace(summary, regx30, "ê");
+    std::regex regx31("&euml;");
+    summary = std::regex_replace(summary, regx31, "ë");
+    std::regex regx32("&#131;");
+    summary = std::regex_replace(summary, regx32, "ƒ");
+    std::regex regx33("&Igrave;");
+    summary = std::regex_replace(summary, regx33, "Ì");
+    std::regex regx34("&Iacute;");
+    summary = std::regex_replace(summary, regx34, "Í");
+    std::regex regx35("&Icirc;");
+    summary = std::regex_replace(summary, regx35, "Î");
+    std::regex regx36("&Iuml;");
+    summary = std::regex_replace(summary, regx36, "Ï");
+    std::regex regx37("&igrave;");
+    summary = std::regex_replace(summary, regx37, "ì");
+    std::regex regx38("&iacute;");
+    summary = std::regex_replace(summary, regx38, "í");
+    std::regex regx39("&icirc;");
+    summary = std::regex_replace(summary, regx39, "î");
+    std::regex regx40("&iuml;");
+    summary = std::regex_replace(summary, regx40, "ï");
+    std::regex regx41("&Ntilde;");
+    summary = std::regex_replace(summary, regx41, "Ñ");
+    std::regex regx42("&ntilde;");
+    summary = std::regex_replace(summary, regx42, "ñ");
+    std::regex regx43("&Ograve;");
+    summary = std::regex_replace(summary, regx43, "Ò");
+    std::regex regx44("&Oacute;");
+    summary = std::regex_replace(summary, regx44, "Ó");
+    std::regex regx45("&Ocirc;");
+    summary = std::regex_replace(summary, regx45, "Ô");
+    std::regex regx46("&Otilde;");
+    summary = std::regex_replace(summary, regx46, "Õ");
+    std::regex regx47("&Ouml;");
+    summary = std::regex_replace(summary, regx47, "Ö");
+    std::regex regx48("&ograve;");
+    summary = std::regex_replace(summary, regx48, "ò");
+    std::regex regx49("&oacute;");
+    summary = std::regex_replace(summary, regx49, "ó");
+    std::regex regx50("&ocirc;");
+    summary = std::regex_replace(summary, regx50, "ô");
+    std::regex regx51("&otilde;");
+    summary = std::regex_replace(summary, regx51, "õ");
+    std::regex regx52("&ouml;");
+    summary = std::regex_replace(summary, regx52, "ö");
+    std::regex regx53("&Oslash;");
+    summary = std::regex_replace(summary, regx53, "Ø");
+    std::regex regx54("&oslash;");
+    summary = std::regex_replace(summary, regx54, "ø");
+    std::regex regx55("&#140;");
+    summary = std::regex_replace(summary, regx55, "Œ");
+    std::regex regx56("&#156;");
+    summary = std::regex_replace(summary, regx56, "œ");
+    std::regex regx57("&#138;");
+    summary = std::regex_replace(summary, regx57, "Š");
+    std::regex regx58("&#154;");
+    summary = std::regex_replace(summary, regx58, "š");
+    std::regex regx59("&Ugrave;");
+    summary = std::regex_replace(summary, regx59, "Ù");
+    std::regex regx60("&Uacute;");
+    summary = std::regex_replace(summary, regx60, "Ú");
+    std::regex regx61("&Ucirc;");
+    summary = std::regex_replace(summary, regx61, "Û");
+    std::regex regx62("&Uuml;");
+    summary = std::regex_replace(summary, regx62, "Ü");
+    std::regex regx63("&ugrave;");
+    summary = std::regex_replace(summary, regx63, "ù");
+    std::regex regx64("&uacute;");
+    summary = std::regex_replace(summary, regx64, "ú");
+    std::regex regx65("&ucirc;");
+    summary = std::regex_replace(summary, regx65, "û");
+    std::regex regx66("&uuml;");
+    summary = std::regex_replace(summary, regx66, "ü");
+    std::regex regx67("&#181;");
+    summary = std::regex_replace(summary, regx67, "µ");
+    std::regex regx68("&#215;");
+    summary = std::regex_replace(summary, regx68, "×");
+    std::regex regx69("&Yacute;");
+    summary = std::regex_replace(summary, regx69, "Ý");
+    std::regex regx70("&#159;");
+    summary = std::regex_replace(summary, regx70, "Ÿ");
+    std::regex regx71("&yacute;");
+    summary = std::regex_replace(summary, regx71, "ý");
+    std::regex regx72("&yuml;");
+    summary = std::regex_replace(summary, regx72, "ÿ");
+    std::regex regx73("&#176;");
+    summary = std::regex_replace(summary, regx73, "°");
+    std::regex regx74("&#134;");
+    summary = std::regex_replace(summary, regx74, "†");
+    std::regex regx75("&#135;");
+    summary = std::regex_replace(summary, regx75, "‡");
+    std::regex regx76("&hellip;");
+    summary = std::regex_replace(summary, regx76, "…");
+    std::regex regx77("&quot;");
+    summary = std::regex_replace(summary, regx77, "\"");
+    std::regex regx78("&#177;");
+    summary = std::regex_replace(summary, regx78, "±");
+    std::regex regx79("&#171;");
+    summary = std::regex_replace(summary, regx79, "«");
+    std::regex regx80("&#187;");
+    summary = std::regex_replace(summary, regx80, "»");
+    std::regex regx81("&#191;");
+    summary = std::regex_replace(summary, regx81, "¿");
+    std::regex regx82("&#161;");
+    summary = std::regex_replace(summary, regx82, "¡");
+    std::regex regx83("&#183;");
+    summary = std::regex_replace(summary, regx83, "·");
+    std::regex regx84("&#149;");
+    summary = std::regex_replace(summary, regx84, "•");
+    std::regex regx85("&#153;");
+    summary = std::regex_replace(summary, regx85, "™");
+    std::regex regx86("&copy;");
+    summary = std::regex_replace(summary, regx86, "©");
+    std::regex regx87("&reg;");
+    summary = std::regex_replace(summary, regx87, "®");
+    std::regex regx88("&#167;");
+    summary = std::regex_replace(summary, regx88, "§");
+    std::regex regx89("&#182;");
+    summary = std::regex_replace(summary, regx89, "¶");
+    std::regex regx_clean("\n\n\n\n\n+");
+    summary = std::regex_replace(summary, regx_clean, "\n\n\n\n");
+
 }
 
 std::string find_toc_href(const pugi::xml_document &opf_doc)
@@ -198,6 +392,7 @@ void parse_opf_from_folder(const std::string &base_dir,
     meta_out.author = metadata.child("dc:creator").text().as_string();
     meta_out.artist = metadata.child("dc:contributor").text().as_string();
     meta_out.summary = metadata.child("dc:description").text().as_string();
+    clean_summary(meta_out.summary);
 
     std::unordered_map<std::string, std::string> id_to_href;
 
