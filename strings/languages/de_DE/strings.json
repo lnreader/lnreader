@@ -4,14 +4,14 @@
     "discord": "Discord",
     "github": "Github",
     "helpTranslate": "Hilf beim Übersetzen",
-    "plugins": "Plugins",
+    "plugins": "German",
     "version": "Version",
     "whatsNew": "Was neu ist"
   },
   "advancedSettings": "Erweitert",
   "advancedSettingsScreen": {
-    "cachedNovelsDeletedToast": "Cached novels deleted",
-    "chapterInsertFailed": "chapter insert failed",
+    "cachedNovelsDeletedToast": "German",
+    "chapterInsertFailed": "German",
     "clearCachedNovels": "Clear cached novels",
     "clearCachedNovelsDesc": "Delete cached novels which not in your library",
     "clearDatabaseWarning": "Read and Downloaded chapters and progress of non-library novels will be lost.",
