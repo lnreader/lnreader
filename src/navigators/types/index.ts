@@ -82,6 +82,7 @@ export type SettingsStackParamList = {
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
   RespositorySettings: { url?: string } | undefined;
+  CustomCode: undefined;
 };
 
 export type NovelScreenProps = StackScreenProps<
@@ -168,6 +169,10 @@ export type TrackerSettingsScreenProps = StackScreenProps<
 export type BackupSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,
   'BackupSettings'
+>;
+export type CustomCodeSettingsScreenProps = StackScreenProps<
+  SettingsStackParamList,
+  'CustomCode'
 >;
 export type AdvancedSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,

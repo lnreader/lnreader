@@ -18,6 +18,7 @@ import RespositorySettings from '@screens/settings/SettingsRepositoryScreen/Sett
 // import LibrarySettings from '@screens/settings/SettingsLibraryScreen/SettingsLibraryScreen';
 import StatsScreen from '@screens/StatsScreen/StatsScreen';
 import { MoreStackParamList, SettingsStackParamList } from './types';
+import SettingsCustomCode from '@screens/settings/SettingsCustomCodeScreen';
 
 const Stack = createNativeStackNavigator<
   MoreStackParamList & SettingsStackParamList
@@ -34,6 +35,7 @@ const SettingsStack = () => (
     <Stack.Screen name="BackupSettings" component={BackupSettings} />
     <Stack.Screen name="AppearanceSettings" component={AppearanceSettings} />
     <Stack.Screen name="AdvancedSettings" component={AdvancedSettings} />
+    <Stack.Screen name="CustomCode" component={SettingsCustomCode} />
     <Stack.Screen name="RespositorySettings" component={RespositorySettings} />
     {/* <Stack.Screen name="LibrarySettings" component={LibrarySettings} /> */}
   </Stack.Navigator>

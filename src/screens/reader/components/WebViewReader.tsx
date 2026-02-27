@@ -94,7 +94,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   useEffect(() => {
     setReaderSettings(
       getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-      initialChapterReaderSettings,
+        initialChapterReaderSettings,
     );
   }, [chapter.id]);
 
@@ -110,6 +110,78 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   const appStateRef = useRef(AppState.currentState);
   const ttsQueueRef = useRef<string[]>([]);
   const ttsQueueIndexRef = useRef<number>(0);
+
+  // Replace modal state
+  const [replaceModalVisible, setReplaceModalVisible] = useState(false);
+  const [selectedTextForReplace, setSelectedTextForReplace] = useState('');
+  const [replacementText, setReplacementText] = useState('');
+
+  const handleTextAction = React.useCallback(
+    (action: string, text: string) => {
+      if (!text) return;
+
+      const { setSettings } = settings;
+      if (action === 'remove') {
+        // Add to removeText array if not already present
+        const newRemoveText = [...settings.removeText];
+        if (!newRemoveText.includes(text)) {
+          newRemoveText.push(text);
+          setSettings({ removeText: newRemoveText });
+        }
+      } else if (action === 'replace-prompt') {
+        // Show modal for user to enter replacement text
+        setSelectedTextForReplace(text);
+        setReplacementText('');
+        setReplaceModalVisible(true);
+      }
+    },
+    [settings],
+  );
+
+  const handleReplaceSave = React.useCallback(() => {
+    if (!selectedTextForReplace) return false;
+
+    const { setSettings } = settings;
+    const newReplaceText = { ...settings.replaceText };
+    if (!(selectedTextForReplace in newReplaceText)) {
+      newReplaceText[selectedTextForReplace] = replacementText;
+      setSettings({ replaceText: newReplaceText });
+    }
+    setReplaceModalVisible(false);
+    return true;
+  }, [selectedTextForReplace, replacementText, settings]);
+
+  const handleReplaceCancel = React.useCallback(() => {
+    setReplaceModalVisible(false);
+    setSelectedTextForReplace('');
+    setReplacementText('');
+  }, []);
+
+  const html = useMemo(() => {
+    let chText = chapterText;
+    settings.removeText.forEach(text => {
+      const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
+      if (m) {
+        const regex = new RegExp(m[1], m[2] ?? '');
+        chText = chText.replace(regex, '');
+      } else {
+        chText = chText.split(text).join('');
+      }
+    });
+    Object.entries(settings.replaceText).forEach(([text, replacement]) => {
+      const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
+      if (m) {
+        const regex = new RegExp(m[1], m[2] ?? '');
+        chText = chText.replace(regex, replacement);
+      } else {
+        chText = chText.split(text).join(replacement);
+      }
+    });
+    return chText;
+  }, [chapterText, settings.removeText, settings.replaceText]);
+
+  if (chapterText === undefined) {
+  }
 
   useEffect(() => {
     readerSettingsRef.current = readerSettings;
@@ -307,6 +379,45 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   const isRTL = plugin?.lang === 'Arabic' || plugin?.lang === 'Hebrew';
   const readerDir = isRTL ? 'rtl' : 'ltr';
 
+  const customJS = useMemo(() => {
+    return readerSettings.codeSnippetsJS
+      .map(snippet => {
+        if (!snippet.active) return null;
+        return `
+        try {
+           ${snippet.code}
+        } catch (error) {
+          alert(\`Error loading executing ${snippet.name}:\n\` + error);
+        }
+        `;
+      })
+      .filter(Boolean)
+      .join('\n');
+  }, [readerSettings.codeSnippetsJS]);
+
+  const customCSS = useMemo(() => {
+    return readerSettings.codeSnippetsCSS
+      .map(snippet => {
+        if (!snippet.active) return null;
+        return snippet.code;
+      })
+      .filter(Boolean)
+      .join('\n');
+  }, [readerSettings.codeSnippetsCSS]);
+
+  const preparedHTML = useMemo(() => {
+    let resultHtml = html;
+    readerSettings.removeText.forEach(text => {
+      resultHtml = resultHtml.replace(text, '');
+    });
+    Object.entries(readerSettings.replaceText).forEach(
+      ([text, replacement]) => {
+        resultHtml = resultHtml.replace(text, replacement);
+      },
+    );
+    return resultHtml;
+  }, [html, readerSettings.removeText, readerSettings.replaceText]);
+
   return (
     <WebView
       ref={webViewRef}
@@ -355,9 +466,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               | undefined;
             const queue = Array.isArray(payload?.queue)
               ? payload?.queue.filter(
-                (item): item is string =>
-                  typeof item === 'string' && item.trim().length > 0,
-              )
+                  (item): item is string =>
+                    typeof item === 'string' && item.trim().length > 0,
+                )
               : [];
             ttsQueueRef.current = queue;
             if (typeof payload?.startIndex === 'number') {
@@ -441,6 +552,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               updateTTSPlaybackState(isReading);
             }
             break;
+          case 'text-action':
+            if (event.action && event.text) {
+              handleTextAction(event.action as string, String(event.text));
+            }
+            break;
         }
       }}
       source={{
@@ -448,7 +564,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
         headers: plugin?.imageRequestInit?.headers,
         method: plugin?.imageRequestInit?.method,
         body: plugin?.imageRequestInit?.body,
-        html: ` 
+        html: `
         <!DOCTYPE html>
           <html dir="${readerDir}">
             <head>
@@ -475,62 +591,68 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 --theme-onSecondary: ${theme.onSecondary};
                 --theme-surface: ${theme.surface};
                 --theme-surface-0-9: ${color(theme.surface)
-            .alpha(0.9)
-            .toString()};
+                  .alpha(0.9)
+                  .toString()};
                 --theme-onSurface: ${theme.onSurface};
                 --theme-surfaceVariant: ${theme.surfaceVariant};
                 --theme-onSurfaceVariant: ${theme.onSurfaceVariant};
                 --theme-outline: ${theme.outline};
                 --theme-rippleColor: ${theme.rippleColor};
                 }
-                
+
                 @font-face {
                   font-family: ${readerSettings.fontFamily};
-                  src: url("file:///android_asset/fonts/${readerSettings.fontFamily
-          }.ttf");
+                  src: url("file:///android_asset/fonts/${
+                    readerSettings.fontFamily
+                  }.ttf");
                 }
                 </style>
- 
+
               <link rel="stylesheet" href="${pluginCustomCSS}">
-              <style>${readerSettings.customCSS}</style>
+              <style>${customCSS}</style>
             </head>
-            <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
-          }">
-              <div class="transition-chapter" style="transform: ${nextChapterScreenVisible.current
-            ? 'translateX(-100%)'
-            : 'translateX(0%)'
-          };
+            <body class="${
+              chapterGeneralSettings.pageReader ? 'page-reader' : ''
+            }">
+              <div class="transition-chapter" style="transform: ${
+                nextChapterScreenVisible.current
+                  ? 'translateX(-100%)'
+                  : 'translateX(0%)'
+              };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
               ">${chapter.name}</div>
               <div id="LNReader-chapter">
-                ${html}  
+                ${preparedHTML}
               </div>
               <div id="reader-ui"></div>
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-            nextChapterScreenVisible: nextChapterScreenVisible.current,
-          })};
- 
- 
+                  nextChapterScreenVisible: nextChapterScreenVisible.current,
+                })};
+
+
                 var initialReaderConfig = ${JSON.stringify({
-            readerSettings,
-            chapterGeneralSettings,
-            novel,
-            chapter,
-            nextChapter,
-            prevChapter,
-            batteryLevel,
-            autoSaveInterval: 2222,
-            DEBUG: __DEV__,
-            strings: {
-              finished: getString('readerScreen.finished') + ': ' + chapter.name.trim(),
-              nextChapter: getString('readerScreen.nextChapter', {
-                name: nextChapter?.name,
-              }),
-              noNextChapter: getString('readerScreen.noNextChapter'),
-            },
-          })}
+                  readerSettings,
+                  chapterGeneralSettings,
+                  novel,
+                  chapter,
+                  nextChapter,
+                  prevChapter,
+                  batteryLevel,
+                  autoSaveInterval: 2222,
+                  DEBUG: __DEV__,
+                  strings: {
+                    finished:
+                      getString('readerScreen.finished') +
+                      ': ' +
+                      chapter.name.trim(),
+                    nextChapter: getString('readerScreen.nextChapter', {
+                      name: nextChapter?.name,
+                    }),
+                    noNextChapter: getString('readerScreen.noNextChapter'),
+                  },
+                })}
               </script>
               <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
@@ -540,8 +662,19 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script src="${pluginCustomJS}"></script>
               <script>
-                ${readerSettings.customJS}
-              </script>
+                 function fn(){
+                     let novelName = "${novel.name}";
+                     let chapterName = "${chapter.name}";
+                     let sourceId = "${novel.pluginId}";
+                     let chapterId =${chapter.id};
+                     let novelId =${chapter.novelId};
+                     const qs = (s) => document.querySelector(s);
+                     let html = qs("#LNReader-chapter").innerHTML;
+                     ${customJS}
+                     qs("#LNReader-chapter").innerHTML = html;
+                   }
+                   document.addEventListener("DOMContentLoaded", fn);
+               </script>
           </html>
           `,
       }}

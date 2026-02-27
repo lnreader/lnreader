@@ -28,6 +28,7 @@ interface ToggleButtonProps {
   theme: ThemeColors;
   color?: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
 export const ToggleButton: React.FC<ToggleButtonProps> = ({
@@ -36,6 +37,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   theme,
   color,
   onPress,
+  disabled,
 }) => (
   <View style={styles.toggleButtonContainer}>
     <Pressable
@@ -45,6 +47,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
         getToggleButtonPressableStyle(selected, theme),
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       <MaterialCommunityIcons
         name={icon}
