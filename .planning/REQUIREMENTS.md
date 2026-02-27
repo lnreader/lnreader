@@ -60,17 +60,17 @@ Explicitly excluded. Documented to prevent scope creep.
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase   | Status  |
-| ----------- | ------- | ------- |
-| TTS-01      | Phase 1 | Pending |
-| TTS-02      | Phase 2 | Pending |
-| TTS-03      | Phase 1 | Pending |
-| TTS-04      | Phase 3 | Pending |
-| TTS-05      | Phase 2 | Pending |
-| TTS-06      | Phase 3 | Pending |
-| TTS-07      | Phase 1 | Pending |
-| TTS-08      | Phase 1 | Pending |
-| TTS-09      | Phase 3 | Pending |
+| Requirement                         | Phase   | Status  |
+| ----------------------------------- | ------- | ------- |
+| TTS-01: Play/pause/stop offline TTS | Phase 1 | Pending |
+| TTS-02: Background playback         | Phase 2 | Pending |
+| TTS-03: Speed control (0.5x-2.0x)   | Phase 3 | Pending |
+| TTS-04: Continue from last position | Phase 3 | Pending |
+| TTS-05: Lock screen controls        | Phase 2 | Pending |
+| TTS-06: Chapter navigation from TTS | Phase 3 | Pending |
+| TTS-07: Voice selection             | Phase 1 | Pending |
+| TTS-08: Toggle native/Piper         | Phase 1 | Pending |
+| TTS-09: Position sync with reader   | Phase 3 | Pending |
 
 **Coverage:**
 
