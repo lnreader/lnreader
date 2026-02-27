@@ -82,6 +82,7 @@ export type SettingsStackParamList = {
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
   RespositorySettings: { url?: string } | undefined;
+  VoiceSelection: undefined;
 };
 
 export type NovelScreenProps = StackScreenProps<
@@ -177,6 +178,11 @@ export type AdvancedSettingsScreenProps = StackScreenProps<
 export type RespositorySettingsScreenProps = CompositeScreenProps<
   StackScreenProps<SettingsStackParamList, 'RespositorySettings'>,
   StackScreenProps<RootStackParamList, 'BottomNavigator'>
+>;
+
+export type VoiceSelectionScreenProps = StackScreenProps<
+  SettingsStackParamList,
+  'VoiceSelection'
 >;
 
 declare global {
