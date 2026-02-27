@@ -30,7 +30,11 @@
 3. User can toggle between native iOS TTS (expo-speech) and offline Piper TTS engines
 4. Voice models can be downloaded, extracted, and stored in app Documents directory
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+- [ ] 01-01-PLAN.md — Install dependencies and create TTS Engine abstraction (Strategy Pattern)
+- [ ] 01-02-PLAN.md — Create Model Manager and PlayerController
+- [ ] 01-03-PLAN.md — Create Voice Selection UI and TTS controls
 
 ---
 
@@ -87,7 +91,7 @@
 
 | Phase                  | Plans Complete | Status      | Completed |
 | ---------------------- | -------------- | ----------- | --------- |
-| 1. Core TTS Engine     | 0/1            | Not started | -         |
+| 1. Core TTS Engine     | 0/3            | Not started | -         |
 | 2. Background Playback | 0/1            | Not started | -         |
 | 3. Reader Integration  | 0/1            | Not started | -         |
 
