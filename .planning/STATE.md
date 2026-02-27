@@ -14,7 +14,7 @@
 | --------- | ------------------ |
 | Phase     | 01-core-tts-engine |
 | --------- | ------------       |
-| Plan      | 2/2 complete       |
+| Plan      | 3/3 complete       |
 | Status    | Complete           |
 | Progress  | ██████████ 100%    |
 
@@ -77,6 +77,13 @@
 - PlayerController provides unified API with auto-fallback to native TTS
 - Uses react-native-fs and react-native-zip-archive for downloads
 
+### Implementation Notes (from 01-03 plan)
+
+- useTTS hook provides reactive TTS controls with AsyncStorage persistence
+- VoiceSelectionScreen lists voices grouped by language with download progress
+- TTSPlayerBar shows playback controls at bottom of screen
+- SettingsScreen includes TTS section with voice, engine toggle, and speed controls
+
 ### Technical Considerations
 
 - Must handle iOS audio session conflicts with AVSpeechSynthesizer
@@ -89,7 +96,16 @@
 
 ---
 
-**Last execution:** Completed 01-02 plan - ModelManager, VoiceManager, and PlayerController
+**Last execution:** Completed 01-03 plan - Voice Selection UI and TTS Playback Controls
+
+- Created useTTS React hook for TTS functionality
+- Created VoiceSelectionScreen with voice download/selection
+- Created TTSPlayerBar component for playback controls
+- Added TTS settings to SettingsScreen
+
+---
+
+**Previous:** Completed 01-02 plan - ModelManager, VoiceManager, and PlayerController
 
 - Created ModelManager for voice model lifecycle
 - Created VoiceManager with 20+ Piper voices

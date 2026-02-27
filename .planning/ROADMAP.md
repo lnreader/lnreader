@@ -7,7 +7,7 @@
 
 ## Phases
 
-- [x] **Phase 1: Core TTS Engine** - TTS Engine abstraction, Model Manager, basic playback
+- [x] **Phase 1: Core TTS Engine** - TTS Engine abstraction, Model Manager, basic playback (COMPLETE)
 - [ ] **Phase 2: Background Playback** - Audio session config, lock screen controls
 - [ ] **Phase 3: Reader Integration** - Speed control, position sync, chapter navigation
 
@@ -34,7 +34,7 @@
 
 - [x] 01-01-PLAN.md — Install dependencies and create TTS Engine abstraction (Strategy Pattern)
 - [x] 01-02-PLAN.md — Create Model Manager and PlayerController
-- [ ] 01-03-PLAN.md — Create Voice Selection UI and TTS controls
+- [x] 01-03-PLAN.md — Create Voice Selection UI and TTS controls
 
 ---
 
@@ -89,11 +89,11 @@
 
 ## Progress
 
-| Phase                  | Plans Complete | Status      | Completed |
-| ---------------------- | -------------- | ----------- | --------- |
-| 1. Core TTS Engine     | 2/3            | In Progress | -         |
-| 2. Background Playback | 0/1            | Not started | -         |
-| 3. Reader Integration  | 0/1            | Not started | -         |
+| Phase                  | Plans Complete | Status      | Completed  |
+| ---------------------- | -------------- | ----------- | ---------- |
+| 1. Core TTS Engine     | 3/3            | Complete    | 2026-02-27 |
+| 2. Background Playback | 0/1            | Not started | -          |
+| 3. Reader Integration  | 0/1            | Not started | -          |
 
 ---
 
