@@ -22,7 +22,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Integration
 
-- [ ] **TTS-08**: Toggle between native iOS TTS and offline Piper TTS
+- [x] **TTS-08**: Toggle between native iOS TTS and offline Piper TTS
 - [ ] **TTS-09**: TTS position syncs with reader position
 
 ## v2 Requirements
