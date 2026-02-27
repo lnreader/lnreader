@@ -33,7 +33,7 @@
 **Plans:** 3 plans
 
 - [x] 01-01-PLAN.md — Install dependencies and create TTS Engine abstraction (Strategy Pattern)
-- [ ] 01-02-PLAN.md — Create Model Manager and PlayerController
+- [x] 01-02-PLAN.md — Create Model Manager and PlayerController
 - [ ] 01-03-PLAN.md — Create Voice Selection UI and TTS controls
 
 ---
@@ -91,7 +91,7 @@
 
 | Phase                  | Plans Complete | Status      | Completed |
 | ---------------------- | -------------- | ----------- | --------- |
-| 1. Core TTS Engine     | 1/3            | In Progress | -         |
+| 1. Core TTS Engine     | 2/3            | In Progress | -         |
 | 2. Background Playback | 0/1            | Not started | -         |
 | 3. Reader Integration  | 0/1            | Not started | -         |
 

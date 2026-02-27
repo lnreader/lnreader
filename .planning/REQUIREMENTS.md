@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Core Playback
 
-- [ ] **TTS-01**: User can play/pause/stop offline TTS playback
+- [x] **TTS-01**: User can play/pause/stop offline TTS playback
 - [ ] **TTS-02**: TTS runs in background with screen off
 - [ ] **TTS-03**: User can adjust playback speed (0.5x - 2.0x)
 - [ ] **TTS-04**: TTS continues from last position when reopened
@@ -18,7 +18,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **TTS-05**: Lock screen shows playback controls (play/pause/stop)
 - [ ] **TTS-06**: User can navigate to next/previous chapter from TTS
-- [ ] **TTS-07**: User can select offline voice from available Piper models
+- [x] **TTS-07**: User can select offline voice from available Piper models
 
 ### Integration
 
@@ -60,17 +60,17 @@ Explicitly excluded. Documented to prevent scope creep.
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement                         | Phase   | Status  |
-| ----------------------------------- | ------- | ------- |
-| TTS-01: Play/pause/stop offline TTS | Phase 1 | Pending |
-| TTS-02: Background playback         | Phase 2 | Pending |
-| TTS-03: Speed control (0.5x-2.0x)   | Phase 3 | Pending |
-| TTS-04: Continue from last position | Phase 3 | Pending |
-| TTS-05: Lock screen controls        | Phase 2 | Pending |
-| TTS-06: Chapter navigation from TTS | Phase 3 | Pending |
-| TTS-07: Voice selection             | Phase 1 | Pending |
-| TTS-08: Toggle native/Piper         | Phase 1 | Pending |
-| TTS-09: Position sync with reader   | Phase 3 | Pending |
+| Requirement                         | Phase   | Status   |
+| ----------------------------------- | ------- | -------- |
+| TTS-01: Play/pause/stop offline TTS | Phase 1 | Complete |
+| TTS-02: Background playback         | Phase 2 | Pending  |
+| TTS-03: Speed control (0.5x-2.0x)   | Phase 3 | Pending  |
+| TTS-04: Continue from last position | Phase 3 | Pending  |
+| TTS-05: Lock screen controls        | Phase 2 | Pending  |
+| TTS-06: Chapter navigation from TTS | Phase 3 | Pending  |
+| TTS-07: Voice selection             | Phase 1 | Complete |
+| TTS-08: Toggle native/Piper         | Phase 1 | Pending  |
+| TTS-09: Position sync with reader   | Phase 3 | Pending  |
 
 **Coverage:**
 
