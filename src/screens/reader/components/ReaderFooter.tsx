@@ -19,6 +19,7 @@ interface ChapterFooterProps {
   scrollToStart: () => void;
   navigation: ChapterScreenProps['navigation'];
   openDrawer: () => void;
+  onOpenRSVP: () => void;
 }
 
 const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
@@ -28,6 +29,7 @@ const ChapterFooter = ({
   scrollToStart,
   navigation,
   openDrawer,
+  onOpenRSVP,
 }: ChapterFooterProps) => {
   const { novel, chapter, nextChapter, prevChapter, navigateChapter } =
     useChapterContext();
@@ -141,6 +143,17 @@ const ChapterFooter = ({
         >
           <IconButton
             icon="format-horizontal-align-right"
+            size={26}
+            iconColor={theme.onSurface}
+          />
+        </Pressable>
+        <Pressable
+          android_ripple={rippleConfig}
+          style={styles.buttonStyles}
+          onPress={onOpenRSVP}
+        >
+          <IconButton
+            icon="play-speed"
             size={26}
             iconColor={theme.onSurface}
           />

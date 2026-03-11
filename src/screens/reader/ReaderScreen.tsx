@@ -3,6 +3,7 @@ import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 
 import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
+import RSVPReader from './components/RSVPReader';
 
 import WebViewReader from './components/WebViewReader';
 import ReaderBottomSheetV2 from './components/ReaderBottomSheet/ReaderBottomSheet';
@@ -16,8 +17,10 @@ import { ChapterContextProvider, useChapterContext } from './ChapterContext';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
+import { IconButton } from 'react-native-paper';
+import color from 'color';
 
 const Chapter = ({ route, navigation }: ChapterScreenProps) => {
   const [open, setOpen] = useState(false);
@@ -69,6 +72,7 @@ export const ChapterContent = ({
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
   const [bookmarked, setBookmarked] = useState<boolean>(chapter.bookmark ?? false);
+  const [rsvpVisible, setRsvpVisible] = useState(false);
 
   useEffect(() => {
     setBookmarked(chapter.bookmark ?? false);
@@ -131,6 +135,25 @@ export const ChapterContent = ({
         <WebViewReader onPress={hideHeader} />
       )}
       <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+      <RSVPReader
+        visible={rsvpVisible}
+        onClose={() => setRsvpVisible(false)}
+      />
+      {!loading && !rsvpVisible ? (
+        <Pressable
+          onPress={() => setRsvpVisible(true)}
+          style={[
+            styles.rsvpFab,
+            { backgroundColor: color(theme.surface).alpha(0.85).string() },
+          ]}
+        >
+          <IconButton
+            icon="play-speed"
+            size={22}
+            iconColor={theme.primary}
+          />
+        </Pressable>
+      ) : null}
       {!hidden ? (
         <>
           <ReaderAppbar
@@ -144,6 +167,7 @@ export const ChapterContent = ({
             scrollToStart={scrollToStart}
             navigation={navigation}
             openDrawer={openDrawerI}
+            onOpenRSVP={() => setRsvpVisible(true)}
           />
         </>
       ) : null}
@@ -155,4 +179,16 @@ export default Chapter;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  rsvpFab: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    zIndex: 2,
+  },
 });
