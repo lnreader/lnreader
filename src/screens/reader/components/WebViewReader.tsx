@@ -464,9 +464,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 --readerSettings-padding: ${readerSettings.padding}px;
                 --readerSettings-textSize: ${readerSettings.textSize}px;
                 --readerSettings-textColor: ${readerSettings.textColor};
-                --readerSettings-textAlign: ${readerSettings.textAlign};
+                --readerSettings-textAlign: ${isRTL ? 'right' : readerSettings.textAlign};
                 --readerSettings-lineHeight: ${readerSettings.lineHeight};
                 --readerSettings-fontFamily: ${readerSettings.fontFamily};
+                --readerSettings-direction: ${readerDir};
                 --theme-primary: ${theme.primary};
                 --theme-onPrimary: ${theme.onPrimary};
                 --theme-secondary: ${theme.secondary};
