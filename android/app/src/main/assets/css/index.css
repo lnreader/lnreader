@@ -24,6 +24,7 @@ body {
   background-color: var(--readerSettings-theme);
   color: var(--readerSettings-textColor);
   text-align: var(--readerSettings-textAlign);
+  direction: var(--readerSettings-direction, ltr);
   line-height: var(--readerSettings-lineHeight);
   font-family: var(--readerSettings-fontFamily);
 }
