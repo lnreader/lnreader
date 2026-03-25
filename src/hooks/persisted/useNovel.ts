@@ -238,7 +238,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
 
       const config = [novel.id, settingsSort, settingsFilter, page] as const;
 
-      let chapterCount = await getChapterCount(novel.id, page);
+      let chapterCount = await getChapterCount(novel.id, page, settingsFilter);
 
       if (chapterCount) {
         try {
@@ -259,7 +259,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
         });
         await insertChapters(novel.id, sourceChapters);
         newChapters = await _getPageChapters(...config);
-        chapterCount = await getChapterCount(novel.id, page);
+        chapterCount = await getChapterCount(novel.id, page, settingsFilter);
       }
 
       setBatchInformation({

@@ -395,10 +395,18 @@ export const getPageChapters = async (
   return query.all();
 };
 
-export const getChapterCount = async (novelId: number, page: string = '1') =>
+export const getChapterCount = async (
+  novelId: number,
+  page: string = '1',
+  filter?: ChapterFilterKey[],
+) =>
   await dbManager.$count(
     chapterSchema,
-    and(eq(chapterSchema.novelId, novelId), eq(chapterSchema.page, page)),
+    and(
+      eq(chapterSchema.novelId, novelId),
+      eq(chapterSchema.page, page),
+      chapterFilterToSQL(filter),
+    ),
   );
 
 export const getPageChaptersBatched = async (
