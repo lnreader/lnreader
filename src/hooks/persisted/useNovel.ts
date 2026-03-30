@@ -271,7 +271,7 @@ export const useNovel = (novelOrPath: string | NovelInfo, pluginId: string) => {
 
       const unread = await _getFirstUnreadChapter(
         novel.id,
-        novelSettings.filter,
+        settingsFilter,
         page,
       );
       setFirstUnreadChapter(unread ?? undefined);

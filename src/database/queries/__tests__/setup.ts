@@ -115,10 +115,26 @@ jest.mock('expo-document-picker', () => ({
 }));
 
 // Mock database utilities
-jest.mock('@database/utils/parser', () => ({
-  chapterFilterToSQL: jest.fn().mockReturnValue(undefined),
-  chapterOrderToSQL: jest.fn().mockReturnValue(undefined),
-}));
+jest.mock('@database/utils/parser', () => {
+  const { sql } = require('drizzle-orm');
+  return {
+    chapterFilterToSQL: jest.fn().mockImplementation(filter => {
+      if (!filter || !filter.length) return undefined;
+      const map: Record<string, string> = {
+        'read': '`unread`=0',
+        'not-read': '`unread`=1',
+        'downloaded': 'isDownloaded=1',
+        'not-downloaded': 'isDownloaded=0',
+        'bookmarked': 'bookmark=1',
+        'not-bookmarked': 'bookmark=0',
+      };
+      const parts = filter.map((f: string) => map[f]).filter(Boolean);
+      if (!parts.length) return undefined;
+      return sql.raw(parts.join(' AND '));
+    }),
+    chapterOrderToSQL: jest.fn().mockReturnValue(undefined),
+  };
+});
 
 // Mock database constants
 jest.mock('@database/constants', () => ({

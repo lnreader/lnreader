@@ -712,6 +712,54 @@ describe('ChapterQueries', () => {
 
       expect(result).toBe(2);
     });
+
+    it('should return filtered count when filter is provided', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        unread: true,
+      });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        unread: false,
+      });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        unread: true,
+      });
+
+      const total = await getChapterCount(novelId, '1');
+      expect(total).toBe(3);
+
+      const unreadOnly = await getChapterCount(novelId, '1', ['not-read']);
+      expect(unreadOnly).toBe(2);
+
+      const readOnly = await getChapterCount(novelId, '1', ['read']);
+      expect(readOnly).toBe(1);
+    });
+
+    it('should return total count when no filter is provided', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        unread: true,
+      });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        unread: false,
+      });
+
+      const result = await getChapterCount(novelId, '1');
+      expect(result).toBe(2);
+
+      const noFilter = await getChapterCount(novelId, '1', undefined);
+      expect(noFilter).toBe(2);
+
+      const emptyFilter = await getChapterCount(novelId, '1', []);
+      expect(emptyFilter).toBe(2);
+    });
   });
 
   describe('getPageChaptersBatched', () => {
