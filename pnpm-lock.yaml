@@ -318,6 +318,9 @@ importers:
       eslint-plugin-testing-library:
         specifier: ^7.16.2
         version: 7.16.2(eslint@8.57.1)(typescript@5.9.3)
+      hermes-compiler:
+        specifier: ^250829098.0.2
+        version: 250829098.0.2
       husky:
         specifier: ^7.0.4
         version: 7.0.4
@@ -3665,6 +3668,9 @@ packages:
 
   hermes-compiler@0.14.1:
     resolution: {integrity: sha512-+RPPQlayoZ9n6/KXKt5SFILWXCGJ/LV5d24L5smXrvTDrPS4L6dSctPczXauuvzFP3QEJbD1YO7Z3Ra4a+4IhA==}
+
+  hermes-compiler@250829098.0.2:
+    resolution: {integrity: sha512-9+la7TeGGZg5Cj0UV5MbqhqyT/Hd/PUlQZ3Uhggy0jiaiG2qxFJbi/uGWALTqa7GwETyQa4A7ngus1A1aXA8QQ==}
 
   hermes-eslint@0.33.3:
     resolution: {integrity: sha512-eGY0l6T5U9LDdC+uN88NrSOrvPPtXGPxN7EaD38hytWuBEVXypq0eQ1SNVsnQPBZLWi+b1jkF4F5aVtTCQC6wg==}
@@ -10394,6 +10400,8 @@ snapshots:
       function-bind: 1.1.2
 
   hermes-compiler@0.14.1: {}
+
+  hermes-compiler@250829098.0.2: {}
 
   hermes-eslint@0.33.3:
     dependencies:
