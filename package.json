@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev:android": "pnpm run generate:env:debug && react-native run-android --appIdSuffix \"debug\" --active-arch-only",
+    "dev:android:release": "pnpm run generate:env:release && react-native run-android --mode \"release\" --active-arch-only",
     "dev:ios": "react-native run-ios",
     "dev:start": "react-native start",
     "dev:clean-start": "pnpm run dev:start -- --reset-cache",
@@ -153,7 +154,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-native": "^5.0.0",
     "eslint-plugin-testing-library": "^7.16.2",
-    "hermes-compiler": "^250829098.0.2",
+    "hermes-compiler": "0.14.1",
     "husky": "^7.0.4",
     "jest": "^29.7.0",
     "jest-expo": "^55.0.11",

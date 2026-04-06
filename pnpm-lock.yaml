@@ -319,8 +319,8 @@ importers:
         specifier: ^7.16.2
         version: 7.16.2(eslint@8.57.1)(typescript@5.9.3)
       hermes-compiler:
-        specifier: ^250829098.0.2
-        version: 250829098.0.2
+        specifier: 0.14.1
+        version: 0.14.1
       husky:
         specifier: ^7.0.4
         version: 7.0.4
