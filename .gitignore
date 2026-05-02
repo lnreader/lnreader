@@ -99,3 +99,6 @@ src/generated/**/*
 
 # Rock
 .rock/
+
+# TypeScript
+*.tsbuildinfo
