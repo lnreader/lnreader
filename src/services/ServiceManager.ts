@@ -16,6 +16,7 @@ import { createBackup, restoreBackup } from './backup/local';
 import { migrateNovel, MigrateNovelData } from './migrate/migrateNovel';
 import { downloadChapter } from './download/downloadChapter';
 import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
+import { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 type taskNames =
   | 'IMPORT_EPUB'
@@ -45,11 +46,11 @@ export type BackgroundTask =
       };
     }
   | { name: 'DRIVE_BACKUP'; data: DriveFile }
-  | { name: 'DRIVE_RESTORE'; data: DriveFile }
+  | { name: 'DRIVE_RESTORE'; data: DriveFile & { mode?: RestoreMode } }
   | { name: 'SELF_HOST_BACKUP'; data: SelfHostData }
-  | { name: 'SELF_HOST_RESTORE'; data: SelfHostData }
+  | { name: 'SELF_HOST_RESTORE'; data: SelfHostData & { mode?: RestoreMode } }
   | { name: 'LOCAL_BACKUP' }
-  | { name: 'LOCAL_RESTORE' }
+  | { name: 'LOCAL_RESTORE'; data?: { mode?: RestoreMode } }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
   | DownloadChapterTask;
 export type DownloadChapterTask = {
@@ -245,15 +246,23 @@ export default class ServiceManager {
       case 'DRIVE_BACKUP':
         return createDriveBackup(task.task.data, this.setMeta.bind(this));
       case 'DRIVE_RESTORE':
-        return driveRestore(task.task.data, this.setMeta.bind(this));
+        return driveRestore(
+          task.task.data,
+          this.setMeta.bind(this),
+          task.task.data?.mode,
+        );
       case 'SELF_HOST_BACKUP':
         return createSelfHostBackup(task.task.data, this.setMeta.bind(this));
       case 'SELF_HOST_RESTORE':
-        return selfHostRestore(task.task.data, this.setMeta.bind(this));
+        return selfHostRestore(
+          task.task.data,
+          this.setMeta.bind(this),
+          task.task.data?.mode,
+        );
       case 'LOCAL_BACKUP':
         return createBackup(this.setMeta.bind(this));
       case 'LOCAL_RESTORE':
-        return restoreBackup(this.setMeta.bind(this));
+        return restoreBackup(this.setMeta.bind(this), task.task.data?.mode);
       case 'MIGRATE_NOVEL':
         return migrateNovel(task.task.data, this.setMeta.bind(this));
       case 'DOWNLOAD_CHAPTER':

@@ -19,6 +19,14 @@ import {
   chapterSchema,
 } from '@database/schema';
 import NativeFile from '@specs/NativeFile';
+import {
+  RestoreOptions,
+  andUnread,
+  maxDateString,
+  maxNum,
+  orBool,
+  preferExisting,
+} from './_restoreMergeUtils';
 
 /**
  * Inserts a novel and its chapters into the database using Drizzle ORM.
@@ -420,25 +428,139 @@ export const updateNovelCategories = async (
 };
 
 /**
- * Restores novel and chapters from a backup object.
+ * Restores a novel and its chapters from a backup object.
+ *
+ * - `overwrite` (default): legacy behaviour — delete the row whose id
+ *   matches the backup, then re-insert verbatim.
+ * - `merge`: match the existing row by the natural key (path, pluginId)
+ *   and merge instead of replacing. Reading progress (bookmark / unread /
+ *   readTime / progress / position) is unioned across both sides; novel
+ *   stats (totalChapters, chaptersDownloaded, chaptersUnread, lastReadAt,
+ *   lastUpdatedAt) are recomputed by SQLite triggers when chapters change.
  */
-export const _restoreNovelAndChapters = async (backupNovel: BackupNovel) => {
+export const _restoreNovelAndChapters = async (
+  backupNovel: BackupNovel,
+  options: RestoreOptions = {},
+) => {
+  const mode = options.mode ?? 'overwrite';
   const { chapters, ...novel } = backupNovel;
+  const backupNovelId = novel.id;
+
   await dbManager.write(async tx => {
-    // Delete existing novel data
-    tx.delete(novelSchema).where(eq(novelSchema.id, novel.id)).run();
-    tx.delete(chapterSchema).where(eq(chapterSchema.novelId, novel.id)).run();
+    if (mode === 'overwrite') {
+      tx.delete(novelSchema).where(eq(novelSchema.id, backupNovelId)).run();
+      tx.delete(chapterSchema)
+        .where(eq(chapterSchema.novelId, backupNovelId))
+        .run();
+      tx.insert(novelSchema).values(novel).run();
+      if (chapters.length > 0) {
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < chapters.length; i += BATCH_SIZE) {
+          const batch = chapters.slice(i, i + BATCH_SIZE);
+          tx.insert(chapterSchema).values(batch).run();
+        }
+      }
+      options.novelIdMap?.set(backupNovelId, backupNovelId);
+      return;
+    }
 
-    // Restore novel
-    tx.insert(novelSchema).values(novel).run();
+    // merge mode: match on (path, pluginId)
+    const existing = await tx
+      .select()
+      .from(novelSchema)
+      .where(
+        and(
+          eq(novelSchema.path, novel.path),
+          eq(novelSchema.pluginId, novel.pluginId),
+        ),
+      )
+      .get();
 
-    // Restore chapters in batches
-    if (chapters.length > 0) {
-      const BATCH_SIZE = 100;
-      for (let i = 0; i < chapters.length; i += BATCH_SIZE) {
-        const batch = chapters.slice(i, i + BATCH_SIZE);
-        tx.insert(chapterSchema).values(batch).run();
+    let realNovelId: number;
+
+    if (!existing) {
+      // new novel — drop the backup id, let auto-increment assign one
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _ignoredId, ...novelInsert } = novel;
+      const inserted = await tx
+        .insert(novelSchema)
+        .values(novelInsert)
+        .returning({ id: novelSchema.id })
+        .get();
+      realNovelId = inserted.id;
+    } else {
+      realNovelId = existing.id;
+      await tx
+        .update(novelSchema)
+        .set({
+          // name: backup wins per merge policy
+          name: novel.name,
+          cover: preferExisting(existing.cover, novel.cover),
+          summary: preferExisting(existing.summary, novel.summary),
+          author: preferExisting(existing.author, novel.author),
+          artist: preferExisting(existing.artist, novel.artist),
+          status: preferExisting(existing.status, novel.status),
+          genres: preferExisting(existing.genres, novel.genres),
+          inLibrary: orBool(existing.inLibrary, novel.inLibrary),
+          isLocal: orBool(existing.isLocal, novel.isLocal),
+          totalPages: maxNum(existing.totalPages, novel.totalPages),
+          // totalChapters / chaptersDownloaded / chaptersUnread /
+          // lastReadAt / lastUpdatedAt are recomputed by triggers when
+          // chapter rows change below.
+        })
+        .where(eq(novelSchema.id, realNovelId))
+        .run();
+    }
+
+    // Chapters: match on (novelId=realNovelId, path)
+    const existingChapters = await tx
+      .select()
+      .from(chapterSchema)
+      .where(eq(chapterSchema.novelId, realNovelId))
+      .all();
+    const existingByPath = new Map(existingChapters.map(c => [c.path, c]));
+
+    const inserts: Array<typeof chapterSchema.$inferInsert> = [];
+    for (const ch of chapters) {
+      const existingCh = existingByPath.get(ch.path);
+      if (!existingCh) {
+        // new chapter — drop backup id, remap novelId to the live one
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _id, novelId: _nid, ...chapterInsert } = ch;
+        inserts.push({ ...chapterInsert, novelId: realNovelId });
+      } else {
+        await tx
+          .update(chapterSchema)
+          .set({
+            // name: existing wins per merge policy ("사용자 의도")
+            name: preferExisting(existingCh.name, ch.name) ?? ch.name,
+            releaseTime: preferExisting(existingCh.releaseTime, ch.releaseTime),
+            updatedTime: maxDateString(existingCh.updatedTime, ch.updatedTime),
+            chapterNumber: preferExisting(
+              existingCh.chapterNumber,
+              ch.chapterNumber,
+            ),
+            bookmark: orBool(existingCh.bookmark, ch.bookmark),
+            unread: andUnread(existingCh.unread, ch.unread),
+            readTime: maxDateString(existingCh.readTime, ch.readTime),
+            isDownloaded: orBool(existingCh.isDownloaded, ch.isDownloaded),
+            progress: maxNum(existingCh.progress, ch.progress),
+            position: maxNum(existingCh.position, ch.position) ?? 0,
+            page: existingCh.page ?? ch.page ?? '1',
+          })
+          .where(eq(chapterSchema.id, existingCh.id))
+          .run();
       }
     }
+
+    if (inserts.length > 0) {
+      const BATCH_SIZE = 100;
+      for (let i = 0; i < inserts.length; i += BATCH_SIZE) {
+        const batch = inserts.slice(i, i + BATCH_SIZE);
+        await tx.insert(chapterSchema).values(batch).run();
+      }
+    }
+
+    options.novelIdMap?.set(backupNovelId, realNovelId);
   });
 };

@@ -8,6 +8,7 @@ import {
   novelCategorySchema,
   type CategoryRow,
 } from '@database/schema';
+import { RestoreOptions } from './_restoreMergeUtils';
 
 /**
  * Get all categories with their novel IDs using Drizzle ORM
@@ -202,39 +203,83 @@ export const getAllNovelCategories = async (): Promise<NovelCategory[]> => {
 };
 
 /**
- * Restore a category from backup
- * Used during the restore process
+ * Restore a category from backup.
+ *
+ * - `overwrite` (default): legacy behaviour — drop the category whose id
+ *   or sort matches and re-insert it with the backup id/name/sort.
+ * - `merge`: match by `name`. If a category with the same name already
+ *   exists, keep its id/sort and only attach novels from the backup. If
+ *   not, insert a new category with an auto-incremented id (the backup
+ *   id is dropped to avoid colliding with the live sequence).
+ *
+ * In merge mode, novel-category associations resolve `backup novelId`
+ * through `options.novelIdMap` so they point at the actual DB novel id
+ * after `_restoreNovelAndChapters` has run.
  */
 export const _restoreCategory = async (
   category: BackupCategory,
+  options: RestoreOptions = {},
 ): Promise<void> => {
+  const mode = options.mode ?? 'overwrite';
+  const novelIdMap = options.novelIdMap;
+
   await dbManager.write(async tx => {
-    // Delete existing category with same id or sort
-    await tx
-      .delete(categorySchema)
-      .where(
-        sql`${categorySchema.id} = ${category.id} OR ${categorySchema.sort} = ${category.sort}`,
-      )
-      .run();
+    let realCategoryId: number;
 
-    // Insert the category
-    await tx
-      .insert(categorySchema)
-      .values({
-        id: category.id,
-        name: category.name,
-        sort: category.sort,
-      })
-      .onConflictDoNothing()
-      .run();
+    if (mode === 'overwrite') {
+      // legacy: drop same id or sort, then re-insert with backup keys
+      await tx
+        .delete(categorySchema)
+        .where(
+          sql`${categorySchema.id} = ${category.id} OR ${categorySchema.sort} = ${category.sort}`,
+        )
+        .run();
 
-    // Insert novel-category associations
-    if (category.novelIds && category.novelIds.length > 0) {
-      for (const novelId of category.novelIds) {
-        tx.insert(novelCategorySchema)
+      await tx
+        .insert(categorySchema)
+        .values({
+          id: category.id,
+          name: category.name,
+          sort: category.sort,
+        })
+        .onConflictDoNothing()
+        .run();
+
+      realCategoryId = category.id;
+    } else {
+      // merge: match by name; preserve existing id/sort
+      const existing = await tx
+        .select()
+        .from(categorySchema)
+        .where(eq(categorySchema.name, category.name))
+        .get();
+
+      if (existing) {
+        realCategoryId = existing.id;
+      } else {
+        // new category — drop backup id, let auto-increment assign one
+        const inserted = await tx
+          .insert(categorySchema)
           .values({
-            categoryId: category.id,
-            novelId: novelId,
+            name: category.name,
+            sort: category.sort ?? null,
+          })
+          .returning({ id: categorySchema.id })
+          .get();
+        realCategoryId = inserted.id;
+      }
+    }
+
+    // Attach novels — remap through novelIdMap when available so that
+    // backup ids do not collide with live auto-increment ids.
+    if (category.novelIds && category.novelIds.length > 0) {
+      for (const backupNovelId of category.novelIds) {
+        const novelId = novelIdMap?.get(backupNovelId) ?? backupNovelId;
+        await tx
+          .insert(novelCategorySchema)
+          .values({
+            categoryId: realCategoryId,
+            novelId,
           })
           .onConflictDoNothing()
           .run();
