@@ -1,3 +1,4 @@
+import { mergeWith } from 'lodash-es';
 import { SELF_HOST_BACKUP } from '@hooks/persisted/useSelfHost';
 import { OLD_TRACKED_NOVEL_PREFIX } from '@hooks/persisted/migrations/trackerMigration';
 import { LAST_UPDATE_TIME } from '@hooks/persisted/useUpdates';
@@ -13,6 +14,7 @@ import {
   getAllNovelCategories,
   getCategoriesFromDb,
 } from '@database/queries/CategoryQueries';
+import { RestoreMode } from '@database/queries/_restoreMergeUtils';
 import { BackupCategory, BackupNovel } from '@database/types';
 import { BackupEntryName } from './types';
 import { ROOT_STORAGE } from '@utils/Storages';
@@ -50,9 +52,79 @@ const backupMMKVData = () => {
   return data;
 };
 
-const restoreMMKVData = (data: any) => {
+// Backup wins for primitives; arrays are replaced wholesale (element-wise
+// merge of arrays usually surprises users — settings list values are
+// normally meant to be replaced as a unit).
+const settingsMergeCustomizer = (
+  _existingValue: unknown,
+  backupValue: unknown,
+) => {
+  if (Array.isArray(backupValue)) {
+    return backupValue;
+  }
+  return undefined;
+};
+
+const deepMergeJsonString = (existing: string, backup: string): string => {
+  let existingParsed: unknown;
+  let backupParsed: unknown;
+  try {
+    existingParsed = JSON.parse(existing);
+  } catch {
+    return backup;
+  }
+  try {
+    backupParsed = JSON.parse(backup);
+  } catch {
+    return backup;
+  }
+
+  if (
+    typeof existingParsed !== 'object' ||
+    existingParsed === null ||
+    typeof backupParsed !== 'object' ||
+    backupParsed === null ||
+    Array.isArray(existingParsed) ||
+    Array.isArray(backupParsed)
+  ) {
+    // Not both plain objects — backup wins as a whole (per merge policy).
+    return backup;
+  }
+
+  const merged = mergeWith(
+    {},
+    existingParsed,
+    backupParsed,
+    settingsMergeCustomizer,
+  );
+  return JSON.stringify(merged);
+};
+
+const restoreMMKVData = (data: any, mode: RestoreMode = 'overwrite') => {
   for (const key in data) {
-    MMKVStorage.set(key, data[key]);
+    const backupRaw = data[key];
+
+    if (mode === 'overwrite') {
+      MMKVStorage.set(key, backupRaw);
+      continue;
+    }
+
+    // merge: pull existing string, deep-merge JSON, fall back to backup.
+    const existingStr = MMKVStorage.getString(key);
+    if (
+      existingStr === undefined ||
+      existingStr === null ||
+      existingStr === ''
+    ) {
+      MMKVStorage.set(key, backupRaw);
+      continue;
+    }
+    if (typeof backupRaw !== 'string') {
+      // boolean / non-string backup — restore wins per "뒤에 restore가 우선"
+      MMKVStorage.set(key, backupRaw);
+      continue;
+    }
+    MMKVStorage.set(key, deepMergeJsonString(existingStr, backupRaw));
   }
 };
 
@@ -143,8 +215,15 @@ export const prepareBackupData = async (cacheDirPath: string) => {
   }
 };
 
-export const restoreData = async (cacheDirPath: string) => {
+export const restoreData = async (
+  cacheDirPath: string,
+  mode: RestoreMode = 'overwrite',
+) => {
   const novelDirPath = cacheDirPath + '/' + BackupEntryName.NOVEL_AND_CHAPTERS;
+  // Maps backup novel.id -> live DB novel.id. In merge mode the live id may
+  // differ from the backup id (auto-increment for new novels, existing id
+  // for matched ones). Categories use this map to remap their novelIds.
+  const novelIdMap = new Map<number, number>();
 
   // version
   // nothing to do
@@ -169,7 +248,7 @@ export const restoreData = async (cacheDirPath: string) => {
               backupNovel.cover = APP_STORAGE_URI + backupNovel.cover;
             }
 
-            await _restoreNovelAndChapters(backupNovel);
+            await _restoreNovelAndChapters(backupNovel, { mode, novelIdMap });
             novelCount++;
           } catch (error: any) {
             failedCount++;
@@ -218,7 +297,7 @@ export const restoreData = async (cacheDirPath: string) => {
 
       for (const category of categories) {
         try {
-          _restoreCategory(category);
+          await _restoreCategory(category, { mode, novelIdMap });
           categoryCount++;
         } catch (error: any) {
           failedCategoryCount++;
@@ -263,7 +342,7 @@ export const restoreData = async (cacheDirPath: string) => {
     try {
       const fileContent = NativeFile.readFile(settingsFilePath);
       const settingsData = JSON.parse(fileContent);
-      restoreMMKVData(settingsData);
+      restoreMMKVData(settingsData, mode);
       showToast(getString('backupScreen.settingsRestored'));
     } catch (error: any) {
       showToast(

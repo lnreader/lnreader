@@ -5,6 +5,7 @@ import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
 import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
+import { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 export interface SelfHostData {
   host: string;
@@ -58,6 +59,7 @@ export const selfHostRestore = async (
   setMeta: (
     transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
   ) => void,
+  mode: RestoreMode = 'overwrite',
 ) => {
   setMeta(meta => ({
     ...meta,
@@ -76,7 +78,7 @@ export const selfHostRestore = async (
 
   await sleep(200);
 
-  await restoreData(CACHE_DIR_PATH);
+  await restoreData(CACHE_DIR_PATH, mode);
 
   setMeta(meta => ({
     ...meta,

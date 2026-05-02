@@ -7,6 +7,7 @@ import { download, updateMetadata, uploadMedia } from '@api/drive/request';
 import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
+import { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 export const createDriveBackup = async (
   backupFolder: DriveFile,
@@ -72,6 +73,7 @@ export const driveRestore = async (
   setMeta: (
     transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
   ) => void,
+  mode: RestoreMode = 'overwrite',
 ) => {
   setMeta(meta => ({
     ...meta,
@@ -99,7 +101,7 @@ export const driveRestore = async (
     progressText: getString('backupScreen.restoringData'),
   }));
 
-  await restoreData(CACHE_DIR_PATH);
+  await restoreData(CACHE_DIR_PATH, mode);
   await sleep(500);
 
   setMeta(meta => ({

@@ -64,7 +64,21 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
             title={getString('backupScreen.restoreBackup')}
             description={getString('backupScreen.restoreBackupDesc')}
             onPress={() => {
-              ServiceManager.manager.addTask({ name: 'LOCAL_RESTORE' });
+              ServiceManager.manager.addTask({
+                name: 'LOCAL_RESTORE',
+                data: { mode: 'overwrite' },
+              });
+            }}
+            theme={theme}
+          />
+          <List.Item
+            title={getString('backupScreen.restoreBackupMerge')}
+            description={getString('backupScreen.restoreBackupMergeDesc')}
+            onPress={() => {
+              ServiceManager.manager.addTask({
+                name: 'LOCAL_RESTORE',
+                data: { mode: 'merge' },
+              });
             }}
             theme={theme}
           />

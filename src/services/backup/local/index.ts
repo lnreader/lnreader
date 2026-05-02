@@ -14,6 +14,7 @@ import NativeFile from '@specs/NativeFile';
 import { getString } from '@strings/translations';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import { sleep } from '@utils/sleep';
+import { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 export const createBackup = async (
   setMeta?: (
@@ -89,6 +90,7 @@ export const restoreBackup = async (
   setMeta?: (
     transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
   ) => void,
+  mode: RestoreMode = 'overwrite',
 ) => {
   try {
     setMeta?.(meta => ({
@@ -141,7 +143,7 @@ export const restoreBackup = async (
 
     await sleep(200);
 
-    await restoreData(CACHE_DIR_PATH);
+    await restoreData(CACHE_DIR_PATH, mode);
 
     setMeta?.(meta => ({
       ...meta,

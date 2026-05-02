@@ -111,6 +111,8 @@ export interface StringMap {
   'backupScreen.remoteBackup': 'string';
   'backupScreen.restoreBackup': 'string';
   'backupScreen.restoreBackupDesc': 'string';
+  'backupScreen.restoreBackupMerge': 'string';
+  'backupScreen.restoreBackupMergeDesc': 'string';
   'backupScreen.restoreLargeBackupsWarning': 'string';
   'backupScreen.restorinBackup': 'string';
   'backupScreen.restoringData': 'string';
