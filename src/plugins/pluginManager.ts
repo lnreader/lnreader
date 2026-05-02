@@ -5,6 +5,7 @@ import { load } from 'cheerio';
 import { Parser } from 'htmlparser2';
 import { reverse, uniqBy } from 'lodash-es';
 import { encode, decode } from 'urlencode';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 
 import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
@@ -25,6 +26,30 @@ import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
 import { FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
 
+const cookies = {
+  /**
+   * Read cookies for a given URL from the shared WebView/HTTP cookie store.
+   * Returns an object keyed by cookie name with `{ value }` entries.
+   */
+  get: (url: string, useWebKit?: boolean) =>
+    CookieManager.get(url, useWebKit ?? false),
+  /** Set a single cookie for the given URL in the shared store. */
+  set: (
+    url: string,
+    cookie: {
+      name: string;
+      value: string;
+      domain?: string;
+      path?: string;
+      secure?: boolean;
+    },
+    useWebKit?: boolean,
+  ) => CookieManager.set(url, cookie, useWebKit ?? false),
+  /** Clear cookies for a given domain (or all domains). */
+  clearByName: (url: string, name: string, useWebKit?: boolean) =>
+    CookieManager.clearByName(url, name, useWebKit ?? false),
+};
+
 const packages: Record<string, any> = {
   'htmlparser2': { Parser },
   'cheerio': { load },
@@ -37,6 +62,7 @@ const packages: Record<string, any> = {
   '@libs/defaultCover': { defaultCover },
   '@libs/aes': { gcm },
   '@libs/utils': { utf8ToBytes, bytesToUtf8 },
+  '@libs/cookies': { cookies },
 };
 
 const initPlugin = (pluginId: string, rawCode: string) => {

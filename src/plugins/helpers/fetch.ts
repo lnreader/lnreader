@@ -40,12 +40,98 @@ const makeInit = (init?: FetchInit) => {
   return init;
 };
 
+const headersToObject = (
+  headers?: Record<string, string> | Headers,
+): Record<string, string> => {
+  const out: Record<string, string> = {};
+  if (!headers) {
+    return out;
+  }
+  if (headers instanceof Headers) {
+    headers.forEach((value, key) => {
+      out[key] = value;
+    });
+    return out;
+  }
+  for (const [key, value] of Object.entries(headers)) {
+    if (typeof value === 'string') {
+      out[key] = value;
+    }
+  }
+  return out;
+};
+
+const isCloudflareChallengeBody = (body: string): boolean =>
+  /Just a moment\.\.\.|cf_chl_opt|challenge-platform|cf-mitigated/i.test(body);
+
+const cacheDir =
+  NativeFile.getConstants().ExternalCachesDirectoryPath ?? '/data/local/tmp';
+
+let webFetchSeq = 0;
+
+const webFetch = async (
+  url: string,
+  init: FetchInit,
+): Promise<Response | undefined> => {
+  const tempPath = `${cacheDir}/web_fetch_${Date.now()}_${webFetchSeq++}.bin`;
+  try {
+    await NativeFile.downloadFile(
+      url,
+      tempPath,
+      init.method || 'get',
+      headersToObject(init.headers),
+      init.body?.toString(),
+    );
+    if (!NativeFile.exists(tempPath)) {
+      return undefined;
+    }
+    const text = NativeFile.readFile(tempPath);
+    return new Response(text, { status: 200 });
+  } catch {
+    return undefined;
+  } finally {
+    try {
+      if (NativeFile.exists(tempPath)) {
+        NativeFile.unlink(tempPath);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+};
+
 export const fetchApi = async (
   url: string,
   init?: FetchInit,
 ): Promise<Response> => {
-  init = makeInit(init);
-  return await fetch(url, init);
+  const finalInit = makeInit(init);
+  const response = await fetch(url, finalInit);
+  const status = response.status;
+  if (status !== 403 && status !== 503) {
+    return response;
+  }
+  const contentType = response.headers.get('content-type') || '';
+  if (!/text\/html/i.test(contentType)) {
+    return response;
+  }
+  const cloned = response.clone();
+  const body = await cloned.text();
+  if (!isCloudflareChallengeBody(body)) {
+    return new Response(body, {
+      status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  }
+  const retried = await webFetch(url, finalInit);
+  if (retried) {
+    return retried;
+  }
+  return new Response(body, {
+    status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
 };
 
 const FILE_READER_PREFIX_LENGTH = 'data:application/octet-stream;base64,'
