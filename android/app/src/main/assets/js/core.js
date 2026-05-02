@@ -39,8 +39,11 @@ window.reader = new (function () {
     10,
   );
   this.chapterHeight = this.chapterElement.scrollHeight + this.paddingTop;
-  this.layoutHeight = window.screen.height;
-  this.layoutWidth = window.screen.width;
+  // Use viewport (CSS pixels) instead of monitor screen so coordinate math
+  // matches `clientX/Y` and works on environments like WSA where the WebView
+  // window can be smaller than the host monitor.
+  this.layoutHeight = window.innerHeight;
+  this.layoutWidth = window.innerWidth;
 
   this.layoutEvent = undefined;
   this.chapterEndingVisible = van.state(false);
@@ -122,6 +125,24 @@ window.reader = new (function () {
     console.warn = console.log;
     console.error = console.log;
   }
+
+  // Track viewport size changes (e.g. WSA window resize, foldable, split-screen)
+  // so click-region math, page counts and scroll amounts stay in sync with the
+  // current WebView size rather than the value captured at first load.
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      this.layoutHeight = window.innerHeight;
+      this.layoutWidth = window.innerWidth;
+      if (
+        this.generalSettings.val.pageReader &&
+        typeof calculatePages === 'function'
+      ) {
+        calculatePages();
+      }
+    }, 150);
+  });
   // end reader
 })();
 
@@ -758,6 +779,69 @@ window.addEventListener('load', () => {
         e.preventDefault();
         reader.post({ type: 'prev' });
       }
+    }
+  });
+})();
+
+// keyboard handler (desktop / WSA: PgUp / PgDown / arrows / space)
+(function () {
+  const isEditableTarget = el => {
+    if (!el) {
+      return false;
+    }
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      return true;
+    }
+    return el.isContentEditable === true;
+  };
+
+  document.addEventListener('keydown', e => {
+    if (isEditableTarget(e.target)) {
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
+    }
+
+    if (reader.generalSettings.val.pageReader) {
+      if (
+        e.key === 'PageDown' ||
+        e.key === 'ArrowRight' ||
+        e.key === ' ' ||
+        e.key === 'Spacebar'
+      ) {
+        e.preventDefault();
+        pageReader.movePage(pageReader.page.val + 1);
+        return;
+      }
+      if (e.key === 'PageUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        pageReader.movePage(pageReader.page.val - 1);
+        return;
+      }
+      return;
+    }
+
+    if (
+      e.key === 'PageDown' ||
+      e.key === 'ArrowDown' ||
+      e.key === ' ' ||
+      e.key === 'Spacebar'
+    ) {
+      e.preventDefault();
+      window.scrollBy({
+        top: reader.layoutHeight * 0.75,
+        behavior: 'smooth',
+      });
+      return;
+    }
+    if (e.key === 'PageUp' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      window.scrollBy({
+        top: -reader.layoutHeight * 0.75,
+        behavior: 'smooth',
+      });
     }
   });
 })();
