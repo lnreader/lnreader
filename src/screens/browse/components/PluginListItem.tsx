@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Pressable, Image, View, Text, StyleSheet } from 'react-native';
+import { Image, View, Text, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { usePlugins } from '@hooks/persisted';
