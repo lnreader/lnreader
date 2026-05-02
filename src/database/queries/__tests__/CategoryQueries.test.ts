@@ -24,6 +24,7 @@ import {
   deleteCategoryById,
   updateCategoryOrderInDb,
   getAllNovelCategories,
+  _restoreCategory,
 } from '../CategoryQueries';
 import { showToast } from '@utils/showToast';
 
@@ -35,6 +36,50 @@ describe('CategoryQueries', () => {
 
   afterAll(() => {
     teardownTestDatabase();
+  });
+
+  describe('_restoreCategory', () => {
+    it('keeps a matching category and remaps its backup novel IDs', async () => {
+      const testDb = getTestDb();
+      const categoryId = await insertTestCategory(testDb, {
+        name: 'Favorites',
+        sort: 10,
+      });
+      const novelId = await insertTestNovel(testDb);
+
+      await _restoreCategory(
+        {
+          id: 123,
+          name: 'Favorites',
+          sort: 99,
+          novelIds: [999],
+        },
+        {
+          mode: 'merge',
+          novelIdMap: new Map([[999, novelId]]),
+        },
+      );
+
+      const restoredCategory = await testDb.drizzleDb
+        .select()
+        .from(categorySchema)
+        .where(eq(categorySchema.id, categoryId))
+        .get();
+      const association = await testDb.drizzleDb
+        .select()
+        .from(novelCategorySchema)
+        .where(
+          sql`${novelCategorySchema.categoryId} = ${categoryId} AND ${novelCategorySchema.novelId} = ${novelId}`,
+        )
+        .get();
+
+      expect(restoredCategory).toMatchObject({
+        id: categoryId,
+        name: 'Favorites',
+        sort: 10,
+      });
+      expect(association).toBeDefined();
+    });
   });
 
   describe('getCategoriesFromDb', () => {

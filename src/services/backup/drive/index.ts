@@ -18,6 +18,7 @@ import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';
 import type {
   DriveBackupData,
+  DriveRestoreData,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import { getSelectedBackupFileSections } from '../fileSections';
@@ -91,7 +92,7 @@ export const createDriveBackup = async (
 };
 
 export const driveRestore = async (
-  backupFolder: DriveFile,
+  backupFolder: DriveRestoreData,
   setMeta: TaskProgressUpdater,
 ) => {
   setMeta(meta => ({
@@ -116,7 +117,11 @@ export const driveRestore = async (
     progressText: getString('backupScreen.restoringData'),
   }));
 
-  const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta);
+  const restoreResult = await restoreData(
+    CACHE_DIR_PATH,
+    setMeta,
+    backupFolder.mode,
+  );
   await sleep(500);
 
   setMeta(meta => ({

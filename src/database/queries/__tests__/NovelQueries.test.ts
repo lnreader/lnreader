@@ -8,12 +8,14 @@ import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
 import {
   insertTestNovel,
+  insertTestChapter,
   insertTestNovelCategory,
   insertTestCategory,
   clearAllTables,
 } from './testData';
 import {
   categorySchema,
+  chapterSchema,
   novelCategorySchema,
   novelSchema,
 } from '@database/schema';
@@ -34,7 +36,9 @@ import {
   pickCustomNovelCover,
   updateNovelCategoryById,
   updateNovelCategories,
+  _restoreNovelAndChapters,
 } from '../NovelQueries';
+import type { BackupNovel } from '@database/types';
 
 const mockGetLibraryDefaultCategoryId = jest.fn<number | undefined, []>();
 
@@ -51,6 +55,139 @@ describe('NovelQueries', () => {
 
   afterAll(() => {
     teardownTestDatabase();
+  });
+
+  describe('_restoreNovelAndChapters', () => {
+    it('merges a matching novel and preserves combined reading state', async () => {
+      const testDb = getTestDb();
+      const existingNovelId = await insertTestNovel(testDb, {
+        path: '/shared-novel',
+        pluginId: 'shared-plugin',
+        name: 'Local name',
+        cover: 'local-cover.jpg',
+        summary: null,
+        inLibrary: true,
+        isLocal: false,
+        totalPages: 10,
+      });
+      const existingChapterId = await insertTestChapter(
+        testDb,
+        existingNovelId,
+        {
+          path: '/chapter-1',
+          name: 'Local chapter name',
+          bookmark: true,
+          unread: true,
+          readTime: '2026-01-01T00:00:00.000Z',
+          isDownloaded: false,
+          updatedTime: '2026-01-01T00:00:00.000Z',
+          page: '2',
+          progress: 30,
+          position: 4,
+          scanlator: 'Local group',
+          timeSpent: 40,
+        },
+      );
+      const novelIdMap = new Map<number, number>();
+      const backupNovel: BackupNovel = {
+        id: 999,
+        path: '/shared-novel',
+        pluginId: 'shared-plugin',
+        name: 'Backup name',
+        cover: 'backup-cover.jpg',
+        summary: 'Backup summary',
+        inLibrary: false,
+        isLocal: true,
+        totalPages: 20,
+        chapters: [
+          {
+            id: 501,
+            novelId: 999,
+            path: '/chapter-1',
+            name: 'Backup chapter name',
+            releaseTime: null,
+            bookmark: false,
+            unread: false,
+            readTime: '2026-02-01T00:00:00.000Z',
+            isDownloaded: true,
+            updatedTime: '2026-02-01T00:00:00.000Z',
+            chapterNumber: 1,
+            page: '3',
+            progress: 80,
+            position: 8,
+            scanlator: 'Backup group',
+            timeSpent: 90,
+          },
+          {
+            id: 502,
+            novelId: 999,
+            path: '/chapter-2',
+            name: 'New chapter',
+            releaseTime: null,
+            bookmark: false,
+            unread: true,
+            readTime: null,
+            isDownloaded: false,
+            updatedTime: null,
+            chapterNumber: 2,
+            page: '1',
+            progress: null,
+            position: 0,
+            scanlator: null,
+            timeSpent: 0,
+          },
+        ],
+      };
+
+      await _restoreNovelAndChapters(backupNovel, {
+        mode: 'merge',
+        novelIdMap,
+      });
+
+      const restoredNovel = await testDb.drizzleDb
+        .select()
+        .from(novelSchema)
+        .where(eq(novelSchema.id, existingNovelId))
+        .get();
+      const restoredChapters = await testDb.drizzleDb
+        .select()
+        .from(chapterSchema)
+        .where(eq(chapterSchema.novelId, existingNovelId))
+        .all();
+      const mergedChapter = restoredChapters.find(
+        chapter => chapter.id === existingChapterId,
+      );
+
+      expect(novelIdMap.get(999)).toBe(existingNovelId);
+      expect(restoredNovel).toMatchObject({
+        name: 'Backup name',
+        cover: 'local-cover.jpg',
+        summary: 'Backup summary',
+        inLibrary: true,
+        isLocal: true,
+        totalPages: 20,
+      });
+      expect(restoredChapters).toHaveLength(2);
+      expect(mergedChapter).toMatchObject({
+        name: 'Local chapter name',
+        bookmark: true,
+        unread: false,
+        readTime: '2026-02-01T00:00:00.000Z',
+        isDownloaded: true,
+        updatedTime: '2026-02-01T00:00:00.000Z',
+        page: '2',
+        progress: 80,
+        position: 8,
+        scanlator: 'Local group',
+        timeSpent: 90,
+      });
+      expect(restoredChapters).toContainEqual(
+        expect.objectContaining({
+          novelId: existingNovelId,
+          path: '/chapter-2',
+        }),
+      );
+    });
   });
 
   describe('getAllNovels', () => {
