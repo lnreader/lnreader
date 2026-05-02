@@ -1,0 +1,23 @@
+diff --git a/dist/src/lib/getReactNativeDeps.js b/dist/src/lib/getReactNativeDeps.js
+index d523e094eb456f91ee8c4de0f65500e4ec002991..1aa6f27ca1cef322db66d2f47a7cbd8a980dcbc2 100644
+--- a/dist/src/lib/getReactNativeDeps.js
++++ b/dist/src/lib/getReactNativeDeps.js
+@@ -1,15 +1,16 @@
+ import { createRequire } from 'node:module';
++import { pathToFileURL } from 'node:url';
+ export async function getDevMiddleware(reactNativePath) {
+     const require = createRequire(import.meta.url);
+     const reactNativeCommunityCliPluginPath = require.resolve('@react-native/community-cli-plugin', { paths: [reactNativePath] });
+     const devMiddlewarePath = require.resolve('@react-native/dev-middleware', {
+         paths: [reactNativeCommunityCliPluginPath],
+     });
+-    return import(devMiddlewarePath);
++    return import(pathToFileURL(devMiddlewarePath).href);
+ }
+ export async function getReactNativeCommunityCliPlugin(reactNativePath) {
+     const require = createRequire(import.meta.url);
+     const reactNativeCommunityCliPluginPath = require.resolve('@react-native/community-cli-plugin', { paths: [reactNativePath] });
+-    return import(reactNativeCommunityCliPluginPath);
++    return import(pathToFileURL(reactNativeCommunityCliPluginPath).href);
+ }
+ //# sourceMappingURL=getReactNativeDeps.js.map
