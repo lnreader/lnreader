@@ -98,6 +98,9 @@ const DownloadCooldownModal: React.FC<DownloadCooldownModalProps> = ({
           ]}
           autoFocus
         />
+        <Text style={[styles.warning, { color: theme.error }]}>
+          {getString('generalSettingsScreen.chapterDownloadCooldownWarning')}
+        </Text>
         <View style={styles.actions}>
           <TouchableRipple
             onPress={reset}
@@ -142,6 +145,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     fontSize: 16,
+  },
+  warning: {
+    fontSize: 12,
+    marginTop: 12,
   },
   actions: {
     flexDirection: 'row',
