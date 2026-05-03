@@ -39,8 +39,6 @@ const ChapterFooter = ({
   const { navigationBarHeight } = useNovelContext();
   // Use reactive viewport height so footer animation targets stay correct
   // when the host window is resized (e.g. WSA, foldables, split-screen).
-  // The previous SCREEN_HEIGHT constant from @gorhom/bottom-sheet captures
-  // the value at module load and never updates.
   const { height: screenHeight } = useWindowDimensions();
 
   const entering = () => {
