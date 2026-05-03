@@ -6,6 +6,7 @@ import { getPlugin } from '@plugins/pluginManager';
 import { getString } from '@strings/translations';
 import { getChapter } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
+import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';
 import { getNovelById } from '@database/queries/NovelQueries';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
@@ -96,7 +97,7 @@ export const downloadChapter = async (
         .run();
     });
 
-    await sleep(1000);
+    await sleep(getChapterDownloadCooldownMs());
   } else {
     throw new Error(getString('downloadScreen.chapterEmptyOrScrapeError'));
   }
