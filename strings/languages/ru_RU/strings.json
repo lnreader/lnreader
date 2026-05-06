@@ -487,7 +487,7 @@
       "scrollToCurrentChapter": "Прокрутка к текущей главе",
       "scrollToTop": "Прокрутить вверх"
     },
-    "emptyChapterMessage": "<p>Глава пуста.</p><p> Сообщите на GitHub, <a href='https://github.com/lnreader/lnreader-sources/issues/new/choose'>GitHub</a> если он доступен в WebView.</p><p>Плагин: %{pluginId}</p><p>Новелла: %{novelName}</p><p>Глава: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Завершено",
     "nextChapter": "%{name}Следующий: %{name}",
     "noNextChapter": "Следующей главы нет",
@@ -516,7 +516,8 @@
     "textColor": "Цвет текста",
     "textColorModal": "Цвет текста",
     "title": "Чтение",
-    "verticalSeekbarDesc": "Использовать вертикальную панель навигации"
+    "verticalSeekbarDesc": "Использовать вертикальную панель навигации",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "Ничего не найдено"
