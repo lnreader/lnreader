@@ -516,7 +516,8 @@
     "textColor": "Warna teks\n",
     "textColorModal": "Text color",
     "title": "Pembaca\n",
-    "verticalSeekbarDesc": "Use vertical seekbar"
+    "verticalSeekbarDesc": "Use vertical seekbar",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "Tidak ada hasil ditemukan\n"
