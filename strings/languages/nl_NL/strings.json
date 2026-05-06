@@ -516,7 +516,8 @@
     "textColor": "Tekstkleur",
     "textColorModal": "Text color",
     "title": "Lezer",
-    "verticalSeekbarDesc": "Use vertical seekbar"
+    "verticalSeekbarDesc": "Use vertical seekbar",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "Geen resultaten gevonden"
