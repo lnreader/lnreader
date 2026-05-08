@@ -4,7 +4,7 @@ import { ToggleButton } from '@components/Common/ToggleButton';
 import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { getString } from '@strings/translations';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -12,6 +12,7 @@ import CodeInput from '../Components/CodeInput';
 import { showToast } from '@utils/showToast';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
+import { useKeyboardHeight } from '@hooks/common/useKeyboardHeight';
 
 type CodeRouteProps = {
   language?: 'css' | 'js';
@@ -22,6 +23,7 @@ type CodeRouteProps = {
     isJS: boolean;
   } | null;
   onSnippetSaved?: () => void;
+  isActive: boolean;
 };
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
@@ -32,6 +34,7 @@ const CodeRoute = ({
   jumpTo,
   editingSnippet,
   onSnippetSaved,
+  isActive,
 }: CodeRouteProps) => {
   const theme = useTheme();
   const {
@@ -63,6 +66,14 @@ const CodeRoute = ({
 
   const [title, setTitle] = React.useState<string>('');
   const [code, setCode] = React.useState<string>('');
+  const [focusedField, setFocusedField] = React.useState<
+    'title' | 'code' | null
+  >(null);
+  const keyboardHeightValue = useKeyboardHeight();
+  const keyboardHeightRef = React.useRef(0);
+  const focusTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Update title, code, and reset errors when snippet changes
   React.useEffect(() => {
@@ -71,8 +82,30 @@ const CodeRoute = ({
     setError({ title: false, code: false });
   }, [snippet]);
 
-  const { height: keyboardHeight } = useAnimatedKeyboard();
+  React.useEffect(() => {
+    keyboardHeightRef.current = keyboardHeightValue;
+    if (keyboardHeightValue > 0 && focusTimeoutRef.current) {
+      clearTimeout(focusTimeoutRef.current);
+      focusTimeoutRef.current = null;
+    }
+  }, [keyboardHeightValue]);
 
+  React.useEffect(() => {
+    return () => {
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!isActive) {
+      Keyboard.dismiss();
+      setFocusedField(null);
+    }
+  }, [isActive]);
+
+  const { height: keyboardHeight } = useAnimatedKeyboard();
   const ScrollViewRef = React.useRef<ScrollView>(null);
 
   const maxHeightScrollView = useAnimatedStyle(() => {
@@ -132,56 +165,87 @@ const CodeRoute = ({
   ]);
 
   return (
-    <AnimatedScrollView
-      ref={ScrollViewRef}
-      style={[styles.container, maxHeightScrollView]}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <Row verticalSpacing={8}>
-        <Text theme={colors} style={styles.text}>
-          {'Select CSS or JS'}
-        </Text>
-        <ToggleButton
-          theme={theme}
-          icon="language-css3"
-          selected={language === 'css'}
-          onPress={() => setLanguage('css')}
-          disabled={isEditing}
+      <AnimatedScrollView
+        ref={ScrollViewRef}
+        style={[styles.scrollContainer, maxHeightScrollView]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Row verticalSpacing={8}>
+          <Text theme={colors} style={styles.text}>
+            {'Select CSS or JS'}
+          </Text>
+          <ToggleButton
+            theme={theme}
+            icon="language-css3"
+            selected={language === 'css'}
+            onPress={() => setLanguage('css')}
+            disabled={isEditing}
+          />
+          <ToggleButton
+            theme={theme}
+            icon="language-javascript"
+            selected={language === 'js'}
+            onPress={() => setLanguage('js')}
+            disabled={isEditing}
+          />
+        </Row>
+        <TextInput
+          placeholder={'Snippet name'}
+          defaultValue={title}
+          onChangeText={setTitle}
+          forceFocused={focusedField === 'title' ? true : undefined}
+          onFocus={() => {
+            setFocusedField('title');
+            if (focusTimeoutRef.current) {
+              clearTimeout(focusTimeoutRef.current);
+            }
+            focusTimeoutRef.current = setTimeout(() => {
+              if (keyboardHeightRef.current === 0) {
+                setFocusedField(null);
+              }
+            }, 250);
+          }}
+          style={styles.snippetName}
+          error={error.title}
         />
-        <ToggleButton
-          theme={theme}
-          icon="language-javascript"
-          selected={language === 'js'}
-          onPress={() => setLanguage('js')}
-          disabled={isEditing}
+        <CodeInput
+          language={language}
+          code={code}
+          setCode={setCode}
+          error={error.code}
+          forceFocused={focusedField === 'code' ? true : undefined}
+          onFocus={() => {
+            setFocusedField('code');
+            if (focusTimeoutRef.current) {
+              clearTimeout(focusTimeoutRef.current);
+            }
+            focusTimeoutRef.current = setTimeout(() => {
+              if (keyboardHeightRef.current === 0) {
+                setFocusedField(null);
+              }
+            }, 250);
+          }}
         />
-      </Row>
-      <TextInput
-        placeholder={'Snippet name'}
-        defaultValue={title}
-        onChangeText={setTitle}
-        style={styles.snippetName}
-        error={error.title}
-      />
-      <CodeInput
-        language={language}
-        code={code}
-        setCode={setCode}
-        error={error.code}
-      />
-      <Row verticalSpacing={8}>
-        <Button
-          style={styles.button}
-          title={getString('readerSettings.openJSFile')}
-          mode="outlined"
-        />
-        <Button
-          style={styles.button}
-          title={getString('common.save')}
-          mode="contained"
-          onPress={save}
-        />
-      </Row>
-    </AnimatedScrollView>
+        <Row verticalSpacing={8}>
+          <Button
+            style={styles.button}
+            title={getString('readerSettings.openJSFile')}
+            mode="outlined"
+          />
+          <Button
+            style={styles.button}
+            title={getString('common.save')}
+            mode="contained"
+            onPress={save}
+          />
+        </Row>
+      </AnimatedScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -190,6 +254,8 @@ export default React.memo(CodeRoute);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
     paddingHorizontal: 16,
   },
   text: {

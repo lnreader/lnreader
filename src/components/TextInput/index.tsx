@@ -1,20 +1,19 @@
 import { useTheme } from '@hooks/persisted';
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  TextInput as RNTextInput,
-  TextInputProps as RNTextInputProps,
-} from 'react-native';
+import { StyleSheet, TextInputProps as RNTextInputProps } from 'react-native';
+import { TextInput as RNTextInput } from 'react-native-gesture-handler';
 
 interface TextInputProps extends RNTextInputProps {
   error?: boolean;
   value?: never;
+  forceFocused?: boolean;
 }
 
 const TextInput = ({
   onBlur,
   onFocus,
   error,
+  forceFocused,
   style,
   ...props
 }: TextInputProps) => {
@@ -31,8 +30,9 @@ const TextInput = ({
     onBlur?.(e);
   };
 
-  const borderWidth = inputFocused || error ? 2 : 1;
-  const margin = inputFocused || error ? 0 : 1;
+  const isFocused = forceFocused ?? inputFocused;
+  const borderWidth = isFocused || error ? 2 : 1;
+  const margin = isFocused || error ? 0 : 1;
   return (
     <RNTextInput
       placeholderTextColor={'grey'}
@@ -44,7 +44,7 @@ const TextInput = ({
           backgroundColor: theme.background,
           borderColor: error
             ? theme.error
-            : inputFocused
+            : isFocused
             ? theme.primary
             : theme.outline,
           borderWidth: borderWidth,

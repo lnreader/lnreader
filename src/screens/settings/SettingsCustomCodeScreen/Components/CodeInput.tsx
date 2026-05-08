@@ -3,14 +3,11 @@ import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import React from 'react';
 import { PixelRatio, StyleSheet } from 'react-native';
 import Animated, {
-  measure,
-  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
-import { getRuntimeKind } from 'react-native-worklets';
 import { useTheme } from '@hooks/persisted';
 
 const FONT_SIZE = 14;
@@ -21,6 +18,9 @@ type CodeInputProps = {
   code: string;
   setCode: (code: string) => void;
   error?: boolean;
+  forceFocused?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 const START_JS_CODE = `const qs = (s) => document.querySelector(s);
@@ -52,28 +52,23 @@ const END_JS_CODE = 'qs("#LNReader-chapter").innerHTML = html;';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
-const CodeInput = ({ language, code, setCode, error }: CodeInputProps) => {
+const CodeInput = ({
+  language,
+  code,
+  setCode,
+  error,
+  forceFocused,
+  onFocus,
+  onBlur,
+}: CodeInputProps) => {
   const theme = useTheme();
-  const TextInputRef = useAnimatedRef();
   const { height: keyboardHeight } = useAnimatedKeyboard();
   const expanded = useSharedValue(0);
 
   const maxHeight = useAnimatedStyle(() => {
-    let m: { height: number; pageY: number } | null = null;
-    if (getRuntimeKind() !== 1) {
-      try {
-        m = measure(TextInputRef);
-      } catch {}
-    }
-
-    if (!m || !keyboardHeight.value) {
-      return { maxHeight: WINDOW_HEIGHT / 2 };
-    }
+    const availableHeight = WINDOW_HEIGHT - keyboardHeight.value - 200;
     return {
-      maxHeight: Math.min(
-        Math.max(WINDOW_HEIGHT - keyboardHeight.value - m.pageY, 300),
-        WINDOW_HEIGHT / 2,
-      ),
+      maxHeight: Math.min(Math.max(availableHeight, 300), WINDOW_HEIGHT / 2),
     };
   });
   const maxHeightTop = useAnimatedStyle(() => {
@@ -109,10 +104,18 @@ const CodeInput = ({ language, code, setCode, error }: CodeInputProps) => {
         {language === 'js' ? START_JS_CODE : START_CSS_CODE}
       </Animated.Text>
       <AnimatedTextInput
-        ref={TextInputRef}
         placeholder={'Your code here'}
         defaultValue={code}
         onChangeText={setCode}
+        forceFocused={forceFocused}
+        onFocus={() => {
+          onFocus?.();
+          console.log('Focused code input');
+        }}
+        onBlur={() => {
+          onBlur?.();
+          console.log('Blurred code input');
+        }}
         multiline
         autoCorrect={false}
         autoCapitalize={'none'}

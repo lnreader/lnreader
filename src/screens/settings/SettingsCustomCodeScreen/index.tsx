@@ -1,4 +1,4 @@
-import { Appbar, SafeAreaView } from '@components';
+import { SafeAreaView } from '@components';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
 import React from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
@@ -11,8 +11,11 @@ import {
 import SettingsRoute from './Routes/SettingsRoute';
 import Color from 'color';
 import CodeRoute from './Routes/CodeRoute';
+import SelfHidingAppBar from './Components/SelfHidingAppbar';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
 import SettingsWebView from './Components/SettingsWebView';
+import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
 
 const routes = [
   { key: 'first', title: 'Settings' },
@@ -30,6 +33,11 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   const [index, setIndex] = React.useState(0);
   const layout = useWindowDimensions();
 
+  // 0 = visible, 1 = hidden. Using a number is flexible.
+  const appBarHiddenState = useSharedValue(0);
+  const tabIndex = useSharedValue(0);
+  const { height: keyboardHeight } = useAnimatedKeyboard();
+
   // State for editing snippets
   const [editingSnippet, setEditingSnippet] = React.useState<{
     index: number;
@@ -37,6 +45,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   } | null>(null);
 
   const handleTabChange = (newIndex: number) => {
+    tabIndex.value = newIndex;
     setIndex(newIndex);
     // Clear editing state when manually switching tabs
     if (newIndex !== 1) {
@@ -49,13 +58,23 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
       index: snippetIndex,
       isJS: snippetIndex === -1 ? true : isJS, // Default to JS for new snippets, use passed value for editing
     });
+    tabIndex.value = 1;
     setIndex(1); // Switch to Code tab
   };
 
   const handleSnippetSaved = () => {
     setEditingSnippet(null);
+    tabIndex.value = 0;
     setIndex(0); // Switch back to Settings tab
+    setEditingSnippet(null);
   };
+
+  useAnimatedReaction(
+    () => tabIndex.value === 1 && keyboardHeight.value > 0,
+    isHidden => {
+      appBarHiddenState.value = isHidden ? 1 : 0;
+    },
+  );
 
   const renderScene = ({
     route,
@@ -75,6 +94,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
             jumpTo={jumpTo}
             editingSnippet={editingSnippet}
             onSnippetSaved={handleSnippetSaved}
+            isActive={index === 1}
           />
         );
       case 'third':
@@ -120,10 +140,11 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   );
   return (
     <SafeAreaView excludeTop>
-      <Appbar
+      <SelfHidingAppBar
         title={'Custom Code'}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
+        hiddenState={appBarHiddenState}
       />
 
       <TabView
