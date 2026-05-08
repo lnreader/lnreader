@@ -1,9 +1,10 @@
 import React from 'react';
-import { Pressable, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { ThemeColors } from '../../theme/types';
 import Color from 'color';
 import { MaterialDesignIconName } from '@type/icon';
+import { Pressable } from 'react-native-gesture-handler';
 
 // --- Dynamic style helpers ---
 

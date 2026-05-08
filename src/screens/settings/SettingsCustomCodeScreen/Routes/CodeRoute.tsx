@@ -168,7 +168,6 @@ const CodeRoute = ({
     editIndex,
     onSnippetSaved,
   ]);
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
