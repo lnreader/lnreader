@@ -26,7 +26,6 @@ import DisplayTab from './tabs/DisplayTab';
 import ThemeTab from './tabs/ThemeTab';
 import NavigationTab from './tabs/NavigationTab';
 import AccessibilityTab from './tabs/AccessibilityTab';
-import AdvancedTab from './tabs/AdvancedTab';
 
 export type TextAlignments =
   | 'left'
@@ -55,7 +54,6 @@ const SettingsReaderScreen = () => {
     { id: 'theme', label: 'Theme', icon: 'palette-outline' },
     { id: 'navigation', label: 'Navigation', icon: 'gesture-swipe-horizontal' },
     { id: 'accessibility', label: 'Accessibility', icon: 'account-voice' },
-    { id: 'advanced', label: 'Advanced', icon: 'code-braces' },
   ];
 
   const novel = {
@@ -127,11 +125,12 @@ const SettingsReaderScreen = () => {
       --theme-outline: ${theme.outline};
       --theme-rippleColor: ${theme.rippleColor};
       }
-      
+
       @font-face {
         font-family: ${readerSettings.fontFamily};
-        src: url("file:///android_asset/fonts/${readerSettings.fontFamily
-    }.ttf");
+        src: url("file:///android_asset/fonts/${
+          readerSettings.fontFamily
+        }.ttf");
       }
     </style>
 
@@ -160,8 +159,6 @@ const SettingsReaderScreen = () => {
         return <NavigationTab />;
       case 'accessibility':
         return <AccessibilityTab />;
-      case 'advanced':
-        return <AdvancedTab />;
       default:
         return <DisplayTab />;
     }
@@ -231,8 +228,9 @@ const SettingsReaderScreen = () => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
                 ${webViewCSS}
               </head>
-              <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
-              }"> 
+              <body class="${
+                chapterGeneralSettings.pageReader ? 'page-reader' : ''
+              }">
                 <div id="LNReader-chapter">
                 ${dummyHTML}
                 </div>
@@ -240,24 +238,24 @@ const SettingsReaderScreen = () => {
               </body>
               <script>
                 var initialReaderConfig = ${JSON.stringify({
-                readerSettings,
-                chapterGeneralSettings,
-                novel,
-                chapter,
-                nextChapter: chapter,
-                batteryLevel,
-                autoSaveInterval: 2222,
-                DEBUG: __DEV__,
-                strings: {
-                  finished: `${getString(
-                    'readerScreen.finished',
-                  )}: ${chapter.name.trim()}`,
-                  nextChapter: getString('readerScreen.nextChapter', {
-                    name: chapter.name,
-                  }),
-                  noNextChapter: getString('readerScreen.noNextChapter'),
-                },
-              })}
+                  readerSettings,
+                  chapterGeneralSettings,
+                  novel,
+                  chapter,
+                  nextChapter: chapter,
+                  batteryLevel,
+                  autoSaveInterval: 2222,
+                  DEBUG: __DEV__,
+                  strings: {
+                    finished: `${getString(
+                      'readerScreen.finished',
+                    )}: ${chapter.name.trim()}`,
+                    nextChapter: getString('readerScreen.nextChapter', {
+                      name: chapter.name,
+                    }),
+                    noNextChapter: getString('readerScreen.noNextChapter'),
+                  },
+                })}
               </script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
               <script src="${assetsUriPrefix}/js/van.js"></script>
