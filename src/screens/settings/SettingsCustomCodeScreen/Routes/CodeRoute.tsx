@@ -174,6 +174,7 @@ const CodeRoute = ({
         ref={ScrollViewRef}
         style={[styles.scrollContainer, maxHeightScrollView]}
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
       >
         <Row verticalSpacing={8}>
           <Text theme={colors} style={styles.text}>
@@ -258,6 +259,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 16,
   },
+  scrollContent: {},
   text: {
     flex: 1,
   },

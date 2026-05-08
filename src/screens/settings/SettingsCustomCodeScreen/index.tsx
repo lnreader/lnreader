@@ -35,6 +35,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
 
   // 0 = visible, 1 = hidden. Using a number is flexible.
   const appBarHiddenState = useSharedValue(0);
+  const appBarAnimationDuration = useSharedValue(250);
   const tabIndex = useSharedValue(0);
   const { height: keyboardHeight } = useAnimatedKeyboard();
 
@@ -66,12 +67,12 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
     setEditingSnippet(null);
     tabIndex.value = 0;
     setIndex(0); // Switch back to Settings tab
-    setEditingSnippet(null);
   };
 
   useAnimatedReaction(
     () => tabIndex.value === 1 && keyboardHeight.value > 0,
     isHidden => {
+      appBarAnimationDuration.value = keyboardHeight.value > 0 ? 150 : 250;
       appBarHiddenState.value = isHidden ? 1 : 0;
     },
   );
@@ -145,6 +146,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
         handleGoBack={() => navigation.goBack()}
         theme={theme}
         hiddenState={appBarHiddenState}
+        animationDuration={appBarAnimationDuration}
       />
 
       <TabView

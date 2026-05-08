@@ -16,22 +16,29 @@ type SelfHidingAppBarProps = {
   mode?: 'small' | 'medium' | 'large' | 'center-aligned';
   children?: React.ReactNode;
   hiddenState: SharedValue<number>;
+  animationDuration?: SharedValue<number>;
 };
 
-const SelfHidingAppBar = ({ hiddenState, ...props }: SelfHidingAppBarProps) => {
+const APP_BAR_HEIGHT = 150;
+
+const SelfHidingAppBar = ({
+  hiddenState,
+  animationDuration,
+  ...props
+}: SelfHidingAppBarProps) => {
   const { top } = useSafeAreaInsets();
 
   const hideAppBar = useAnimatedStyle(() => {
     // The animation now depends on the shared value's .value
     const isHidden = hiddenState.value === 1;
     return {
-      height: withTiming(isHidden ? top : 150, {
-        duration: 250,
+      height: withTiming(isHidden ? top : APP_BAR_HEIGHT, {
+        duration: animationDuration?.value ?? 250,
         easing: Easing.out(Easing.cubic),
       }),
       overflow: 'hidden',
     };
-  }, []); // The dependency array is now EMPTY!
+  });
 
   return (
     <Animated.View style={hideAppBar}>
