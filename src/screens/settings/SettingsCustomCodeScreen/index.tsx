@@ -1,4 +1,4 @@
-import { SafeAreaView } from '@components';
+import { Appbar, SafeAreaView } from '@components';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
 import React from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
@@ -11,8 +11,6 @@ import {
 import SettingsRoute from './Routes/SettingsRoute';
 import Color from 'color';
 import CodeRoute from './Routes/CodeRoute';
-import SelfHidingAppBar from './Components/SelfHidingAppbar';
-import { useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
 import SettingsWebView from './Components/SettingsWebView';
 
@@ -32,9 +30,6 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   const [index, setIndex] = React.useState(0);
   const layout = useWindowDimensions();
 
-  // 0 = visible, 1 = hidden. Using a number is flexible.
-  const appBarHiddenState = useSharedValue(0);
-
   // State for editing snippets
   const [editingSnippet, setEditingSnippet] = React.useState<{
     index: number;
@@ -42,7 +37,6 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   } | null>(null);
 
   const handleTabChange = (newIndex: number) => {
-    appBarHiddenState.value = newIndex ? 1 : 0;
     setIndex(newIndex);
     // Clear editing state when manually switching tabs
     if (newIndex !== 1) {
@@ -51,7 +45,6 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   };
 
   const handleEditSnippet = (snippetIndex: number, isJS: boolean) => {
-    appBarHiddenState.value = 1;
     setEditingSnippet({
       index: snippetIndex,
       isJS: snippetIndex === -1 ? true : isJS, // Default to JS for new snippets, use passed value for editing
@@ -127,11 +120,10 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   );
   return (
     <SafeAreaView excludeTop>
-      <SelfHidingAppBar
+      <Appbar
         title={'Custom Code'}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
-        hiddenState={appBarHiddenState}
       />
 
       <TabView
