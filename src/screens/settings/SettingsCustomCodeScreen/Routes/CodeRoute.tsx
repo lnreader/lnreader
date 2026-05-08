@@ -4,7 +4,12 @@ import { ToggleButton } from '@components/Common/ToggleButton';
 import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { getString } from '@strings/translations';
 import React from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -110,7 +115,7 @@ const CodeRoute = ({
 
   const maxHeightScrollView = useAnimatedStyle(() => {
     return {
-      maxHeight: WINDOW_HEIGHT - keyboardHeight.value - 26,
+      maxHeight: WINDOW_HEIGHT - keyboardHeight.value,
     };
   });
 

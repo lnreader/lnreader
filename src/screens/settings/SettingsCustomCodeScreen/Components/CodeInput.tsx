@@ -108,14 +108,8 @@ const CodeInput = ({
         defaultValue={code}
         onChangeText={setCode}
         forceFocused={forceFocused}
-        onFocus={() => {
-          onFocus?.();
-          console.log('Focused code input');
-        }}
-        onBlur={() => {
-          onBlur?.();
-          console.log('Blurred code input');
-        }}
+        onFocus={onFocus}
+        onBlur={onBlur}
         multiline
         autoCorrect={false}
         autoCapitalize={'none'}
