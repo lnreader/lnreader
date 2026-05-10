@@ -1,46 +1,33 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import {
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { Modal, ModalProps, overlay, Portal } from 'react-native-paper';
-import { Keyboard, StyleSheet, Text, View } from 'react-native';
-import Button from '@components/Button/Button';
-import { ThemeColors } from '@theme/types';
-import { getString } from '@strings/translations';
-import Animated, {
-  measure,
-  useAnimatedRef,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
-import SafeAreaView from '@components/SafeAreaView/SafeAreaView';
-import { getRuntimeKind } from 'react-native-worklets';
-import { useTheme } from '@hooks/persisted';
-import { useKeyboardHeight } from '@hooks/common/useKeyboardHeight';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// --- Dynamic style helpers ---
-const getModalTitleColor = (theme: ThemeColors) => ({ color: theme.onSurface });
+import Button from '@components/Button/Button';
+import { useTheme } from '@hooks/persisted';
+import { getString } from '@strings/translations';
+import { ThemeColors } from '@theme/types';
+import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
+
+const MODAL_MARGIN = 24;
+
+const getModalTitleColor = (theme: ThemeColors) => ({
+  color: theme.onSurface,
+});
 
 export type DefaultModalProps = {
-  /**
-   * Title of the modal
-   */
   title: string;
-  /**
-   * Dismisses the modal with onDismiss and calls onSave.
-   * If onSave returns false, the modal will not be dismissed.
-   */
   onSave: () => void | boolean;
-  /**
-   * The function to dismiss the modal
-   */
   onDismiss: () => void;
-  /**
-   * Dismisses the modal with onDismiss and calls onCancel
-   */
   onCancel?: () => void;
-  /**
-   * The function to reset the values
-   */
   onReset?: () => void;
 } & Omit<ModalProps, 'theme' | 'onDismiss' | 'contentContainerStyle'>;
 
@@ -55,93 +42,83 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
   ...props
 }) => {
   const theme = useTheme();
-  const kH = useKeyboardHeight();
-
-  const animatedRef = useAnimatedRef();
-
-  const keyboardHeight = useSharedValue(0);
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const keyboard = useAnimatedKeyboard();
 
   const onDismiss = () => {
     Keyboard.dismiss();
     _onDismiss?.();
   };
 
-  useEffect(() => {
-    if (!kH) {
-      keyboardHeight.value = 0;
-    } else {
-      keyboardHeight.value = kH;
-    }
-  }, [kH, keyboardHeight]);
+  const dismiss = (cb?: () => void | boolean) => {
+    if (cb?.() === false) return;
+    onDismiss();
+  };
 
-  const AvoidKeyboard = useAnimatedStyle(() => {
-    let m: { height: number; pageY: number } | null = null;
-    if (getRuntimeKind() !== 1) {
-      try {
-        m = measure(animatedRef);
-      } catch {}
-    }
+  const default_availableHeight = windowHeight - insets.top - MODAL_MARGIN * 2;
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    const kb = keyboard.height.value;
 
-    if (!m) {
-      m = {
-        height: 0,
-        pageY: 0,
-      };
-    }
-    const newWindowHeight = WINDOW_HEIGHT - keyboardHeight.value;
-    const dif = Math.min(newWindowHeight - (m.height + m.pageY), 0);
+    const availableHeight =
+      default_availableHeight - Math.max(insets.bottom, kb);
 
     return {
-      maxHeight: withTiming(newWindowHeight, {
-        duration: 150,
-      }),
+      maxHeight: availableHeight,
       transform: [
         {
-          translateY: withTiming(dif, { duration: 150 }),
+          translateY: -(kb / 2),
         },
       ],
     };
-  });
-
-  const dismiss = (op?: () => void | boolean) => {
-    if (op?.() === false) return;
-    onDismiss();
-  };
-  const save = () => dismiss(onSave);
-  const cancel = () => dismiss(onCancel);
+  }, [insets.bottom, default_availableHeight]);
 
   return (
     <Portal>
-      <SafeAreaView>
-        <Modal
-          visible={visible}
-          onDismiss={onDismiss}
-          {...props}
-          style={styles.contentContainer}
+      <Modal
+        visible={visible}
+        onDismiss={onDismiss}
+        {...props}
+        style={styles.modalWrapper}
+      >
+        <Animated.View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: overlay(2, theme.surface) },
+            animatedContainerStyle,
+          ]}
         >
-          <Animated.View
-            ref={animatedRef}
-            style={[
-              styles.modalContainer,
-              { backgroundColor: overlay(2, theme.surface) },
-              AvoidKeyboard,
-            ]}
-          >
-            <Text style={[styles.modalTitle, getModalTitleColor(theme)]}>
-              {title}
-            </Text>
-            {children}
-            <View style={styles.buttonRow}>
-              {!onReset ? null : (
-                <Button onPress={onReset}>{getString('common.reset')}</Button>
-              )}
-              <View style={styles.flex} />
-              <Button onPress={cancel}>{getString('common.cancel')}</Button>
-              <Button onPress={save}>{getString('common.save')}</Button>
-            </View>
-          </Animated.View>
-        </Modal>
-      </SafeAreaView>
+          <Text style={[styles.modalTitle, getModalTitleColor(theme)]}>
+            {title}
+          </Text>
+
+          <View style={styles.body}>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.content}
+            >
+              {children}
+            </ScrollView>
+          </View>
+
+          <View style={styles.buttonRow}>
+            {onReset ? (
+              <Button onPress={onReset}>{getString('common.reset')}</Button>
+            ) : null}
+
+            <View style={styles.flex} />
+
+            <Button onPress={() => dismiss(onCancel)}>
+              {getString('common.cancel')}
+            </Button>
+            <Button onPress={() => dismiss(onSave)}>
+              {getString('common.save')}
+            </Button>
+          </View>
+        </Animated.View>
+      </Modal>
     </Portal>
   );
 };
@@ -149,21 +126,33 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
 export default KeyboardAvoidingModal;
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    paddingHorizontal: 24,
+  modalWrapper: {
+    justifyContent: 'center',
+    paddingHorizontal: MODAL_MARGIN,
   },
   modalContainer: {
-    maxHeight: WINDOW_HEIGHT,
     borderRadius: 28,
     padding: 24,
-    shadowColor: 'transparent', // Modal weird shadow fix
+    shadowColor: 'transparent',
   },
   modalTitle: {
     fontSize: 24,
-    marginBottom: 16,
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  body: {
+    flexShrink: 1,
+    minHeight: 0,
+  },
+  content: {
+    paddingBottom: 16,
   },
   buttonRow: {
+    alignItems: 'center',
     flexDirection: 'row',
+    marginTop: 8,
+    marginBottom: -8,
+    marginHorizontal: -8,
   },
   flex: {
     flex: 1,
