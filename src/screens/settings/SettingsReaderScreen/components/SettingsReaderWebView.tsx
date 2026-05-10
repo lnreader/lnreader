@@ -17,6 +17,7 @@ import * as Speech from 'expo-speech';
 type WebViewPostEvent = {
   type: string;
   data?: { [key: string]: string | number };
+  msg?: string;
 };
 
 const SettingsReaderWebView = () => {
@@ -95,6 +96,9 @@ const SettingsReaderWebView = () => {
   );
   const webViewCSS = `
   <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/pageReader.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/toolWrapper.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     :root {
       --StatusBar-currentHeight: ${StatusBar.currentHeight};
@@ -190,6 +194,9 @@ const SettingsReaderWebView = () => {
           case 'stop-speak':
             Speech.stop();
             break;
+          case 'console':
+            /* eslint-disable no-console */
+            console.info(`[Console] ${JSON.stringify(event.msg, null, 2)}`);
         }
       }}
       source={{
@@ -208,6 +215,9 @@ const SettingsReaderWebView = () => {
                 <div id="reader-ui"></div>
               </body>
               <script>
+              var initialPageReaderConfig = ${JSON.stringify({
+                nextChapterScreenVisible: false,
+              })};
                 var initialReaderConfig = ${JSON.stringify({
                   readerSettings,
                   chapterGeneralSettings,
@@ -228,14 +238,27 @@ const SettingsReaderWebView = () => {
                   },
                 })}
               </script>
+              <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
               <script src="${assetsUriPrefix}/js/van.js"></script>
               <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
+              <script src="${assetsUriPrefix}/js/textRemover.js"></script>
               <script>
-                ${customJS}
-              </script>
+                 function fn(){
+                     let novelName = "${novel.name}";
+                     let chapterName = "${chapter.name}";
+                     let sourceId = "${novel.pluginId}";
+                     let chapterId =${chapter.id};
+                     let novelId =${chapter.novelId};
+                     const qs = (s) => document.querySelector(s);
+                     let html = qs("#LNReader-chapter").innerHTML;
+                     ${customJS}
+                     qs("#LNReader-chapter").innerHTML = html;
+                   }
+                   document.addEventListener("DOMContentLoaded", fn);
+               </script>
             </html>
             `,
       }}
