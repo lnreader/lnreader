@@ -11,7 +11,9 @@ import { Pressable } from 'react-native-gesture-handler';
 const getToggleButtonPressableStyle = (
   selected: boolean,
   theme: ThemeColors,
+  disabled?: boolean,
 ) => ({
+  opacity: disabled ? 0.6 : 1,
   backgroundColor: selected
     ? Color(theme.primary).alpha(0.12).string()
     : 'transparent',
@@ -45,7 +47,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
       android_ripple={{ color: theme.rippleColor }}
       style={[
         styles.toggleButtonPressable,
-        getToggleButtonPressableStyle(selected, theme),
+        getToggleButtonPressableStyle(selected, theme, disabled),
       ]}
       onPress={onPress}
       disabled={disabled}
