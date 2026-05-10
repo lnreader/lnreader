@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Modal, ModalProps, overlay, Portal } from 'react-native-paper';
-import { StyleSheet, Text, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, View } from 'react-native';
 import Button from '@components/Button/Button';
 import { ThemeColors } from '@theme/types';
 import { getString } from '@strings/translations';
@@ -46,7 +46,7 @@ export type DefaultModalProps = {
 
 const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
   visible,
-  onDismiss,
+  onDismiss: _onDismiss,
   onSave,
   onCancel,
   onReset,
@@ -60,6 +60,11 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
   const animatedRef = useAnimatedRef();
 
   const keyboardHeight = useSharedValue(0);
+
+  const onDismiss = () => {
+    Keyboard.dismiss();
+    _onDismiss?.();
+  };
 
   useEffect(() => {
     if (!kH) {
