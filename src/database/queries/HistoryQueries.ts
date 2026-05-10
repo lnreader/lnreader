@@ -32,7 +32,8 @@ export const getHistoryFromDb = async () => {
  */
 export const insertHistory = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({
         readTime: sql`datetime('now','localtime')`,
       })
@@ -48,7 +49,8 @@ export const deleteChapterHistory = async (
   chapterId: number,
 ): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ readTime: null })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -60,7 +62,7 @@ export const deleteChapterHistory = async (
  */
 export const deleteAllHistory = async (): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema).set({ readTime: null }).run();
+    await tx.update(chapterSchema).set({ readTime: null }).run();
   });
   showToast(getString('historyScreen.deleted'));
 };

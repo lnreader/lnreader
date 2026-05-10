@@ -156,7 +156,8 @@ export const updateCategory = async (
     await tx
       .update(categorySchema)
       .set({ name: categoryName })
-      .where(eq(categorySchema.id, categoryId));
+      .where(eq(categorySchema.id, categoryId))
+      .run();
   });
 };
 
@@ -186,7 +187,8 @@ export const updateCategoryOrderInDb = async (
 
   await dbManager.write(async tx => {
     for (const category of categories) {
-      tx.update(categorySchema)
+      await tx
+        .update(categorySchema)
         .set({ sort: category.sort })
         .where(eq(categorySchema.id, category.id))
         .run();
@@ -231,7 +233,8 @@ export const _restoreCategory = async (
     // Insert novel-category associations
     if (category.novelIds && category.novelIds.length > 0) {
       for (const novelId of category.novelIds) {
-        tx.insert(novelCategorySchema)
+        await tx
+          .insert(novelCategorySchema)
           .values({
             categoryId: category.id,
             novelId: novelId,

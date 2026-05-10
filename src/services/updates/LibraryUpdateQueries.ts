@@ -43,7 +43,8 @@ const updateNovelMetadata = async (
   }
 
   await dbManager.write(async tx => {
-    tx.update(novelSchema)
+    await tx
+      .update(novelSchema)
       .set({
         name,
         cover: cover || null,
@@ -64,7 +65,8 @@ const updateNovelMetadata = async (
  */
 const updateNovelTotalPages = async (novelId: number, totalPages: number) => {
   await dbManager.write(async tx => {
-    tx.update(novelSchema)
+    await tx
+      .update(novelSchema)
       .set({ totalPages })
       .where(eq(novelSchema.id, novelId))
       .run();

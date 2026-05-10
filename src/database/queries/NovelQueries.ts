@@ -203,12 +203,14 @@ export const removeNovelsFromLibrary = async (novelIds: Array<number>) => {
   if (!novelIds.length) return;
 
   await dbManager.write(async tx => {
-    tx.update(novelSchema)
+    await tx
+      .update(novelSchema)
       .set({ inLibrary: false })
       .where(inArray(novelSchema.id, novelIds))
       .run();
 
-    tx.delete(novelCategorySchema)
+    await tx
+      .delete(novelCategorySchema)
       .where(inArray(novelCategorySchema.novelId, novelIds))
       .run();
   });
@@ -225,7 +227,7 @@ export const getCachedNovels = async (): Promise<NovelInfo[]> => {
 
 export const deleteCachedNovels = async () => {
   await dbManager.write(async tx => {
-    tx.delete(novelSchema).where(eq(novelSchema.inLibrary, false)).run();
+    await tx.delete(novelSchema).where(eq(novelSchema.inLibrary, false)).run();
   });
   showToast(getString('advancedSettingsScreen.cachedNovelsDeletedToast'));
 };
@@ -299,7 +301,8 @@ export const restoreLibrary = async (novel: NovelInfo) => {
 
 export const updateNovelInfo = async (info: NovelInfo) => {
   await dbManager.write(async tx => {
-    tx.update(novelSchema)
+    await tx
+      .update(novelSchema)
       .set({
         name: info.name,
         cover: info.cover || '',
@@ -330,7 +333,8 @@ export const pickCustomNovelCover = async (novel: NovelInfo) => {
     NativeFile.copyFile(image.assets[0].uri, novelCoverUri);
     novelCoverUri += '?' + Date.now();
     await dbManager.write(async tx => {
-      tx.update(novelSchema)
+      await tx
+        .update(novelSchema)
         .set({ cover: novelCoverUri })
         .where(eq(novelSchema.id, novel.id))
         .run();
@@ -345,7 +349,8 @@ export const updateNovelCategoryById = async (
 ) => {
   await dbManager.write(async tx => {
     for (const categoryId of categoryIds) {
-      tx.insert(novelCategorySchema)
+      await tx
+        .insert(novelCategorySchema)
         .values({ novelId, categoryId })
         .onConflictDoNothing()
         .run();
@@ -377,7 +382,8 @@ export const updateNovelCategories = async (
     if (categoryIds.length) {
       for (const novelId of novelIds) {
         for (const categoryId of categoryIds) {
-          tx.insert(novelCategorySchema)
+          await tx
+            .insert(novelCategorySchema)
             .values({ novelId, categoryId })
             .onConflictDoNothing()
             .run();
@@ -401,7 +407,8 @@ export const updateNovelCategories = async (
             .get();
 
           if (!hasCategory || hasCategory.count === 0) {
-            tx.insert(novelCategorySchema)
+            await tx
+              .insert(novelCategorySchema)
               .values({
                 novelId: novelId,
                 categoryId: defaultCategory.id,
@@ -421,11 +428,14 @@ export const _restoreNovelAndChapters = async (backupNovel: BackupNovel) => {
   const { chapters, ...novel } = backupNovel;
   await dbManager.write(async tx => {
     // Delete existing novel data
-    tx.delete(novelSchema).where(eq(novelSchema.id, novel.id)).run();
-    tx.delete(chapterSchema).where(eq(chapterSchema.novelId, novel.id)).run();
+    await tx.delete(novelSchema).where(eq(novelSchema.id, novel.id)).run();
+    await tx
+      .delete(chapterSchema)
+      .where(eq(chapterSchema.novelId, novel.id))
+      .run();
 
     // Restore novel
-    tx
+    await tx
       .insert(novelSchema)
       .values({
         ...novel,
@@ -440,7 +450,7 @@ export const _restoreNovelAndChapters = async (backupNovel: BackupNovel) => {
       const BATCH_SIZE = 100;
       for (let i = 0; i < chapters.length; i += BATCH_SIZE) {
         const batch = chapters.slice(i, i + BATCH_SIZE);
-        tx.insert(chapterSchema).values(batch).run();
+        await tx.insert(chapterSchema).values(batch).run();
       }
     }
   });

@@ -93,7 +93,8 @@ export const insertChapters = async (
 
 export const markChapterRead = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: false })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -105,7 +106,8 @@ export const markChaptersRead = async (chapterIds: number[]): Promise<void> => {
     return;
   }
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: false })
       .where(inArray(chapterSchema.id, chapterIds))
       .run();
@@ -114,7 +116,8 @@ export const markChaptersRead = async (chapterIds: number[]): Promise<void> => {
 
 export const markChapterUnread = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: true })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -128,7 +131,8 @@ export const markChaptersUnread = async (
     return;
   }
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: true })
       .where(inArray(chapterSchema.id, chapterIds))
       .run();
@@ -137,7 +141,8 @@ export const markChaptersUnread = async (
 
 export const markAllChaptersRead = async (novelId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: false })
       .where(eq(chapterSchema.novelId, novelId))
       .run();
@@ -146,7 +151,8 @@ export const markAllChaptersRead = async (novelId: number): Promise<void> => {
 
 export const markAllChaptersUnread = async (novelId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: true })
       .where(eq(chapterSchema.novelId, novelId))
       .run();
@@ -174,7 +180,8 @@ export const deleteChapter = async (
 ): Promise<void> => {
   deleteDownloadedFiles(pluginId, novelId, chapterId);
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ isDownloaded: false })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -196,7 +203,8 @@ export const deleteChapters = async (
   );
 
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ isDownloaded: false })
       .where(inArray(chapterSchema.id, chapterIds))
       .run();
@@ -217,7 +225,7 @@ export const deleteDownloads = async (
     deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id);
   });
   await dbManager.write(async tx => {
-    tx.update(chapterSchema).set({ isDownloaded: false }).run();
+    await tx.update(chapterSchema).set({ isDownloaded: false }).run();
   });
 };
 
@@ -229,7 +237,8 @@ export const deleteReadChaptersFromDb = async (): Promise<void> => {
   const chapterIds = chapters?.map(chapter => chapter.id);
   if (chapterIds?.length) {
     await dbManager.write(async tx => {
-      tx.update(chapterSchema)
+      await tx
+        .update(chapterSchema)
         .set({ isDownloaded: false })
         .where(inArray(chapterSchema.id, chapterIds))
         .run();
@@ -243,7 +252,8 @@ export const updateChapterProgress = async (
   progress: number,
 ): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ progress })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -258,7 +268,8 @@ export const updateChapterProgressByIds = async (
     return;
   }
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ progress })
       .where(inArray(chapterSchema.id, chapterIds))
       .run();
@@ -267,7 +278,8 @@ export const updateChapterProgressByIds = async (
 
 export const bookmarkChapter = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ bookmark: sql`NOT ${chapterSchema.bookmark}` })
       .where(eq(chapterSchema.id, chapterId))
       .run();
@@ -279,7 +291,8 @@ export const markPreviuschaptersRead = async (
   novelId: number,
 ): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: false })
       .where(
         and(
@@ -296,7 +309,8 @@ export const markPreviousChaptersUnread = async (
   novelId: number,
 ): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema)
+    await tx
+      .update(chapterSchema)
       .set({ unread: true })
       .where(
         and(
@@ -310,7 +324,7 @@ export const markPreviousChaptersUnread = async (
 
 export const clearUpdates = async (): Promise<void> => {
   await dbManager.write(async tx => {
-    tx.update(chapterSchema).set({ updatedTime: null }).run();
+    await tx.update(chapterSchema).set({ updatedTime: null }).run();
   });
 };
 
