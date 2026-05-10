@@ -79,6 +79,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     replaceModalVisible,
     setReplaceModalVisible,
     selectedTextForReplace,
+    setSelectedTextForReplace,
     replacementText,
     setReplacementText,
     handleReplaceSave,
@@ -314,19 +315,21 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         <TextInput
           label="Text to replace"
           value={selectedTextForReplace}
-          editable={false}
+          onChangeText={setSelectedTextForReplace}
+          autoCorrect={false}
           mode="outlined"
           style={styles.textInput}
-          theme={{ colors: { background: theme.surface } }}
+          theme={{ colors: theme }}
         />
         <TextInput
           label="Replace with"
           value={replacementText}
           onChangeText={setReplacementText}
           autoCorrect={false}
+          autoFocus
           mode="outlined"
           style={styles.textInput}
-          theme={{ colors: { background: theme.surface } }}
+          theme={{ colors: theme }}
         />
       </KeyboardAvoidingModal>
     </>

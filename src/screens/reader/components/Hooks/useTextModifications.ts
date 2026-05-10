@@ -13,12 +13,23 @@ export default function useTextModifications(chapterText: string) {
 
   const html = useMemo(() => {
     let chText = chapterText;
+    const validFlags = new Set(['g', 'm', 'i', 'y', 'u', 'v', 's', 'd']);
     readerSettings.removeText.forEach(text => {
       // test if text is regex
       const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
       if (m) {
-        const regex = new RegExp(m[1], m[2] ?? '');
-        chText = chText.replace(regex, '');
+        const flags = m[2] ?? '';
+        const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
+        if (hasInvalidFlags) {
+          console.warn('Invalid regex flags in removeText:', text);
+          return;
+        }
+        try {
+          const regex = new RegExp(m[1], flags);
+          chText = chText.replace(regex, '');
+        } catch (e) {
+          console.warn('Invalid regex pattern in removeText:', text);
+        }
       } else {
         chText = chText.split(text).join('');
       }
@@ -27,8 +38,18 @@ export default function useTextModifications(chapterText: string) {
       ([text, replacement]) => {
         const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
         if (m) {
-          const regex = new RegExp(m[1], m[2] ?? '');
-          chText = chText.replace(regex, replacement);
+          const flags = m[2] ?? '';
+          const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
+          if (hasInvalidFlags) {
+            console.warn('Invalid regex flags in replaceText:', text);
+            return;
+          }
+          try {
+            const regex = new RegExp(m[1], flags);
+            chText = chText.replace(regex, replacement);
+          } catch (e) {
+            console.warn('Invalid regex pattern in replaceText:', text);
+          }
         } else {
           chText = chText.split(text).join(replacement);
         }
