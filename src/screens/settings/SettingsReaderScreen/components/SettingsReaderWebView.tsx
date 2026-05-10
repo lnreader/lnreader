@@ -1,5 +1,11 @@
 import { StatusBar, StyleSheet } from 'react-native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import WebView from 'react-native-webview';
 import { dummyHTML } from './dummy';
 
@@ -101,7 +107,7 @@ const SettingsReaderWebView = () => {
   <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     :root {
-      --StatusBar-currentHeight: ${StatusBar.currentHeight};
+      --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
       --readerSettings-theme: ${readerSettings.theme};
       --readerSettings-padding: ${readerSettings.padding}px;
       --readerSettings-textSize: ${readerSettings.textSize}px;
@@ -143,18 +149,47 @@ const SettingsReaderWebView = () => {
     };
   }, []);
 
+  const saveRegex = useCallback(
+    (regex: RegExpMatchArray, text: string, replacement: string = '') => {
+      const validFlags = new Set(['g', 'm', 'i', 'y', 'u', 'v', 's', 'd']);
+      const flags = regex[2] ?? '';
+      const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
+      if (hasInvalidFlags) {
+        return text;
+      }
+      try {
+        const r = new RegExp(regex[1], flags);
+        return text.replace(r, replacement);
+      } catch {
+        return text;
+      }
+    },
+    [],
+  );
+
   const preparedDummyHTML = useMemo(() => {
-    let resultHtml = dummyHTML;
+    let chText = dummyHTML;
     readerSettings.removeText.forEach(text => {
-      resultHtml = resultHtml.replace(text, '');
+      // test if text is regex
+      const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
+      if (m) {
+        chText = saveRegex(m, chText);
+      } else {
+        chText = chText.split(text).join('');
+      }
     });
     Object.entries(readerSettings.replaceText).forEach(
       ([text, replacement]) => {
-        resultHtml = resultHtml.replace(text, replacement);
+        const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
+        if (m) {
+          chText = saveRegex(m, chText, replacement);
+        } else {
+          chText = chText.split(text).join(replacement);
+        }
       },
     );
-    return resultHtml;
-  }, [readerSettings.removeText, readerSettings.replaceText]);
+    return chText;
+  }, [readerSettings.removeText, readerSettings.replaceText, saveRegex]);
 
   return (
     <WebView
