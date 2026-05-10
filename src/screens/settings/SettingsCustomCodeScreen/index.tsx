@@ -16,11 +16,12 @@ import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
 import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
 import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsReaderWebView';
+import { getString } from '@strings/translations';
 
 const routes = [
-  { key: 'first', title: 'Settings' },
-  { key: 'second', title: 'Code' },
-  { key: 'third', title: 'Example' },
+  { key: 'first', title: getString('common.settings') },
+  { key: 'second', title: getString('common.code') },
+  { key: 'third', title: getString('common.example') },
 ];
 
 type State = NavigationState<{
@@ -142,7 +143,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <SelfHidingAppBar
-        title={'Custom Code'}
+        title={getString('common.custom_code')}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
         hiddenState={appBarHiddenState}

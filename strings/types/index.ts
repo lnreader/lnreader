@@ -174,6 +174,11 @@ export interface StringMap {
   'common.categories': 'string';
   'common.chapters': 'string';
   'common.clear': 'string';
+  'common.code': 'string';
+  'common.custom_code': 'string';
+  'common.replaceText': 'string';
+  'common.textToReplace': 'string';
+  'common.replaceWith': 'string';
   'common.copiedToClipboard': 'string';
   'common.delete': 'string';
   'common.deleted': 'string';
@@ -472,4 +477,11 @@ export interface StringMap {
   'notifications.LOCAL_RESTORE': 'string';
   'notifications.MIGRATE_NOVEL': 'string';
   'notifications.DOWNLOAD_CHAPTER': 'string';
+  'customCodeSettings.textManipulation': 'string';
+  'customCodeSettings.codeSnippets': 'string';
+  'customCodeSettings.createNewSnippet': 'string';
+  'customCodeSettings.addCssOrJsCode': 'string';
+  'customCodeSettings.cssSnippets': 'string';
+  'customCodeSettings.javascriptSnippets': 'string';
+  'customCodeSettings.noCodeSnippets': 'string';
 }
