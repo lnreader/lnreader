@@ -71,9 +71,9 @@ export const ChapterContent = ({
   const [bookmarked, setBookmarked] = useState<boolean>(
     chapter.bookmark ?? false,
   );
-  const maxBottom = useRef(bottom);
-  if (maxBottom.current !== bottom && bottom !== 0) {
-    maxBottom.current = bottom;
+  const nonZeroBottom = useRef(bottom);
+  if (nonZeroBottom.current !== bottom && bottom !== 0) {
+    nonZeroBottom.current = bottom;
   }
   useEffect(() => {
     setBookmarked(chapter.bookmark ?? false);
@@ -131,7 +131,10 @@ export const ChapterContent = ({
       {loading ? (
         <ChapterLoadingScreen />
       ) : (
-        <WebViewReader onPress={hideHeader} bottomInset={maxBottom.current} />
+        <WebViewReader
+          onPress={hideHeader}
+          bottomInset={nonZeroBottom.current}
+        />
       )}
       <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
       {!hidden ? (
