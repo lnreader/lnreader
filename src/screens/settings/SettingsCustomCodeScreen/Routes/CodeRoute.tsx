@@ -129,13 +129,14 @@ const CodeRoute = ({
       setError({ title: !title.trim(), code: !code.trim() });
       return;
     }
+    const newSnippets = [...snippets];
 
     // Editing existing snippet
     if (isEditing && editIndex !== undefined && editIndex !== -1) {
-      snippets[editIndex].name = title;
-      snippets[editIndex].code = code;
+      newSnippets[editIndex].name = title;
+      newSnippets[editIndex].code = code;
       setSettings({
-        [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']: snippets,
+        [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']: newSnippets,
       });
       showToast('Snippet updated successfully');
       onSnippetSaved?.();
@@ -143,14 +144,14 @@ const CodeRoute = ({
     }
 
     // Creating new snippet
-    snippets.push({
+    newSnippets.push({
       name: title,
       code,
       active: true,
       lang: language,
     });
     setSettings({
-      [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']: snippets,
+      [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']: newSnippets,
     });
     showToast('Snippet saved successfully');
     jumpTo('first'); // Go back to settings tab
