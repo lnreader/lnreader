@@ -16,9 +16,11 @@ window.textRemover = new (function () {
       button(
         {
           style:
-            'background: var(--theme-secondary); color: var(--theme-onSecondary); border: none; padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px; cursor: pointer;',
+            'background: var(--theme-secondary); color: var(--theme-onSecondary); padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px;',
           onclick: e => {
-            e.stopPropagation();
+            if (reader.hidden.val) {
+              e.stopPropagation();
+            }
             removeSelectedText();
           },
         },
@@ -27,9 +29,11 @@ window.textRemover = new (function () {
       button(
         {
           style:
-            'background: var(--theme-primary); color: var(--theme-onPrimary); border: none; padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px; cursor: pointer;',
+            'background: var(--theme-primary); color: var(--theme-onPrimary); padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px;',
           onclick: e => {
-            e.stopPropagation();
+            if (reader.hidden.val) {
+              e.stopPropagation();
+            }
             replaceSelectedText();
           },
         },

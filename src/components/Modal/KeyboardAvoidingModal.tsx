@@ -8,7 +8,13 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Modal, ModalProps, overlay, Portal } from 'react-native-paper';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  withClamp,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Button from '@components/Button/Button';
@@ -64,10 +70,10 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
       default_availableHeight - Math.max(insets.bottom, kb);
 
     return {
-      maxHeight: availableHeight,
+      maxHeight: withClamp({ min: 200 }, withTiming(availableHeight)),
       transform: [
         {
-          translateY: -(kb / 2),
+          translateY: -(kb * 0.5),
         },
       ],
     };
@@ -82,6 +88,8 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
         style={styles.modalWrapper}
       >
         <Animated.View
+          entering={FadeIn.duration(150)}
+          exiting={FadeOut.duration(150)}
           style={[
             styles.modalContainer,
             { backgroundColor: overlay(2, theme.surface) },
