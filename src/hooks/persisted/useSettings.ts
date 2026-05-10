@@ -5,6 +5,7 @@ import {
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
 import { Voice } from 'expo-speech';
+import { useEffect, useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 
@@ -323,45 +324,46 @@ type MigrationChapterReaderSettings = ChapterReaderSettings & {
   customCSS?: string;
 };
 export const useChapterReaderSettings = () => {
-  const [
-    storedSettings = initialChapterReaderSettings as MigrationChapterReaderSettings,
-    setSettings,
-  ] = useMMKVObject<MigrationChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+  const [_storedSettings, setSettings] =
+    useMMKVObject<MigrationChapterReaderSettings>(CHAPTER_READER_SETTINGS);
 
-  if (
-    !Array.isArray(storedSettings.codeSnippetsCSS) ||
-    !Array.isArray(storedSettings.codeSnippetsCSS)
-  ) {
-    setSettings({ ...storedSettings, codeSnippetsCSS: [], codeSnippetsJS: [] });
-  }
+  const storedSettings: MigrationChapterReaderSettings = useMemo(
+    () => ({
+      ...initialChapterReaderSettings,
+      ..._storedSettings,
+    }),
+    [_storedSettings],
+  );
 
   // Migrate old js and css to new
-  if (storedSettings.customJS) {
-    storedSettings.codeSnippetsJS.push({
-      active: true,
-      code: storedSettings.customJS,
-      lang: 'js',
-      name: 'Custom JS',
-    });
-    setSettings({
-      ...storedSettings,
-      customJS: undefined,
-      codeSnippetsJS: storedSettings.codeSnippetsJS,
-    });
-  }
-  if (storedSettings.customCSS) {
-    storedSettings.codeSnippetsCSS.push({
-      active: true,
-      code: storedSettings.customCSS,
-      lang: 'css',
-      name: 'Custom CSS',
-    });
-    setSettings({
-      ...storedSettings,
-      customCSS: undefined,
-      codeSnippetsCSS: storedSettings.codeSnippetsCSS,
-    });
-  }
+  useEffect(() => {
+    if (storedSettings.customJS) {
+      storedSettings.codeSnippetsJS.push({
+        active: true,
+        code: storedSettings.customJS,
+        lang: 'js',
+        name: 'Custom JS',
+      });
+      setSettings({
+        ...storedSettings,
+        customJS: undefined,
+        codeSnippetsJS: storedSettings.codeSnippetsJS,
+      });
+    }
+    if (storedSettings.customCSS) {
+      storedSettings.codeSnippetsCSS.push({
+        active: true,
+        code: storedSettings.customCSS,
+        lang: 'css',
+        name: 'Custom CSS',
+      });
+      setSettings({
+        ...storedSettings,
+        customCSS: undefined,
+        codeSnippetsCSS: storedSettings.codeSnippetsCSS,
+      });
+    }
+  }, [setSettings, storedSettings]);
 
   // Ensure TTS settings have proper defaults (migration for existing users)
   const chapterReaderSettings = {
