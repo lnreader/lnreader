@@ -17,7 +17,10 @@ window.textRemover = new (function () {
         {
           style:
             'background: var(--theme-secondary); color: var(--theme-onSecondary); border: none; padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px; cursor: pointer;',
-          onclick: () => removeSelectedText(),
+          onclick: e => {
+            e.stopPropagation();
+            removeSelectedText();
+          },
         },
         'Remove',
       ),
@@ -25,7 +28,10 @@ window.textRemover = new (function () {
         {
           style:
             'background: var(--theme-primary); color: var(--theme-onPrimary); border: none; padding: 6px 12px; margin: 2px; border-radius: 4px; font-size: 12px; cursor: pointer;',
-          onclick: () => replaceSelectedText(),
+          onclick: e => {
+            e.stopPropagation();
+            replaceSelectedText();
+          },
         },
         'Replace',
       ),
