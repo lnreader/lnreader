@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { useChapterReaderSettings } from '@hooks/persisted/useSettings';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { WebViewPostEvent } from '../WebViewReader';
 
 export default function useTextModifications(chapterText: string) {
@@ -12,25 +12,33 @@ export default function useTextModifications(chapterText: string) {
   const { setChapterReaderSettings, ...readerSettings } =
     useChapterReaderSettings();
 
+  const saveRegex = useCallback(
+    (regex: RegExpMatchArray, text: string, replacement: string = '') => {
+      const validFlags = new Set(['g', 'm', 'i', 'y', 'u', 'v', 's', 'd']);
+      const flags = regex[2] ?? '';
+      const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
+      if (hasInvalidFlags) {
+        console.warn('Invalid regex flags in removeText:', text);
+        return text;
+      }
+      try {
+        const r = new RegExp(regex[1], flags);
+        return text.replace(r, replacement);
+      } catch {
+        console.warn('Invalid regex pattern in removeText:', text);
+      }
+      return text;
+    },
+    [],
+  );
+
   const html = useMemo(() => {
     let chText = chapterText;
-    const validFlags = new Set(['g', 'm', 'i', 'y', 'u', 'v', 's', 'd']);
     readerSettings.removeText.forEach(text => {
       // test if text is regex
       const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
       if (m) {
-        const flags = m[2] ?? '';
-        const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
-        if (hasInvalidFlags) {
-          console.warn('Invalid regex flags in removeText:', text);
-          return;
-        }
-        try {
-          const regex = new RegExp(m[1], flags);
-          chText = chText.replace(regex, '');
-        } catch {
-          console.warn('Invalid regex pattern in removeText:', text);
-        }
+        chText = saveRegex(m, chText);
       } else {
         chText = chText.split(text).join('');
       }
@@ -39,25 +47,19 @@ export default function useTextModifications(chapterText: string) {
       ([text, replacement]) => {
         const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
         if (m) {
-          const flags = m[2] ?? '';
-          const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
-          if (hasInvalidFlags) {
-            console.warn('Invalid regex flags in replaceText:', text);
-            return;
-          }
-          try {
-            const regex = new RegExp(m[1], flags);
-            chText = chText.replace(regex, replacement);
-          } catch {
-            console.warn('Invalid regex pattern in replaceText:', text);
-          }
+          chText = saveRegex(m, chText, replacement);
         } else {
           chText = chText.split(text).join(replacement);
         }
       },
     );
     return chText;
-  }, [chapterText, readerSettings.removeText, readerSettings.replaceText]);
+  }, [
+    chapterText,
+    readerSettings.removeText,
+    readerSettings.replaceText,
+    saveRegex,
+  ]);
 
   const handleTextAction = React.useCallback(
     (action: string, text: string) => {
