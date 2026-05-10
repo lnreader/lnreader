@@ -63,13 +63,18 @@ export const ChapterContent = ({
   navigation,
   openDrawer,
 }: ChapterContentProps) => {
-  const { left, right } = useSafeAreaInsets();
+  const { left, right, bottom } = useSafeAreaInsets();
   const { novel, chapter } = useChapterContext();
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
-  const [bookmarked, setBookmarked] = useState<boolean>(chapter.bookmark ?? false);
-
+  const [bookmarked, setBookmarked] = useState<boolean>(
+    chapter.bookmark ?? false,
+  );
+  const maxBottom = useRef(bottom);
+  if (maxBottom.current !== bottom && bottom !== 0) {
+    maxBottom.current = bottom;
+  }
   useEffect(() => {
     setBookmarked(chapter.bookmark ?? false);
   }, [chapter]);
@@ -121,14 +126,12 @@ export const ChapterContent = ({
     );
   }
   return (
-    <View
-      style={[{ paddingStart: left, paddingEnd: right }, styles.container]}
-    >
+    <View style={[{ paddingStart: left, paddingEnd: right }, styles.container]}>
       {keepScreenOn ? <KeepScreenAwake /> : null}
       {loading ? (
         <ChapterLoadingScreen />
       ) : (
-        <WebViewReader onPress={hideHeader} />
+        <WebViewReader onPress={hideHeader} bottomInset={maxBottom.current} />
       )}
       <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
       {!hidden ? (

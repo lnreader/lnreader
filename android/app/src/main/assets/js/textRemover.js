@@ -12,7 +12,7 @@ window.textRemover = new (function () {
       {
         id: 'text-selection-ui',
         style:
-          'position: fixed; background: var(--theme-surface); border: 1px solid var(--theme-outline); border-radius: 8px; padding: 8px; z-index: 100000; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.25); pointer-events: auto;',
+          'position: fixed; background: color-mix(in srgb, var(--theme-surface), transparent 10%); border-radius: 8px; padding: 8px; z-index: 100000; opacity: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transition: opacity 150ms',
       },
       button(
         {
@@ -51,41 +51,46 @@ window.textRemover = new (function () {
           getComputedStyle(document.documentElement).getPropertyValue(
             '--StatusBar-currentHeight',
           ),
+          10,
+        ) || 24;
+      const navigationBarHeight =
+        parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--bottom-inset',
+          ),
+          10,
         ) || 24;
       const readerPadding =
         parseInt(
           getComputedStyle(document.documentElement).getPropertyValue(
             '--readerSettings-padding',
           ),
+          10,
         ) || 16;
       const uiHeight = 50; // Approximate height of our UI
 
       // Calculate available space
       const viewportHeight = window.innerHeight;
       const selectionCenterY = rect.top + rect.height / 2;
-      const topSafeArea = statusBarHeight + readerPadding + uiHeight + 10;
-      const bottomSafeArea = readerPadding + uiHeight + 10;
+      const topSafeArea = statusBarHeight + readerPadding + 10;
+      const bottomSafeArea = readerPadding + uiHeight + navigationBarHeight;
 
       // Position UI based on selection location
       let topPosition;
       if (selectionCenterY < viewportHeight / 2) {
         // Selection is in top half, position UI at bottom
         //TODO: make this dynamic
-        const avoidUI = !reader.hidden.val ? 58 : 0;
         const avoidScrollbar = reader.generalSettings.val.verticalSeekbar
           ? 0
-          : 20;
-        topPosition =
-          viewportHeight - bottomSafeArea - avoidUI - avoidScrollbar;
+          : 42;
+        const avoidUI = !reader.hidden.val ? 46 + avoidScrollbar : 0;
+        topPosition = viewportHeight - bottomSafeArea - avoidUI - 4;
         ui.style.top = topPosition + 'px';
         ui.style.bottom = 'auto';
       } else {
         // Selection is in bottom half, position UI at top (accounting for status bar)
-        topPosition = Math.max(
-          statusBarHeight + readerPadding + 10,
-          statusBarHeight + 20,
-        );
-        const avoidUI = !reader.hidden.val ? 32 : 0;
+        topPosition = Math.max(topSafeArea, statusBarHeight + 20);
+        const avoidUI = !reader.hidden.val ? 34 : 0;
         ui.style.top = topPosition + avoidUI + 'px';
         ui.style.bottom = 'auto';
       }
@@ -101,13 +106,13 @@ window.textRemover = new (function () {
       ui.style.bottom = 'auto';
     }
 
-    ui.style.display = 'block';
+    ui.style.opacity = '1';
     isUIActive = true;
   }
 
   function hideSelectionUI() {
     if (selectionUI) {
-      selectionUI.style.display = 'none';
+      selectionUI.style.opacity = '0';
     }
     isUIActive = false;
   }

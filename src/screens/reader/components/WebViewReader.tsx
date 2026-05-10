@@ -30,6 +30,7 @@ export type WebViewPostEvent = {
 
 type WebViewReaderProps = {
   onPress(): void;
+  bottomInset: number;
 };
 
 const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
@@ -46,7 +47,10 @@ const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'
   : 'file:///android_asset';
 
-const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
+const WebViewReader: React.FC<WebViewReaderProps> = ({
+  onPress,
+  bottomInset,
+}) => {
   const {
     novel,
     chapter,
@@ -195,6 +199,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               <style>
               :root {
                 --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
+                --bottom-inset: ${bottomInset ?? 0}px;
                 --readerSettings-theme: ${readerSettings.theme};
                 --readerSettings-padding: ${readerSettings.padding}px;
                 --readerSettings-textSize: ${readerSettings.textSize}px;
