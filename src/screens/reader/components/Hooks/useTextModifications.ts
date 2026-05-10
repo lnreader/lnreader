@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useChapterReaderSettings } from '@hooks/persisted/useSettings';
 import React, { useMemo, useState } from 'react';
 import { WebViewPostEvent } from '../WebViewReader';
