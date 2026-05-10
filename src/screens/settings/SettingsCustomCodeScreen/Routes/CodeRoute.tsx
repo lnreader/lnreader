@@ -93,15 +93,12 @@ const CodeRoute = ({
       clearTimeout(focusTimeoutRef.current);
       focusTimeoutRef.current = null;
     }
-  }, [keyboardHeightValue]);
-
-  React.useEffect(() => {
     return () => {
       if (focusTimeoutRef.current) {
         clearTimeout(focusTimeoutRef.current);
       }
     };
-  }, []);
+  }, [keyboardHeightValue]);
 
   React.useEffect(() => {
     if (!isActive) {

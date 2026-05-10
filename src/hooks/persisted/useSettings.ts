@@ -132,8 +132,6 @@ export interface ChapterReaderSettings {
   padding: number;
   fontFamily: string;
   lineHeight: number;
-  customCSS: string;
-  customJS: string;
   customThemes: ReaderTheme[];
   tts?: {
     voice?: Voice;
@@ -237,8 +235,6 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   padding: 16,
   fontFamily: '',
   lineHeight: 1.5,
-  customCSS: '',
-  customJS: '',
   customThemes: [],
   tts: {
     rate: 1,
@@ -322,9 +318,50 @@ export const useChapterGeneralSettings = () => {
   };
 };
 
+type MigrationChapterReaderSettings = ChapterReaderSettings & {
+  customJS?: string;
+  customCSS?: string;
+};
 export const useChapterReaderSettings = () => {
-  const [storedSettings = initialChapterReaderSettings, setSettings] =
-    useMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+  const [
+    storedSettings = initialChapterReaderSettings as MigrationChapterReaderSettings,
+    setSettings,
+  ] = useMMKVObject<MigrationChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+
+  if (
+    !Array.isArray(storedSettings.codeSnippetsCSS) ||
+    !Array.isArray(storedSettings.codeSnippetsCSS)
+  ) {
+    setSettings({ ...storedSettings, codeSnippetsCSS: [], codeSnippetsJS: [] });
+  }
+
+  // Migrate old js and css to new
+  if (storedSettings.customJS) {
+    storedSettings.codeSnippetsJS.push({
+      active: true,
+      code: storedSettings.customJS,
+      lang: 'js',
+      name: 'Custom JS',
+    });
+    setSettings({
+      ...storedSettings,
+      customJS: undefined,
+      codeSnippetsJS: storedSettings.codeSnippetsJS,
+    });
+  }
+  if (storedSettings.customCSS) {
+    storedSettings.codeSnippetsCSS.push({
+      active: true,
+      code: storedSettings.customCSS,
+      lang: 'css',
+      name: 'Custom CSS',
+    });
+    setSettings({
+      ...storedSettings,
+      customCSS: undefined,
+      codeSnippetsCSS: storedSettings.codeSnippetsCSS,
+    });
+  }
 
   // Ensure TTS settings have proper defaults (migration for existing users)
   const chapterReaderSettings = {
