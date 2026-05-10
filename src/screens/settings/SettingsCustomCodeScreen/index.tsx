@@ -14,8 +14,8 @@ import CodeRoute from './Routes/CodeRoute';
 import SelfHidingAppBar from './Components/SelfHidingAppbar';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
-import SettingsWebView from './Components/SettingsWebView';
 import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
+import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsReaderWebView';
 
 const routes = [
   { key: 'first', title: 'Settings' },
@@ -99,7 +99,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
           />
         );
       case 'third':
-        return <SettingsWebView />;
+        return <SettingsReaderWebView />;
       default:
         return null;
     }

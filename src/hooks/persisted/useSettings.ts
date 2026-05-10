@@ -399,7 +399,7 @@ export const useChapterReaderSettings = () => {
     });
 
   return {
-    ...chapterReaderSettings,
+    ...(chapterReaderSettings as ChapterReaderSettings),
     setChapterReaderSettings,
     saveCustomReaderTheme,
     deleteCustomReaderTheme,

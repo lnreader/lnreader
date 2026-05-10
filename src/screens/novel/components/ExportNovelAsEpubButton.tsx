@@ -84,14 +84,36 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       }`
       : '';
 
+    const customCSS = readerSettings.codeSnippetsCSS
+      .map(snippet => {
+        if (!snippet.active) return null;
+        return snippet.code;
+      })
+      .filter(Boolean)
+      .join('\n');
+
     const customStyles = epubUseCustomCSS
-      ? readerSettings.customCSS
+      ? customCSS
           .replace(RegExp(`#sourceId-${novel.pluginId}\\s*\\{`, 'g'), 'body {')
           .replace(RegExp(`#sourceId-${novel.pluginId}[^.#A-Z]*`, 'gi'), '')
       : '';
 
     return appThemeStyles + customStyles;
   }, [novel, epubUseAppTheme, epubUseCustomCSS, readerSettings, theme.primary]);
+
+  const customJS = readerSettings.codeSnippetsJS
+    .map(snippet => {
+      if (!snippet.active) return null;
+      return `
+      try {
+        ${snippet.code}
+      } catch (error) {
+        alert('Error loading executing ${snippet.name}:\n' + error);
+      }
+      `;
+    })
+    .filter(Boolean)
+    .join('\n');
 
   const epubJavaScript = useMemo(() => {
     if (!novel) {
@@ -105,10 +127,10 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       let chapterId = "";
       let novelId = ${novel.id};
       let html = document.querySelector("chapter").innerHTML;
-      
-      ${readerSettings.customJS}
+
+      ${customJS}
     `;
-  }, [novel, readerSettings]);
+  }, [customJS, novel]);
 
   const exportNovelAsEpub = async (
     destinationUri: string,
