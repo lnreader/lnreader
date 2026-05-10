@@ -28,7 +28,7 @@ export default function useTextModifications(chapterText: string) {
         try {
           const regex = new RegExp(m[1], flags);
           chText = chText.replace(regex, '');
-        } catch (e) {
+        } catch {
           console.warn('Invalid regex pattern in removeText:', text);
         }
       } else {
@@ -48,7 +48,7 @@ export default function useTextModifications(chapterText: string) {
           try {
             const regex = new RegExp(m[1], flags);
             chText = chText.replace(regex, replacement);
-          } catch (e) {
+          } catch {
             console.warn('Invalid regex pattern in replaceText:', text);
           }
         } else {
