@@ -69,7 +69,9 @@ const SettingsReaderWebView = () => {
       try {
         ${snippet.code}
       } catch (error) {
-        alert('Error loading executing ${snippet.name}:\n' + error);
+        alert('Error loading executing ${JSON.stringify(
+          snippet.name,
+        )}:\n' + error);
       }
       `;
       })

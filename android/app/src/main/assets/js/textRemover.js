@@ -2,7 +2,6 @@
 window.textRemover = new (function () {
   let selectionUI = null;
   let isUIActive = false;
-  this.hidden = van.state(true);
 
   function createSelectionUI() {
     if (selectionUI) return selectionUI;
