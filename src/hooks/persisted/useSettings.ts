@@ -90,6 +90,8 @@ export interface ChapterGeneralSettings {
   bionicReading: boolean;
   tapToScroll: boolean;
   TTSEnable: boolean;
+  googleTranslateApiKey: string;
+  translationTargetLang: string;
 }
 
 export interface ReaderTheme {
@@ -186,6 +188,8 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   bionicReading: false,
   tapToScroll: false,
   TTSEnable: true,
+  googleTranslateApiKey: '',
+  translationTargetLang: 'en',
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
