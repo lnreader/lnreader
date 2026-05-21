@@ -16,3 +16,4 @@ export { useTrackedNovel } from './useTrackedNovel';
 export { deleteCachedNovels } from './useNovel';
 export { default as useDownload } from './useDownload';
 export { default as useUserAgent } from './useUserAgent';
+export { useTranslation } from './useTranslation';
