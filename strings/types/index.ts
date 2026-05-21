@@ -209,6 +209,9 @@ export interface StringMap {
   'common.submit': 'string';
   'common.loading': 'string';
   'common.warning': 'string';
+  'common.translated': 'string';
+  'common.translationFailed': 'string';
+  'common.noApiKey': 'string';
   'webview.refresh': 'string';
   'webview.share': 'string';
   'webview.openInBrowser': 'string';

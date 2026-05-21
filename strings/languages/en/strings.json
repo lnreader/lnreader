@@ -235,7 +235,10 @@
     "sort": "Sort",
     "submit": "Submit",
     "loading": "Loading ...",
-    "warning": "Warning"
+    "warning": "Warning",
+    "translated": "Chapter translated!",
+    "translationFailed": "Translation failed: %{error}",
+    "noApiKey": "No API key set. Add one in Reader Settings → Translation."
   },
   "webview": {
     "refresh": "Refresh",
