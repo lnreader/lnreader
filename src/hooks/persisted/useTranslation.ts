@@ -1,73 +1,55 @@
 import { useState } from 'react';
-import { translateChapterContent } from '@services/translate/TranslationService';
-import { saveChapterTranslation, clearChapterTranslation } from '@database/queries/ChapterQueries';
-import { getNovelById } from '@database/queries/NovelQueries';
-import { fetchChapter } from '@services/plugin/fetch';
+import { translateChapterContent, ProviderConfig } from '@services/translation';
+import {
+  saveChapterTranslation,
+  clearChapterTranslation,
+} from '@database/queries/ChapterQueries';
 import { useChapterGeneralSettings } from './useSettings';
-import { ChapterInfo } from '@database/types';
-import NativeFile from '@specs/NativeFile';
-import { NOVEL_STORAGE } from '@utils/Storages';
+import { ChapterInfo, NovelInfo } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 
 export function useTranslation() {
   const [translatingIds, setTranslatingIds] = useState<Set<number>>(new Set());
-  const { googleTranslateApiKey, translationTargetLang } = useChapterGeneralSettings();
+  const settings = useChapterGeneralSettings();
 
   const { updateChapter } = useNovelActions();
   const chapters = useNovelValue('chapters');
 
-  const translateChapter = async (chapter: ChapterInfo) => {
-    if (!googleTranslateApiKey) {
-      const msg = getString('common.noApiKey') || 'No API key set. Add one in Reader Settings → Translation.';
-      showToast(msg);
-      throw new Error(msg);
-    }
+  const getConfig = (): ProviderConfig => ({
+    googleApiKey: settings.googleApiKey,
+    deeplApiKey: settings.deeplApiKey,
+    deeplPlan: settings.deeplPlan,
+    microsoftApiKey: settings.microsoftApiKey,
+    microsoftRegion: settings.microsoftRegion,
+  });
 
-    // Already translated in the target lang — skip (cache hit)
-    if (
-      chapter.translatedContent &&
-      chapter.translationLang === translationTargetLang
-    ) {
+  const translateChapter = async (chapter: ChapterInfo, novel: NovelInfo) => {
+    const targetLang = novel.translationLang || 'en';
+
+    // Cache hit — already translated into the current target lang
+    if (chapter.translatedContent && chapter.translationLang === targetLang) {
       return;
     }
 
     setTranslatingIds(prev => new Set(prev).add(chapter.id));
     try {
-      let rawContent = '';
-      const novel = getNovelById(chapter.novelId);
-      if (!novel) {
-        throw new Error('Novel not found in database');
-      }
-
-      const filePath = `${NOVEL_STORAGE}/${novel.pluginId}/${chapter.novelId}/${chapter.id}/index.html`;
-      if (chapter.isDownloaded && NativeFile.exists(filePath)) {
-        rawContent = NativeFile.readFile(filePath);
-      } else {
-        rawContent = await fetchChapter(novel.pluginId, chapter.path);
-      }
-
-      if (!rawContent) {
-        throw new Error('Chapter content is empty');
-      }
-
       const translated = await translateChapterContent(
-        rawContent,
-        translationTargetLang,
-        googleTranslateApiKey,
+        chapter.content || '',
+        targetLang,
+        settings.translationProvider,
+        getConfig(),
       );
-
-      await saveChapterTranslation(chapter.id, translated, translationTargetLang);
+      await saveChapterTranslation(chapter.id, translated, targetLang);
 
       const index = chapters.findIndex(c => c.id === chapter.id);
       if (index !== -1) {
         updateChapter(index, {
           translatedContent: translated,
-          translationLang: translationTargetLang,
+          translationLang: targetLang,
         });
       }
-
       showToast(getString('common.translated') || 'Chapter translated!');
     } catch (error: any) {
       const errorMsg = error?.message || 'Translation failed';
@@ -85,10 +67,13 @@ export function useTranslation() {
     }
   };
 
-  // Bulk translate — called from NovelScreen header action
-  const translateChapters = async (chaptersToTranslate: ChapterInfo[]) => {
+  // Sequential to avoid hammering the API
+  const translateChapters = async (
+    chaptersToTranslate: ChapterInfo[],
+    novel: NovelInfo,
+  ) => {
     for (const ch of chaptersToTranslate) {
-      await translateChapter(ch).catch(() => {}); // skip failed, continue
+      await translateChapter(ch, novel).catch(() => {});
     }
   };
 
@@ -112,4 +97,3 @@ export function useTranslation() {
     isAnyTranslating: translatingIds.size > 0,
   };
 }
-
