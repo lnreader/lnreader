@@ -196,6 +196,37 @@ describe('useChapter', () => {
     );
   });
 
+  it('hydrates the initial chapter from the database before rendering reader progress', async () => {
+    const store = createStore({ [initialChapter.id]: 'cached chapter body' });
+    const hydratedChapter = { ...initialChapter, progress: 56 };
+    mockUseNovelActions.mockReturnValue(store.state);
+    mockGetDbChapter.mockResolvedValue(hydratedChapter);
+
+    const { result } = renderHook(() =>
+      useChapter({ current: null }, initialChapter, novel),
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.chapter.progress).toBe(56);
+  });
+
+  it('uses database progress as the source of truth on initial open', async () => {
+    const routeChapter = { ...initialChapter, progress: 72 };
+    const dbChapter = { ...initialChapter, progress: 12 };
+    const store = createStore({ [initialChapter.id]: 'cached chapter body' });
+    mockUseNovelActions.mockReturnValue(store.state);
+    mockGetDbChapter.mockResolvedValue(dbChapter);
+
+    const { result } = renderHook(() =>
+      useChapter({ current: null }, routeChapter, novel),
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.chapter.progress).toBe(12);
+  });
+
   it('updates chapter progress, caps at 100, and marks chapter read/tracker progress near completion', async () => {
     const store = createStore();
     const updateAllTrackedNovels = jest.fn();
