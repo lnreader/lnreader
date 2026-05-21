@@ -53,6 +53,7 @@ export function useTranslation() {
   };
 
   return {
+    translatingIds,
     translateChapter,
     translateChapters,
     clearTranslation,

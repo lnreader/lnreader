@@ -4,7 +4,13 @@ import NovelInfoHeader from './Info/NovelInfoHeader';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { pickCustomNovelCover } from '@database/queries/NovelQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
-import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useDownload,
+  useTheme,
+  useTranslation,
+  useChapterGeneralSettings,
+} from '@hooks/persisted';
 import {
   updateNovel,
   updateNovelPage,
@@ -104,6 +110,8 @@ const NovelScreenList = ({
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
   const { downloadingChapterIds, downloadChapter } = useDownload();
+  const { translateChapter, clearTranslation, isTranslating, translatingIds } = useTranslation();
+  const { translationTargetLang } = useChapterGeneralSettings();
 
   // Mark chapters as downloaded when their download completes
   const prevDownloadingRef = useRef(downloadingChapterIds);
@@ -504,11 +512,15 @@ const NovelScreenList = ({
               onDownloadChapter={handleDownloadChapter}
               onSelectPress={onSelectPress}
               onSelectLongPress={onSelectLongPress}
+              isTranslating={isTranslating(item.id)}
+              translationTargetLang={translationTargetLang}
+              onTranslateChapter={translateChapter}
+              onClearTranslation={clearTranslation}
             />
           );
         }}
         keyExtractor={chapterKeyExtractor}
-        extraData={[downloadingChapterIds, selectedIds]}
+        extraData={[downloadingChapterIds, selectedIds, translatingIds]}
         contentContainerStyle={styles.contentContainer}
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}

@@ -18,6 +18,9 @@ jest.mock('@hooks/persisted', () => ({
   useDownload: () => ({
     downloadChapters: mockDownloadChapters,
   }),
+  useTranslation: () => ({
+    translateChapters: jest.fn(),
+  }),
 }));
 
 jest.mock('@hooks', () => ({

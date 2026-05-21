@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Portal, Appbar, Snackbar } from 'react-native-paper';
-import { useDownload, useTheme } from '@hooks/persisted';
+import { useDownload, useTheme, useTranslation } from '@hooks/persisted';
 import JumpToChapterModal from './components/JumpToChapterModal';
 import { Actionbar } from '../../components/Actionbar/Actionbar';
 import EditInfoModal from './components/EditInfoModal';
@@ -49,6 +49,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const theme = useTheme();
   const { downloadChapters } = useDownload();
+  const { translateChapters } = useTranslation();
 
   const [selected, setSelected] = useState<ChapterInfo[]>([]);
   const [editInfoModal, showEditInfoModal] = useState(false);
@@ -116,6 +117,16 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const actions = useMemo(() => {
     const list: { icon: MaterialDesignIconName; onPress: () => void }[] = [];
+
+    if (!novel?.isLocal) {
+      list.push({
+        icon: 'translate',
+        onPress: () => {
+          translateChapters(selected);
+          setSelected([]);
+        },
+      });
+    }
 
     if (!novel?.isLocal && selected.some(obj => !obj.isDownloaded)) {
       list.push({
