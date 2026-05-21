@@ -159,7 +159,7 @@ describe('useChapter', () => {
       showStatusAndNavBar: jest.fn(),
     });
 
-    mockGetDbChapter.mockResolvedValue(initialChapter);
+    mockGetDbChapter.mockImplementation(async (id: number) => makeChapter(id, '1'));
     mockGetChapterCount.mockResolvedValue(1);
     mockGetNextChapter.mockResolvedValue(undefined);
     mockGetPrevChapter.mockResolvedValue(undefined);

@@ -125,7 +125,11 @@ export default function useChapter(
   const getChapter = useCallback(
     async (navChapter?: ChapterInfo) => {
       try {
-        const chap = navChapter ?? chapter;
+        let chap = navChapter ?? chapter;
+        const dbChap = await getDbChapter(chap.id);
+        if (dbChap) {
+          chap = { ...chap, ...dbChap };
+        }
         const cachedText = chapterTextCache.read(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
         const [nextChapResult, prevChapResult, awaitedText] = await Promise.all(
@@ -202,7 +206,7 @@ export default function useChapter(
             novel.pluginId,
             novel.name,
             chap.name,
-            awaitedText,
+            chap.translatedContent ?? awaitedText,
           ),
         );
         setAdjacentChapter([nextChap!, prevChap!]);
