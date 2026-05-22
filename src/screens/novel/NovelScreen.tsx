@@ -13,6 +13,7 @@ import { Actionbar } from '../../components/Actionbar/Actionbar';
 import EditInfoModal from './components/EditInfoModal';
 import { pickCustomNovelCover } from '../../database/queries/NovelQueries';
 import DownloadCustomChapterModal from './components/DownloadCustomChapterModal';
+import TranslationModal from './components/TranslationModal';
 import { useBoolean } from '@hooks';
 import NovelScreenLoading from './components/LoadingAnimation/NovelScreenLoading';
 import { NovelScreenProps } from '@navigators/types';
@@ -53,6 +54,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const [selected, setSelected] = useState<ChapterInfo[]>([]);
   const [editInfoModal, showEditInfoModal] = useState(false);
+  const [translationModalVisible, showTranslationModal] = useState(false);
 
   const chapterListRef = useRef<LegendListRef | null>(null);
 
@@ -285,6 +287,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
               headerOpacity={headerOpacity}
+              showTranslationModal={() => showTranslationModal(true)}
             />
           ) : (
             <Animated.View
@@ -361,6 +364,14 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
                 chapters={chapters}
                 theme={theme}
                 downloadChapters={downloadChapters}
+              />
+              <TranslationModal
+                modalVisible={translationModalVisible}
+                hideModal={() => showTranslationModal(false)}
+                novel={novel}
+                chapters={chapters}
+                theme={theme}
+                setNovel={setNovel}
               />
             </>
           ) : null}

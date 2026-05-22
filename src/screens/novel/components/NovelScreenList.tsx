@@ -8,8 +8,6 @@ import {
   useAppSettings,
   useDownload,
   useTheme,
-  useTranslation,
-  useChapterGeneralSettings,
 } from '@hooks/persisted';
 import {
   updateNovel,
@@ -110,9 +108,6 @@ const NovelScreenList = ({
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
   const { downloadingChapterIds, downloadChapter } = useDownload();
-  const { translateChapter, clearTranslation, isTranslating, translatingIds } =
-    useTranslation();
-  const { translationTargetLang } = useChapterGeneralSettings();
 
   // Mark chapters as downloaded when their download completes
   const prevDownloadingRef = useRef(downloadingChapterIds);
@@ -513,15 +508,11 @@ const NovelScreenList = ({
               onDownloadChapter={handleDownloadChapter}
               onSelectPress={onSelectPress}
               onSelectLongPress={onSelectLongPress}
-              isTranslating={isTranslating(item.id)}
-              translationTargetLang={translationTargetLang}
-              onTranslateChapter={ch => translateChapter(ch, novel)}
-              onClearTranslation={clearTranslation}
             />
           );
         }}
         keyExtractor={chapterKeyExtractor}
-        extraData={[downloadingChapterIds, selectedIds, translatingIds]}
+        extraData={[downloadingChapterIds, selectedIds]}
         contentContainerStyle={styles.contentContainer}
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}

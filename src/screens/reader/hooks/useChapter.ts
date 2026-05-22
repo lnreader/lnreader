@@ -348,10 +348,9 @@ export default function useChapter(
   }, [incognitoMode, setLastRead, setLoading, chapter.id]);
 
   useEffect(() => {
-    if (!chapter || !chapterText) {
-      getChapter();
-    }
-  }, [chapter, chapterText, getChapter]);
+    getChapter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialChapter.id]);
 
   const refetch = useCallback(() => {
     setLoading(true);

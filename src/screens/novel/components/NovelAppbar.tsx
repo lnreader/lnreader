@@ -84,6 +84,7 @@ const NovelAppbar = ({
   shareNovel,
   showJumpToChapterModal,
   headerOpacity,
+  showTranslationModal,
 }: {
   novel: NovelInfo | undefined;
   theme: ThemeColors;
@@ -97,6 +98,7 @@ const NovelAppbar = ({
   shareNovel: () => void;
   showJumpToChapterModal: (arg: boolean) => void;
   headerOpacity: SharedValue<number>;
+  showTranslationModal: () => void;
 }) => {
   const headerOpacityStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -180,8 +182,12 @@ const NovelAppbar = ({
         label: getString('novelScreen.edit.cover'),
         onPress: () => setCustomNovelCover(),
       },
+      {
+        label: 'Translate',
+        onPress: () => showTranslationModal(),
+      },
     ],
-    [showEditInfoModal, setCustomNovelCover],
+    [showEditInfoModal, setCustomNovelCover, showTranslationModal],
   );
 
   const openDlMenu = useCallback(() => showDownloadMenu(true), []);

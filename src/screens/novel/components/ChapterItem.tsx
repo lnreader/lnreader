@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useMemo, ReactNode } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import {
   ChapterBookmarkButton,
   DownloadButton,
@@ -26,10 +25,6 @@ interface ChapterItemProps {
   onDownloadChapter: (chapter: ChapterInfo) => void;
   onSelectPress: (chapter: ChapterInfo) => void;
   onSelectLongPress?: (chapter: ChapterInfo) => void;
-  isTranslating?: boolean;
-  translationTargetLang?: string;
-  onTranslateChapter?: (chapter: ChapterInfo) => void;
-  onClearTranslation?: (chapterId: number) => void;
 }
 
 const ChapterItem: React.FC<ChapterItemProps> = ({
@@ -47,10 +42,6 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   onDownloadChapter,
   onSelectPress,
   onSelectLongPress,
-  isTranslating = false,
-  translationTargetLang = 'en',
-  onTranslateChapter,
-  onClearTranslation,
 }) => {
   const { id, name, unread, releaseTime, bookmark, chapterNumber, progress } =
     chapter;
@@ -186,37 +177,6 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         </View>
         {!isLocal ? (
           <View style={styles.actionContainer}>
-            {isTranslating ? (
-              <View style={styles.translatingContainer}>
-                <ActivityIndicator
-                  color={theme.primary}
-                  size={20}
-                  style={styles.activityIndicator}
-                />
-              </View>
-            ) : (
-              <IconButton
-                icon={
-                  chapter.translatedContent && chapter.translationLang === translationTargetLang
-                    ? 'check-circle'
-                    : 'translate'
-                }
-                iconColor={
-                  chapter.translatedContent && chapter.translationLang === translationTargetLang
-                    ? theme.primary
-                    : theme.outline
-                }
-                size={22}
-                style={styles.translateButton}
-                onPress={() => {
-                  if (chapter.translatedContent && chapter.translationLang === translationTargetLang) {
-                    onClearTranslation?.(chapter.id);
-                  } else {
-                    onTranslateChapter?.(chapter);
-                  }
-                }}
-              />
-            )}
             <DownloadButton
               isDownloading={isDownloading}
               isDownloaded={chapter.isDownloaded ?? false}
@@ -238,21 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  translatingContainer: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activityIndicator: {
-    padding: 5,
-  },
-  translateButton: {
-    margin: 0,
-    padding: 0,
-    width: 40,
-    height: 40,
   },
   chapterCardContainer: {
     alignItems: 'center',
