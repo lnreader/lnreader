@@ -5,7 +5,6 @@ import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 import { List } from '@components/index';
 import SettingSwitch from '../../components/SettingSwitch';
-import { TranslationSettings } from '../Settings/TranslationSettings';
 
 const AccessibilityTab: React.FC = () => {
   const theme = useTheme();
@@ -76,10 +75,6 @@ const AccessibilityTab: React.FC = () => {
           }
           theme={theme}
         />
-      </View>
-
-      <View style={styles.section}>
-        <TranslationSettings />
       </View>
 
       <View style={styles.bottomSpacing} />

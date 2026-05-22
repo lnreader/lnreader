@@ -7,7 +7,7 @@ import { getString } from '@strings/translations';
 import { Modal, SwitchItem, List, Button } from '@components';
 import { useTranslation } from '@hooks/persisted';
 import { updateNovelInfo } from '@database/queries/NovelQueries';
-import { LANGUAGES, LanguagePickerModal } from '../../settings/SettingsReaderScreen/Settings/TranslationSettings';
+import { LANGUAGES, LanguagePickerModal } from '../../settings/TranslationSettingsScreen';
 
 interface TranslationModalProps {
   theme: ThemeColors;
@@ -78,7 +78,7 @@ const TranslationModal = ({
             <List.Item
               title="Translate to"
               description={
-                LANGUAGES.find(l => l.code === novel?.translationLang)?.label ||
+                LANGUAGES.find((l: { code: string; label: string }) => l.code === novel?.translationLang)?.label ||
                 'Not selected'
               }
               icon="web"
@@ -89,12 +89,12 @@ const TranslationModal = ({
               title="Translate all downloaded chapters"
               description={
                 isAnyTranslating
-                  ? 'Translating chapters...'
-                  : `${untranslatedCount} chapters not yet translated`
+                   ? 'Translating chapters...'
+                   : `${untranslatedCount} chapters not yet translated`
               }
               onPress={() => {
                 if (!isAnyTranslating && downloadedChapters.length > 0 && novel) {
-                  translateChapters(downloadedChapters, novel);
+                   translateChapters(downloadedChapters, novel);
                 }
               }}
               disabled={isAnyTranslating || downloadedChapters.length === 0}
@@ -118,7 +118,7 @@ const TranslationModal = ({
           visible={langVisible}
           onDismiss={() => setLangVisible(false)}
           currentLanguage={novel?.translationLang || ''}
-          onSelect={lang => updateNovel({ translationLang: lang })}
+          onSelect={(lang: string) => updateNovel({ translationLang: lang })}
           languages={LANGUAGES}
         />
       </Modal>
