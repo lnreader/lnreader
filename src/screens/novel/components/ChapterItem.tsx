@@ -176,15 +176,13 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
           </View>
         </View>
         {!isLocal ? (
-          <View style={styles.actionContainer}>
-            <DownloadButton
-              isDownloading={isDownloading}
-              isDownloaded={chapter.isDownloaded ?? false}
-              theme={theme}
-              deleteChapter={handleDelete}
-              downloadChapter={handleDownload}
-            />
-          </View>
+          <DownloadButton
+            isDownloading={isDownloading}
+            isDownloaded={chapter.isDownloaded ?? false}
+            theme={theme}
+            deleteChapter={handleDelete}
+            downloadChapter={handleDownload}
+          />
         ) : null}
       </Pressable>
     </View>
@@ -194,11 +192,6 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 export default memo(ChapterItem);
 
 const styles = StyleSheet.create({
-  actionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   chapterCardContainer: {
     alignItems: 'center',
     flexDirection: 'row',
