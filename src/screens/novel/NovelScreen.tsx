@@ -37,6 +37,7 @@ import { LegendListRef } from '@legendapp/list';
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
   const chapters = useNovelValue('chapters');
+  const novelSettings = useNovelValue('novelSettings');
   const {
     setNovel,
     bookmarkChapters,
@@ -120,17 +121,15 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   const actions = useMemo(() => {
     const list: { icon: MaterialDesignIconName; onPress: () => void }[] = [];
 
-    if (!novel?.isLocal) {
-      list.push({
-        icon: 'translate',
-        onPress: () => {
-          if (novel) {
-            translateChapters(selected, novel);
-          }
-          setSelected([]);
-        },
-      });
-    }
+    list.push({
+      icon: 'translate',
+      onPress: () => {
+        if (novel) {
+          translateChapters(selected, novel, novelSettings.translationLang);
+        }
+        setSelected([]);
+      },
+    });
 
     if (!novel?.isLocal && selected.some(obj => !obj.isDownloaded)) {
       list.push({
@@ -218,6 +217,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     markPreviousChaptersUnread,
     markPreviouschaptersRead,
     novel,
+    novelSettings,
     refreshChapters,
     selected,
     translateChapters,
