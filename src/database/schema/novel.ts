@@ -27,8 +27,6 @@ export const novel = sqliteTable(
     totalChapters: integer('totalChapters').default(0),
     lastReadAt: text('lastReadAt'),
     lastUpdatedAt: text('lastUpdatedAt'),
-    autoTranslate: integer('autoTranslate', { mode: 'boolean' }).default(false),
-    translationLang: text('translationLang'),
   },
   table => [
     uniqueIndex('novel_path_plugin_unique').on(table.path, table.pluginId),

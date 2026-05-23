@@ -35,7 +35,7 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import NativeVolumeButtonListener from '@specs/NativeVolumeButtonListener';
 import NativeFile from '@specs/NativeFile';
-import { useNovelActions } from '@screens/novel/NovelContext';
+import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 
 const emmiter = new NativeEventEmitter(NativeVolumeButtonListener);
 
@@ -50,6 +50,7 @@ export default function useChapter(
     updateChapterProgress,
     chapterTextCache,
   } = useNovelActions();
+  const novelSettings = useNovelValue('novelSettings');
   const { translateChapter } = useTranslation();
 
   const [hidden, setHidden] = useState(true);
@@ -149,14 +150,14 @@ export default function useChapter(
         ]);
 
         if (
-          novel.autoTranslate &&
-          novel.translationLang &&
+          novelSettings.autoTranslate &&
+          novelSettings.translationLang &&
           !chap.translatedContent
         ) {
           setLoading(true);
           try {
             chap.content = awaitedText;
-            await translateChapter(chap, novel);
+            await translateChapter(chap, novel, novelSettings.translationLang);
             const updatedChap = await getDbChapter(chap.id);
             if (updatedChap) {
               chap = { ...chap, ...updatedChap };

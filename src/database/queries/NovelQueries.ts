@@ -313,8 +313,6 @@ export const updateNovelInfo = async (info: NovelInfo) => {
         genres: info.genres || '',
         status: info.status || '',
         isLocal: info.isLocal,
-        ...(info.autoTranslate !== undefined ? { autoTranslate: info.autoTranslate } : {}),
-        ...(info.translationLang !== undefined ? { translationLang: info.translationLang } : {}),
       })
       .where(eq(novelSchema.id, info.id))
       .run();

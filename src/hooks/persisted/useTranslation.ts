@@ -26,11 +26,12 @@ export function useTranslation() {
   chaptersRef.current = chapters;
 
   const translateChapter = useCallback(
-    async (chapter: ChapterInfo, novel: NovelInfo, silent = false) => {
-      const targetLang = novel.translationLang || 'en';
+    async (chapter: ChapterInfo, novel: NovelInfo, targetLanguage?: string, silent = false) => {
+      const targetLang = targetLanguage || 'en';
 
       // Cache hit — already translated into the current target lang
-      if (chapter.translatedContent && chapter.translationLang === targetLang) {
+      const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chapter.novelId}/${chapter.id}/translation_${targetLang}.html`;
+      if (NativeFile.exists(transPath) || (chapter.translatedContent && chapter.translationLang === targetLang)) {
         return;
       }
 
@@ -97,12 +98,12 @@ export function useTranslation() {
 
   // Sequential to avoid hammering the API
   const translateChapters = useCallback(
-    async (chaptersToTranslate: ChapterInfo[], novel: NovelInfo) => {
+    async (chaptersToTranslate: ChapterInfo[], novel: NovelInfo, targetLanguage?: string) => {
       let successCount = 0;
       let failCount = 0;
       for (const ch of chaptersToTranslate) {
         try {
-          await translateChapter(ch, novel, true);
+          await translateChapter(ch, novel, targetLanguage, true);
           successCount++;
         } catch {
           failCount++;

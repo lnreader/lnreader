@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Portal } from 'react-native-paper';
 import { ThemeColors } from '@theme/types';
@@ -6,7 +6,7 @@ import { ChapterInfo, NovelInfo } from '@database/types';
 import { getString } from '@strings/translations';
 import { Modal, SwitchItem, List, Button } from '@components';
 import { useTranslation } from '@hooks/persisted';
-import { updateNovelInfo } from '@database/queries/NovelQueries';
+import { useNovelStore } from '../NovelContext';
 import { LANGUAGES, LanguagePickerModal } from '../../settings/components/LanguagePickerModal';
 
 interface TranslationModalProps {
@@ -29,17 +29,8 @@ const TranslationModal = ({
   const { translateChapters, isAnyTranslating, clearAllTranslations } = useTranslation();
   const [langVisible, setLangVisible] = useState(false);
 
-  const updateNovel = useCallback(
-    (updates: Partial<NovelInfo>) => {
-      if (!novel) {
-        return;
-      }
-      const updatedNovel = { ...novel, ...updates };
-      setNovel(updatedNovel);
-      updateNovelInfo(updatedNovel);
-    },
-    [novel, setNovel],
-  );
+  const novelSettings = useNovelStore(state => state.novelSettings);
+  const setNovelSettings = useNovelStore(state => state.actions.setNovelSettings);
 
   const downloadedChapters = useMemo(
     () => chapters.filter(c => c.isDownloaded),
@@ -49,9 +40,9 @@ const TranslationModal = ({
   const untranslatedChapters = useMemo(
     () =>
       downloadedChapters.filter(
-        c => !c.translationLang || c.translationLang !== novel?.translationLang,
+        c => !c.translationLang || c.translationLang !== novelSettings.translationLang,
       ),
-    [downloadedChapters, novel?.translationLang],
+    [downloadedChapters, novelSettings.translationLang],
   );
 
   const translatedChapters = useMemo(
@@ -72,18 +63,18 @@ const TranslationModal = ({
 
         <SwitchItem
           label="Auto-translate chapters"
-          value={!!novel?.autoTranslate}
-          onPress={() => updateNovel({ autoTranslate: !novel?.autoTranslate })}
+          value={!!novelSettings.autoTranslate}
+          onPress={() => setNovelSettings({ ...novelSettings, autoTranslate: !novelSettings.autoTranslate })}
           theme={theme}
           style={styles.switchItem}
         />
 
-        {novel?.autoTranslate ? (
+        {novelSettings.autoTranslate ? (
           <View style={styles.optionsContainer}>
             <List.Item
               title="Translate to"
               description={
-                LANGUAGES.find((l: { code: string; label: string }) => l.code === novel?.translationLang)?.label ||
+                LANGUAGES.find((l: { code: string; label: string }) => l.code === novelSettings.translationLang)?.label ||
                 'Not selected'
               }
               icon="web"
@@ -99,7 +90,7 @@ const TranslationModal = ({
               }
               onPress={() => {
                 if (!isAnyTranslating && untranslatedChapters.length > 0 && novel) {
-                   translateChapters(untranslatedChapters, novel);
+                   translateChapters(untranslatedChapters, novel, novelSettings.translationLang);
                 }
               }}
               disabled={isAnyTranslating || untranslatedChapters.length === 0}
@@ -138,8 +129,8 @@ const TranslationModal = ({
         <LanguagePickerModal
           visible={langVisible}
           onDismiss={() => setLangVisible(false)}
-          currentLanguage={novel?.translationLang || ''}
-          onSelect={(lang: string) => updateNovel({ translationLang: lang })}
+          currentLanguage={novelSettings.translationLang || ''}
+          onSelect={(lang: string) => setNovelSettings({ ...novelSettings, translationLang: lang })}
           languages={LANGUAGES}
         />
       </Modal>

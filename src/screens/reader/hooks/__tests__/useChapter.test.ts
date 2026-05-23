@@ -3,6 +3,7 @@ import useChapter from '../useChapter';
 import NativeFile from '@specs/NativeFile';
 
 const mockUseNovelActions = jest.fn();
+const mockUseNovelValue = jest.fn(() => ({ autoTranslate: false, translationLang: '' }));
 const mockUseChapterGeneralSettings = jest.fn();
 const mockUseLibrarySettings = jest.fn();
 const mockUseTracker = jest.fn();
@@ -22,6 +23,7 @@ const mockParseChapterNumber = jest.fn();
 
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
+  useNovelValue: (key: string) => mockUseNovelValue(key),
 }));
 
 jest.mock('@hooks/persisted', () => ({

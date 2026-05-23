@@ -7,6 +7,8 @@ export const LAST_READ_PREFIX = 'LAST_READ_PREFIX';
 export const defaultNovelSettings: NovelSettingsWithoutSort = {
   showChapterTitles: true,
   filter: [],
+  autoTranslate: false,
+  translationLang: '',
 };
 
 export const defaultPageIndex = 0;
@@ -15,6 +17,8 @@ export interface NovelSettingsWithoutSort {
   filter: ChapterFilterKey[];
   showChapterTitles: boolean;
   sort?: ChapterOrderKey;
+  autoTranslate?: boolean;
+  translationLang?: string;
 }
 export interface NovelSettings extends NovelSettingsWithoutSort {
   sort: ChapterOrderKey;
