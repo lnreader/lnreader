@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text, Pressable } from 'react-native';
 import { TextInput, Portal, RadioButton as PaperRadioButton } from 'react-native-paper';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import { useChapterGeneralSettings, useTheme, useSecureKeys } from '@hooks/persisted';
 import { List, Modal, Button, SegmentedControl, SafeAreaView, Appbar } from '@components';
 import { getString } from '@strings/translations';
 import { ProviderId } from '@services/translation';
@@ -138,14 +138,18 @@ const PROVIDERS: { id: ProviderId; label: string; note: string }[] = [
 const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProps) => {
   const theme = useTheme();
   const {
-    translationProvider = 'gtx',
-    googleApiKey = '',
-    deeplApiKey = '',
-    deeplPlan = 'free',
-    microsoftApiKey = '',
-    microsoftRegion = '',
+    translationConfig,
     setChapterGeneralSettings,
   } = useChapterGeneralSettings();
+
+  const {
+    googleApiKey,
+    deeplApiKey,
+    microsoftApiKey,
+    setSecureKeys,
+  } = useSecureKeys();
+
+  const translationProvider = translationConfig.provider;
 
   const [providerVisible, setProviderVisible] = useState(false);
   const [googleKeyVisible, setGoogleKeyVisible] = useState(false);
@@ -174,7 +178,21 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
             visible={providerVisible}
             onDismiss={() => setProviderVisible(false)}
             currentProvider={translationProvider}
-            onSelect={val => setChapterGeneralSettings({ translationProvider: val })}
+            onSelect={val => {
+              if (val === 'deepl') {
+                setChapterGeneralSettings({
+                  translationConfig: { provider: 'deepl', plan: 'free' },
+                });
+              } else if (val === 'microsoft') {
+                setChapterGeneralSettings({
+                  translationConfig: { provider: 'microsoft', region: '' },
+                });
+              } else {
+                setChapterGeneralSettings({
+                  translationConfig: { provider: val },
+                });
+              }
+            }}
             providers={PROVIDERS}
           />
 
@@ -192,7 +210,7 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
                 visible={googleKeyVisible}
                 onDismiss={() => setGoogleKeyVisible(false)}
                 defaultValue={googleApiKey}
-                onSubmit={val => setChapterGeneralSettings({ googleApiKey: val })}
+                onSubmit={val => setSecureKeys({ googleApiKey: val })}
                 secureTextEntry
                 title="Google API Key"
               />
@@ -212,7 +230,7 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
                 visible={deeplKeyVisible}
                 onDismiss={() => setDeeplKeyVisible(false)}
                 defaultValue={deeplApiKey}
-                onSubmit={val => setChapterGeneralSettings({ deeplApiKey: val })}
+                onSubmit={val => setSecureKeys({ deeplApiKey: val })}
                 secureTextEntry
                 title="DeepL API Key"
               />
@@ -222,8 +240,17 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
                   DeepL Plan
                 </Text>
                 <SegmentedControl
-                  value={deeplPlan}
-                  onChange={val => setChapterGeneralSettings({ deeplPlan: val as 'free' | 'pro' })}
+                  value={translationConfig.provider === 'deepl' ? translationConfig.plan : 'free'}
+                  onChange={val => {
+                    if (translationConfig.provider === 'deepl') {
+                      setChapterGeneralSettings({
+                        translationConfig: {
+                          ...translationConfig,
+                          plan: val as 'free' | 'pro',
+                        },
+                      });
+                    }
+                  }}
                   options={[
                     { value: 'free', label: 'Free' },
                     { value: 'pro', label: 'Pro' },
@@ -247,14 +274,14 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
                 visible={microsoftKeyVisible}
                 onDismiss={() => setMicrosoftKeyVisible(false)}
                 defaultValue={microsoftApiKey}
-                onSubmit={val => setChapterGeneralSettings({ microsoftApiKey: val })}
+                onSubmit={val => setSecureKeys({ microsoftApiKey: val })}
                 secureTextEntry
                 title="Azure API Key"
               />
 
               <List.Item
                 title="Azure Region"
-                description={microsoftRegion || 'e.g. eastus'}
+                description={(translationConfig.provider === 'microsoft' && translationConfig.region) || 'e.g. eastus'}
                 icon="map-marker"
                 onPress={() => setMicrosoftRegionVisible(true)}
                 theme={theme}
@@ -262,8 +289,17 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
               <TextInputModal
                 visible={microsoftRegionVisible}
                 onDismiss={() => setMicrosoftRegionVisible(false)}
-                defaultValue={microsoftRegion}
-                onSubmit={val => setChapterGeneralSettings({ microsoftRegion: val })}
+                defaultValue={translationConfig.provider === 'microsoft' ? translationConfig.region : ''}
+                onSubmit={val => {
+                  if (translationConfig.provider === 'microsoft') {
+                    setChapterGeneralSettings({
+                      translationConfig: {
+                        ...translationConfig,
+                        region: val,
+                      },
+                    });
+                  }
+                }}
                 title="Azure Region"
               />
             </>

@@ -5,6 +5,7 @@ import {
   clearChapterTranslation,
 } from '@database/queries/ChapterQueries';
 import { useChapterGeneralSettings } from './useSettings';
+import { useSecureKeys } from './useSecureKeys';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
@@ -15,6 +16,7 @@ import NativeFile from '@specs/NativeFile';
 export function useTranslation() {
   const [translatingIds, setTranslatingIds] = useState<Set<number>>(new Set());
   const settings = useChapterGeneralSettings();
+  const { googleApiKey, deeplApiKey, microsoftApiKey } = useSecureKeys();
 
   const { updateChapter } = useNovelActions();
   const chapters = useNovelValue('chapters');
@@ -47,17 +49,17 @@ export function useTranslation() {
         }
 
         const config: ProviderConfig = {
-          googleApiKey: settings.googleApiKey,
-          deeplApiKey: settings.deeplApiKey,
-          deeplPlan: settings.deeplPlan,
-          microsoftApiKey: settings.microsoftApiKey,
-          microsoftRegion: settings.microsoftRegion,
+          googleApiKey,
+          deeplApiKey,
+          deeplPlan: settings.translationConfig.provider === 'deepl' ? settings.translationConfig.plan : undefined,
+          microsoftApiKey,
+          microsoftRegion: settings.translationConfig.provider === 'microsoft' ? settings.translationConfig.region : undefined,
         };
 
         const translated = await translateChapterContent(
           content,
           targetLang,
-          settings.translationProvider,
+          settings.translationConfig.provider,
           config,
         );
         await saveChapterTranslation(chapter.id, translated, targetLang);

@@ -7,8 +7,8 @@ import { getString } from '@strings/translations';
 import { getChapter, saveChapterTranslation } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
 import { getNovelById } from '@database/queries/NovelQueries';
-import { getMMKVObject } from '@utils/mmkv/mmkv';
-import { translateChapterContent, ProviderConfig } from '@services/translation';
+import { getTranslationConfigAndKeys } from '@hooks/persisted/useSettings';
+import { translateChapterContent } from '@services/translation';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
@@ -100,18 +100,11 @@ export const downloadChapter = async (
 
     if (novel.autoTranslate && novel.translationLang) {
       try {
-        const settings = getMMKVObject<any>('CHAPTER_GENERAL_SETTINGS') || {};
-        const config: ProviderConfig = {
-          googleApiKey: settings.googleApiKey,
-          deeplApiKey: settings.deeplApiKey,
-          deeplPlan: settings.deeplPlan,
-          microsoftApiKey: settings.microsoftApiKey,
-          microsoftRegion: settings.microsoftRegion,
-        };
+        const { provider, config } = getTranslationConfigAndKeys();
         const translated = await translateChapterContent(
           chapterText,
           novel.translationLang,
-          settings.translationProvider || 'gtx',
+          provider,
           config,
         );
         await saveChapterTranslation(chapter.id, translated, novel.translationLang);

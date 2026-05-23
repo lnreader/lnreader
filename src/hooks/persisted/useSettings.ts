@@ -6,7 +6,9 @@ import {
 } from '@screens/library/constants/constants';
 import { Voice } from 'expo-speech';
 import { useMMKVObject } from 'react-native-mmkv';
-import { ProviderId } from '@services/translation';
+import { getMMKVObject, getSecureKey, SecureMMKVStorage } from '@utils/mmkv/mmkv';
+
+
 
 export const APP_SETTINGS = 'APP_SETTINGS';
 export const BROWSE_SETTINGS = 'BROWSE_SETTINGS';
@@ -74,6 +76,22 @@ export interface LibrarySettings {
   downloadedOnlyMode?: boolean;
 }
 
+export type TranslationConfig =
+  | {
+      provider: 'gtx';
+    }
+  | {
+      provider: 'google';
+    }
+  | {
+      provider: 'deepl';
+      plan: 'free' | 'pro';
+    }
+  | {
+      provider: 'microsoft';
+      region: string;
+    };
+
 export interface ChapterGeneralSettings {
   keepScreenOn: boolean;
   fullScreenMode: boolean;
@@ -91,14 +109,8 @@ export interface ChapterGeneralSettings {
   bionicReading: boolean;
   tapToScroll: boolean;
   TTSEnable: boolean;
-  googleTranslateApiKey: string;
   translationTargetLang: string;
-  translationProvider: ProviderId;
-  googleApiKey: string;
-  deeplApiKey: string;
-  deeplPlan: 'free' | 'pro';
-  microsoftApiKey: string;
-  microsoftRegion: string;
+  translationConfig: TranslationConfig;
 }
 
 export interface ReaderTheme {
@@ -195,14 +207,10 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   bionicReading: false,
   tapToScroll: false,
   TTSEnable: true,
-  googleTranslateApiKey: '',
   translationTargetLang: 'en',
-  translationProvider: 'gtx',
-  googleApiKey: '',
-  deeplApiKey: '',
-  deeplPlan: 'free',
-  microsoftApiKey: '',
-  microsoftRegion: '',
+  translationConfig: {
+    provider: 'gtx',
+  },
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
@@ -279,17 +287,119 @@ export const useLibrarySettings = () => {
 };
 
 export const useChapterGeneralSettings = () => {
-  const [chapterGeneralSettings = initialChapterGeneralSettings, setSettings] =
-    useMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS);
+  const [storedSettings = initialChapterGeneralSettings, setSettings] =
+    useMMKVObject<any>(CHAPTER_GENERAL_SETTINGS);
+
+  const migratedSettings = { ...initialChapterGeneralSettings, ...storedSettings };
+
+  let needsSave = false;
+  if ('translationProvider' in migratedSettings) {
+    const provider = migratedSettings.translationProvider || 'gtx';
+    if (!migratedSettings.translationConfig) {
+      if (provider === 'deepl') {
+        migratedSettings.translationConfig = {
+          provider: 'deepl',
+          plan: migratedSettings.deeplPlan || 'free',
+        };
+      } else if (provider === 'microsoft') {
+        migratedSettings.translationConfig = {
+          provider: 'microsoft',
+          region: migratedSettings.microsoftRegion || '',
+        };
+      } else {
+        migratedSettings.translationConfig = {
+          provider: provider,
+        };
+      }
+    }
+    delete migratedSettings.translationProvider;
+    delete migratedSettings.deeplPlan;
+    delete migratedSettings.microsoftRegion;
+    needsSave = true;
+  }
+
+  if ('googleApiKey' in migratedSettings) {
+    if (migratedSettings.googleApiKey) {
+      SecureMMKVStorage.set('googleApiKey', migratedSettings.googleApiKey);
+    }
+    delete migratedSettings.googleApiKey;
+    needsSave = true;
+  }
+  if ('deeplApiKey' in migratedSettings) {
+    if (migratedSettings.deeplApiKey) {
+      SecureMMKVStorage.set('deeplApiKey', migratedSettings.deeplApiKey);
+    }
+    delete migratedSettings.deeplApiKey;
+    needsSave = true;
+  }
+  if ('microsoftApiKey' in migratedSettings) {
+    if (migratedSettings.microsoftApiKey) {
+      SecureMMKVStorage.set('microsoftApiKey', migratedSettings.microsoftApiKey);
+    }
+    delete migratedSettings.microsoftApiKey;
+    needsSave = true;
+  }
+  if ('googleTranslateApiKey' in migratedSettings) {
+    delete migratedSettings.googleTranslateApiKey;
+    needsSave = true;
+  }
+
+  if (needsSave) {
+    setSettings(migratedSettings);
+  }
 
   const setChapterGeneralSettings = (values: Partial<ChapterGeneralSettings>) =>
-    setSettings({ ...chapterGeneralSettings, ...values });
+    setSettings({ ...migratedSettings, ...values });
 
   return {
-    ...chapterGeneralSettings,
+    ...(migratedSettings as ChapterGeneralSettings),
     setChapterGeneralSettings,
   };
 };
+
+export function getTranslationConfigAndKeys() {
+  const settings = getMMKVObject<any>(CHAPTER_GENERAL_SETTINGS) || {};
+  let translationConfig = settings.translationConfig;
+  let provider = translationConfig?.provider || 'gtx';
+
+  if ('translationProvider' in settings) {
+    const oldProvider = settings.translationProvider || 'gtx';
+    if (oldProvider === 'deepl') {
+      translationConfig = {
+        provider: 'deepl',
+        plan: settings.deeplPlan || 'free',
+      };
+    } else if (oldProvider === 'microsoft') {
+      translationConfig = {
+        provider: 'microsoft',
+        region: settings.microsoftRegion || '',
+      };
+    } else {
+      translationConfig = {
+        provider: oldProvider,
+      };
+    }
+    provider = oldProvider;
+  }
+
+  const googleApiKey = getSecureKey('googleApiKey') || settings.googleApiKey || '';
+  const deeplApiKey = getSecureKey('deeplApiKey') || settings.deeplApiKey || '';
+  const microsoftApiKey = getSecureKey('microsoftApiKey') || settings.microsoftApiKey || '';
+
+  const deeplPlan = (translationConfig?.provider === 'deepl' ? translationConfig.plan : undefined) || settings.deeplPlan || 'free';
+  const microsoftRegion = (translationConfig?.provider === 'microsoft' ? translationConfig.region : undefined) || settings.microsoftRegion || '';
+
+  return {
+    provider,
+    config: {
+      googleApiKey,
+      deeplApiKey,
+      deeplPlan,
+      microsoftApiKey,
+      microsoftRegion,
+    },
+  };
+}
 
 export const useChapterReaderSettings = () => {
   const [storedSettings = initialChapterReaderSettings, setSettings] =
