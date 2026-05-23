@@ -132,15 +132,21 @@ export default function useChapter(
         if (dbChap) {
           chap = { ...chap, ...dbChap };
         }
+
+        if (chap.translationLang) {
+          const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
+          if (NativeFile.exists(transPath)) {
+            chap.translatedContent = NativeFile.readFile(transPath);
+          }
+        }
+
         const cachedText = chapterTextCache.read(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
-        const [nextChapResult, prevChapResult, awaitedText] = await Promise.all(
-          [
-            getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
-            getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
-            text,
-          ],
-        );
+        const [nextChapResult, prevChapResult, awaitedText] = await Promise.all([
+          getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
+          getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
+          text,
+        ]);
 
         if (
           novel.autoTranslate &&
@@ -154,6 +160,12 @@ export default function useChapter(
             const updatedChap = await getDbChapter(chap.id);
             if (updatedChap) {
               chap = { ...chap, ...updatedChap };
+              if (chap.translationLang) {
+                const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
+                if (NativeFile.exists(transPath)) {
+                  chap.translatedContent = NativeFile.readFile(transPath);
+                }
+              }
             }
           } catch {}
         }

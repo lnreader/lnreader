@@ -1138,35 +1138,46 @@ describe('ChapterQueries', () => {
   });
 
   describe('saveChapterTranslation', () => {
-    it('should save translated content and lang', async () => {
+    it('should save translated content to file system and update lang', async () => {
       const testDb = getTestDb();
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const novelId = await insertTestNovel(testDb, { inLibrary: true, pluginId: 'test-plugin' });
       const chapterId = await insertTestChapter(testDb, novelId);
+
+      const NativeFile = require('@specs/NativeFile').default;
+      NativeFile.writeFile.mockClear();
 
       await saveChapterTranslation(chapterId, '<p>Translated Content</p>', 'es');
 
       const chapters = await getNovelChapters(novelId);
       const chapter = chapters.find(c => c.id === chapterId);
-      expect(chapter?.translatedContent).toBe('<p>Translated Content</p>');
       expect(chapter?.translationLang).toBe('es');
+      expect(NativeFile.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining(`test-plugin/${novelId}/${chapterId}/translation_es.html`),
+        '<p>Translated Content</p>',
+      );
     });
   });
 
   describe('clearChapterTranslation', () => {
-    it('should clear translated content and lang', async () => {
+    it('should clear translated content from file system and update lang', async () => {
       const testDb = getTestDb();
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const novelId = await insertTestNovel(testDb, { inLibrary: true, pluginId: 'test-plugin' });
       const chapterId = await insertTestChapter(testDb, novelId, {
-        translatedContent: '<p>Translated Content</p>',
         translationLang: 'es',
       });
+
+      const NativeFile = require('@specs/NativeFile').default;
+      NativeFile.exists.mockReturnValue(true);
+      NativeFile.unlink.mockClear();
 
       await clearChapterTranslation(chapterId);
 
       const chapters = await getNovelChapters(novelId);
       const chapter = chapters.find(c => c.id === chapterId);
-      expect(chapter?.translatedContent).toBeNull();
       expect(chapter?.translationLang).toBeNull();
+      expect(NativeFile.unlink).toHaveBeenCalledWith(
+        expect.stringContaining(`test-plugin/${novelId}/${chapterId}/translation_es.html`),
+      );
     });
   });
 });

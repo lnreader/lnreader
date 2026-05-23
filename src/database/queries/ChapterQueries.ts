@@ -334,10 +334,32 @@ export const saveChapterTranslation = async (
   translatedContent: string,
   lang: string,
 ): Promise<void> => {
+  const result = await dbManager
+    .select({
+      novelId: chapterSchema.novelId,
+      pluginId: novelSchema.pluginId,
+    })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(eq(chapterSchema.id, chapterId))
+    .get();
+
+  if (result) {
+    const { pluginId, novelId } = result;
+    const folder = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}`;
+    try {
+      NativeFile.mkdir(folder);
+      const filePath = `${folder}/translation_${lang}.html`;
+      NativeFile.writeFile(filePath, translatedContent);
+    } catch (e) {
+      console.warn('Failed to save translation file:', e);
+    }
+  }
+
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ translatedContent, translationLang: lang })
+      .set({ translationLang: lang })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
@@ -345,10 +367,33 @@ export const saveChapterTranslation = async (
 
 // Clear translation (so user can re-translate with a different lang)
 export const clearChapterTranslation = async (chapterId: number): Promise<void> => {
+  const result = await dbManager
+    .select({
+      novelId: chapterSchema.novelId,
+      pluginId: novelSchema.pluginId,
+      translationLang: chapterSchema.translationLang,
+    })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(eq(chapterSchema.id, chapterId))
+    .get();
+
+  if (result && result.translationLang) {
+    const { pluginId, novelId, translationLang } = result;
+    const filePath = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}/translation_${translationLang}.html`;
+    try {
+      if (NativeFile.exists(filePath)) {
+        NativeFile.unlink(filePath);
+      }
+    } catch (e) {
+      console.warn('Failed to delete translation file:', e);
+    }
+  }
+
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ translatedContent: null, translationLang: null })
+      .set({ translationLang: null })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });

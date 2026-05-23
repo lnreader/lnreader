@@ -49,13 +49,13 @@ const TranslationModal = ({
   const untranslatedChapters = useMemo(
     () =>
       downloadedChapters.filter(
-        c => !c.translatedContent || c.translationLang !== novel?.translationLang,
+        c => !c.translationLang || c.translationLang !== novel?.translationLang,
       ),
     [downloadedChapters, novel?.translationLang],
   );
 
   const translatedChapters = useMemo(
-    () => chapters.filter(c => c.translatedContent),
+    () => chapters.filter(c => !!c.translationLang),
     [chapters],
   );
 
