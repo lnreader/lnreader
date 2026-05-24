@@ -129,7 +129,9 @@ export default function useChapter(
     async (navChapter?: ChapterInfo) => {
       try {
         const dbChap = navChapter ? undefined : await getDbChapter(chapter.id);
-        let chap = dbChap ?? navChapter ?? chapter;
+        let chap: ChapterInfo = dbChap
+          ? { ...(navChapter ?? chapter), ...dbChap }
+          : (navChapter ?? chapter);
 
         if (chap.translationLang) {
           const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
