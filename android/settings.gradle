@@ -23,10 +23,11 @@ plugins {
 }
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+  def npxCmd = System.getProperty('os.name').toLowerCase().contains('windows') ? 'npx.cmd' : 'npx'
   if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
-    ex.autolinkLibrariesFromCommand(['npx', 'rock', 'config', '-p', 'android'])
+    ex.autolinkLibrariesFromCommand([npxCmd, 'rock', 'config', '-p', 'android'])
   } else {
-    ex.autolinkLibrariesFromCommand(['npx', 'rock', 'config', '-p', 'android'])
+    ex.autolinkLibrariesFromCommand([npxCmd, 'rock', 'config', '-p', 'android'])
   }
 }
 

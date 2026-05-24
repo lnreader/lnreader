@@ -1,4 +1,9 @@
+nodeLinker: hoisted
+
 onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
   - protobufjs
+
+patchedDependencies:
+  '@rock-js/plugin-metro@0.12.12': patches/@rock-js__plugin-metro@0.12.12.patch

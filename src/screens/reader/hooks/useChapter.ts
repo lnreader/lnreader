@@ -128,11 +128,8 @@ export default function useChapter(
   const getChapter = useCallback(
     async (navChapter?: ChapterInfo) => {
       try {
-        let chap = navChapter ?? chapter;
-        const dbChap = await getDbChapter(chap.id);
-        if (dbChap) {
-          chap = { ...chap, ...dbChap };
-        }
+        const dbChap = navChapter ? undefined : await getDbChapter(chapter.id);
+        let chap = dbChap ?? navChapter ?? chapter;
 
         if (chap.translationLang) {
           const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
@@ -140,7 +137,6 @@ export default function useChapter(
             chap.translatedContent = NativeFile.readFile(transPath);
           }
         }
-
         const cachedText = chapterTextCache.read(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
         const [nextChapResult, prevChapResult, awaitedText] = await Promise.all([
