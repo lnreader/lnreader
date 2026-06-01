@@ -142,19 +142,30 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
     setChapterGeneralSettings,
   } = useChapterGeneralSettings();
 
-  const {
-    googleApiKey,
-    deeplApiKey,
-    microsoftApiKey,
-    setSecureKeys,
-  } = useSecureKeys();
+  const { googleApiKey, deeplApiKey, microsoftApiKey, setSecureKeys } = useSecureKeys();
 
   const translationProvider = translationConfig.provider;
 
+  const apiKeyLabel =
+    translationProvider === 'google' ? 'Google API Key'
+    : translationProvider === 'deepl' ? 'DeepL API Key'
+    : translationProvider === 'microsoft' ? 'Azure API Key'
+    : '';
+
+  const apiKey =
+    translationProvider === 'google' ? googleApiKey
+    : translationProvider === 'deepl' ? deeplApiKey
+    : translationProvider === 'microsoft' ? microsoftApiKey
+    : '';
+
+  const setApiKey = (val: string) => {
+    if (translationProvider === 'google') setSecureKeys({ googleApiKey: val });
+    else if (translationProvider === 'deepl') setSecureKeys({ deeplApiKey: val });
+    else if (translationProvider === 'microsoft') setSecureKeys({ microsoftApiKey: val });
+  };
+
   const [providerVisible, setProviderVisible] = useState(false);
-  const [googleKeyVisible, setGoogleKeyVisible] = useState(false);
-  const [deeplKeyVisible, setDeeplKeyVisible] = useState(false);
-  const [microsoftKeyVisible, setMicrosoftKeyVisible] = useState(false);
+  const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [microsoftRegionVisible, setMicrosoftRegionVisible] = useState(false);
 
   return (
@@ -196,92 +207,55 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
             providers={PROVIDERS}
           />
 
-          {/* Conditionally show only the fields relevant to the selected provider */}
-          {translationProvider === 'google' && (
+          {/* Single API key input shared across all providers that require one */}
+          {translationProvider !== 'gtx' && (
             <>
               <List.Item
-                title="Google API Key"
-                description={googleApiKey ? '••••••••' : 'Not configured'}
+                title={apiKeyLabel}
+                description={apiKey ? '••••••••' : 'Not configured'}
                 icon="key"
-                onPress={() => setGoogleKeyVisible(true)}
+                onPress={() => setApiKeyVisible(true)}
                 theme={theme}
               />
               <TextInputModal
-                visible={googleKeyVisible}
-                onDismiss={() => setGoogleKeyVisible(false)}
-                defaultValue={googleApiKey}
-                onSubmit={val => setSecureKeys({ googleApiKey: val })}
+                visible={apiKeyVisible}
+                onDismiss={() => setApiKeyVisible(false)}
+                defaultValue={apiKey}
+                onSubmit={setApiKey}
                 secureTextEntry
-                title="Google API Key"
+                title={apiKeyLabel}
               />
             </>
           )}
 
-          {translationProvider === 'deepl' && (
-            <>
-              <List.Item
-                title="DeepL API Key"
-                description={deeplApiKey ? '••••••••' : 'Not configured'}
-                icon="key"
-                onPress={() => setDeeplKeyVisible(true)}
+          {/* DeepL plan toggle */}
+          {translationConfig.provider === 'deepl' && (
+            <View style={styles.segmentedContainer}>
+              <Text style={[styles.segmentedLabel, { color: theme.onSurfaceVariant }]}>
+                DeepL Plan
+              </Text>
+              <SegmentedControl
+                value={translationConfig.plan}
+                onChange={val =>
+                  setChapterGeneralSettings({
+                    translationConfig: { ...translationConfig, plan: val as 'free' | 'pro' },
+                  })
+                }
+                options={[
+                  { value: 'free', label: 'Free' },
+                  { value: 'pro', label: 'Pro' },
+                ]}
                 theme={theme}
               />
-              <TextInputModal
-                visible={deeplKeyVisible}
-                onDismiss={() => setDeeplKeyVisible(false)}
-                defaultValue={deeplApiKey}
-                onSubmit={val => setSecureKeys({ deeplApiKey: val })}
-                secureTextEntry
-                title="DeepL API Key"
-              />
-
-              <View style={styles.segmentedContainer}>
-                <Text style={[styles.segmentedLabel, { color: theme.onSurfaceVariant }]}>
-                  DeepL Plan
-                </Text>
-                <SegmentedControl
-                  value={translationConfig.provider === 'deepl' ? translationConfig.plan : 'free'}
-                  onChange={val => {
-                    if (translationConfig.provider === 'deepl') {
-                      setChapterGeneralSettings({
-                        translationConfig: {
-                          ...translationConfig,
-                          plan: val as 'free' | 'pro',
-                        },
-                      });
-                    }
-                  }}
-                  options={[
-                    { value: 'free', label: 'Free' },
-                    { value: 'pro', label: 'Pro' },
-                  ]}
-                  theme={theme}
-                />
-              </View>
-            </>
+            </View>
           )}
 
-          {translationProvider === 'microsoft' && (
+          {/* Microsoft region input */}
+          {translationConfig.provider === 'microsoft' && (
             <>
-              <List.Item
-                title="Azure API Key"
-                description={microsoftApiKey ? '••••••••' : 'Not configured'}
-                icon="key"
-                onPress={() => setMicrosoftKeyVisible(true)}
-                theme={theme}
-              />
-              <TextInputModal
-                visible={microsoftKeyVisible}
-                onDismiss={() => setMicrosoftKeyVisible(false)}
-                defaultValue={microsoftApiKey}
-                onSubmit={val => setSecureKeys({ microsoftApiKey: val })}
-                secureTextEntry
-                title="Azure API Key"
-              />
-
               <List.Item
                 title="Azure Region"
-                description={(translationConfig.provider === 'microsoft' && translationConfig.region) || 'e.g. eastus'}
+                description={translationConfig.region || 'e.g. eastus'}
                 icon="map-marker"
                 onPress={() => setMicrosoftRegionVisible(true)}
                 theme={theme}
@@ -289,17 +263,12 @@ const TranslationSettingsScreen = ({ navigation }: TranslationSettingsScreenProp
               <TextInputModal
                 visible={microsoftRegionVisible}
                 onDismiss={() => setMicrosoftRegionVisible(false)}
-                defaultValue={translationConfig.provider === 'microsoft' ? translationConfig.region : ''}
-                onSubmit={val => {
-                  if (translationConfig.provider === 'microsoft') {
-                    setChapterGeneralSettings({
-                      translationConfig: {
-                        ...translationConfig,
-                        region: val,
-                      },
-                    });
-                  }
-                }}
+                defaultValue={translationConfig.region}
+                onSubmit={val =>
+                  setChapterGeneralSettings({
+                    translationConfig: { ...translationConfig, region: val },
+                  })
+                }
                 title="Azure Region"
               />
             </>
