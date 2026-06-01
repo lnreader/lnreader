@@ -11,7 +11,7 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 import { NOVEL_STORAGE } from '@utils/Storages';
-import { SecureMMKVStorage } from '@utils/mmkv/mmkv';
+import { getSecureMMKV } from '@utils/mmkv/mmkv';
 import NativeFile from '@specs/NativeFile';
 
 export function useTranslation() {
@@ -23,7 +23,7 @@ export function useTranslation() {
     : provider === 'deepl' ? 'deeplApiKey'
     : provider === 'microsoft' ? 'microsoftApiKey'
     : null;
-  const [apiKey = ''] = useMMKVString(apiKeyName ?? '__unused__', SecureMMKVStorage);
+  const [apiKey = ''] = useMMKVString(apiKeyName ?? '__unused__', getSecureMMKV());
 
   const { updateChapter } = useNovelActions();
   const chapters = useNovelValue('chapters');

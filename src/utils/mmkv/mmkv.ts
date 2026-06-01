@@ -1,10 +1,26 @@
-import { createMMKV } from 'react-native-mmkv';
+import * as SecureStore from 'expo-secure-store';
+import { createMMKV, MMKV } from 'react-native-mmkv';
 
 export const MMKVStorage = createMMKV();
-export const SecureMMKVStorage = createMMKV({
-  id: 'secure-api-keys',
-  encryptionKey: 'lnreader-secure-encryption-key-for-api-keys',
-});
+
+const KEYCHAIN_KEY = 'lnreader.mmkv.encryptionKey';
+let _secureMMKV: MMKV | null = null;
+
+export async function initSecureStorage(): Promise<void> {
+  let encryptionKey = await SecureStore.getItemAsync(KEYCHAIN_KEY);
+  if (!encryptionKey) {
+    encryptionKey = crypto.randomUUID();
+    await SecureStore.setItemAsync(KEYCHAIN_KEY, encryptionKey);
+  }
+  _secureMMKV = createMMKV({ id: 'secure-api-keys', encryptionKey });
+}
+
+export function getSecureMMKV(): MMKV {
+  if (!_secureMMKV) {
+    throw new Error('Secure storage not initialized. Call initSecureStorage() first.');
+  }
+  return _secureMMKV;
+}
 
 export function getMMKVObject<T>(key: string) {
   const data = MMKVStorage.getString(key);
@@ -19,10 +35,9 @@ export function setMMKVObject<T>(key: string, obj: T) {
 }
 
 export function getSecureKey(key: string): string {
-  return SecureMMKVStorage.getString(key) || '';
+  return getSecureMMKV().getString(key) || '';
 }
 
 export function setSecureKey(key: string, value: string): void {
-  SecureMMKVStorage.set(key, value);
+  getSecureMMKV().set(key, value);
 }
-

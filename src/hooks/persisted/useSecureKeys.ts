@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
-import { SecureMMKVStorage } from '@utils/mmkv/mmkv';
+import { getSecureMMKV } from '@utils/mmkv/mmkv';
 
 export interface SecureKeys {
   googleApiKey: string;
@@ -11,15 +11,15 @@ export interface SecureKeys {
 export const useSecureKeys = () => {
   const [googleApiKey = '', setGoogleApiKey] = useMMKVString(
     'googleApiKey',
-    SecureMMKVStorage,
+    getSecureMMKV(),
   );
   const [deeplApiKey = '', setDeeplApiKey] = useMMKVString(
     'deeplApiKey',
-    SecureMMKVStorage,
+    getSecureMMKV(),
   );
   const [microsoftApiKey = '', setMicrosoftApiKey] = useMMKVString(
     'microsoftApiKey',
-    SecureMMKVStorage,
+    getSecureMMKV(),
   );
 
   const setSecureKeys = useCallback(

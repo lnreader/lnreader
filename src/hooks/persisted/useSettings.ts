@@ -6,7 +6,7 @@ import {
 } from '@screens/library/constants/constants';
 import { Voice } from 'expo-speech';
 import { useMMKVObject } from 'react-native-mmkv';
-import { getMMKVObject, getSecureKey, SecureMMKVStorage } from '@utils/mmkv/mmkv';
+import { getMMKVObject, getSecureKey } from '@utils/mmkv/mmkv';
 import { TranslationConfig } from '@services/translation';
 
 export type { TranslationConfig };
