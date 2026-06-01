@@ -382,6 +382,16 @@ export interface StringMap {
   'novelScreen.status.unknown': 'string';
   'novelScreen.tracked': 'string';
   'novelScreen.tracking': 'string';
+  'novelScreen.translationModal.title': 'string';
+  'novelScreen.translationModal.autoTranslate': 'string';
+  'novelScreen.translationModal.translateTo': 'string';
+  'novelScreen.translationModal.notSelected': 'string';
+  'novelScreen.translationModal.translateAll': 'string';
+  'novelScreen.translationModal.translating': 'string';
+  'novelScreen.translationModal.chaptersNotTranslated': 'string';
+  'novelScreen.translationModal.clearAll': 'string';
+  'novelScreen.translationModal.clearing': 'string';
+  'novelScreen.translationModal.translatedChapters': 'string';
   'novelScreen.unknownStatus': 'string';
   'novelScreen.updatedToast': 'string';
   'readerScreen.bottomSheet.allowTextSelection': 'string';

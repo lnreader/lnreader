@@ -58,11 +58,11 @@ const TranslationModal = ({
     <Portal>
       <Modal visible={modalVisible} onDismiss={onDismiss}>
         <Text style={[styles.modalTitle, { color: theme.onSurface }]}>
-          Translation Settings
+          {getString('novelScreen.translationModal.title')}
         </Text>
 
         <SwitchItem
-          label="Auto-translate chapters"
+          label={getString('novelScreen.translationModal.autoTranslate')}
           value={!!novelSettings.autoTranslate}
           onPress={() => setNovelSettings({ ...novelSettings, autoTranslate: !novelSettings.autoTranslate })}
           theme={theme}
@@ -72,21 +72,21 @@ const TranslationModal = ({
         {novelSettings.autoTranslate ? (
           <View style={styles.optionsContainer}>
             <List.Item
-              title="Translate to"
+              title={getString('novelScreen.translationModal.translateTo')}
               description={
                 LANGUAGES.find((l: { code: string; label: string }) => l.code === novelSettings.translationLang)?.label ||
-                'Not selected'
+                getString('novelScreen.translationModal.notSelected')
               }
               icon="web"
               onPress={() => setLangVisible(true)}
               theme={theme}
             />
             <List.Item
-              title="Translate all downloaded chapters"
+              title={getString('novelScreen.translationModal.translateAll')}
               description={
                 isAnyTranslating
-                   ? 'Translating chapters...'
-                   : `${untranslatedChapters.length} chapters not yet translated`
+                  ? getString('novelScreen.translationModal.translating')
+                  : getString('novelScreen.translationModal.chaptersNotTranslated', { count: untranslatedChapters.length })
               }
               onPress={() => {
                 if (!isAnyTranslating && untranslatedChapters.length > 0 && novel) {
@@ -98,11 +98,11 @@ const TranslationModal = ({
               icon="translate"
             />
             <List.Item
-              title="Clear all translations"
+              title={getString('novelScreen.translationModal.clearAll')}
               description={
                 isAnyTranslating
-                   ? 'Clearing translations...'
-                   : `${translatedChapters.length} translated chapters`
+                  ? getString('novelScreen.translationModal.clearing')
+                  : getString('novelScreen.translationModal.translatedChapters', { count: translatedChapters.length })
               }
               onPress={() => {
                 if (!isAnyTranslating && translatedChapters.length > 0) {
