@@ -133,10 +133,11 @@ export default function useChapter(
           ? { ...(navChapter ?? chapter), ...dbChap }
           : (navChapter ?? chapter);
 
+        let translatedContent: string | undefined;
         if (chap.translationLang) {
           const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
           if (NativeFile.exists(transPath)) {
-            chap.translatedContent = NativeFile.readFile(transPath);
+            translatedContent = NativeFile.readFile(transPath);
           }
         }
         const cachedText = chapterTextCache.read(chap.id);
@@ -150,7 +151,7 @@ export default function useChapter(
         if (
           novelSettings.autoTranslate &&
           novelSettings.translationLang &&
-          !chap.translatedContent
+          !translatedContent
         ) {
           setLoading(true);
           try {
@@ -162,7 +163,7 @@ export default function useChapter(
               if (chap.translationLang) {
                 const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
                 if (NativeFile.exists(transPath)) {
-                  chap.translatedContent = NativeFile.readFile(transPath);
+                  translatedContent = NativeFile.readFile(transPath);
                 }
               }
             }
@@ -235,7 +236,7 @@ export default function useChapter(
             novel.pluginId,
             novel.name,
             chap.name,
-            chap.translatedContent ?? awaitedText,
+            translatedContent ?? awaitedText,
           ),
         );
         setAdjacentChapter([nextChap!, prevChap!]);

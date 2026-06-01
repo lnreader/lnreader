@@ -43,7 +43,6 @@ const MIGRATION_STATEMENTS = [
 	page text DEFAULT '1',
 	position integer DEFAULT 0,
 	progress integer,
-	translatedContent text,
 	translationLang text
 )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS chapter_novel_path_unique ON Chapter (novelId, path)`,

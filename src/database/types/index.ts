@@ -40,7 +40,6 @@ export interface ChapterInfo {
   progress: number | null;
   position?: number | null;
   content?: string | null;
-  translatedContent?: string | null;
   translationLang?: string | null;
 }
 

@@ -290,69 +290,13 @@ export const useChapterGeneralSettings = () => {
   const [storedSettings = initialChapterGeneralSettings, setSettings] =
     useMMKVObject<any>(CHAPTER_GENERAL_SETTINGS);
 
-  const migratedSettings = { ...initialChapterGeneralSettings, ...storedSettings };
-
-  let needsSave = false;
-  if ('translationProvider' in migratedSettings) {
-    const provider = migratedSettings.translationProvider || 'gtx';
-    if (!migratedSettings.translationConfig) {
-      if (provider === 'deepl') {
-        migratedSettings.translationConfig = {
-          provider: 'deepl',
-          plan: migratedSettings.deeplPlan || 'free',
-        };
-      } else if (provider === 'microsoft') {
-        migratedSettings.translationConfig = {
-          provider: 'microsoft',
-          region: migratedSettings.microsoftRegion || '',
-        };
-      } else {
-        migratedSettings.translationConfig = {
-          provider: provider,
-        };
-      }
-    }
-    delete migratedSettings.translationProvider;
-    delete migratedSettings.deeplPlan;
-    delete migratedSettings.microsoftRegion;
-    needsSave = true;
-  }
-
-  if ('googleApiKey' in migratedSettings) {
-    if (migratedSettings.googleApiKey) {
-      SecureMMKVStorage.set('googleApiKey', migratedSettings.googleApiKey);
-    }
-    delete migratedSettings.googleApiKey;
-    needsSave = true;
-  }
-  if ('deeplApiKey' in migratedSettings) {
-    if (migratedSettings.deeplApiKey) {
-      SecureMMKVStorage.set('deeplApiKey', migratedSettings.deeplApiKey);
-    }
-    delete migratedSettings.deeplApiKey;
-    needsSave = true;
-  }
-  if ('microsoftApiKey' in migratedSettings) {
-    if (migratedSettings.microsoftApiKey) {
-      SecureMMKVStorage.set('microsoftApiKey', migratedSettings.microsoftApiKey);
-    }
-    delete migratedSettings.microsoftApiKey;
-    needsSave = true;
-  }
-  if ('googleTranslateApiKey' in migratedSettings) {
-    delete migratedSettings.googleTranslateApiKey;
-    needsSave = true;
-  }
-
-  if (needsSave) {
-    setSettings(migratedSettings);
-  }
+  const settings = { ...initialChapterGeneralSettings, ...storedSettings };
 
   const setChapterGeneralSettings = (values: Partial<ChapterGeneralSettings>) =>
-    setSettings({ ...migratedSettings, ...values });
+    setSettings({ ...settings, ...values });
 
   return {
-    ...(migratedSettings as ChapterGeneralSettings),
+    ...(settings as ChapterGeneralSettings),
     setChapterGeneralSettings,
   };
 };

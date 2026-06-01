@@ -31,7 +31,7 @@ export function useTranslation() {
 
       // Cache hit — already translated into the current target lang
       const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chapter.novelId}/${chapter.id}/translation_${targetLang}.html`;
-      if (NativeFile.exists(transPath) || (chapter.translatedContent && chapter.translationLang === targetLang)) {
+      if (NativeFile.exists(transPath)) {
         return;
       }
 
@@ -69,7 +69,6 @@ export function useTranslation() {
         const index = latestChapters.findIndex(c => c.id === chapter.id);
         if (index !== -1) {
           updateChapter(index, {
-            translatedContent: translated,
             translationLang: targetLang,
           });
         }
@@ -130,7 +129,6 @@ export function useTranslation() {
       const index = latestChapters.findIndex(c => c.id === chapterId);
       if (index !== -1) {
         updateChapter(index, {
-          translatedContent: null,
           translationLang: null,
         });
       }
@@ -155,7 +153,6 @@ export function useTranslation() {
           const index = latestChapters.findIndex(c => c.id === ch.id);
           if (index !== -1) {
             updateChapter(index, {
-              translatedContent: null,
               translationLang: null,
             });
           }
