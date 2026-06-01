@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 import { SecureMMKVStorage } from '@utils/mmkv/mmkv';
 
 export interface SecureKeys {
@@ -8,30 +9,33 @@ export interface SecureKeys {
 }
 
 export const useSecureKeys = () => {
-  const [keys, setKeysState] = useState<SecureKeys>(() => ({
-    googleApiKey: SecureMMKVStorage.getString('googleApiKey') || '',
-    deeplApiKey: SecureMMKVStorage.getString('deeplApiKey') || '',
-    microsoftApiKey: SecureMMKVStorage.getString('microsoftApiKey') || '',
-  }));
+  const [googleApiKey = '', setGoogleApiKey] = useMMKVString(
+    'googleApiKey',
+    SecureMMKVStorage,
+  );
+  const [deeplApiKey = '', setDeeplApiKey] = useMMKVString(
+    'deeplApiKey',
+    SecureMMKVStorage,
+  );
+  const [microsoftApiKey = '', setMicrosoftApiKey] = useMMKVString(
+    'microsoftApiKey',
+    SecureMMKVStorage,
+  );
 
-  const setSecureKeys = useCallback((values: Partial<SecureKeys>) => {
-    setKeysState(prev => {
-      const next = { ...prev, ...values };
-      if (values.googleApiKey !== undefined) {
-        SecureMMKVStorage.set('googleApiKey', values.googleApiKey);
-      }
-      if (values.deeplApiKey !== undefined) {
-        SecureMMKVStorage.set('deeplApiKey', values.deeplApiKey);
-      }
-      if (values.microsoftApiKey !== undefined) {
-        SecureMMKVStorage.set('microsoftApiKey', values.microsoftApiKey);
-      }
-      return next;
-    });
-  }, []);
+  const setSecureKeys = useCallback(
+    (values: Partial<SecureKeys>) => {
+      if (values.googleApiKey !== undefined) setGoogleApiKey(values.googleApiKey);
+      if (values.deeplApiKey !== undefined) setDeeplApiKey(values.deeplApiKey);
+      if (values.microsoftApiKey !== undefined)
+        setMicrosoftApiKey(values.microsoftApiKey);
+    },
+    [setGoogleApiKey, setDeeplApiKey, setMicrosoftApiKey],
+  );
 
   return {
-    ...keys,
+    googleApiKey,
+    deeplApiKey,
+    microsoftApiKey,
     setSecureKeys,
   };
 };
