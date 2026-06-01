@@ -16,9 +16,13 @@ import ExportNovelAsEpubButton from './ExportNovelAsEpubButton';
 import { NovelInfo } from '@database/types';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { MaterialDesignIconName } from '@type/icon';
+import { useTranslateSettings } from '@hooks/persisted';
+import {
+  LanguagePickerModal,
+  LANGUAGES,
+} from '@screens/reader/components/ReaderBottomSheet/TranslateTab';
 
-const AnimatedAppbarAction =
-  Animated.createAnimatedComponent(Appbar.Action);
+const AnimatedAppbarAction = Animated.createAnimatedComponent(Appbar.Action);
 
 const Menu = React.memo(
   ({
@@ -76,6 +80,8 @@ const NovelAppbar = ({
   theme,
   isLocal,
   downloadChapters,
+  translateChapters,
+  clearNovelTranslations,
   deleteChapters,
   showEditInfoModal,
   downloadCustomChapterModal,
@@ -89,6 +95,8 @@ const NovelAppbar = ({
   theme: ThemeColors;
   isLocal: boolean | undefined;
   downloadChapters: (amount: number | 'all' | 'unread') => void;
+  translateChapters: (amount: 'all' | 'unread') => void;
+  clearNovelTranslations: () => void;
   deleteChapters: () => void;
   showEditInfoModal: React.Dispatch<React.SetStateAction<boolean>>;
   downloadCustomChapterModal: () => void;
@@ -109,13 +117,13 @@ const NovelAppbar = ({
     };
   });
 
+  const { translateEnabled, translateTargetLanguage, setTranslateSettings } =
+    useTranslateSettings();
   const [downloadMenu, showDownloadMenu] = useState(false);
   const [extraMenu, showExtraMenu] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
-  const appbarTheme = useMemo(
-    () => ({ colors: theme }),
-    [theme],
-  );
+  const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
 
   const AppbarAction = useCallback(
     (props: {
@@ -170,6 +178,11 @@ const NovelAppbar = ({
     ];
   }, [deleteChapters, downloadChapters, downloadCustomChapterModal]);
 
+  const openDlMenu = useCallback(() => showDownloadMenu(true), []);
+  const closeDlMenu = useCallback(() => showDownloadMenu(false), []);
+  const openExtraMenu = useCallback(() => showExtraMenu(true), []);
+  const closeExtraMenu = useCallback(() => showExtraMenu(false), []);
+
   const extraMenuItems = useMemo(
     () => [
       {
@@ -180,14 +193,60 @@ const NovelAppbar = ({
         label: getString('novelScreen.edit.cover'),
         onPress: () => setCustomNovelCover(),
       },
+      ...(translateEnabled
+        ? [
+            {
+              label: getString('novelScreen.translateAll'),
+              onPress: () => {
+                translateChapters('all');
+                closeExtraMenu();
+              },
+            },
+            {
+              label: getString('novelScreen.translateUnread'),
+              onPress: () => {
+                translateChapters('unread');
+                closeExtraMenu();
+              },
+            },
+            {
+              label: getString('novelScreen.removeTranslations'),
+              onPress: () => {
+                clearNovelTranslations();
+                closeExtraMenu();
+              },
+            },
+            {
+              label: getString('translation.translateTo', {
+                lang:
+                  LANGUAGES.find(l => l.code === translateTargetLanguage)
+                    ?.label || translateTargetLanguage.toUpperCase(),
+              }),
+              onPress: () => setLanguageModalVisible(true),
+            },
+            {
+              label: getString('translation.disableTranslation'),
+              onPress: () => setTranslateSettings({ translateEnabled: false }),
+            },
+          ]
+        : [
+            {
+              label: getString('translation.enableTranslation'),
+              onPress: () => setTranslateSettings({ translateEnabled: true }),
+            },
+          ]),
     ],
-    [showEditInfoModal, setCustomNovelCover],
+    [
+      showEditInfoModal,
+      setCustomNovelCover,
+      translateEnabled,
+      translateTargetLanguage,
+      setTranslateSettings,
+      translateChapters,
+      clearNovelTranslations,
+      closeExtraMenu,
+    ],
   );
-
-  const openDlMenu = useCallback(() => showDownloadMenu(true), []);
-  const closeDlMenu = useCallback(() => showDownloadMenu(false), []);
-  const openExtraMenu = useCallback(() => showExtraMenu(true), []);
-  const closeExtraMenu = useCallback(() => showExtraMenu(false), []);
 
   const openJumpToChapter = useCallback(
     () => showJumpToChapterModal(true),
@@ -200,54 +259,67 @@ const NovelAppbar = ({
   );
 
   return (
-    <Animated.View
-      entering={SlideInUp.duration(250)}
-      exiting={SlideOutUp.duration(250)}
-      style={headerOpacityStyle}
-    >
-      <Appbar.Header theme={headerTheme}>
-        <Appbar.BackAction onPress={goBack} />
+    <>
+      <Animated.View
+        entering={SlideInUp.duration(250)}
+        exiting={SlideOutUp.duration(250)}
+        style={headerOpacityStyle}
+      >
+        <Appbar.Header theme={headerTheme}>
+          <Appbar.BackAction onPress={goBack} />
 
-        <View style={styles.row}>
-          <ExportNovelAsEpubButton novel={novel} iconComponent={AppbarAction} />
-          <AppbarAction icon="share-variant" onPress={shareNovel} />
-          <AppbarAction
-            icon="text-box-search-outline"
-            onPress={openJumpToChapter}
-          />
-          {!isLocal ? (
+          <View style={styles.row}>
+            <ExportNovelAsEpubButton
+              novel={novel}
+              iconComponent={AppbarAction}
+            />
+            <AppbarAction icon="share-variant" onPress={shareNovel} />
+            <AppbarAction
+              icon="text-box-search-outline"
+              onPress={openJumpToChapter}
+            />
+            {!isLocal ? (
+              <Menu
+                theme={theme}
+                visible={downloadMenu}
+                onDismiss={closeDlMenu}
+                anchor={
+                  <Appbar.Action
+                    theme={appbarTheme}
+                    icon="download-outline"
+                    onPress={openDlMenu}
+                    size={26}
+                  />
+                }
+                items={downloadMenuItems}
+              />
+            ) : null}
             <Menu
-              theme={theme}
-              visible={downloadMenu}
-              onDismiss={closeDlMenu}
+              visible={extraMenu}
+              onDismiss={closeExtraMenu}
               anchor={
                 <Appbar.Action
                   theme={appbarTheme}
-                  icon="download-outline"
-                  onPress={openDlMenu}
-                  size={26}
+                  icon="dots-vertical"
+                  onPress={openExtraMenu}
+                  size={24}
                 />
               }
-              items={downloadMenuItems}
+              theme={theme}
+              items={extraMenuItems}
             />
-          ) : null}
-          <Menu
-            visible={extraMenu}
-            onDismiss={closeExtraMenu}
-            anchor={
-              <Appbar.Action
-                theme={appbarTheme}
-                icon="dots-vertical"
-                onPress={openExtraMenu}
-                size={24}
-              />
-            }
-            theme={theme}
-            items={extraMenuItems}
-          />
-        </View>
-      </Appbar.Header>
-    </Animated.View>
+          </View>
+        </Appbar.Header>
+      </Animated.View>
+      <LanguagePickerModal
+        visible={languageModalVisible}
+        onDismiss={() => setLanguageModalVisible(false)}
+        currentLanguage={translateTargetLanguage}
+        onSelect={code =>
+          setTranslateSettings({ translateTargetLanguage: code })
+        }
+      />
+    </>
   );
 };
 
