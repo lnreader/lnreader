@@ -21,6 +21,9 @@ import { getString } from '@strings/translations';
 import { isNumber } from 'lodash-es';
 import NovelAppbar from './components/NovelAppbar';
 import { resolveUrl } from '@services/plugin/fetch';
+import ServiceManager from '@services/ServiceManager';
+import { clearNovelTranslationCache } from '@utils/translate';
+import { showToast } from '@utils/showToast';
 import {
   getAllUndownloadedAndUnreadChapters,
   getAllUndownloadedChapters,
@@ -106,6 +109,33 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
       message: resolveUrl(novel.pluginId, novel.path, true),
     });
   }, [novel]);
+
+  const translateChs = useCallback(
+    async (amount: 'all' | 'unread') => {
+      if (!novel) return;
+      let filtered = chapters;
+      if (amount === 'unread') {
+        filtered = chapters.filter(c => c.unread);
+      }
+      if (filtered.length > 0) {
+        ServiceManager.manager.addTask({
+          name: 'TRANSLATE_NOVEL',
+          data: {
+            novelId: novel.id,
+            novelName: novel.name,
+            chapterIds: filtered.map(c => c.id),
+          },
+        });
+      }
+    },
+    [chapters, novel],
+  );
+
+  const clearNovelTranslations = useCallback(() => {
+    if (!novel) return;
+    clearNovelTranslationCache(novel.id, chapters);
+    showToast(getString('novelScreen.removeTranslationsSuccess'));
+  }, [novel, chapters]);
 
   const [jumpToChapterModal, showJumpToChapterModal] = useState(false);
   const {
@@ -262,6 +292,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               novel={novel}
               deleteChapters={deleteChs}
               downloadChapters={downloadChs}
+              translateChapters={translateChs}
+              clearNovelTranslations={clearNovelTranslations}
               showEditInfoModal={showEditInfoModal}
               setCustomNovelCover={setCustomNovelCover}
               downloadCustomChapterModal={openDlChapterModal}

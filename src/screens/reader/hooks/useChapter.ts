@@ -12,9 +12,17 @@ import {
   useLibrarySettings,
   useTrackedNovel,
   useTracker,
+  useTranslateSettings,
 } from '@hooks/persisted';
 import { fetchChapter, fetchPage } from '@services/plugin/fetch';
 import { NOVEL_STORAGE } from '@utils/Storages';
+import {
+  translateHtml,
+  getCachedTranslation,
+  saveTranslationToCache,
+  TranslateProviderConfig,
+} from '@utils/translate';
+import { getProviderApiKey } from '@hooks/persisted/useTranslateSettings';
 import {
   RefObject,
   useCallback,
@@ -70,6 +78,17 @@ export default function useChapter(
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
   const { setImmersiveMode, showStatusAndNavBar } = useFullscreenMode();
+  const {
+    translateEnabled,
+    translateMode,
+    translateTargetLanguage,
+    translateColor,
+    translateItalic,
+    translateUnderline,
+    translateProvider,
+    deeplPlan,
+    microsoftRegion,
+  } = useTranslateSettings();
 
   const connectVolumeButton = useCallback(() => {
     const offset = defaultTo(
@@ -108,14 +127,30 @@ export default function useChapter(
     async (id: number, path: string) => {
       const filePath = `${NOVEL_STORAGE}/${novel.pluginId}/${chapter.novelId}/${id}/index.html`;
       let text = '';
+      let isLegacy = false;
+
       if (NativeFile.exists(filePath)) {
         text = NativeFile.readFile(filePath);
-      } else {
-        await fetchChapter(novel.pluginId, path)
-          .then(res => {
-            text = res;
-          })
-          .catch(e => setError(e.message));
+        if (
+          text.includes('class="translated-text"') ||
+          text.includes('class=\\"translated-text\\"')
+        ) {
+          isLegacy = true;
+        }
+      }
+
+      if (!text || isLegacy) {
+        try {
+          const networkText = await fetchChapter(novel.pluginId, path);
+          if (networkText) {
+            text = networkText;
+            if (NativeFile.exists(filePath)) {
+              NativeFile.writeFile(filePath, networkText);
+            }
+          }
+        } catch (e: any) {
+          setError(e.message);
+        }
       }
       return text;
     },
@@ -200,13 +235,60 @@ export default function useChapter(
           chapterTextCache.write(chap.id, text);
         }
         setChapter(chap);
+
+        let finalText = awaitedText;
+        if (translateEnabled) {
+          const cachedTr = getCachedTranslation(
+            chap.id,
+            translateTargetLanguage,
+            translateMode,
+            translateColor,
+            translateItalic,
+            translateUnderline,
+          );
+          if (cachedTr) {
+            finalText = cachedTr;
+          } else {
+            // Build provider config for live translation
+            const providerId = translateProvider ?? 'gtx';
+            const apiKey = getProviderApiKey(providerId);
+            const extra: Record<string, string> = {};
+            if (providerId === 'deepl') {
+              extra.plan = deeplPlan ?? 'free';
+            } else if (providerId === 'microsoft' && microsoftRegion) {
+              extra.region = microsoftRegion;
+            }
+            const providerConfig: TranslateProviderConfig = {
+              providerId,
+              apiKey,
+              extra,
+            };
+
+            finalText = await translateHtml(
+              awaitedText,
+              translateTargetLanguage,
+              translateMode,
+              {
+                color: translateColor,
+                italic: translateItalic,
+                underline: translateUnderline,
+              },
+              providerConfig,
+            );
+            saveTranslationToCache(
+              chap.id,
+              translateTargetLanguage,
+              translateMode,
+              translateColor,
+              translateItalic,
+              translateUnderline,
+              finalText,
+            );
+          }
+        }
+
         setChapterText(
-          sanitizeChapterText(
-            novel.pluginId,
-            novel.name,
-            chap.name,
-            awaitedText,
-          ),
+          sanitizeChapterText(novel.pluginId, novel.name, chap.name, finalText),
         );
         setAdjacentChapter([nextChap!, prevChap!]);
       } catch (e: any) {
@@ -226,6 +308,15 @@ export default function useChapter(
       novel.path,
       novel.totalPages,
       setLoading,
+      translateEnabled,
+      translateMode,
+      translateTargetLanguage,
+      translateColor,
+      translateItalic,
+      translateUnderline,
+      translateProvider,
+      deeplPlan,
+      microsoftRegion,
     ],
   );
 
@@ -263,7 +354,8 @@ export default function useChapter(
   const saveProgress = useCallback(
     (percentage: number) => {
       if (!incognitoMode) {
-        updateChapterProgress(chapter.id, percentage > 100 ? 100 : percentage);
+        const finalProgress = percentage > 100 ? 100 : percentage;
+        updateChapterProgress(chapter.id, finalProgress);
 
         if (percentage >= 97) {
           // a relative number
@@ -330,11 +422,50 @@ export default function useChapter(
     };
   }, [incognitoMode, setLastRead, setLoading, chapter.id]);
 
+  const initialLoadDone = useRef(false);
+  const prevTranslateRef = useRef({
+    translateEnabled,
+    translateMode,
+    translateTargetLanguage,
+    translateColor,
+    translateItalic,
+    translateUnderline,
+  });
+
   useEffect(() => {
-    if (!chapter || !chapterText) {
+    const prev = prevTranslateRef.current;
+    const changed =
+      prev.translateEnabled !== translateEnabled ||
+      prev.translateMode !== translateMode ||
+      prev.translateTargetLanguage !== translateTargetLanguage ||
+      prev.translateColor !== translateColor ||
+      prev.translateItalic !== translateItalic ||
+      prev.translateUnderline !== translateUnderline;
+
+    prevTranslateRef.current = {
+      translateEnabled,
+      translateMode,
+      translateTargetLanguage,
+      translateColor,
+      translateItalic,
+      translateUnderline,
+    };
+
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
+      getChapter();
+    } else if (changed) {
       getChapter();
     }
-  }, [chapter, chapterText, getChapter]);
+  }, [
+    getChapter,
+    translateEnabled,
+    translateMode,
+    translateTargetLanguage,
+    translateColor,
+    translateItalic,
+    translateUnderline,
+  ]);
 
   const refetch = useCallback(() => {
     setLoading(true);

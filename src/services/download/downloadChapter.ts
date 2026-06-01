@@ -12,6 +12,18 @@ import { chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import NativeFile from '@specs/NativeFile';
 import { eq } from 'drizzle-orm';
+import { getMMKVObject } from '@utils/mmkv/mmkv';
+import {
+  TRANSLATE_SETTINGS,
+  TranslateSettings,
+  initialTranslateSettings,
+  getProviderApiKey,
+} from '@hooks/persisted/useTranslateSettings';
+import {
+  translateHtml,
+  saveTranslationToCache,
+  TranslateProviderConfig,
+} from '@utils/translate';
 
 const createChapterFolder = async (
   path: string,
@@ -34,7 +46,7 @@ const downloadFiles = async (
   plugin: Plugin,
   novelId: number,
   chapterId: number,
-): Promise<void> => {
+): Promise<string> => {
   const folder = await createChapterFolder(NOVEL_STORAGE, {
     pluginId: plugin.id,
     novelId,
@@ -56,7 +68,9 @@ const downloadFiles = async (
       }
     }
   }
-  NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
+  const offlineHtml = loadedCheerio.html();
+  NativeFile.writeFile(folder + '/index.html', offlineHtml);
+  return offlineHtml;
 };
 
 export const downloadChapter = async (
@@ -82,12 +96,80 @@ export const downloadChapter = async (
     throw new Error('Novel not found for chapter: ' + chapter.name);
   }
   const plugin = getPlugin(novel.pluginId);
-  if (!plugin) {
-    throw new Error(getString('downloadScreen.pluginNotFound'));
+
+  let chapterText = '';
+  if (novel.pluginId === 'local') {
+    const filePath = `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}/index.html`;
+    if (NativeFile.exists(filePath)) {
+      chapterText = NativeFile.readFile(filePath);
+    }
+  } else {
+    if (!plugin) {
+      throw new Error(getString('downloadScreen.pluginNotFound'));
+    }
+    chapterText = await plugin.parseChapter(chapter.path);
   }
-  const chapterText = await plugin.parseChapter(chapter.path);
+
   if (chapterText && chapterText.length) {
-    await downloadFiles(chapterText, plugin, novel.id, chapter.id);
+    const translateSettings =
+      getMMKVObject<TranslateSettings>(TRANSLATE_SETTINGS) ??
+      initialTranslateSettings;
+
+    let offlineHtml = chapterText;
+    if (plugin) {
+      offlineHtml = await downloadFiles(
+        chapterText,
+        plugin,
+        novel.id,
+        chapter.id,
+      );
+    }
+
+    if (translateSettings.translateEnabled) {
+      try {
+        // Build provider config
+        const providerId = translateSettings.translateProvider ?? 'gtx';
+        const apiKey = getProviderApiKey(providerId);
+        const extra: Record<string, string> = {};
+        if (providerId === 'deepl') {
+          extra.plan = translateSettings.deeplPlan ?? 'free';
+        } else if (
+          providerId === 'microsoft' &&
+          translateSettings.microsoftRegion
+        ) {
+          extra.region = translateSettings.microsoftRegion;
+        }
+        const providerConfig: TranslateProviderConfig = {
+          providerId,
+          apiKey,
+          extra,
+        };
+
+        const modes: ('dual' | 'translated')[] = ['dual', 'translated'];
+        for (const mode of modes) {
+          const translatedHtml = await translateHtml(
+            offlineHtml,
+            translateSettings.translateTargetLanguage,
+            mode,
+            {
+              color: translateSettings.translateColor,
+              italic: translateSettings.translateItalic,
+              underline: translateSettings.translateUnderline,
+            },
+            providerConfig,
+          );
+          saveTranslationToCache(
+            chapter.id,
+            translateSettings.translateTargetLanguage,
+            mode,
+            translateSettings.translateColor,
+            translateSettings.translateItalic,
+            translateSettings.translateUnderline,
+            translatedHtml,
+          );
+        }
+      } catch {}
+    }
 
     await dbManager.write(async tx => {
       tx.update(chapterSchema)
