@@ -3,9 +3,9 @@ import { GoogleProvider } from './providers/google';
 import { DeepLProvider } from './providers/deepl';
 import { MicrosoftProvider } from './providers/microsoft';
 import { extractParagraphs } from './htmlUtils';
-import { TranslationProvider, ProviderConfig, ProviderId } from './types';
+import { TranslationProvider, TranslationConfig, ProviderId } from './types';
 
-export type { ProviderId, ProviderConfig };
+export type { ProviderId, TranslationConfig };
 
 export const PROVIDERS: Record<ProviderId, TranslationProvider> = {
   gtx: GtxProvider,
@@ -17,12 +17,12 @@ export const PROVIDERS: Record<ProviderId, TranslationProvider> = {
 export async function translateChapterContent(
   html: string,
   targetLang: string,
-  providerId: ProviderId,
-  config: ProviderConfig,
+  config: TranslationConfig,
+  apiKey: string,
 ): Promise<string> {
-  const provider = PROVIDERS[providerId];
+  const provider = PROVIDERS[config.provider];
   const { texts, rebuild } = extractParagraphs(html);
   if (!texts.length) return html;
-  const translated = await provider.translateBatch(texts, targetLang, config);
+  const translated = await provider.translateBatch(texts, targetLang, config, apiKey);
   return rebuild(translated);
 }

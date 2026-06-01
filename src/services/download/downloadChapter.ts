@@ -106,12 +106,12 @@ export const downloadChapter = async (
 
     if (novelSettings.autoTranslate && novelSettings.translationLang) {
       try {
-        const { provider, config } = getTranslationConfigAndKeys();
+        const { translationConfig, apiKey } = getTranslationConfigAndKeys();
         const translated = await translateChapterContent(
           chapterText,
           novelSettings.translationLang,
-          provider,
-          config,
+          translationConfig,
+          apiKey,
         );
         await saveChapterTranslation(chapter.id, translated, novelSettings.translationLang);
       } catch {

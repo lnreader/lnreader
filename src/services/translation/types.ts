@@ -1,18 +1,10 @@
 export type ProviderId = 'gtx' | 'google' | 'deepl' | 'microsoft';
 
-// Per-provider config — only the fields relevant to that provider are used
-export interface ProviderConfig {
-  // Google Cloud
-  googleApiKey?: string;
-
-  // DeepL
-  deeplApiKey?: string;
-  deeplPlan?: 'free' | 'pro'; // determines base URL
-
-  // Microsoft
-  microsoftApiKey?: string;
-  microsoftRegion?: string; // e.g. 'eastus', required for regional resources
-}
+export type TranslationConfig =
+  | { provider: 'gtx' }
+  | { provider: 'google' }
+  | { provider: 'deepl'; plan: 'free' | 'pro' }
+  | { provider: 'microsoft'; region: string };
 
 export interface TranslationProvider {
   id: ProviderId;
@@ -21,6 +13,7 @@ export interface TranslationProvider {
   translateBatch: (
     texts: string[], // plain text paragraph strings
     targetLang: string,
-    config: ProviderConfig,
+    config: TranslationConfig,
+    apiKey: string,
   ) => Promise<string[]>; // same order as input
 }

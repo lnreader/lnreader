@@ -8,9 +8,9 @@ export const GoogleProvider: TranslationProvider = {
   label: 'Google Cloud Translate',
   requiresKey: true,
 
-  translateBatch: async (texts, targetLang, config) => {
-    const key = config.googleApiKey;
-    if (!key) throw new Error('Google API key not configured');
+  translateBatch: async (texts, targetLang, _config, apiKey) => {
+    if (!apiKey) throw new Error('Google API key not configured');
+    const key = apiKey;
 
     const batches = buildBatches(texts, MAX_CHARS_PER_BATCH);
     const results = await Promise.all(

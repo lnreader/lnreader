@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
-import { translateChapterContent, ProviderConfig } from '@services/translation';
+import { translateChapterContent } from '@services/translation';
 import {
   saveChapterTranslation,
   clearChapterTranslation,
@@ -56,20 +56,11 @@ export function useTranslation() {
           throw new Error('Chapter content is empty or not downloaded');
         }
 
-        const config: ProviderConfig =
-          settings.translationConfig.provider === 'deepl'
-            ? { deeplApiKey: apiKey, deeplPlan: settings.translationConfig.plan }
-            : settings.translationConfig.provider === 'microsoft'
-            ? { microsoftApiKey: apiKey, microsoftRegion: settings.translationConfig.region }
-            : settings.translationConfig.provider === 'google'
-            ? { googleApiKey: apiKey }
-            : {};
-
         const translated = await translateChapterContent(
           content,
           targetLang,
-          settings.translationConfig.provider,
-          config,
+          settings.translationConfig,
+          apiKey,
         );
         await saveChapterTranslation(chapter.id, translated, targetLang);
 

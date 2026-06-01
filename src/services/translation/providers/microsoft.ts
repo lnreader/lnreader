@@ -9,15 +9,13 @@ export const MicrosoftProvider: TranslationProvider = {
   label: 'Microsoft Azure Translator',
   requiresKey: true,
 
-  translateBatch: async (texts, targetLang, config) => {
-    const key = config.microsoftApiKey;
-    if (!key) throw new Error('Microsoft API key not configured');
+  translateBatch: async (texts, targetLang, config, apiKey) => {
+    if (!apiKey) throw new Error('Microsoft API key not configured');
+    const region = config.provider === 'microsoft' ? config.region : undefined;
 
     const batches = buildBatches(texts, MAX_CHARS_PER_BATCH);
     const results = await Promise.all(
-      batches.map(b =>
-        callMicrosoft(b, targetLang, key, config.microsoftRegion),
-      ),
+      batches.map(b => callMicrosoft(b, targetLang, apiKey, region)),
     );
     return results.flat();
   },

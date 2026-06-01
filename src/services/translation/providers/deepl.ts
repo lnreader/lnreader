@@ -11,14 +11,14 @@ export const DeepLProvider: TranslationProvider = {
   label: 'DeepL',
   requiresKey: true,
 
-  translateBatch: async (texts, targetLang, config) => {
-    const key = config.deeplApiKey;
-    if (!key) throw new Error('DeepL API key not configured');
-    const url = URLS[config.deeplPlan ?? 'free'];
+  translateBatch: async (texts, targetLang, config, apiKey) => {
+    if (!apiKey) throw new Error('DeepL API key not configured');
+    const plan = config.provider === 'deepl' ? config.plan : 'free';
+    const url = URLS[plan];
 
     const batches = buildBatches(texts, MAX_CHARS_PER_BATCH);
     const results = await Promise.all(
-      batches.map(b => callDeepL(b, targetLang, key, url)),
+      batches.map(b => callDeepL(b, targetLang, apiKey, url)),
     );
     return results.flat();
   },

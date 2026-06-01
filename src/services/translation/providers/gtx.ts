@@ -131,7 +131,7 @@ export const GtxProvider: TranslationProvider = {
   label: 'Google Translate (Free)',
   requiresKey: false,
 
-  translateBatch: async (texts, targetLang) => {
+  translateBatch: async (texts, targetLang, _config, _apiKey) => {
     if (texts.length === 0) return [];
 
     const results: string[] = new Array(texts.length);
