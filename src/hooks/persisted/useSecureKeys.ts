@@ -26,8 +26,9 @@ export const useSecureKeys = () => {
     (values: Partial<SecureKeys>) => {
       if (values.googleApiKey !== undefined) setGoogleApiKey(values.googleApiKey);
       if (values.deeplApiKey !== undefined) setDeeplApiKey(values.deeplApiKey);
-      if (values.microsoftApiKey !== undefined)
+      if (values.microsoftApiKey !== undefined) {
         setMicrosoftApiKey(values.microsoftApiKey);
+      }
     },
     [setGoogleApiKey, setDeeplApiKey, setMicrosoftApiKey],
   );
