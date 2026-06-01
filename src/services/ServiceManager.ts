@@ -15,6 +15,7 @@ import {
 import { createBackup, restoreBackup } from './backup/local';
 import { migrateNovel, MigrateNovelData } from './migrate/migrateNovel';
 import { downloadChapter } from './download/downloadChapter';
+import { translateNovel } from './translate/translateNovel';
 import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
 
 type taskNames =
@@ -27,7 +28,8 @@ type taskNames =
   | 'LOCAL_BACKUP'
   | 'LOCAL_RESTORE'
   | 'MIGRATE_NOVEL'
-  | 'DOWNLOAD_CHAPTER';
+  | 'DOWNLOAD_CHAPTER'
+  | 'TRANSLATE_NOVEL';
 
 export type BackgroundTask =
   | {
@@ -51,10 +53,17 @@ export type BackgroundTask =
   | { name: 'LOCAL_BACKUP' }
   | { name: 'LOCAL_RESTORE' }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
-  | DownloadChapterTask;
+  | DownloadChapterTask
+  | TranslateNovelTask;
+
 export type DownloadChapterTask = {
   name: 'DOWNLOAD_CHAPTER';
   data: { chapterId: number; novelName: string; chapterName: string };
+};
+
+export type TranslateNovelTask = {
+  name: 'TRANSLATE_NOVEL';
+  data: { novelId: number; novelName: string; chapterIds: number[] };
 };
 
 export type BackgroundTaskMetadata = {
@@ -101,9 +110,12 @@ export default class ServiceManager {
       return false;
     }
     return (
-      ['DOWNLOAD_CHAPTER', 'IMPORT_EPUB', 'MIGRATE_NOVEL'] as Array<
-        BackgroundTask['name']
-      >
+      [
+        'DOWNLOAD_CHAPTER',
+        'IMPORT_EPUB',
+        'MIGRATE_NOVEL',
+        'TRANSLATE_NOVEL',
+      ] as Array<BackgroundTask['name']>
     ).includes(task.name);
   }
 
@@ -146,7 +158,8 @@ export default class ServiceManager {
 
     if (
       taskList[0].meta?.isRunning &&
-      taskList[0].task?.name !== 'DOWNLOAD_CHAPTER'
+      taskList[0].task?.name !== 'DOWNLOAD_CHAPTER' &&
+      taskList[0].task?.name !== 'TRANSLATE_NOVEL'
     ) {
       const now = Date.now();
       if (now - this.lastNotifUpdate > 1000) {
@@ -258,6 +271,8 @@ export default class ServiceManager {
         return migrateNovel(task.task.data, this.setMeta.bind(this));
       case 'DOWNLOAD_CHAPTER':
         return downloadChapter(task.task.data, this.setMeta.bind(this));
+      case 'TRANSLATE_NOVEL':
+        return translateNovel(task.task.data, this.setMeta.bind(this));
     }
   }
 
@@ -275,6 +290,7 @@ export default class ServiceManager {
       'LOCAL_RESTORE': 0,
       'MIGRATE_NOVEL': 0,
       'DOWNLOAD_CHAPTER': 0,
+      'TRANSLATE_NOVEL': 0,
     };
     const startingTasks = manager.getTaskList();
     const tasksSet = new Set(startingTasks.map(t => t.id));
@@ -336,6 +352,10 @@ export default class ServiceManager {
       return 'Unknown Task';
     }
     switch (task.name) {
+      case 'TRANSLATE_NOVEL':
+        return `${getString('notifications.TRANSLATE_NOVEL')}: ${
+          task.data?.novelName || ''
+        }`;
       case 'DOWNLOAD_CHAPTER':
         return `${getString('notifications.DOWNLOAD_CHAPTER')}: ${
           task.data?.novelName || ''

@@ -8,6 +8,7 @@ const mockUseLibrarySettings = jest.fn();
 const mockUseTracker = jest.fn();
 const mockUseTrackedNovel = jest.fn();
 const mockUseFullscreenMode = jest.fn();
+const mockUseTranslateSettings = jest.fn();
 
 const mockGetDbChapter = jest.fn();
 const mockGetChapterCount = jest.fn();
@@ -29,6 +30,7 @@ jest.mock('@hooks/persisted', () => ({
   useLibrarySettings: () => mockUseLibrarySettings(),
   useTracker: () => mockUseTracker(),
   useTrackedNovel: (...args: unknown[]) => mockUseTrackedNovel(...args),
+  useTranslateSettings: () => mockUseTranslateSettings(),
 }));
 
 jest.mock('@hooks', () => ({
@@ -157,6 +159,18 @@ describe('useChapter', () => {
     mockUseFullscreenMode.mockReturnValue({
       setImmersiveMode: jest.fn(),
       showStatusAndNavBar: jest.fn(),
+    });
+    mockUseTranslateSettings.mockReturnValue({
+      translateEnabled: false,
+      translateMode: 'dual',
+      translateTargetLanguage: 'es',
+      translateColor: '#6b7280',
+      translateItalic: true,
+      translateUnderline: false,
+      translateProvider: 'gtx',
+      deeplPlan: 'free',
+      microsoftRegion: 'eastus',
+      setTranslateSettings: jest.fn(),
     });
 
     mockGetDbChapter.mockResolvedValue(initialChapter);

@@ -42,6 +42,7 @@ export const sanitizeChapterText = (
         'aria-label',
         'aria-labelledby',
         'aria-describedby',
+        'style',
       ],
       a: ['href', 'name', 'target'],
       img: ['src', 'srcset', 'alt', 'width', 'height', 'loading'],
@@ -66,6 +67,47 @@ export const sanitizeChapterText = (
       meta: ['charset', 'name', 'content', 'http-equiv'],
     },
     allowedSchemes: ['data', 'http', 'https', 'file'],
+    transformTags: {
+      '*': function (tagName, attribs) {
+        if (attribs.style) {
+          const isTranslated =
+            attribs.class &&
+            (attribs.class.includes('translated-text') ||
+              attribs.class.includes('translated'));
+          attribs.style = attribs.style
+            .split(';')
+            .map(style => style.trim())
+            .filter(style => {
+              if (!style) return false;
+              const lower = style.toLowerCase();
+
+              if (
+                lower.startsWith('font-size') ||
+                lower.startsWith('line-height') ||
+                lower.startsWith('font-family')
+              ) {
+                return false;
+              }
+
+              if (!isTranslated) {
+                if (
+                  lower.startsWith('color') ||
+                  lower.startsWith('background')
+                ) {
+                  return false;
+                }
+              }
+
+              return true;
+            })
+            .join('; ');
+        }
+        return {
+          tagName: tagName,
+          attribs: attribs,
+        };
+      },
+    },
   });
 
   return (
