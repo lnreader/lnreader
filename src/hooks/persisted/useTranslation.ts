@@ -1,22 +1,29 @@
 import { useState, useCallback, useRef } from 'react';
+import { useMMKVString } from 'react-native-mmkv';
 import { translateChapterContent, ProviderConfig } from '@services/translation';
 import {
   saveChapterTranslation,
   clearChapterTranslation,
 } from '@database/queries/ChapterQueries';
 import { useChapterGeneralSettings } from './useSettings';
-import { useSecureKeys } from './useSecureKeys';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 import { NOVEL_STORAGE } from '@utils/Storages';
+import { SecureMMKVStorage } from '@utils/mmkv/mmkv';
 import NativeFile from '@specs/NativeFile';
 
 export function useTranslation() {
   const [translatingIds, setTranslatingIds] = useState<Set<number>>(new Set());
   const settings = useChapterGeneralSettings();
-  const { googleApiKey, deeplApiKey, microsoftApiKey } = useSecureKeys();
+  const provider = settings.translationConfig.provider;
+  const apiKeyName =
+    provider === 'google' ? 'googleApiKey'
+    : provider === 'deepl' ? 'deeplApiKey'
+    : provider === 'microsoft' ? 'microsoftApiKey'
+    : null;
+  const [apiKey = ''] = useMMKVString(apiKeyName ?? '__unused__', SecureMMKVStorage);
 
   const { updateChapter } = useNovelActions();
   const chapters = useNovelValue('chapters');
@@ -49,13 +56,14 @@ export function useTranslation() {
           throw new Error('Chapter content is empty or not downloaded');
         }
 
-        const config: ProviderConfig = {
-          googleApiKey,
-          deeplApiKey,
-          deeplPlan: settings.translationConfig.provider === 'deepl' ? settings.translationConfig.plan : undefined,
-          microsoftApiKey,
-          microsoftRegion: settings.translationConfig.provider === 'microsoft' ? settings.translationConfig.region : undefined,
-        };
+        const config: ProviderConfig =
+          settings.translationConfig.provider === 'deepl'
+            ? { deeplApiKey: apiKey, deeplPlan: settings.translationConfig.plan }
+            : settings.translationConfig.provider === 'microsoft'
+            ? { microsoftApiKey: apiKey, microsoftRegion: settings.translationConfig.region }
+            : settings.translationConfig.provider === 'google'
+            ? { googleApiKey: apiKey }
+            : {};
 
         const translated = await translateChapterContent(
           content,
@@ -92,7 +100,7 @@ export function useTranslation() {
         });
       }
     },
-    [settings, updateChapter],
+    [settings, apiKey, updateChapter],
   );
 
   // Sequential to avoid hammering the API
