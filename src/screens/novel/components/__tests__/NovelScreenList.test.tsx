@@ -27,6 +27,15 @@ jest.mock('@hooks/persisted', () => ({
     onPrimary: '#fff',
     surface2: '#222',
   }),
+  useTranslation: () => ({
+    translateChapter: jest.fn(),
+    clearTranslation: jest.fn(),
+    isTranslating: jest.fn(() => false),
+    translatingIds: new Set<number>(),
+  }),
+  useChapterGeneralSettings: () => ({
+    translationTargetLang: 'en',
+  }),
 }));
 
 jest.mock('@hooks/index', () => ({

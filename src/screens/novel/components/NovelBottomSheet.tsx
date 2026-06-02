@@ -189,6 +189,7 @@ const ChaptersSettingsSheet = ({
     },
     [],
   );
+
   return (
     <BottomSheet
       snapPoints={[240]}

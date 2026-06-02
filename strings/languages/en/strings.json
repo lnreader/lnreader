@@ -235,7 +235,13 @@
     "sort": "Sort",
     "submit": "Submit",
     "loading": "Loading ...",
-    "warning": "Warning"
+    "warning": "Warning",
+    "translated": "Chapter translated!",
+    "translationFailed": "Translation failed: %{error}",
+    "noApiKey": "No API key set. Add one in Reader Settings → Translation.",
+    "translationsCleared": "Translations cleared!",
+    "bulkTranslated": "Translated %{count} chapters!",
+    "bulkTranslationFailed": "Bulk translation failed"
   },
   "webview": {
     "refresh": "Refresh",
@@ -455,6 +461,18 @@
     },
     "tracked": "Tracked",
     "tracking": "Tracking",
+    "translationModal": {
+      "title": "Translation Settings",
+      "autoTranslate": "Auto-translate chapters",
+      "translateTo": "Translate to",
+      "notSelected": "Not selected",
+      "translateAll": "Translate all downloaded chapters",
+      "translating": "Translating chapters...",
+      "chaptersNotTranslated": "%{count} chapters not yet translated",
+      "clearAll": "Clear all translations",
+      "clearing": "Clearing translations...",
+      "translatedChapters": "%{count} translated chapters"
+    },
     "unknownStatus": "Unknown status",
     "updatedToast": "Updated %{name}"
   },

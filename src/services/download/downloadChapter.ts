@@ -4,9 +4,12 @@ import { Plugin } from '@plugins/types';
 import { downloadFile } from '@plugins/helpers/fetch';
 import { getPlugin } from '@plugins/pluginManager';
 import { getString } from '@strings/translations';
-import { getChapter } from '@database/queries/ChapterQueries';
+import { getChapter, saveChapterTranslation } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
 import { getNovelById } from '@database/queries/NovelQueries';
+import { getTranslationConfigAndKeys } from '@hooks/persisted/useSettings';
+import { novelPersistence } from '@hooks/persisted/useNovel/store-helper/persistence';
+import { translateChapterContent } from '@services/translation';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
@@ -95,6 +98,26 @@ export const downloadChapter = async (
         .where(eq(chapterSchema.id, chapter.id))
         .run();
     });
+
+    const novelSettings = novelPersistence.readSettings({
+      pluginId: novel.pluginId,
+      novelPath: novel.path,
+    });
+
+    if (novelSettings.autoTranslate && novelSettings.translationLang) {
+      try {
+        const { translationConfig, apiKey } = getTranslationConfigAndKeys();
+        const translated = await translateChapterContent(
+          chapterText,
+          novelSettings.translationLang,
+          translationConfig,
+          apiKey,
+        );
+        await saveChapterTranslation(chapter.id, translated, novelSettings.translationLang);
+      } catch {
+        // ignore translation error, don't fail the download
+      }
+    }
 
     await sleep(1000);
   } else {

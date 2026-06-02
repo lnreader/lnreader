@@ -6,6 +6,12 @@ import {
 } from '@screens/library/constants/constants';
 import { Voice } from 'expo-speech';
 import { useMMKVObject } from 'react-native-mmkv';
+import { getMMKVObject, getSecureKey } from '@utils/mmkv/mmkv';
+import { TranslationConfig } from '@services/translation';
+
+export type { TranslationConfig };
+
+
 
 export const APP_SETTINGS = 'APP_SETTINGS';
 export const BROWSE_SETTINGS = 'BROWSE_SETTINGS';
@@ -73,6 +79,7 @@ export interface LibrarySettings {
   downloadedOnlyMode?: boolean;
 }
 
+
 export interface ChapterGeneralSettings {
   keepScreenOn: boolean;
   fullScreenMode: boolean;
@@ -90,6 +97,8 @@ export interface ChapterGeneralSettings {
   bionicReading: boolean;
   tapToScroll: boolean;
   TTSEnable: boolean;
+  translationTargetLang: string;
+  translationConfig: TranslationConfig;
 }
 
 export interface ReaderTheme {
@@ -186,6 +195,10 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   bionicReading: false,
   tapToScroll: false,
   TTSEnable: true,
+  translationTargetLang: 'en',
+  translationConfig: {
+    provider: 'gtx',
+  },
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
@@ -262,17 +275,38 @@ export const useLibrarySettings = () => {
 };
 
 export const useChapterGeneralSettings = () => {
-  const [chapterGeneralSettings = initialChapterGeneralSettings, setSettings] =
-    useMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS);
+  const [storedSettings = initialChapterGeneralSettings, setSettings] =
+    useMMKVObject<any>(CHAPTER_GENERAL_SETTINGS);
+
+  const settings = { ...initialChapterGeneralSettings, ...storedSettings };
 
   const setChapterGeneralSettings = (values: Partial<ChapterGeneralSettings>) =>
-    setSettings({ ...chapterGeneralSettings, ...values });
+    setSettings({ ...settings, ...values });
 
   return {
-    ...chapterGeneralSettings,
+    ...(settings as ChapterGeneralSettings),
     setChapterGeneralSettings,
   };
 };
+
+export function getTranslationConfigAndKeys(): {
+  translationConfig: TranslationConfig;
+  apiKey: string;
+} {
+  const settings =
+    getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
+    initialChapterGeneralSettings;
+  const translationConfig = settings.translationConfig;
+  const apiKey =
+    translationConfig.provider === 'google'
+      ? getSecureKey('googleApiKey')
+      : translationConfig.provider === 'deepl'
+      ? getSecureKey('deeplApiKey')
+      : translationConfig.provider === 'microsoft'
+      ? getSecureKey('microsoftApiKey')
+      : '';
+  return { translationConfig, apiKey };
+}
 
 export const useChapterReaderSettings = () => {
   const [storedSettings = initialChapterReaderSettings, setSettings] =

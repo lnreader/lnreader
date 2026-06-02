@@ -18,6 +18,9 @@ jest.mock('@hooks/persisted', () => ({
   useDownload: () => ({
     downloadChapters: mockDownloadChapters,
   }),
+  useTranslation: () => ({
+    translateChapters: jest.fn(),
+  }),
 }));
 
 jest.mock('@hooks', () => ({
@@ -31,6 +34,16 @@ jest.mock('@hooks', () => ({
 jest.mock('../NovelContext', () => ({
   useNovelValue: (key: string) => mockUseNovelValue(key),
   useNovelActions: () => mockUseNovelActions(),
+  useNovelStore: (selector: any) =>
+    selector({
+      novelSettings: {
+        autoTranslate: false,
+        translationLang: '',
+      },
+      actions: {
+        setNovelSettings: jest.fn(),
+      },
+    }),
 }));
 
 jest.mock('@services/plugin/fetch', () => ({
@@ -149,9 +162,42 @@ jest.mock('../../../components/Actionbar/Actionbar', () => {
 
 jest.mock('@components', () => {
   const React = require('react');
+  const { View, Text, Pressable } = require('react-native');
+
+  const List = {
+    Item: ({ title, description, onPress }: any) =>
+      React.createElement(
+        Pressable,
+        { onPress },
+        React.createElement(Text, null, title),
+        description ? React.createElement(Text, null, description) : null,
+      ),
+    Subheader: ({ children }: any) => React.createElement(Text, null, children),
+  };
+
+  const Modal = ({ visible, children }: any) => {
+    if (!visible) return null;
+    return React.createElement(View, null, children);
+  };
+
+  const SwitchItem = ({ label, value, onPress }: any) =>
+    React.createElement(
+      Pressable,
+      { onPress },
+      React.createElement(Text, null, label),
+      React.createElement(Text, null, value ? 'ON' : 'OFF'),
+    );
+
+  const Button = ({ children, onPress }: any) =>
+    React.createElement(Pressable, { onPress }, children);
+
   return {
     SafeAreaView: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    Modal,
+    SwitchItem,
+    List,
+    Button,
   };
 });
 

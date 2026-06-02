@@ -328,6 +328,73 @@ export const clearUpdates = async (): Promise<void> => {
   });
 };
 
+// Save translation result for a chapter
+export const saveChapterTranslation = async (
+  chapterId: number,
+  translatedContent: string,
+  lang: string,
+): Promise<void> => {
+  const result = await dbManager
+    .select({
+      novelId: chapterSchema.novelId,
+      pluginId: novelSchema.pluginId,
+    })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(eq(chapterSchema.id, chapterId))
+    .get();
+
+  if (result) {
+    const { pluginId, novelId } = result;
+    const folder = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}`;
+    try {
+      NativeFile.mkdir(folder);
+      const filePath = `${folder}/translation_${lang}.html`;
+      NativeFile.writeFile(filePath, translatedContent);
+    } catch {}
+  }
+
+  await dbManager.write(async tx => {
+    await tx
+      .update(chapterSchema)
+      .set({ translationLang: lang })
+      .where(eq(chapterSchema.id, chapterId))
+      .run();
+  });
+};
+
+// Clear translation (so user can re-translate with a different lang)
+export const clearChapterTranslation = async (chapterId: number): Promise<void> => {
+  const result = await dbManager
+    .select({
+      novelId: chapterSchema.novelId,
+      pluginId: novelSchema.pluginId,
+      translationLang: chapterSchema.translationLang,
+    })
+    .from(chapterSchema)
+    .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
+    .where(eq(chapterSchema.id, chapterId))
+    .get();
+
+  if (result && result.translationLang) {
+    const { pluginId, novelId, translationLang } = result;
+    const filePath = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}/translation_${translationLang}.html`;
+    try {
+      if (NativeFile.exists(filePath)) {
+        NativeFile.unlink(filePath);
+      }
+    } catch {}
+  }
+
+  await dbManager.write(async tx => {
+    await tx
+      .update(chapterSchema)
+      .set({ translationLang: null })
+      .where(eq(chapterSchema.id, chapterId))
+      .run();
+  });
+};
+
 // #endregion
 // #region Selectors
 
@@ -510,7 +577,7 @@ export const getPageChaptersBatched = async (
   filter?: ChapterFilterKey[],
   page?: string,
   batch: number = 0,
-) => {
+): Promise<ChapterInfo[]> => {
   const limit = 1000;
   const offset = 1000 * batch;
   const query = dbManager

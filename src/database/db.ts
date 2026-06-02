@@ -16,6 +16,7 @@ import {
   createNovelTriggerQueryUpdate,
 } from './queryStrings/triggers';
 import { useEffect, useReducer } from 'react';
+import { initSecureStorage } from '@utils/mmkv/mmkv';
 
 class MyLogger implements Logger {
   logQuery(_query: string, _params: unknown[]): void {
@@ -126,36 +127,33 @@ export const useInitDatabase = () => {
   const [state, dispatch] = useReducer(fetchReducer, initialState);
   useEffect(() => {
     dispatch({ type: 'migrating' });
-    setPragmas(_db);
 
-    // To resolve issue in drizzle before beta 16
-    const results = db.executeRawSync(
-      `PRAGMA table_info(__drizzle_migrations);`,
-    );
-    const resolved = results.some((row: unknown[]) => row[1] === 'applied_at');
-    if (!resolved && results.length > 0) {
-      _db.executeRawSync(
-        "ALTER TABLE '__drizzle_migrations' ADD COLUMN 'applied_at' text;",
-      );
-      _db.executeRawSync(
-        "ALTER TABLE '__drizzle_migrations' ADD COLUMN 'name' text;",
-      );
-    }
+    const init = async () => {
+      await initSecureStorage();
+      setPragmas(_db);
 
-    migrate(drizzleDb, migrations)
-      .then(() => {
-        runDatabaseBootstrap(_db);
-        dispatch({
-          type: 'migrated',
-          payload: true,
-        });
-      })
-      .catch((error: Error) => {
-        dispatch({
-          type: 'error',
-          payload: error,
-        });
-      });
+      // To resolve issue in drizzle before beta 16
+      const results = db.executeRawSync(
+        `PRAGMA table_info(__drizzle_migrations);`,
+      );
+      const resolved = results.some((row: unknown[]) => row[1] === 'applied_at');
+      if (!resolved && results.length > 0) {
+        _db.executeRawSync(
+          "ALTER TABLE '__drizzle_migrations' ADD COLUMN 'applied_at' text;",
+        );
+        _db.executeRawSync(
+          "ALTER TABLE '__drizzle_migrations' ADD COLUMN 'name' text;",
+        );
+      }
+
+      await migrate(drizzleDb, migrations);
+      runDatabaseBootstrap(_db);
+      dispatch({ type: 'migrated', payload: true });
+    };
+
+    init().catch((error: Error) => {
+      dispatch({ type: 'error', payload: error });
+    });
   }, []);
   return state;
 };

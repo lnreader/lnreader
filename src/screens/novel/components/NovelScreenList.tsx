@@ -4,7 +4,11 @@ import NovelInfoHeader from './Info/NovelInfoHeader';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { pickCustomNovelCover } from '@database/queries/NovelQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
-import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useDownload,
+  useTheme,
+} from '@hooks/persisted';
 import {
   updateNovel,
   updateNovelPage,

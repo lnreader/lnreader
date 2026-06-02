@@ -7,12 +7,13 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Portal, Appbar, Snackbar } from 'react-native-paper';
-import { useDownload, useTheme } from '@hooks/persisted';
+import { useDownload, useTheme, useTranslation } from '@hooks/persisted';
 import JumpToChapterModal from './components/JumpToChapterModal';
 import { Actionbar } from '../../components/Actionbar/Actionbar';
 import EditInfoModal from './components/EditInfoModal';
 import { pickCustomNovelCover } from '../../database/queries/NovelQueries';
 import DownloadCustomChapterModal from './components/DownloadCustomChapterModal';
+import TranslationModal from './components/TranslationModal';
 import { useBoolean } from '@hooks';
 import NovelScreenLoading from './components/LoadingAnimation/NovelScreenLoading';
 import { NovelScreenProps } from '@navigators/types';
@@ -36,6 +37,7 @@ import { LegendListRef } from '@legendapp/list';
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
   const chapters = useNovelValue('chapters');
+  const novelSettings = useNovelValue('novelSettings');
   const {
     setNovel,
     bookmarkChapters,
@@ -49,9 +51,11 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const theme = useTheme();
   const { downloadChapters } = useDownload();
+  const { translateChapters } = useTranslation();
 
   const [selected, setSelected] = useState<ChapterInfo[]>([]);
   const [editInfoModal, showEditInfoModal] = useState(false);
+  const [translationModalVisible, showTranslationModal] = useState(false);
 
   const chapterListRef = useRef<LegendListRef | null>(null);
 
@@ -116,6 +120,16 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const actions = useMemo(() => {
     const list: { icon: MaterialDesignIconName; onPress: () => void }[] = [];
+
+    list.push({
+      icon: 'translate',
+      onPress: () => {
+        if (novel) {
+          translateChapters(selected, novel, novelSettings.translationLang);
+        }
+        setSelected([]);
+      },
+    });
 
     if (!novel?.isLocal && selected.some(obj => !obj.isDownloaded)) {
       list.push({
@@ -203,8 +217,10 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     markPreviousChaptersUnread,
     markPreviouschaptersRead,
     novel,
+    novelSettings,
     refreshChapters,
     selected,
+    translateChapters,
   ]);
 
   const setCustomNovelCover = useCallback(async () => {
@@ -271,6 +287,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
               headerOpacity={headerOpacity}
+              showTranslationModal={() => showTranslationModal(true)}
             />
           ) : (
             <Animated.View
@@ -347,6 +364,13 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
                 chapters={chapters}
                 theme={theme}
                 downloadChapters={downloadChapters}
+              />
+              <TranslationModal
+                modalVisible={translationModalVisible}
+                hideModal={() => showTranslationModal(false)}
+                novel={novel}
+                chapters={chapters}
+                theme={theme}
               />
             </>
           ) : null}

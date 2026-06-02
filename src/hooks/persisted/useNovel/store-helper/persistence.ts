@@ -50,6 +50,18 @@ const isValidNovelSettings = (value: unknown): value is NovelSettings => {
   ) {
     return false;
   }
+  if (
+    value.autoTranslate !== undefined &&
+    typeof value.autoTranslate !== 'boolean'
+  ) {
+    return false;
+  }
+  if (
+    value.translationLang !== undefined &&
+    typeof value.translationLang !== 'string'
+  ) {
+    return false;
+  }
   return true;
 };
 

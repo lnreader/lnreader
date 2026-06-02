@@ -3,6 +3,7 @@ import useChapter from '../useChapter';
 import NativeFile from '@specs/NativeFile';
 
 const mockUseNovelActions = jest.fn();
+const mockUseNovelValue = jest.fn((_key?: string) => ({ autoTranslate: false, translationLang: '' }));
 const mockUseChapterGeneralSettings = jest.fn();
 const mockUseLibrarySettings = jest.fn();
 const mockUseTracker = jest.fn();
@@ -22,6 +23,7 @@ const mockParseChapterNumber = jest.fn();
 
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
+  useNovelValue: (key: string) => mockUseNovelValue(key),
 }));
 
 jest.mock('@hooks/persisted', () => ({
@@ -29,6 +31,14 @@ jest.mock('@hooks/persisted', () => ({
   useLibrarySettings: () => mockUseLibrarySettings(),
   useTracker: () => mockUseTracker(),
   useTrackedNovel: (...args: unknown[]) => mockUseTrackedNovel(...args),
+  useTranslation: () => ({
+    translateChapter: jest.fn(() => Promise.resolve()),
+    translateChapters: jest.fn(() => Promise.resolve()),
+    clearTranslation: jest.fn(() => Promise.resolve()),
+    clearAllTranslations: jest.fn(() => Promise.resolve()),
+    isTranslating: jest.fn(() => false),
+    isAnyTranslating: false,
+  }),
 }));
 
 jest.mock('@hooks', () => ({
@@ -159,7 +169,7 @@ describe('useChapter', () => {
       showStatusAndNavBar: jest.fn(),
     });
 
-    mockGetDbChapter.mockResolvedValue(initialChapter);
+    mockGetDbChapter.mockImplementation(async (id: number) => makeChapter(id, '1'));
     mockGetChapterCount.mockResolvedValue(1);
     mockGetNextChapter.mockResolvedValue(undefined);
     mockGetPrevChapter.mockResolvedValue(undefined);

@@ -12,6 +12,7 @@ import {
   useLibrarySettings,
   useTrackedNovel,
   useTracker,
+  useTranslation,
 } from '@hooks/persisted';
 import { fetchChapter, fetchPage } from '@services/plugin/fetch';
 import { NOVEL_STORAGE } from '@utils/Storages';
@@ -34,7 +35,7 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import NativeVolumeButtonListener from '@specs/NativeVolumeButtonListener';
 import NativeFile from '@specs/NativeFile';
-import { useNovelActions } from '@screens/novel/NovelContext';
+import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 
 const emmiter = new NativeEventEmitter(NativeVolumeButtonListener);
 
@@ -49,6 +50,8 @@ export default function useChapter(
     updateChapterProgress,
     chapterTextCache,
   } = useNovelActions();
+  const novelSettings = useNovelValue('novelSettings');
+  const { translateChapter } = useTranslation();
 
   const [hidden, setHidden] = useState(true);
   const [chapter, setChapter] = useState(initialChapter);
@@ -125,19 +128,47 @@ export default function useChapter(
   const getChapter = useCallback(
     async (navChapter?: ChapterInfo) => {
       try {
-        const dbChapter = navChapter
-          ? undefined
-          : await getDbChapter(chapter.id);
-        const chap = dbChapter ?? navChapter ?? chapter;
+        const dbChap = navChapter ? undefined : await getDbChapter(chapter.id);
+        let chap: ChapterInfo = dbChap
+          ? { ...(navChapter ?? chapter), ...dbChap }
+          : (navChapter ?? chapter);
+
+        let translatedContent: string | undefined;
+        if (chap.translationLang) {
+          const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
+          if (NativeFile.exists(transPath)) {
+            translatedContent = NativeFile.readFile(transPath);
+          }
+        }
         const cachedText = chapterTextCache.read(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
-        const [nextChapResult, prevChapResult, awaitedText] = await Promise.all(
-          [
-            getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
-            getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
-            text,
-          ],
-        );
+        const [nextChapResult, prevChapResult, awaitedText] = await Promise.all([
+          getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
+          getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
+          text,
+        ]);
+
+        if (
+          novelSettings.autoTranslate &&
+          novelSettings.translationLang &&
+          !translatedContent
+        ) {
+          setLoading(true);
+          try {
+            chap.content = awaitedText;
+            await translateChapter(chap, novel, novelSettings.translationLang);
+            const updatedChap = await getDbChapter(chap.id);
+            if (updatedChap) {
+              chap = { ...chap, ...updatedChap };
+              if (chap.translationLang) {
+                const transPath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/translation_${chap.translationLang}.html`;
+                if (NativeFile.exists(transPath)) {
+                  translatedContent = NativeFile.readFile(transPath);
+                }
+              }
+            }
+          } catch {}
+        }
 
         let nextChap = nextChapResult;
         let prevChap = prevChapResult;
@@ -205,7 +236,7 @@ export default function useChapter(
             novel.pluginId,
             novel.name,
             chap.name,
-            awaitedText,
+            translatedContent ?? awaitedText,
           ),
         );
         setAdjacentChapter([nextChap!, prevChap!]);
@@ -221,11 +252,11 @@ export default function useChapter(
       loadChapterText,
       setChapter,
       setChapterText,
-      novel.pluginId,
-      novel.name,
-      novel.path,
-      novel.totalPages,
       setLoading,
+      translateChapter,
+      novel,
+      novelSettings.autoTranslate,
+      novelSettings.translationLang,
     ],
   );
 
