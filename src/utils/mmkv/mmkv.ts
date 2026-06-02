@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { createMMKV, MMKV } from 'react-native-mmkv';
 
@@ -9,7 +10,7 @@ let _secureMMKV: MMKV | null = null;
 export async function initSecureStorage(): Promise<void> {
   let encryptionKey = await SecureStore.getItemAsync(KEYCHAIN_KEY);
   if (!encryptionKey) {
-    encryptionKey = crypto.randomUUID();
+    encryptionKey = Crypto.randomUUID();
     await SecureStore.setItemAsync(KEYCHAIN_KEY, encryptionKey);
   }
   _secureMMKV = createMMKV({ id: 'secure-api-keys', encryptionKey });
