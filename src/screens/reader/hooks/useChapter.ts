@@ -255,6 +255,8 @@ export default function useChapter(
       setLoading,
       translateChapter,
       novel,
+      novelSettings.autoTranslate,
+      novelSettings.translationLang,
     ],
   );
 

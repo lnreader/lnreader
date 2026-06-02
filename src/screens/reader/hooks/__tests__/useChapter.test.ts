@@ -3,7 +3,7 @@ import useChapter from '../useChapter';
 import NativeFile from '@specs/NativeFile';
 
 const mockUseNovelActions = jest.fn();
-const mockUseNovelValue = jest.fn((key?: string) => ({ autoTranslate: false, translationLang: '' }));
+const mockUseNovelValue = jest.fn((_key?: string) => ({ autoTranslate: false, translationLang: '' }));
 const mockUseChapterGeneralSettings = jest.fn();
 const mockUseLibrarySettings = jest.fn();
 const mockUseTracker = jest.fn();

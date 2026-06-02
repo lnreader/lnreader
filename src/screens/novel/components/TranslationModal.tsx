@@ -15,7 +15,6 @@ interface TranslationModalProps {
   modalVisible: boolean;
   novel: NovelInfo;
   chapters: ChapterInfo[];
-  setNovel: (novel: NovelInfo | undefined) => void;
 }
 
 const TranslationModal = ({
@@ -24,7 +23,6 @@ const TranslationModal = ({
   modalVisible,
   novel,
   chapters,
-  setNovel,
 }: TranslationModalProps) => {
   const { translateChapters, isAnyTranslating, clearAllTranslations } = useTranslation();
   const [langVisible, setLangVisible] = useState(false);

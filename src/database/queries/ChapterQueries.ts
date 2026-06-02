@@ -351,9 +351,7 @@ export const saveChapterTranslation = async (
       NativeFile.mkdir(folder);
       const filePath = `${folder}/translation_${lang}.html`;
       NativeFile.writeFile(filePath, translatedContent);
-    } catch (e) {
-      console.warn('Failed to save translation file:', e);
-    }
+    } catch {}
   }
 
   await dbManager.write(async tx => {
@@ -385,9 +383,7 @@ export const clearChapterTranslation = async (chapterId: number): Promise<void> 
       if (NativeFile.exists(filePath)) {
         NativeFile.unlink(filePath);
       }
-    } catch (e) {
-      console.warn('Failed to delete translation file:', e);
-    }
+    } catch {}
   }
 
   await dbManager.write(async tx => {

@@ -371,7 +371,6 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
                 novel={novel}
                 chapters={chapters}
                 theme={theme}
-                setNovel={setNovel}
               />
             </>
           ) : null}
