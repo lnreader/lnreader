@@ -19,7 +19,7 @@
       <action android:name="android.intent.action.TTS_SERVICE"/>
     </intent>
   </queries>
-  <application android:name=".MainApplication" android:largeHeap="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:allowBackup="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="true" android:supportsRtl="true">
+  <application android:name=".MainApplication" android:largeHeap="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:allowBackup="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="true" android:supportsRtl="true" android:enableOnBackInvokedCallback="true">
     <meta-data android:name="expo.modules.notifications.default_notification_color" android:resource="@color/notification_icon_color"/>
     <meta-data android:name="expo.modules.notifications.default_notification_icon" android:resource="@drawable/notification_icon"/>
     <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" android:foregroundServiceType="shortService"/>
