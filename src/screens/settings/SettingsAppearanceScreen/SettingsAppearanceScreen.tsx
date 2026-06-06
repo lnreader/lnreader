@@ -157,7 +157,7 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
   // };
 
   const handleModeChange = (mode: ThemeMode, event: GestureResponderEvent) => {
-    setThemeMode(mode);
+    setTimeout(() => setThemeMode(mode), 0);
     event.currentTarget.measure((_x1, _y1, width, height, px, py) => {
       switchTheme({
         switchThemeFunction: () => {},
