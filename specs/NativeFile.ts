@@ -25,7 +25,7 @@ export interface Spec extends TurboModule {
     url: string,
     destPath: string,
     method: string,
-    headers: { [key: string]: string } | Headers,
+    headers: Object,
     body?: string,
   ) => Promise<void>;
   getConstants: () => {
