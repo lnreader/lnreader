@@ -6,6 +6,7 @@ import {
   useWindowDimensions,
   Pressable,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,7 +23,6 @@ import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { getString } from '@strings/translations';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
 import { defaultCover } from '@plugins/helpers/constants';
-import { ActivityIndicator } from 'react-native-paper';
 
 interface UnreadBadgeProps {
   showDownloadBadges: boolean;
@@ -316,7 +316,7 @@ const InActivityBadge = ({ theme }: { theme: ThemeColors }) => (
       styles.standardBorderRadius,
     ]}
   >
-    <ActivityIndicator animating={true} size={10} color={theme.onPrimary} />
+    <ActivityIndicator animating={true} size={12} color={theme.onPrimary} />
   </View>
 );
 
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   },
   activityBadge: {
     marginHorizontal: 4,
-    padding: 5,
+    padding: 4,
   },
   badgeContainer: {
     flexDirection: 'row',
