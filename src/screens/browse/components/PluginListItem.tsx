@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Image, View, Text, StyleSheet } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { usePlugins } from '@hooks/persisted';
@@ -8,10 +7,11 @@ import { PluginItem } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
 import { getString } from '@strings/translations';
 import { BrowseScreenProps } from '@navigators/types';
-import { Button, IconButtonV2 } from '@components';
+import { IconButtonV2 } from '@components';
 import { showToast } from '@utils/showToast';
 import { UseBooleanReturnType } from '@hooks';
 import ConfirmationDialog from '@components/ConfirmationDialog/ConfirmationDialog';
+import { Pressable } from 'react-native-gesture-handler';
 
 interface PluginListItemProps {
   item: PluginItem;
@@ -203,11 +203,16 @@ export const PluginListItem = memo(
                 theme={theme}
               />
             ) : null}
-            <Button
-              title={getString('browseScreen.latest')}
-              textColor={theme.primary}
+            <Pressable
               onPress={handleLatestPress}
-            />
+              style={styles.latestButtonContainer}
+              android_ripple={{ color: theme.rippleColor, radius: 36 }}
+              hitSlop={10}
+            >
+              <Text style={[styles.latestButton, { color: theme.primary }]}>
+                {getString('browseScreen.latest')}
+              </Text>
+            </Pressable>
           </Pressable>
         </Swipeable>
         <ConfirmationDialog
@@ -226,6 +231,12 @@ export const PluginListItem = memo(
 );
 
 const styles = StyleSheet.create({
+  latestButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+    fontWeight: 600,
+  },
+  latestButtonContainer: { borderRadius: 36 },
   addition: {
     fontSize: 12,
     lineHeight: 20,

@@ -1,10 +1,17 @@
 import React from 'react';
-import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  GestureResponderEvent,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Color from 'color';
 
 import { ThemeColors } from '../../theme/types';
 import { MaterialDesignIconName } from '@type/icon';
+import { Pressable } from 'react-native-gesture-handler';
+import { PressableEvent } from 'react-native-gesture-handler/lib/typescript/components/Pressable/PressableProps';
 
 type Props = {
   name: MaterialDesignIconName;
@@ -12,7 +19,7 @@ type Props = {
   size?: number;
   disabled?: boolean;
   padding?: number;
-  onPress?: () => void;
+  onPress?: (event: PressableEvent) => void;
   theme: ThemeColors;
   style?: ViewStyle;
 };
