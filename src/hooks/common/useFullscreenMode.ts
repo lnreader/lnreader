@@ -8,10 +8,7 @@ import {
 } from '../persisted';
 import Color from 'color';
 import * as NavigationBar from 'expo-navigation-bar';
-import {
-  changeNavigationBarColor,
-  setStatusBarColor,
-} from '@theme/utils/setBarColor';
+import { setStatusBarColor } from '@theme/utils/setBarColor';
 import { SystemBars } from 'react-native-edge-to-edge';
 
 const useFullscreenMode = () => {
@@ -26,10 +23,6 @@ const useFullscreenMode = () => {
       SystemBars.setHidden(true);
     } else {
       setStatusBarColor(Color(backgroundColor));
-      changeNavigationBarColor(
-        backgroundColor,
-        Color(backgroundColor).isDark(),
-      );
     }
   }, [backgroundColor, fullScreenMode]);
 
@@ -42,18 +35,10 @@ const useFullscreenMode = () => {
        * This is overlay of reader footer and should be transparent.
        * But in hexa, ##xxxxxx00 could be another color
        */
-      changeNavigationBarColor(
-        Color(theme.surface).alpha(0.01).hexa(),
-        theme.isDark,
-      );
+
       setStatusBarColor(theme);
-    } else {
-      changeNavigationBarColor(
-        backgroundColor,
-        Color(backgroundColor).isDark(),
-      );
     }
-  }, [backgroundColor, fullScreenMode, theme]);
+  }, [fullScreenMode, theme]);
 
   useEffect(() => {
     setImmersiveMode();
@@ -68,7 +53,6 @@ const useFullscreenMode = () => {
       StatusBar.setHidden(false);
       NavigationBar.setVisibilityAsync('visible');
       setStatusBarColor(theme);
-      changeNavigationBarColor(Color(theme.surface2).hex(), theme.isDark);
     });
 
     return unsubscribe;
