@@ -1,10 +1,11 @@
 import React, { memo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, TextInput } from 'react-native';
+import { StyleSheet, View, TextInput } from 'react-native';
 
 import IconButtonV2 from '../IconButtonV2/IconButtonV2';
 import { ThemeColors } from '../../theme/types';
 import { Menu } from '@components';
 import { MaterialDesignIconName } from '@type/icon';
+import { Pressable } from 'react-native-gesture-handler';
 
 export interface RightIcon {
   iconName: MaterialDesignIconName;
