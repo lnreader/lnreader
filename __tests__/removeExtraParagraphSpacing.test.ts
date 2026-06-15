@@ -9,8 +9,8 @@ describe('removeExtraParagraphSpacing', () => {
     },
     {
       id: '#2',
-      // Including the \u200b zero-width space mentioned in your comments
-      input: '<p>bb<br></p>\u200b',
+      // ↓↓ \u200b zero width space
+      input: '<p>bb<br>\u200b</p>',
       expected: '<p>bb</p>',
     },
     {
