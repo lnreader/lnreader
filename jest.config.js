@@ -74,6 +74,24 @@ module.exports = {
         '!src/**/__tests__/**',
       ],
     },
+    {
+      displayName: 'js assets',
+      preset: 'jest-expo',
+      roots: ['<rootDir>'],
+      testMatch: ['__tests__/**/*.test.tsx', '**/__tests__/**/*.test.ts'],
+      testPathIgnorePatterns: ['/node_modules/', '<rootDir>/src/'],
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+      transform: baseTransform,
+      transformIgnorePatterns: baseTransformIgnorePatterns,
+      moduleNameMapper: baseModuleNameMapper,
+      setupFiles: ['<rootDir>/__mocks__/index.js'],
+      setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],
+      collectCoverageFrom: [
+        'src/**/*.{ts,tsx}',
+        '!src/database/queries/**/__tests__/**',
+        '!src/**/__tests__/**',
+      ],
+    },
   ],
 
   // Global settings

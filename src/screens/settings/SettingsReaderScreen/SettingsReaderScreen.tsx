@@ -127,11 +127,12 @@ const SettingsReaderScreen = () => {
       --theme-outline: ${theme.outline};
       --theme-rippleColor: ${theme.rippleColor};
       }
-      
+
       @font-face {
         font-family: ${readerSettings.fontFamily};
-        src: url("file:///android_asset/fonts/${readerSettings.fontFamily
-    }.ttf");
+        src: url("file:///android_asset/fonts/${
+          readerSettings.fontFamily
+        }.ttf");
       }
     </style>
 
@@ -231,8 +232,9 @@ const SettingsReaderScreen = () => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
                 ${webViewCSS}
               </head>
-              <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
-              }"> 
+              <body class="${
+                chapterGeneralSettings.pageReader ? 'page-reader' : ''
+              }">
                 <div id="LNReader-chapter">
                 ${dummyHTML}
                 </div>
@@ -240,28 +242,29 @@ const SettingsReaderScreen = () => {
               </body>
               <script>
                 var initialReaderConfig = ${JSON.stringify({
-                readerSettings,
-                chapterGeneralSettings,
-                novel,
-                chapter,
-                nextChapter: chapter,
-                batteryLevel,
-                autoSaveInterval: 2222,
-                DEBUG: __DEV__,
-                strings: {
-                  finished: `${getString(
-                    'readerScreen.finished',
-                  )}: ${chapter.name.trim()}`,
-                  nextChapter: getString('readerScreen.nextChapter', {
-                    name: chapter.name,
-                  }),
-                  noNextChapter: getString('readerScreen.noNextChapter'),
-                },
-              })}
+                  readerSettings,
+                  chapterGeneralSettings,
+                  novel,
+                  chapter,
+                  nextChapter: chapter,
+                  batteryLevel,
+                  autoSaveInterval: 2222,
+                  DEBUG: __DEV__,
+                  strings: {
+                    finished: `${getString(
+                      'readerScreen.finished',
+                    )}: ${chapter.name.trim()}`,
+                    nextChapter: getString('readerScreen.nextChapter', {
+                      name: chapter.name,
+                    }),
+                    noNextChapter: getString('readerScreen.noNextChapter'),
+                  },
+                })}
               </script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
               <script src="${assetsUriPrefix}/js/van.js"></script>
               <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
+              <script src="${assetsUriPrefix}/js/removeExtraParagraphSpacing.js"></script>
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script>

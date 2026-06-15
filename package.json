@@ -176,5 +176,5 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@11.6.0"
 }
