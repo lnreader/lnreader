@@ -146,10 +146,7 @@ if (title) {
         {/* Tab Selector */}
         <View style={styles.tabContainer}>
           <Pressable
-            style={[
-              styles.tab,
-              activeCodeTab === 'css' && styles.activeTab,
-            ]}
+            style={[styles.tab, activeCodeTab === 'css' && styles.activeTab]}
             onPress={() => setActiveCodeTab('css')}
             android_ripple={{ color: theme.rippleColor }}
           >
@@ -178,10 +175,7 @@ if (title) {
           </Pressable>
 
           <Pressable
-            style={[
-              styles.tab,
-              activeCodeTab === 'js' && styles.activeTab,
-            ]}
+            style={[styles.tab, activeCodeTab === 'js' && styles.activeTab]}
             onPress={() => setActiveCodeTab('js')}
             android_ripple={{ color: theme.rippleColor }}
           >

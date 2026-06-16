@@ -31,7 +31,6 @@ Notifications.setNotificationHandler({
   },
 });
 
-
 const App = () => {
   const state = useInitDatabase();
 
@@ -43,6 +42,10 @@ const App = () => {
 
   if (state.error) {
     return <ErrorFallback error={state.error} resetError={() => null} />;
+  }
+
+  if (!state.success) {
+    return null;
   }
 
   return (

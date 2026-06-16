@@ -36,6 +36,8 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   getNovelChaptersSync: jest.fn(),
   getFirstUnreadChapter: jest.fn(),
   updateChapterProgress: jest.fn(),
+  getNovelScanlators: jest.fn(() => []),
+  getNovelScanlatorsSync: jest.fn(() => []),
 }));
 
 jest.mock('@database/queries/HistoryQueries', () => ({

@@ -7,6 +7,7 @@ export const LAST_READ_PREFIX = 'LAST_READ_PREFIX';
 export const defaultNovelSettings: NovelSettingsWithoutSort = {
   showChapterTitles: true,
   filter: [],
+  excludedScanlators: [],
 };
 
 export const defaultPageIndex = 0;
@@ -15,6 +16,7 @@ export interface NovelSettingsWithoutSort {
   filter: ChapterFilterKey[];
   showChapterTitles: boolean;
   sort?: ChapterOrderKey;
+  excludedScanlators?: string[];
 }
 export interface NovelSettings extends NovelSettingsWithoutSort {
   sort: ChapterOrderKey;

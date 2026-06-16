@@ -374,7 +374,8 @@
       "filters": {
         "bookmarked": "Bookmarked",
         "downloaded": "Downloaded",
-        "unread": "Unread"
+        "unread": "Unread",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "By chapter name",

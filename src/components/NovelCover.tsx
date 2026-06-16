@@ -164,11 +164,7 @@ function NovelCover<
       <Pressable
         android_ripple={{ color: theme.rippleColor }}
         style={styles.opac}
-        onPress={
-          selectionActive
-            ? selectNovel
-            : onPress
-        }
+        onPress={selectionActive ? selectNovel : onPress}
         onLongPress={selectNovel}
       >
         <View style={styles.badgeContainer}>
@@ -249,9 +245,7 @@ function NovelCover<
       }
       inLibraryBadge={libraryStatus && <InLibraryBadge theme={theme} />}
       theme={theme}
-      onPress={
-        selectionActive ? selectNovel : onPress
-      }
+      onPress={selectionActive ? selectNovel : onPress}
       onLongPress={selectNovel}
       isSelected={isSelected}
     />

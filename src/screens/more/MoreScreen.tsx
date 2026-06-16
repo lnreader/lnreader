@@ -116,10 +116,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
                 </Text>
               </View>
             </View>
-            <Switch
-              value={incognitoMode}
-              onValueChange={enableIncognitoMode}
-            />
+            <Switch value={incognitoMode} onValueChange={enableIncognitoMode} />
           </Pressable>
           <List.Divider theme={theme} />
           <List.Item

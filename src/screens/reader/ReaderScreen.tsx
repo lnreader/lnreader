@@ -68,7 +68,9 @@ export const ChapterContent = ({
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
-  const [bookmarked, setBookmarked] = useState<boolean>(chapter.bookmark ?? false);
+  const [bookmarked, setBookmarked] = useState<boolean>(
+    chapter.bookmark ?? false,
+  );
 
   useEffect(() => {
     setBookmarked(chapter.bookmark ?? false);
@@ -121,9 +123,7 @@ export const ChapterContent = ({
     );
   }
   return (
-    <View
-      style={[{ paddingStart: left, paddingEnd: right }, styles.container]}
-    >
+    <View style={[{ paddingStart: left, paddingEnd: right }, styles.container]}>
       {keepScreenOn ? <KeepScreenAwake /> : null}
       {loading ? (
         <ChapterLoadingScreen />

@@ -15,7 +15,6 @@ jest.mock('@utils/Storages', () => ({
   NOVEL_STORAGE: {},
 }));
 
-
 // Mock MMKVStorage
 jest.mock('@utils/mmkv/mmkv', () => ({
   MMKVStorage: {
@@ -23,7 +22,6 @@ jest.mock('@utils/mmkv/mmkv', () => ({
     set: jest.fn(),
   },
 }));
-
 
 // Mock NativeFile
 jest.mock('@specs/NativeFile', () => ({

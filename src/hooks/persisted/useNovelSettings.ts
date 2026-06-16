@@ -4,7 +4,6 @@ import {
   ChapterOrderKey,
 } from '@database/constants';
 import { useCallback, useMemo, useRef } from 'react';
-import { useAppSettings } from './useSettings';
 import { ChapterFilterObject, FilterStates } from '@database/utils/filter';
 import {
   defaultNovelSettings,
@@ -16,7 +15,6 @@ import { useNovelAction, useNovelValue } from '@screens/novel/NovelContext';
 export { NOVEL_PAGE_INDEX_PREFIX, NOVEL_SETTINGS_PREFIX };
 
 export const useNovelSettings = () => {
-  const { defaultChapterSort } = useAppSettings();
   const novel = useNovelValue('novel');
   const domainNovelSettings = useNovelValue('novelSettings');
   const writeNovelSettings = useNovelAction('setNovelSettings');
@@ -26,7 +24,6 @@ export const useNovelSettings = () => {
     [domainNovelSettings],
   );
 
-  const _sort: ChapterOrderKey = novelSettings.sort ?? defaultChapterSort;
   const _filter: ChapterFilterKey[] = novelSettings.filter;
 
   // #endregion
@@ -36,25 +33,23 @@ export const useNovelSettings = () => {
     async (sort: ChapterOrderKey) => {
       if (novel) {
         writeNovelSettings({
-          showChapterTitles: novelSettings?.showChapterTitles,
+          ...novelSettings,
           sort,
-          filter: _filter,
         });
       }
     },
-    [novel, writeNovelSettings, novelSettings?.showChapterTitles, _filter],
+    [novel, writeNovelSettings, novelSettings],
   );
   const setChapterFilter = useCallback(
     async (filter?: ChapterFilterKey[]) => {
       if (novel) {
         writeNovelSettings({
-          showChapterTitles: novelSettings?.showChapterTitles,
-          sort: _sort,
+          ...novelSettings,
           filter: filter ?? [],
         });
       }
     },
-    [novel, writeNovelSettings, novelSettings?.showChapterTitles, _sort],
+    [novel, writeNovelSettings, novelSettings],
   );
 
   const filterManager = useRef<ChapterFilterObject>(
@@ -95,6 +90,18 @@ export const useNovelSettings = () => {
     [novelSettings, writeNovelSettings],
   );
 
+  const setExcludedScanlators = useCallback(
+    (excludedScanlators: string[]) => {
+      if (novel) {
+        writeNovelSettings({
+          ...novelSettings,
+          excludedScanlators,
+        });
+      }
+    },
+    [novel, writeNovelSettings, novelSettings],
+  );
+
   // #endregion
 
   return useMemo(
@@ -107,6 +114,7 @@ export const useNovelSettings = () => {
       getChapterFilter,
       setChapterSort,
       setShowChapterTitles,
+      setExcludedScanlators,
     }),
     [
       cycleChapterFilter,
@@ -117,6 +125,7 @@ export const useNovelSettings = () => {
       setChapterFilterValue,
       setChapterSort,
       setShowChapterTitles,
+      setExcludedScanlators,
     ],
   );
 };

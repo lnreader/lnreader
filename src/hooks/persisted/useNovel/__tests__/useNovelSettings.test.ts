@@ -61,11 +61,12 @@ describe('useNovelSettings', () => {
       showChapterTitles: true,
       sort: 'nameDesc',
       filter: ['read'],
+      excludedScanlators: [],
     });
     expect(storeSetNovelSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to app default sort and persists it when changing filter', async () => {
+  it('persists changes when changing filter', async () => {
     const storeSetNovelSettings = jest.fn();
     const storeNovelSettings = {
       filter: ['read'],
@@ -92,8 +93,8 @@ describe('useNovelSettings', () => {
 
     expect(storeSetNovelSettings).toHaveBeenCalledWith({
       showChapterTitles: true,
-      sort: 'positionAsc',
       filter: ['downloaded'],
+      excludedScanlators: [],
     });
   });
 

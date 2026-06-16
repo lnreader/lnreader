@@ -145,7 +145,12 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   const backgroundColor = tabHeaderColor;
 
   const renderScene = useMemo(
-    () => SceneMap({ readerTab: ReaderTab, generalTab: GeneralTab, ttsTab: TTSTab }),
+    () =>
+      SceneMap({
+        readerTab: ReaderTab,
+        generalTab: GeneralTab,
+        ttsTab: TTSTab,
+      }),
     [],
   );
 

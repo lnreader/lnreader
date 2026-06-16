@@ -45,6 +45,7 @@ export const createNovelStoreActions = ({
           pageIndex: state.pageIndex,
           settingsSort: getSettingsSort(state.novelSettings),
           settingsFilter: getSettingsFilter(state.novelSettings),
+          excludedScanlators: state.novelSettings.excludedScanlators,
         });
 
         if (!result.ok) {
@@ -63,6 +64,7 @@ export const createNovelStoreActions = ({
           chapters: deps.transformChapters(result.chapters),
           batchInformation: result.batchInformation,
           firstUnreadChapter: result.firstUnreadChapter,
+          scanlators: result.scanlators,
         });
 
         return true;
@@ -81,6 +83,7 @@ export const createNovelStoreActions = ({
         pageIndex: state.pageIndex,
         settingsSort: getSettingsSort(state.novelSettings),
         settingsFilter: getSettingsFilter(state.novelSettings),
+        excludedScanlators: state.novelSettings.excludedScanlators,
       });
 
       if (!result.ok) {
@@ -95,6 +98,7 @@ export const createNovelStoreActions = ({
         chapters: deps.transformChapters(result.chapters),
         batchInformation: result.batchInformation,
         firstUnreadChapter: result.firstUnreadChapter,
+        scanlators: result.scanlators,
       });
 
       return true;
@@ -116,6 +120,7 @@ export const createNovelStoreActions = ({
           pageIndex: state.pageIndex,
           settingsSort: getSettingsSort(state.novelSettings),
           settingsFilter: getSettingsFilter(state.novelSettings),
+          excludedScanlators: state.novelSettings.excludedScanlators,
         });
 
         set({
@@ -139,6 +144,7 @@ export const createNovelStoreActions = ({
           pageIndex: state.pageIndex,
           settingsSort: getSettingsSort(state.novelSettings),
           settingsFilter: getSettingsFilter(state.novelSettings),
+          excludedScanlators: state.novelSettings.excludedScanlators,
         });
 
         if (!refreshed.ok) {
@@ -151,6 +157,7 @@ export const createNovelStoreActions = ({
           chapters: deps.transformChapters(refreshed.chapters),
           batchInformation: refreshed.batchInformation,
           firstUnreadChapter: refreshed.firstUnreadChapter,
+          scanlators: refreshed.scanlators,
         });
       } finally {
         set({ loading: false, fetching: false });

@@ -20,8 +20,11 @@ const mockFetchPage = jest.fn();
 const mockSanitizeChapterText = jest.fn();
 const mockParseChapterNumber = jest.fn();
 
+const mockUseNovelValue = jest.fn();
+
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
+  useNovelValue: (key: string) => mockUseNovelValue(key),
 }));
 
 jest.mock('@hooks/persisted', () => ({

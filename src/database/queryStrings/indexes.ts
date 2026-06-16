@@ -1,4 +1,3 @@
-
 export const createNovelIndexQuery = `
     CREATE INDEX
     IF NOT EXISTS
@@ -8,8 +7,6 @@ export const createNovelIndexQuery = `
 export const dropNovelIndexQuery = `
     DROP INDEX IF EXISTS NovelIndex;
 `;
-
-
 
 export const createChapterIndexQuery = `
     CREATE INDEX

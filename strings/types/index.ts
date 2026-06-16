@@ -313,6 +313,7 @@ export interface StringMap {
   'novelScreen.bottomSheet.displays.sourceTitle': 'string';
   'novelScreen.bottomSheet.filters.bookmarked': 'string';
   'novelScreen.bottomSheet.filters.downloaded': 'string';
+  'novelScreen.bottomSheet.filters.scanlators': 'string';
   'novelScreen.bottomSheet.filters.unread': 'string';
   'novelScreen.bottomSheet.order.byChapterName': 'string';
   'novelScreen.bottomSheet.order.bySource': 'string';

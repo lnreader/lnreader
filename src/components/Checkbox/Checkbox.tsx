@@ -42,8 +42,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         status === 'indeterminate'
           ? 'indeterminate'
           : status
-            ? 'checked'
-            : 'unchecked'
+          ? 'checked'
+          : 'unchecked'
       }
       onPress={onPress}
       color={theme.primary}

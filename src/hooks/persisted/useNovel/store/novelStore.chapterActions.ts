@@ -135,6 +135,7 @@ export const createNovelStoreChapterActions = ({
           onBatchLoaded: (batch, chapters) => {
             appendBatch(batch, transformChapters(chapters));
           },
+          excludedScanlators: state.novelSettings.excludedScanlators,
         });
       }
     })().finally(() => {
@@ -161,6 +162,7 @@ export const createNovelStoreChapterActions = ({
           settingsSort: getSettingsSort(state.novelSettings),
           settingsFilter: getSettingsFilter(state.novelSettings),
           batchInformation: state.batchInformation,
+          excludedScanlators: state.novelSettings.excludedScanlators,
         });
 
         if (!result) {

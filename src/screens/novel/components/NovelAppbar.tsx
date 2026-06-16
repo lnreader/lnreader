@@ -17,8 +17,7 @@ import { NovelInfo } from '@database/types';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { MaterialDesignIconName } from '@type/icon';
 
-const AnimatedAppbarAction =
-  Animated.createAnimatedComponent(Appbar.Action);
+const AnimatedAppbarAction = Animated.createAnimatedComponent(Appbar.Action);
 
 const Menu = React.memo(
   ({
@@ -112,10 +111,7 @@ const NovelAppbar = ({
   const [downloadMenu, showDownloadMenu] = useState(false);
   const [extraMenu, showExtraMenu] = useState(false);
 
-  const appbarTheme = useMemo(
-    () => ({ colors: theme }),
-    [theme],
-  );
+  const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
 
   const AppbarAction = useCallback(
     (props: {
