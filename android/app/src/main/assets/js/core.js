@@ -167,6 +167,7 @@ window.tts = new (function () {
   this.normalizeText = text => {
     if (!text) return '';
     return text
+      .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
       .replace(/\s+/g, ' ')
       .replace(/\s*([.,!?;:])\s*/g, '$1 ')
       .trim();
