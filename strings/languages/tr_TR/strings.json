@@ -4,7 +4,7 @@
     "discord": "Discord",
     "github": "Github",
     "helpTranslate": "Çevirmeye Yardım Et",
-    "plugins": "Plugins",
+    "plugins": "Eklentiler",
     "version": "Versiyon",
     "whatsNew": "Yenilikler"
   },
@@ -37,12 +37,12 @@
   "appearanceScreen": {
     "accentColor": "Vurgu Rengi",
     "alwaysShowNavLabels": "Menü yazılarını hep göster",
-    "appLanguage": "App language",
+    "appLanguage": "Uygulama Dili",
     "languagePickerModal": {
-      "title": "Select Language",
-      "restartNote": "You will need to restart the app for the language change to take full effect."
+      "title": "Dili Seç",
+      "restartNote": "Dil değişikliğinin tamamen etkin olması için uygulamanın yeniden başlatılması gerekmekte."
     },
-    "appLanguageDefault": "Default",
+    "appLanguageDefault": "Varsayılan",
     "appTheme": "Uygulama teması",
     "darkTheme": "Karanlık Tema",
     "hideBackdrop": "Arka planı gizle",
@@ -52,10 +52,10 @@
     "pureBlackDarkMode": "Tamamen siyah karanlık tema",
     "showHistoryInTheNav": "Navigasyonda geçmişi göster",
     "showUpdatesInTheNav": "Menüde güncellemeleri göster",
-    "themeMode": "Theme mode",
-    "themeModeLight": "Light",
-    "themeModeDark": "Dark",
-    "themeModeSystem": "System",
+    "themeMode": "Tema Modu",
+    "themeModeLight": "Açık",
+    "themeModeDark": "Koyu",
+    "themeModeSystem": "Sistem",
     "theme": {
       "default": "Varsayılan",
       "lavender": "Lavanta",
@@ -72,11 +72,11 @@
   },
   "backupScreen": {
     "backupName": "Yedek ismi",
-    "backupCreated": "Backup created successfully",
-    "backupRestored": "Backup restored successfully",
-    "savingBackup": "Saving Backup",
-    "categoriesRestored": "Restored %{count} categories",
-    "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
+    "backupCreated": "Yedekleme başarıyla tamamlandı",
+    "backupRestored": "Yedekleme başarıyla geri yüklendi",
+    "savingBackup": "Yedekleme kaydediliyor",
+    "categoriesRestored": "%{count} kategori geri yüklendi",
+    "categoriesRestoredWithErrors": "%{count} kategori geri yüklendi (%{failedCount} yüklenemedi)",
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
     "categoryFileReadFailed": "Failed to read category file: %{error}",
