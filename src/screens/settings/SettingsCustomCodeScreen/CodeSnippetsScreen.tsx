@@ -84,7 +84,13 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         android_ripple={{ color: theme.rippleColor, foreground: true }}
       />
     ),
-    [theme.isDark, theme.primary, theme.rippleColor, theme.secondary, theme.surface],
+    [
+      theme.isDark,
+      theme.primary,
+      theme.rippleColor,
+      theme.secondary,
+      theme.surface,
+    ],
   );
 
   return (

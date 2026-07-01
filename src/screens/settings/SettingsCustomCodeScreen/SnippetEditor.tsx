@@ -3,26 +3,18 @@ import { Row } from '@components/Common';
 import { ToggleButton } from '@components/Common/ToggleButton';
 import { getString } from '@strings/translations';
 import React from 'react';
-import {
-  LayoutChangeEvent,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import CodeInput from './Components/CodeInput';
 import { showToast } from '@utils/showToast';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 type SnippetEditorProps = {
   snippetIndex?: number;
   isJS?: boolean;
   navigation: { goBack: () => void };
 };
-
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 const SnippetEditor: React.FC<SnippetEditorProps> = ({
   snippetIndex,
@@ -49,9 +41,6 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
   const [code, setCode] = React.useState<string>('');
   const [error, setError] = React.useState({ title: false, code: false });
 
-  const scrollViewRef = React.useRef<ScrollView>(null);
-  const codeSectionY = React.useRef(0);
-
   // Update fields when snippet changes
   React.useEffect(() => {
     setTitle(snippet?.name ?? '');
@@ -66,29 +55,10 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
     }
   }, [isEditing, snippet]);
 
-  const { height: windowHeight } = useWindowDimensions();
-  const { height: keyboardHeight } = useAnimatedKeyboard();
-
-  const maxHeightScrollView = useAnimatedStyle(() => ({
-    maxHeight: windowHeight - keyboardHeight.value,
-  }));
-
   const colors = React.useMemo(
     () => ({ colors: theme }),
     [theme],
   );
-
-  const handleCodeFocus = () => {
-    // Scroll the code block into view when the user starts editing
-    scrollViewRef.current?.scrollTo({
-      y: codeSectionY.current,
-      animated: true,
-    });
-  };
-
-  const onCodeSectionLayout = (e: LayoutChangeEvent) => {
-    codeSectionY.current = e.nativeEvent.layout.y;
-  };
 
   const save = React.useCallback(() => {
     setError({ title: false, code: false });
@@ -131,9 +101,9 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
   ]);
 
   return (
-    <AnimatedScrollView
-      ref={scrollViewRef}
-      style={[styles.scrollContainer, maxHeightScrollView]}
+    <KeyboardAwareScrollView
+      style={styles.scrollContainer}
+      bottomOffset={80}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       contentContainerStyle={styles.scrollContent}
@@ -164,15 +134,12 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
         style={styles.snippetName}
         error={error.title}
       />
-      <Animated.View onLayout={onCodeSectionLayout}>
-        <CodeInput
-          language={language}
-          code={code}
-          setCode={setCode}
-          error={error.code}
-          onFocus={handleCodeFocus}
-        />
-      </Animated.View>
+      <CodeInput
+        language={language}
+        code={code}
+        setCode={setCode}
+        error={error.code}
+      />
       <Row verticalSpacing={8}>
         <Button
           style={styles.button}
@@ -186,7 +153,7 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
           onPress={save}
         />
       </Row>
-    </AnimatedScrollView>
+    </KeyboardAwareScrollView>
   );
 };
 
