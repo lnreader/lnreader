@@ -15,6 +15,8 @@ import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 
 import ExportEpubModal from './ExportEpubModal';
 import { MaterialDesignIconName } from '@type/icon';
+import { composeCSS, composeJS } from '@utils/customCode';
+
 
 interface ExportNovelAsEpubButtonProps {
   novel?: NovelInfo;
@@ -84,13 +86,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       }`
       : '';
 
-    const customCSS = readerSettings.codeSnippetsCSS
-      .map(snippet => {
-        if (!snippet.active) return null;
-        return snippet.code;
-      })
-      .filter(Boolean)
-      .join('\n');
+    const customCSS = composeCSS(readerSettings.codeSnippetsCSS);
 
     const customStyles = epubUseCustomCSS
       ? customCSS
@@ -101,19 +97,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
     return appThemeStyles + customStyles;
   }, [novel, epubUseAppTheme, epubUseCustomCSS, readerSettings, theme.primary]);
 
-  const customJS = readerSettings.codeSnippetsJS
-    .map(snippet => {
-      if (!snippet.active) return null;
-      return `
-      try {
-        ${snippet.code}
-      } catch (error) {
-        alert('Error loading executing ${snippet.name}:\n' + error);
-      }
-      `;
-    })
-    .filter(Boolean)
-    .join('\n');
+  const customJS = composeJS(readerSettings.codeSnippetsJS);
 
   const epubJavaScript = useMemo(() => {
     if (!novel) {

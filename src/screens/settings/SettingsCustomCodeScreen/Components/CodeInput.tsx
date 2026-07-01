@@ -1,7 +1,6 @@
 import { TextInput } from '@components';
-import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import React from 'react';
-import { PixelRatio, StyleSheet } from 'react-native';
+import { PixelRatio, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -64,24 +63,25 @@ const CodeInput = ({
   const theme = useTheme();
   const { height: keyboardHeight } = useAnimatedKeyboard();
   const expanded = useSharedValue(0);
+  const { height: windowHeight } = useWindowDimensions();
 
   const maxHeight = useAnimatedStyle(() => {
-    const availableHeight = WINDOW_HEIGHT - keyboardHeight.value - 200;
+    const availableHeight = windowHeight - keyboardHeight.value - 200;
     return {
-      maxHeight: Math.min(Math.max(availableHeight, 300), WINDOW_HEIGHT / 2),
+      maxHeight: Math.min(Math.max(availableHeight, 300), windowHeight / 2),
     };
   });
   const maxHeightTop = useAnimatedStyle(() => {
     if (expanded.value !== 1) {
       return { maxHeight: withTiming(2 * LINE_HEIGHT + 18, { duration: 250 }) };
     }
-    return { maxHeight: withTiming(WINDOW_HEIGHT / 2, { duration: 250 }) };
+    return { maxHeight: withTiming(windowHeight / 2, { duration: 250 }) };
   }, [expanded]);
   const maxHeightBottom = useAnimatedStyle(() => {
     if (expanded.value !== 2) {
       return { maxHeight: withTiming(2 * LINE_HEIGHT + 18, { duration: 250 }) };
     }
-    return { maxHeight: withTiming(WINDOW_HEIGHT / 2, { duration: 250 }) };
+    return { maxHeight: withTiming(windowHeight / 2, { duration: 250 }) };
   });
 
   const codeColor = React.useMemo(

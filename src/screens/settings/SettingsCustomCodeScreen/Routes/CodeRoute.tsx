@@ -1,7 +1,6 @@
 import { Button, TextInput } from '@components';
 import { Row } from '@components/Common';
 import { ToggleButton } from '@components/Common/ToggleButton';
-import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { getString } from '@strings/translations';
 import React from 'react';
 import {
@@ -9,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
@@ -107,12 +107,13 @@ const CodeRoute = ({
     }
   }, [isActive]);
 
+  const { height: windowHeight } = useWindowDimensions();
   const { height: keyboardHeight } = useAnimatedKeyboard();
   const ScrollViewRef = React.useRef<ScrollView>(null);
 
   const maxHeightScrollView = useAnimatedStyle(() => {
     return {
-      maxHeight: WINDOW_HEIGHT - keyboardHeight.value,
+      maxHeight: windowHeight - keyboardHeight.value,
     };
   });
 

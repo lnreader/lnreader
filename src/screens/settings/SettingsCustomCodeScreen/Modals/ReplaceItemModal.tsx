@@ -1,11 +1,10 @@
 import { AnimatedIconButton, List } from '@components';
 import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
-import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { useBoolean } from '@hooks/index';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { TextInput as RNTextInput, StyleSheet } from 'react-native';
+import { TextInput as RNTextInput, StyleSheet, useWindowDimensions } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import Animated, {
   FadeIn,
@@ -35,6 +34,7 @@ const ReplaceItemModal = ({
   toggleList,
 }: ReplaceItemModalProps) => {
   const theme = useTheme();
+  const { height: windowHeight } = useWindowDimensions();
   const modal = useBoolean(false);
   const {
     setChapterReaderSettings: setSettings,
@@ -101,6 +101,7 @@ const ReplaceItemModal = ({
       setSettings({ removeText: removeText });
     }
     cancel();
+    modal.setFalse();
     return true;
   };
 
@@ -141,7 +142,7 @@ const ReplaceItemModal = ({
       }
       if (listExpanded) {
         listSize.value = Math.min(
-          WINDOW_HEIGHT * 0.6,
+          windowHeight * 0.6,
           arrayLength * (LIST_ITEM_LINE_HEIGHT + 16),
         );
       } else {
@@ -151,7 +152,7 @@ const ReplaceItemModal = ({
         );
       }
     },
-    [arrayLength, iconRotation, listExpanded, listSize, toggleList],
+    [arrayLength, iconRotation, listExpanded, listSize, toggleList, windowHeight],
   );
   useEffect(() => {
     calcListSize(false);

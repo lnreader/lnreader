@@ -1,5 +1,6 @@
 import { ChapterReaderSettings } from '@hooks/persisted/useSettings';
 import { useMemo } from 'react';
+import { composeCSS, composeJS } from '@utils/customCode';
 
 export default function useCustomCode(
   readerSettings: Pick<
@@ -7,33 +8,15 @@ export default function useCustomCode(
     'codeSnippetsJS' | 'codeSnippetsCSS'
   >,
 ) {
-  const customJS = useMemo(() => {
-    return readerSettings.codeSnippetsJS
-      .map(snippet => {
-        if (!snippet.active) return null;
-        return `
-        try {
-           ${snippet.code}
-        } catch (error) {
-          alert(\`Error loading executing ${JSON.stringify(
-            snippet.name,
-          )}:\n\` + error);
-        }
-        `;
-      })
-      .filter(Boolean)
-      .join('\n');
-  }, [readerSettings.codeSnippetsJS]);
+  const customJS = useMemo(
+    () => composeJS(readerSettings.codeSnippetsJS),
+    [readerSettings.codeSnippetsJS],
+  );
 
-  const customCSS = useMemo(() => {
-    return readerSettings.codeSnippetsCSS
-      .map(snippet => {
-        if (!snippet.active) return null;
-        return snippet.code;
-      })
-      .filter(Boolean)
-      .join('\n');
-  }, [readerSettings.codeSnippetsCSS]);
+  const customCSS = useMemo(
+    () => composeCSS(readerSettings.codeSnippetsCSS),
+    [readerSettings.codeSnippetsCSS],
+  );
 
   return {
     customJS,

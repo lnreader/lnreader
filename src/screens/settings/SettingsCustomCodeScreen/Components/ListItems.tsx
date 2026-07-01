@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
-    verticalAlign: 'middle',
   },
   itemRow: {
     justifyContent: 'space-between',

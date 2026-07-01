@@ -31,7 +31,7 @@ const getModalTitleColor = (theme: ThemeColors) => ({
 
 export type DefaultModalProps = {
   title: string;
-  onSave: () => void | boolean;
+  onSave: () => boolean;
   onDismiss: () => void;
   onCancel?: () => void;
   onReset?: () => void;

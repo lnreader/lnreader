@@ -1,11 +1,5 @@
 import { StatusBar, StyleSheet } from 'react-native';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import WebView from 'react-native-webview';
 import { dummyHTML } from './dummy';
 
@@ -19,6 +13,11 @@ import { getString } from '@strings/translations';
 import color from 'color';
 import { useBatteryLevel } from 'react-native-device-info';
 import * as Speech from 'expo-speech';
+import {
+  composeCSS,
+  composeJS,
+  applyTextModifications,
+} from '@utils/customCode';
 
 type WebViewPostEvent = {
   type: string;
@@ -26,7 +25,7 @@ type WebViewPostEvent = {
   msg?: string;
 };
 
-const SettingsReaderWebView = () => {
+const SettingsReaderWebView = ({ onPress }: { onPress?: () => void } = {}) => {
   const theme = useTheme();
   const webViewRef = useRef<WebView>(null);
 
@@ -68,33 +67,15 @@ const SettingsReaderWebView = () => {
   const readerSettings = useChapterReaderSettings();
   const chapterGeneralSettings = useChapterGeneralSettings();
 
-  const customJS = useMemo(() => {
-    return readerSettings.codeSnippetsJS
-      .map(snippet => {
-        if (!snippet.active) return null;
-        return `
-      try {
-        ${snippet.code}
-      } catch (error) {
-        alert('Error loading executing ${JSON.stringify(
-          snippet.name,
-        )}:\n' + error);
-      }
-      `;
-      })
-      .filter(Boolean)
-      .join('\n');
-  }, [readerSettings.codeSnippetsJS]);
+  const customJS = useMemo(
+    () => composeJS(readerSettings.codeSnippetsJS),
+    [readerSettings.codeSnippetsJS],
+  );
 
-  const customCSS = useMemo(() => {
-    return readerSettings.codeSnippetsCSS
-      .map(snippet => {
-        if (!snippet.active) return null;
-        return snippet.code;
-      })
-      .filter(Boolean)
-      .join('\n');
-  }, [readerSettings.codeSnippetsCSS]);
+  const customCSS = useMemo(
+    () => composeCSS(readerSettings.codeSnippetsCSS),
+    [readerSettings.codeSnippetsCSS],
+  );
 
   const assetsUriPrefix = useMemo(
     () => (__DEV__ ? 'http://localhost:8081/assets' : 'file:///android_asset'),
@@ -108,6 +89,7 @@ const SettingsReaderWebView = () => {
     <style>
     :root {
       --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
+      --bottom-inset: 0px;
       --readerSettings-theme: ${readerSettings.theme};
       --readerSettings-padding: ${readerSettings.padding}px;
       --readerSettings-textSize: ${readerSettings.textSize}px;
@@ -149,47 +131,15 @@ const SettingsReaderWebView = () => {
     };
   }, []);
 
-  const saveRegex = useCallback(
-    (regex: RegExpMatchArray, text: string, replacement: string = '') => {
-      const validFlags = new Set(['g', 'm', 'i', 'y', 'u', 'v', 's', 'd']);
-      const flags = regex[2] ?? '';
-      const hasInvalidFlags = [...flags].some(f => !validFlags.has(f));
-      if (hasInvalidFlags) {
-        return text;
-      }
-      try {
-        const r = new RegExp(regex[1], flags);
-        return text.replace(r, replacement);
-      } catch {
-        return text;
-      }
-    },
-    [],
+  const preparedDummyHTML = useMemo(
+    () =>
+      applyTextModifications(
+        dummyHTML,
+        readerSettings.removeText,
+        readerSettings.replaceText,
+      ),
+    [readerSettings.removeText, readerSettings.replaceText],
   );
-
-  const preparedDummyHTML = useMemo(() => {
-    let chText = dummyHTML;
-    readerSettings.removeText.forEach(text => {
-      // test if text is regex
-      const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
-      if (m) {
-        chText = saveRegex(m, chText);
-      } else {
-        chText = chText.split(text).join('');
-      }
-    });
-    Object.entries(readerSettings.replaceText).forEach(
-      ([text, replacement]) => {
-        const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
-        if (m) {
-          chText = saveRegex(m, chText, replacement);
-        } else {
-          chText = chText.split(text).join(replacement);
-        }
-      },
-    );
-    return chText;
-  }, [readerSettings.removeText, readerSettings.replaceText, saveRegex]);
 
   return (
     <WebView
@@ -205,6 +155,7 @@ const SettingsReaderWebView = () => {
         const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
         switch (event.type) {
           case 'hide':
+            onPress?.();
             if (hidden) {
               webViewRef.current?.injectJavaScript('reader.hidden.val = true');
             } else {
