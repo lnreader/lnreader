@@ -1,0 +1,68 @@
+src/services/Trackers/myAnimeList.ts
+  human 4-9,126-135,139-142,145,148-191
+src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx
+  human 17,21
+src/services/Trackers/__tests__/myAnimeList.test.ts
+  human 1-76
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 65,
+          "added_lines": 65,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "4-9,126-135,139-142,145,148-191",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/myAnimeList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "17,21",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 76,
+          "added_lines": 76,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-76",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/__tests__/myAnimeList.test.ts"
+    }
+  ],
+  "base_commit_sha": "bbb2645a6f6c47f7cda8d83ef096c329e03ffa6a",
+  "branch": "master",
+  "commit_sha": "4a3a47ac470f266d085215cd8f62b4c0b2d517a5",
+  "commit_time": "2026-07-02T00:09:22+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.21",
+  "prompts": {
+    "human": {
+      "accepted_lines": 143,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 143,
+      "total_deletions": 0
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
