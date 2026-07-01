@@ -588,6 +588,11 @@
     "addCssOrJsCode": "Add CSS or JavaScript code",
     "cssSnippets": "CSS Snippets",
     "javascriptSnippets": "JavaScript Snippets",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code",
+    "renameSnippet": "Rename Snippet",
     "noCodeSnippets": "No code snippets"
   }
 }

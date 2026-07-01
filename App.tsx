@@ -48,9 +48,9 @@ const App = () => {
   return (
     <Suspense fallback={null}>
       <GestureHandlerRootView style={styles.flex}>
-        <AppErrorBoundary>
-          <SafeAreaProvider>
-            <ThemeProvider>
+        <ThemeProvider>
+          <AppErrorBoundary>
+            <SafeAreaProvider>
               <KeyboardProvider>
                 <PaperProvider>
                   <BottomSheetModalProvider>
@@ -62,9 +62,9 @@ const App = () => {
                   </BottomSheetModalProvider>
                 </PaperProvider>
               </KeyboardProvider>
-            </ThemeProvider>
-          </SafeAreaProvider>
-        </AppErrorBoundary>
+            </SafeAreaProvider>
+          </AppErrorBoundary>
+        </ThemeProvider>
       </GestureHandlerRootView>
     </Suspense>
   );

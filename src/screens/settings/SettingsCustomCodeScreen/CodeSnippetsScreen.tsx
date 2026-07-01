@@ -8,10 +8,11 @@ import {
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import Color from 'color';
 
-import { Appbar, SafeAreaView } from '@components';
+import { Appbar, IconButtonV2, SafeAreaView } from '@components';
 import { useTheme } from '@hooks/persisted';
+import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
-import SnippetEditor from './SnippetEditor';
+import SnippetEditor, { SnippetEditorHandle } from './SnippetEditor';
 import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsReaderWebView';
 import { CodeSnippetsScreenProps } from '@navigators/types';
 
@@ -29,12 +30,15 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
   navigation,
   route,
 }) => {
-  const theme = useTheme();
-  const layout = useWindowDimensions();
   const snippetIndex = route?.params?.snippetIndex;
   const isJS = route?.params?.isJS;
+  const language = isJS === false ? 'css' : 'js';
+  const theme = useTheme();
+  const layout = useWindowDimensions();
 
   const [index, setIndex] = React.useState(0);
+  const editorRef = React.useRef<SnippetEditorHandle>(null);
+
 
   const renderScene = ({
     route: r,
@@ -48,9 +52,9 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
       case 'code':
         return (
           <SnippetEditor
+            ref={editorRef}
             snippetIndex={snippetIndex}
-            isJS={isJS}
-            navigation={navigation}
+            language={language}
           />
         );
       case 'example':
@@ -100,7 +104,20 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         handleGoBack={() => navigation.goBack()}
         theme={theme}
         mode="small"
-      />
+      >
+        <IconButtonV2
+          name="file-import-outline"
+          size={24}
+          onPress={() => showToast('Not implemented')}
+          theme={theme}
+        />
+        <IconButtonV2
+          name="content-save"
+          size={24}
+          onPress={() => editorRef.current?.save()}
+          theme={theme}
+        />
+      </Appbar>
       <TabView
         collapsable={false}
         lazy

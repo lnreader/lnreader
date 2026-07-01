@@ -483,5 +483,10 @@ export interface StringMap {
   'customCodeSettings.addCssOrJsCode': 'string';
   'customCodeSettings.cssSnippets': 'string';
   'customCodeSettings.javascriptSnippets': 'string';
+  'customCodeSettings.createJSSnippet': 'string';
+  'customCodeSettings.addJavascriptCode': 'string';
+  'customCodeSettings.createCSSSnippet': 'string';
+  'customCodeSettings.addCssCode': 'string';
+  'customCodeSettings.renameSnippet': 'string';
   'customCodeSettings.noCodeSnippets': 'string';
 }
