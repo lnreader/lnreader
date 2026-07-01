@@ -104,6 +104,7 @@ const SnippetEditor: React.FC<SnippetEditorProps> = ({
     <KeyboardAwareScrollView
       style={styles.scrollContainer}
       bottomOffset={80}
+      nestedScrollEnabled
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       contentContainerStyle={styles.scrollContent}

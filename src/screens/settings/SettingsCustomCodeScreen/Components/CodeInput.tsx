@@ -1,6 +1,10 @@
-import { TextInput } from '@components';
 import React from 'react';
-import { PixelRatio, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  PixelRatio,
+  StyleSheet,
+  TextInput as RNTextInput,
+  useWindowDimensions,
+} from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -17,7 +21,6 @@ type CodeInputProps = {
   code: string;
   setCode: (code: string) => void;
   error?: boolean;
-  forceFocused?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
 };
@@ -49,14 +52,13 @@ const START_CSS_CODE = `:root {
 }`;
 const END_JS_CODE = 'qs("#LNReader-chapter").innerHTML = html;';
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+const AnimatedTextInput = Animated.createAnimatedComponent(RNTextInput);
 
 const CodeInput = ({
   language,
   code,
   setCode,
   error,
-  forceFocused,
   onFocus,
   onBlur,
 }: CodeInputProps) => {
@@ -64,6 +66,21 @@ const CodeInput = ({
   const { height: keyboardHeight } = useAnimatedKeyboard();
   const expanded = useSharedValue(0);
   const { height: windowHeight } = useWindowDimensions();
+
+  const [inputFocused, setInputFocused] = React.useState(false);
+
+  const handleFocus = () => {
+    setInputFocused(true);
+    onFocus?.();
+  };
+  const handleBlur = () => {
+    setInputFocused(false);
+    onBlur?.();
+  };
+
+  const isFocused = inputFocused;
+  const borderWidth = isFocused || error ? 2 : 1;
+  const margin = isFocused || error ? 0 : 1;
 
   const maxHeight = useAnimatedStyle(() => {
     const availableHeight = windowHeight - keyboardHeight.value - 200;
@@ -89,35 +106,43 @@ const CodeInput = ({
     [theme],
   );
 
+  const codeFieldStyle = React.useMemo(
+    () => ({
+      color: theme.onBackground,
+      backgroundColor: theme.background,
+      borderColor: error
+        ? theme.error
+        : isFocused
+        ? theme.primary
+        : theme.outline,
+      borderWidth,
+      margin,
+    }),
+    [theme, error, isFocused, borderWidth, margin],
+  );
+
   return (
     <>
       <Animated.Text
         style={[styles.fakeTextInput, styles.topField, codeColor, maxHeightTop]}
         onPress={() => {
-          if (expanded.value === 1) {
-            expanded.value = 0;
-          } else {
-            expanded.value = 1;
-          }
+          expanded.value = expanded.value === 1 ? 0 : 1;
         }}
       >
         {language === 'js' ? START_JS_CODE : START_CSS_CODE}
       </Animated.Text>
       <AnimatedTextInput
+        {...({ nestedScrollEnabled: true } as any)}
         placeholder={'Your code here'}
         defaultValue={code}
         onChangeText={setCode}
-        forceFocused={forceFocused}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         multiline
         autoCorrect={false}
         autoCapitalize={'none'}
-        style={[styles.codeField, maxHeight]}
-        onPress={() => {
-          expanded.value = 0;
-        }}
-        error={error}
+        placeholderTextColor={'grey'}
+        style={[codeFieldStyle, styles.codeField, maxHeight]}
       />
       <Animated.Text
         style={[
@@ -127,11 +152,7 @@ const CodeInput = ({
           maxHeightBottom,
         ]}
         onPress={() => {
-          if (expanded.value === 2) {
-            expanded.value = 0;
-          } else {
-            expanded.value = 2;
-          }
+          expanded.value = expanded.value === 2 ? 0 : 2;
         }}
       >
         {language === 'js' ? END_JS_CODE : ''}
@@ -167,6 +188,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     minHeight: LINE_HEIGHT * 8,
+    borderStyle: 'solid',
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   bottomField: {
     flexGrow: 1,
