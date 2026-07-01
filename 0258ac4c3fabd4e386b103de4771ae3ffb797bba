@@ -1,0 +1,53 @@
+src/database/queries/__tests__/ChapterQueries.test.ts
+  human 1026,1031-1046,1051-1052,1057-1062,1065,1069,1071,1075,1077,1081,1083-1090,1093,1095-1098
+src/database/queries/ChapterQueries.ts
+  human 680-693,696,699
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1026,1031-1046,1051-1052,1057-1062,1065,1069,1071,1075,1077,1081,1083-1090,1093,1095-1098",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/ChapterQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "680-693,696,699",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/ChapterQueries.ts"
+    }
+  ],
+  "base_commit_sha": "4a3a47ac470f266d085215cd8f62b4c0b2d517a5",
+  "branch": "master",
+  "commit_sha": "0258ac4c3fabd4e386b103de4771ae3ffb797bba",
+  "commit_time": "2026-07-02T00:52:53+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.21",
+  "prompts": {
+    "human": {
+      "accepted_lines": 60,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 60,
+      "total_deletions": 0
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
