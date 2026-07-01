@@ -1,10 +1,10 @@
 src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx
   019f1ef8-c820-7840-98b6-8cdd0bea2ce9 17,21
-src/services/Trackers/__tests__/myAnimeList.test.ts
-  019f1ef8-c820-7840-98b6-8cdd0bea2ce9 1-76
 src/services/Trackers/myAnimeList.ts
   019f1ef8-c820-7840-98b6-8cdd0bea2ce9 4-8,126-135,139-142,145,148-190
   human 9,191
+src/services/Trackers/__tests__/myAnimeList.test.ts
+  019f1ef8-c820-7840-98b6-8cdd0bea2ce9 1-76
 ---
 {
   "attestations": [
@@ -24,22 +24,9 @@ src/services/Trackers/myAnimeList.ts
     {
       "entries": [
         {
-          "accepted_lines": 76,
-          "added_lines": 76,
-          "deleted_lines": 23,
-          "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
-          "lines": "1-76",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/Trackers/__tests__/myAnimeList.test.ts"
-    },
-    {
-      "entries": [
-        {
           "accepted_lines": 63,
           "added_lines": 64,
-          "deleted_lines": 20,
+          "deleted_lines": 19,
           "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
           "lines": "4-8,126-135,139-142,145,148-190",
           "overridden_lines": 0
@@ -54,6 +41,19 @@ src/services/Trackers/myAnimeList.ts
         }
       ],
       "file": "src/services/Trackers/myAnimeList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 76,
+          "added_lines": 76,
+          "deleted_lines": 24,
+          "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
+          "lines": "1-76",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/__tests__/myAnimeList.test.ts"
     }
   ],
   "base_commit_sha": "bbb2645a6f6c47f7cda8d83ef096c329e03ffa6a",
