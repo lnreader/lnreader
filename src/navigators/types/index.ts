@@ -83,6 +83,7 @@ export type SettingsStackParamList = {
   LibrarySettings: undefined;
   RespositorySettings: { url?: string } | undefined;
   CustomCode: undefined;
+  CodeSnippets: { snippetIndex?: number; isJS?: boolean } | undefined;
 };
 
 export type NovelScreenProps = StackScreenProps<
@@ -173,6 +174,10 @@ export type BackupSettingsScreenProps = StackScreenProps<
 export type CustomCodeSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,
   'CustomCode'
+>;
+export type CodeSnippetsScreenProps = StackScreenProps<
+  SettingsStackParamList,
+  'CodeSnippets'
 >;
 export type AdvancedSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,

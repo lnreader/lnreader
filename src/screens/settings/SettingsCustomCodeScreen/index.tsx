@@ -1,164 +1,181 @@
-import { SafeAreaView } from '@components';
+import { Appbar, IconButtonV2, List, SafeAreaView, SwitchItem } from '@components';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
 import React from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
-import {
-  NavigationState,
-  SceneRendererProps,
-  TabBar,
-  TabView,
-} from 'react-native-tab-view';
-import SettingsRoute from './Routes/SettingsRoute';
-import Color from 'color';
-import CodeRoute from './Routes/CodeRoute';
-import SelfHidingAppBar from './Components/SelfHidingAppbar';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
-import { useTheme } from '@hooks/persisted';
-import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
-import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsReaderWebView';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import ReplaceItemModal from './Modals/ReplaceItemModal';
+import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 
-const routes = [
-  { key: 'first', title: getString('common.settings') },
-  { key: 'second', title: getString('common.code') },
-  { key: 'third', title: getString('common.example') },
-];
-
-type State = NavigationState<{
-  key: string;
-  title: string;
-}>;
-
-const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
+const SettingsCustomCode = ({
+  navigation,
+}: CustomCodeSettingsScreenProps) => {
   const theme = useTheme();
-  const [index, setIndex] = React.useState(0);
-  const layout = useWindowDimensions();
+  const {
+    codeSnippetsJS,
+    codeSnippetsCSS,
+    setChapterReaderSettings: setSettings,
+  } = useChapterReaderSettings();
+  const [extended, setExtended] = React.useState([false, false, false, false]);
 
-  // 0 = visible, 1 = hidden. Using a number is flexible.
-  const appBarHiddenState = useSharedValue(0);
-  const appBarAnimationDuration = useSharedValue(250);
-  const tabIndex = useSharedValue(0);
-  const { height: keyboardHeight } = useAnimatedKeyboard();
+  const toggleExtended = React.useCallback(
+    (index: number) => {
+      const newExtended = [false, false, false, false];
+      newExtended[index] = !extended[index];
+      setExtended(newExtended);
+    },
+    [extended],
+  );
 
-  // State for editing snippets
-  const [editingSnippet, setEditingSnippet] = React.useState<{
-    index: number;
-    isJS: boolean;
-  } | null>(null);
+  const toggleSnippet = React.useCallback(
+    (index: number, isJS: boolean) => {
+      const snippets = isJS ? [...codeSnippetsJS] : [...codeSnippetsCSS];
+      snippets[index].active = !snippets[index].active;
+      setSettings({
+        [isJS ? 'codeSnippetsJS' : 'codeSnippetsCSS']: snippets,
+      });
+    },
+    [codeSnippetsJS, codeSnippetsCSS, setSettings],
+  );
 
-  const handleTabChange = (newIndex: number) => {
-    tabIndex.value = newIndex;
-    setIndex(newIndex);
-    // Clear editing state when manually switching tabs
-    if (newIndex !== 1) {
-      setEditingSnippet(null);
-    }
-  };
+  const deleteSnippet = React.useCallback(
+    (index: number, isJS: boolean) => {
+      const snippets = isJS ? [...codeSnippetsJS] : [...codeSnippetsCSS];
+      snippets.splice(index, 1);
+      setSettings({
+        [isJS ? 'codeSnippetsJS' : 'codeSnippetsCSS']: snippets,
+      });
+    },
+    [codeSnippetsJS, codeSnippetsCSS, setSettings],
+  );
 
   const handleEditSnippet = (snippetIndex: number, isJS: boolean) => {
-    setEditingSnippet({
-      index: snippetIndex,
-      isJS: snippetIndex === -1 ? true : isJS, // Default to JS for new snippets, use passed value for editing
+    navigation.navigate('CodeSnippets', {
+      snippetIndex,
+      isJS,
     });
-    tabIndex.value = 1;
-    setIndex(1); // Switch to Code tab
   };
 
-  const handleSnippetSaved = () => {
-    setEditingSnippet(null);
-    tabIndex.value = 0;
-    setIndex(0); // Switch back to Settings tab
-  };
-
-  useAnimatedReaction(
-    () => tabIndex.value === 1 && keyboardHeight.value > 0,
-    isHidden => {
-      appBarAnimationDuration.value = keyboardHeight.value > 0 ? 150 : 250;
-      appBarHiddenState.value = isHidden ? 1 : 0;
-    },
-  );
-
-  const renderScene = ({
-    route,
-    jumpTo,
-  }: SceneRendererProps & {
-    route: {
-      key: string;
-      title: string;
-    };
-  }) => {
-    switch (route.key) {
-      case 'first':
-        return <SettingsRoute onEditSnippet={handleEditSnippet} />;
-      case 'second':
-        return (
-          <CodeRoute
-            jumpTo={jumpTo}
-            editingSnippet={editingSnippet}
-            onSnippetSaved={handleSnippetSaved}
-            isActive={index === 1}
-          />
-        );
-      case 'third':
-        return <SettingsReaderWebView />;
-      default:
-        return null;
-    }
-  };
-
-  const renderTabBar = React.useCallback(
-    (props: SceneRendererProps & { navigationState: State }) => {
-      return (
-        <TabBar
-          {...props}
-          indicatorStyle={[
-            styles.tabBarIndicator,
-            { backgroundColor: theme.primary },
-          ]}
-          style={[
-            {
-              backgroundColor: theme.surface,
-              borderBottomColor: Color(theme.isDark ? '#FFFFFF' : '#000000')
-                .alpha(0.12)
-                .string(),
-            },
-            styles.tabBar,
-          ]}
-          tabStyle={styles.flex}
-          gap={8}
-          inactiveColor={theme.secondary}
-          activeColor={theme.primary}
-          android_ripple={{ color: theme.rippleColor, foreground: true }}
-        />
-      );
-    },
-    [
-      theme.isDark,
-      theme.primary,
-      theme.rippleColor,
-      theme.secondary,
-      theme.surface,
-    ],
-  );
   return (
     <SafeAreaView excludeTop>
-      <SelfHidingAppBar
+      <Appbar
         title={getString('common.custom_code')}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
-        hiddenState={appBarHiddenState}
-        animationDuration={appBarAnimationDuration}
       />
+      <ScrollView style={styles.paddingBottom}>
+        <List.Section>
+          <List.SubHeader theme={theme}>
+            {getString('customCodeSettings.textManipulation')}
+          </List.SubHeader>
+          <ReplaceItemModal
+            showReplace
+            toggleList={() => toggleExtended(0)}
+            listExpanded={extended[0]}
+          />
+          <ReplaceItemModal
+            toggleList={() => toggleExtended(1)}
+            listExpanded={extended[1]}
+          />
+          <List.Divider theme={theme} />
+          <List.SubHeader theme={theme}>
+            {getString('customCodeSettings.codeSnippets')}
+          </List.SubHeader>
+          <List.Item
+            title={getString('customCodeSettings.createNewSnippet')}
+            description={getString('customCodeSettings.addCssOrJsCode')}
+            theme={theme}
+            right="plus"
+            onPress={() => handleEditSnippet(-1, true)}
+          />
 
-      <TabView
-        collapsable={false}
-        lazy
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={handleTabChange}
-        initialLayout={{ width: layout.width }}
-      />
+          {/* CSS Snippets */}
+          {codeSnippetsCSS.length > 0 && (
+            <>
+              <View style={styles.subSubHeader}>
+                <List.SubHeader theme={theme}>
+                  {getString('customCodeSettings.cssSnippets')}
+                </List.SubHeader>
+              </View>
+              {codeSnippetsCSS.map((snippet, index) => (
+                <View key={`css-${index}`} style={styles.snippetRow}>
+                  <SwitchItem
+                    value={snippet.active}
+                    label={snippet.name}
+                    description={
+                      snippet.code.substring(0, 50) +
+                      (snippet.code.length > 50 ? '...' : '')
+                    }
+                    onPress={() => toggleSnippet(index, false)}
+                    theme={theme}
+                    style={styles.switchItem}
+                  />
+                  <View style={styles.actionButtons}>
+                    <IconButtonV2
+                      name="pencil"
+                      size={20}
+                      onPress={() => handleEditSnippet(index, false)}
+                      theme={theme}
+                    />
+                    <IconButtonV2
+                      name="delete"
+                      size={20}
+                      onPress={() => deleteSnippet(index, false)}
+                      theme={theme}
+                    />
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* JS Snippets */}
+          {codeSnippetsJS.length > 0 && (
+            <>
+              <View style={styles.subSubHeader}>
+                <List.SubHeader theme={theme}>
+                  {getString('customCodeSettings.javascriptSnippets')}
+                </List.SubHeader>
+              </View>
+              {codeSnippetsJS.map((snippet, index) => (
+                <View key={`js-${index}`} style={styles.snippetRow}>
+                  <SwitchItem
+                    value={snippet.active}
+                    label={snippet.name}
+                    description={
+                      snippet.code.substring(0, 50) +
+                      (snippet.code.length > 50 ? '...' : '')
+                    }
+                    onPress={() => toggleSnippet(index, true)}
+                    theme={theme}
+                    style={styles.switchItem}
+                  />
+                  <View style={styles.actionButtons}>
+                    <IconButtonV2
+                      name="pencil"
+                      size={20}
+                      onPress={() => handleEditSnippet(index, true)}
+                      theme={theme}
+                    />
+                    <IconButtonV2
+                      name="delete"
+                      size={20}
+                      onPress={() => deleteSnippet(index, true)}
+                      theme={theme}
+                    />
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+
+          {codeSnippetsCSS.length === 0 && codeSnippetsJS.length === 0 && (
+            <List.Item
+              title={getString('customCodeSettings.noCodeSnippets')}
+              theme={theme}
+            />
+          )}
+        </List.Section>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -166,14 +183,24 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
 export default SettingsCustomCode;
 
 const styles = StyleSheet.create({
-  tabBar: {
-    borderBottomWidth: 1,
-    elevation: 0,
+  paddingBottom: { paddingBottom: 40 },
+  subSubHeader: {
+    fontSize: 14,
+    marginTop: 8,
+    marginBottom: 4,
   },
-  tabBarIndicator: {
-    height: 3,
+  snippetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
-  flex: {
+  switchItem: {
     flex: 1,
+    paddingHorizontal: 0,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    marginLeft: 8,
   },
 });
