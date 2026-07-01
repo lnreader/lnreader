@@ -1,4 +1,10 @@
-import { Appbar, IconButtonV2, List, SafeAreaView, SwitchItem } from '@components';
+import {
+  Appbar,
+  IconButtonV2,
+  List,
+  SafeAreaView,
+  SwitchItem,
+} from '@components';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -7,10 +13,9 @@ import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
 import ReplaceItemModal from './Modals/ReplaceItemModal';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
+import Snippet from './Components/Snippet';
 
-const SettingsCustomCode = ({
-  navigation,
-}: CustomCodeSettingsScreenProps) => {
+const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   const theme = useTheme();
   const {
     codeSnippetsJS,
@@ -64,7 +69,9 @@ const SettingsCustomCode = ({
 
   const handleRenameSave = React.useCallback(() => {
     if (!renameSnippet || !renameSnippet.name.trim()) return false;
-    const snippets = renameSnippet.isJS ? [...codeSnippetsJS] : [...codeSnippetsCSS];
+    const snippets = renameSnippet.isJS
+      ? [...codeSnippetsJS]
+      : [...codeSnippetsCSS];
     snippets[renameSnippet.index].name = renameSnippet.name.trim();
     setSettings({
       [renameSnippet.isJS ? 'codeSnippetsJS' : 'codeSnippetsCSS']: snippets,
@@ -108,43 +115,24 @@ const SettingsCustomCode = ({
               {getString('customCodeSettings.cssSnippets')}
             </List.SubHeader>
           </View>
-          {codeSnippetsCSS.length > 0 && codeSnippetsCSS.map((snippet, index) => (
-            <View key={`css-${index}`} style={styles.snippetRow}>
-              <SwitchItem
-                value={snippet.active}
-                label={snippet.name}
-                description={
-                  snippet.code.substring(0, 50) +
-                  (snippet.code.length > 50 ? '...' : '')
+          {codeSnippetsCSS.length > 0 &&
+            codeSnippetsCSS.map((snippet, index) => (
+              <Snippet
+                key={`css-${index}`}
+                toggle={toggleSnippet}
+                rename={(index, isJS, name) =>
+                  setRenameSnippet({
+                    index,
+                    isJS,
+                    name,
+                  })
                 }
-                onPress={() => toggleSnippet(index, false)}
-                theme={theme}
-                style={styles.switchItem}
+                edit={handleEditSnippet}
+                delete={deleteSnippet}
+                index={index}
+                snippet={snippet}
               />
-              <View style={styles.actionButtons}>
-                <IconButtonV2
-                  name="form-textbox"
-                  size={20}
-                  onPress={() =>
-                    setRenameSnippet({ index, isJS: false, name: snippet.name })
-                  }
-                  theme={theme}
-                />
-                <IconButtonV2
-                  name="pencil"
-                  size={20}
-                  onPress={() => handleEditSnippet(index, false)}
-                  theme={theme}
-                />
-                <IconButtonV2
-                  name="delete"
-                  size={20}
-                  onPress={() => deleteSnippet(index, false)}
-                  theme={theme}
-                />
-              </View>
-            </View>
-          ))}
+            ))}
           <List.Item
             title={getString('customCodeSettings.createCSSSnippet')}
             description={getString('customCodeSettings.addCssCode')}
@@ -165,43 +153,24 @@ const SettingsCustomCode = ({
               {getString('customCodeSettings.javascriptSnippets')}
             </List.SubHeader>
           </View>
-          {codeSnippetsJS.length > 0 && codeSnippetsJS.map((snippet, index) => (
-            <View key={`js-${index}`} style={styles.snippetRow}>
-              <SwitchItem
-                value={snippet.active}
-                label={snippet.name}
-                description={
-                  snippet.code.substring(0, 50) +
-                  (snippet.code.length > 50 ? '...' : '')
+          {codeSnippetsJS.length > 0 &&
+            codeSnippetsJS.map((snippet, index) => (
+              <Snippet
+                key={`js-${index}`}
+                toggle={toggleSnippet}
+                rename={(index, isJS, name) =>
+                  setRenameSnippet({
+                    index,
+                    isJS,
+                    name,
+                  })
                 }
-                onPress={() => toggleSnippet(index, true)}
-                theme={theme}
-                style={styles.switchItem}
+                edit={handleEditSnippet}
+                delete={deleteSnippet}
+                index={index}
+                snippet={snippet}
               />
-              <View style={styles.actionButtons}>
-                <IconButtonV2
-                  name="form-textbox"
-                  size={20}
-                  onPress={() =>
-                    setRenameSnippet({ index, isJS: true, name: snippet.name })
-                  }
-                  theme={theme}
-                />
-                <IconButtonV2
-                  name="pencil"
-                  size={20}
-                  onPress={() => handleEditSnippet(index, true)}
-                  theme={theme}
-                />
-                <IconButtonV2
-                  name="delete"
-                  size={20}
-                  onPress={() => deleteSnippet(index, true)}
-                  theme={theme}
-                />
-              </View>
-            </View>
-          ))}
+            ))}
           <List.Item
             title={getString('customCodeSettings.createJSSnippet')}
             description={getString('customCodeSettings.addJavascriptCode')}
@@ -228,7 +197,9 @@ const SettingsCustomCode = ({
           label={getString('common.name')}
           defaultValue={renameSnippet?.name ?? ''}
           onChangeText={text => {
-            if (renameSnippet) setRenameSnippet({ ...renameSnippet, name: text });
+            if (renameSnippet) {
+              setRenameSnippet({ ...renameSnippet, name: text });
+            }
           }}
           autoFocus
           mode="outlined"

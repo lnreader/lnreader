@@ -24,6 +24,7 @@ import { ThemeColors } from '@theme/types';
 import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
 
 const MODAL_MARGIN = 24;
+const BORDER_RADIUS = 28;
 
 const getModalTitleColor = (theme: ThemeColors) => ({
   color: theme.onSurface,
@@ -65,17 +66,16 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
   const default_availableHeight = windowHeight - insets.top - MODAL_MARGIN * 2;
   const animatedContainerStyle = useAnimatedStyle(() => {
     const kb = keyboard.height.value;
+    const radius = kb > 1 ? 0 : BORDER_RADIUS;
 
     const availableHeight =
       default_availableHeight - Math.max(insets.bottom, kb);
 
     return {
       maxHeight: withClamp({ min: 200 }, withTiming(availableHeight)),
-      transform: [
-        {
-          translateY: -(kb * 0.5),
-        },
-      ],
+      marginBottom: kb / 2,
+      borderBottomLeftRadius: withTiming(radius, { duration: 150 }),
+      borderBottomRightRadius: withTiming(radius, { duration: 150 }),
     };
   }, [insets.bottom, default_availableHeight]);
 
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: MODAL_MARGIN,
   },
   modalContainer: {
-    borderRadius: 28,
+    borderRadius: BORDER_RADIUS,
     padding: 24,
     shadowColor: 'transparent',
   },

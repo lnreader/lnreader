@@ -1,18 +1,17 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import {
   PixelRatio,
   StyleSheet,
   TextInput as RNTextInput,
-  useWindowDimensions,
+  Text,
+  View,
 } from 'react-native';
-import { useAnimatedStyle } from 'react-native-reanimated';
-import { useAnimatedKeyboard } from 'react-native-keyboard-controller';
 import { useTheme } from '@hooks/persisted';
 import { Row } from '@components/Common';
-import { Text } from 'react-native-gesture-handler';
 
 const FONT_SIZE = 14;
 const LINE_HEIGHT = FONT_SIZE * PixelRatio.getFontScale() * 1.2;
+const MIN_LINES = 16;
 
 type CodeInputProps = {
   language: 'css' | 'js';
@@ -50,6 +49,45 @@ const START_CSS_CODE = `:root {
 }`;
 const END_JS_CODE = 'qs("#LNReader-chapter").innerHTML = html;';
 
+function LinesRow({
+  startNr,
+  endNr,
+  fake,
+  style,
+  children,
+}: {
+  startNr: number;
+  endNr: number;
+  fake?: boolean;
+  style: object;
+  children: React.ReactNode;
+}) {
+  function printLineNumbers(start: number, length: number) {
+    const res: number[] = [];
+    for (let i = start; i < start + length; i++) {
+      res.push(i + 1);
+    }
+    return res.join('\n');
+  }
+
+  return (
+    <Row style={styles.rowContainer}>
+      <Text
+        pointerEvents="none"
+        style={[
+          { opacity: fake ? 0.4 : 0.7 },
+          style,
+          styles.lines,
+          styles.fontStyle,
+        ]}
+      >
+        {printLineNumbers(startNr, endNr)}
+      </Text>
+      {children}
+    </Row>
+  );
+}
+
 const CodeInput = ({
   language,
   code,
@@ -67,78 +105,107 @@ const CodeInput = ({
     [theme],
   );
 
-  function printLineNumbers(start: number, length: number) {
-    const res: number[] = [];
-    for (let i = start; i < start + length; i++) {
-      res.push(i + 1);
-    }
-    return res.join('\n');
-  }
+  const [startLines, setStartLines] = React.useState(0);
+  const [endLines, setEndLines] = React.useState(0);
 
-  const [lines, setLines] = useState(0);
+  const [codeLines, setCodeLines] = React.useState(0);
 
   return (
-    <>
-      <Row>
-        <Text style={[styles.fakeTextInput, styles.lines, codeFieldStyle]}>
-          {printLineNumbers(0, lines)}
-        </Text>
+    <View style={[styles.container]}>
+      <LinesRow fake startNr={0} endNr={startLines} style={codeFieldStyle}>
         <Text
-          style={[styles.fakeTextInput, styles.topField, codeFieldStyle]}
-          onTextLayout={e => setLines(e.nativeEvent.lines.length)}
+          pointerEvents="none"
+          style={[
+            codeFieldStyle,
+            styles.fontStyle,
+            styles.fakeTextInput,
+            styles.topField,
+          ]}
+          onTextLayout={e => setStartLines(e.nativeEvent.lines.length)}
         >
           {language === 'js' ? START_JS_CODE : START_CSS_CODE}
         </Text>
-      </Row>
-      <RNTextInput
-        placeholder={'Your code here'}
-        defaultValue={code}
-        onChangeText={setCode}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        multiline
-        autoCorrect={false}
-        autoCapitalize={'none'}
-        placeholderTextColor={'grey'}
-        style={[codeFieldStyle, styles.codeField]}
-      />
-      <Text style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}>
-        {language === 'js' ? END_JS_CODE : ''}
-      </Text>
-    </>
+      </LinesRow>
+      <LinesRow startNr={startLines} endNr={codeLines} style={codeFieldStyle}>
+        <RNTextInput
+          placeholder={'Your code here'}
+          defaultValue={code}
+          onChangeText={setCode}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          multiline
+          scrollEnabled={false}
+          autoCorrect={false}
+          autoCapitalize={'none'}
+          placeholderTextColor={'grey'}
+          onContentSizeChange={e => {
+            const l = e.nativeEvent.contentSize.height / LINE_HEIGHT;
+            setCodeLines(Math.max(Math.floor(l), MIN_LINES));
+          }}
+          style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
+        />
+      </LinesRow>
+      {language !== 'js' ? null : (
+        <LinesRow
+          fake
+          startNr={startLines + codeLines}
+          endNr={endLines}
+          style={codeFieldStyle}
+        >
+          <Text
+            onTextLayout={e => {
+              const l = e.nativeEvent.lines.length;
+              setEndLines(l);
+            }}
+            style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}
+          >
+            {END_JS_CODE}
+          </Text>
+        </LinesRow>
+      )}
+    </View>
   );
 };
 export default CodeInput;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginVertical: 8,
+    paddingBottom: 8,
+  },
+  rowContainer: {
+    paddingVertical: 8,
+  },
+  codeContainer: {
+    flex: 1,
+  },
   lines: {
     paddingRight: 4,
     textAlign: 'right',
   },
-  fakeTextInput: {
-    paddingVertical: 8,
+  fontStyle: {
     fontSize: FONT_SIZE,
     lineHeight: LINE_HEIGHT,
+    fontFamily: 'monospace',
+    margin: 0,
+    padding: 0,
+  },
+  fakeTextInput: {
     opacity: 0.6,
   },
   topField: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    flexGrow: 1,
+    marginBottom: 0,
+    paddingBottom: 0,
+    flex: 1,
   },
   codeField: {
     verticalAlign: 'top',
-    flexGrow: 1,
-    borderRadius: 0,
-    borderTopWidth: 0,
-    borderBottomWidth: 0,
-    minHeight: LINE_HEIGHT * 8,
-    fontSize: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    flex: 1,
+    minHeight: LINE_HEIGHT * MIN_LINES,
   },
   bottomField: {
-    flexGrow: 1,
+    flex: 1,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
   },

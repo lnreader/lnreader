@@ -92,9 +92,9 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
       <>
         <KeyboardAwareScrollView
           style={styles.scrollContainer}
-          bottomOffset={80}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
+          bottomOffset={100}
+          nestedScrollEnabled
+          contentContainerStyle={{ flexGrow: 1 }}
         >
           <CodeInput
             language={language}
@@ -129,7 +129,7 @@ export default React.memo(SnippetEditor);
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 2,
   },
   scrollContent: {},
   button: {
