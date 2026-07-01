@@ -1,0 +1,89 @@
+src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx
+  019f1ef8-c820-7840-98b6-8cdd0bea2ce9 17,21
+src/services/Trackers/__tests__/myAnimeList.test.ts
+  019f1ef8-c820-7840-98b6-8cdd0bea2ce9 1-76
+src/services/Trackers/myAnimeList.ts
+  019f1ef8-c820-7840-98b6-8cdd0bea2ce9 4-8,126-135,139-142,145,148-190
+  human 9,191
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
+          "lines": "17,21",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 76,
+          "added_lines": 76,
+          "deleted_lines": 23,
+          "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
+          "lines": "1-76",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/__tests__/myAnimeList.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 63,
+          "added_lines": 64,
+          "deleted_lines": 20,
+          "hash": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
+          "lines": "4-8,126-135,139-142,145,148-190",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "9,191",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/myAnimeList.ts"
+    }
+  ],
+  "base_commit_sha": "bbb2645a6f6c47f7cda8d83ef096c329e03ffa6a",
+  "branch": "master",
+  "commit_sha": "bbb87b30cb1f99b6cd1e158b59aea7faf68ada9b",
+  "commit_time": "2026-07-02T00:07:35+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.21",
+  "prompts": {
+    "019f1ef8-c820-7840-98b6-8cdd0bea2ce9": {
+      "accepted_lines": 141,
+      "agent_id": {
+        "id": "019f1ef8-c820-7840-98b6-8cdd0bea2ce9",
+        "model": "unknown",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 142,
+      "total_deletions": 43
+    },
+    "human": {
+      "accepted_lines": 2,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 2,
+      "total_deletions": 0
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
