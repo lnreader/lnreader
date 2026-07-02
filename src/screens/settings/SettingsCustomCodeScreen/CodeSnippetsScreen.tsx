@@ -39,7 +39,6 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
   const [index, setIndex] = React.useState(0);
   const editorRef = React.useRef<SnippetEditorHandle>(null);
 
-
   const renderScene = ({
     route: r,
   }: SceneRendererProps & {

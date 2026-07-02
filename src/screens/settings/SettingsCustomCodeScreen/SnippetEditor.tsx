@@ -94,7 +94,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
           style={styles.scrollContainer}
           bottomOffset={100}
           nestedScrollEnabled
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.flexGrow}
         >
           <CodeInput
             language={language}
@@ -116,7 +116,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
             onChangeText={setSnippetName}
             autoFocus
             mode="outlined"
-            style={{ marginBottom: 16 }}
+            style={styles.mb16}
             theme={{ colors: theme }}
           />
         </KeyboardAvoidingModal>
@@ -128,6 +128,8 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
 export default React.memo(SnippetEditor);
 
 const styles = StyleSheet.create({
+  flexGrow: { flexGrow: 1 },
+  mb16: { marginBottom: 16 },
   scrollContainer: {
     paddingHorizontal: 2,
   },

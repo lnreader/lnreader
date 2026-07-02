@@ -1,13 +1,7 @@
-import {
-  Appbar,
-  IconButtonV2,
-  List,
-  SafeAreaView,
-  SwitchItem,
-} from '@components';
+import { Appbar, List, SafeAreaView } from '@components';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
 import ReplaceItemModal from './Modals/ReplaceItemModal';
@@ -88,7 +82,10 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
     <SafeAreaView excludeTop>
       <Appbar
         title={getString('common.custom_code')}
-        handleGoBack={() => navigation.goBack()}
+        handleGoBack={() => {
+          Keyboard.dismiss();
+          navigation.goBack();
+        }}
         theme={theme}
       />
       <ScrollView style={styles.paddingBottom}>
@@ -120,7 +117,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
               <Snippet
                 key={`css-${index}`}
                 toggle={toggleSnippet}
-                rename={(index, isJS, name) =>
+                rename={(_index, isJS, name) =>
                   setRenameSnippet({
                     index,
                     isJS,
@@ -158,7 +155,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
               <Snippet
                 key={`js-${index}`}
                 toggle={toggleSnippet}
-                rename={(index, isJS, name) =>
+                rename={(_index, isJS, name) =>
                   setRenameSnippet({
                     index,
                     isJS,
@@ -203,7 +200,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
           }}
           autoFocus
           mode="outlined"
-          style={{ marginBottom: 16 }}
+          style={styles.mb16}
           theme={{ colors: theme }}
         />
       </KeyboardAvoidingModal>
@@ -214,6 +211,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
 export default SettingsCustomCode;
 
 const styles = StyleSheet.create({
+  mb16: { marginBottom: 16 },
   paddingBottom: { paddingBottom: 40 },
   subSubHeader: {
     fontSize: 14,
