@@ -63,19 +63,18 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
     onDismiss();
   };
 
-  const default_availableHeight = windowHeight - insets.top - MODAL_MARGIN * 2;
+  const default_availableHeight = windowHeight - insets.top;
   const animatedContainerStyle = useAnimatedStyle(() => {
     const kb = keyboard.height.value;
-    const radius = kb > 1 ? 0 : BORDER_RADIUS;
 
     const availableHeight =
       default_availableHeight - Math.max(insets.bottom, kb);
-
     return {
-      maxHeight: withClamp({ min: 200 }, withTiming(availableHeight)),
-      marginBottom: kb / 2,
-      borderBottomLeftRadius: withTiming(radius, { duration: 150 }),
-      borderBottomRightRadius: withTiming(radius, { duration: 150 }),
+      maxHeight: withClamp(
+        { min: 200 },
+        withTiming(availableHeight, { duration: 0 }),
+      ),
+      marginBottom: kb,
     };
   }, [insets.bottom, default_availableHeight]);
 
@@ -106,6 +105,7 @@ const KeyboardAvoidingModal: React.FC<DefaultModalProps> = ({
               keyboardDismissMode="interactive"
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.content}
+              nestedScrollEnabled
             >
               {children}
             </ScrollView>
@@ -140,13 +140,12 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     borderRadius: BORDER_RADIUS,
-    padding: 24,
     shadowColor: 'transparent',
   },
   modalTitle: {
     fontSize: 24,
     lineHeight: 24,
-    marginBottom: 24,
+    padding: 24,
   },
   body: {
     flexShrink: 1,
@@ -154,13 +153,15 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 16,
+    paddingHorizontal: 24,
   },
   buttonRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    marginTop: 8,
     marginBottom: -8,
     marginHorizontal: -8,
+    padding: 24,
+    paddingTop: 8,
   },
   flex: {
     flex: 1,
