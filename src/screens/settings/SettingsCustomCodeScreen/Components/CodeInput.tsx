@@ -2,7 +2,7 @@ import React from 'react';
 import { PixelRatio, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
 import { Row } from '@components/Common';
-import { SimpleCodeEditor, HighlightedCode } from './SimpleCodeEditor';
+import { SimpleCodeEditor, MemoizedHighlightedCode } from './SimpleCodeEditor';
 import { Portal } from 'react-native-paper';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -144,53 +144,41 @@ const CodeInput = ({
           </Animated.View>
         )}
       </Portal>
-      <LinesRow fake startNr={0} endNr={startLines} style={codeFieldStyle}>
-        <HighlightedCode
-          pointerEvents="none"
-          style={[
-            codeFieldStyle,
-            styles.fontStyle,
-            styles.fakeTextInput,
-            styles.topField,
-          ]}
-          onTextLayout={e => setStartLines(e.nativeEvent.lines.length)}
-          mode={language}
-          value={language === 'js' ? START_JS_CODE : START_CSS_CODE}
-        />
-      </LinesRow>
-      <LinesRow startNr={startLines} endNr={codeLines} style={codeFieldStyle}>
-        <SimpleCodeEditor
-          placeholder={'Your code here'}
-          value={code}
-          mode={language}
-          onChangeText={setAndAnalyzeCode}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          placeholderTextColor={'grey'}
-          onContentSizeChange={e => {
-            const l = e.nativeEvent.contentSize.height / LINE_HEIGHT;
-            setCodeLines(Math.max(Math.floor(l), MIN_LINES));
-          }}
-          style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
-        />
-      </LinesRow>
+      {/*<LinesRow fake startNr={0} endNr={startLines} style={codeFieldStyle}>*/}
+      <MemoizedHighlightedCode
+        style={[
+          codeFieldStyle,
+          styles.fontStyle,
+          styles.fakeTextInput,
+          styles.topField,
+        ]}
+        setLineNumbers={setStartLines}
+        mode={language}
+        value={language === 'js' ? START_JS_CODE : START_CSS_CODE}
+      />
+      {/*</LinesRow>*/}
+      {/*<LinesRow startNr={startLines} endNr={codeLines} style={codeFieldStyle}>*/}
+      <SimpleCodeEditor
+        placeholder={'Your code here'}
+        value={code}
+        mode={language}
+        onChangeText={setAndAnalyzeCode}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        placeholderTextColor={'grey'}
+        setLineNumbers={setCodeLines}
+        startLine={startLines}
+        style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
+      />
+      {/*</LinesRow>*/}
       {language !== 'js' ? null : (
-        <LinesRow
-          fake
-          startNr={startLines + codeLines}
-          endNr={endLines}
-          style={codeFieldStyle}
-        >
-          <HighlightedCode
-            onTextLayout={e => {
-              const l = e.nativeEvent.lines.length;
-              setEndLines(l);
-            }}
-            style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}
-            mode={language}
-            value={END_JS_CODE}
-          />
-        </LinesRow>
+        <MemoizedHighlightedCode
+          setLineNumbers={setEndLines}
+          startLine={startLines + codeLines}
+          style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}
+          mode={language}
+          value={END_JS_CODE}
+        />
       )}
     </View>
   );
