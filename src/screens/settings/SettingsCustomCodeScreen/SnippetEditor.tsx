@@ -9,7 +9,10 @@ import { TextInput as PaperTextInput } from 'react-native-paper';
 
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-export type SnippetEditorHandle = { save: () => void };
+export type SnippetEditorHandle = {
+  save: () => void;
+  setCode: (val: string) => void;
+};
 
 type SnippetEditorProps = {
   snippetIndex?: number;
@@ -86,7 +89,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
       setSnippetName('');
     }, []);
 
-    React.useImperativeHandle(ref, () => ({ save }), [save]);
+    React.useImperativeHandle(ref, () => ({ save, setCode }), [save, setCode]);
 
     return (
       <>

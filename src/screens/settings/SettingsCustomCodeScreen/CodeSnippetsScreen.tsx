@@ -15,6 +15,8 @@ import { getString } from '@strings/translations';
 import SnippetEditor, { SnippetEditorHandle } from './SnippetEditor';
 import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsReaderWebView';
 import { CodeSnippetsScreenProps } from '@navigators/types';
+import NativeFile from '@specs/NativeFile';
+import * as DocumentPicker from 'expo-document-picker';
 
 type State = NavigationState<{
   key: string;
@@ -96,6 +98,32 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
     ],
   );
 
+  const handleImport = async () => {
+    try {
+      const mimeType =
+        language === 'css' ? 'text/css' : 'application/javascript';
+      const file = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: false,
+        type: mimeType,
+      });
+
+      if (file.assets) {
+        const tempPath =
+          NativeFile.getConstants().ExternalCachesDirectoryPath +
+          '/imported_custom.' +
+          language;
+        NativeFile.copyFile(file.assets[0].uri, tempPath);
+        const content = NativeFile.readFile(tempPath);
+        NativeFile.unlink(tempPath);
+
+        editorRef.current?.setCode(content.trim());
+        showToast('Imported');
+      }
+    } catch (error: any) {
+      showToast(error.message);
+    }
+  };
+
   return (
     <SafeAreaView excludeTop>
       <Appbar
@@ -107,7 +135,7 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         <IconButtonV2
           name="file-import-outline"
           size={24}
-          onPress={() => showToast('Not implemented')}
+          onPress={handleImport}
           theme={theme}
         />
         <IconButtonV2
