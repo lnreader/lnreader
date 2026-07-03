@@ -5,7 +5,13 @@ import { MMKVStorage } from '@utils/mmkv/mmkv';
 
 interface GithubUpdate {
   isNewVersion: boolean;
-  latestRelease: any;
+  latestRelease:
+    | {
+        tag_name: string;
+        body: string;
+        downloadUrl: string;
+      }
+    | undefined;
 }
 
 const LAST_UPDATE_CHECK_KEY = 'LAST_UPDATE_CHECK';
@@ -54,7 +60,7 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
       const release = {
         tag_name: data.tag_name,
         body: data.body,
-        downloadUrl: data.assets?.[0]?.browser_download_url || undefined,
+        downloadUrl: data.assets?.[0]?.browser_download_url || '',
       };
 
       MMKVStorage.set(LAST_UPDATE_CHECK_KEY, Date.now());
@@ -67,23 +73,25 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
     }
   }, []);
 
-  const isNewVersion = (versionTag: string) => {
+  const checkIsNewVersion = useCallback((versionTag: string) => {
     const currentVersion = `${version}`;
     const regex = /[^\d.]/;
 
     const newVersion = versionTag.replace(regex, '');
 
     return newer(newVersion, currentVersion);
-  };
+  }, []);
 
   useEffect(() => {
     checkForRelease();
   }, [checkForRelease]);
 
-  if (!checking && latestRelease?.tag_name) {
+  const releaseTagName = latestRelease?.tag_name;
+
+  if (!checking && releaseTagName) {
     return {
       latestRelease,
-      isNewVersion: isNewVersion(latestRelease.tag_name),
+      isNewVersion: checkIsNewVersion(releaseTagName),
     };
   }
 
