@@ -98,6 +98,7 @@ export const applyTextModifications = (
   }
 
   for (const [text, replacement] of Object.entries(replaceText)) {
+    if (!text) continue;
     const m = isRegexString(text);
     if (m) {
       result = safeApplyRegex(m, result, replacement);
