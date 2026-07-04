@@ -1,7 +1,12 @@
 import React from 'react';
 import { PixelRatio, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
-import {SimpleCodeEditor, MemoizedHighlightedCode, HighlightMode, useStableLineModels} from './SimpleCodeEditor';
+import {
+  SimpleCodeEditor,
+  MemoizedHighlightedCode,
+  HighlightMode,
+  useStableLineModels,
+} from './SimpleCodeEditor';
 import { Portal } from 'react-native-paper';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -66,7 +71,7 @@ const CodeInput = ({
     [theme],
   );
 
-  const startValue = language === 'js' ? START_JS_CODE : START_CSS_CODE
+  const startValue = language === 'js' ? START_JS_CODE : START_CSS_CODE;
 
   const lines = useStableLineModels(code);
   const startLines = useStableLineModels(startValue);
@@ -117,6 +122,7 @@ const CodeInput = ({
           styles.fakeTextInput,
           styles.topField,
         ]}
+        isDark={theme.isDark}
         mode={language}
         lines={startLines}
       />
@@ -131,6 +137,7 @@ const CodeInput = ({
         placeholderTextColor={'grey'}
         lines={lines}
         startLine={startLines.length}
+        isDark={theme.isDark}
         style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
       />
       {language !== 'js' ? null : (
@@ -138,6 +145,7 @@ const CodeInput = ({
           startLine={lines.length + startLines.length}
           style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}
           mode={language}
+          isDark={theme.isDark}
           value={END_JS_CODE}
         />
       )}

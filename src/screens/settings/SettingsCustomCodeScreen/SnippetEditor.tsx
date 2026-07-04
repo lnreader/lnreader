@@ -118,7 +118,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
                   : 'off',
               )
             }
-            style={{ position: 'absolute', end: 24, zIndex: 2 }}
+            style={{ position: 'absolute', end: 8, top: 8, zIndex: 2 }}
           />
         </View>
         <KeyboardAwareScrollView

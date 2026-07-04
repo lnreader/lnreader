@@ -18,7 +18,8 @@ import {
 import { PrismLight as Light } from 'react-syntax-highlighter';
 import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
 import js from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
-import colDark from 'react-syntax-highlighter/dist/esm/styles/prism/coldark-dark';
+import materialDark from 'react-syntax-highlighter/dist/esm/styles/prism/material-dark';
+import materialLight from 'react-syntax-highlighter/dist/esm/styles/prism/material-light';
 
 Light.registerLanguage('javascript', js);
 Light.registerLanguage('css', css);
@@ -49,13 +50,9 @@ type SimpleCodeEditorProps = Omit<
   TextInputProps,
   'value' | 'defaultValue' | 'children' | 'onChangeText'
 > & {
-  mode: SupportedMode;
   highlightMode?: HighlightMode;
-  value: string;
-  lines?: LineModel[];
   onChangeText?: (text: string) => void;
   containerStyle?: StyleProp<ViewStyle>;
-  startLine?: number;
 };
 
 interface LineModel {
@@ -65,6 +62,7 @@ interface LineModel {
 
 interface HighlightedLineProps {
   code: string;
+  isDark?: boolean;
   mode: SupportedMode;
   textStyle: TextStyle;
   lineHeight: number;
@@ -235,6 +233,7 @@ const HighlightedLine = memo(
   function HighlightedLine({
     code,
     mode,
+    isDark = true,
     textStyle,
     lineHeight,
     hide,
@@ -256,7 +255,7 @@ const HighlightedLine = memo(
         ) : (
           <Light
             language={LANG_MAP[mode]}
-            style={colDark}
+            style={isDark ? materialDark : materialLight}
             PreTag={Passthrough}
             CodeTag={Passthrough}
             renderer={lineHighlightRenderer}
@@ -415,6 +414,17 @@ function getLineHeight(style: StyleProp<TextStyle>): number {
   return 20;
 }
 
+export type MemoizedHighlightedCode = {
+  lines?: LineModel[];
+  value?: string;
+  mode: SupportedMode;
+  style?: StyleProp<TextStyle>;
+  hide?: boolean;
+  isDark?: boolean;
+  setLines?: (num: number) => void;
+  startLine?: number;
+};
+
 export function MemoizedHighlightedCode({
   lines,
   value,
@@ -422,16 +432,9 @@ export function MemoizedHighlightedCode({
   style,
   hide,
   setLines,
+  isDark = false,
   startLine = 0,
-}: {
-  lines?: LineModel[];
-  value?: string;
-  mode: SupportedMode;
-  style?: StyleProp<TextStyle>;
-  hide?: boolean;
-  setLines?: (num: number) => void;
-  startLine?: number;
-}) {
+}: MemoizedHighlightedCode) {
   const opacityStyle = useMemo(() => extractOpacityStyle(style), [style]);
   const textStyle = useMemo(() => extractTextStyle(style), [style]);
   const contentPadding = useMemo(() => extractContentPadding(style), [style]);
@@ -449,8 +452,9 @@ export function MemoizedHighlightedCode({
           </Text>
 
           <HighlightedLine
-            key={line.id}
+            key={line.id + hide}
             code={line.code}
+            isDark={isDark}
             mode={mode}
             hide={hide ?? false}
             textStyle={textStyle}
@@ -463,22 +467,35 @@ export function MemoizedHighlightedCode({
 }
 
 export function SimpleCodeEditor({
-  mode,
   highlightMode = 'combined',
-  value,
-  lines: _lines,
   onChangeText,
-  style,
   containerStyle,
   onScroll,
-  startLine,
   scrollEnabled = true,
+  lines: _lines,
+  value,
+  mode,
+  style,
+  isDark,
+  setLines,
+  startLine,
   ...props
-}: SimpleCodeEditorProps) {
+}: SimpleCodeEditorProps & Omit<MemoizedHighlightedCode, 'hide'>) {
   const hideHighlight = highlightMode === 'off';
   const showInput = highlightMode !== 'on';
   const scrollY = useRef(new Animated.Value(0)).current;
   let lines = _lines;
+
+  const highlightedCodeProps = {
+    lines,
+    value,
+    mode,
+    style,
+    hide: hideHighlight,
+    isDark,
+    setLines,
+    startLine,
+  };
 
   const negativeScrollY = useMemo(() => {
     return Animated.multiply(scrollY, -1);
@@ -503,13 +520,7 @@ export function SimpleCodeEditor({
           },
         ]}
       >
-        <MemoizedHighlightedCode
-          startLine={startLine}
-          mode={mode}
-          lines={lines}
-          hide={hideHighlight}
-          style={style as StyleProp<TextStyle>}
-        />
+        <MemoizedHighlightedCode {...highlightedCodeProps} />
       </Animated.View>
       <TextInput
         {...props}
