@@ -15,10 +15,10 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Light } from 'react-syntax-highlighter';
-import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
-import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
-import atomOneDark from 'react-syntax-highlighter/dist/esm/styles/hljs/atom-one-dark';
+import { PrismLight as Light } from 'react-syntax-highlighter';
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
+import js from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import colDark from 'react-syntax-highlighter/dist/esm/styles/prism/coldark-dark';
 
 Light.registerLanguage('javascript', js);
 Light.registerLanguage('css', css);
@@ -256,7 +256,7 @@ const HighlightedLine = memo(
         ) : (
           <Light
             language={LANG_MAP[mode]}
-            style={atomOneDark}
+            style={colDark}
             PreTag={Passthrough}
             CodeTag={Passthrough}
             renderer={lineHighlightRenderer}
