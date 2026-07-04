@@ -410,10 +410,9 @@ function getLineHeight(style: StyleProp<TextStyle>): number {
   return 20;
 }
 
-export type MemoizedHighlightedCode = (
-  | { value: string; lines: undefined }
-  | { lines: LineModel[]; value: undefined }
-) & {
+type _MemoizedHighlightedCode<Lines extends boolean> = (Lines extends false
+  ? { value: string; lines?: never }
+  : { lines: LineModel[]; value?: never }) & {
   mode: SupportedMode;
   style?: StyleProp<TextStyle>;
   hide?: boolean;
@@ -421,6 +420,9 @@ export type MemoizedHighlightedCode = (
   setLines?: (num: number) => void;
   startLine?: number;
 };
+export type MemoizedHighlightedCode =
+  | _MemoizedHighlightedCode<true>
+  | _MemoizedHighlightedCode<false>;
 
 export function MemoizedHighlightedCode({
   lines,
