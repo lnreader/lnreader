@@ -1,8 +1,7 @@
 import React from 'react';
 import { PixelRatio, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
-import { Row } from '@components/Common';
-import { SimpleCodeEditor, MemoizedHighlightedCode } from './SimpleCodeEditor';
+import {SimpleCodeEditor, MemoizedHighlightedCode, HighlightMode, useStableLineModels} from './SimpleCodeEditor';
 import { Portal } from 'react-native-paper';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -16,6 +15,7 @@ type CodeInputProps = {
   language: 'css' | 'js';
   code: string;
   setCode: (code: string) => void;
+  highlightMode?: HighlightMode;
   error?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -48,44 +48,11 @@ const START_CSS_CODE = `:root {
 }`;
 const END_JS_CODE = 'qs("#LNReader-chapter").innerHTML = html;';
 
-function LinesRow({
-  startNr,
-  endNr,
-  fake,
-  style,
-  children,
-}: {
-  startNr: number;
-  endNr: number;
-  fake?: boolean;
-  style: object;
-  children: React.ReactNode;
-}) {
-  function printLineNumbers(start: number, length: number) {
-    const res: number[] = [];
-    for (let i = start; i < start + length; i++) {
-      res.push(i + 1);
-    }
-    return res.join('\n');
-  }
-  const op = { opacity: fake ? 0.4 : 0.7 };
-  return (
-    <Row style={styles.rowContainer}>
-      <Text
-        pointerEvents="none"
-        style={[style, styles.lines, styles.fontStyle, op]}
-      >
-        {printLineNumbers(startNr, endNr)}
-      </Text>
-      {children}
-    </Row>
-  );
-}
-
 const CodeInput = ({
   language,
   code,
   setCode,
+  highlightMode,
   onFocus,
   onBlur,
 }: CodeInputProps) => {
@@ -99,10 +66,10 @@ const CodeInput = ({
     [theme],
   );
 
-  const [startLines, setStartLines] = React.useState(0);
-  const [endLines, setEndLines] = React.useState(0);
+  const startValue = language === 'js' ? START_JS_CODE : START_CSS_CODE
 
-  const [codeLines, setCodeLines] = React.useState(0);
+  const lines = useStableLineModels(code);
+  const startLines = useStableLineModels(startValue);
   const debounce = React.useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = React.useState<string | undefined>(undefined);
 
@@ -111,7 +78,6 @@ const CodeInput = ({
       debounce.current && clearTimeout(debounce.current);
       debounce.current = setTimeout(() => analyzeCode(val), 500);
     }
-
     setCode(val);
   }
   function analyzeCode(val: string) {
@@ -123,7 +89,7 @@ const CodeInput = ({
       setError(
         (e as Error).message.replace(
           /^(\d+)/,
-          (_, i) => Number(i) + startLines + '',
+          (_, i) => Number(i) + startLines.length + '',
         ),
       );
     }
@@ -144,7 +110,6 @@ const CodeInput = ({
           </Animated.View>
         )}
       </Portal>
-      {/*<LinesRow fake startNr={0} endNr={startLines} style={codeFieldStyle}>*/}
       <MemoizedHighlightedCode
         style={[
           codeFieldStyle,
@@ -152,29 +117,25 @@ const CodeInput = ({
           styles.fakeTextInput,
           styles.topField,
         ]}
-        setLineNumbers={setStartLines}
         mode={language}
-        value={language === 'js' ? START_JS_CODE : START_CSS_CODE}
+        lines={startLines}
       />
-      {/*</LinesRow>*/}
-      {/*<LinesRow startNr={startLines} endNr={codeLines} style={codeFieldStyle}>*/}
       <SimpleCodeEditor
         placeholder={'Your code here'}
         value={code}
         mode={language}
+        highlightMode={highlightMode}
         onChangeText={setAndAnalyzeCode}
         onFocus={onFocus}
         onBlur={onBlur}
         placeholderTextColor={'grey'}
-        setLineNumbers={setCodeLines}
-        startLine={startLines}
+        lines={lines}
+        startLine={startLines.length}
         style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
       />
-      {/*</LinesRow>*/}
       {language !== 'js' ? null : (
         <MemoizedHighlightedCode
-          setLineNumbers={setEndLines}
-          startLine={startLines + codeLines}
+          startLine={lines.length + startLines.length}
           style={[styles.fakeTextInput, styles.bottomField, codeFieldStyle]}
           mode={language}
           value={END_JS_CODE}

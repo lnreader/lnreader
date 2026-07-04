@@ -1,7 +1,7 @@
 import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
 import { getString } from '@strings/translations';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import CodeInput from './Components/CodeInput';
 import { showToast } from '@utils/showToast';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
@@ -9,6 +9,8 @@ import { TextInput as PaperTextInput } from 'react-native-paper';
 
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { IconButtonV2 } from '@components';
+import type { HighlightMode } from './Components/SimpleCodeEditor';
 export type SnippetEditorHandle = {
   save: () => void;
   setCode: (val: string) => void;
@@ -35,9 +37,11 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
 
     const [code, setCode] = React.useState<string>(snippet?.code ?? '');
     const [error, setError] = React.useState({ code: false });
+    const [highlightMode, setHighlightMode] =
+      React.useState<HighlightMode>('combined');
+    const [snippetName, setSnippetName] = React.useState('');
 
     const [showNameModal, setShowNameModal] = React.useState(false);
-    const [snippetName, setSnippetName] = React.useState('');
 
     const save = React.useCallback(() => {
       setError({ code: false });
@@ -93,6 +97,30 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
 
     return (
       <>
+        <View style={styles.toolbar}>
+          <IconButtonV2
+            name="code-braces"
+            color={
+              highlightMode === 'off'
+                ? theme.outline
+                : highlightMode === 'on'
+                ? theme.primary
+                : theme.secondary
+            }
+            size={24}
+            theme={theme}
+            onPress={() =>
+              setHighlightMode(prev =>
+                prev === 'off'
+                  ? 'combined'
+                  : prev === 'combined'
+                  ? 'on'
+                  : 'off',
+              )
+            }
+            style={{ position: 'absolute', end: 24, zIndex: 2 }}
+          />
+        </View>
         <KeyboardAwareScrollView
           style={styles.scrollContainer}
           bottomOffset={100}
@@ -103,6 +131,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
             language={language}
             code={code}
             setCode={setCode}
+            highlightMode={highlightMode}
             error={error.code}
           />
         </KeyboardAwareScrollView>
@@ -133,6 +162,12 @@ export default React.memo(SnippetEditor);
 const styles = StyleSheet.create({
   flexGrow: { flexGrow: 1 },
   mb16: { marginBottom: 16 },
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
   scrollContainer: {
     paddingHorizontal: 2,
   },

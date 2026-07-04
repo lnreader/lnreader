@@ -1,17 +1,9 @@
 import { Row } from '@components/Common';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   AnimatableNumericValue,
   Animated,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
+  ColorValue,
   PixelRatio,
   Platform,
   StyleProp,
@@ -51,15 +43,18 @@ interface RendererNode {
   children?: RendererNode[];
 }
 
+export type HighlightMode = 'off' | 'on' | 'combined';
+
 type SimpleCodeEditorProps = Omit<
   TextInputProps,
   'value' | 'defaultValue' | 'children' | 'onChangeText'
 > & {
   mode: SupportedMode;
+  highlightMode?: HighlightMode;
   value: string;
+  lines?: LineModel[];
   onChangeText?: (text: string) => void;
   containerStyle?: StyleProp<ViewStyle>;
-  setLineNumbers?: (val: number) => void;
   startLine?: number;
 };
 
@@ -73,6 +68,7 @@ interface HighlightedLineProps {
   mode: SupportedMode;
   textStyle: TextStyle;
   lineHeight: number;
+  hide: boolean;
 }
 
 const stylesheetCache = new WeakMap<StyleSheet, RNStylesheet>();
@@ -81,7 +77,7 @@ function Passthrough({
   children,
 }: {
   children?: React.ReactNode;
-  [key: string]: unknown;
+  [_key: string]: unknown;
 }) {
   return <>{children}</>;
 }
@@ -133,7 +129,7 @@ function getRNStylesheet(stylesheet: StyleSheet): RNStylesheet {
   const rn: RNStylesheet = {};
 
   for (const [key, value] of Object.entries(stylesheet)) {
-    rn[key] = cssToTextStyle(value);
+    rn[key] = cssToTextStyle(value as HLStyle);
   }
 
   stylesheetCache.set(stylesheet, rn);
@@ -165,7 +161,7 @@ function stripLineBreaks(value: string | number): string {
 function renderInlineNodes(
   nodes: RendererNode[],
   rnStylesheet: RNStylesheet,
-  defaultColor: string,
+  defaultColor: ColorValue,
   keyPrefix = 'n',
 ): React.ReactNode[] {
   const result: React.ReactNode[] = [];
@@ -241,6 +237,7 @@ const HighlightedLine = memo(
     mode,
     textStyle,
     lineHeight,
+    hide,
   }: HighlightedLineProps) {
     return (
       <Text
@@ -249,6 +246,7 @@ const HighlightedLine = memo(
           {
             minHeight: lineHeight,
             flex: 1,
+            opacity: hide ? 0 : 1,
             lineHeight,
           },
         ]}
@@ -283,7 +281,7 @@ function splitLines(value: string): string[] {
   return value.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
 }
 
-function useStableLineModels(value: string): LineModel[] {
+export function useStableLineModels(value: string): LineModel[] {
   const previousRef = useRef<{
     lines: string[];
     models: LineModel[];
@@ -418,35 +416,43 @@ function getLineHeight(style: StyleProp<TextStyle>): number {
 }
 
 export function MemoizedHighlightedCode({
+  lines,
   value,
   mode,
   style,
-  setLineNumbers,
+  hide,
+  setLines,
   startLine = 0,
 }: {
-  value: string;
+  lines?: LineModel[];
+  value?: string;
   mode: SupportedMode;
   style?: StyleProp<TextStyle>;
-  setLineNumbers?: (val: number) => void;
+  hide?: boolean;
+  setLines?: (num: number) => void;
   startLine?: number;
 }) {
-  const lines = useStableLineModels(value);
   const opacityStyle = useMemo(() => extractOpacityStyle(style), [style]);
   const textStyle = useMemo(() => extractTextStyle(style), [style]);
   const contentPadding = useMemo(() => extractContentPadding(style), [style]);
   const lineHeight = useMemo(() => getLineHeight(style), [style]);
-  if (setLineNumbers) {
-    setLineNumbers(lines.length);
+  if (!lines) {
+    lines = useStableLineModels(value!);
+    setLines?.(lines.length);
   }
   return (
     <View style={[contentPadding, opacityStyle, styles.lineContainer]}>
       {lines.map((line, i) => (
-        <Row>
-          <Text style={[textStyle, styles.lines]}>{i + 1 + startLine}</Text>
+        <Row key={'row' + i + 1 + startLine}>
+          <Text key={'l' + i + 1 + startLine} style={[textStyle, styles.lines]}>
+            {i + 1 + startLine}
+          </Text>
+
           <HighlightedLine
             key={line.id}
             code={line.code}
             mode={mode}
+            hide={hide ?? false}
             textStyle={textStyle}
             lineHeight={lineHeight}
           />
@@ -458,68 +464,39 @@ export function MemoizedHighlightedCode({
 
 export function SimpleCodeEditor({
   mode,
+  highlightMode = 'combined',
   value,
+  lines: _lines,
   onChangeText,
   style,
   containerStyle,
   onScroll,
-  setLineNumbers,
   startLine,
   scrollEnabled = true,
   ...props
 }: SimpleCodeEditorProps) {
-  const [localValue, setLocalValue] = useState(value);
-  const localValueRef = useRef(value);
+  const hideHighlight = highlightMode === 'off';
+  const showInput = highlightMode !== 'on';
   const scrollY = useRef(new Animated.Value(0)).current;
+  let lines = _lines;
 
   const negativeScrollY = useMemo(() => {
     return Animated.multiply(scrollY, -1);
   }, [scrollY]);
 
-  useEffect(() => {
-    if (value === localValueRef.current) {
-      return;
-    }
-
-    localValueRef.current = value;
-    setLocalValue(value);
-  }, [value]);
-
   const handleChangeText = useCallback(
     (text: string) => {
-      localValueRef.current = text;
-      setLocalValue(text);
       onChangeText?.(text);
     },
     [onChangeText],
   );
-
-  const handleScroll = useMemo(() => {
-    return Animated.event(
-      [
-        {
-          nativeEvent: {
-            contentOffset: {
-              y: scrollY,
-            },
-          },
-        },
-      ],
-      {
-        useNativeDriver: true,
-        listener: onScroll as
-          | ((event: NativeSyntheticEvent<NativeScrollEvent>) => void)
-          | undefined,
-      },
-    );
-  }, [onScroll, scrollY]);
 
   return (
     <View style={[styles.container, containerStyle]}>
       <Animated.View
         pointerEvents="none"
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           styles.highlightLayer,
           {
             transform: [{ translateY: negativeScrollY }],
@@ -527,14 +504,13 @@ export function SimpleCodeEditor({
         ]}
       >
         <MemoizedHighlightedCode
-          setLineNumbers={setLineNumbers}
           startLine={startLine}
           mode={mode}
-          value={localValue}
+          lines={lines}
+          hide={hideHighlight}
           style={style as StyleProp<TextStyle>}
         />
       </Animated.View>
-
       <TextInput
         {...props}
         multiline
@@ -542,15 +518,20 @@ export function SimpleCodeEditor({
         autoCorrect={false}
         spellCheck={false}
         scrollEnabled={scrollEnabled}
-        value={localValue}
+        value={value}
         onChangeText={handleChangeText}
-        onScroll={handleScroll}
         cursorColor="#abb2bf"
         selectionColor="#abb2bf"
         style={[
           style,
           styles.input,
           Platform.OS === 'android' && styles.androidInput,
+          {
+            color: showInput
+              ? 'rgba(255,255,255,0.2)'
+              : 'rgba(255,255,255,0.01)',
+          },
+          highlightMode === 'off' && styles.inputVisible,
         ]}
       />
     </View>
@@ -570,10 +551,12 @@ const styles = StyleSheet.create({
   input: {
     zIndex: 1,
     backgroundColor: 'transparent',
-    color: 'rgba(255,255,255,0.1)',
     width: 'auto',
     textAlignVertical: 'top',
     marginLeft: 32,
+  },
+  inputVisible: {
+    color: '#abb2bf',
   },
   androidInput: {
     includeFontPadding: false,
