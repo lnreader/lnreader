@@ -238,18 +238,14 @@ const HighlightedLine = memo(
     lineHeight,
     hide,
   }: HighlightedLineProps) {
+    const style = {
+      minHeight: lineHeight,
+      flex: 1,
+      opacity: hide ? 0 : 1,
+      lineHeight,
+    };
     return (
-      <Text
-        style={[
-          textStyle,
-          {
-            minHeight: lineHeight,
-            flex: 1,
-            opacity: hide ? 0 : 1,
-            lineHeight,
-          },
-        ]}
-      >
+      <Text style={[textStyle, style]}>
         {code.length === 0 ? (
           '\u200B'
         ) : (
@@ -414,9 +410,10 @@ function getLineHeight(style: StyleProp<TextStyle>): number {
   return 20;
 }
 
-export type MemoizedHighlightedCode = {
-  lines?: LineModel[];
-  value?: string;
+export type MemoizedHighlightedCode = (
+  | { value: string; lines: undefined }
+  | { lines: LineModel[]; value: undefined }
+) & {
   mode: SupportedMode;
   style?: StyleProp<TextStyle>;
   hide?: boolean;
@@ -440,6 +437,8 @@ export function MemoizedHighlightedCode({
   const contentPadding = useMemo(() => extractContentPadding(style), [style]);
   const lineHeight = useMemo(() => getLineHeight(style), [style]);
   if (!lines) {
+    // Value and lines prop can't be switched
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     lines = useStableLineModels(value!);
     setLines?.(lines.length);
   }
@@ -470,9 +469,8 @@ export function SimpleCodeEditor({
   highlightMode = 'combined',
   onChangeText,
   containerStyle,
-  onScroll,
   scrollEnabled = true,
-  lines: _lines,
+  lines,
   value,
   mode,
   style,
@@ -484,7 +482,6 @@ export function SimpleCodeEditor({
   const hideHighlight = highlightMode === 'off';
   const showInput = highlightMode !== 'on';
   const scrollY = useRef(new Animated.Value(0)).current;
-  let lines = _lines;
 
   const highlightedCodeProps = {
     lines,
@@ -508,6 +505,10 @@ export function SimpleCodeEditor({
     [onChangeText],
   );
 
+  const color = {
+    color: showInput ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.01)',
+  };
+
   return (
     <View style={[styles.container, containerStyle]}>
       <Animated.View
@@ -520,6 +521,7 @@ export function SimpleCodeEditor({
           },
         ]}
       >
+        {/*@ts-expect-error*/}
         <MemoizedHighlightedCode {...highlightedCodeProps} />
       </Animated.View>
       <TextInput
@@ -537,11 +539,7 @@ export function SimpleCodeEditor({
           style,
           styles.input,
           Platform.OS === 'android' && styles.androidInput,
-          {
-            color: showInput
-              ? 'rgba(255,255,255,0.2)'
-              : 'rgba(255,255,255,0.01)',
-          },
+          color,
           highlightMode === 'off' && styles.inputVisible,
         ]}
       />
