@@ -117,7 +117,7 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         NativeFile.unlink(tempPath);
 
         editorRef.current?.setCode(content.trim());
-        showToast('Imported');
+        showToast(getString('customCodeSettings.imported'));
       }
     } catch (error: any) {
       showToast(error.message);

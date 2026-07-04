@@ -56,7 +56,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
           [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']:
             newSnippets,
         });
-        showToast('Snippet updated successfully');
+        showToast(getString('customCodeSettings.snippetUpdated'));
         navigation.goBack();
       } else {
         setShowNameModal(true);
@@ -82,7 +82,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
       setSettings({
         [language === 'js' ? 'codeSnippetsJS' : 'codeSnippetsCSS']: newSnippets,
       });
-      showToast('Snippet saved successfully');
+      showToast(getString('customCodeSettings.snippetSaved'));
       setShowNameModal(false);
       navigation.goBack();
       return true;

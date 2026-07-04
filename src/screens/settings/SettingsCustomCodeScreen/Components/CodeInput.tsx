@@ -1,6 +1,7 @@
 import React from 'react';
 import { PixelRatio, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
+import { getString } from '@strings/translations';
 import {
   SimpleCodeEditor,
   MemoizedHighlightedCode,
@@ -127,7 +128,7 @@ const CodeInput = ({
         lines={startLines}
       />
       <SimpleCodeEditor
-        placeholder={'Your code here'}
+        placeholder={getString('customCodeSettings.yourCodeHere')}
         value={code}
         mode={language}
         highlightMode={highlightMode}

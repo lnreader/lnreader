@@ -247,6 +247,10 @@ export interface StringMap {
   'generalSettingsScreen.disableLoadingAnimationsDesc': 'string';
   'generalSettingsScreen.disableHapticFeedback': 'string';
   'generalSettingsScreen.disableHapticFeedbackDescription': 'string';
+  'generalSettingsScreen.chapterDownloadCooldown': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownDesc': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownPlaceholder': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownWarning': 'string';
   'generalSettingsScreen.displayMode': 'string';
   'generalSettingsScreen.downloadNewChapters': 'string';
   'generalSettingsScreen.epub': 'string';
@@ -485,8 +489,14 @@ export interface StringMap {
   'customCodeSettings.javascriptSnippets': 'string';
   'customCodeSettings.createJSSnippet': 'string';
   'customCodeSettings.addJavascriptCode': 'string';
-  'customCodeSettings.createCSSSnippet': 'string';
-  'customCodeSettings.addCssCode': 'string';
-  'customCodeSettings.renameSnippet': 'string';
-  'customCodeSettings.noCodeSnippets': 'string';
+  'customCodeSettings.replace': 'string';
+  'customCodeSettings.removeText': 'string';
+  'customCodeSettings.enterAMatch': 'string';
+  'customCodeSettings.enterAReplace': 'string';
+  'customCodeSettings.itemAlreadyExists': 'string';
+  'customCodeSettings.editReplace': 'string';
+  'customCodeSettings.yourCodeHere': 'string';
+  'customCodeSettings.imported': 'string';
+  'customCodeSettings.snippetUpdated': 'string';
+  'customCodeSettings.snippetSaved': 'string';
 }

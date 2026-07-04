@@ -590,9 +590,15 @@
     "javascriptSnippets": "JavaScript Snippets",
     "createJSSnippet": "Create JS Snippet",
     "addJavascriptCode": "Add custom JavaScript code",
-    "createCSSSnippet": "Create CSS Snippet",
-    "addCssCode": "Add custom CSS code",
-    "renameSnippet": "Rename Snippet",
-    "noCodeSnippets": "No code snippets"
+    "replace": "Replace",
+    "removeText": "Remove text",
+    "enterAMatch": "Enter a match",
+    "enterAReplace": "Enter a replace",
+    "itemAlreadyExists": "Item already exists",
+    "editReplace": "Edit Replace",
+    "yourCodeHere": "Your code here",
+    "imported": "Imported",
+    "snippetUpdated": "Snippet updated successfully",
+    "snippetSaved": "Snippet saved successfully"
   }
 }

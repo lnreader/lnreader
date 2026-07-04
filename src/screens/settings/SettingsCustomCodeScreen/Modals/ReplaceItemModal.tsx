@@ -1,4 +1,5 @@
 import { AnimatedIconButton, List } from '@components';
+import { getString } from '@strings/translations';
 import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
 import { useBoolean } from '@hooks/index';
 import { FlashList } from '@shopify/flash-list';
@@ -79,10 +80,10 @@ const ReplaceItemModal = ({
     if (!text || (showReplace && !replacementText)) {
       const e: [string, string] = ['', ''];
       if (!text) {
-        e[0] = 'Enter a match';
+        e[0] = getString('customCodeSettings.enterAMatch');
       }
       if (!replacementText) {
-        e[1] = 'Enter a replace';
+        e[1] = getString('customCodeSettings.enterAReplace');
       }
       setError(e);
       return false;
@@ -99,7 +100,7 @@ const ReplaceItemModal = ({
       } else if (!removeText.includes(text)) {
         removeText.push(text);
       } else {
-        setError(['Item already exists', '']);
+        setError([getString('customCodeSettings.itemAlreadyExists'), '']);
         return false;
       }
       setSettings({ removeText: removeText });
@@ -181,8 +182,16 @@ const ReplaceItemModal = ({
   return (
     <>
       <List.Item
-        title={showReplace ? 'Replace' : 'Remove'}
-        description={showReplace ? 'Replace text' : 'Remove text'}
+        title={
+          showReplace
+            ? getString('customCodeSettings.replace')
+            : getString('common.remove')
+        }
+        description={
+          showReplace
+            ? getString('common.replaceText')
+            : getString('customCodeSettings.removeText')
+        }
         theme={theme}
         right="plus"
         onPress={modal.setTrue}
@@ -240,11 +249,11 @@ const ReplaceItemModal = ({
         }}
         onSave={save}
         onCancel={cancel}
-        title="Edit Replace"
+        title={getString('customCodeSettings.editReplace')}
       >
         <TextInput
           ref={textRef}
-          label={'match'}
+          label={getString('common.textToReplace')}
           theme={colorTheme}
           defaultValue={text}
           onChangeText={setText}
@@ -256,7 +265,7 @@ const ReplaceItemModal = ({
         {!showReplace ? null : (
           <TextInput
             ref={replaceTextRef}
-            label={'replace'}
+            label={getString('common.replaceWith')}
             theme={colorTheme}
             defaultValue={replacementText}
             onChangeText={setReplacementText}
