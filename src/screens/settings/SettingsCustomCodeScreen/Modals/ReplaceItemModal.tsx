@@ -4,7 +4,11 @@ import { useBoolean } from '@hooks/index';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { TextInput as RNTextInput, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  TextInput as RNTextInput,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import Animated, {
   FadeIn,
@@ -14,13 +18,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {
-  LIST_ITEM_LINE_HEIGHT,
+  LIST_ITEM_HEIGHT,
   RemoveItem,
   ReplaceItem,
 } from '../Components/ListItems';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const LIST_CLOSED_HEIGHT = LIST_ITEM_HEIGHT * 3;
 
 type ReplaceItemModalProps = {
   showReplace?: boolean;
@@ -54,9 +59,8 @@ const ReplaceItemModal = ({
   const [replacementText, setReplacementText] = React.useState('');
   const [editing, setEditing] = React.useState<string | undefined>();
   const [error, setError] = React.useState<[string, string] | undefined>();
-
   const listSize = useSharedValue<number | `${number}%`>(
-    Math.min(110, arrayLength * 48),
+    Math.min(LIST_CLOSED_HEIGHT, arrayLength * LIST_ITEM_HEIGHT),
   );
   const iconRotation = useSharedValue<number>(0);
 
@@ -143,16 +147,23 @@ const ReplaceItemModal = ({
       if (listExpanded) {
         listSize.value = Math.min(
           windowHeight * 0.6,
-          arrayLength * (LIST_ITEM_LINE_HEIGHT + 16),
+          arrayLength * LIST_ITEM_HEIGHT,
         );
       } else {
         listSize.value = Math.min(
-          110,
-          arrayLength * (LIST_ITEM_LINE_HEIGHT + 16),
+          LIST_CLOSED_HEIGHT,
+          arrayLength * LIST_ITEM_HEIGHT,
         );
       }
     },
-    [arrayLength, iconRotation, listExpanded, listSize, toggleList, windowHeight],
+    [
+      arrayLength,
+      iconRotation,
+      listExpanded,
+      listSize,
+      toggleList,
+      windowHeight,
+    ],
   );
   useEffect(() => {
     calcListSize(false);
@@ -211,14 +222,16 @@ const ReplaceItemModal = ({
           />
         )}
       </Animated.View>
-      <AnimatedIconButton
-        name="menu-down"
-        theme={theme}
-        onPress={calcListSize}
-        style={styles.marginHorizontal}
-        color={theme.primary}
-        rotation={iconRotation}
-      />
+      {arrayLength > 3 ? (
+        <AnimatedIconButton
+          name="menu-down"
+          theme={theme}
+          onPress={calcListSize}
+          style={styles.marginHorizontal}
+          color={theme.primary}
+          rotation={iconRotation}
+        />
+      ) : null}
       <KeyboardAvoidingModal
         visible={modal.value}
         onDismiss={() => {

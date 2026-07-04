@@ -6,7 +6,8 @@ import { Text } from 'react-native-paper';
 
 const fontScale = PixelRatio.getFontScale();
 const fontSize = 14;
-export const LIST_ITEM_LINE_HEIGHT = fontSize * fontScale * 1.2;
+export const LIST_ITEM_LINE_HEIGHT = Math.ceil(fontSize * fontScale * 1.2);
+export const LIST_ITEM_HEIGHT = LIST_ITEM_LINE_HEIGHT + 16;
 
 export const ReplaceItem = ({
   item,
