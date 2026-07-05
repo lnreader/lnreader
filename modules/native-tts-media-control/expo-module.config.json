@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NativeTTSMediaControlModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nativettsmediacontrol.NativeTTSMediaControlModule"]
+  }
+}

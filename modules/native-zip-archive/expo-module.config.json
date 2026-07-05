@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NativeZipArchiveModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nativeziparchive.NativeZipArchiveModule"]
+  }
+}

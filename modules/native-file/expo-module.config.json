@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NativeFileModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nativefile.NativeFileModule"]
+  }
+}
