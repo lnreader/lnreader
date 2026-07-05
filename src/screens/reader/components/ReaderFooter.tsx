@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import color from 'color';
 import Animated, {
@@ -22,6 +22,51 @@ interface ChapterFooterProps {
 
 const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
 
+const createEntering = (navigationBarHeight: number) => () => {
+  'worklet';
+  const animations = {
+    transform: [
+      {
+        translateY: withTiming(0, {
+          duration: 250,
+          easing: fastOutSlowIn,
+          reduceMotion: ReduceMotion.System,
+        }),
+      },
+    ],
+    opacity: withTiming(1, { duration: 150 }),
+  };
+  const initialValues = {
+    transform: [{ translateY: 64 + navigationBarHeight }],
+    opacity: 0,
+  };
+  return { initialValues, animations };
+};
+
+const createExiting = (navigationBarHeight: number) => () => {
+  'worklet';
+  const animations = {
+    transform: [
+      {
+        translateY: withTiming(64 + navigationBarHeight, {
+          duration: 250,
+          easing: fastOutSlowIn,
+          reduceMotion: ReduceMotion.System,
+        }),
+      },
+    ],
+    opacity: withTiming(0, { duration: 150 }),
+  };
+  const initialValues = {
+    transform: [{ translateY: 0 }],
+    opacity: 1,
+  };
+  return { initialValues, animations };
+};
+
+
+
+
 const ChapterFooter = ({
   readerSheetRef,
   scrollToStart,
@@ -37,47 +82,6 @@ const ChapterFooter = ({
     radius: 50,
   };
   const { navigationBarHeight } = useNovelLayout();
-  //const navigationBarHeight = 0;
-  const { height: SCREEN_HEIGHT } = useWindowDimensions();
-
-  const entering = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(SCREEN_HEIGHT - navigationBarHeight - 64, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(1, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: SCREEN_HEIGHT - 64,
-      opacity: 0,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
-  const exiting = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(SCREEN_HEIGHT - 64, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(0, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: SCREEN_HEIGHT - navigationBarHeight - 64,
-      opacity: 1,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
 
   const style = useMemo(
     () => [
@@ -87,6 +91,15 @@ const ChapterFooter = ({
       },
     ],
     [theme.surface, navigationBarHeight],
+  );
+
+  const entering = useMemo(
+    () => createEntering(navigationBarHeight),
+    [navigationBarHeight],
+  );
+  const exiting = useMemo(
+    () => createExiting(navigationBarHeight),
+    [navigationBarHeight],
   );
 
   return (
