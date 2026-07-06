@@ -28,12 +28,15 @@
           "color": "#1D1B20"
         }
       ],
-      "./plugins/withNativeEpub",
       "./plugins/withReaderAssets",
       "./plugins/withAndroidCustomizations",
       ["expo-build-properties", {
         "android": {
-          "usesCleartextTraffic": true
+          "usesCleartextTraffic": true,
+          "manifestApplicationAttributes": {
+            "android:largeHeap": "true",
+            "android:allowBackup": "true"
+          }
         }
       }]
     ],

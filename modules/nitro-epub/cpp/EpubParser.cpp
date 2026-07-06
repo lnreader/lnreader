@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include <Epub.hpp>
+#include "EpubParser.hpp"
 #include <sstream>
 
 std::string join(const std::string &folder_path, const std::string &child_path)

@@ -89,13 +89,10 @@ android {
 
     namespace 'com.rajarsheechatterjee.LNReader'
     defaultConfig {
-        def versionMajor = 2
-        def versionMinor = 0
-        def versionPatch = 3
         applicationId 'com.rajarsheechatterjee.LNReader'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode ((((versionMajor << 10) | versionMinor) << 11) | versionPatch)
+        versionCode 4194307
         versionName "2.0.3"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
@@ -141,11 +138,6 @@ android {
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
-    }
-    externalNativeBuild {
-        cmake {
-            path "src/main/jni/CMakeLists.txt"
-        }
     }
 }
 

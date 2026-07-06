@@ -1,0 +1,9 @@
+{
+  "name": "nitro-epub",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "scripts": {},
+  "peerDependencies": {
+    "react-native-nitro-modules": "*"
+  }
+}

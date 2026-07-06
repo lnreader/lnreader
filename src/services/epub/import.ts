@@ -11,7 +11,8 @@ import { novelSchema, chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import NativeFile from '@modules/native-file'
 import NativeZipArchive from '@modules/native-zip-archive'
-import NativeEpub from '@specs/NativeEpub';
+import { NitroModules } from 'react-native-nitro-modules';
+import type { Epub } from '@modules/nitro-epub';
 
 const decodePath = (path: string) => {
   try {
@@ -134,7 +135,8 @@ export const importEpub = async (
   }
   NativeFile.mkdir(epubDirPath);
   await NativeZipArchive.unzip(epubFilePath, epubDirPath);
-  const novel = NativeEpub.parseNovelAndChapters(epubDirPath);
+  const epub = NitroModules.createHybridObject<Epub>('Epub');
+  const novel = epub.parseNovelAndChapters(epubDirPath);
   if (!novel.name) {
     novel.name = filename.replace('.epub', '') || 'Untitled';
   }

@@ -39,8 +39,8 @@ const withManifestCustomizations = (config) => {
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
     if (app.$) {
       app.$['android:largeHeap'] = 'true';
-      app.$['android:allowBackup'] = 'true';
     }
+
 
     // RNBackgroundActionsTask service — ensure foregroundServiceType is set
     let found = false;
@@ -79,28 +79,6 @@ const withBuildGradleCustomizations = (config) => {
     let contents = config.modResults.contents;
 
 
-    // Insert version vars after defaultConfig {
-    if (
-      !contents.includes('def versionMajor') &&
-      contents.includes('defaultConfig {')
-    ) {
-      contents = contents.replace(
-        /defaultConfig\s*\{/,
-        `defaultConfig {\n        def versionMajor = 2\n        def versionMinor = 0\n        def versionPatch = 3`
-      );
-    }
-
-    // versionCode
-    contents = contents.replace(
-      /versionCode\s+\d+/,
-      'versionCode ((((versionMajor << 10) | versionMinor) << 11) | versionPatch)'
-    );
-
-    // versionName
-    contents = contents.replace(
-      /versionName\s+'[^']*'/,
-      'versionName "$versionMajor.$versionMinor.$versionPatch"'
-    );
 
     // Insert preRelease build type after buildTypes {
     if (

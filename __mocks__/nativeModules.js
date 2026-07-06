@@ -20,18 +20,21 @@ jest.mock('@specs/NativeFile', () => ({
   },
 }));
 
-jest.mock('@specs/NativeEpub', () => ({
-  __esModule: true,
-  default: {
-    parseNovelAndChapters: jest.fn(() => ({
-      name: 'Mock Novel',
-      cover: null,
-      summary: null,
-      author: null,
-      artist: null,
-      chapters: [],
-      cssPaths: [],
-      imagePaths: [],
+const mockEpubNovel = {
+  name: 'Mock Novel',
+  cover: null,
+  summary: null,
+  author: null,
+  artist: null,
+  chapters: [],
+  cssPaths: [],
+  imagePaths: [],
+};
+
+jest.mock('react-native-nitro-modules', () => ({
+  NitroModules: {
+    createHybridObject: jest.fn(() => ({
+      parseNovelAndChapters: jest.fn(() => mockEpubNovel),
     })),
   },
 }));
