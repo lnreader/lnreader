@@ -93,6 +93,17 @@ export const ChapterContent = ({
     resetSearchResult();
   }, [resetSearchResult, setSearchText]);
 
+  useBackHandler(
+    useCallback(() => {
+      if (searchVisible) {
+        setSearchVisible(false);
+        return true;
+      }
+
+      return false;
+    }, [searchVisible]),
+  );
+
   useEffect(() => {
     setBookmarked(chapter.bookmark ?? false);
   }, [chapter]);
