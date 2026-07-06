@@ -9,8 +9,8 @@ const path = require('path');
 
 // ---------- 3a. AndroidManifest.xml ----------
 
-const withManifestCustomizations = (config) => {
-  return withAndroidManifest(config, (config) => {
+const withManifestCustomizations = config => {
+  return withAndroidManifest(config, config => {
     const manifest = config.modResults;
 
     // Permissions
@@ -34,13 +34,10 @@ const withManifestCustomizations = (config) => {
       }
     }
 
-
-
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
     if (app.$) {
       app.$['android:largeHeap'] = 'true';
     }
-
 
     // RNBackgroundActionsTask service — ensure foregroundServiceType is set
     let found = false;
@@ -67,18 +64,15 @@ const withManifestCustomizations = (config) => {
       app['service'] = services;
     }
 
-
     return config;
   });
 };
 
 // ---------- 3b. android/app/build.gradle ----------
 
-const withBuildGradleCustomizations = (config) => {
-  return withAppBuildGradle(config, (config) => {
+const withBuildGradleCustomizations = config => {
+  return withAppBuildGradle(config, config => {
     let contents = config.modResults.contents;
-
-
 
     // Insert preRelease build type after buildTypes {
     if (
@@ -87,7 +81,7 @@ const withBuildGradleCustomizations = (config) => {
     ) {
       contents = contents.replace(
         /buildTypes\s*\{/,
-        `buildTypes {\n        preRelease {\n            initWith release\n            matchingFallbacks = ["release"]\n            applicationIdSuffix "preRelease"\n            versionNameSuffix "-pre-release"\n            signingConfig signingConfigs.debug\n        }`
+        `buildTypes {\n        preRelease {\n            initWith release\n            matchingFallbacks = ["release"]\n            applicationIdSuffix "preRelease"\n            versionNameSuffix "-pre-release"\n            signingConfig signingConfigs.debug\n        }`,
       );
     }
 
@@ -98,7 +92,7 @@ const withBuildGradleCustomizations = (config) => {
     ) {
       contents = contents.replace(
         /(debug\s*\{[^}]*signingConfig\s+signingConfigs\.debug\s*\n)(\s*\})/s,
-        '$1            applicationIdSuffix "debug"\n            versionNameSuffix "-debug"\n$2'
+        '$1            applicationIdSuffix "debug"\n            versionNameSuffix "-debug"\n$2',
       );
     }
 
@@ -109,7 +103,7 @@ const withBuildGradleCustomizations = (config) => {
     ) {
       contents = contents.replace(
         /dependencies\s*\{/,
-        `dependencies {\n    implementation "androidx.core:core-ktx:1.15.0"\n    implementation "androidx.media:media:1.7.0"`
+        `dependencies {\n    implementation "androidx.core:core-ktx:1.15.0"\n    implementation "androidx.media:media:1.7.0"`,
       );
     }
 
@@ -124,10 +118,10 @@ const KOTLIN_CUTOUT = `    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }`;
 
-const withMainActivityCustomizations = (config) => {
+const withMainActivityCustomizations = config => {
   return withDangerousMod(config, [
     'android',
-    (config) => {
+    config => {
       const platformRoot = config.modRequest.platformProjectRoot;
       const mainActivityPath = path.join(
         platformRoot,
@@ -138,12 +132,12 @@ const withMainActivityCustomizations = (config) => {
         'com',
         'rajarsheechatterjee',
         'LNReader',
-        'MainActivity.kt'
+        'MainActivity.kt',
       );
 
       if (!fs.existsSync(mainActivityPath)) {
         console.warn(
-          `MainActivity.kt not found at ${mainActivityPath}, skipping customizations`
+          `MainActivity.kt not found at ${mainActivityPath}, skipping customizations`,
         );
         return config;
       }
@@ -156,12 +150,12 @@ const withMainActivityCustomizations = (config) => {
         if (content.includes('setTheme(R.style.AppTheme)')) {
           content = content.replace(
             /(setTheme\(R\.style\.AppTheme\);?\s*[\r\n]+)/,
-            `$1\n${KOTLIN_CUTOUT}\n`
+            `$1\n${KOTLIN_CUTOUT}\n`,
           );
         } else if (content.includes('super.onCreate(')) {
           content = content.replace(
             /(super\.onCreate\([^)]*\)\s*[\r\n]+)/,
-            `$1\n${KOTLIN_CUTOUT}\n`
+            `$1\n${KOTLIN_CUTOUT}\n`,
           );
         }
       }
@@ -172,12 +166,54 @@ const withMainActivityCustomizations = (config) => {
   ]);
 };
 
+// ---------- 3d. MainApplication.kt ----------
+
+const withMainApplicationCustomizations = config => {
+  return withDangerousMod(config, [
+    'android',
+    config => {
+      const platformRoot = config.modRequest.platformProjectRoot;
+      const mainAppPath = path.join(
+        platformRoot,
+        'app',
+        'src',
+        'main',
+        'java',
+        'com',
+        'rajarsheechatterjee',
+        'LNReader',
+        'MainApplication.kt',
+      );
+
+      if (!fs.existsSync(mainAppPath)) {
+        console.warn(
+          `MainApplication.kt not found at ${mainAppPath}, skipping library load injection`,
+        );
+        return config;
+      }
+
+      let content = fs.readFileSync(mainAppPath, 'utf8');
+
+      if (!content.includes('System.loadLibrary("nitro_epub")')) {
+        content = content.replace(
+          /(super\.onCreate\(\)\s*\n)/,
+          '$1    System.loadLibrary("nitro_epub")\n',
+        );
+      }
+
+      fs.writeFileSync(mainAppPath, content);
+      return config;
+    },
+  ]);
+};
+
 // ---------- Composed plugin ----------
 
-const withAndroidCustomizations = (config) => {
+const withAndroidCustomizations = config => {
   config = withManifestCustomizations(config);
   config = withBuildGradleCustomizations(config);
   config = withMainActivityCustomizations(config);
+  config = withMainApplicationCustomizations(config);
   return config;
 };
 

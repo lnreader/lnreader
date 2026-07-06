@@ -1,7 +1,7 @@
 package expo.modules.nativevolumebuttonlistener
 
 import android.view.KeyEvent
-import android.view.View
+import android.view.Window
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -12,8 +12,15 @@ class NativeVolumeButtonListenerModule : Module() {
 
     Events("VolumeUp", "VolumeDown")
 
+    Function("setActive") { active: Boolean ->
+      isActive = active
+    }
+
     OnCreate {
       Companion.module = this@NativeVolumeButtonListenerModule
+    }
+
+    OnActivityEntersForeground {
       setupKeyInterceptor(appContext)
     }
 
@@ -25,6 +32,8 @@ class NativeVolumeButtonListenerModule : Module() {
   companion object {
     var module: NativeVolumeButtonListenerModule? = null
     var isActive = false
+    private var callbackAttached = false
+    private var originalCallback: Window.Callback? = null
 
     fun sendEvent(up: Boolean) {
       if (!isActive) return
@@ -32,35 +41,42 @@ class NativeVolumeButtonListenerModule : Module() {
       module?.sendEvent(eventName, mapOf<String, Any?>())
     }
 
-    private val keyListener = View.OnKeyListener { _, keyCode, event ->
-      if (isActive && event.action == KeyEvent.ACTION_DOWN) {
-        when (keyCode) {
-          KeyEvent.KEYCODE_VOLUME_UP -> {
-            sendEvent(true)
-            true
-          }
-          KeyEvent.KEYCODE_VOLUME_DOWN -> {
-            sendEvent(false)
-            true
-          }
-          else -> false
-        }
-      } else false
-    }
-
-    private var keyListenerAttached = false
-
     private fun setupKeyInterceptor(appContext: AppContext) {
-      if (keyListenerAttached) return
+      if (callbackAttached) return
       val activity = appContext.currentActivity ?: return
-      val decorView = activity.window?.decorView ?: return
-      decorView.setOnKeyListener(keyListener)
-      keyListenerAttached = true
+      val window = activity.window ?: return
+      originalCallback = window.callback
+      window.callback = object : Window.Callback by (originalCallback ?: window.callback) {
+        override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+          if (isActive && event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+              KeyEvent.KEYCODE_VOLUME_UP -> {
+                sendEvent(true)
+                return true
+              }
+              KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                sendEvent(false)
+                return true
+              }
+            }
+          }
+          return originalCallback?.dispatchKeyEvent(event) ?: false
+        }
+      }
+      callbackAttached = true
     }
 
     private fun cleanup() {
+      val activity = module?.appContext?.currentActivity
+      if (callbackAttached && activity != null) {
+        val window = activity.window
+        if (window != null && originalCallback != null) {
+          window.callback = originalCallback
+        }
+      }
       module = null
-      keyListenerAttached = false
+      callbackAttached = false
+      originalCallback = null
     }
   }
 }

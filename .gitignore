@@ -102,3 +102,9 @@ src/generated/**/*
 
 # TypeScript
 *.tsbuildinfo
+
+*/**/org.eclipse.buildship.core.prefs
+*/**/org.eclipse.jdt.core.prefs
+*/**/.classpath
+*/**/.project
+android/app/bin/*

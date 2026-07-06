@@ -78,6 +78,7 @@ export default function useChapter(
       volumeButtonsOffset,
       Math.round(Dimensions.get('window').height * 0.75),
     );
+    NativeVolumeButtonListener.setActive(true);
     const subUp = NativeVolumeButtonListener.addListener('VolumeUp', () => {
       webViewRef.current?.injectJavaScript(`(()=>{
         window.scrollBy({top: -${offset}, behavior: 'smooth'})
@@ -89,6 +90,7 @@ export default function useChapter(
       })()`);
     });
     return () => {
+      NativeVolumeButtonListener.setActive(false);
       subUp.remove();
       subDown.remove();
     };
