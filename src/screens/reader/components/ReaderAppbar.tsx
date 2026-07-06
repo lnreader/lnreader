@@ -14,6 +14,7 @@ import { bookmarkChapter } from '@database/queries/ChapterQueries';
 import { useChapterContext } from '../ChapterContext';
 import { useNovelLayout } from '@screens/novel/NovelContext';
 import ReaderSearchbar from './ReaderSearchbar';
+import { ReaderSearchResult } from '../types';
 
 interface ReaderAppbarProps {
   theme: ThemeColors;
@@ -22,6 +23,11 @@ interface ReaderAppbarProps {
   setBookmarked: React.Dispatch<React.SetStateAction<boolean>>;
   searchVisible: boolean;
   setSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  searchText: string;
+  setSearchText: (text: string) => void;
+  searchResult: ReaderSearchResult;
+  resetSearchResult: () => void;
+  resetSearch: () => void;
 }
 
 const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
@@ -33,6 +39,11 @@ const ReaderAppbar = ({
   setBookmarked,
   searchVisible,
   setSearchVisible,
+  searchText,
+  setSearchText,
+  searchResult,
+  resetSearchResult,
+  resetSearch,
 }: ReaderAppbarProps) => {
   const { chapter, novel } = useChapterContext();
   const { statusBarHeight } = useNovelLayout();
@@ -128,7 +139,16 @@ const ReaderAppbar = ({
           style={styles.bookmark}
         />
       </View>
-      {searchVisible ? <ReaderSearchbar theme={theme} /> : null}
+      {searchVisible ? (
+        <ReaderSearchbar
+          theme={theme}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          searchResult={searchResult}
+          resetSearchResult={resetSearchResult}
+          resetSearch={resetSearch}
+        />
+      ) : null}
     </Animated.View>
   );
 };

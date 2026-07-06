@@ -33,10 +33,11 @@ import {
   dismissTTSNotification,
   ttsMediaEmitter,
 } from '@utils/ttsNotification';
+import { ReaderSearchResult } from '../types';
 
 type WebViewPostEvent = {
   type: string;
-  data?: { [key: string]: unknown };
+  data?: unknown;
   autoStartTTS?: boolean;
   index?: number;
   total?: number;
@@ -45,6 +46,8 @@ type WebViewPostEvent = {
 type WebViewReaderProps = {
   onPress(): void;
   onTouchStart?(): void;
+  onSearchResult(result: ReaderSearchResult): void;
+  searchTextRef: React.MutableRefObject<string>;
 };
 
 const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
@@ -67,6 +70,8 @@ const assetsUriPrefix = __DEV__
 const WebViewReader: React.FC<WebViewReaderProps> = ({
   onPress,
   onTouchStart,
+  onSearchResult,
+  searchTextRef,
 }) => {
   const {
     novel,
@@ -331,6 +336,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           }`,
         );
 
+        const searchText = searchTextRef.current.trim();
+        if (searchText) {
+          webViewRef.current?.injectJavaScript(
+            `window.readerSearch?.search(${JSON.stringify(searchText)}); true;`,
+          );
+        }
+
         if (autoStartTTSRef.current) {
           autoStartTTSRef.current = false;
           setTimeout(() => {
@@ -391,6 +403,18 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           case 'save':
             if (event.data && typeof event.data === 'number') {
               saveProgress(event.data);
+            }
+            break;
+          case 'search-result':
+            if (event.data && typeof event.data === 'object') {
+              const data = event.data as {
+                current?: unknown;
+                total?: unknown;
+              };
+              onSearchResult({
+                current: typeof data.current === 'number' ? data.current : 0,
+                total: typeof data.total === 'number' ? data.total : 0,
+              });
             }
             break;
           case 'speak':

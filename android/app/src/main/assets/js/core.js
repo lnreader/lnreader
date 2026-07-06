@@ -135,6 +135,7 @@ window.tts = new (function () {
     'BR',
     'STRONG',
     'A',
+    'MARK',
   ];
   this.prevElement = null;
   this.currentElement = reader.chapterElement;
@@ -763,6 +764,211 @@ window.addEventListener('load', () => {
   });
 })();
 
+window.readerSearch = new (function () {
+  this.query = '';
+  this.index = -1;
+  this.matches = [];
+
+  this.emit = () => {
+    reader.post({
+      type: 'search-result',
+      data: {
+        current: this.index >= 0 ? this.index + 1 : 0,
+        total: this.matches.length,
+      },
+    });
+  };
+
+  this.clear = (emit = true, resetQuery = true) => {
+    if (resetQuery) {
+      this.query = '';
+    }
+
+    document.querySelectorAll('mark.lnreader-search-match').forEach(mark => {
+      const parent = mark.parentNode;
+      if (!parent) {
+        return;
+      }
+
+      parent.replaceChild(
+        document.createTextNode(mark.textContent || ''),
+        mark,
+      );
+      parent.normalize();
+    });
+
+    this.matches = [];
+    this.index = -1;
+    reader.refresh();
+
+    if (emit) {
+      this.emit();
+    }
+  };
+
+  this.getTextNodes = () => {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      reader.chapterElement,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: node => {
+          if (!node.nodeValue?.trim()) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          if (node.parentElement?.closest('script, style')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      },
+    );
+    let node = walker.nextNode();
+
+    while (node) {
+      textNodes.push(node);
+      node = walker.nextNode();
+    }
+
+    return textNodes;
+  };
+
+  this.wrapMatches = (node, term, normalizedTerm) => {
+    const text = node.nodeValue || '';
+    const normalizedText = text.toLocaleLowerCase();
+    let start = 0;
+    let matchIndex = normalizedText.indexOf(normalizedTerm);
+
+    if (matchIndex === -1) {
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    while (matchIndex !== -1) {
+      if (matchIndex > start) {
+        fragment.appendChild(
+          document.createTextNode(text.slice(start, matchIndex)),
+        );
+      }
+
+      const mark = document.createElement('mark');
+      mark.className = 'lnreader-search-match';
+      mark.textContent = text.slice(matchIndex, matchIndex + term.length);
+      fragment.appendChild(mark);
+
+      start = matchIndex + term.length;
+      matchIndex = normalizedText.indexOf(normalizedTerm, start);
+    }
+
+    if (start < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(start)));
+    }
+
+    node.parentNode?.replaceChild(fragment, node);
+  };
+
+  this.hasLiveMatches = () => {
+    return (
+      this.matches.length > 0 &&
+      this.matches.every(match => reader.chapterElement.contains(match))
+    );
+  };
+
+  this.ensureSearch = query => {
+    const term = String(query ?? this.query ?? '').trim();
+    if (!term) {
+      this.clear();
+      return false;
+    }
+
+    if (term !== this.query || !this.hasLiveMatches()) {
+      this.search(term, Math.max(0, this.index));
+    }
+
+    return this.matches.length > 0;
+  };
+
+  this.scrollToMatch = match => {
+    if (reader.generalSettings.val.pageReader && window.pageReader) {
+      const rect = match.getBoundingClientRect();
+      const relativePage = Math.floor(
+        (rect.left + rect.width / 2) / reader.layoutWidth,
+      );
+      const page = Math.max(
+        0,
+        Math.min(
+          pageReader.totalPages.val - 1,
+          pageReader.page.val + relativePage,
+        ),
+      );
+      pageReader.movePage(page);
+      return;
+    }
+
+    match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  };
+
+  this.focus = index => {
+    if (!this.matches.length) {
+      this.index = -1;
+      this.emit();
+      return;
+    }
+
+    this.matches[this.index]?.classList.remove(
+      'lnreader-search-match-active',
+    );
+    this.index =
+      ((index % this.matches.length) + this.matches.length) %
+      this.matches.length;
+
+    const match = this.matches[this.index];
+    match.classList.add('lnreader-search-match-active');
+    this.scrollToMatch(match);
+    this.emit();
+  };
+
+  this.search = (query, preferredIndex = 0) => {
+    const term = String(query ?? '').trim();
+    this.clear(false, false);
+    this.query = term;
+
+    if (!term) {
+      this.emit();
+      return;
+    }
+
+    const normalizedTerm = term.toLocaleLowerCase();
+    this.getTextNodes().forEach(node => {
+      this.wrapMatches(node, term, normalizedTerm);
+    });
+    this.matches = Array.from(
+      reader.chapterElement.querySelectorAll('mark.lnreader-search-match'),
+    );
+    reader.refresh();
+
+    if (!this.matches.length) {
+      this.emit();
+      return;
+    }
+
+    this.focus(Math.max(0, Math.min(preferredIndex, this.matches.length - 1)));
+  };
+
+  this.next = query => {
+    if (this.ensureSearch(query)) {
+      this.focus(this.index + 1);
+    }
+  };
+
+  this.previous = query => {
+    if (this.ensureSearch(query)) {
+      this.focus(this.index - 1);
+    }
+  };
+})();
+
 // text options
 (function () {
   van.derive(() => {
@@ -790,5 +996,10 @@ window.addEventListener('load', () => {
         .replace(/<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?:>| [^>]+>)(?:<[^>]+>)*\s*<br>))\s*/g, '');
     }
     reader.chapterElement.innerHTML = html;
+    const searchQuery = window.readerSearch?.query;
+    const searchIndex = window.readerSearch?.index;
+    if (searchQuery) {
+      window.readerSearch.search(searchQuery, searchIndex);
+    }
   });
 })();

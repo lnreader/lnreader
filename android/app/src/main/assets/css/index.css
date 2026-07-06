@@ -160,6 +160,22 @@ td {
   background-color: transparent;
 }
 
+mark.lnreader-search-match {
+  border-radius: 2px;
+  padding: 0 1px;
+  color: inherit;
+  background-color: color-mix(
+    in srgb,
+    var(--theme-tertiary) 55%,
+    transparent
+  );
+}
+
+mark.lnreader-search-match-active {
+  color: var(--theme-onPrimary);
+  background-color: var(--theme-primary);
+}
+
 #Image-Modal {
   position: fixed;
   left: 0;
