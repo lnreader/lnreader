@@ -4,17 +4,30 @@
     "name": "LNReader",
     "slug": "LNReader",
     "scheme": "lnreader",
+    "icon": "./assets/native/ic_launcher.png",
     "plugins": [
       "expo-localization",
       "react-native-edge-to-edge",
       "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/native/notification_icon.png",
+          "color": "#1D1B20"
+        }
+      ],
       "./plugins/withNativeEpub",
       "./plugins/withReaderAssets",
       "./plugins/withAndroidCustomizations"
     ],
     "android": {
       "versionCode": 1,
-      "package": "com.rajarsheechatterjee.LNReader"
+      "package": "com.rajarsheechatterjee.LNReader",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/native/ic_launcher_foreground.png",
+        "backgroundImage": "./assets/native/ic_launcher_background.png",
+        "monochromeImage": "./assets/native/ic_launcher_monochrome.png",
+      }
     },
     "splash": {
       "backgroundColor": "#1D1B20",

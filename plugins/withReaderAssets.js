@@ -21,14 +21,6 @@ const withReaderAssets = (config) => {
         }
       }
 
-      // Copy notification icon to base drawable
-      const iconSrc = path.join(projectRoot, 'assets', 'native', 'notification_icon.png');
-      if (fs.existsSync(iconSrc)) {
-        const drawableDir = path.join(platformRoot, 'app', 'src', 'main', 'res', 'drawable');
-        fs.mkdirSync(drawableDir, { recursive: true });
-        fs.copyFileSync(iconSrc, path.join(drawableDir, 'notification_icon.png'));
-      }
-
       return config;
     },
   ]);

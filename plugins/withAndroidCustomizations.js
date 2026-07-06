@@ -1,5 +1,4 @@
 const {
-  withAndroidColors,
   withAndroidManifest,
   withAppBuildGradle,
   withDangerousMod,
@@ -45,19 +44,6 @@ const withManifestCustomizations = (config) => {
       app.$['android:usesCleartextTraffic'] = 'true';
     }
 
-    // Notification metadata
-    AndroidConfig.Manifest.addMetaDataItemToMainApplication(
-      app,
-      'expo.modules.notifications.default_notification_color',
-      '@color/notification_icon_color',
-      'resource'
-    );
-    AndroidConfig.Manifest.addMetaDataItemToMainApplication(
-      app,
-      'expo.modules.notifications.default_notification_icon',
-      '@drawable/notification_icon',
-      'resource'
-    );
 
     // RNBackgroundActionsTask service
     let hasBgActions = false;
@@ -193,18 +179,6 @@ const KOTLIN_CUTOUT = `    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }`;
 
-// ---------- 3d. colors.xml ----------
-
-const withColorsCustomizations = (config) => {
-  return withAndroidColors(config, (config) => {
-    const colors = config.modResults;
-    AndroidConfig.Colors.setColorItem(
-      { $: { name: 'notification_icon_color' }, _: '#1D1B20' },
-      colors
-    );
-    return config;
-  });
-};
 
 const KOTLIN_DISPATCH_KEY = `  override fun dispatchKeyEvent(event: KeyEvent): Boolean {
     if (NativeVolumeButtonListenerModule.isActive) {
@@ -312,7 +286,6 @@ const withMainActivityCustomizations = (config) => {
 
 const withAndroidCustomizations = (config) => {
   config = withManifestCustomizations(config);
-  config = withColorsCustomizations(config);
   config = withBuildGradleCustomizations(config);
   config = withMainActivityCustomizations(config);
   return config;
