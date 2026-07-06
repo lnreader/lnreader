@@ -766,8 +766,38 @@ window.addEventListener('load', () => {
 
 window.readerSearch = new (function () {
   const MIN_QUERY_LENGTH = 1;
-  const NODE_BATCH_SIZE = 80;
+  const SEGMENT_BATCH_SIZE = 80;
   const MAX_RENDERED_MATCHES = 1500;
+  const INLINE_TEXT_ELEMENTS = new Set([
+    'A',
+    'ABBR',
+    'B',
+    'BDI',
+    'BDO',
+    'CITE',
+    'CODE',
+    'DATA',
+    'DFN',
+    'EM',
+    'I',
+    'KBD',
+    'MARK',
+    'Q',
+    'RP',
+    'RT',
+    'RUBY',
+    'S',
+    'SAMP',
+    'SMALL',
+    'SPAN',
+    'STRONG',
+    'SUB',
+    'SUP',
+    'TIME',
+    'U',
+    'VAR',
+    'WBR',
+  ]);
 
   this.query = '';
   this.index = -1;
@@ -832,10 +862,10 @@ window.readerSearch = new (function () {
         return;
       }
 
-      parent.replaceChild(
-        document.createTextNode(mark.textContent || ''),
-        mark,
-      );
+      while (mark.firstChild) {
+        parent.insertBefore(mark.firstChild, mark);
+      }
+      parent.removeChild(mark);
       touchedParents.add(parent);
     });
 
@@ -864,14 +894,43 @@ window.readerSearch = new (function () {
     }
   };
 
-  this.getTextNodes = () => {
+  this.getTextBlock = node => {
+    let element = node.parentElement;
+
+    while (
+      element &&
+      element !== reader.chapterElement &&
+      INLINE_TEXT_ELEMENTS.has(element.nodeName)
+    ) {
+      element = element.parentElement;
+    }
+
+    return element || reader.chapterElement;
+  };
+
+  this.hasElementBetween = (previousNode, nextNode, selector) => {
+    const range = document.createRange();
+
+    try {
+      range.setStartAfter(previousNode);
+      range.setEndBefore(nextNode);
+      return !!range.cloneContents().querySelector(selector);
+    } catch {
+      return false;
+    } finally {
+      range.detach?.();
+    }
+  };
+
+  this.getTextSegments = () => {
+    const segments = [];
     const textNodes = [];
     const walker = document.createTreeWalker(
       reader.chapterElement,
       NodeFilter.SHOW_TEXT,
       {
         acceptNode: node => {
-          if (!node.nodeValue?.trim()) {
+          if (!node.nodeValue) {
             return NodeFilter.FILTER_REJECT;
           }
           if (node.parentElement?.closest('script, style')) {
@@ -888,73 +947,114 @@ window.readerSearch = new (function () {
       node = walker.nextNode();
     }
 
-    return textNodes;
+    textNodes.forEach(textNode => {
+      const block = this.getTextBlock(textNode);
+      const previousSegment = segments[segments.length - 1];
+      const previousEntry =
+        previousSegment?.entries[previousSegment.entries.length - 1];
+      const startsNewSegment =
+        !previousSegment ||
+        previousSegment.block !== block ||
+        this.hasElementBetween(
+          previousEntry.node,
+          textNode,
+          'br, hr, img, table, ul, ol',
+        );
+
+      if (startsNewSegment) {
+        segments.push({
+          block,
+          entries: [],
+          text: '',
+        });
+      }
+
+      const segment = segments[segments.length - 1];
+      const start = segment.text.length;
+      const text = textNode.nodeValue || '';
+
+      segment.entries.push({
+        end: start + text.length,
+        node: textNode,
+        start,
+      });
+      segment.text += text;
+    });
+
+    return segments.filter(segment => segment.text.trim());
   };
 
-  this.countMatches = (text, normalizedTerm) => {
-    const normalizedText = text.toLowerCase();
-    let matchCount = 0;
+  this.findSegmentMatches = (segment, normalizedTerm) => {
+    const matches = [];
+    const normalizedText = segment.text.toLowerCase();
     let matchIndex = normalizedText.indexOf(normalizedTerm);
 
     while (matchIndex !== -1) {
-      matchCount += 1;
+      matches.push(matchIndex);
       matchIndex = normalizedText.indexOf(
         normalizedTerm,
         matchIndex + normalizedTerm.length,
       );
     }
 
-    return matchCount;
+    return matches;
   };
 
-  this.wrapMatches = (node, term, normalizedTerm, maxMatches) => {
-    const text = node.nodeValue || '';
-    const normalizedText = text.toLowerCase();
-    let matchesAdded = 0;
-    let totalMatches = 0;
-    let start = 0;
-    let matchIndex = normalizedText.indexOf(normalizedTerm);
-
-    if (matchIndex === -1) {
-      return { rendered: matchesAdded, total: totalMatches };
-    }
-
-    const fragment = document.createDocumentFragment();
-
-    while (matchIndex !== -1) {
-      totalMatches += 1;
-
-      if (matchesAdded < maxMatches) {
-        if (matchIndex > start) {
-          fragment.appendChild(
-            document.createTextNode(text.slice(start, matchIndex)),
-          );
-        }
-
-        const mark = document.createElement('mark');
-        mark.className = 'lnreader-search-match';
-        mark.textContent = text.slice(matchIndex, matchIndex + term.length);
-        fragment.appendChild(mark);
-
-        matchesAdded += 1;
-        start = matchIndex + term.length;
+  this.getTextPosition = (segment, offset, preferPrevious = false) => {
+    for (const entry of segment.entries) {
+      if (offset >= entry.start && offset < entry.end) {
+        return {
+          node: entry.node,
+          offset: offset - entry.start,
+        };
       }
 
-      matchIndex = normalizedText.indexOf(
-        normalizedTerm,
-        matchIndex + term.length,
-      );
+      if (preferPrevious && offset === entry.end) {
+        return {
+          node: entry.node,
+          offset: entry.node.nodeValue?.length || 0,
+        };
+      }
     }
 
-    if (matchesAdded > 0 && start < text.length) {
-      fragment.appendChild(document.createTextNode(text.slice(start)));
+    const entry = segment.entries[segment.entries.length - 1];
+    return {
+      node: entry.node,
+      offset: entry.node.nodeValue?.length || 0,
+    };
+  };
+
+  this.removeEmptyInlineTextElement = node => {
+    if (
+      !node ||
+      node.nodeType !== Node.ELEMENT_NODE ||
+      !INLINE_TEXT_ELEMENTS.has(node.nodeName) ||
+      node.textContent ||
+      node.querySelector('img, svg, canvas, video, audio, iframe')
+    ) {
+      return;
     }
 
-    if (matchesAdded > 0) {
-      node.parentNode?.replaceChild(fragment, node);
-    }
+    const parent = node.parentNode;
+    parent?.removeChild(node);
+    this.removeEmptyInlineTextElement(parent);
+  };
 
-    return { rendered: matchesAdded, total: totalMatches };
+  this.wrapSegmentMatch = (segment, start, length) => {
+    const end = start + length;
+    const range = document.createRange();
+    const mark = document.createElement('mark');
+    const startPosition = this.getTextPosition(segment, start);
+    const endPosition = this.getTextPosition(segment, end, true);
+
+    mark.className = 'lnreader-search-match';
+    range.setStart(startPosition.node, startPosition.offset);
+    range.setEnd(endPosition.node, endPosition.offset);
+    mark.appendChild(range.extractContents());
+    range.insertNode(mark);
+    this.removeEmptyInlineTextElement(mark.previousSibling);
+    this.removeEmptyInlineTextElement(mark.nextSibling);
+    range.detach?.();
   };
 
   this.hasLiveMatches = () => {
@@ -1048,8 +1148,8 @@ window.readerSearch = new (function () {
 
     const searchToken = this.searchToken;
     const normalizedTerm = term.toLowerCase();
-    const textNodes = this.getTextNodes();
-    let textNodeIndex = 0;
+    const textSegments = this.getTextSegments();
+    let textSegmentIndex = 0;
     let totalMatchCount = 0;
     let renderedMatchCount = 0;
 
@@ -1060,33 +1160,28 @@ window.readerSearch = new (function () {
       }
 
       const batchEnd = Math.min(
-        textNodeIndex + NODE_BATCH_SIZE,
-        textNodes.length,
+        textSegmentIndex + SEGMENT_BATCH_SIZE,
+        textSegments.length,
       );
 
-      while (textNodeIndex < batchEnd) {
-        const node = textNodes[textNodeIndex];
+      while (textSegmentIndex < batchEnd) {
+        const segment = textSegments[textSegmentIndex];
+        const matches = this.findSegmentMatches(segment, normalizedTerm);
+        const renderableMatches = matches.slice(
+          0,
+          Math.max(0, MAX_RENDERED_MATCHES - renderedMatchCount),
+        );
 
-        if (renderedMatchCount < MAX_RENDERED_MATCHES) {
-          const matchCounts = this.wrapMatches(
-            node,
-            term,
-            normalizedTerm,
-            MAX_RENDERED_MATCHES - renderedMatchCount,
-          );
-          renderedMatchCount += matchCounts.rendered;
-          totalMatchCount += matchCounts.total;
-        } else {
-          totalMatchCount += this.countMatches(
-            node.nodeValue || '',
-            normalizedTerm,
-          );
-        }
+        renderableMatches.reverse().forEach(matchIndex => {
+          this.wrapSegmentMatch(segment, matchIndex, normalizedTerm.length);
+        });
 
-        textNodeIndex += 1;
+        renderedMatchCount += renderableMatches.length;
+        totalMatchCount += matches.length;
+        textSegmentIndex += 1;
       }
 
-      if (textNodeIndex < textNodes.length) {
+      if (textSegmentIndex < textSegments.length) {
         this.pendingSearchTimer = setTimeout(processBatch, 0);
         return;
       }
