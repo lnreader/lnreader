@@ -66,6 +66,7 @@
     "dayjs": "^1.11.21",
     "drizzle-orm": "1.0.0-beta.22",
     "expo": "^56.0.14",
+    "expo-build-properties": "~56.0.21",
     "expo-clipboard": "~56.0.4",
     "expo-dev-client": "^56.0.22",
     "expo-document-picker": "~56.0.4",

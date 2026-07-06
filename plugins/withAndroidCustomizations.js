@@ -15,9 +15,7 @@ const withManifestCustomizations = (config) => {
 
     // Permissions
     const PERMS = [
-      'android.permission.ACCESS_NETWORK_STATE',
       'android.permission.DOWNLOAD_WITHOUT_NOTIFICATION',
-      'android.permission.FOREGROUND_SERVICE',
       'android.permission.WAKE_LOCK',
     ];
     for (const perm of PERMS) {
@@ -36,17 +34,16 @@ const withManifestCustomizations = (config) => {
       }
     }
 
-    // Application attributes
+
+
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
     if (app.$) {
       app.$['android:largeHeap'] = 'true';
       app.$['android:allowBackup'] = 'true';
-      app.$['android:usesCleartextTraffic'] = 'true';
     }
 
-
-    // RNBackgroundActionsTask service
-    let hasBgActions = false;
+    // RNBackgroundActionsTask service — ensure foregroundServiceType is set
+    let found = false;
     const services = app['service'] || [];
     for (const s of services) {
       if (
@@ -54,43 +51,22 @@ const withManifestCustomizations = (config) => {
         s.$['android:name'] ===
           'com.asterinet.react.bgactions.RNBackgroundActionsTask'
       ) {
-        hasBgActions = true;
+        s.$['android:foregroundServiceType'] = 'dataSync';
+        found = true;
+        break;
       }
     }
-    if (!hasBgActions) {
+    if (!found) {
       services.push({
         $: {
           'android:name':
             'com.asterinet.react.bgactions.RNBackgroundActionsTask',
-          'android:foregroundServiceType': 'shortService',
+          'android:foregroundServiceType': 'dataSync',
         },
       });
       app['service'] = services;
     }
 
-    // Deep link intent-filter on MainActivity
-    const mainActivity = AndroidConfig.Manifest.getMainActivityOrThrow(manifest);
-    const intentFilters = mainActivity['intent-filter'] || [];
-    let hasLnreaderFilter = false;
-    for (const filter of intentFilters) {
-      const dataNodes = filter['data'] || [];
-      for (const d of dataNodes) {
-        if (d.$ && d.$['android:scheme'] === 'lnreader') {
-          hasLnreaderFilter = true;
-        }
-      }
-    }
-    if (!hasLnreaderFilter) {
-      intentFilters.push({
-        action: [{ $: { 'android:name': 'android.intent.action.VIEW' } }],
-        category: [
-          { $: { 'android:name': 'android.intent.category.DEFAULT' } },
-          { $: { 'android:name': 'android.intent.category.BROWSABLE' } },
-        ],
-        data: [{ $: { 'android:scheme': 'lnreader' } }],
-      });
-      mainActivity['intent-filter'] = intentFilters;
-    }
 
     return config;
   });
@@ -102,11 +78,6 @@ const withBuildGradleCustomizations = (config) => {
   return withAppBuildGradle(config, (config) => {
     let contents = config.modResults.contents;
 
-    // applicationId
-    contents = contents.replace(
-      /applicationId\s+'[^']*'/,
-      "applicationId 'com.rajarsheechatterjee.LNReader'"
-    );
 
     // Insert version vars after defaultConfig {
     if (
@@ -170,39 +141,10 @@ const withBuildGradleCustomizations = (config) => {
 };
 
 // ---------- 3c. MainActivity.kt ----------
-
-const KOTLIN_IMPORTS = `import android.view.KeyEvent
-import expo.modules.nativevolumebuttonlistener.NativeVolumeButtonListenerModule`;
-
 const KOTLIN_CUTOUT = `    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       window.attributes.layoutInDisplayCutoutMode =
         android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }`;
-
-
-const KOTLIN_DISPATCH_KEY = `  override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-    if (NativeVolumeButtonListenerModule.isActive) {
-      val action = event.action
-      return when (event.keyCode) {
-        KeyEvent.KEYCODE_VOLUME_UP -> {
-          if (action == KeyEvent.ACTION_DOWN) {
-            NativeVolumeButtonListenerModule.sendEvent(true)
-          }
-          true
-        }
-
-        KeyEvent.KEYCODE_VOLUME_DOWN -> {
-          if (action == KeyEvent.ACTION_DOWN) {
-            NativeVolumeButtonListenerModule.sendEvent(false)
-          }
-          true
-        }
-
-        else -> super.dispatchKeyEvent(event)
-      }
-    }
-    return super.dispatchKeyEvent(event)
-  }`;
 
 const withMainActivityCustomizations = (config) => {
   return withDangerousMod(config, [
@@ -230,26 +172,7 @@ const withMainActivityCustomizations = (config) => {
 
       let content = fs.readFileSync(mainActivityPath, 'utf8');
 
-      // 1. Add imports after the last existing import line
-      if (
-        !content.includes(
-          'import expo.modules.nativevolumebuttonlistener.NativeVolumeButtonListenerModule'
-        )
-      ) {
-        const lines = content.split('\n');
-        let lastImportIdx = -1;
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith('import ')) {
-            lastImportIdx = i;
-          }
-        }
-        if (lastImportIdx >= 0) {
-          lines.splice(lastImportIdx + 1, 0, KOTLIN_IMPORTS);
-          content = lines.join('\n');
-        }
-      }
-
-      // 2. Insert cutout mode near the top of onCreate
+      // Insert cutout mode near the top of onCreate
       if (!content.includes('layoutInDisplayCutoutMode')) {
         // Try setTheme anchor first; fall back to super.onCreate
         if (content.includes('setTheme(R.style.AppTheme)')) {
@@ -263,17 +186,6 @@ const withMainActivityCustomizations = (config) => {
             `$1\n${KOTLIN_CUTOUT}\n`
           );
         }
-      }
-
-      // 3. Insert dispatchKeyEvent before getMainComponentName
-      if (
-        !content.includes('dispatchKeyEvent') &&
-        content.includes('override fun getMainComponentName')
-      ) {
-        content = content.replace(
-          /(^\s*override fun getMainComponentName)/m,
-          `${KOTLIN_DISPATCH_KEY}\n\n$1`
-        );
       }
 
       fs.writeFileSync(mainActivityPath, content);

@@ -94,6 +94,9 @@ importers:
       expo:
         specifier: ^56.0.14
         version: 56.0.14(1cbce0288e2a9944d8f335c7b4c022b5)
+      expo-build-properties:
+        specifier: ~56.0.21
+        version: 56.0.21(expo@56.0.14)
       expo-clipboard:
         specifier: ~56.0.4
         version: 56.0.4(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
@@ -3332,6 +3335,11 @@ packages:
       expo: '*'
       react: '*'
       react-native: '*'
+
+  expo-build-properties@56.0.21:
+    resolution: {integrity: sha512-e3CeuoycpthiMsx0L8+NtHjx5O4C12FZHecdkGUZdWEm+R28QhzYHgxqfrxDr7epnzdPPR7yuUomScIJbLUnBg==}
+    peerDependencies:
+      expo: '*'
 
   expo-clipboard@56.0.4:
     resolution: {integrity: sha512-qb4DYlkiowHYHaUYVT2FN9nk/nI1xShXOUYsI7J9dVpQCOHcGFjCBPX1VAvEW4Ye4/Aagd6IuhOVAq/+scBOiA==}
@@ -10166,6 +10174,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  expo-build-properties@56.0.21(expo@56.0.14):
+    dependencies:
+      '@expo/schema-utils': 56.0.2
+      expo: 56.0.14(1cbce0288e2a9944d8f335c7b4c022b5)
+      resolve-from: 5.0.0
+      semver: 7.8.5
 
   expo-clipboard@56.0.4(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3):
     dependencies:

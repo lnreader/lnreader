@@ -10,8 +10,6 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 import expo.modules.ReactActivityDelegateWrapper
-import android.view.KeyEvent
-import expo.modules.nativevolumebuttonlistener.NativeVolumeButtonListenerModule
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,30 +32,6 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-    if (NativeVolumeButtonListenerModule.isActive) {
-      val action = event.action
-      return when (event.keyCode) {
-        KeyEvent.KEYCODE_VOLUME_UP -> {
-          if (action == KeyEvent.ACTION_DOWN) {
-            NativeVolumeButtonListenerModule.sendEvent(true)
-          }
-          true
-        }
-
-        KeyEvent.KEYCODE_VOLUME_DOWN -> {
-          if (action == KeyEvent.ACTION_DOWN) {
-            NativeVolumeButtonListenerModule.sendEvent(false)
-          }
-          true
-        }
-
-        else -> super.dispatchKeyEvent(event)
-      }
-    }
-    return super.dispatchKeyEvent(event)
-  }
-
   override fun getMainComponentName(): String = "main"
 
   /**
