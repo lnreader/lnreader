@@ -765,24 +765,66 @@ window.addEventListener('load', () => {
 })();
 
 window.readerSearch = new (function () {
+  const MIN_QUERY_LENGTH = 1;
+  const NODE_BATCH_SIZE = 80;
+  const MAX_RENDERED_MATCHES = 1500;
+
   this.query = '';
   this.index = -1;
   this.matches = [];
+  this.total = 0;
+  this.isTruncated = false;
+  this.searchToken = 0;
+  this.pendingSearchTimer = null;
 
-  this.emit = () => {
+  this.emit = (query = this.query) => {
     reader.post({
       type: 'search-result',
       data: {
+        query,
         current: this.index >= 0 ? this.index + 1 : 0,
-        total: this.matches.length,
+        total: this.total,
+        renderedTotal: this.matches.length,
+        isTruncated: this.isTruncated,
       },
     });
   };
 
-  this.clear = (emit = true, resetQuery = true) => {
-    if (resetQuery) {
-      this.query = '';
+  this.cancelPendingSearch = () => {
+    this.searchToken += 1;
+
+    if (this.pendingSearchTimer !== null) {
+      clearTimeout(this.pendingSearchTimer);
+      this.pendingSearchTimer = null;
     }
+  };
+
+  this.refreshLayout = () => {
+    reader.refresh();
+
+    if (!reader.generalSettings.val.pageReader || !window.pageReader) {
+      return;
+    }
+
+    const totalPages = parseInt(
+      (reader.chapterWidth + reader.readerSettings.val.padding * 2) /
+        reader.layoutWidth,
+      10,
+    );
+
+    if (!Number.isFinite(totalPages) || totalPages <= 0) {
+      return;
+    }
+
+    pageReader.totalPages.val = totalPages;
+
+    if (pageReader.page.val >= totalPages) {
+      pageReader.movePage(totalPages - 1);
+    }
+  };
+
+  this.resetMatches = () => {
+    const touchedParents = new Set();
 
     document.querySelectorAll('mark.lnreader-search-match').forEach(mark => {
       const parent = mark.parentNode;
@@ -794,12 +836,28 @@ window.readerSearch = new (function () {
         document.createTextNode(mark.textContent || ''),
         mark,
       );
+      touchedParents.add(parent);
+    });
+
+    touchedParents.forEach(parent => {
       parent.normalize();
     });
 
     this.matches = [];
     this.index = -1;
-    reader.refresh();
+    this.total = 0;
+    this.isTruncated = false;
+    this.refreshLayout();
+  };
+
+  this.clear = (emit = true, resetQuery = true) => {
+    this.cancelPendingSearch();
+
+    if (resetQuery) {
+      this.query = '';
+    }
+
+    this.resetMatches();
 
     if (emit) {
       this.emit();
@@ -833,39 +891,70 @@ window.readerSearch = new (function () {
     return textNodes;
   };
 
-  this.wrapMatches = (node, term, normalizedTerm) => {
+  this.countMatches = (text, normalizedTerm) => {
+    const normalizedText = text.toLowerCase();
+    let matchCount = 0;
+    let matchIndex = normalizedText.indexOf(normalizedTerm);
+
+    while (matchIndex !== -1) {
+      matchCount += 1;
+      matchIndex = normalizedText.indexOf(
+        normalizedTerm,
+        matchIndex + normalizedTerm.length,
+      );
+    }
+
+    return matchCount;
+  };
+
+  this.wrapMatches = (node, term, normalizedTerm, maxMatches) => {
     const text = node.nodeValue || '';
-    const normalizedText = text.toLocaleLowerCase();
+    const normalizedText = text.toLowerCase();
+    let matchesAdded = 0;
+    let totalMatches = 0;
     let start = 0;
     let matchIndex = normalizedText.indexOf(normalizedTerm);
 
     if (matchIndex === -1) {
-      return;
+      return { rendered: matchesAdded, total: totalMatches };
     }
 
     const fragment = document.createDocumentFragment();
 
     while (matchIndex !== -1) {
-      if (matchIndex > start) {
-        fragment.appendChild(
-          document.createTextNode(text.slice(start, matchIndex)),
-        );
+      totalMatches += 1;
+
+      if (matchesAdded < maxMatches) {
+        if (matchIndex > start) {
+          fragment.appendChild(
+            document.createTextNode(text.slice(start, matchIndex)),
+          );
+        }
+
+        const mark = document.createElement('mark');
+        mark.className = 'lnreader-search-match';
+        mark.textContent = text.slice(matchIndex, matchIndex + term.length);
+        fragment.appendChild(mark);
+
+        matchesAdded += 1;
+        start = matchIndex + term.length;
       }
 
-      const mark = document.createElement('mark');
-      mark.className = 'lnreader-search-match';
-      mark.textContent = text.slice(matchIndex, matchIndex + term.length);
-      fragment.appendChild(mark);
-
-      start = matchIndex + term.length;
-      matchIndex = normalizedText.indexOf(normalizedTerm, start);
+      matchIndex = normalizedText.indexOf(
+        normalizedTerm,
+        matchIndex + term.length,
+      );
     }
 
-    if (start < text.length) {
+    if (matchesAdded > 0 && start < text.length) {
       fragment.appendChild(document.createTextNode(text.slice(start)));
     }
 
-    node.parentNode?.replaceChild(fragment, node);
+    if (matchesAdded > 0) {
+      node.parentNode?.replaceChild(fragment, node);
+    }
+
+    return { rendered: matchesAdded, total: totalMatches };
   };
 
   this.hasLiveMatches = () => {
@@ -929,31 +1018,83 @@ window.readerSearch = new (function () {
     this.emit();
   };
 
-  this.search = (query, preferredIndex = 0) => {
-    const term = String(query ?? '').trim();
-    this.clear(false, false);
-    this.query = term;
-
-    if (!term) {
-      this.emit();
-      return;
-    }
-
-    const normalizedTerm = term.toLocaleLowerCase();
-    this.getTextNodes().forEach(node => {
-      this.wrapMatches(node, term, normalizedTerm);
-    });
+  this.finishSearch = (query, preferredIndex, total) => {
+    this.pendingSearchTimer = null;
     this.matches = Array.from(
       reader.chapterElement.querySelectorAll('mark.lnreader-search-match'),
     );
-    reader.refresh();
+    this.total = total;
+    this.isTruncated = this.matches.length < this.total;
+    this.refreshLayout();
 
     if (!this.matches.length) {
-      this.emit();
+      this.emit(query);
       return;
     }
 
     this.focus(Math.max(0, Math.min(preferredIndex, this.matches.length - 1)));
+  };
+
+  this.search = (query, preferredIndex = 0) => {
+    const term = String(query ?? '').trim();
+    this.cancelPendingSearch();
+    this.resetMatches();
+    this.query = term;
+
+    if (!term || term.length < MIN_QUERY_LENGTH) {
+      this.emit(term);
+      return;
+    }
+
+    const searchToken = this.searchToken;
+    const normalizedTerm = term.toLowerCase();
+    const textNodes = this.getTextNodes();
+    let textNodeIndex = 0;
+    let totalMatchCount = 0;
+    let renderedMatchCount = 0;
+
+    const processBatch = () => {
+      if (searchToken !== this.searchToken || term !== this.query) {
+        this.pendingSearchTimer = null;
+        return;
+      }
+
+      const batchEnd = Math.min(
+        textNodeIndex + NODE_BATCH_SIZE,
+        textNodes.length,
+      );
+
+      while (textNodeIndex < batchEnd) {
+        const node = textNodes[textNodeIndex];
+
+        if (renderedMatchCount < MAX_RENDERED_MATCHES) {
+          const matchCounts = this.wrapMatches(
+            node,
+            term,
+            normalizedTerm,
+            MAX_RENDERED_MATCHES - renderedMatchCount,
+          );
+          renderedMatchCount += matchCounts.rendered;
+          totalMatchCount += matchCounts.total;
+        } else {
+          totalMatchCount += this.countMatches(
+            node.nodeValue || '',
+            normalizedTerm,
+          );
+        }
+
+        textNodeIndex += 1;
+      }
+
+      if (textNodeIndex < textNodes.length) {
+        this.pendingSearchTimer = setTimeout(processBatch, 0);
+        return;
+      }
+
+      this.finishSearch(term, preferredIndex, totalMatchCount);
+    };
+
+    processBatch();
   };
 
   this.next = query => {

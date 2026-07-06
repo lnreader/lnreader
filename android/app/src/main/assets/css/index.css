@@ -162,7 +162,6 @@ td {
 
 mark.lnreader-search-match {
   border-radius: 2px;
-  padding: 0 1px;
   color: inherit;
   background-color: color-mix(
     in srgb,

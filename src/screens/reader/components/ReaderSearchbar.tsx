@@ -29,8 +29,13 @@ const ReaderSearchbar = ({
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { searchChapterText, clearChapterSearch, navigateChapterSearch } =
     useChapterContext();
-  const hasSearchText = searchText.trim().length > 0;
-  const hasMatches = hasSearchText && searchResult.total > 0;
+  const normalizedSearchText = searchText.trim();
+  const hasSearchText = normalizedSearchText.length > 0;
+  const hasCurrentSearchResult = searchResult.query === normalizedSearchText;
+  const hasMatches = hasCurrentSearchResult && searchResult.renderedTotal > 0;
+  const resultTotalText = searchResult.isTruncated
+    ? `${searchResult.renderedTotal}+`
+    : String(searchResult.total);
 
   const clearPendingSearch = useCallback(() => {
     if (searchTimeoutRef.current) {
@@ -133,7 +138,7 @@ const ReaderSearchbar = ({
         />
         {hasSearchText ? (
           <Text style={[styles.resultText, { color: theme.onSurfaceVariant }]}>
-            {searchResult.current}/{searchResult.total}
+            {searchResult.current}/{resultTotalText}
           </Text>
         ) : null}
         <IconButtonV2

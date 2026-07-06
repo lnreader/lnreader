@@ -408,12 +408,26 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           case 'search-result':
             if (event.data && typeof event.data === 'object') {
               const data = event.data as {
+                query?: unknown;
                 current?: unknown;
                 total?: unknown;
+                renderedTotal?: unknown;
+                isTruncated?: unknown;
               };
+              const query = typeof data.query === 'string' ? data.query : '';
+              if (query !== searchTextRef.current.trim()) {
+                break;
+              }
+              const total = typeof data.total === 'number' ? data.total : 0;
               onSearchResult({
+                query,
                 current: typeof data.current === 'number' ? data.current : 0,
-                total: typeof data.total === 'number' ? data.total : 0,
+                total,
+                renderedTotal:
+                  typeof data.renderedTotal === 'number'
+                    ? data.renderedTotal
+                    : total,
+                isTruncated: data.isTruncated === true,
               });
             }
             break;
