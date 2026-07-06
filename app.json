@@ -6,6 +6,15 @@
     "scheme": "lnreader",
     "icon": "./assets/native/ic_launcher.png",
     "plugins": [
+      ["expo-splash-screen", {
+        "image": "./assets/native/ic_launcher_round.png",
+        "backgroundColor": "#1D1B20",
+        "resizeMode": "contain",
+        "dark": {
+          "image": "./assets/native/ic_launcher_round.png",
+          "backgroundColor": "#000000"
+        }
+      }],
       "expo-localization",
       "react-native-edge-to-edge",
       "expo-web-browser",
@@ -26,12 +35,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/native/ic_launcher_foreground.png",
         "backgroundImage": "./assets/native/ic_launcher_background.png",
-        "monochromeImage": "./assets/native/ic_launcher_monochrome.png",
+        "monochromeImage": "./assets/native/ic_launcher_monochrome.png"
       }
     },
     "splash": {
+      "image": "./assets/native/ic_launcher_round.png",
       "backgroundColor": "#1D1B20",
-      "resizeMode": "contain"
+      "resizeMode": "contain",
+      "dark": {
+        "image": "./assets/native/ic_launcher_round.png",
+        "backgroundColor": "#000000"
+      }
     },
     "extra": {
       "eas": {
