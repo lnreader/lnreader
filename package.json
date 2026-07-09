@@ -91,7 +91,7 @@
     "lodash-es": "^4.17.23",
     "lottie-ios": "^3.5.0",
     "lottie-react-native": "^5.1.6",
-    "protobufjs": "^8.0.0",
+    "protobufjs": "^8.0.1",
     "react": "^19.2.4",
     "react-native": "^0.83.4",
     "react-native-background-actions": "^4.0.1",
