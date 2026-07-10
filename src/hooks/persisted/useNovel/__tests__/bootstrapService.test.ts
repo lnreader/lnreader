@@ -389,9 +389,12 @@ describe('bootstrapService', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.batchInformation.totalChapters).toBe(2);
-    expect(mockGetChapterCountSync).toHaveBeenCalledWith(mockNovel.id, '1', [
-      'not-read',
-    ]);
+    expect(mockGetChapterCountSync).toHaveBeenCalledWith(
+      mockNovel.id,
+      '1',
+      ['not-read'],
+      undefined,
+    );
   });
 
   it('bootstrapNovelSync returns missing-chapters only when unfiltered count is zero', () => {
