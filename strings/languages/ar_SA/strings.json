@@ -4,7 +4,7 @@
     "discord": "ديس كورد",
     "github": "كيت هاب",
     "helpTranslate": "المساعدة في الترجَمة",
-    "plugins": "Plugins",
+    "plugins": "المكونات الإضافية",
     "version": "آلإصدار",
     "whatsNew": "ما الجديد"
   },
@@ -39,10 +39,10 @@
     "alwaysShowNavLabels": "إظهار تسميات التنقل دائمًا",
     "appLanguage": "",
     "languagePickerModal": {
-      "title": "Select Language",
-      "restartNote": "You will need to restart the app for the language change to take full effect."
+      "title": "اختر اللغة",
+      "restartNote": "سوف تحتاج إلى إعادة تشغيل التطبيق حتى يصبح تغيير اللغة ساري المفعول بالكامل."
     },
-    "appLanguageDefault": "Default",
+    "appLanguageDefault": "افتراضي",
     "appTheme": "مظهر التطبيق",
     "darkTheme": "المظهر الداكن",
     "hideBackdrop": "إخفاء الخلفية",
@@ -53,9 +53,9 @@
     "showHistoryInTheNav": "إظهار التاريخ في شريط التنقل",
     "showUpdatesInTheNav": "إظهار التحديثات في شريط التنقل",
     "themeMode": "Theme mode",
-    "themeModeLight": "Light",
-    "themeModeDark": "Dark",
-    "themeModeSystem": "System",
+    "themeModeLight": "فاتح (ابيض)",
+    "themeModeDark": "مظلم (أسود)",
+    "themeModeSystem": "النظام",
     "theme": {
       "default": "تلقائي",
       "lavender": "",
@@ -63,8 +63,8 @@
       "daybreakBloom": "Daybreak Bloom",
       "strawberry": "Strawberry Daiquiri",
       "tako": "Tako",
-      "teal": "Teal",
-      "turquoise": "Turquoise",
+      "teal": "أزرق مخضر",
+      "turquoise": "تركواز",
       "yotsuba": "Yotsuba",
       "catppuccin": "",
       "yinyang": ""
@@ -73,8 +73,8 @@
   "backupScreen": {
     "backupName": "اسم النسخة الاحتياطية",
     "backupCreated": "Backup created successfully",
-    "backupRestored": "Backup restored successfully",
-    "savingBackup": "Saving Backup",
+    "backupRestored": "تم استعادة النسخة الاحتياطية بنجاح",
+    "savingBackup": "حفظ النسخة الاحتياطية",
     "categoriesRestored": "",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
