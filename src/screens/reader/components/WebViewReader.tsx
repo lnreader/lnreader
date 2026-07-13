@@ -1,10 +1,5 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  AppState,
-  NativeEventEmitter,
-  NativeModules,
-  StatusBar,
-} from 'react-native';
+import React, { memo, useMemo, useRef } from 'react';
+import { StatusBar, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
 import color from 'color';
 
@@ -12,29 +7,20 @@ import { useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 
 import { getPlugin } from '@plugins/pluginManager';
-import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';
 import {
-  CHAPTER_GENERAL_SETTINGS,
-  CHAPTER_READER_SETTINGS,
-  ChapterGeneralSettings,
-  ChapterReaderSettings,
-  initialChapterGeneralSettings,
-  initialChapterReaderSettings,
+  useChapterGeneralSettings,
+  useChapterReaderSettings,
 } from '@hooks/persisted/useSettings';
 import { getBatteryLevelSync } from 'react-native-device-info';
-import * as Speech from 'expo-speech';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
-import {
-  showTTSNotification,
-  updateTTSNotification,
-  updateTTSPlaybackState,
-  updateTTSProgress,
-  dismissTTSNotification,
-  ttsMediaEmitter,
-} from '@utils/ttsNotification';
+import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
+import { TextInput } from 'react-native-paper';
+import useTTS from './Hooks/useTTS';
+import useCustomCode from './Hooks/useCustomCode';
+import useTextModifications from './Hooks/useTextModifications';
 
-type WebViewPostEvent = {
+export type WebViewPostEvent = {
   type: string;
   data?: { [key: string]: unknown };
   autoStartTTS?: boolean;
@@ -44,6 +30,7 @@ type WebViewPostEvent = {
 
 type WebViewReaderProps = {
   onPress(): void;
+  bottomInset: number;
 };
 
 const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
@@ -56,18 +43,18 @@ const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
   }
 };
 
-const { RNDeviceInfo } = NativeModules;
-const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
-
 const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'
   : 'file:///android_asset';
 
-const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
+const WebViewReader: React.FC<WebViewReaderProps> = ({
+  onPress,
+  bottomInset,
+}) => {
   const {
     novel,
     chapter,
-    chapterText: html,
+    chapterText,
     navigateChapter,
     saveProgress,
     nextChapter,
@@ -76,27 +63,30 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   } = useChapterContext();
   const theme = useTheme();
   // Use state for settings so they update when MMKV changes
-  const [readerSettings, setReaderSettings] = useState<ChapterReaderSettings>(
-    () =>
-      getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-      initialChapterReaderSettings,
-  );
-  const chapterGeneralSettings = useMemo(
-    () =>
-      getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
-      initialChapterGeneralSettings,
-    // needed to preserve settings during chapter change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
-  );
+  const readerSettings = useChapterReaderSettings();
+  const chapterGeneralSettings = useChapterGeneralSettings();
 
-  // Update readerSettings when chapter changes
-  useEffect(() => {
-    setReaderSettings(
-      getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-      initialChapterReaderSettings,
-    );
-  }, [chapter.id]);
+  const {
+    autoStartTTSRef,
+    eventTTSQueue,
+    eventTTSSpeak,
+    eventTTSPauseSpeak,
+    eventTTSStopSpeak,
+    eventTTSState,
+  } = useTTS(webViewRef, novel, chapter);
+  const {
+    html,
+    replaceModalVisible,
+    setReplaceModalVisible,
+    selectedTextForReplace,
+    setSelectedTextForReplace,
+    replacementText,
+    setReplacementText,
+    handleReplaceSave,
+    handleReplaceCancel,
+    eventTextAction,
+  } = useTextModifications(chapterText);
+  const { customJS, customCSS } = useCustomCode(readerSettings);
 
   // Update battery level when chapter changes to ensure fresh value on navigation
   const batteryLevel = useMemo(() => getBatteryLevelSync(), []);
@@ -104,232 +94,34 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
-  const autoStartTTSRef = useRef<boolean>(false);
-  const isTTSReadingRef = useRef<boolean>(false);
-  const readerSettingsRef = useRef<ChapterReaderSettings>(readerSettings);
-  const appStateRef = useRef(AppState.currentState);
-  const ttsQueueRef = useRef<string[]>([]);
-  const ttsQueueIndexRef = useRef<number>(0);
 
-  useEffect(() => {
-    readerSettingsRef.current = readerSettings;
-  }, [readerSettings]);
-
-  useEffect(() => {
-    const playListener = ttsMediaEmitter.addListener('TTSPlay', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && !tts.reading) { tts.resume(); }
-      `);
-    });
-    const pauseListener = ttsMediaEmitter.addListener('TTSPause', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && tts.reading) { tts.pause(); }
-      `);
-    });
-    const stopListener = ttsMediaEmitter.addListener('TTSStop', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts) { tts.stop(); }
-      `);
-    });
-    const rewindListener = ttsMediaEmitter.addListener('TTSRewind', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && tts.started) { tts.rewind(); }
-      `);
-    });
-    const prevListener = ttsMediaEmitter.addListener('TTSPrev', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && window.reader && window.reader.prevChapter) {
-          window.reader.post({ type: 'prev', autoStartTTS: true });
-        }
-      `);
-    });
-    const nextListener = ttsMediaEmitter.addListener('TTSNext', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && window.reader && window.reader.nextChapter) {
-          window.reader.post({ type: 'next', autoStartTTS: true });
-        }
-      `);
-    });
-    const seekToListener = ttsMediaEmitter.addListener(
-      'TTSSeekTo',
-      (event: { position: number }) => {
-        const position = event.position;
-        webViewRef.current?.injectJavaScript(`
-          if (window.tts && tts.started) { tts.seekTo(${position}); }
-        `);
-      },
-    );
-    return () => {
-      playListener.remove();
-      pauseListener.remove();
-      stopListener.remove();
-      rewindListener.remove();
-      prevListener.remove();
-      nextListener.remove();
-      seekToListener.remove();
-    };
-  }, [webViewRef]);
-
-  useEffect(() => {
-    if (isTTSReadingRef.current) {
-      updateTTSNotification({
-        novelName: novel?.name || 'Unknown',
-        chapterName: chapter.name,
-        coverUri: novel?.cover || '',
-        isPlaying: isTTSReadingRef.current,
-      });
-    }
-  }, [novel?.name, novel?.cover, chapter.name]);
-
-  useEffect(() => {
-    return () => {
-      dismissTTSNotification();
-    };
-  }, []);
-
-  useEffect(() => {
-    const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
-      switch (key) {
-        case CHAPTER_READER_SETTINGS:
-          // Update local state with new settings
-          const newSettings =
-            getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-            initialChapterReaderSettings;
-          setReaderSettings(newSettings);
-
-          // Stop any currently playing speech
-          Speech.stop();
-
-          // Update WebView settings
-          webViewRef.current?.injectJavaScript(
-            `
-            reader.readerSettings.val = ${MMKVStorage.getString(
-              CHAPTER_READER_SETTINGS,
-            )};
-            // Auto-restart TTS if currently reading
-            if (window.tts && tts.reading) {
-              const currentElement = tts.currentElement;
-              const wasReading = tts.reading;
-              tts.stop();
-              if (wasReading) {
-                setTimeout(() => {
-                  tts.start(currentElement);
-                }, 100);
-              }
-            }
-            `,
-          );
-          break;
-        case CHAPTER_GENERAL_SETTINGS:
-          webViewRef.current?.injectJavaScript(
-            `reader.generalSettings.val = ${MMKVStorage.getString(
-              CHAPTER_GENERAL_SETTINGS,
-            )}`,
-          );
-          break;
-      }
-    });
-
-    const subscription = deviceInfoEmitter.addListener(
-      'RNDeviceInfo_batteryLevelDidChange',
-      (level: number) => {
-        webViewRef.current?.injectJavaScript(
-          `reader.batteryLevel.val = ${level}`,
-        );
-      },
-    );
-    return () => {
-      subscription.remove();
-      mmkvListener.remove();
-    };
-  }, [webViewRef]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextState => {
-      appStateRef.current = nextState;
-      if (nextState === 'active' && isTTSReadingRef.current) {
-        const index = ttsQueueIndexRef.current;
-        webViewRef.current?.injectJavaScript(`
-          if (window.tts && window.tts.allReadableElements) {
-            const idx = ${index};
-            if (idx < tts.allReadableElements.length) {
-              tts.elementsRead = idx;
-              tts.currentElement = tts.allReadableElements[idx];
-              tts.prevElement = null;
-              tts.started = true;
-              tts.reading = true;
-              tts.scrollToElement(tts.currentElement);
-              tts.currentElement.classList.add('highlight');
-            }
-          }
-        `);
-      }
-    });
-
-    return () => subscription.remove();
-  }, [webViewRef]);
-
-  const speakText = (text: string) => {
-    Speech.speak(text, {
-      onDone() {
-        const isBackground =
-          appStateRef.current === 'background' ||
-          appStateRef.current === 'inactive';
-
-        if (
-          isBackground &&
-          ttsQueueRef.current.length > 0 &&
-          ttsQueueIndexRef.current + 1 < ttsQueueRef.current.length
-        ) {
-          const nextIndex = ttsQueueIndexRef.current + 1;
-          const nextText = ttsQueueRef.current[nextIndex];
-          if (nextText) {
-            ttsQueueIndexRef.current = nextIndex;
-            speakText(nextText);
-            return;
-          }
-        }
-
-        if (isBackground) {
-          isTTSReadingRef.current = false;
-          dismissTTSNotification();
-          webViewRef.current?.injectJavaScript('tts.stop?.()');
-          return;
-        }
-
-        webViewRef.current?.injectJavaScript('tts.next?.()');
-      },
-      voice: readerSettingsRef.current.tts?.voice?.identifier,
-      pitch: readerSettingsRef.current.tts?.pitch || 1,
-      rate: readerSettingsRef.current.tts?.rate || 1,
-    });
-  };
   const isRTL = plugin?.lang === 'Arabic' || plugin?.lang === 'Hebrew';
   const readerDir = isRTL ? 'rtl' : 'ltr';
 
   return (
-    <WebView
-      ref={webViewRef}
-      style={{ backgroundColor: readerSettings.theme }}
-      allowFileAccess={true}
-      originWhitelist={['*']}
-      scalesPageToFit={true}
-      showsVerticalScrollIndicator={false}
-      javaScriptEnabled={true}
-      webviewDebuggingEnabled={__DEV__}
-      onLoadEnd={() => {
-        // Update battery level when WebView finishes loading
-        const currentBatteryLevel = getBatteryLevelSync();
-        webViewRef.current?.injectJavaScript(
-          `if (window.reader && window.reader.batteryLevel) {
+    <>
+      <WebView
+        ref={webViewRef}
+        style={{ backgroundColor: readerSettings.theme }}
+        allowFileAccess={true}
+        originWhitelist={['*']}
+        scalesPageToFit={true}
+        showsVerticalScrollIndicator={false}
+        javaScriptEnabled={true}
+        webviewDebuggingEnabled={__DEV__}
+        onLoadEnd={() => {
+          // Update battery level when WebView finishes loading
+          const currentBatteryLevel = getBatteryLevelSync();
+          webViewRef.current?.injectJavaScript(
+            `if (window.reader && window.reader.batteryLevel) {
             window.reader.batteryLevel.val = ${currentBatteryLevel};
           }`,
-        );
+          );
 
-        if (autoStartTTSRef.current) {
-          autoStartTTSRef.current = false;
-          setTimeout(() => {
-            webViewRef.current?.injectJavaScript(`
+          if (autoStartTTSRef.current) {
+            autoStartTTSRef.current = false;
+            setTimeout(() => {
+              webViewRef.current?.injectJavaScript(`
               (function() {
                 if (window.tts && reader.generalSettings.val.TTSEnable) {
                   setTimeout(() => {
@@ -342,113 +134,61 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 }
               })();
             `);
-          }, 300);
-        }
-      }}
-      onMessage={(ev: { nativeEvent: { data: string } }) => {
-        __DEV__ && onLogMessage(ev);
-        const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
-        switch (event.type) {
-          case 'tts-queue': {
-            const payload = event.data as
-              | { queue?: unknown; startIndex?: unknown }
-              | undefined;
-            const queue = Array.isArray(payload?.queue)
-              ? payload?.queue.filter(
-                (item): item is string =>
-                  typeof item === 'string' && item.trim().length > 0,
-              )
-              : [];
-            ttsQueueRef.current = queue;
-            if (typeof payload?.startIndex === 'number') {
-              ttsQueueIndexRef.current = payload.startIndex;
-            } else {
-              ttsQueueIndexRef.current = 0;
-            }
-            break;
+            }, 300);
           }
-          case 'hide':
-            onPress();
-            break;
-          case 'next':
-            nextChapterScreenVisible.current = true;
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
-            navigateChapter('NEXT');
-            break;
-          case 'prev':
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
-            navigateChapter('PREV');
-            break;
-          case 'save':
-            if (event.data && typeof event.data === 'number') {
-              saveProgress(event.data);
-            }
-            break;
-          case 'speak':
-            if (event.data && typeof event.data === 'string') {
-              if (typeof event.index === 'number') {
-                ttsQueueIndexRef.current = event.index;
+        }}
+        onMessage={(ev: { nativeEvent: { data: string } }) => {
+          __DEV__ && onLogMessage(ev);
+          const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
+          switch (event.type) {
+            case 'hide':
+              onPress();
+              break;
+            case 'next':
+              nextChapterScreenVisible.current = true;
+              if (event.autoStartTTS) {
+                autoStartTTSRef.current = true;
               }
-              if (!isTTSReadingRef.current) {
-                isTTSReadingRef.current = true;
-                showTTSNotification({
-                  novelName: novel?.name || 'Unknown',
-                  chapterName: chapter.name,
-                  coverUri: novel?.cover || '',
-                  isPlaying: true,
-                });
-              } else {
-                updateTTSNotification({
-                  novelName: novel?.name || 'Unknown',
-                  chapterName: chapter.name,
-                  coverUri: novel?.cover || '',
-                  isPlaying: true,
-                });
+              navigateChapter('NEXT');
+              break;
+            case 'prev':
+              if (event.autoStartTTS) {
+                autoStartTTSRef.current = true;
               }
-              if (
-                typeof event.index === 'number' &&
-                typeof event.total === 'number' &&
-                event.total > 0
-              ) {
-                updateTTSProgress(event.index, event.total);
+              navigateChapter('PREV');
+              break;
+            case 'save':
+              if (event.data && typeof event.data === 'number') {
+                saveProgress(event.data);
               }
-              speakText(event.data);
-            } else {
-              webViewRef.current?.injectJavaScript('tts.next?.()');
+              break;
+            case 'tts-queue': {
+              eventTTSQueue(event);
+              break;
             }
-            break;
-          case 'pause-speak':
-            Speech.stop();
-            break;
-          case 'stop-speak':
-            Speech.stop();
-            if (!autoStartTTSRef.current) {
-              isTTSReadingRef.current = false;
-              ttsQueueRef.current = [];
-              ttsQueueIndexRef.current = 0;
-              dismissTTSNotification();
-            }
-            break;
-          case 'tts-state':
-            if (event.data && typeof event.data === 'object') {
-              const data = event.data as { isReading?: boolean };
-              const isReading = data.isReading === true;
-              isTTSReadingRef.current = isReading;
-              updateTTSPlaybackState(isReading);
-            }
-            break;
-        }
-      }}
-      source={{
-        baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
-        headers: plugin?.imageRequestInit?.headers,
-        method: plugin?.imageRequestInit?.method,
-        body: plugin?.imageRequestInit?.body,
-        html: ` 
+            case 'speak':
+              eventTTSSpeak(event);
+              break;
+            case 'pause-speak':
+              eventTTSPauseSpeak();
+              break;
+            case 'stop-speak':
+              eventTTSStopSpeak();
+              break;
+            case 'tts-state':
+              eventTTSState(event);
+              break;
+            case 'text-action':
+              eventTextAction(event);
+              break;
+          }
+        }}
+        source={{
+          baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
+          headers: plugin?.imageRequestInit?.headers,
+          method: plugin?.imageRequestInit?.method,
+          body: plugin?.imageRequestInit?.body,
+          html: `
         <!DOCTYPE html>
           <html dir="${readerDir}">
             <head>
@@ -460,6 +200,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               <style>
               :root {
                 --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
+                --bottom-inset: ${bottomInset ?? 0}px;
                 --readerSettings-theme: ${readerSettings.theme};
                 --readerSettings-padding: ${readerSettings.padding}px;
                 --readerSettings-textSize: ${readerSettings.textSize}px;
@@ -475,62 +216,68 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 --theme-onSecondary: ${theme.onSecondary};
                 --theme-surface: ${theme.surface};
                 --theme-surface-0-9: ${color(theme.surface)
-            .alpha(0.9)
-            .toString()};
+                  .alpha(0.9)
+                  .toString()};
                 --theme-onSurface: ${theme.onSurface};
                 --theme-surfaceVariant: ${theme.surfaceVariant};
                 --theme-onSurfaceVariant: ${theme.onSurfaceVariant};
                 --theme-outline: ${theme.outline};
                 --theme-rippleColor: ${theme.rippleColor};
                 }
-                
+
                 @font-face {
                   font-family: ${readerSettings.fontFamily};
-                  src: url("file:///android_asset/fonts/${readerSettings.fontFamily
-          }.ttf");
+                  src: url("file:///android_asset/fonts/${
+                    readerSettings.fontFamily
+                  }.ttf");
                 }
                 </style>
- 
+
               <link rel="stylesheet" href="${pluginCustomCSS}">
-              <style>${readerSettings.customCSS}</style>
+              <style>${customCSS}</style>
             </head>
-            <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
-          }">
-              <div class="transition-chapter" style="transform: ${nextChapterScreenVisible.current
-            ? 'translateX(-100%)'
-            : 'translateX(0%)'
-          };
+            <body class="${
+              chapterGeneralSettings.pageReader ? 'page-reader' : ''
+            }">
+              <div class="transition-chapter" style="transform: ${
+                nextChapterScreenVisible.current
+                  ? 'translateX(-100%)'
+                  : 'translateX(0%)'
+              };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
               ">${chapter.name}</div>
               <div id="LNReader-chapter">
-                ${html}  
+                ${html}
               </div>
               <div id="reader-ui"></div>
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-            nextChapterScreenVisible: nextChapterScreenVisible.current,
-          })};
- 
- 
+                  nextChapterScreenVisible: nextChapterScreenVisible.current,
+                })};
+
+
                 var initialReaderConfig = ${JSON.stringify({
-            readerSettings,
-            chapterGeneralSettings,
-            novel,
-            chapter,
-            nextChapter,
-            prevChapter,
-            batteryLevel,
-            autoSaveInterval: 2222,
-            DEBUG: __DEV__,
-            strings: {
-              finished: getString('readerScreen.finished') + ': ' + chapter.name.trim(),
-              nextChapter: getString('readerScreen.nextChapter', {
-                name: nextChapter?.name,
-              }),
-              noNextChapter: getString('readerScreen.noNextChapter'),
-            },
-          })}
+                  readerSettings,
+                  chapterGeneralSettings,
+                  novel,
+                  chapter,
+                  nextChapter,
+                  prevChapter,
+                  batteryLevel,
+                  autoSaveInterval: 2222,
+                  DEBUG: __DEV__,
+                  strings: {
+                    finished:
+                      getString('readerScreen.finished') +
+                      ': ' +
+                      chapter.name.trim(),
+                    nextChapter: getString('readerScreen.nextChapter', {
+                      name: nextChapter?.name,
+                    }),
+                    noNextChapter: getString('readerScreen.noNextChapter'),
+                  },
+                })}
               </script>
               <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>
@@ -539,14 +286,60 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script src="${pluginCustomJS}"></script>
+              <script src="${assetsUriPrefix}/js/textRemover.js"></script>
               <script>
-                ${readerSettings.customJS}
-              </script>
+                 function fn(){
+                     let novelName = "${novel.name}";
+                     let chapterName = "${chapter.name}";
+                     let sourceId = "${novel.pluginId}";
+                     let chapterId =${chapter.id};
+                     let novelId =${chapter.novelId};
+                     const qs = (s) => document.querySelector(s);
+                     let html = qs("#LNReader-chapter").innerHTML;
+                     ${customJS}
+                     qs("#LNReader-chapter").innerHTML = html;
+                   }
+                   document.addEventListener("DOMContentLoaded", fn);
+               </script>
           </html>
           `,
-      }}
-    />
+        }}
+      />
+      <KeyboardAvoidingModal
+        visible={replaceModalVisible}
+        onDismiss={() => setReplaceModalVisible(false)}
+        onSave={handleReplaceSave}
+        onCancel={handleReplaceCancel}
+        title={getString('common.replaceText')}
+      >
+        <TextInput
+          label={getString('common.textToReplace')}
+          defaultValue={selectedTextForReplace}
+          onChangeText={setSelectedTextForReplace}
+          autoCorrect={false}
+          mode="outlined"
+          style={styles.textInput}
+          theme={{ colors: theme }}
+        />
+        <TextInput
+          label={getString('common.replaceWith')}
+          defaultValue={replacementText}
+          onChangeText={setReplacementText}
+          autoCorrect={false}
+          autoFocus
+          mode="outlined"
+          style={styles.textInput}
+          theme={{ colors: theme }}
+        />
+      </KeyboardAvoidingModal>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  textInput: {
+    marginBottom: 16,
+  },
+});
 
 export default memo(WebViewReader);

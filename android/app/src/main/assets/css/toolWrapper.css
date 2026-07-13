@@ -12,7 +12,7 @@
   right: unset;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 120px;
+  bottom: calc(68px + var(--bottom-inset));
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
@@ -20,7 +20,7 @@
 
 @media only screen and (min-width: 500px) {
   #ToolWrapper.horizontal {
-    bottom: 80px;
+    bottom: calc(28px + var(--bottom-inset));
   }
 }
 
@@ -32,7 +32,7 @@
 
 #ToolWrapper.hidden.horizontal {
   opacity: 0;
-  bottom: 80px;
+  bottom: calc(28px + var(--bottom-inset));
   right: unset;
 }
 

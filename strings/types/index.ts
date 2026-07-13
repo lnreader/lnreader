@@ -174,6 +174,11 @@ export interface StringMap {
   'common.categories': 'string';
   'common.chapters': 'string';
   'common.clear': 'string';
+  'common.code': 'string';
+  'common.custom_code': 'string';
+  'common.replaceText': 'string';
+  'common.textToReplace': 'string';
+  'common.replaceWith': 'string';
   'common.copiedToClipboard': 'string';
   'common.delete': 'string';
   'common.deleted': 'string';
@@ -242,6 +247,10 @@ export interface StringMap {
   'generalSettingsScreen.disableLoadingAnimationsDesc': 'string';
   'generalSettingsScreen.disableHapticFeedback': 'string';
   'generalSettingsScreen.disableHapticFeedbackDescription': 'string';
+  'generalSettingsScreen.chapterDownloadCooldown': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownDesc': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownPlaceholder': 'string';
+  'generalSettingsScreen.chapterDownloadCooldownWarning': 'string';
   'generalSettingsScreen.displayMode': 'string';
   'generalSettingsScreen.downloadNewChapters': 'string';
   'generalSettingsScreen.epub': 'string';
@@ -472,4 +481,22 @@ export interface StringMap {
   'notifications.LOCAL_RESTORE': 'string';
   'notifications.MIGRATE_NOVEL': 'string';
   'notifications.DOWNLOAD_CHAPTER': 'string';
+  'customCodeSettings.textManipulation': 'string';
+  'customCodeSettings.codeSnippets': 'string';
+  'customCodeSettings.createNewSnippet': 'string';
+  'customCodeSettings.addCssOrJsCode': 'string';
+  'customCodeSettings.cssSnippets': 'string';
+  'customCodeSettings.javascriptSnippets': 'string';
+  'customCodeSettings.createJSSnippet': 'string';
+  'customCodeSettings.addJavascriptCode': 'string';
+  'customCodeSettings.replace': 'string';
+  'customCodeSettings.removeText': 'string';
+  'customCodeSettings.enterAMatch': 'string';
+  'customCodeSettings.enterAReplace': 'string';
+  'customCodeSettings.itemAlreadyExists': 'string';
+  'customCodeSettings.editReplace': 'string';
+  'customCodeSettings.yourCodeHere': 'string';
+  'customCodeSettings.imported': 'string';
+  'customCodeSettings.snippetUpdated': 'string';
+  'customCodeSettings.snippetSaved': 'string';
 }

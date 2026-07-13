@@ -59,6 +59,12 @@ const SettingsScreen = ({ navigation }: SettingsScreenProps) => {
           theme={theme}
         />
         <List.Item
+          title="Custom Code"
+          icon="code-braces"
+          onPress={() => navigation.navigate('CustomCode')}
+          theme={theme}
+        />
+        <List.Item
           title={getString('tracking')}
           icon="sync"
           onPress={() =>

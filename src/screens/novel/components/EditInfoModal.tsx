@@ -18,6 +18,7 @@ import { ThemeColors } from '@theme/types';
 import { NovelInfo } from '@database/types';
 import { NovelStatus } from '@plugins/types';
 import { translateNovelStatus } from '@utils/translateEnum';
+import KeyboardAvoidingModal from '@components/Modal/KeyboardAvoidingModal';
 
 interface EditInfoModalProps {
   theme: ThemeColors;
@@ -71,10 +72,22 @@ const EditInfoModal = ({
 
   return (
     <Portal>
-      <Modal visible={modalVisible} onDismiss={hideModal}>
-        <Text style={[styles.modalTitle, getModalTitleColor(theme)]}>
-          {getString('novelScreen.edit.info')}
-        </Text>
+      <KeyboardAvoidingModal
+        title={getString('novelScreen.edit.info')}
+        visible={modalVisible}
+        onDismiss={hideModal}
+        onSave={() => {
+          setNovel(novelInfo);
+          updateNovelInfo(novelInfo);
+          hideModal();
+          return true;
+        }}
+        onCancel={hideModal}
+        onReset={() => {
+          setNovelInfo(initialNovelInfo);
+          updateNovelInfo(initialNovelInfo);
+        }}
+      >
         <View style={styles.statusRow}>
           <Text style={getStatusLabelColor(theme)}>
             {getString('novelScreen.edit.status')}
@@ -197,28 +210,7 @@ const EditInfoModal = ({
             showsHorizontalScrollIndicator={false}
           />
         ) : null}
-        <View style={getButtonRowStyle()}>
-          <Button
-            onPress={() => {
-              setNovelInfo(initialNovelInfo);
-              updateNovelInfo(initialNovelInfo);
-            }}
-          >
-            {getString('common.reset')}
-          </Button>
-          <View style={getFlex1()} />
-          <Button
-            onPress={() => {
-              setNovel(novelInfo);
-              updateNovelInfo(novelInfo);
-              hideModal();
-            }}
-          >
-            {getString('common.save')}
-          </Button>
-          <Button onPress={hideModal}>{getString('common.cancel')}</Button>
-        </View>
-      </Modal>
+      </KeyboardAvoidingModal>
     </Portal>
   );
 };

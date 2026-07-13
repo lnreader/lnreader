@@ -15,6 +15,8 @@ import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 
 import ExportEpubModal from './ExportEpubModal';
 import { MaterialDesignIconName } from '@type/icon';
+import { composeCSS, composeJS } from '@utils/customCode';
+
 
 interface ExportNovelAsEpubButtonProps {
   novel?: NovelInfo;
@@ -84,14 +86,18 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       }`
       : '';
 
+    const customCSS = composeCSS(readerSettings.codeSnippetsCSS);
+
     const customStyles = epubUseCustomCSS
-      ? readerSettings.customCSS
+      ? customCSS
           .replace(RegExp(`#sourceId-${novel.pluginId}\\s*\\{`, 'g'), 'body {')
           .replace(RegExp(`#sourceId-${novel.pluginId}[^.#A-Z]*`, 'gi'), '')
       : '';
 
     return appThemeStyles + customStyles;
   }, [novel, epubUseAppTheme, epubUseCustomCSS, readerSettings, theme.primary]);
+
+  const customJS = composeJS(readerSettings.codeSnippetsJS);
 
   const epubJavaScript = useMemo(() => {
     if (!novel) {
@@ -105,10 +111,10 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       let chapterId = "";
       let novelId = ${novel.id};
       let html = document.querySelector("chapter").innerHTML;
-      
-      ${readerSettings.customJS}
+
+      ${customJS}
     `;
-  }, [novel, readerSettings]);
+  }, [customJS, novel]);
 
   const exportNovelAsEpub = async (
     destinationUri: string,

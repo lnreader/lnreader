@@ -201,6 +201,11 @@
     "categories": "Categories",
     "chapters": "Chapters",
     "clear": "Clear",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "replaceText": "Replace Text",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
     "copiedToClipboard": "Copied to clipboard: %{name}",
     "delete": "Delete",
     "deleted": "Deleted %{name}",
@@ -575,5 +580,25 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text manipulation",
+    "codeSnippets": "Code Snippets",
+    "createNewSnippet": "Create new snippet",
+    "addCssOrJsCode": "Add CSS or JavaScript code",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code",
+    "replace": "Replace",
+    "removeText": "Remove text",
+    "enterAMatch": "Enter a match",
+    "enterAReplace": "Enter a replace",
+    "itemAlreadyExists": "Item already exists",
+    "editReplace": "Edit Replace",
+    "yourCodeHere": "Your code here",
+    "imported": "Imported",
+    "snippetUpdated": "Snippet updated successfully",
+    "snippetSaved": "Snippet saved successfully"
   }
 }

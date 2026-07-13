@@ -5,6 +5,7 @@ import {
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
 import { Voice } from 'expo-speech';
+import { useEffect, useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 
@@ -132,8 +133,6 @@ export interface ChapterReaderSettings {
   padding: number;
   fontFamily: string;
   lineHeight: number;
-  customCSS: string;
-  customJS: string;
   customThemes: ReaderTheme[];
   tts?: {
     voice?: Voice;
@@ -146,7 +145,21 @@ export interface ChapterReaderSettings {
   epubUseAppTheme: boolean;
   epubUseCustomCSS: boolean;
   epubUseCustomJS: boolean;
+  /**
+   * Custom code
+   */
+  replaceText: Record<string, string>;
+  removeText: string[];
+  codeSnippetsCSS: CodeSnippet[];
+  codeSnippetsJS: CodeSnippet[];
 }
+
+type CodeSnippet = {
+  name: string;
+  code: string;
+  lang: 'js' | 'css';
+  active: boolean;
+};
 
 const initialAppSettings: AppSettings = {
   /**
@@ -223,8 +236,6 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   padding: 16,
   fontFamily: '',
   lineHeight: 1.5,
-  customCSS: '',
-  customJS: '',
   customThemes: [],
   tts: {
     rate: 1,
@@ -236,6 +247,13 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   epubUseAppTheme: false,
   epubUseCustomCSS: false,
   epubUseCustomJS: false,
+  /**
+   * Custom code
+   */
+  replaceText: {},
+  removeText: [],
+  codeSnippetsCSS: [],
+  codeSnippetsJS: [],
 };
 
 export const useAppSettings = () => {
@@ -301,9 +319,51 @@ export const useChapterGeneralSettings = () => {
   };
 };
 
+type MigrationChapterReaderSettings = ChapterReaderSettings & {
+  customJS?: string;
+  customCSS?: string;
+};
 export const useChapterReaderSettings = () => {
-  const [storedSettings = initialChapterReaderSettings, setSettings] =
-    useMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+  const [_storedSettings, setSettings] =
+    useMMKVObject<MigrationChapterReaderSettings>(CHAPTER_READER_SETTINGS);
+
+  const storedSettings: MigrationChapterReaderSettings = useMemo(
+    () => ({
+      ...initialChapterReaderSettings,
+      ..._storedSettings,
+    }),
+    [_storedSettings],
+  );
+
+  // Migrate old js and css to new
+  useEffect(() => {
+    if (storedSettings.customJS) {
+      storedSettings.codeSnippetsJS.push({
+        active: true,
+        code: storedSettings.customJS,
+        lang: 'js',
+        name: 'Custom JS',
+      });
+      setSettings({
+        ...storedSettings,
+        customJS: undefined,
+        codeSnippetsJS: storedSettings.codeSnippetsJS,
+      });
+    }
+    if (storedSettings.customCSS) {
+      storedSettings.codeSnippetsCSS.push({
+        active: true,
+        code: storedSettings.customCSS,
+        lang: 'css',
+        name: 'Custom CSS',
+      });
+      setSettings({
+        ...storedSettings,
+        customCSS: undefined,
+        codeSnippetsCSS: storedSettings.codeSnippetsCSS,
+      });
+    }
+  }, [setSettings, storedSettings]);
 
   // Ensure TTS settings have proper defaults (migration for existing users)
   const chapterReaderSettings = {
@@ -341,7 +401,7 @@ export const useChapterReaderSettings = () => {
     });
 
   return {
-    ...chapterReaderSettings,
+    ...(chapterReaderSettings as ChapterReaderSettings),
     setChapterReaderSettings,
     saveCustomReaderTheme,
     deleteCustomReaderTheme,
