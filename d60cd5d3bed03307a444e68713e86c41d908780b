@@ -1,0 +1,42 @@
+.github/workflows/testing.yml
+  019f5b00-ac96-7e22-8048-9b375d0b6775 47-49
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f5b00-ac96-7e22-8048-9b375d0b6775",
+          "lines": "47-49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/testing.yml"
+    }
+  ],
+  "base_commit_sha": "52d5c99c46b14148bd262c878701abf91c8b593b",
+  "branch": "master",
+  "commit_sha": "d60cd5d3bed03307a444e68713e86c41d908780b",
+  "commit_time": "2026-07-13T16:01:58+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.25",
+  "prompts": {
+    "019f5b00-ac96-7e22-8048-9b375d0b6775": {
+      "accepted_lines": 3,
+      "agent_id": {
+        "id": "019f5b00-ac96-7e22-8048-9b375d0b6775",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 3,
+      "total_deletions": 0
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
