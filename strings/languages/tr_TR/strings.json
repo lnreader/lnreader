@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "İşaretlenmiş",
         "downloaded": "İndirilmiş",
-        "unread": "Okunmamış"
+        "unread": "Okunmamış",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "Bölüm ismine göre",
