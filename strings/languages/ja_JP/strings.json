@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "ブックマーク済み",
         "downloaded": "ダウンロード済み",
-        "unread": "未読"
+        "unread": "未読",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "章名順",
