@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "Ditandai",
         "downloaded": "Diunduh",
-        "unread": "Belum dibaca"
+        "unread": "Belum dibaca",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "Berdasarkan nama bab",
