@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "В закладках",
         "downloaded": "Загружено",
-        "unread": "Не прочитано"
+        "unread": "Не прочитано",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "По названию главы",
