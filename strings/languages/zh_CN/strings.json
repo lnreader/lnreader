@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "已添加书签",
         "downloaded": "已下载",
-        "unread": "未读"
+        "unread": "未读",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "按章节名",
