@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "Закладки",
         "downloaded": "Завантажено",
-        "unread": "Не прочитано"
+        "unread": "Не прочитано",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "За назвою розділу",
