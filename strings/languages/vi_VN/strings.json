@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "Đã đánh dấu",
         "downloaded": "Đã tải xuống",
-        "unread": "Chưa đọc"
+        "unread": "Chưa đọc",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "Theo tên chương",
