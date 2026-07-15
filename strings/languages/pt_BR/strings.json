@@ -378,7 +378,8 @@
       "filters": {
         "bookmarked": "Favoritado",
         "downloaded": "Transferido",
-        "unread": "Não lido"
+        "unread": "Não lido",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "Por nome do capítulo",
