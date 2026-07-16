@@ -40,11 +40,7 @@ const SwitchItem: React.FC<SwitchItemProps> = ({
         </Text>
       ) : null}
     </View>
-    <Switch
-      value={value}
-      onValueChange={onPress}
-      style={styles.switch}
-    />
+    <Switch value={value} onValueChange={onPress} style={styles.switch} />
   </Pressable>
 );
 

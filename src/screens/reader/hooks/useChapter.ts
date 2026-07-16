@@ -34,7 +34,7 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
 import NativeVolumeButtonListener from '@specs/NativeVolumeButtonListener';
 import NativeFile from '@specs/NativeFile';
-import { useNovelActions } from '@screens/novel/NovelContext';
+import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 
 const emmiter = new NativeEventEmitter(NativeVolumeButtonListener);
 
@@ -49,6 +49,7 @@ export default function useChapter(
     updateChapterProgress,
     chapterTextCache,
   } = useNovelActions();
+  const novelSettings = useNovelValue('novelSettings');
 
   const [hidden, setHidden] = useState(true);
   const [chapter, setChapter] = useState(initialChapter);
@@ -131,16 +132,28 @@ export default function useChapter(
         const chap = dbChapter ?? navChapter ?? chapter;
         const cachedText = chapterTextCache.read(chap.id);
         const text = cachedText ?? loadChapterText(chap.id, chap.path);
+        const excludedScanlators = novelSettings?.excludedScanlators || [];
         const [nextChapResult, prevChapResult, awaitedText] = await Promise.all(
           [
-            getNextChapter(chap.novelId, chap.position!, chap.page ?? ''),
-            getPrevChapter(chap.novelId, chap.position!, chap.page ?? ''),
+            getNextChapter(
+              chap.novelId,
+              chap.position!,
+              chap.page ?? '',
+              excludedScanlators,
+            ),
+            getPrevChapter(
+              chap.novelId,
+              chap.position!,
+              chap.page ?? '',
+              excludedScanlators,
+            ),
             text,
           ],
         );
 
         let nextChap = nextChapResult;
         let prevChap = prevChapResult;
+
         const totalPages = novel.totalPages ?? 0;
 
         // Pre-fetch adjacent page chapters if at a page boundary
@@ -164,6 +177,7 @@ export default function useChapter(
               chap.novelId,
               chap.position!,
               chap.page ?? '',
+              excludedScanlators,
             );
           } catch {}
         }
@@ -186,6 +200,7 @@ export default function useChapter(
               chap.novelId,
               chap.position!,
               chap.page ?? '',
+              excludedScanlators,
             );
           } catch {}
         }
@@ -226,6 +241,7 @@ export default function useChapter(
       novel.path,
       novel.totalPages,
       setLoading,
+      novelSettings,
     ],
   );
 

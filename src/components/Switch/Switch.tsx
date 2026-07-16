@@ -42,15 +42,12 @@ const Switch = ({ value, onValueChange, style }: SwitchProps) => {
   const thumbPositionStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateX: withSpring(
-          value ? THUMB_OFFSET_ON : THUMB_OFFSET_OFF,
-          {
-            mass: 1,
-            damping: 15,
-            stiffness: 120,
-            overshootClamping: false,
-          },
-        ),
+        translateX: withSpring(value ? THUMB_OFFSET_ON : THUMB_OFFSET_OFF, {
+          mass: 1,
+          damping: 15,
+          stiffness: 120,
+          overshootClamping: false,
+        }),
       },
     ],
   }));
@@ -109,12 +106,7 @@ const Switch = ({ value, onValueChange, style }: SwitchProps) => {
   return (
     <Pressable onPress={onValueChange}>
       <Animated.View
-        style={[
-          styles.track,
-          style,
-          trackColorStyle,
-          trackBorderStyle,
-        ]}
+        style={[styles.track, style, trackColorStyle, trackBorderStyle]}
       >
         <Animated.View
           style={[

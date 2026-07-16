@@ -53,6 +53,10 @@ img {
   max-width: 100%;
 }
 
+div:has(> table):not(#LNReader-chapter) {
+  overflow: auto;
+}
+
 table {
   background-color: var(--theme-onPrimary);
   border-collapse: collapse;
@@ -83,8 +87,6 @@ td {
   margin-left: var(--readerSettings-padding);
   margin-right: var(--readerSettings-padding);
   border-radius: 50px;
-  border-width: 1;
-  color: var(--theme-onPrimary);
   background-color: var(--theme-primary);
   font-family: var(--readerSettings-fontFamily);
   font-size: 16px;
@@ -93,6 +95,7 @@ td {
 }
 
 .next-button {
+  color: var(--theme-onPrimary);
   min-height: 40px;
   text-overflow: ellipsis;
   overflow: hidden;

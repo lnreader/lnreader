@@ -1,0 +1,1 @@
+ALTER TABLE `Chapter` ADD `scanlator` text;

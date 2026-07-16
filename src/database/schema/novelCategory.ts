@@ -1,8 +1,4 @@
-import {
-  integer,
-  sqliteTable,
-  uniqueIndex,
-} from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const novelCategory = sqliteTable(
   'NovelCategory',

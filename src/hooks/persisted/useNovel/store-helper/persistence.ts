@@ -50,6 +50,13 @@ const isValidNovelSettings = (value: unknown): value is NovelSettings => {
   ) {
     return false;
   }
+  if (
+    value.excludedScanlators !== undefined &&
+    (!Array.isArray(value.excludedScanlators) ||
+      !value.excludedScanlators.every(s => typeof s === 'string'))
+  ) {
+    return false;
+  }
   return true;
 };
 

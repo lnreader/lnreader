@@ -6,6 +6,7 @@ describe('novelStore.chapterState', () => {
       chapters: [],
       firstUnreadChapter: undefined,
       chapterTextCache: {},
+      scanlators: [],
       batchInformation: {
         batch: 0,
         total: 0,

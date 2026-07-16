@@ -1,9 +1,4 @@
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useContext,
-} from 'react';
+import { createContext, Dispatch, SetStateAction, useContext } from 'react';
 
 interface SelectionContextValue {
   selectedIdsSet: Set<number>;

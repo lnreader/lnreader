@@ -96,7 +96,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 
   const releaseTimeStyle = {
     color: theme.outline,
-    marginStart: chapter.releaseTime ? 5 : 0,
+    marginStart: chapter.releaseTime || chapter.scanlator ? 5 : 0,
   } as const;
   function parseTime(time?: string | Date | null) {
     if (!time) return undefined;
@@ -163,12 +163,26 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                   {parsedTime}
                 </Text>
               ) : null}
+              {chapter.scanlator && !isUpdateCard ? (
+                <Text
+                  style={[
+                    { color: releaseColor },
+                    styles.mt4,
+                    styles.text,
+                    { marginStart: parsedTime ? 5 : 0 },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {parsedTime ? '•  ' : null}
+                  {chapter.scanlator}
+                </Text>
+              ) : null}
               {!isUpdateCard && progress && progress > 0 && chapter.unread ? (
                 <Text
                   style={[styles.text, styles.mt4, releaseTimeStyle]}
                   numberOfLines={1}
                 >
-                  {chapter.releaseTime ? '•  ' : null}
+                  {chapter.releaseTime || chapter.scanlator ? '•  ' : null}
                   {getString('novelScreen.progress', { progress })}
                 </Text>
               ) : null}

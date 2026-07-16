@@ -8,4 +8,5 @@ export const createInitialChapterSlice = (): ChapterSliceState => ({
     batch: 0,
     total: 0,
   },
+  scanlators: [],
 });

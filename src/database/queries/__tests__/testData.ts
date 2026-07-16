@@ -90,6 +90,7 @@ export async function insertTestChapter(
     page: '1',
     position: 0,
     progress: null,
+    scanlator: null,
     ...data,
     novelId,
   };
