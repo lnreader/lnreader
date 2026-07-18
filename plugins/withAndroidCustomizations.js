@@ -89,88 +89,12 @@ const withBuildGradleCustomizations = config => {
   });
 };
 
-// ---------- 3c. MainActivity.kt ----------
-
-const withMainActivityCustomizations = config => {
-  return withDangerousMod(config, [
-    'android',
-    config => {
-      const platformRoot = config.modRequest.platformProjectRoot;
-      const mainActivityPath = path.join(
-        platformRoot,
-        'app',
-        'src',
-        'main',
-        'java',
-        'com',
-        'rajarsheechatterjee',
-        'LNReader',
-        'MainActivity.kt',
-      );
-
-      if (!fs.existsSync(mainActivityPath)) {
-        console.warn(
-          `MainActivity.kt not found at ${mainActivityPath}, skipping customizations`,
-        );
-        return config;
-      }
-
-      let content = fs.readFileSync(mainActivityPath, 'utf8');
-
-      fs.writeFileSync(mainActivityPath, content);
-      return config;
-    },
-  ]);
-};
-
-// ---------- 3d. MainApplication.kt ----------
-
-const withMainApplicationCustomizations = config => {
-  return withDangerousMod(config, [
-    'android',
-    config => {
-      const platformRoot = config.modRequest.platformProjectRoot;
-      const mainAppPath = path.join(
-        platformRoot,
-        'app',
-        'src',
-        'main',
-        'java',
-        'com',
-        'rajarsheechatterjee',
-        'LNReader',
-        'MainApplication.kt',
-      );
-
-      if (!fs.existsSync(mainAppPath)) {
-        console.warn(
-          `MainApplication.kt not found at ${mainAppPath}, skipping library load injection`,
-        );
-        return config;
-      }
-
-      let content = fs.readFileSync(mainAppPath, 'utf8');
-
-      if (!content.includes('System.loadLibrary("nitro_epub")')) {
-        content = content.replace(
-          /(super\.onCreate\(\)\s*\n)/,
-          '$1    System.loadLibrary("nitro_epub")\n',
-        );
-      }
-
-      fs.writeFileSync(mainAppPath, content);
-      return config;
-    },
-  ]);
-};
 
 // ---------- Composed plugin ----------
 
 const withAndroidCustomizations = config => {
   config = withManifestCustomizations(config);
   config = withBuildGradleCustomizations(config);
-  config = withMainActivityCustomizations(config);
-  config = withMainApplicationCustomizations(config);
   return config;
 };
 

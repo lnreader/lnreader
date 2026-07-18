@@ -12,7 +12,7 @@ import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import NativeFile from '@modules/native-file'
 import NativeZipArchive from '@modules/native-zip-archive'
 import { NitroModules } from 'react-native-nitro-modules';
-import type { Epub } from '@modules/nitro-epub';
+import type { Epub } from '@modules/nitro-import-epub';
 
 const decodePath = (path: string) => {
   try {
@@ -126,6 +126,7 @@ export const importEpub = async (
     progress: 0,
   }));
 
+  try {
   const epubFilePath =
     NativeFile.ExternalCachesDirectoryPath + '/novel.epub';
   const epubDirPath =
@@ -133,8 +134,10 @@ export const importEpub = async (
   if (NativeFile.exists(epubDirPath)) {
     NativeFile.unlink(epubDirPath);
   }
-  NativeFile.mkdir(epubDirPath);
+  await NativeFile.mkdir(epubDirPath);
+  await NativeFile.copyFile(uri, epubFilePath);
   await NativeZipArchive.unzip(epubFilePath, epubDirPath);
+
   const epub = NitroModules.createHybridObject<Epub>('Epub');
   const novel = epub.parseNovelAndChapters(epubDirPath);
   if (!novel.name) {
@@ -196,6 +199,9 @@ export const importEpub = async (
       );
     }
   }
+} catch (error) {
+    console.error('Error importing EPUB:', error);
+}
 
   setMeta(meta => ({
     ...meta,

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": [
+    "nitroimportepub"
+  ],
+  "ios": {
+    "iosModuleName": "NitroImportEpub"
+  },
+  "android": {
+    "androidNamespace": [
+      "nitroimportepub"
+    ],
+    "androidCxxLibName": "NitroImportEpub"
+  },
+  "autolinking": {},
+  "ignorePaths": [
+    "**/node_modules"
+  ]
+}
