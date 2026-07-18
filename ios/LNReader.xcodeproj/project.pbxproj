@@ -106,7 +106,7 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				E0E6A1C535C144718E54026B /* [Expo Dev Launcher] Strip Local Network Keys for Release */,
+				659E12BA6747485DA1AB6165 /* [Expo Dev Launcher] Strip Local Network Keys for Release */,
 			);
 			buildRules = (
 			);
@@ -223,7 +223,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LNReader/Pods-LNReader-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E0E6A1C535C144718E54026B /* [Expo Dev Launcher] Strip Local Network Keys for Release */ = {
+		659E12BA6747485DA1AB6165 /* [Expo Dev Launcher] Strip Local Network Keys for Release */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

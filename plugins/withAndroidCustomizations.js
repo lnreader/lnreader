@@ -13,33 +13,6 @@ const withManifestCustomizations = config => {
   return withAndroidManifest(config, config => {
     const manifest = config.modResults;
 
-    // Permissions — add foreground service permissions required for Android 15+
-    const PERMS = new Set([
-      'android.permission.DOWNLOAD_WITHOUT_NOTIFICATION',
-      'android.permission.WAKE_LOCK',
-      'android.permission.FOREGROUND_SERVICE',
-      'android.permission.FOREGROUND_SERVICE_DATA_SYNC',
-    ]);
-    const usesPerms = manifest.manifest['uses-permission'] || [];
-    const existingPerms = new Set(usesPerms.map(el => el.$['android:name']));
-    for (const perm of PERMS) {
-      if (!existingPerms.has(perm)) {
-        usesPerms.push({ $: { 'android:name': perm } });
-      }
-    }
-    manifest.manifest['uses-permission'] = usesPerms;
-
-    // Remove android:maxSdkVersion from WRITE_EXTERNAL_STORAGE
-    for (const el of manifest.manifest['uses-permission']) {
-      if (
-        el.$ &&
-        el.$['android:name'] === 'android.permission.WRITE_EXTERNAL_STORAGE'
-      ) {
-        delete el.$['android:maxSdkVersion'];
-        delete el.$['tools:replace'];
-      }
-    }
-
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
     if (app.$) {
       app.$['android:largeHeap'] = 'true';

@@ -47,7 +47,13 @@
         "foregroundImage": "./assets/native/ic_launcher_foreground.png",
         "backgroundImage": "./assets/native/ic_launcher_background.png",
         "monochromeImage": "./assets/native/ic_launcher_monochrome.png"
-      }
+      },
+      "permissions":[
+        "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+      ]
     },
     "splash": {
       "image": "./assets/native/ic_launcher_round.png",
