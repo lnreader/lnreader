@@ -73,17 +73,6 @@ const withBuildGradleCustomizations = config => {
       );
     }
 
-    // Insert deps after dependencies {
-    if (
-      !contents.includes('"androidx.core:core-ktx:') &&
-      contents.includes('dependencies {')
-    ) {
-      contents = contents.replace(
-        /dependencies\s*\{/,
-        `dependencies {\n    implementation "androidx.core:core-ktx:1.15.0"\n    implementation "androidx.media:media:1.7.0"`,
-      );
-    }
-
     config.modResults.contents = contents;
     return config;
   });
