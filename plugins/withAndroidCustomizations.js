@@ -12,13 +12,9 @@ const path = require('path');
 const withManifestCustomizations = config => {
   return withAndroidManifest(config, config => {
     const manifest = config.modResults;
-
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
-    if (app.$) {
-      app.$['android:largeHeap'] = 'true';
-    }
 
-    // RNBackgroundActionsTask service — ensure foregroundServiceType is set
+    // RNBackgroundActionsTask service
     let found = false;
     const services = app['service'] || [];
     for (const s of services) {
@@ -94,10 +90,6 @@ const withBuildGradleCustomizations = config => {
 };
 
 // ---------- 3c. MainActivity.kt ----------
-const KOTLIN_CUTOUT = `    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      window.attributes.layoutInDisplayCutoutMode =
-        android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-    }`;
 
 const withMainActivityCustomizations = config => {
   return withDangerousMod(config, [
@@ -124,22 +116,6 @@ const withMainActivityCustomizations = config => {
       }
 
       let content = fs.readFileSync(mainActivityPath, 'utf8');
-
-      // Insert cutout mode near the top of onCreate
-      if (!content.includes('layoutInDisplayCutoutMode')) {
-        // Try setTheme anchor first; fall back to super.onCreate
-        if (content.includes('setTheme(R.style.AppTheme)')) {
-          content = content.replace(
-            /(setTheme\(R\.style\.AppTheme\);?\s*[\r\n]+)/,
-            `$1\n${KOTLIN_CUTOUT}\n`,
-          );
-        } else if (content.includes('super.onCreate(')) {
-          content = content.replace(
-            /(super\.onCreate\([^)]*\)\s*[\r\n]+)/,
-            `$1\n${KOTLIN_CUTOUT}\n`,
-          );
-        }
-      }
 
       fs.writeFileSync(mainActivityPath, content);
       return config;
