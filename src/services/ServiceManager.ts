@@ -118,6 +118,7 @@ export default class ServiceManager {
         taskIcon: { name: 'notification_icon', type: 'drawable' },
         color: '#00adb5',
         linkingURI: 'lnreader://',
+        foregroundServiceType: ['dataSync'],
       }).catch(error => {
         Notifications.scheduleNotificationAsync({
           content: {

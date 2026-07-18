@@ -13,18 +13,24 @@ const withManifestCustomizations = config => {
   return withAndroidManifest(config, config => {
     const manifest = config.modResults;
 
-    // Permissions
-    const PERMS = [
+    // Permissions — add foreground service permissions required for Android 15+
+    const PERMS = new Set([
       'android.permission.DOWNLOAD_WITHOUT_NOTIFICATION',
       'android.permission.WAKE_LOCK',
-    ];
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.FOREGROUND_SERVICE_DATA_SYNC',
+    ]);
+    const usesPerms = manifest.manifest['uses-permission'] || [];
+    const existingPerms = new Set(usesPerms.map(el => el.$['android:name']));
     for (const perm of PERMS) {
-      AndroidConfig.Permissions.ensurePermission(manifest, perm);
+      if (!existingPerms.has(perm)) {
+        usesPerms.push({ $: { 'android:name': perm } });
+      }
     }
+    manifest.manifest['uses-permission'] = usesPerms;
 
     // Remove android:maxSdkVersion from WRITE_EXTERNAL_STORAGE
-    const usesPerms = manifest.manifest['uses-permission'] || [];
-    for (const el of usesPerms) {
+    for (const el of manifest.manifest['uses-permission']) {
       if (
         el.$ &&
         el.$['android:name'] === 'android.permission.WRITE_EXTERNAL_STORAGE'
@@ -46,9 +52,10 @@ const withManifestCustomizations = config => {
       if (
         s.$ &&
         s.$['android:name'] ===
-          'com.asterinet.react.bgactions.RNBackgroundActionsTask'
+        'com.asterinet.react.bgactions.RNBackgroundActionsTask'
       ) {
         s.$['android:foregroundServiceType'] = 'dataSync';
+        s.$['tools:replace'] = 'android:foregroundServiceType';
         found = true;
         break;
       }
@@ -59,6 +66,7 @@ const withManifestCustomizations = config => {
           'android:name':
             'com.asterinet.react.bgactions.RNBackgroundActionsTask',
           'android:foregroundServiceType': 'dataSync',
+          'tools:replace': 'android:foregroundServiceType',
         },
       });
       app['service'] = services;
