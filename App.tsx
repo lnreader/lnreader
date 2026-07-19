@@ -6,7 +6,7 @@ enableFreeze(true);
 import React, { Suspense, useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import SplashScreen from 'react-native-splash-screen';
+import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
 import * as Notifications from 'expo-notifications';
@@ -36,7 +36,7 @@ const App = () => {
 
   useEffect(() => {
     if (state.success || state.error) {
-      SplashScreen.hide();
+      SplashScreen.hideAsync();
     }
   }, [state.success, state.error]);
 

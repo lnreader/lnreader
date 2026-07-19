@@ -12,11 +12,11 @@
 // If you wish to customize it (because you want to manually link a C++ library
 // or pass a custom compilation flag) you can:
 //
-// 1. Copy this CMake file inside the `android/app/src/main/jni` folder of your
+// 1. Copy this CMake file inside the android/app/src/main/jni folder of your
 // project
 // 2. Copy the OnLoad.cpp (in this same folder) file inside the same folder as
 // above.
-// 3. Extend your `android/app/build.gradle` as follows
+// 3. Extend your android/app/build.gradle as follows
 //
 // android {
 //    // Other config here...
@@ -67,14 +67,6 @@ namespace facebook::react
         const std::string &name,
         const std::shared_ptr<CallInvoker> &jsInvoker)
     {
-        // Here you can provide your CXX Turbo Modules coming from
-        // either your application or from external libraries. The approach to follow
-        // is similar to the following (for a module called `NativeCxxModuleExample`):
-        //
-        // if (name == NativeCxxModuleExample::kModuleName) {
-        //   return std::make_shared<NativeCxxModuleExample>(jsInvoker);
-        // }
-
         if (name == NativeEpub::kModuleName)
         {
             return std::make_shared<NativeEpub>(jsInvoker);
@@ -88,17 +80,6 @@ namespace facebook::react
         const std::string &name,
         const JavaTurboModule::InitParams &params)
     {
-        // Here you can provide your own module provider for TurboModules coming from
-        // either your application or from external libraries. The approach to follow
-        // is similar to the following (for a library called `samplelibrary`):
-        //
-        // auto module = samplelibrary_ModuleProvider(name, params);
-        // if (module != nullptr) {
-        //    return module;
-        // }
-        // return FBReactNativeSpec_ModuleProvider(name, params);
-
-        // We link app local modules if available
 #ifdef REACT_NATIVE_APP_MODULE_PROVIDER
         auto module = REACT_NATIVE_APP_MODULE_PROVIDER(name, params);
         if (module != nullptr)

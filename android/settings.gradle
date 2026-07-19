@@ -6,7 +6,7 @@ pluginManagement {
     }.standardOutput.asText.get().trim()
   ).getParentFile().absolutePath
   includeBuild(reactNativeGradlePlugin)
-
+  
   def expoPluginsPath = new File(
     providers.exec {
       workingDir(rootDir)
@@ -23,23 +23,17 @@ plugins {
 }
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-  def command = [
-    'node',
-    '--no-warnings',
-    '--eval',
-    'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
-    'react-native-config',
-    '--json',
-    '--platform',
-    'android'
-  ]
-  ex.autolinkLibrariesFromCommand(command)
+  if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
+    ex.autolinkLibrariesFromCommand()
+  } else {
+    ex.autolinkLibrariesFromCommand(expoAutolinking.rnConfigCommand)
+  }
 }
-
-rootProject.name = "LNReader"
-
 expoAutolinking.useExpoModules()
+
+rootProject.name = 'LNReader'
+
 expoAutolinking.useExpoVersionCatalog()
 
-include(":app")
+include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)

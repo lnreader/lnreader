@@ -1,0 +1,48 @@
+#TTS-Controller {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  opacity: 0.5;
+}
+
+#TTS-Controller button {
+  background: color-mix(
+    in srgb,
+    var(--readerSettings-theme) 85%,
+    var(--readerSettings-textColor) 15%
+  );
+  outline: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: color-mix(
+    in srgb,
+    var(--readerSettings-textColor) 30%,
+    var(--readerSettings-theme) 70%
+  );
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  padding: 4px;
+  border-radius: 100%;
+  transition: 0.5s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#TTS-Controller.active {
+  opacity: 1;
+}
+
+#TTS-Controller.active button {
+  padding: 16px;
+}
+
+#TTS-Controller svg {
+  fill: var(--readerSettings-textColor);
+  width: 20px;
+  height: 20px;
+}
+
+#TTS-Controller.active svg {
+  width: 24px;
+  height: 24px;
+}

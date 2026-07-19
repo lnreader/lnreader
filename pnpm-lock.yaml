@@ -211,9 +211,6 @@ importers:
       react-native-shimmer-placeholder:
         specifier: ^2.0.9
         version: 2.0.9(prop-types@15.8.1)(react-native-linear-gradient@2.8.3(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3))
-      react-native-splash-screen:
-        specifier: ^3.3.0
-        version: 3.3.0(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))
       react-native-tab-view:
         specifier: ^4.3.1
         version: 4.3.1(react-native-pager-view@8.0.1(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
@@ -5298,11 +5295,6 @@ packages:
     peerDependencies:
       prop-types: '>=15.6.0'
       react-native-linear-gradient: '>=2.4.0'
-
-  react-native-splash-screen@3.3.0:
-    resolution: {integrity: sha512-rGjt6HkoSXxMqH4SQUJ1gnPQlPJV8+J47+4yhgTIan4bVvAwJhEeJH7wWt9hXSdH4+VfwTS0GTaflj1Tw83IhA==}
-    peerDependencies:
-      react-native: '>=0.57.0'
 
   react-native-tab-view@4.3.1:
     resolution: {integrity: sha512-z2x4ZAJfdiy3Rk78/2tIfKu1DezMKHWOfIIw4bpfPlwVqg3i2ViFtvZJTadKWZpZJEnG43cfhJPNDzH5RZTK2Q==}
@@ -12555,10 +12547,6 @@ snapshots:
     dependencies:
       prop-types: 15.8.1
       react-native-linear-gradient: 2.8.3(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
-
-  react-native-splash-screen@3.3.0(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0)):
-    dependencies:
-      react-native: 0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0)
 
   react-native-tab-view@4.3.1(react-native-pager-view@8.0.1(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(@react-native-community/cli@20.1.3(typescript@6.0.3))(@react-native/jest-preset@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3):
     dependencies:

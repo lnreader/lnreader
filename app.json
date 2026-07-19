@@ -8,15 +8,25 @@
       "expo-localization",
       "react-native-edge-to-edge",
       "expo-web-browser",
-      "./plugins/withNativeEpub"
+      "./plugins/withNativeEpub",
+      "./plugins/withReaderAssets",
+      "./plugins/withAndroidCustomizations"
     ],
     "android": {
-      "versionCode": 1
+      "versionCode": 1,
+      "package": "com.rajarsheechatterjee.LNReader"
+    },
+    "splash": {
+      "backgroundColor": "#1D1B20",
+      "resizeMode": "contain"
     },
     "extra": {
       "eas": {
         "projectId": "3a63596f-e80c-4342-96b7-a8ac48910489"
       }
+    },
+    "ios": {
+      "bundleIdentifier": "com.rajarsheechatterjee.LNReader"
     }
   }
 }

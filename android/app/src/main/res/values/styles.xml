@@ -2,27 +2,9 @@
   <style name="AppTheme" parent="Theme.EdgeToEdge">
     <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     <item name="colorPrimary">@color/colorPrimary</item>
-    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-    <item name="colorControlActivated">#2596be</item>
     <item name="android:windowLightStatusBar">true</item>
   </style>
-  <style name="SplashScreen_SplashAnimation">
-    <item name="android:windowExitAnimation">@android:anim/fade_out</item>
-  </style>
-  <style name="SplashScreen_SplashTheme" parent="Theme.AppCompat.NoActionBar">
-    <item name="android:windowAnimationStyle">@style/SplashScreen_SplashAnimation</item>
-  </style>
-  <style name="SplashScreenTheme" parent="SplashScreen_SplashTheme">
-    <item name="android:statusBarColor">@color/colorPrimaryDark</item>
-    <item name="android:windowActionBar">false</item>
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">true</item>
-    <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-  </style>
   <style name="Theme.App.SplashScreen" parent="AppTheme">
-    <item name="android:windowSplashScreenBackground" tools:targetApi="s">@color/colorPrimaryDark</item>
-    <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">@drawable/invisible</item>
-    <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">1000</item>
-    <item name="android:windowBackground">@drawable/splashscreen</item>
+    <item name="android:windowBackground">@drawable/splashscreen_logo</item>
   </style>
 </resources>

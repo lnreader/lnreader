@@ -1,18 +1,15 @@
-import UIKit
-import Expo
+internal import Expo
 import React
-import React_RCTAppDelegate
 import ReactAppDependencyProvider
-import Lottie
 
 @main
 class AppDelegate: ExpoAppDelegate {
   var window: UIWindow?
 
-  var reactNativeDelegate: ReactNativeDelegate?
+  var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
   var reactNativeFactory: RCTReactNativeFactory?
 
-  override func application(
+  public override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
@@ -22,40 +19,41 @@ class AppDelegate: ExpoAppDelegate {
 
     reactNativeDelegate = delegate
     reactNativeFactory = factory
-    bindReactNativeFactory(factory)
-    window = UIWindow(frame: UIScreen.main.bounds)
 
+#if os(iOS) || os(tvOS)
+    window = UIWindow(frame: UIScreen.main.bounds)
     factory.startReactNative(
       withModuleName: "main",
       in: window,
-      launchOptions: launchOptions
-    )
-    
-    if let w = window {
-      let splashScreenBackground = UIColor(red: 31/255, green: 32/255, blue: 36/255, alpha: 1)
-      w.backgroundColor = splashScreenBackground
-      w.rootViewController?.view.backgroundColor = splashScreenBackground
-      let t = Dynamic()
-      let animationSize = CGSize(width: 200, height: 200)
-      let screenBounds = UIScreen.main.bounds
-      let animationX = (screenBounds.width - animationSize.width) / 2
-      let animationY = (screenBounds.height - animationSize.height) / 2
-      let animationUIView: UIView = t.createAnimationView(rootView: UIView(frame:CGRect(x: animationX, y: animationY, width: animationSize.width, height: animationSize.height)), lottieName:"loading")
-      RNSplashScreen.showLottieSplash(animationUIView, inRootView: w)
-      animationUIView.backgroundColor = UIColor(white: 1, alpha:0)
-      t.play(animationView: animationUIView as! AnimationView)
-      RNSplashScreen.setAnimationFinished(true)
-    }
+      launchOptions: launchOptions)
+#endif
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
-  
-  override func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    return RCTLinkingManager.application(application, open: url, options: options);
+
+  // Linking API
+  public override func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
+  }
+
+  // Universal Links
+  public override func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
 }
 
 class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
+  // Extension point for config-plugins
+
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     // needed to return the correct URL for expo-dev-client.
     bridge.bundleURL ?? bundleURL()
@@ -63,9 +61,9 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
 }
