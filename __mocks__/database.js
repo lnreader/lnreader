@@ -4,6 +4,8 @@ jest.mock('@database/queries/NovelQueries', () => ({
   deleteCachedNovels: jest.fn(),
   getCachedNovels: jest.fn(),
   insertNovelAndChapters: jest.fn(),
+  updateNovelCategoryById: jest.fn(),
+  updateNovelInfo: jest.fn(),
 }));
 
 jest.mock('@database/queries/CategoryQueries', () => ({
@@ -29,6 +31,7 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   deleteChapters: jest.fn(),
   getPageChapters: jest.fn(),
   insertChapters: jest.fn(),
+  getNovelChapters: jest.fn(),
   getCustomPages: jest.fn(),
   getChapterCount: jest.fn(),
   getChapterCountSync: jest.fn(),

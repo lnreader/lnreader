@@ -48,6 +48,50 @@ std::string join(const std::string &folder_path, const std::string &child_path)
     return full_path;
 }
 
+bool hasToken(const std::string &value, const std::string &token)
+{
+    std::stringstream ss(value);
+    std::string segment;
+    while (ss >> segment)
+    {
+        if (segment == token)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isTagName(const pugi::xml_node &node, const std::string &name)
+{
+    std::string node_name = node.name();
+    if (node_name == name)
+    {
+        return true;
+    }
+    size_t pos = node_name.find(':');
+    if (pos != std::string::npos)
+    {
+        return node_name.substr(pos + 1) == name;
+    }
+    return false;
+}
+
+std::string resolve_href(const std::string &base_dir,
+                         const std::string &opf_dir,
+                         const std::string &href)
+{
+    if (href.empty())
+    {
+        return "";
+    }
+    if (href.front() == '/')
+    {
+        return join(base_dir, href.substr(1));
+    }
+    return join(opf_dir, href);
+}
+
 std::string getParentPath(const std::string &path)
 {
     if (path.empty())
@@ -62,23 +106,18 @@ std::string getParentPath(const std::string &path)
     return path.substr(0, pos);
 }
 
-std::string find_toc_href(const pugi::xml_document &opf_doc)
+bool is_toc_nav(const pugi::xml_node &node)
 {
-    auto manifest = opf_doc.child("package").child("manifest");
-    for (pugi::xml_node item : manifest.children("item"))
-    {
-        std::string media_type = item.attribute("media-type").value();
-        std::string id = item.attribute("id").value();
-        if (media_type == "application/x-dtbncx+xml" || id == "ncx" || id == "nav")
-        {
-            return item.attribute("href").value();
-        }
-    }
-    return "";
+    std::string epub_type = node.attribute("epub:type").value();
+    std::string type = node.attribute("type").value();
+    std::string role = node.attribute("role").value();
+    return hasToken(epub_type, "toc") || hasToken(type, "toc") || hasToken(role, "doc-toc");
 }
 
 void parse_navele_recursive(const pugi::xml_node &parent,
-                            std::unordered_map<std::string, std::string> &href_to_label, std::string &nav_folder)
+                            std::unordered_map<std::string, std::string> &href_to_label,
+                            const std::string &nav_folder,
+                            const std::string &root_folder)
 {
     for (pugi::xml_node li : parent.children("li"))
     {
@@ -93,38 +132,95 @@ void parse_navele_recursive(const pugi::xml_node &parent,
                 href = href.substr(0, sharp);
 
             if (!href.empty() && !label.empty())
-                href_to_label[join(nav_folder, href)] = label;
+            {
+                if (href.front() == '/')
+                {
+                    href_to_label[join(root_folder, href.substr(1))] = label;
+                }
+                else
+                {
+                    href_to_label[join(nav_folder, href)] = label;
+                }
+            }
         }
 
         if (pugi::xml_node sublist = li.child("ol"))
         {
-            parse_navele_recursive(sublist, href_to_label, nav_folder);
+            parse_navele_recursive(sublist, href_to_label, nav_folder, root_folder);
         }
     }
 }
 
+bool find_first_list(const pugi::xml_node &node, pugi::xml_node &result)
+{
+    for (pugi::xml_node child : node.children())
+    {
+        if (isTagName(child, "ol") || isTagName(child, "ul"))
+        {
+            result = child;
+            return true;
+        }
+        if (find_first_list(child, result))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void collect_nav_nodes(const pugi::xml_node &node, std::vector<pugi::xml_node> &navs)
+{
+    for (pugi::xml_node child : node.children())
+    {
+        if (isTagName(child, "nav"))
+        {
+            navs.push_back(child);
+        }
+        collect_nav_nodes(child, navs);
+    }
+}
+
 void parse_nav_xhtml(const std::string &nav_path,
-                     std::unordered_map<std::string, std::string> &path_to_label)
+                     std::unordered_map<std::string, std::string> &path_to_label,
+                     const std::string &root_folder)
 {
     std::string nav_folder = getParentPath(nav_path);
     pugi::xml_document nav_doc;
     if (!nav_doc.load_file(nav_path.c_str()))
         return;
 
-    for (pugi::xpath_node nav : nav_doc.select_nodes("//nav"))
+    std::vector<pugi::xml_node> nav_nodes;
+    collect_nav_nodes(nav_doc, nav_nodes);
+    if (nav_nodes.empty())
+        return;
+
+    pugi::xml_node toc_nav;
+    for (pugi::xml_node node : nav_nodes)
     {
-        pugi::xml_node node = nav.node();
-        std::string nav_type = node.attribute("epub:type").as_string();
-        pugi::xml_node ol = node.child("ol");
-        if (ol)
+        if (is_toc_nav(node))
         {
-            parse_navele_recursive(ol, path_to_label, nav_folder);
+            toc_nav = node;
+            break;
         }
     }
+    if (!toc_nav)
+    {
+        toc_nav = nav_nodes.front();
+    }
+
+    pugi::xml_node list_node;
+    if (!find_first_list(toc_nav, list_node))
+    {
+        return;
+    }
+
+    parse_navele_recursive(list_node, path_to_label, nav_folder, root_folder);
 }
 
 void parse_navpoint_recursive(const pugi::xml_node &navPoint,
-                              std::unordered_map<std::string, std::string> &result, std::string &ncx_folder)
+                              std::unordered_map<std::string, std::string> &result,
+                              const std::string &ncx_folder,
+                              const std::string &root_folder)
 {
     for (pugi::xml_node point : navPoint.children("navPoint"))
     {
@@ -143,14 +239,26 @@ void parse_navpoint_recursive(const pugi::xml_node &navPoint,
             size_t sharp = src.find('#');
             if (sharp != std::string::npos)
                 src = src.substr(0, sharp);
-            result[join(ncx_folder, src)] = label;
+            if (!src.empty())
+            {
+                if (src.front() == '/')
+                {
+                    result[join(root_folder, src.substr(1))] = label;
+                }
+                else
+                {
+                    result[join(ncx_folder, src)] = label;
+                }
+            }
         }
 
-        parse_navpoint_recursive(point, result, ncx_folder);
+        parse_navpoint_recursive(point, result, ncx_folder, root_folder);
     }
 }
 
-void parse_toc_ncx(const std::string &ncx_path, std::unordered_map<std::string, std::string> &href_to_label)
+void parse_toc_ncx(const std::string &ncx_path,
+                   std::unordered_map<std::string, std::string> &href_to_label,
+                   const std::string &root_folder)
 {
     std::string ncx_folder = getParentPath(ncx_path);
     pugi::xml_document doc;
@@ -161,7 +269,7 @@ void parse_toc_ncx(const std::string &ncx_path, std::unordered_map<std::string, 
     if (!navMap)
         return;
 
-    parse_navpoint_recursive(navMap, href_to_label, ncx_folder);
+    parse_navpoint_recursive(navMap, href_to_label, ncx_folder, root_folder);
 }
 
 void parse_opf_from_folder(const std::string &base_dir,
@@ -180,19 +288,6 @@ void parse_opf_from_folder(const std::string &base_dir,
         version = package.attribute("version").as_string();
     }
 
-    std::unordered_map<std::string, std::string> path_to_label;
-    std::string toc_href = find_toc_href(opf_doc);
-    if (toc_href.find("ncx") != std::string::npos)
-    {
-        std::string ncx_path = join(opf_dir, toc_href);
-        parse_toc_ncx(ncx_path, path_to_label);
-    }
-    else
-    {
-        std::string nav_path = join(opf_dir, toc_href);
-        parse_nav_xhtml(nav_path, path_to_label);
-    }
-
     auto metadata = opf_doc.child("package").child("metadata");
     meta_out.name = metadata.child("dc:title").text().as_string();
     meta_out.author = metadata.child("dc:creator").text().as_string();
@@ -201,37 +296,128 @@ void parse_opf_from_folder(const std::string &base_dir,
 
     std::unordered_map<std::string, std::string> id_to_href;
 
-    std::string cover_id;
-    for (pugi::xml_node meta : metadata.children("meta"))
-    {
-        if (std::string(meta.attribute("name").value()) == "cover")
-        {
-            cover_id = meta.attribute("content").value();
-            break;
-        }
-    }
-
     auto manifest = opf_doc.child("package").child("manifest");
+    std::string nav_href;
+    std::string ncx_href;
+    std::string cover_href;
     for (pugi::xml_node item : manifest.children("item"))
     {
         std::string id = item.attribute("id").value();
         std::string href = item.attribute("href").value();
         std::string media_type = item.attribute("media-type").value();
+        std::string properties = item.attribute("properties").value();
 
         id_to_href[id] = href;
         if (media_type == "text/css")
         {
-            meta_out.cssPaths.push_back(join(opf_dir, href));
+            meta_out.cssPaths.push_back(resolve_href(base_dir, opf_dir, href));
         }
-        else if (media_type == "image/jpeg" || media_type == "image/png" || media_type == "image/jpg")
+        else if (media_type.rfind("image/", 0) == 0)
         {
-            meta_out.imagePaths.push_back(join(opf_dir, href));
+            meta_out.imagePaths.push_back(resolve_href(base_dir, opf_dir, href));
+        }
+        if (hasToken(properties, "nav"))
+        {
+            nav_href = href;
+        }
+        if (media_type == "application/x-dtbncx+xml" || id == "ncx")
+        {
+            ncx_href = href;
+        }
+        if (hasToken(properties, "cover-image"))
+        {
+            cover_href = href;
         }
     }
 
-    if (!cover_id.empty() && id_to_href.count(cover_id))
+    std::string cover_id;
+    for (pugi::xml_node meta : metadata.children("meta"))
     {
-        meta_out.cover = join(opf_dir, id_to_href[cover_id]);
+        std::string name = meta.attribute("name").value();
+        std::string property = meta.attribute("property").value();
+        std::string content = meta.attribute("content").value();
+        std::string refines = meta.attribute("refines").value();
+
+        if (name == "cover")
+        {
+            cover_id = content;
+        }
+        else if (property == "cover")
+        {
+            cover_id = !content.empty() ? content : meta.text().as_string();
+        }
+        else if (property == "cover-image")
+        {
+            if (!refines.empty())
+            {
+                cover_id = refines;
+            }
+            else if (!content.empty())
+            {
+                cover_id = content;
+            }
+        }
+
+        if (!cover_id.empty())
+        {
+            if (cover_id.front() == '#')
+            {
+                cover_id = cover_id.substr(1);
+            }
+            break;
+        }
+    }
+
+    if (cover_href.empty() && !cover_id.empty() && id_to_href.count(cover_id))
+    {
+        cover_href = id_to_href[cover_id];
+    }
+    if (!cover_href.empty())
+    {
+        meta_out.cover = resolve_href(base_dir, opf_dir, cover_href);
+    }
+
+    std::unordered_map<std::string, std::string> path_to_label;
+    std::string toc_href;
+    bool is_nav = false;
+    if (!nav_href.empty())
+    {
+        toc_href = nav_href;
+        is_nav = true;
+    }
+    else
+    {
+        auto spine = opf_doc.child("package").child("spine");
+        std::string toc_id = spine ? spine.attribute("toc").value() : "";
+        if (!toc_id.empty() && id_to_href.count(toc_id))
+        {
+            toc_href = id_to_href[toc_id];
+        }
+        else if (!ncx_href.empty())
+        {
+            toc_href = ncx_href;
+        }
+    }
+
+    if (!toc_href.empty())
+    {
+        if (!is_nav)
+        {
+            if (toc_href.find(".xhtml") != std::string::npos || toc_href.find(".html") != std::string::npos || toc_href.find(".htm") != std::string::npos)
+            {
+                is_nav = true;
+            }
+        }
+        if (is_nav)
+        {
+            std::string nav_path = resolve_href(base_dir, opf_dir, toc_href);
+            parse_nav_xhtml(nav_path, path_to_label, base_dir);
+        }
+        else
+        {
+            std::string ncx_path = resolve_href(base_dir, opf_dir, toc_href);
+            parse_toc_ncx(ncx_path, path_to_label, base_dir);
+        }
     }
 
     auto spine = opf_doc.child("package").child("spine");
@@ -244,7 +430,7 @@ void parse_opf_from_folder(const std::string &base_dir,
         {
             std::string chapter_href = id_to_href[idref];
             Chapter chapter;
-            chapter.path = join(opf_dir, chapter_href);
+            chapter.path = resolve_href(base_dir, opf_dir, chapter_href);
 
             if (path_to_label.count(chapter.path))
             {
