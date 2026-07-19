@@ -201,7 +201,7 @@ export const importEpub = async (
     }
   }
   } catch (error) {
-    showToast(getString('advancedSettingsScreen.importFailed'));
+    showToast(getString('advancedSettingsScreen.importFailed'), (error as Error).message);
 }
 
   setMeta(meta => ({
