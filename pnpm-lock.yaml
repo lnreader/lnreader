@@ -239,7 +239,7 @@ importers:
         version: 3.3.6(supports-color@9.4.0)
       '@testing-library/react-native':
         specifier: ^13.3.3
-        version: 13.3.3(jest@29.7.0(@types/node@26.1.1)(supports-color@9.4.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react-test-renderer@19.2.4(react@19.2.3))(react@19.2.3)
+        version: 13.3.3(jest@29.7.0(@types/node@26.1.1)(supports-color@9.4.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react-test-renderer@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
@@ -313,8 +313,8 @@ importers:
         specifier: ^0.36.0
         version: 0.36.1(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
       react-test-renderer:
-        specifier: 19.2.4
-        version: 19.2.4(react@19.2.3)
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
@@ -5159,11 +5159,6 @@ packages:
     peerDependencies:
       react: ^19.2.3
 
-  react-test-renderer@19.2.4:
-    resolution: {integrity: sha512-Ttl5D7Rnmi6JGMUpri4UjB4BAN0FPs4yRDnu2XSsigCWOLm11o8GwRlVsh27ER+4WFqsGtrBuuv5zumUaRCmKw==}
-    peerDependencies:
-      react: ^19.2.4
-
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
@@ -7941,14 +7936,14 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
-  '@testing-library/react-native@13.3.3(jest@29.7.0(@types/node@26.1.1)(supports-color@9.4.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react-test-renderer@19.2.4(react@19.2.3))(react@19.2.3)':
+  '@testing-library/react-native@13.3.3(jest@29.7.0(@types/node@26.1.1)(supports-color@9.4.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react-test-renderer@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       jest-matcher-utils: 30.4.1
       picocolors: 1.1.1
       pretty-format: 30.4.1
       react: 19.2.3
       react-native: 0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3)(supports-color@9.4.0))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0)
-      react-test-renderer: 19.2.4(react@19.2.3)
+      react-test-renderer: 19.2.3(react@19.2.3)
       redent: 3.0.0
     optionalDependencies:
       jest: 29.7.0(@types/node@26.1.1)(supports-color@9.4.0)
@@ -11848,12 +11843,6 @@ snapshots:
   react-refresh@0.14.2: {}
 
   react-test-renderer@19.2.3(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-      react-is: 19.2.7
-      scheduler: 0.27.0
-
-  react-test-renderer@19.2.4(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-is: 19.2.7

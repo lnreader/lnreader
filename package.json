@@ -134,7 +134,7 @@
     "nitrogen": "^0.36.1",
     "prettier": "2.8.8",
     "react-native-nitro-modules": "^0.36.0",
-    "react-test-renderer": "19.2.4",
+    "react-test-renderer": "19.2.3",
     "typescript": "~6.0.3"
   },
   "expo": {

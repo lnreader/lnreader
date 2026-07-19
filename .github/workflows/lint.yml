@@ -44,5 +44,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Environment Variables
+        run: pnpm generate:env:debug
+
       - name: Run ESLint
         run: pnpm run lint
