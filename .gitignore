@@ -109,3 +109,5 @@ src/generated/**/*
 */**/.classpath
 */**/.project
 android/app/bin/*
+android/
+ios/
