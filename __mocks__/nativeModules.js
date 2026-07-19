@@ -1,7 +1,7 @@
 // require('react-native-gesture-handler/jestSetup');
 // require('react-native-reanimated').setUpTests();
 
-jest.mock('@specs/NativeFile', () => ({
+jest.mock('@modules/native-file', () => ({
   __esModule: true,
   default: {
     writeFile: jest.fn(),
@@ -39,7 +39,7 @@ jest.mock('react-native-nitro-modules', () => ({
   },
 }));
 
-jest.mock('@specs/NativeTTSMediaControl', () => ({
+jest.mock('@modules/native-tts-media-control', () => ({
   __esModule: true,
   default: {
     showMediaNotification: jest.fn(),
@@ -51,15 +51,16 @@ jest.mock('@specs/NativeTTSMediaControl', () => ({
   },
 }));
 
-jest.mock('@specs/NativeVolumeButtonListener', () => ({
+jest.mock('@modules/native-volume-button-listener', () => ({
   __esModule: true,
   default: {
-    addListener: jest.fn(),
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
     removeListeners: jest.fn(),
+    setActive: jest.fn(),
   },
 }));
 
-jest.mock('@specs/NativeZipArchive', () => ({
+jest.mock('@modules/native-zip-archive', () => ({
   __esModule: true,
   default: {
     zip: jest.fn().mockResolvedValue(),

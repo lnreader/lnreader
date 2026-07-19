@@ -16,6 +16,7 @@ const baseModuleNameMapper = {
   '^@api/(.*)$': '<rootDir>/src/api/$1',
   '^@type/(.*)$': '<rootDir>/src/type/$1',
   '^@specs/(.*)$': '<rootDir>/specs/$1',
+  '^@modules/(.*)$': '<rootDir>/modules/$1',
   '^@test-utils$': '<rootDir>/__tests-modules__/test-utils',
   '^@env$': '<rootDir>/src/generated/build-info',
   // Mock static assets

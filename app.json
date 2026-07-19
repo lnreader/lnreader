@@ -55,15 +55,6 @@
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
       ]
     },
-    "splash": {
-      "image": "./assets/native/ic_launcher_round.png",
-      "backgroundColor": "#1D1B20",
-      "resizeMode": "contain",
-      "dark": {
-        "image": "./assets/native/ic_launcher_round.png",
-        "backgroundColor": "#000000"
-      }
-    },
     "extra": {
       "eas": {
         "projectId": "3a63596f-e80c-4342-96b7-a8ac48910489"

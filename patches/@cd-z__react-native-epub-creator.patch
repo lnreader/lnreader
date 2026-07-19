@@ -1,0 +1,15 @@
+diff --git a/package.json b/package.json
+index d8ffb500a037a9f1d1d1b430a3e9464b24df4d79..192d78ee32a8aa8e01338536ba7fadcf50eb8372 100644
+--- a/package.json
++++ b/package.json
+@@ -45,8 +45,8 @@
+     "lib/"
+   ],
+   "dependencies": {
+-    "react-native-file-access": "^3.1.0",
+-    "react-native-zip-archive": "^6.0.3",
++    "react-native-file-access": "^4.0.0",
++    "react-native-zip-archive": "^7.0.0",
+     "react-native-saf-x": "^2.2.1",
+     "@cd-z/epub-constructor": "^3.0.0"
+   }
