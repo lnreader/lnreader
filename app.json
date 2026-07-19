@@ -1,12 +1,22 @@
 {
   "expo": {
+    "version": "2.0.3",
     "name": "LNReader",
     "slug": "LNReader",
     "scheme": "lnreader",
     "plugins": [
       "expo-localization",
       "react-native-edge-to-edge",
-      "expo-web-browser"
-    ]
+      "expo-web-browser",
+      "./plugins/withNativeEpub"
+    ],
+    "android": {
+      "versionCode": 1
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3a63596f-e80c-4342-96b7-a8ac48910489"
+      }
+    }
   }
 }

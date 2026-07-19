@@ -33,7 +33,7 @@ target 'LNReader' do
     ]
   end
  
-  config = use_native_modules!(['npx', 'rock', 'config', '-p', 'ios'])(config_command)
+  config = use_native_modules!(config_command)
 
   use_react_native!(
     :path => config[:reactNativePath],

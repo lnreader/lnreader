@@ -11,7 +11,7 @@ import { getNovelById } from '@database/queries/NovelQueries';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { eq } from 'drizzle-orm';
 
 const createChapterFolder = async (

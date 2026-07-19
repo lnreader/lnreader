@@ -5,7 +5,7 @@ const ReactCompilerConfig = {
 export default function (api) {
   api.cache(true);
   return {
-    presets: ['module:@react-native/babel-preset'],
+    presets: ['babel-preset-expo'],
     plugins: [
       'module:@babel/plugin-transform-export-namespace-from',
       ['babel-plugin-react-compiler', ReactCompilerConfig],
@@ -28,6 +28,7 @@ export default function (api) {
             '@specs': './specs',
             '@test-utils': './__tests-modules__/test-utils',
             '@env': './src/generated/build-info',
+            '@modules': './modules',
             'react-native-vector-icons/MaterialCommunityIcons':
               '@react-native-vector-icons/material-design-icons',
           },

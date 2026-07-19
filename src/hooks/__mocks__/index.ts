@@ -24,7 +24,7 @@ jest.mock('@utils/mmkv/mmkv', () => ({
 }));
 
 // Mock NativeFile
-jest.mock('@specs/NativeFile', () => ({
+jest.mock('@modules/native-file', () => ({
   // Mock NativeFile methods
 }));
 

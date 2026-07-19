@@ -24,7 +24,7 @@ import { getString } from '@strings/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import color from 'color';
 import Animated, {
@@ -10,7 +10,6 @@ import Animated, {
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ChapterScreenProps } from '@navigators/types';
 import { useChapterContext } from '../ChapterContext';
-import { SCREEN_HEIGHT } from '@gorhom/bottom-sheet';
 import { useTheme } from '@hooks/persisted';
 import { useNovelLayout } from '@screens/novel/NovelContext';
 
@@ -38,6 +37,8 @@ const ChapterFooter = ({
     radius: 50,
   };
   const { navigationBarHeight } = useNovelLayout();
+  //const navigationBarHeight = 0;
+  const { height: SCREEN_HEIGHT } = useWindowDimensions();
 
   const entering = () => {
     'worklet';
@@ -80,7 +81,6 @@ const ChapterFooter = ({
 
   const style = useMemo(
     () => [
-      styles.footer,
       {
         backgroundColor: color(theme.surface).alpha(0.9).string(),
         paddingBottom: navigationBarHeight,

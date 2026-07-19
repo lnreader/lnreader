@@ -3,7 +3,7 @@ import { Portal } from 'react-native-paper';
 import { StatusBar, StyleProp, ViewStyle } from 'react-native';
 
 import EpubBuilder from '@cd-z/react-native-epub-creator';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 
 import { NovelInfo } from '@database/types';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';

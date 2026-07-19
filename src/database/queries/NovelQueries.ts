@@ -18,7 +18,7 @@ import {
   categorySchema,
   chapterSchema,
 } from '@database/schema';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 
 /**
  * Inserts a novel and its chapters into the database using Drizzle ORM.

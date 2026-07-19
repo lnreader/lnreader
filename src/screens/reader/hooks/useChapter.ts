@@ -27,16 +27,17 @@ import { sanitizeChapterText } from '../utils/sanitizeChapterText';
 import { parseChapterNumber } from '@utils/parseChapterNumber';
 import WebView from 'react-native-webview';
 import { useFullscreenMode } from '@hooks';
-import { Dimensions, NativeEventEmitter } from 'react-native';
+import { Dimensions } from 'react-native';
 import * as Speech from 'expo-speech';
 import { defaultTo } from 'lodash-es';
 import { showToast } from '@utils/showToast';
 import { getString } from '@strings/translations';
-import NativeVolumeButtonListener from '@specs/NativeVolumeButtonListener';
-import NativeFile from '@specs/NativeFile';
+import NativeVolumeButtonListener from '@modules/native-volume-button-listener'
+import NativeFile from '@modules/native-file'
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 
-const emmiter = new NativeEventEmitter(NativeVolumeButtonListener);
+
+
 
 export default function useChapter(
   webViewRef: RefObject<WebView | null>,
@@ -77,30 +78,31 @@ export default function useChapter(
       volumeButtonsOffset,
       Math.round(Dimensions.get('window').height * 0.75),
     );
-    emmiter.addListener('VolumeUp', () => {
+    const subUp = NativeVolumeButtonListener.addListener('VolumeUp', () => {
       webViewRef.current?.injectJavaScript(`(()=>{
         window.scrollBy({top: -${offset}, behavior: 'smooth'})
       })()`);
     });
-    emmiter.addListener('VolumeDown', () => {
+    const subDown = NativeVolumeButtonListener.addListener('VolumeDown', () => {
       webViewRef.current?.injectJavaScript(`(()=>{
         window.scrollBy({top: ${offset}, behavior: 'smooth'})
       })()`);
     });
+    return () => {
+      subUp.remove();
+      subDown.remove();
+    };
   }, [webViewRef, volumeButtonsOffset]);
 
   useEffect(() => {
     if (useVolumeButtons) {
-      connectVolumeButton();
-    } else {
-      emmiter.removeAllListeners('VolumeUp');
-      emmiter.removeAllListeners('VolumeDown');
-      // this is just for sure, without it app still works properly
+      const cleanup = connectVolumeButton();
+      return () => {
+        cleanup();
+        Speech.stop();
+      };
     }
-
     return () => {
-      emmiter.removeAllListeners('VolumeUp');
-      emmiter.removeAllListeners('VolumeDown');
       Speech.stop();
     };
   }, [useVolumeButtons, chapter, connectVolumeButton]);

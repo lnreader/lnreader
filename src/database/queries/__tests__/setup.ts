@@ -72,7 +72,7 @@ jest.mock('@utils/Storages', () => ({
 }));
 
 // Mock NativeFile
-jest.mock('@specs/NativeFile', () => ({
+jest.mock('@modules/native-file', () => ({
   __esModule: true,
   default: {
     exists: jest.fn().mockReturnValue(true),

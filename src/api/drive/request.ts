@@ -6,7 +6,7 @@ import {
   DriveRequestParams,
 } from './types';
 import { PATH_SEPARATOR } from '@api/constants';
-import NativeZipArchive from '@specs/NativeZipArchive';
+import NativeZipArchive from '@modules/native-zip-archive'
 
 const BASE_URL = 'https://www.googleapis.com/drive/v3/files';
 const MEDIA_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';

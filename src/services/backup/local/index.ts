@@ -7,10 +7,10 @@ import {
   keepLocalCopy,
 } from '@react-native-documents/picker';
 import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
-import NativeZipArchive from '@specs/NativeZipArchive';
+import NativeZipArchive from '@modules/native-zip-archive'
 import { ROOT_STORAGE } from '@utils/Storages';
 import { ZipBackupName } from '../types';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { getString } from '@strings/translations';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
 import { sleep } from '@utils/sleep';

@@ -1,7 +1,6 @@
-import { NativeEventEmitter } from 'react-native';
-import NativeTTSMediaControl from '@specs/NativeTTSMediaControl';
+import NativeTTSMediaControl from '@modules/native-tts-media-control'
 
-export const ttsMediaEmitter = new NativeEventEmitter(NativeTTSMediaControl);
+export { NativeTTSMediaControl };
 
 export interface TTSNotificationData {
   novelName: string;

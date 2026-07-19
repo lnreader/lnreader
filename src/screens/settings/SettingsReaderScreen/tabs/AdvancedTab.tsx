@@ -11,7 +11,7 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { TextInput, Portal } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 import { ThemeColors } from '@theme/types';
@@ -111,7 +111,7 @@ if (title) {
 
       if (file.assets) {
         const tempPath =
-          NativeFile.getConstants().ExternalCachesDirectoryPath +
+          NativeFile.ExternalCachesDirectoryPath +
           '/imported_custom.' +
           activeCodeTab;
         NativeFile.copyFile(file.assets[0].uri, tempPath);

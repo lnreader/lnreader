@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { parse as parseProto } from 'protobufjs';
 
 type FetchInit = {

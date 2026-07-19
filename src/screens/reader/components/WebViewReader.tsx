@@ -31,7 +31,7 @@ import {
   updateTTSPlaybackState,
   updateTTSProgress,
   dismissTTSNotification,
-  ttsMediaEmitter,
+  NativeTTSMediaControl,
 } from '@utils/ttsNotification';
 
 type WebViewPostEvent = {
@@ -116,41 +116,41 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   }, [readerSettings]);
 
   useEffect(() => {
-    const playListener = ttsMediaEmitter.addListener('TTSPlay', () => {
+    const playListener = NativeTTSMediaControl.addListener('TTSPlay', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts && !tts.reading) { tts.resume(); }
       `);
     });
-    const pauseListener = ttsMediaEmitter.addListener('TTSPause', () => {
+    const pauseListener = NativeTTSMediaControl.addListener('TTSPause', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts && tts.reading) { tts.pause(); }
       `);
     });
-    const stopListener = ttsMediaEmitter.addListener('TTSStop', () => {
+    const stopListener = NativeTTSMediaControl.addListener('TTSStop', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts) { tts.stop(); }
       `);
     });
-    const rewindListener = ttsMediaEmitter.addListener('TTSRewind', () => {
+    const rewindListener = NativeTTSMediaControl.addListener('TTSRewind', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts && tts.started) { tts.rewind(); }
       `);
     });
-    const prevListener = ttsMediaEmitter.addListener('TTSPrev', () => {
+    const prevListener = NativeTTSMediaControl.addListener('TTSPrev', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts && window.reader && window.reader.prevChapter) {
           window.reader.post({ type: 'prev', autoStartTTS: true });
         }
       `);
     });
-    const nextListener = ttsMediaEmitter.addListener('TTSNext', () => {
+    const nextListener = NativeTTSMediaControl.addListener('TTSNext', () => {
       webViewRef.current?.injectJavaScript(`
         if (window.tts && window.reader && window.reader.nextChapter) {
           window.reader.post({ type: 'next', autoStartTTS: true });
         }
       `);
     });
-    const seekToListener = ttsMediaEmitter.addListener(
+    const seekToListener = NativeTTSMediaControl.addListener(
       'TTSSeekTo',
       (event: { position: number }) => {
         const position = event.position;

@@ -9,7 +9,7 @@ import { encode, decode } from 'urlencode';
 import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { newer } from '@utils/compareVersion';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { showToast } from '@utils/showToast';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 

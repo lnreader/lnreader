@@ -1,5 +1,5 @@
 import { PATH_SEPARATOR } from '@api/constants';
-import NativeZipArchive from '@specs/NativeZipArchive';
+import NativeZipArchive from '@modules/native-zip-archive'
 import { fetchTimeout } from '@utils/fetch/fetch';
 
 const commonHeaders = {

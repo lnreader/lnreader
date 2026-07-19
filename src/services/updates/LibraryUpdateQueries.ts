@@ -7,7 +7,7 @@ import ServiceManager from '@services/ServiceManager';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { insertChapters } from '@database/queries/ChapterQueries';
 
 /**

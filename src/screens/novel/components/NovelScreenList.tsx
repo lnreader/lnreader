@@ -29,7 +29,7 @@ import { AnimatedFAB } from 'react-native-paper';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { LegendList, LegendListRef } from '@legendapp/list';
-import FileManager from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { downloadFile } from '@plugins/helpers/fetch';
 import { StorageAccessFramework } from 'expo-file-system/legacy';
 import PagePaginationControl from './PagePaginationControl';
@@ -345,19 +345,19 @@ const NovelScreenList = ({
         'image/' + imageExtension,
       );
       if (cover.startsWith('http')) {
-        const { ExternalCachesDirectoryPath } = FileManager.getConstants();
+        const { ExternalCachesDirectoryPath } = NativeFile;
         tempCoverUri = ExternalCachesDirectoryPath + '/' + fileName;
         await downloadFile(cover, tempCoverUri);
-        FileManager.copyFile(tempCoverUri, coverDestUri);
+        NativeFile.copyFile(tempCoverUri, coverDestUri);
       } else {
-        FileManager.copyFile(cover, coverDestUri);
+        NativeFile.copyFile(cover, coverDestUri);
       }
       showToast(getString('novelScreen.coverSaved'));
     } catch (err: any) {
       showToast(err.message);
     } finally {
       if (tempCoverUri) {
-        FileManager.unlink(tempCoverUri);
+        NativeFile.unlink(tempCoverUri);
       }
     }
   }, [novel]);

@@ -162,8 +162,8 @@ jest.mock('@utils/showToast', () => ({
   showToast: jest.fn(),
 }));
 
-jest.mock('@specs/NativeFile', () => ({
-  getConstants: () => ({ ExternalCachesDirectoryPath: '/tmp' }),
+jest.mock('@modules/native-file', () => ({
+  ExternalCachesDirectoryPath: '/tmp',
   copyFile: jest.fn(),
   unlink: jest.fn(),
 }));

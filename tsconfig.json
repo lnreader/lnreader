@@ -33,7 +33,8 @@
       "@type/*": ["./src/type/*"],
       "@specs/*": ["./specs/*"],
       "@test-utils": ["./__tests-modules__/test-utils"],
-      "@env": ["./src/generated/build-info"]
+      "@env": ["./src/generated/build-info"],
+      "@modules/*": ["./modules/*"]
     },
     "types": ["react-native", "jest"]
   }

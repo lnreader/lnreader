@@ -4,7 +4,7 @@ import {
   getCachedNovels as _getCachedNovels,
   deleteCachedNovels as _deleteCachedNovels,
 } from '@database/queries/NovelQueries';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file'
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import { TRACKED_NOVEL_PREFIX } from '@hooks/persisted/useTrackedNovel';

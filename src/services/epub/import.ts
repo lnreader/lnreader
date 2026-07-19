@@ -9,8 +9,8 @@ import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import { BackgroundTaskMetadata } from '@services/ServiceManager';
-import NativeFile from '@specs/NativeFile';
-import NativeZipArchive from '@specs/NativeZipArchive';
+import NativeFile from '@modules/native-file'
+import NativeZipArchive from '@modules/native-zip-archive'
 import NativeEpub from '@specs/NativeEpub';
 
 const decodePath = (path: string) => {
@@ -126,16 +126,9 @@ export const importEpub = async (
   }));
 
   const epubFilePath =
-    NativeFile.getConstants().ExternalCachesDirectoryPath + '/novel.epub';
-  try {
-    NativeFile.copyFile(uri, epubFilePath);
-  } catch {
-    throw new Error(
-      `Failed to read EPUB file "${filename}". The file may have been moved or deleted. Please try importing again.`,
-    );
-  }
+    NativeFile.ExternalCachesDirectoryPath + '/novel.epub';
   const epubDirPath =
-    NativeFile.getConstants().ExternalCachesDirectoryPath + '/epub';
+    NativeFile.ExternalCachesDirectoryPath + '/epub';
   if (NativeFile.exists(epubDirPath)) {
     NativeFile.unlink(epubDirPath);
   }

@@ -10,7 +10,7 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
-import com.rajarsheechatterjee.NativeVolumeButtonListener.NativeVolumeButtonListener
+import expo.modules.nativevolumebuttonlistener.NativeVolumeButtonListenerModule
 import expo.modules.ReactActivityDelegateWrapper
 import org.devio.rn.splashscreen.SplashScreen
 
@@ -28,24 +28,23 @@ class MainActivity : ReactActivity() {
         window.decorView.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         super.onCreate(null)
-        SplashScreen.show(this, R.style.SplashScreenTheme, R.id.lottie)
-        SplashScreen.setAnimationFinished(true)
+        SplashScreen.show(this, R.style.SplashScreenTheme, true)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (NativeVolumeButtonListener.isActive) {
+        if (NativeVolumeButtonListenerModule.isActive) {
             val action = event.action
             return when (event.keyCode) {
                 KeyEvent.KEYCODE_VOLUME_UP -> {
                     if (action == KeyEvent.ACTION_DOWN) {
-                        NativeVolumeButtonListener.sendEvent(true)
+                        NativeVolumeButtonListenerModule.sendEvent(true)
                     }
                     true
                 }
 
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
                     if (action == KeyEvent.ACTION_DOWN) {
-                        NativeVolumeButtonListener.sendEvent(false)
+                        NativeVolumeButtonListenerModule.sendEvent(false)
                     }
                     true
                 }
