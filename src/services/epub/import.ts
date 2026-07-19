@@ -13,6 +13,7 @@ import NativeFile from '@modules/native-file'
 import NativeZipArchive from '@modules/native-zip-archive'
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Epub } from '@modules/nitro-import-epub';
+import { showToast } from '@utils/showToast';
 
 const decodePath = (path: string) => {
   try {
@@ -199,8 +200,8 @@ export const importEpub = async (
       );
     }
   }
-} catch (error) {
-    console.error('Error importing EPUB:', error);
+  } catch (error) {
+    showToast(getString('advancedSettingsScreen.importFailed'));
 }
 
   setMeta(meta => ({

@@ -23,6 +23,7 @@
     "deleteReadChapters": "Delete read chapters",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
     "importEpub": "Import Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Import Novel",
     "importStaticFiles": "Import Static Files",
     "novelInsertFailed": "novel insert failed",
