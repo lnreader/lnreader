@@ -6,9 +6,9 @@
  */
 
 // @ts-ignore
-global.__DEV__ ??= false;
-
 import type { TestDb } from './testDb';
+
+global.__DEV__ ??= false;
 
 const getTestDbModule = () => require('./testDb') as typeof import('./testDb');
 

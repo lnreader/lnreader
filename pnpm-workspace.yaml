@@ -3,6 +3,7 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   protobufjs: true
+  unrs-resolver: true
 
 minimumReleaseAgeExclude:
   - '@expo/cli@56.1.14'

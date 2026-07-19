@@ -1,3 +1,0 @@
-src/plugins/types/filterTypes.ts
-src/screens/reader/components/ReaderBottomSheet/ReaderValueChange.tsx
-# These two files cause the @typescript-eslint/no-unused-vars rule to fail

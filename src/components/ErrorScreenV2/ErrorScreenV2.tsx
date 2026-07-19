@@ -7,11 +7,11 @@ import { MaterialDesignIconName } from '@type/icon';
 
 interface ErrorScreenProps {
   error: any;
-  actions?: Array<{
+  actions?: {
     iconName: MaterialDesignIconName;
     title: string;
     onPress: () => void;
-  }>;
+  }[];
 }
 
 const ErrorScreen: React.FC<ErrorScreenProps> = ({ error, actions }) => {

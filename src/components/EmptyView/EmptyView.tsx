@@ -8,11 +8,11 @@ interface EmptyViewProps {
   icon?: string;
   description: string;
   theme: ThemeColors;
-  actions?: Array<{
+  actions?: {
     iconName: string;
     title: string;
     onPress: () => void;
-  }>;
+  }[];
 }
 
 const EmptyView: React.FC<EmptyViewProps> = ({

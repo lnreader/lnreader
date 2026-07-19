@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';

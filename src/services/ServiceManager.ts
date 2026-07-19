@@ -101,9 +101,7 @@ export default class ServiceManager {
       return false;
     }
     return (
-      ['DOWNLOAD_CHAPTER', 'IMPORT_EPUB', 'MIGRATE_NOVEL'] as Array<
-        BackgroundTask['name']
-      >
+      ['DOWNLOAD_CHAPTER', 'IMPORT_EPUB', 'MIGRATE_NOVEL'] as BackgroundTask['name'][]
     ).includes(task.name);
   }
 
@@ -374,7 +372,7 @@ export default class ServiceManager {
   }
 
   getTaskList() {
-    const tasks = getMMKVObject<Array<any>>(this.STORE_KEY) || [];
+    const tasks = getMMKVObject<any[]>(this.STORE_KEY) || [];
 
     const convertedTasks = tasks
       .map(task => {

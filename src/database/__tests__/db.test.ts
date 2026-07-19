@@ -86,7 +86,7 @@ describe('new database initialization', () => {
 
       const tables = sqlite.executeSync(
         "SELECT name FROM sqlite_master WHERE type='table'",
-      ).rows as Array<{ name: string }>;
+      ).rows as { name: string }[];
       const tableNames = tables.map(table => table.name);
       expect(tableNames).toEqual(
         expect.arrayContaining([
@@ -100,7 +100,7 @@ describe('new database initialization', () => {
 
       const triggers = sqlite.executeSync(
         "SELECT name FROM sqlite_master WHERE type='trigger'",
-      ).rows as Array<{ name: string }>;
+      ).rows as { name: string }[];
       const triggerNames = triggers.map(trigger => trigger.name);
       expect(triggerNames).toEqual(
         expect.arrayContaining([
@@ -113,7 +113,7 @@ describe('new database initialization', () => {
 
       const categories = sqlite.executeSync(
         'SELECT id, name FROM Category ORDER BY id',
-      ).rows as Array<{ id: number; name: string }>;
+      ).rows as { id: number; name: string }[];
       expect(categories.map(category => category.id)).toEqual([1, 2]);
     } finally {
       sqlite.close();
@@ -139,7 +139,7 @@ describe('runDatabaseBootstrap', () => {
 
       const triggers = sqlite.executeSync(
         "SELECT name FROM sqlite_master WHERE type='trigger'",
-      ).rows as Array<{ name: string }>;
+      ).rows as { name: string }[];
       const triggerNames = triggers.map(trigger => trigger.name);
       expect(triggerNames).toEqual(
         expect.arrayContaining([
@@ -152,7 +152,7 @@ describe('runDatabaseBootstrap', () => {
 
       const categories = sqlite.executeSync(
         'SELECT id, name FROM Category ORDER BY id',
-      ).rows as Array<{ id: number; name: string }>;
+      ).rows as { id: number; name: string }[];
       expect(categories.map(category => category.id)).toEqual([1, 2]);
       expect(categories.map(category => category.name)).toEqual([
         'categories.default',
@@ -179,7 +179,7 @@ describe('production migrations', () => {
 
       const tables = sqlite.executeSync(
         "SELECT name FROM sqlite_master WHERE type='table'",
-      ).rows as Array<{ name: string }>;
+      ).rows as { name: string }[];
       const tableNames = tables.map(table => table.name);
       expect(tableNames).toEqual(
         expect.arrayContaining([

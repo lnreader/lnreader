@@ -56,7 +56,7 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
   };
   const renderLoading = (item: number) => {
     const offset = Math.pow(10, item);
-    const items: Array<number> = [1 * offset];
+    const items: number[] = [1 * offset];
     if (displayMode !== DisplayModes.List) {
       for (let i = 2; i <= numColumns; i++) {
         items.push(i * offset);
@@ -68,7 +68,7 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
       </View>
     );
   };
-  let items: Array<number> = [];
+  let items: number[] = [];
   if (completeRow === 1) {
     return renderLoadingNovel(completeRow);
   }

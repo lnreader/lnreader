@@ -46,10 +46,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import useLoadingColors from '@components/Skeleton/useLoadingColors';
-
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 import { ChapterFilterKey } from '@database/constants';
 import { useNovelAction } from '@screens/novel/NovelContext';
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 interface NovelInfoHeaderProps {
   chapters: ChapterInfo[];

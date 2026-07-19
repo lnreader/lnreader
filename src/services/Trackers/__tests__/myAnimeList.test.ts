@@ -1,11 +1,11 @@
+import { myAnimeListTracker } from '../myAnimeList';
+
 jest.mock('expo-linking', () => ({
   createURL: jest.fn(() => 'lnreader://tracker/MAL'),
 }));
 jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: jest.fn(),
 }));
-
-import { myAnimeListTracker } from '../myAnimeList';
 
 const auth = {
   accessToken: 'access-token',

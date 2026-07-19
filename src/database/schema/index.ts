@@ -1,3 +1,9 @@
+import { category } from './category';
+import { novel } from './novel';
+import { chapter } from './chapter';
+import { novelCategory } from './novelCategory';
+import { repository } from './repository';
+
 export {
   category as categorySchema,
   type CategoryRow,
@@ -19,12 +25,6 @@ export {
   type RepositoryRow,
   type RepositoryInsert,
 } from './repository';
-
-import { category } from './category';
-import { novel } from './novel';
-import { chapter } from './chapter';
-import { novelCategory } from './novelCategory';
-import { repository } from './repository';
 
 /**
  * Unified schema object containing all database tables

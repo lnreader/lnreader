@@ -20,7 +20,7 @@ type listDataItem =
 
 interface NovelListProps extends FlatListProps<NovelInfo | NovelItem> {
   inSource?: boolean;
-  data: Array<listDataItem>;
+  data: listDataItem[];
 }
 
 const novelListKeyExtractor = (item: NovelInfo | NovelItem, index: number) =>
@@ -45,10 +45,10 @@ const NovelList: React.FC<NovelListProps> = props => {
     }
   }, [isListView, orientation, novelsPerRow]);
 
-  let extendedNovelList: Array<listDataItem> = props?.data;
+  let extendedNovelList: listDataItem[] = props?.data;
   if (props.data?.length && props.inSource) {
     const remainder = numColumns - (props.data?.length % numColumns);
-    const extension: Array<listDataItem> = [];
+    const extension: listDataItem[] = [];
     if (remainder !== 0 && remainder !== numColumns) {
       for (let i = 0; i < remainder; i++) {
         extension.push({

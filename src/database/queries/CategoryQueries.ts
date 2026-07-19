@@ -13,7 +13,7 @@ import {
  * Get all categories with their novel IDs using Drizzle ORM
  */
 export const getCategoriesFromDb = async (): Promise<
-  Array<CategoryRow & { novelIds: string | null }>
+  (CategoryRow & { novelIds: string | null })[]
 > => {
   return await dbManager
     .select({

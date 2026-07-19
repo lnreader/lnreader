@@ -14,7 +14,7 @@ const GlobalSearchSkeletonLoading: React.FC<Props> = ({ theme }) => {
 
   const [highlightColor, backgroundColor] = useLoadingColors(theme);
 
-  const items: Array<number> = [1, 2, 3, 4];
+  const items: number[] = [1, 2, 3, 4];
   return (
     <View style={[styles.container, styles.row]}>
       {items.map((item: number, index: number) => {

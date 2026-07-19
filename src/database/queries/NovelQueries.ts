@@ -199,7 +199,7 @@ export const switchNovelToLibraryQuery = async (
 /**
  * Removes multiple novels from the library and clears their categories.
  */
-export const removeNovelsFromLibrary = async (novelIds: Array<number>) => {
+export const removeNovelsFromLibrary = async (novelIds: number[]) => {
   if (!novelIds.length) return;
 
   await dbManager.write(async tx => {

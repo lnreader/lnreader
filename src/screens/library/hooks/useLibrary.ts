@@ -117,7 +117,7 @@ export const useLibrary = (): UseLibraryReturnType => {
   });
 
   const [taskQueue] = useMMKVObject<
-    Array<BackgroundTask | QueuedBackgroundTask>
+    (BackgroundTask | QueuedBackgroundTask)[]
   >(ServiceManager.manager.STORE_KEY);
   const restoreTasksCount = useMemo(
     () =>

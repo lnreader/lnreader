@@ -57,7 +57,7 @@ const MalLoading: React.FC<Props> = ({ theme }) => {
       </View>
     );
   };
-  const items: Array<number> = [0, 1, 2, 3, 4];
+  const items: number[] = [0, 1, 2, 3, 4];
   return <View style={styles.container}>{items.map(renderLoadingRect)}</View>;
 };
 
