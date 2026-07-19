@@ -41,7 +41,11 @@ const App = () => {
   }, [state.success, state.error]);
 
   if (state.error) {
-    return <ErrorFallback error={state.error} resetError={() => null} />;
+    return (
+      <ThemeProvider>
+        <ErrorFallback error={state.error} resetError={() => null} />
+      </ThemeProvider>
+    );
   }
 
   if (!state.success) {
@@ -51,18 +55,18 @@ const App = () => {
   return (
     <Suspense fallback={null}>
       <GestureHandlerRootView style={styles.flex}>
-        <AppErrorBoundary>
-          <SafeAreaProvider>
-            <ThemeProvider>
+        <ThemeProvider>
+          <AppErrorBoundary>
+            <SafeAreaProvider>
               <PaperProvider>
                 <BottomSheetModalProvider>
                   <StatusBar translucent={true} backgroundColor="transparent" />
                   <Main />
                 </BottomSheetModalProvider>
               </PaperProvider>
-            </ThemeProvider>
-          </SafeAreaProvider>
-        </AppErrorBoundary>
+            </SafeAreaProvider>
+          </AppErrorBoundary>
+        </ThemeProvider>
       </GestureHandlerRootView>
     </Suspense>
   );
