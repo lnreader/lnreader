@@ -1,5 +1,5 @@
 {
-  "extends": "@react-native/typescript-config",
+  "extends": "expo/tsconfig.base",
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": [
     "**/node_modules",
