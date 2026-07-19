@@ -1,0 +1,17 @@
+android {
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix "debug"
+            versionNameSuffix "-debug"
+        }
+
+        preRelease {
+            initWith release
+            matchingFallbacks = ["release"]
+            applicationIdSuffix "preRelease"
+            versionNameSuffix "-pre-release"
+            signingConfig signingConfigs.debug
+        }
+    }
+}
