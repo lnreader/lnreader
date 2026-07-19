@@ -4,7 +4,11 @@ import { migrate } from 'drizzle-orm/op-sqlite/migrator';
 import migrations from '../../../drizzle/migrations';
 import { schema } from '@database/schema';
 
-import { runDatabaseBootstrap } from '@database/db';
+import {
+  getPendingMigrations,
+  repairMigrationHistory,
+  runDatabaseBootstrap,
+} from '@database/db';
 
 const MIGRATION_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS Category (
@@ -175,7 +179,7 @@ describe('production migrations', () => {
       }
 
       const drizzleDb = drizzle(sqlite, { schema });
-      await migrate(drizzleDb, migrations);
+      await migrate(drizzleDb, getPendingMigrations(sqlite));
 
       const tables = sqlite.executeSync(
         "SELECT name FROM sqlite_master WHERE type='table'",
@@ -190,6 +194,57 @@ describe('production migrations', () => {
           'Repository',
         ]),
       );
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('recovers when the scanlator column exists without a migration record', async () => {
+    const sqlite = open({ name: ':memory:' });
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      for (const statement of MIGRATION_STATEMENTS) {
+        sqlite.executeSync(statement.trim());
+      }
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync(`
+        CREATE TABLE __drizzle_migrations (
+          id INTEGER PRIMARY KEY,
+          hash text NOT NULL,
+          created_at numeric,
+          name text,
+          applied_at text
+        )
+      `);
+      sqlite.executeSync(`
+        INSERT INTO __drizzle_migrations (hash, created_at, name)
+        VALUES ('', 1766417172000, NULL)
+      `);
+
+      repairMigrationHistory(sqlite);
+
+      expect(
+        sqlite.executeSync(
+          "SELECT name FROM __drizzle_migrations WHERE name = '20260612232322_normal_saracen'",
+        ).rows,
+      ).toHaveLength(1);
+
+      const drizzleDb = drizzle(sqlite, { schema });
+      await migrate(drizzleDb, getPendingMigrations(sqlite));
+
+      const scanlatorColumns = sqlite
+        .executeRawSync('PRAGMA table_info(Chapter)')
+        .filter(column => column[1] === 'scanlator');
+      expect(scanlatorColumns).toHaveLength(1);
+
+      const appliedMigrations = sqlite.executeSync(
+        'SELECT name FROM __drizzle_migrations ORDER BY created_at',
+      ).rows as Array<{ name: string }>;
+      expect(appliedMigrations.map(row => row.name)).toEqual([
+        '20251222152612_past_mandrill',
+        '20260612232322_normal_saracen',
+      ]);
     } finally {
       sqlite.close();
     }

@@ -135,6 +135,7 @@ window.tts = new (function () {
     'BR',
     'STRONG',
     'A',
+    'MARK',
   ];
   this.prevElement = null;
   this.currentElement = reader.chapterElement;
@@ -789,5 +790,10 @@ window.addEventListener('load', () => {
         .replace(/<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p>\s*<br>))\s*/g, '');
     }
     reader.chapterElement.innerHTML = html;
+    const searchQuery = window.readerSearch?.query;
+    const searchIndex = window.readerSearch?.index;
+    if (searchQuery) {
+      window.readerSearch.search(searchQuery, searchIndex);
+    }
   });
 })();

@@ -13,12 +13,21 @@ import { ThemeColors } from '@theme/types';
 import { bookmarkChapter } from '@database/queries/ChapterQueries';
 import { useChapterContext } from '../ChapterContext';
 import { useNovelLayout } from '@screens/novel/NovelContext';
+import ReaderSearchbar from './ReaderSearchbar';
+import { ReaderSearchResult } from '../types';
 
 interface ReaderAppbarProps {
   theme: ThemeColors;
   goBack: () => void;
   bookmarked: boolean;
   setBookmarked: React.Dispatch<React.SetStateAction<boolean>>;
+  searchVisible: boolean;
+  setSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  searchText: string;
+  setSearchText: (text: string) => void;
+  searchResult: ReaderSearchResult;
+  resetSearchResult: () => void;
+  resetSearch: () => void;
 }
 
 const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
@@ -28,6 +37,13 @@ const ReaderAppbar = ({
   theme,
   bookmarked,
   setBookmarked,
+  searchVisible,
+  setSearchVisible,
+  searchText,
+  setSearchText,
+  searchResult,
+  resetSearchResult,
+  resetSearch,
 }: ReaderAppbarProps) => {
   const { chapter, novel } = useChapterContext();
   const { statusBarHeight } = useNovelLayout();
@@ -106,6 +122,13 @@ const ReaderAppbar = ({
           </Text>
         </View>
         <IconButtonV2
+          name={searchVisible ? 'magnify-close' : 'magnify'}
+          size={24}
+          onPress={() => setSearchVisible(current => !current)}
+          color={theme.onSurface}
+          theme={theme}
+        />
+        <IconButtonV2
           name={bookmarked ? 'bookmark' : 'bookmark-outline'}
           size={24}
           onPress={() => {
@@ -116,6 +139,16 @@ const ReaderAppbar = ({
           style={styles.bookmark}
         />
       </View>
+      {searchVisible ? (
+        <ReaderSearchbar
+          theme={theme}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          searchResult={searchResult}
+          resetSearchResult={resetSearchResult}
+          resetSearch={resetSearch}
+        />
+      ) : null}
     </Animated.View>
   );
 };
