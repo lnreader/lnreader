@@ -496,7 +496,9 @@
     "finished": "Завершено",
     "nextChapter": "Наступний: %{name}",
     "noNextChapter": "Наступний розділ не знайдено",
-    "noPreviousChapter": "Попереднього розділу немає"
+    "noPreviousChapter": "Попереднього розділу немає",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
