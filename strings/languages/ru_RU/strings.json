@@ -496,7 +496,9 @@
     "finished": "Завершено",
     "nextChapter": "%{name}Следующий: %{name}",
     "noNextChapter": "Следующей главы нет",
-    "noPreviousChapter": "Предыдущей главы нет"
+    "noPreviousChapter": "Предыдущей главы нет",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Интервал прокрутки (секунды)",
