@@ -496,7 +496,9 @@
     "finished": "Biten",
     "nextChapter": "Sonraki: %{name}",
     "noNextChapter": "Başka bölüm yok",
-    "noPreviousChapter": "Önceki bölüm yok"
+    "noPreviousChapter": "Önceki bölüm yok",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
