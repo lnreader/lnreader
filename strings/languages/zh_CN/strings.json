@@ -496,7 +496,9 @@
     "finished": "已完成",
     "nextChapter": "下一章: %{name}",
     "noNextChapter": "没有下一章节",
-    "noPreviousChapter": "没有上一章节"
+    "noPreviousChapter": "没有上一章节",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "滚屏间隔 (秒)",
