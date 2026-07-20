@@ -496,7 +496,9 @@
     "finished": "Finished",
     "nextChapter": "次: %{name}",
     "noNextChapter": "次の章はありません",
-    "noPreviousChapter": "前の章はありません"
+    "noPreviousChapter": "前の章はありません",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "スクロール間隔 (秒)",
