@@ -496,7 +496,9 @@
     "finished": "Đã xong",
     "nextChapter": "Tiếp: %{name}",
     "noNextChapter": "Không có chương kế tiếp",
-    "noPreviousChapter": "Không có chương kế tiếp"
+    "noPreviousChapter": "Không có chương kế tiếp",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
