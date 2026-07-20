@@ -81,6 +81,7 @@ const makeChapter = (id: number, page = '1') => ({
   releaseTime: '2026-01-01',
   updatedTime: '2026-01-01',
   readTime: '2026-01-01',
+  timeSpent: 0,
 });
 
 const makeNovel = () => ({
@@ -124,6 +125,7 @@ const createStore = (
     updateChapterProgress: jest.fn(),
     chapterTextCache,
     setLastRead: jest.fn(),
+	increaseTimeSpent: jest.fn()
   };
 
   return {

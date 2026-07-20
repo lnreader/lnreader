@@ -6,6 +6,7 @@ import {
   ChapterActionsDependencies,
   deleteChapterAction,
   deleteChaptersAction,
+  increaseTimeSpentAction,
   markChapterReadAction,
   markChaptersReadAction,
   markChaptersUnreadAction,
@@ -31,6 +32,7 @@ jest.mock('../store/chapterActions', () => {
     markPreviousChaptersUnreadAction: jest.fn(),
     refreshChaptersAction: jest.fn(),
     updateChapterProgressAction: jest.fn(),
+    increaseTimeSpentAction: jest.fn(),
   };
 });
 
@@ -65,6 +67,7 @@ const makeChapter = (id: number, overrides: Partial<ChapterInfo> = {}) => ({
   page: '1',
   progress: 0,
   position: id - 1,
+  timeSpent: 0,
   ...overrides,
 });
 
@@ -86,6 +89,7 @@ const createDeps = (): jest.Mocked<ChapterActionsDependencies> => ({
   deleteChapter: jest.fn().mockResolvedValue(undefined),
   deleteChapters: jest.fn().mockResolvedValue(undefined),
   getPageChapters: jest.fn().mockResolvedValue([]),
+  increaseTimeSpent: jest.fn().mockResolvedValue(undefined),
   showToast: jest.fn(),
   getString: jest
     .fn<
@@ -405,5 +409,29 @@ describe('novelStore.chapterActions', () => {
       expect.any(Function),
       harness.chapterDeps,
     );
+  });
+  it('increaseTimeSpent delegates mutation to low-level action with dependencies', () => {
+    const harness = createHarness();
+    (
+      increaseTimeSpentAction as jest.MockedFunction<typeof increaseTimeSpentAction>
+    ).mockImplementation((chapterId, timeSpent, mutate) => {
+      mutate(chs =>
+        chs.map(ch =>
+          ch.id === chapterId
+            ? { ...ch, timeSpent: (ch.timeSpent ?? 0) + timeSpent }
+            : ch,
+        ),
+      );
+    });
+
+    harness.actions.increaseTimeSpent(1, 200);
+
+    expect(increaseTimeSpentAction).toHaveBeenCalledWith(
+      1,
+      200,
+      expect.any(Function),
+      harness.chapterDeps,
+    );
+    expect(harness.getState().chapters[0].timeSpent).toBe(200);
   });
 });

@@ -46,6 +46,7 @@ import {
   getFirstUnreadChapter,
   getNovelScanlators,
   getNovelScanlatorsSync,
+  increaseTimeSpent,
 } from '../ChapterQueries';
 
 describe('ChapterQueries', () => {
@@ -1399,6 +1400,84 @@ describe('ChapterQueries', () => {
       expect(scanlatorsSync).toHaveLength(2);
       expect(scanlatorsSync).toContain('Scan A');
       expect(scanlatorsSync).toContain('Scan B');
+    });
+  });
+  describe('increaseTimeSpent', () => {
+    it('should increase timeSpent from default 0', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelId, {});
+
+      await increaseTimeSpent(chapterId, 500);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter = chapters.find(c => c.id === chapterId);
+      expect(chapter?.timeSpent).toBe(500);
+    });
+
+    it('should accumulate timeSpent across multiple calls', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelId, {});
+
+      await increaseTimeSpent(chapterId, 300);
+      await increaseTimeSpent(chapterId, 200);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter = chapters.find(c => c.id === chapterId);
+      expect(chapter?.timeSpent).toBe(500);
+    });
+
+    it('should add to a pre-existing non-zero timeSpent', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        timeSpent: 1000,
+      });
+
+      await increaseTimeSpent(chapterId, 250);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter = chapters.find(c => c.id === chapterId);
+      expect(chapter?.timeSpent).toBe(1250);
+    });
+
+    it('should only update the targeted chapter', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId, {});
+      const chapterId2 = await insertTestChapter(testDb, novelId, {});
+
+      await increaseTimeSpent(chapterId1, 400);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter1 = chapters.find(c => c.id === chapterId1);
+      const chapter2 = chapters.find(c => c.id === chapterId2);
+      expect(chapter1?.timeSpent).toBe(400);
+      expect(chapter2?.timeSpent).toBe(0);
+    });
+
+    it('should be a no-op for a non-existent chapterId', async () => {
+      await expect(increaseTimeSpent(999999, 100)).resolves.not.toThrow();
+    });
+
+    it('should handle a timeSpent value of 0', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        timeSpent: 750,
+      });
+
+      await increaseTimeSpent(chapterId, 0);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter = chapters.find(c => c.id === chapterId);
+      expect(chapter?.timeSpent).toBe(750);
     });
   });
 });

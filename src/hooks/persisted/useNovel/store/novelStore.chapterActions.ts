@@ -6,6 +6,7 @@ import {
   ChapterActionsDependencies,
   deleteChapterAction,
   deleteChaptersAction,
+  increaseTimeSpentAction,
   markChapterReadAction,
   markChaptersReadAction,
   markChaptersUnreadAction,
@@ -291,5 +292,14 @@ export const createNovelStoreChapterActions = ({
         deps: chapterActionsDependencies,
       });
     },
+
+	increaseTimeSpent: (chapterId, timeSpent) => {
+	  increaseTimeSpentAction(
+		chapterId,
+		timeSpent,
+		mutateChapters,
+		chapterActionsDependencies,
+	  );
+	}
   };
 };

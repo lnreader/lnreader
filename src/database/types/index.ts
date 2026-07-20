@@ -40,6 +40,7 @@ export interface ChapterInfo {
   progress: number | null;
   position?: number | null;
   scanlator?: string | null;
+  timeSpent: number | null;
 }
 
 export interface DownloadedChapter extends ChapterInfo {
@@ -97,6 +98,19 @@ export interface LibraryStats {
   sourcesCount?: number;
   genres?: Record<string, number>;
   status?: Record<string, number>;
+  totalTimeSpent?: number;
+  topNovelsByTimeSpent?: {
+    id: number;
+    pluginId: string;
+    name: string;
+    cover: string | null;
+    timeSpent: number;
+  }[];
+  topCategoriesByTimeSpent?: {
+	id: number;
+	name: string;
+	timeSpent: number;
+  }[];
 }
 
 export interface BackupNovel extends NovelInfo {

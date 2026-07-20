@@ -52,6 +52,7 @@ export interface NovelStoreChapterActions {
   deleteChapter: (chapter: ChapterInfo) => void;
   deleteChapters: (chapters: ChapterInfo[]) => void;
   refreshChapters: () => void;
+  increaseTimeSpent: (chapterId: number, timeSpent: number) => void;
 }
 
 export interface NovelStoreNovelActions {

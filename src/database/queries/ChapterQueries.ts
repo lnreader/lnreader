@@ -227,6 +227,19 @@ export const deleteChapters = async (
   });
 };
 
+/** Increases the timeSpent for the specified chapterId by the given amount */
+export const increaseTimeSpent = async (
+  chapterId: number,
+  timeSpent: number,
+): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx.update(chapterSchema)
+      .set({ timeSpent: sql`COALESCE(${chapterSchema.timeSpent}, 0) + ${timeSpent}` })
+      .where(eq(chapterSchema.id, chapterId))
+      .run();
+  });
+};
+
 // TODO: Remove the need for the chapters array, as it could lead to not deleting the downloaded files but just marking them as not downloaded
 /*
   Deletes all downloaded chapters from the database

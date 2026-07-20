@@ -35,6 +35,7 @@ import { getString } from '@strings/translations';
 import NativeVolumeButtonListener from '@specs/NativeVolumeButtonListener';
 import NativeFile from '@specs/NativeFile';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
+import useTimeTracking from './useTimeTracking';
 
 const emmiter = new NativeEventEmitter(NativeVolumeButtonListener);
 
@@ -47,6 +48,7 @@ export default function useChapter(
     setLastRead,
     markChapterRead,
     updateChapterProgress,
+    increaseTimeSpent,
     chapterTextCache,
   } = useNovelActions();
   const novelSettings = useNovelValue('novelSettings');
@@ -71,6 +73,8 @@ export default function useChapter(
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
   const { setImmersiveMode, showStatusAndNavBar } = useFullscreenMode();
+
+  useTimeTracking(chapter.id, incognitoMode || false, increaseTimeSpent);
 
   const connectVolumeButton = useCallback(() => {
     const offset = defaultTo(
@@ -356,6 +360,8 @@ export default function useChapter(
     [getChapter, nextChapter, prevChapter],
   );
 
+
+  // Cleanup when the component unmounts or the chapter changes
   useEffect(() => {
     if (!incognitoMode) {
       insertHistory(chapter.id);

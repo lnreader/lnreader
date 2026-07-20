@@ -10,6 +10,7 @@ import {
   markPreviousChaptersUnread as _markPreviousChaptersUnread,
   markPreviuschaptersRead as _markPreviuschaptersRead,
   updateChapterProgress as _updateChapterProgress,
+  increaseTimeSpent as _increaseTimeSpent,
 } from '@database/queries/ChapterQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { getString as translateGetString } from '@strings/translations';
@@ -49,6 +50,7 @@ export interface ChapterActionsDependencies {
     filter?: ChapterFilterKey[],
     page?: string,
   ) => Promise<ChapterInfo[]>;
+  increaseTimeSpent: (chapterId: number, timeSpent: number) => Promise<void>;
   showToast: (message: string) => void;
   getString: typeof translateGetString;
 }
@@ -64,6 +66,7 @@ export const defaultChapterActionsDependencies: ChapterActionsDependencies = {
   deleteChapter: _deleteChapter,
   deleteChapters: _deleteChapters,
   getPageChapters: _getPageChapters,
+  increaseTimeSpent: _increaseTimeSpent,
   showToast,
   getString: translateGetString,
 };
@@ -326,3 +329,25 @@ export const refreshChaptersAction = ({
     );
   }
 };
+
+export function increaseTimeSpentAction(
+  chapterId: number,
+  timeSpent: number,
+  mutateChapters: MutateChapters,
+  deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
+) {
+  runAsyncAction(
+    deps.increaseTimeSpent(chapterId, timeSpent),
+    deps,
+  );
+
+  mutateChapters(chapters =>
+    chapters.map(ch =>
+      ch.id === chapterId
+        ? {
+          ...ch, timeSpent: (ch.timeSpent ?? 0) + timeSpent
+        }
+        : ch
+    )
+  );
+}

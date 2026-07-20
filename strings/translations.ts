@@ -8,11 +8,13 @@ import localeData from 'dayjs/plugin/localeData';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import calendar from 'dayjs/plugin/calendar';
+import duration from 'dayjs/plugin/duration';
 dayjs.extend(customParseFormat);
 dayjs.extend(localeData);
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(calendar);
+dayjs.extend(duration);
 
 import 'dayjs/locale/ar';
 import 'dayjs/locale/ca';
@@ -163,8 +165,12 @@ export const setLocale = (locale: string) => {
 
 export { i18n };
 
+type PluralSuffix = '.one' | '.other';
+
+type TrimPlural<T extends string> = T extends `${infer Base}${PluralSuffix}` ? Base : T;
+
 export const getString = (
-  stringKey: keyof StringMap,
+  stringKey: keyof StringMap | TrimPlural<keyof StringMap>,
   options?: TranslateOptions,
 ) => i18n.t(stringKey, options);
 

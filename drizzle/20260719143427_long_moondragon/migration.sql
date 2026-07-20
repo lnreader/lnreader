@@ -1,0 +1,1 @@
+ALTER TABLE `Chapter` ADD `timeSpent` integer DEFAULT 0;

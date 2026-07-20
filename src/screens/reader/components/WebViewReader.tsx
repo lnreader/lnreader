@@ -222,51 +222,37 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
       switch (key) {
         case CHAPTER_READER_SETTINGS: {
-            // Update reader settings
-            const newReaderSettings = getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) || initialChapterReaderSettings;
-            setReaderSettings(newReaderSettings);
-            // Check if the new TTS settings are different from the current ones, so the changes apply instantly and not after finishing the current paragraph
-            if (!areTTSSettingsEqual(readerSettingsRef.current.tts, newReaderSettings.tts)) {
-                // Stop any currently playing speech
-                Speech.stop();
-                // Restart TTS if it was reading before the settings change
-                webViewRef.current?.injectJavaScript(
-                    `
-                    // Auto-restart TTS if currently reading
-                    if (window.tts && tts.reading) {
-                        const currentElement = tts.currentElement;
-                        const wasReading = tts.reading;
-                        tts.stop();
-                        if (wasReading) {
-                            setTimeout(() => {
-                            tts.start(currentElement);
-                            }, 100);
-                        }
-                    }
-                    `,
-                );
-            }
-            // Update WebView settings
+          // Update reader settings
+          const newReaderSettings = getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) || initialChapterReaderSettings;
+          setReaderSettings(newReaderSettings);
+          // Check if the new TTS settings are different from the current ones, so the changes apply instantly and not after finishing the current paragraph
+          if (!areTTSSettingsEqual(readerSettingsRef.current.tts, newReaderSettings.tts)) {
+            // Stop any currently playing speech
+            Speech.stop();
+            // Restart TTS if it was reading before the settings change
             webViewRef.current?.injectJavaScript(
-                `
-                (function() {
-                    const s = ${MMKVStorage.getString(CHAPTER_READER_SETTINGS)};
-                    reader.readerSettings.val = s;
-                    const root = document.documentElement.style;
-                    root.setProperty('--readerSettings-theme', s.theme);
-                    root.setProperty('--readerSettings-padding', s.padding + 'px');
-                    root.setProperty('--readerSettings-textSize', s.textSize + 'px');
-                    root.setProperty('--readerSettings-textColor', s.textColor);
-                    root.setProperty('--readerSettings-textAlign', s.textAlign);
-                    root.setProperty('--readerSettings-lineHeight', s.lineHeight);
-                    root.setProperty('--readerSettings-fontFamily', s.fontFamily);
-                    document.getElementById('ln-custom-css').innerHTML = s.customCSS;
-                    document.getElementById('ln-font').innerHTML = \`@font-face { font-family: \${s.fontFamily}; src: url("file:///android_asset/fonts/\${s.fontFamily}.ttf"); }\`;
-                    document.getElementById('ln-custom-js').innerHTML = s.customJS;
-                })();
-                `,
+              `
+              // Auto-restart TTS if currently reading
+              if (window.tts && tts.reading) {
+                const currentElement = tts.currentElement;
+                const wasReading = tts.reading;
+                tts.stop();
+                if (wasReading) {
+                  setTimeout(() => {
+                    tts.start(currentElement);
+                  }, 100);
+                }
+              }
+              `,
             );
-            break;
+          }
+          // Update WebView settings
+          webViewRef.current?.injectJavaScript(
+            `
+            reader.readerSettings.val = ${JSON.stringify(newReaderSettings)}
+            `,
+          );
+          break;
         }
         case CHAPTER_GENERAL_SETTINGS:
           webViewRef.current?.injectJavaScript(
