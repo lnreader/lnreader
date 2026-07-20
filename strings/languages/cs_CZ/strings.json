@@ -496,7 +496,9 @@
     "finished": "Dokončeno",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Nejsou žádné další kapitoly",
-    "noPreviousChapter": "There's no previous chapter"
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
