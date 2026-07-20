@@ -496,7 +496,9 @@
     "finished": "Selesai\n",
     "nextChapter": "Berikutnya: %{name}",
     "noNextChapter": "Tidak ada bab selanjutnya\n",
-    "noPreviousChapter": "Tidak ada bab sebelumnya"
+    "noPreviousChapter": "Tidak ada bab sebelumnya",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Interval gulir (detik)",
