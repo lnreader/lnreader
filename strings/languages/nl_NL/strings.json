@@ -496,7 +496,9 @@
     "finished": "Voltooid",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Er is geen volgend hoofdstuk",
-    "noPreviousChapter": "There's no previous chapter"
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
