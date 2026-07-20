@@ -496,7 +496,9 @@
     "finished": "Finito",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Non c'è un capitolo successivo",
-    "noPreviousChapter": "There's no previous chapter"
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
