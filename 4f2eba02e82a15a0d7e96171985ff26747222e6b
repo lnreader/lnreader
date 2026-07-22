@@ -1,292 +1,182 @@
-android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasksPackage.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-26
-src/screens/reader/hooks/useChapter.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 112-113
-  human 112-113
-src/screens/library/hooks/useLibrary.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 12-13,16,122
-  human 12,15,121
-android/app/src/main/java/com/rajarsheechatterjee/background/TaskNotificationFactory.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-103
-src/hooks/persisted/useImport.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 2-6,13-14,17,27,37,39,41
-  human 2,9-10,13,23,33,35,37-38
-src/screens/updates/UpdatesScreen.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 20,66,143
-  human 20,66,143
-App.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 20,24-26,29,32-34,36-39,42
-  human 12,23-33,35,38,41,43-44,47
-src/navigators/Main.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 38,63
-  human 38,63
-android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskScheduler.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-47
-src/services/backgroundTasks/contracts.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-62
-src/database/queries/ChapterQueries.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 178,185,197,217-220
-  human 178,185,197,217-218
+src/services/epub/import.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 11,42,47-48,92,103-107,121,132,140-141,143,188-189,198-199
+  human 11,42,47-48,92,103-104,118-120,131,139-140,142,187-188,197-198
+src/services/backup/utils.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264
+  human 19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264
 android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderTaskWorker.kt
   019f8787-8de1-7123-82f1-9676c4a02c00 1-89
-src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 117-119
-  human 117-119
+src/plugins/pluginManager.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 15,89,108,114-115,119-120,122,135-136,171-193,200-201
+  human 194-195
+android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskScheduler.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-47
+specs/NativeBackgroundTasks.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-39
+android/app/src/main/AndroidManifest.xml
+  019f8787-8de1-7123-82f1-9676c4a02c00 1,13-14,25-27
+  human 1,23-25
+src/services/backup/selfhost/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 7-10,14,54
+  human 7-12,16-18,58-60
+src/services/updates/LibraryUpdateQueries.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 6,25-26,86,118,142,158,183,199-200,221,236,253,264
+  human 6,25-26,117,141,181,247
 src/hooks/common/useInitializeAppServices.ts
   019f8787-8de1-7123-82f1-9676c4a02c00 1-57
-src/services/backup/local/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 8,12-13,54,69,74-75,85-86,88-89,138
-  human 2-8,15,19-21,62-70,89-91,101-108,110-124
-src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 14,135,190
-  human 14,135,190
+android/app/src/main/java/com/rajarsheechatterjee/LNReader/MainApplication.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 18,31
+src/database/db.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 178-190,233
+  human 220-224,226
+src/hooks/persisted/useDownload.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 2-3,5,8,17,31,40,50,52,54,64
+  human 2,6,15,29,38,48,50,52-53
+src/services/updates/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 7-8,14-17,25-26,39
+  human 7-8,14,22-24
+android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-179
 src/hooks/persisted/usePlugins.ts
   019f8787-8de1-7123-82f1-9676c4a02c00 11,19
   human 18
 src/database/queries/NovelQueries.ts
   019f8787-8de1-7123-82f1-9676c4a02c00 56,330-331,333
   human 56,330-331,333
-index.js
-  019f8787-8de1-7123-82f1-9676c4a02c00 3,5-10
-  human 3
-src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-77
-src/screens/more/MoreScreen.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 12-15,19-20
-  human 12,16-17
-src/services/migrate/migrateNovel.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1,16-20,48-49,146
-  human 1,16-18,27-32,52-54,151
-android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-179
-android/app/src/main/java/com/rajarsheechatterjee/background/TaskActionReceiver.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-44
-src/database/db.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 178-190,233
-  human 220-224,226
-src/hooks/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 7
-specs/NativeBackgroundTasks.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-39
-src/services/backgroundTasks/BackgroundTaskQueue.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-226
-android/app/src/main/java/com/rajarsheechatterjee/background/TaskExecutionRegistry.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-29
-src/services/backgroundTasks/taskDefinitions.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-73
-specs/NativeFile.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 10-14,18,22-25
-  human 10-14,18,22-23
-android/app/src/main/java/com/rajarsheechatterjee/NativeFile/NativeFile.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 3-4,7,19,22-24,41,48-69,72,78-117,148-155,159-170,174-182,185-198,201,214,231-239,241-251,255-256,258,262-264,267-276,281-302,305-308,310-311,390-401
-  human 118-119,277-280,402
-src/hooks/persisted/useNovel/__tests__/persistence.test.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 14-16
-  human 14-19
-android/app/build.gradle
-  019f8787-8de1-7123-82f1-9676c4a02c00 4,143-146
-src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 4,56,113
-  human 4,56,113
-src/screens/novel/components/ExportNovelAsEpubButton.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 159-160,171
-  human 159-160,171
-src/screens/settings/SettingsBackupScreen/index.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 8,12-13,23-52,90,96
-  human 8,58-60,66-68
-src/screens/library/LibraryScreen.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 47,350,356
-  human 47,350,356
-android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskEntity.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-32
-src/services/backgroundTasks/backgroundTasks.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-3
-android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-36
-src/services/backup/selfhost/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 7-10,14,54
-  human 7-12,16-18,58-60
 src/services/backgroundTasks/headlessTask.ts
   019f8787-8de1-7123-82f1-9676c4a02c00 1-13
-src/screens/library/components/LibraryListView.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 13,83
-  human 13,83
-src/services/backup/drive/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 9,13,70
-  human 9,13-15,72-74
-src/services/updates/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 7-8,14-17,25-26,39
-  human 7-8,14,22-24
-src/screens/novel/components/NovelScreenList.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 106-107,249,266,275,283
-  human 106,279
-android/app/src/main/java/com/rajarsheechatterjee/LNReader/MainApplication.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 18,31
-android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDatabase.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-24
-src/services/backup/utils.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264
-  human 19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264
-src/services/download/downloadChapter.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 13,27,29,60,65
-  human 13,27,29,60,65-67
-android/app/src/main/AndroidManifest.xml
-  019f8787-8de1-7123-82f1-9676c4a02c00 1,13-14,25-27
-  human 1,23-25
-android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderHeadlessTaskService.kt
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-18
-src/hooks/persisted/useDownload.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 2-3,5,8,17,31,40,50,52,54,64
-  human 2,6,15,29,38,48,50,52-53
-src/plugins/pluginManager.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 15,89,108,114-115,119-120,122,135-136,171-193,200-201
-  human 194-195
-src/services/backgroundTasks/index.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-14
-src/services/epub/import.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 11,42,47-48,92,103-107,121,132,140-141,143,188-189,198-199
-  human 11,42,47-48,92,103-104,118-120,131,139-140,142,187-188,197-198
 src/screens/browse/migration/MigrationNovelList.tsx
   019f8787-8de1-7123-82f1-9676c4a02c00 14,114
   human 14,114
-src/screens/more/TaskQueueScreen.tsx
-  019f8787-8de1-7123-82f1-9676c4a02c00 16-20,28,30,65,120,123
-  human 16,24,26,61,116,119
-src/services/updates/LibraryUpdateQueries.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 6,25-26,86,118,142,158,183,199-200,221,236,253,264
-  human 6,25-26,117,141,181,247
-src/services/backgroundTasks/executeTask.ts
-  019f8787-8de1-7123-82f1-9676c4a02c00 1-41
+src/services/download/downloadChapter.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 13,27,29,60,65
+  human 13,27,29,60,65-67
+src/database/queries/ChapterQueries.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 178,185,197,217-220
+  human 178,185,197,217-218
+src/screens/library/LibraryScreen.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 47,350,356
+  human 47,350,356
+src/hooks/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 7
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 14,135,190
+  human 14,135,190
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-226
+src/services/backup/local/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 8,12-13,54,69,74-75,85-86,88-89,138
+  human 2-8,15,19-21,62-70,89-91,101-108,110-124
+src/screens/novel/components/NovelScreenList.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 106-107,249,266,275,283
+  human 106,279
+src/services/backgroundTasks/backgroundTasks.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-3
+android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasksPackage.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-26
+src/navigators/Main.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 38,63
+  human 38,63
 src/hooks/persisted/useNovel.ts
   019f8787-8de1-7123-82f1-9676c4a02c00 55-56
   human 55-56
+src/services/backgroundTasks/contracts.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-62
+android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-36
+specs/NativeFile.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 10-14,18,22-25
+  human 10-14,18,22-23
+src/screens/library/hooks/useLibrary.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 12-13,16,122
+  human 12,15,121
+src/services/backup/drive/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 9,13,70
+  human 9,13-15,72-74
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 159-160,171
+  human 159-160,171
+src/screens/updates/UpdatesScreen.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 20,66,143
+  human 20,66,143
+src/screens/settings/SettingsBackupScreen/index.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 8,12-13,23-52,90,96
+  human 8,58-60,66-68
+android/app/src/main/java/com/rajarsheechatterjee/NativeFile/NativeFile.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 3-4,7,19,22-24,41,48-69,72,78-117,148-155,159-170,174-182,185-198,201,214,231-239,241-251,255-256,258,262-264,267-276,281-302,305-308,310-311,390-401
+  human 118-119,277-280,402
+android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskEntity.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-32
+android/app/src/main/java/com/rajarsheechatterjee/background/TaskActionReceiver.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-44
+index.js
+  019f8787-8de1-7123-82f1-9676c4a02c00 3,5-10
+  human 3
+android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderHeadlessTaskService.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-18
+android/app/build.gradle
+  019f8787-8de1-7123-82f1-9676c4a02c00 4,143-146
+src/hooks/persisted/useImport.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 2-6,13-14,17,27,37,39,41
+  human 2,9-10,13,23,33,35,37-38
+App.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 20,24-26,29,32-34,36-39,42
+  human 12,23-33,35,38,41,43-44,47
+src/hooks/persisted/useNovel/__tests__/persistence.test.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 14-16
+  human 14-19
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-77
+src/services/migrate/migrateNovel.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1,16-20,48-49,146
+  human 1,16-18,27-32,52-54,151
+src/screens/more/MoreScreen.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 12-15,19-20
+  human 12,16-17
+src/services/backgroundTasks/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-14
+src/services/backgroundTasks/executeTask.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-41
+src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 117-119
+  human 117-119
+src/screens/more/TaskQueueScreen.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 16-20,28,30,65,120,123
+  human 16,24,26,61,116,119
+src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 4,56,113
+  human 4,56,113
+android/app/src/main/java/com/rajarsheechatterjee/background/TaskExecutionRegistry.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-29
+android/app/src/main/java/com/rajarsheechatterjee/background/TaskNotificationFactory.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-103
+src/screens/library/components/LibraryListView.tsx
+  019f8787-8de1-7123-82f1-9676c4a02c00 13,83
+  human 13,83
+src/screens/reader/hooks/useChapter.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 112-113
+  human 112-113
+src/services/backgroundTasks/taskDefinitions.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-73
+android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDatabase.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-24
 package.json
   human 86,97
-pnpm-lock.yaml
-  human 118-120,151-153,2403-2405,3328-3330,3351-3355,3441-3447,5226-5230,9216-9217,10168-10169,10196-10199,10301-10314,12602-12606
 src/services/ServiceManager.ts
   human 1-475
+pnpm-lock.yaml
+  human 118-120,151-153,2403-2405,3328-3330,3351-3355,3441-3447,5226-5230,9216-9217,10168-10169,10196-10199,10301-10314,12602-12606
 ---
 {
   "attestations": [
     {
       "entries": [
         {
-          "accepted_lines": 26,
-          "added_lines": 26,
-          "deleted_lines": 4,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-26",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasksPackage.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "112-113",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "112-113",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/reader/hooks/useChapter.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 4,
-          "added_lines": 4,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "12-13,16,122",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
+          "accepted_lines": 19,
+          "added_lines": 19,
           "deleted_lines": 3,
-          "hash": "human",
-          "lines": "12,15,121",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/library/hooks/useLibrary.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 103,
-          "added_lines": 103,
-          "deleted_lines": 18,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-103",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskNotificationFactory.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 12,
-          "added_lines": 12,
-          "deleted_lines": 2,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "2-6,13-14,17,27,37,39,41",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 9,
-          "hash": "human",
-          "lines": "2,9-10,13,23,33,35,37-38",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/persisted/useImport.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "20,66,143",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "20,66,143",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/updates/UpdatesScreen.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 13,
-          "added_lines": 27,
-          "deleted_lines": 4,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "20,24-26,29,32-34,36-39,42",
+          "lines": "11,42,47-48,92,103-107,121,132,140-141,143,188-189,198-199",
           "overridden_lines": 0
         },
         {
@@ -294,32 +184,66 @@ src/services/ServiceManager.ts
           "added_lines": 0,
           "deleted_lines": 18,
           "hash": "human",
-          "lines": "12,23-33,35,38,41,43-44,47",
+          "lines": "11,42,47-48,92,103-104,118-120,131,139-140,142,187-188,197-198",
           "overridden_lines": 0
         }
       ],
-      "file": "App.tsx"
+      "file": "src/services/epub/import.ts"
     },
     {
       "entries": [
         {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 2,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "38,63",
+          "lines": "19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264",
           "overridden_lines": 0
         },
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 2,
+          "deleted_lines": 16,
           "hash": "human",
-          "lines": "38,63",
+          "lines": "19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264",
           "overridden_lines": 0
         }
       ],
-      "file": "src/navigators/Main.tsx"
+      "file": "src/services/backup/utils.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 89,
+          "added_lines": 89,
+          "deleted_lines": 16,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-89",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderTaskWorker.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 35,
+          "added_lines": 37,
+          "deleted_lines": 6,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "15,89,108,114-115,119-120,122,135-136,171-193,200-201",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 19,
+          "hash": "human",
+          "lines": "194-195",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/pluginManager.ts"
     },
     {
       "entries": [
@@ -337,70 +261,78 @@ src/services/ServiceManager.ts
     {
       "entries": [
         {
-          "accepted_lines": 62,
-          "added_lines": 62,
-          "deleted_lines": 11,
+          "accepted_lines": 39,
+          "added_lines": 39,
+          "deleted_lines": 7,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-62",
+          "lines": "1-39",
           "overridden_lines": 0
         }
       ],
-      "file": "src/services/backgroundTasks/contracts.ts"
+      "file": "specs/NativeBackgroundTasks.ts"
     },
     {
       "entries": [
         {
-          "accepted_lines": 7,
-          "added_lines": 7,
+          "accepted_lines": 6,
+          "added_lines": 6,
           "deleted_lines": 1,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "178,185,197,217-220",
+          "lines": "1,13-14,25-27",
           "overridden_lines": 0
         },
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 5,
+          "deleted_lines": 4,
           "hash": "human",
-          "lines": "178,185,197,217-218",
+          "lines": "1,23-25",
           "overridden_lines": 0
         }
       ],
-      "file": "src/database/queries/ChapterQueries.ts"
+      "file": "android/app/src/main/AndroidManifest.xml"
     },
     {
       "entries": [
         {
-          "accepted_lines": 89,
-          "added_lines": 89,
-          "deleted_lines": 15,
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 1,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-89",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderTaskWorker.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "117-119",
+          "lines": "7-10,14,54",
           "overridden_lines": 0
         },
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 3,
+          "deleted_lines": 12,
           "hash": "human",
-          "lines": "117-119",
+          "lines": "7-12,16-18,58-60",
           "overridden_lines": 0
         }
       ],
-      "file": "src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx"
+      "file": "src/services/backup/selfhost/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "6,25-26,86,118,142,158,183,199-200,221,236,253,264",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "6,25-26,117,141,181,247",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/LibraryUpdateQueries.ts"
     },
     {
       "entries": [
@@ -418,44 +350,91 @@ src/services/ServiceManager.ts
     {
       "entries": [
         {
-          "accepted_lines": 12,
-          "added_lines": 12,
-          "deleted_lines": 2,
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "8,12-13,54,69,74-75,85-86,88-89,138",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 46,
-          "hash": "human",
-          "lines": "2-8,15,19-21,62-70,89-91,101-108,110-124",
+          "lines": "18,31",
           "overridden_lines": 0
         }
       ],
-      "file": "src/services/backup/local/index.ts"
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/LNReader/MainApplication.kt"
     },
     {
       "entries": [
         {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 2,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "14,135,190",
+          "lines": "178-190,233",
           "overridden_lines": 0
         },
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 3,
+          "deleted_lines": 6,
           "hash": "human",
-          "lines": "14,135,190",
+          "lines": "220-224,226",
           "overridden_lines": 0
         }
       ],
-      "file": "src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx"
+      "file": "src/database/db.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "2-3,5,8,17,31,40,50,52,54,64",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "2,6,15,29,38,48,50,52-53",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useDownload.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "7-8,14-17,25-26,39",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "7-8,14,22-24",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 179,
+          "added_lines": 179,
+          "deleted_lines": 32,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-179",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt"
     },
     {
       "entries": [
@@ -502,414 +481,6 @@ src/services/ServiceManager.ts
     {
       "entries": [
         {
-          "accepted_lines": 7,
-          "added_lines": 7,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "3,5-10",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 1,
-          "hash": "human",
-          "lines": "3",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "index.js"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 77,
-          "added_lines": 77,
-          "deleted_lines": 13,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-77",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/__tests__/taskDefinitions.test.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 6,
-          "added_lines": 6,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "12-15,19-20",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "12,16-17",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/more/MoreScreen.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 9,
-          "added_lines": 9,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1,16-20,48-49,146",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 14,
-          "hash": "human",
-          "lines": "1,16-18,27-32,52-54,151",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/migrate/migrateNovel.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 179,
-          "added_lines": 179,
-          "deleted_lines": 32,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-179",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 44,
-          "added_lines": 44,
-          "deleted_lines": 7,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-44",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskActionReceiver.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 14,
-          "added_lines": 14,
-          "deleted_lines": 2,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "178-190,233",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 6,
-          "hash": "human",
-          "lines": "220-224,226",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/database/db.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "7",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 39,
-          "added_lines": 39,
-          "deleted_lines": 6,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-39",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "specs/NativeBackgroundTasks.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 226,
-          "added_lines": 226,
-          "deleted_lines": 40,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-226",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 29,
-          "added_lines": 29,
-          "deleted_lines": 5,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-29",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskExecutionRegistry.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 73,
-          "added_lines": 73,
-          "deleted_lines": 13,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-73",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/taskDefinitions.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 10,
-          "added_lines": 10,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "10-14,18,22-25",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 8,
-          "hash": "human",
-          "lines": "10-14,18,22-23",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "specs/NativeFile.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 192,
-          "added_lines": 199,
-          "deleted_lines": 35,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "3-4,7,19,22-24,41,48-69,72,78-117,148-155,159-170,174-182,185-198,201,214,231-239,241-251,255-256,258,262-264,267-276,281-302,305-308,310-311,390-401",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 7,
-          "added_lines": 7,
-          "deleted_lines": 44,
-          "hash": "human",
-          "lines": "118-119,277-280,402",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/NativeFile/NativeFile.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "14-16",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 6,
-          "hash": "human",
-          "lines": "14-19",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/persisted/useNovel/__tests__/persistence.test.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 5,
-          "added_lines": 5,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "4,143-146",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/build.gradle"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "4,56,113",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "4,56,113",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "159-160,171",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "159-160,171",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/novel/components/ExportNovelAsEpubButton.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 35,
-          "added_lines": 35,
-          "deleted_lines": 6,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "8,12-13,23-52,90,96",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 7,
-          "hash": "human",
-          "lines": "8,58-60,66-68",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "47,350,356",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "47,350,356",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/library/LibraryScreen.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 32,
-          "added_lines": 32,
-          "deleted_lines": 5,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-32",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskEntity.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-3",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/backgroundTasks.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 36,
-          "added_lines": 36,
-          "deleted_lines": 6,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-36",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 6,
-          "added_lines": 6,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "7-10,14,54",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 12,
-          "hash": "human",
-          "lines": "7-12,16-18,58-60",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backup/selfhost/index.ts"
-    },
-    {
-      "entries": [
-        {
           "accepted_lines": 13,
           "added_lines": 13,
           "deleted_lines": 2,
@@ -919,268 +490,6 @@ src/services/ServiceManager.ts
         }
       ],
       "file": "src/services/backgroundTasks/headlessTask.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "13,83",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "13,83",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/library/components/LibraryListView.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "9,13,70",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 7,
-          "hash": "human",
-          "lines": "9,13-15,72-74",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backup/drive/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 9,
-          "added_lines": 9,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "7-8,14-17,25-26,39",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 6,
-          "hash": "human",
-          "lines": "7-8,14,22-24",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/updates/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 6,
-          "added_lines": 6,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "106-107,249,266,275,283",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "106,279",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/novel/components/NovelScreenList.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "18,31",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/LNReader/MainApplication.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 24,
-          "added_lines": 24,
-          "deleted_lines": 4,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-24",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDatabase.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 16,
-          "added_lines": 16,
-          "deleted_lines": 2,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 16,
-          "hash": "human",
-          "lines": "19,31,61-62,65,69,87,110,133,157,161,165,212,216,260,264",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backup/utils.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 5,
-          "added_lines": 5,
-          "deleted_lines": 0,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "13,27,29,60,65",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 7,
-          "hash": "human",
-          "lines": "13,27,29,60,65-67",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/download/downloadChapter.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 6,
-          "added_lines": 6,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1,13-14,25-27",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 4,
-          "hash": "human",
-          "lines": "1,23-25",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/AndroidManifest.xml"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 18,
-          "added_lines": 18,
-          "deleted_lines": 3,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-18",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderHeadlessTaskService.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 11,
-          "added_lines": 11,
-          "deleted_lines": 1,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "2-3,5,8,17,31,40,50,52,54,64",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 9,
-          "hash": "human",
-          "lines": "2,6,15,29,38,48,50,52-53",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/persisted/useDownload.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 35,
-          "added_lines": 37,
-          "deleted_lines": 6,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "15,89,108,114-115,119-120,122,135-136,171-193,200-201",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 19,
-          "hash": "human",
-          "lines": "194-195",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/plugins/pluginManager.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 14,
-          "added_lines": 14,
-          "deleted_lines": 2,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-14",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 19,
-          "added_lines": 19,
-          "deleted_lines": 3,
-          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "11,42,47-48,92,103-107,121,132,140-141,143,188-189,198-199",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 18,
-          "hash": "human",
-          "lines": "11,42,47-48,92,103-104,118-120,131,139-140,142,187-188,197-198",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/epub/import.ts"
     },
     {
       "entries": [
@@ -1206,6 +515,637 @@ src/services/ServiceManager.ts
     {
       "entries": [
         {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "13,27,29,60,65",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "13,27,29,60,65-67",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/download/downloadChapter.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "178,185,197,217-220",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "178,185,197,217-218",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/ChapterQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "47,350,356",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "47,350,356",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/LibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "14,135,190",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "14,135,190",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 226,
+          "added_lines": 226,
+          "deleted_lines": 40,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-226",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "8,12-13,54,69,74-75,85-86,88-89,138",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 46,
+          "hash": "human",
+          "lines": "2-8,15,19-21,62-70,89-91,101-108,110-124",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/local/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "106-107,249,266,275,283",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "106,279",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelScreenList.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/backgroundTasks.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 26,
+          "added_lines": 26,
+          "deleted_lines": 4,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasksPackage.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "38,63",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "38,63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/Main.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "55-56",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "55-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 62,
+          "added_lines": 62,
+          "deleted_lines": 11,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-62",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 6,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "10-14,18,22-25",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "10-14,18,22-23",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "specs/NativeFile.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "12-13,16,122",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "12,15,121",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/hooks/useLibrary.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "9,13,70",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "9,13-15,72-74",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/drive/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "159-160,171",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "159-160,171",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ExportNovelAsEpubButton.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "20,66,143",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "20,66,143",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/updates/UpdatesScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 35,
+          "added_lines": 35,
+          "deleted_lines": 6,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "8,12-13,23-52,90,96",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "8,58-60,66-68",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 192,
+          "added_lines": 199,
+          "deleted_lines": 35,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "3-4,7,19,22-24,41,48-69,72,78-117,148-155,159-170,174-182,185-198,201,214,231-239,241-251,255-256,258,262-264,267-276,281-302,305-308,310-311,390-401",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 44,
+          "hash": "human",
+          "lines": "118-119,277-280,402",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/NativeFile/NativeFile.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 32,
+          "added_lines": 32,
+          "deleted_lines": 5,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-32",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskEntity.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 7,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-44",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskActionReceiver.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "3,5-10",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "index.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 3,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-18",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderHeadlessTaskService.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "4,143-146",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/build.gradle"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "2-6,13-14,17,27,37,39,41",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "2,9-10,13,23,33,35,37-38",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useImport.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 13,
+          "added_lines": 14,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "20,24-26,29,32-34,36-39,42",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 18,
+          "hash": "human",
+          "lines": "12,23-33,35,38,41,43-44,47",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "App.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "14-16",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "14-19",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/__tests__/persistence.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 77,
+          "added_lines": 77,
+          "deleted_lines": 13,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-77",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/taskDefinitions.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1,16-20,48-49,146",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 14,
+          "hash": "human",
+          "lines": "1,16-18,27-32,52-54,151",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/migrate/migrateNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "12-15,19-20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "12,16-17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/MoreScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-14",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 41,
+          "added_lines": 41,
+          "deleted_lines": 7,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-41",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/executeTask.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "117-119",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "117-119",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx"
+    },
+    {
+      "entries": [
+        {
           "accepted_lines": 10,
           "added_lines": 10,
           "deleted_lines": 1,
@@ -1227,45 +1167,58 @@ src/services/ServiceManager.ts
     {
       "entries": [
         {
-          "accepted_lines": 14,
-          "added_lines": 14,
-          "deleted_lines": 2,
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "6,25-26,86,118,142,158,183,199-200,221,236,253,264",
+          "lines": "4,56,113",
           "overridden_lines": 0
         },
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 7,
+          "deleted_lines": 3,
           "hash": "human",
-          "lines": "6,25-26,117,141,181,247",
+          "lines": "4,56,113",
           "overridden_lines": 0
         }
       ],
-      "file": "src/services/updates/LibraryUpdateQueries.ts"
+      "file": "src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx"
     },
     {
       "entries": [
         {
-          "accepted_lines": 41,
-          "added_lines": 41,
-          "deleted_lines": 7,
+          "accepted_lines": 29,
+          "added_lines": 29,
+          "deleted_lines": 5,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "1-41",
+          "lines": "1-29",
           "overridden_lines": 0
         }
       ],
-      "file": "src/services/backgroundTasks/executeTask.ts"
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskExecutionRegistry.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 103,
+          "added_lines": 103,
+          "deleted_lines": 18,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-103",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/TaskNotificationFactory.kt"
     },
     {
       "entries": [
         {
           "accepted_lines": 2,
           "added_lines": 2,
-          "deleted_lines": 30,
+          "deleted_lines": 0,
           "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
-          "lines": "55-56",
+          "lines": "13,83",
           "overridden_lines": 0
         },
         {
@@ -1273,11 +1226,58 @@ src/services/ServiceManager.ts
           "added_lines": 0,
           "deleted_lines": 2,
           "hash": "human",
-          "lines": "55-56",
+          "lines": "13,83",
           "overridden_lines": 0
         }
       ],
-      "file": "src/hooks/persisted/useNovel.ts"
+      "file": "src/screens/library/components/LibraryListView.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "112-113",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "112-113",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/hooks/useChapter.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 73,
+          "added_lines": 73,
+          "deleted_lines": 13,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/taskDefinitions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 24,
+          "added_lines": 24,
+          "deleted_lines": 34,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-24",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDatabase.kt"
     },
     {
       "entries": [
@@ -1297,19 +1297,6 @@ src/services/ServiceManager.ts
         {
           "accepted_lines": 0,
           "added_lines": 0,
-          "deleted_lines": 56,
-          "hash": "human",
-          "lines": "118-120,151-153,2403-2405,3328-3330,3351-3355,3441-3447,5226-5230,9216-9217,10168-10169,10196-10199,10301-10314,12602-12606",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "pnpm-lock.yaml"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
           "deleted_lines": 475,
           "hash": "human",
           "lines": "1-475",
@@ -1317,6 +1304,19 @@ src/services/ServiceManager.ts
         }
       ],
       "file": "src/services/ServiceManager.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 56,
+          "hash": "human",
+          "lines": "118-120,151-153,2403-2405,3328-3330,3351-3355,3441-3447,5226-5230,9216-9217,10168-10169,10196-10199,10301-10314,12602-12606",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "pnpm-lock.yaml"
     }
   ],
   "base_commit_sha": "3e1e211098779264ba123121cc66bb48385fcf77",
@@ -1335,7 +1335,7 @@ src/services/ServiceManager.ts
       },
       "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
       "overriden_lines": 0,
-      "total_additions": 1761,
+      "total_additions": 1748,
       "total_deletions": 316
     },
     "human": {
