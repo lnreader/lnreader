@@ -12,9 +12,9 @@ import {
   novelPersistence,
   type NovelPersistenceInput,
 } from '@hooks/persisted/useNovel/store-helper/contracts';
-import { sleep } from '@utils/sleep';
 import type {
   BackgroundTaskEnqueuer,
+  ChapterDownload,
   MigrateNovelData,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
@@ -112,6 +112,7 @@ export const migrateNovel = async (
 
   let fromPointer = 0,
     toPointer = 0;
+  const chaptersToDownload: ChapterDownload[] = [];
   while (fromPointer < fromChapters.length && toPointer < toChapters.length) {
     const fromChapter = fromChapters[fromPointer];
     const toChapter = toChapters[toPointer];
@@ -143,15 +144,10 @@ export const migrateNovel = async (
     });
 
     if (fromChapter.isDownloaded) {
-      enqueue({
-        name: 'DOWNLOAD_CHAPTER',
-        data: {
-          chapterId: toChapter.id,
-          novelName: toNovel.name,
-          chapterName: toChapter.name,
-        },
+      chaptersToDownload.push({
+        chapterId: toChapter.id,
+        chapterName: toChapter.name,
       });
-      await sleep(1000);
     }
 
     if (lastRead && fromChapter.id === lastRead.id) {
@@ -160,6 +156,16 @@ export const migrateNovel = async (
 
     ++fromPointer;
     ++toPointer;
+  }
+
+  if (chaptersToDownload.length) {
+    enqueue({
+      name: 'DOWNLOAD_CHAPTER',
+      data: {
+        novelName: toNovel.name,
+        chapters: chaptersToDownload,
+      },
+    });
   }
 
   setMeta(meta => ({

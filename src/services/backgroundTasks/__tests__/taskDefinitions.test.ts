@@ -30,9 +30,8 @@ describe('background task definitions', () => {
     const task: BackgroundTask = {
       name: 'DOWNLOAD_CHAPTER',
       data: {
-        chapterId: 42,
         novelName: 'Example Novel',
-        chapterName: 'Chapter 7',
+        chapters: [{ chapterId: 42, chapterName: 'Chapter 7' }],
       },
     };
 
@@ -45,6 +44,23 @@ describe('background task definitions', () => {
       progress: undefined,
       progressText: 'Chapter 7',
     });
+  });
+
+  it('derives metadata for a multi-file EPUB import', () => {
+    const task: BackgroundTask = {
+      name: 'IMPORT_EPUB',
+      data: {
+        files: [
+          { filename: 'First.epub', uri: 'file://first' },
+          { filename: 'Second.epub', uri: 'file://second' },
+        ],
+      },
+    };
+
+    expect(getBackgroundTaskTitle(task)).toBe('notifications.IMPORT_EPUB (2)');
+    expect(createBackgroundTaskMetadata(task, false).progressText).toBe(
+      'First.epub',
+    );
   });
 
   it('maps a native record into the reactive queue projection', () => {

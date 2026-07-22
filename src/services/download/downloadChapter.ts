@@ -60,15 +60,7 @@ const downloadFiles = async (
   await NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
 };
 
-export const downloadChapter = async (
-  { chapterId }: { chapterId: number },
-  setMeta: TaskProgressUpdater,
-) => {
-  setMeta(meta => ({
-    ...meta,
-    isRunning: true,
-  }));
-
+const downloadChapter = async (chapterId: number) => {
   const chapter = await getChapter(chapterId);
   if (!chapter) {
     throw new Error('Chapter not found with id: ' + chapterId);
@@ -99,10 +91,52 @@ export const downloadChapter = async (
   } else {
     throw new Error(getString('downloadScreen.chapterEmptyOrScrapeError'));
   }
+};
+
+export const downloadChapters = async (
+  {
+    chapters,
+  }: {
+    novelName: string;
+    chapters: { chapterId: number; chapterName: string }[];
+  },
+  setMeta: TaskProgressUpdater,
+) => {
+  if (!chapters.length) return;
+
+  const failures: string[] = [];
+
+  for (let index = 0; index < chapters.length; index++) {
+    const chapter = chapters[index];
+    setMeta(meta => ({
+      ...meta,
+      isRunning: true,
+      progress: index / chapters.length,
+      progressText: `${index + 1}/${chapters.length} · ${chapter.chapterName}`,
+    }));
+
+    try {
+      await downloadChapter(chapter.chapterId);
+    } catch (error) {
+      failures.push(
+        `${chapter.chapterName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
 
   setMeta(meta => ({
     ...meta,
     progress: 1,
     isRunning: false,
   }));
+
+  if (failures.length) {
+    throw new Error(
+      `${failures.length} of ${
+        chapters.length
+      } chapters failed: ${failures.join('; ')}`,
+    );
+  }
 };

@@ -23,7 +23,12 @@ export default function useDownload() {
   ) as { task: DownloadChapterTask; meta: BackgroundTaskMetadata }[];
 
   const downloadingChapterIds = useMemo(
-    () => new Set(downloadQueue.map(c => c.task.data.chapterId)),
+    () =>
+      new Set(
+        downloadQueue.flatMap(item =>
+          item.task.data.chapters.map(chapter => chapter.chapterId),
+        ),
+      ),
     [downloadQueue],
   );
 
@@ -31,22 +36,21 @@ export default function useDownload() {
     backgroundTasks.enqueue({
       name: 'DOWNLOAD_CHAPTER',
       data: {
-        chapterId: chapter.id,
         novelName: novel.name,
-        chapterName: chapter.name,
+        chapters: [{ chapterId: chapter.id, chapterName: chapter.name }],
       },
     });
   const downloadChapters = (novel: NovelInfo, chapters: ChapterInfo[]) =>
-    backgroundTasks.enqueue(
-      chapters.map(chapter => ({
-        name: 'DOWNLOAD_CHAPTER',
-        data: {
+    backgroundTasks.enqueue({
+      name: 'DOWNLOAD_CHAPTER',
+      data: {
+        novelName: novel.name,
+        chapters: chapters.map(chapter => ({
           chapterId: chapter.id,
-          novelName: novel.name,
           chapterName: chapter.name,
-        },
-      })),
-    );
+        })),
+      },
+    });
   const resumeDownload = () => backgroundTasks.resumeAll();
 
   const pauseDownload = () => backgroundTasks.pauseAll();

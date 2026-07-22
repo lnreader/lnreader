@@ -28,7 +28,13 @@ export const getBackgroundTaskTitle = (task: BackgroundTask) => {
         task.data.novelName
       }`;
     case 'IMPORT_EPUB':
-      return `${getString('notifications.IMPORT_EPUB')}: ${task.data.filename}`;
+      return task.data.files.length === 1
+        ? `${getString('notifications.IMPORT_EPUB')}: ${
+            task.data.files[0].filename
+          }`
+        : `${getString('notifications.IMPORT_EPUB')} (${
+            task.data.files.length
+          })`;
     case 'MIGRATE_NOVEL':
       return `${getString('notifications.MIGRATE_NOVEL')}: ${
         task.data.fromNovel.name
@@ -52,7 +58,11 @@ export const createBackgroundTaskMetadata = (
   isRunning,
   progress: undefined,
   progressText:
-    task.name === 'DOWNLOAD_CHAPTER' ? task.data.chapterName : undefined,
+    task.name === 'DOWNLOAD_CHAPTER'
+      ? task.data.chapters[0]?.chapterName
+      : task.name === 'IMPORT_EPUB'
+      ? task.data.files[0]?.filename
+      : undefined,
 });
 
 export const fromNativeTaskRecord = (

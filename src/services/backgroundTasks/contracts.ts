@@ -13,8 +13,18 @@ export type MigrateNovelData = {
   toNovelPath: string;
 };
 
+export type EpubImportFile = {
+  filename: string;
+  uri: string;
+};
+
+export type ChapterDownload = {
+  chapterId: number;
+  chapterName: string;
+};
+
 export type BackgroundTask =
-  | { name: 'IMPORT_EPUB'; data: { filename: string; uri: string } }
+  | { name: 'IMPORT_EPUB'; data: { files: EpubImportFile[] } }
   | {
       name: 'UPDATE_LIBRARY';
       data?: { categoryId?: number; categoryName?: string };
@@ -30,7 +40,7 @@ export type BackgroundTask =
 
 export type DownloadChapterTask = {
   name: 'DOWNLOAD_CHAPTER';
-  data: { chapterId: number; novelName: string; chapterName: string };
+  data: { novelName: string; chapters: ChapterDownload[] };
 };
 
 export type BackgroundTaskMetadata = {

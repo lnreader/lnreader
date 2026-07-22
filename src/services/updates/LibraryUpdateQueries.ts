@@ -138,14 +138,17 @@ const updateNovelChapters = async (
       ]),
     );
 
-    for (const insertedChapter of insertedNewChapters) {
+    if (insertedNewChapters.length) {
       enqueue({
         name: 'DOWNLOAD_CHAPTER',
         data: {
-          chapterId: insertedChapter.id,
           novelName,
-          chapterName:
-            chapterNameByPath.get(insertedChapter.path) || insertedChapter.name,
+          chapters: insertedNewChapters.map(insertedChapter => ({
+            chapterId: insertedChapter.id,
+            chapterName:
+              chapterNameByPath.get(insertedChapter.path) ||
+              insertedChapter.name,
+          })),
         },
       });
     }

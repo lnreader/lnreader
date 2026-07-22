@@ -8,7 +8,11 @@ import { getString } from '@strings/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
-import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
+import type {
+  BackgroundTaskMetadata,
+  EpubImportFile,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
 import NativeFile from '@specs/NativeFile';
 import NativeZipArchive from '@specs/NativeZipArchive';
 import NativeEpub from '@specs/NativeEpub';
@@ -111,13 +115,7 @@ const insertLocalChapter = async (
 };
 
 export const importEpub = async (
-  {
-    uri,
-    filename,
-  }: {
-    uri: string;
-    filename: string;
-  },
+  { uri, filename }: EpubImportFile,
   setMeta: TaskProgressUpdater,
 ) => {
   setMeta(meta => ({
@@ -208,4 +206,66 @@ export const importEpub = async (
     progress: 1,
     isRunning: false,
   }));
+};
+
+export const importEpubBatch = async (
+  { files }: { files: EpubImportFile[] },
+  setMeta: TaskProgressUpdater,
+) => {
+  if (!files.length) return;
+
+  const failures: string[] = [];
+
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    let fileMeta: BackgroundTaskMetadata = {
+      name: file.filename,
+      isRunning: true,
+      progress: 0,
+      progressText: undefined,
+    };
+    let progressError: unknown;
+    const updateFileProgress: TaskProgressUpdater = transformer => {
+      fileMeta = transformer(fileMeta);
+      try {
+        setMeta(meta => ({
+          ...meta,
+          isRunning: true,
+          progress: (index + (fileMeta.progress ?? 0)) / files.length,
+          progressText: `${index + 1}/${files.length} · ${file.filename}${
+            fileMeta.progressText ? ` · ${fileMeta.progressText}` : ''
+          }`,
+        }));
+      } catch (error) {
+        progressError = error;
+        throw error;
+      }
+    };
+
+    try {
+      await importEpub(file, updateFileProgress);
+    } catch (error) {
+      if (error === progressError) throw error;
+
+      failures.push(
+        `${file.filename}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  setMeta(meta => ({
+    ...meta,
+    progress: 1,
+    isRunning: false,
+  }));
+
+  if (failures.length) {
+    throw new Error(
+      `${failures.length} of ${
+        files.length
+      } EPUB imports failed: ${failures.join('; ')}`,
+    );
+  }
 };

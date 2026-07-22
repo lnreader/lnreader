@@ -1,8 +1,8 @@
 import { createDriveBackup, driveRestore } from '../backup/drive';
 import { createBackup, restoreBackup } from '../backup/local';
 import { createSelfHostBackup, selfHostRestore } from '../backup/selfhost';
-import { downloadChapter } from '../download/downloadChapter';
-import { importEpub } from '../epub/import';
+import { downloadChapters } from '../download/downloadChapter';
+import { importEpubBatch } from '../epub/import';
 import { migrateNovel } from '../migrate/migrateNovel';
 import { updateLibrary } from '../updates';
 import type {
@@ -18,7 +18,7 @@ export const executeBackgroundTask = async (
 ) => {
   switch (task.name) {
     case 'IMPORT_EPUB':
-      return importEpub(task.data, updateProgress);
+      return importEpubBatch(task.data, updateProgress);
     case 'UPDATE_LIBRARY':
       return updateLibrary(task.data || {}, updateProgress, enqueue);
     case 'DRIVE_BACKUP':
@@ -36,6 +36,6 @@ export const executeBackgroundTask = async (
     case 'MIGRATE_NOVEL':
       return migrateNovel(task.data, updateProgress, enqueue);
     case 'DOWNLOAD_CHAPTER':
-      return downloadChapter(task.data, updateProgress);
+      return downloadChapters(task.data, updateProgress);
   }
 };

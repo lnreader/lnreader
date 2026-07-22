@@ -24,15 +24,15 @@ export default function useImport() {
 
   const importNovel = useCallback((pickedNovel: DocumentPickerResult) => {
     if (pickedNovel.canceled) return;
-    backgroundTasks.enqueue(
-      pickedNovel.assets.map(asset => ({
-        name: 'IMPORT_EPUB',
-        data: {
+    backgroundTasks.enqueue({
+      name: 'IMPORT_EPUB',
+      data: {
+        files: pickedNovel.assets.map(asset => ({
           filename: asset.name,
           uri: asset.uri,
-        },
-      })),
-    );
+        })),
+      },
+    });
   }, []);
   const resumeImport = () => backgroundTasks.resumeAll();
 
