@@ -1,6 +1,6 @@
 import { DeviceEventEmitter } from 'react-native';
 
-import NativeBackgroundTasks from '@specs/NativeBackgroundTasks';
+import NativeBackgroundTasks from '@modules/native-background-tasks';
 import { getString } from '@strings/translations';
 import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';

@@ -19,7 +19,6 @@ minimumReleaseAgeExclude:
   - expo-server@56.0.5
   - expo@56.0.9
   - expo-clipboard@56.0.4
-  - expo-notifications@56.0.16
 
 nodeLinker: hoisted
 

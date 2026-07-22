@@ -21,24 +21,20 @@
       "expo-localization",
       "react-native-edge-to-edge",
       "expo-web-browser",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/native/notification_icon.png",
-          "color": "#1D1B20"
-        }
-      ],
       "./plugins/withReaderAssets",
       "./plugins/withAndroidCustomizations",
-      ["expo-build-properties", {
-        "android": {
-          "usesCleartextTraffic": true,
-          "manifestApplicationAttributes": {
-            "android:largeHeap": "true",
-            "android:allowBackup": "true"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "manifestApplicationAttributes": {
+              "android:largeHeap": "true",
+              "android:allowBackup": "true"
+            }
           }
         }
-      }]
+      ]
     ],
     "android": {
       "versionCode": 4194307,
@@ -48,7 +44,7 @@
         "backgroundImage": "./assets/native/ic_launcher_background.png",
         "monochromeImage": "./assets/native/ic_launcher_monochrome.png"
       },
-      "permissions":[
+      "permissions": [
         "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION",
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",

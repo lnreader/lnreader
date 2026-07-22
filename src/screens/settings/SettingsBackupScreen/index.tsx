@@ -10,7 +10,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { getString } from '@strings/translations';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
-import NativeFile from '@specs/NativeFile';
+import NativeFile from '@modules/native-file';
 
 const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   const theme = useTheme();

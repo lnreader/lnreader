@@ -1,9 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import { enableFreeze } from 'react-native-screens';
-
-enableFreeze(true);
-
-import React, { Suspense, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,6 +17,8 @@ import { useInitDatabase } from '@database/db';
 import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
 import { ThemeProvider } from '@hooks/persisted/useTheme';
 
+enableFreeze(true);
+
 const App = () => {
   const { success: databaseReady, error: databaseError } = useInitDatabase();
   const { ready: servicesReady, error: servicesError } =
@@ -34,9 +33,11 @@ const App = () => {
   const initializationError = databaseError || servicesError;
 
   if (initializationError) {
-    return (<ThemeProvider>
-      <ErrorFallback error={initializationError} resetError={() => null} />
-    </ThemeProvider>);
+    return (
+      <ThemeProvider>
+        <ErrorFallback error={initializationError} resetError={() => null} />
+      </ThemeProvider>
+    );
   }
 
   if (!databaseReady || !servicesReady) {

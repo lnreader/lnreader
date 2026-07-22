@@ -195,7 +195,7 @@ The setup automatically mocks external dependencies that aren't database-related
 
 - `@utils/showToast` - Toast notifications
 - `@strings/translations` - i18n translations
-- `@specs/NativeFile` - Native file system operations
+- `@modules/native-file` - Native file system operations
 - `@plugins/helpers/fetch` - Download utilities
 - `@services/plugin/fetch` - Novel fetching service
 - `expo-document-picker` - Document picker

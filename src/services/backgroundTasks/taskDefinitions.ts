@@ -1,4 +1,4 @@
-import type { NativeBackgroundTaskRecord } from '@specs/NativeBackgroundTasks';
+import type { NativeBackgroundTaskRecord } from '@modules/native-background-tasks';
 import { getString } from '@strings/translations';
 import type {
   BackgroundTask,

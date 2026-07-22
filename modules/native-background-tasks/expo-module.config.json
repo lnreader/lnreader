@@ -1,5 +1,8 @@
 {
-  "platforms": ["android"],
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NativeBackgroundTasksModule"]
+  },
   "android": {
     "modules": ["expo.modules.nativebackgroundtasks.NativeBackgroundTasksModule"]
   }

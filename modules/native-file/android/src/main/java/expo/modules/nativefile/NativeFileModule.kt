@@ -4,13 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import expo.modules.kotlin.Promise
-import expo.modules.kotlin.modules.Module
-import expo.modules.kotlin.modules.ModuleDefinition
 import com.facebook.react.bridge.BaseActivityEventListener
+import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.modules.network.CookieJarContainer
 import com.facebook.react.modules.network.ForwardingCookieHandler
 import com.facebook.react.modules.network.OkHttpClientProvider
+import expo.modules.kotlin.Promise
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,9 @@ class NativeFileModule : Module() {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var pendingDocumentPromise: Promise? = null
 
+    private val reactContext: ReactApplicationContext?
+        get() = appContext.reactContext as? ReactApplicationContext
+
     private val activityEventListener = object : BaseActivityEventListener() {
         override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode != CREATE_DOCUMENT_REQUEST && requestCode != PICK_DOCUMENT_REQUEST) return
@@ -48,13 +52,13 @@ class NativeFileModule : Module() {
             pendingDocumentPromise = null
             val uri = data?.data
             if (resultCode != Activity.RESULT_OK || uri == null) {
-                promise.reject("ECANCELLED", "Document selection was cancelled")
+                promise.reject("ECANCELLED", "Document selection was cancelled", null)
                 return
             }
             try {
                 val flags = data.flags and
                     (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                appContext.reactContext?.contentResolver?.takePersistableUriPermission(uri, flags)
+                reactContext?.contentResolver?.takePersistableUriPermission(uri, flags)
             } catch (_: SecurityException) {
                 // Some providers do not support persisted grants.
             }
@@ -76,7 +80,7 @@ class NativeFileModule : Module() {
 
     private fun getInputStream(filepath: String): InputStream {
         val uri = getFileUri(filepath)
-        return appContext.reactContext?.contentResolver?.openInputStream(uri)
+        return reactContext?.contentResolver?.openInputStream(uri)
             ?: throw Exception("ENOENT: could not open an input stream for '$filepath'")
     }
 
@@ -85,7 +89,7 @@ class NativeFileModule : Module() {
 
     private fun getOutputStream(filepath: String): OutputStream {
         val uri = getFileUri(filepath)
-        return appContext.reactContext?.contentResolver?.openOutputStream(uri, writeAccessByAPILevel)
+        return reactContext?.contentResolver?.openOutputStream(uri, writeAccessByAPILevel)
             ?: throw Exception("ENOENT: could not open an output stream for '$filepath'")
     }
 
@@ -154,15 +158,16 @@ class NativeFileModule : Module() {
         Name("NativeFile")
 
         OnCreate {
+            val ctx = reactContext ?: return@OnCreate
             val cookieContainer = okHttpClient.cookieJar as CookieJarContainer
-            val cookieHandler = ForwardingCookieHandler(appContext.reactContext)
+            val cookieHandler = ForwardingCookieHandler(ctx)
             cookieContainer.setCookieJar(JavaNetCookieJar(cookieHandler))
-            appContext.reactContext?.addActivityEventListener(activityEventListener)
+            ctx.addActivityEventListener(activityEventListener)
         }
 
         OnDestroy {
-            appContext.reactContext?.removeActivityEventListener(activityEventListener)
-            pendingDocumentPromise?.reject("ECANCELLED", "Native file module invalidated")
+            reactContext?.removeActivityEventListener(activityEventListener)
+            pendingDocumentPromise?.reject("ECANCELLED", "Native file module invalidated", null)
             pendingDocumentPromise = null
             coroutineScope.cancel()
         }
@@ -206,7 +211,7 @@ class NativeFileModule : Module() {
                 try {
                     val file = File(path)
                     if (!file.exists()) {
-                        promise.reject("ENOENT", "File not found: '$path'")
+                        promise.reject("ENOENT", "File not found: '$path'", null)
                         return@launch
                     }
                     promise.resolve(file.bufferedReader().use { it.readText() })
@@ -286,7 +291,7 @@ class NativeFileModule : Module() {
                 try {
                     val file = File(directory)
                     if (!file.exists()) {
-                        promise.reject("ENOENT", "Folder does not exist: '$directory'")
+                        promise.reject("ENOENT", "Folder does not exist: '$directory'", null)
                         return@launch
                     }
                     val result = file.listFiles().orEmpty().map { childFile ->
@@ -320,13 +325,13 @@ class NativeFileModule : Module() {
                     okHttpClient.newCall(requestBuilder.build())
                         .enqueue(object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
-                                promise.reject(e)
+                                promise.reject("DOWNLOAD_FAILED", e.message ?: "Download failed", e)
                             }
 
                             override fun onResponse(call: Call, response: Response) {
                                 response.use {
                                     if (!it.isSuccessful || it.body == null) {
-                                        promise.reject(Exception("Failed to download: ${it.code}"))
+                                        promise.reject("DOWNLOAD_FAILED", "Failed to download: ${it.code}", Exception("HTTP ${it.code}"))
                                         return
                                     }
                                     try {
@@ -337,36 +342,36 @@ class NativeFileModule : Module() {
                                         }
                                         promise.resolve(null)
                                     } catch (e: Exception) {
-                                        promise.reject(e)
+                                        promise.reject("DOWNLOAD_FAILED", e.message ?: "Download error", e)
                                     }
                                 }
                             }
                         })
                 } catch (e: Exception) {
-                    promise.reject(e)
+                    promise.reject("DOWNLOAD_FAILED", e.message ?: "Download error", e)
                 }
             }
         }
 
         Constant("ExternalDirectoryPath") {
-            val externalDirectory = appContext.reactContext?.getExternalFilesDir(null)
+            val externalDirectory = reactContext?.getExternalFilesDir(null)
             externalDirectory?.absolutePath ?: ""
         }
 
         Constant("ExternalCachesDirectoryPath") {
-            val externalCachesDirectory = appContext.reactContext?.externalCacheDir
+            val externalCachesDirectory = reactContext?.externalCacheDir
             externalCachesDirectory?.absolutePath ?: ""
         }
     }
 
     private fun launchDocumentIntent(intent: Intent, requestCode: Int, promise: Promise) {
-        val activity = appContext.reactContext?.currentActivity
+        val activity = appContext.currentActivity
         if (activity == null) {
-            promise.reject("ENOACTIVITY", "A visible activity is required to select a document")
+            promise.reject("ENOACTIVITY", "A visible activity is required to select a document", null)
             return
         }
         if (pendingDocumentPromise != null) {
-            promise.reject("EBUSY", "Another document selection is already active")
+            promise.reject("EBUSY", "Another document selection is already active", null)
             return
         }
         pendingDocumentPromise = promise

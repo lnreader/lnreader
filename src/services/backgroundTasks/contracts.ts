@@ -1,6 +1,6 @@
 import type { DriveFile } from '@api/drive/types';
 import type { NovelInfo } from '@database/types';
-import type { NativeBackgroundTaskRecord } from '@specs/NativeBackgroundTasks';
+import type { NativeBackgroundTaskRecord } from '@modules/native-background-tasks';
 
 export type SelfHostData = {
   host: string;
