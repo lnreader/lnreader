@@ -108,6 +108,6 @@ src/generated/**/*
 */**/org.eclipse.jdt.core.prefs
 */**/.classpath
 */**/.project
-android/app/bin/*
 android/
+!modules/**/android/
 ios/

@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <application>
+    <service
+      android:name="expo.modules.nativebackgroundtasks.LNReaderHeadlessTaskService"
+      android:exported="false" />
+    <receiver
+      android:name="expo.modules.nativebackgroundtasks.TaskActionReceiver"
+      android:exported="false" />
+    <service
+      android:name="androidx.work.impl.foreground.SystemForegroundService"
+      android:foregroundServiceType="dataSync"
+      tools:node="merge" />
+  </application>
+</manifest>
