@@ -1,0 +1,20 @@
+plugins/withAndroidCustomizations.js
+  s_6331aa5019bf5f::t_d64c6da43db427 25
+  s_6331aa5019bf5f::t_c03c8243db34e0 1,3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9babe1676dd053069d127743a61bc7a8bc11256c",
+  "prompts": {},
+  "sessions": {
+    "s_6331aa5019bf5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8787-8de1-7123-82f1-9676c4a02c00",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
