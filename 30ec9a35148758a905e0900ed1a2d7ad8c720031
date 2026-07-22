@@ -1,0 +1,290 @@
+src/hooks/persisted/useDownload.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 26-31,40,44-48,51-53
+  human 26,34,36,40-43,45,47-49
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 34,49-63
+  human 64-65
+src/hooks/persisted/useImport.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 27-30,33-35
+  human 27-30,33-35
+src/services/backgroundTasks/taskDefinitions.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 31-37,61-65
+  human 31,55
+src/services/backgroundTasks/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 8,10
+src/services/backgroundTasks/executeTask.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 4-5,21,39
+  human 4-5,21,39
+src/services/epub/import.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 11-14,118,210-270
+  human 15,271
+src/services/migrate/migrateNovel.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 17,115,147-149,161-168
+  human 169-170
+src/services/updates/LibraryUpdateQueries.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 141,146-151
+  human 141,145,147-148
+src/services/download/downloadChapter.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 63,94-126,134-141
+  human 127
+src/services/backgroundTasks/contracts.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 16-25,27,43
+  human 17,33
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 4,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "26-31,40,44-48,51-53",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "26,34,36,40-43,45,47-49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useDownload.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 16,
+          "added_lines": 18,
+          "deleted_lines": 5,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "34,49-63",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "64-65",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/taskDefinitions.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "27-30,33-35",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "27-30,33-35",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useImport.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 3,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "31-37,61-65",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "31,55",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/taskDefinitions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "8,10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "4-5,21,39",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "4-5,21,39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/executeTask.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 66,
+          "added_lines": 67,
+          "deleted_lines": 19,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "11-14,118,210-270",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "15,271",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/epub/import.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 13,
+          "added_lines": 15,
+          "deleted_lines": 4,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "17,115,147-149,161-168",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "169-170",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/migrate/migrateNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "141,146-151",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "141,145,147-148",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/LibraryUpdateQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 42,
+          "added_lines": 43,
+          "deleted_lines": 12,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "63,94-126,134-141",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "127",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/download/downloadChapter.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 6,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "16-25,27,43",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "17,33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    }
+  ],
+  "base_commit_sha": "4f2eba02e82a15a0d7e96171985ff26747222e6b",
+  "branch": "refactor/native-background-task-scheduling",
+  "commit_sha": "30ec9a35148758a905e0900ed1a2d7ad8c720031",
+  "commit_time": "2026-07-22T09:05:22+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.25",
+  "prompts": {
+    "019f8787-8de1-7123-82f1-9676c4a02c00": {
+      "accepted_lines": 196,
+      "agent_id": {
+        "id": "019f8787-8de1-7123-82f1-9676c4a02c00",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 202,
+      "total_deletions": 58
+    },
+    "human": {
+      "accepted_lines": 7,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 7,
+      "total_deletions": 58
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
