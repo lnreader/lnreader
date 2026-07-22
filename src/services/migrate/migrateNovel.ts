@@ -1,4 +1,4 @@
-import { NovelInfo, ChapterInfo } from '@database/types';
+import { ChapterInfo } from '@database/types';
 import {
   getNovelByPath,
   insertNovelAndChapters,
@@ -13,9 +13,11 @@ import {
   type NovelPersistenceInput,
 } from '@hooks/persisted/useNovel/store-helper/contracts';
 import { sleep } from '@utils/sleep';
-import ServiceManager, {
-  BackgroundTaskMetadata,
-} from '@services/ServiceManager';
+import type {
+  BackgroundTaskEnqueuer,
+  MigrateNovelData,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
 import { dbManager } from '@database/db';
 import {
   chapterSchema,
@@ -23,12 +25,6 @@ import {
   novelSchema,
 } from '@database/schema';
 import { eq } from 'drizzle-orm';
-
-export interface MigrateNovelData {
-  pluginId: string;
-  fromNovel: NovelInfo;
-  toNovelPath: string;
-}
 
 const sortChaptersByNumber = (novelName: string, chapters: ChapterInfo[]) => {
   for (let i = 0; i < chapters.length; ++i) {
@@ -49,9 +45,8 @@ const sortChaptersByNumber = (novelName: string, chapters: ChapterInfo[]) => {
 
 export const migrateNovel = async (
   { pluginId, fromNovel, toNovelPath }: MigrateNovelData,
-  setMeta: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  setMeta: TaskProgressUpdater,
+  enqueue: BackgroundTaskEnqueuer,
 ) => {
   setMeta(meta => ({
     ...meta,
@@ -148,7 +143,7 @@ export const migrateNovel = async (
     });
 
     if (fromChapter.isDownloaded) {
-      ServiceManager.manager.addTask({
+      enqueue({
         name: 'DOWNLOAD_CHAPTER',
         data: {
           chapterId: toChapter.id,

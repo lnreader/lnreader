@@ -10,7 +10,7 @@ import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';
 import { getNovelById } from '@database/queries/NovelQueries';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
-import { BackgroundTaskMetadata } from '@services/ServiceManager';
+import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import NativeFile from '@specs/NativeFile';
 import { eq } from 'drizzle-orm';
 
@@ -24,9 +24,9 @@ const createChapterFolder = async (
 ): Promise<string> => {
   const { pluginId, novelId, chapterId } = data;
   const chapterFolder = `${path}/${pluginId}/${novelId}/${chapterId}`;
-  NativeFile.mkdir(chapterFolder);
+  await NativeFile.mkdir(chapterFolder);
   const nomediaPath = chapterFolder + '/.nomedia';
-  NativeFile.writeFile(nomediaPath, ',');
+  await NativeFile.writeFile(nomediaPath, ',');
   return chapterFolder;
 };
 
@@ -57,14 +57,12 @@ const downloadFiles = async (
       }
     }
   }
-  NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
+  await NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
 };
 
 export const downloadChapter = async (
   { chapterId }: { chapterId: number },
-  setMeta: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  setMeta: TaskProgressUpdater,
 ) => {
   setMeta(meta => ({
     ...meta,

@@ -7,20 +7,22 @@ interface ReadDirResult {
 }
 
 export interface Spec extends TurboModule {
-  writeFile: (path: string, content: string) => void;
-  readFile: (path: string) => string;
-  copyFile: (sourcePath: string, destPath: string) => void;
-  moveFile: (sourcePath: string, destPath: string) => void;
-  exists: (filePath: string) => boolean;
+  writeFile: (path: string, content: string) => Promise<void>;
+  readFile: (path: string) => Promise<string>;
+  copyFile: (sourcePath: string, destPath: string) => Promise<void>;
+  moveFile: (sourcePath: string, destPath: string) => Promise<void>;
+  exists: (filePath: string) => Promise<boolean>;
   /**
    * @description create parents, and do nothing if exists;
    */
-  mkdir: (filePath: string) => void;
+  mkdir: (filePath: string) => Promise<void>;
   /**
    * @description remove recursively
    */
-  unlink: (filePath: string) => void;
-  readDir: (dirPath: string) => ReadDirResult[];
+  unlink: (filePath: string) => Promise<void>;
+  readDir: (dirPath: string) => Promise<ReadDirResult[]>;
+  createDocument: (filename: string, mimeType: string) => Promise<string>;
+  pickDocument: (mimeType: string) => Promise<string>;
   downloadFile: (
     url: string,
     destPath: string,

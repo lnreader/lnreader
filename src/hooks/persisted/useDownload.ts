@@ -1,9 +1,11 @@
 import { ChapterInfo, NovelInfo } from '@database/types';
-import ServiceManager, {
+import {
+  BACKGROUND_TASKS_STORE_KEY,
   BackgroundTaskMetadata,
+  backgroundTasks,
   DownloadChapterTask,
   QueuedBackgroundTask,
-} from '@services/ServiceManager';
+} from '@services/backgroundTasks';
 import { useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 
@@ -12,7 +14,7 @@ export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
 
 export default function useDownload() {
   const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
-    ServiceManager.manager.STORE_KEY,
+    BACKGROUND_TASKS_STORE_KEY,
   );
 
   const downloadQueue = useMemo(
@@ -26,7 +28,7 @@ export default function useDownload() {
   );
 
   const downloadChapter = (novel: NovelInfo, chapter: ChapterInfo) =>
-    ServiceManager.manager.addTask({
+    backgroundTasks.enqueue({
       name: 'DOWNLOAD_CHAPTER',
       data: {
         chapterId: chapter.id,
@@ -35,7 +37,7 @@ export default function useDownload() {
       },
     });
   const downloadChapters = (novel: NovelInfo, chapters: ChapterInfo[]) =>
-    ServiceManager.manager.addTask(
+    backgroundTasks.enqueue(
       chapters.map(chapter => ({
         name: 'DOWNLOAD_CHAPTER',
         data: {
@@ -45,12 +47,11 @@ export default function useDownload() {
         },
       })),
     );
-  const resumeDownload = () => ServiceManager.manager.resume();
+  const resumeDownload = () => backgroundTasks.resumeAll();
 
-  const pauseDownload = () => ServiceManager.manager.pause();
+  const pauseDownload = () => backgroundTasks.pauseAll();
 
-  const cancelDownload = () =>
-    ServiceManager.manager.removeTasksByName('DOWNLOAD_CHAPTER');
+  const cancelDownload = () => backgroundTasks.cancelByType('DOWNLOAD_CHAPTER');
 
   return {
     downloadQueue,
@@ -60,5 +61,6 @@ export default function useDownload() {
     downloadChapters,
     pauseDownload,
     cancelDownload,
+    enqueueTasks: backgroundTasks.enqueue,
   };
 }

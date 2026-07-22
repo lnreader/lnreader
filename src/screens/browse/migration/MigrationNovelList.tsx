@@ -11,7 +11,7 @@ import { NovelInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
 import { SourceSearchResult } from './MigrationNovels';
 import { NovelItem } from '@plugins/types';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 
 interface MigrationNovelListProps {
   data: SourceSearchResult;
@@ -111,7 +111,7 @@ const MigrationNovelList = ({
             <Button
               onPress={() => {
                 hideMigrateNovelDialog();
-                ServiceManager.manager.addTask({
+                backgroundTasks.enqueue({
                   name: 'MIGRATE_NOVEL',
                   data: {
                     pluginId,

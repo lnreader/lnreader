@@ -9,7 +9,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import LottieSplashScreen from 'react-native-lottie-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
-import * as Notifications from 'expo-notifications';
 
 import AppErrorBoundary, {
   ErrorFallback,
@@ -18,33 +17,29 @@ import AppErrorBoundary, {
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useInitDatabase } from '@database/db';
+import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
 import { ThemeProvider } from '@hooks/persisted/useTheme';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => {
-    return {
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    };
-  },
-});
-
 const App = () => {
-  const state = useInitDatabase();
+  const { success: databaseReady, error: databaseError } = useInitDatabase();
+  const { ready: servicesReady, error: servicesError } =
+    useInitializeAppServices(Boolean(databaseReady));
 
   useEffect(() => {
-    if (state.success || state.error) {
+    if ((databaseReady && servicesReady) || databaseError || servicesError) {
       LottieSplashScreen.hide();
     }
-  }, [state.success, state.error]);
+  }, [databaseReady, databaseError, servicesReady, servicesError]);
 
-  if (state.error) {
-    return <ErrorFallback error={state.error} resetError={() => null} />;
+  const initializationError = databaseError || servicesError;
+
+  if (initializationError) {
+    return (
+      <ErrorFallback error={initializationError} resetError={() => null} />
+    );
   }
 
-  if (!state.success) {
+  if (!databaseReady || !servicesReady) {
     return null;
   }
 

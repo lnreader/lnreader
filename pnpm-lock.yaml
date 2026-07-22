@@ -115,9 +115,6 @@ importers:
       expo-navigation-bar:
         specifier: ~55.0.9
         version: 55.0.9(expo@55.0.9)(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
-      expo-notifications:
-        specifier: ~55.0.14
-        version: 55.0.14(expo@55.0.9)(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       expo-speech:
         specifier: ~55.0.9
         version: 55.0.9(expo@55.0.9)
@@ -148,9 +145,6 @@ importers:
       react-native:
         specifier: ^0.83.4
         version: 0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4)
-      react-native-background-actions:
-        specifier: ^4.0.1
-        version: 4.0.1(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))
       react-native-device-info:
         specifier: ^15.0.2
         version: 15.0.2(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))
@@ -2400,9 +2394,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0
 
-  badgin@1.2.3:
-    resolution: {integrity: sha512-NQGA7LcfCpSzIbGRbkgjgdWkjy7HI+Th5VLxTJfW5EeaAf3fnS+xWQaQOCYiny+q6QSvxqoSO04vCx+4u++EJw==}
-
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -3325,9 +3316,6 @@ packages:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
 
-  eventemitter3@4.0.7:
-    resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
-
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
@@ -3347,11 +3335,6 @@ packages:
   expect@29.7.0:
     resolution: {integrity: sha512-2Zks0hf1VLFYI1kbh0I5jP3KHHyCHpkfyHBzsSXRFgl/Bg9mWYfMW8oD+PdMPlEwy5HNsR9JutYy6pMeOh61nw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  expo-application@55.0.10:
-    resolution: {integrity: sha512-5ccf+S6hsQz+doi907TOJxKzV5AKgAgw004z4FoDWSoGhfab0LUPg6uyvOspuU4cbNvqw8EAy08hZbVO8nKc9Q==}
-    peerDependencies:
-      expo: '*'
 
   expo-asset@55.0.10:
     resolution: {integrity: sha512-wxjNBKIaDyachq7oJgVlWVFzZ6SnNpJFJhkkcymXoTPt5O3XmDM+a6fT91xQQawCXTyZuCc1sNxKMetEofeYkg==}
@@ -3433,13 +3416,6 @@ packages:
 
   expo-navigation-bar@55.0.9:
     resolution: {integrity: sha512-9GF+HpfUrhQWZ2YgOrcb2T5Apt93XHxUbPbLYfJ9gvNdekwyzWw+2aVMCEBzFyo4V7p+jRB4CD4ybn+jS+SubA==}
-    peerDependencies:
-      expo: '*'
-      react: '*'
-      react-native: '*'
-
-  expo-notifications@55.0.14:
-    resolution: {integrity: sha512-fwWTd0OK82Yj2MLJJK0cIgaRtAu8OUcjGuucdtsp/dOsErqBsGQQWpotoEXoRPrDrCL4sHwSvg9QzGdeouJ/jQ==}
     peerDependencies:
       expo: '*'
       react: '*'
@@ -5222,11 +5198,6 @@ packages:
 
   react-is@19.2.4:
     resolution: {integrity: sha512-W+EWGn2v0ApPKgKKCy/7s7WHXkboGcsrXE+2joLyVxkbyVQfO3MUEaUQDHoSmb8TFFrSKYa9mw64WZHNHSDzYA==}
-
-  react-native-background-actions@4.0.1:
-    resolution: {integrity: sha512-LADhnb4ag1oH5Lotq0j8K9e2cFmrafFyg2PCME88VkTjqDUgNcJonkNdMCTHN0N3fh+hwAA7nDR4Cxkj9Q8eCw==}
-    peerDependencies:
-      react-native: '>=0.47.0'
 
   react-native-device-info@15.0.2:
     resolution: {integrity: sha512-dd71eXG2l3Cwp66IvKNadMTB8fhU3PEjyVddI97sYan+D4bgIAUmgGDhbSOFvHcGavksb2U17kiQYaDiK2WK2g==}
@@ -9213,8 +9184,6 @@ snapshots:
       babel-plugin-jest-hoist: 29.6.3
       babel-preset-current-node-syntax: 1.2.0(@babel/core@7.29.0)
 
-  badgin@1.2.3: {}
-
   balanced-match@1.0.2: {}
 
   balanced-match@4.0.4: {}
@@ -10165,8 +10134,6 @@ snapshots:
 
   event-target-shim@5.0.1: {}
 
-  eventemitter3@4.0.7: {}
-
   events@3.3.0: {}
 
   execa@5.1.1:
@@ -10192,10 +10159,6 @@ snapshots:
       jest-matcher-utils: 29.7.0
       jest-message-util: 29.7.0
       jest-util: 29.7.0
-
-  expo-application@55.0.10(expo@55.0.9):
-    dependencies:
-      expo: 55.0.9(@babel/core@7.29.0)(@expo/dom-webview@55.0.3)(react-native-webview@13.16.1(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4))(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
 
   expo-asset@55.0.10(expo@55.0.9)(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
     dependencies:
@@ -10297,20 +10260,6 @@ snapshots:
       react-native-is-edge-to-edge: 1.3.1(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
       - supports-color
-
-  expo-notifications@55.0.14(expo@55.0.9)(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
-    dependencies:
-      '@expo/image-utils': 0.8.12
-      abort-controller: 3.0.0
-      badgin: 1.2.3
-      expo: 55.0.9(@babel/core@7.29.0)(@expo/dom-webview@55.0.3)(react-native-webview@13.16.1(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4))(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
-      expo-application: 55.0.10(expo@55.0.9)
-      expo-constants: 55.0.9(expo@55.0.9)(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4))(typescript@5.9.3)
-      react: 19.2.4
-      react-native: 0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   expo-server@55.0.6: {}
 
@@ -12598,11 +12547,6 @@ snapshots:
   react-is@18.3.1: {}
 
   react-is@19.2.4: {}
-
-  react-native-background-actions@4.0.1(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4)):
-    dependencies:
-      eventemitter3: 4.0.7
-      react-native: 0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4)
 
   react-native-device-info@15.0.2(react-native@0.83.4(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.9.3))(@react-native/metro-config@0.83.4(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.4)):
     dependencies:

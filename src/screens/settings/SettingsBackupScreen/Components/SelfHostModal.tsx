@@ -1,7 +1,7 @@
 import { list } from '@api/remote';
 import { Button, EmptyView, Modal } from '@components';
 import { useSelfHost } from '@hooks/persisted/useSelfHost';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 import { getString } from '@strings/translations';
 import { ThemeColors } from '@theme/types';
 import { fetchTimeout } from '@utils/fetch/fetch';
@@ -53,7 +53,7 @@ function CreateBackup({
           title={getString('common.ok')}
           onPress={() => {
             closeModal();
-            ServiceManager.manager.addTask({
+            backgroundTasks.enqueue({
               name: 'SELF_HOST_BACKUP',
               data: {
                 host,
@@ -110,7 +110,7 @@ function RestoreBackup({
             style={styles.btnOutline}
             onPress={() => {
               closeModal();
-              ServiceManager.manager.addTask({
+              backgroundTasks.enqueue({
                 name: 'SELF_HOST_RESTORE',
                 data: {
                   host,

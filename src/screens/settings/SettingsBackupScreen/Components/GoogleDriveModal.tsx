@@ -11,7 +11,7 @@ import { getString } from '@strings/translations';
 import { exists, getBackups, makeDir } from '@api/drive';
 import { DriveFile } from '@api/drive/types';
 import dayjs from 'dayjs';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 
 enum BackupModal {
   UNAUTHORIZED,
@@ -132,7 +132,7 @@ function CreateBackup({
           onPress={() => {
             prepare().then(folder => {
               closeModal();
-              ServiceManager.manager.addTask({
+              backgroundTasks.enqueue({
                 name: 'DRIVE_BACKUP',
                 data: folder,
               });
@@ -187,7 +187,7 @@ function RestoreBackup({
             style={styles.btnOutline}
             onPress={() => {
               closeModal();
-              ServiceManager.manager.addTask({
+              backgroundTasks.enqueue({
                 name: 'DRIVE_RESTORE',
                 data: item,
               });

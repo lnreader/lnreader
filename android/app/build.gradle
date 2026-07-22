@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.kapt'
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -139,6 +140,10 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.media:media:1.7.0'
+    implementation 'androidx.work:work-runtime:2.11.2'
+    implementation 'androidx.room:room-runtime:2.8.4'
+    implementation 'androidx.room:room-ktx:2.8.4'
+    kapt 'androidx.room:room-compiler:2.8.4'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

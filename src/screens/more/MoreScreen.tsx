@@ -9,12 +9,15 @@ import { useLibrarySettings, useTheme } from '@hooks/persisted';
 import { MoreStackScreenProps } from '@navigators/types';
 import Switch from '@components/Switch/Switch';
 import { useMMKVObject } from 'react-native-mmkv';
-import ServiceManager, { BackgroundTask } from '@services/ServiceManager';
+import {
+  BACKGROUND_TASKS_STORE_KEY,
+  QueuedBackgroundTask,
+} from '@services/backgroundTasks';
 
 const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
   const theme = useTheme();
-  const [taskQueue] = useMMKVObject<BackgroundTask[]>(
-    ServiceManager.manager.STORE_KEY,
+  const [taskQueue] = useMMKVObject<QueuedBackgroundTask[]>(
+    BACKGROUND_TASKS_STORE_KEY,
   );
   const {
     incognitoMode = false,

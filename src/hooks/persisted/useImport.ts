@@ -1,16 +1,20 @@
 import { useLibraryContext } from '@components/Context/LibraryContext';
-import ServiceManager, { BackgroundTask } from '@services/ServiceManager';
+import {
+  BACKGROUND_TASKS_STORE_KEY,
+  backgroundTasks,
+  QueuedBackgroundTask,
+} from '@services/backgroundTasks';
 import { DocumentPickerResult } from 'expo-document-picker';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 
 export default function useImport() {
   const { refetchLibrary } = useLibraryContext();
-  const [queue] = useMMKVObject<BackgroundTask[]>(
-    ServiceManager.manager.STORE_KEY,
+  const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
+    BACKGROUND_TASKS_STORE_KEY,
   );
   const importQueue = useMemo(
-    () => queue?.filter(t => t.name === 'IMPORT_EPUB') || [],
+    () => queue?.filter(t => t.task.name === 'IMPORT_EPUB') || [],
     [queue],
   );
 
@@ -20,7 +24,7 @@ export default function useImport() {
 
   const importNovel = useCallback((pickedNovel: DocumentPickerResult) => {
     if (pickedNovel.canceled) return;
-    ServiceManager.manager.addTask(
+    backgroundTasks.enqueue(
       pickedNovel.assets.map(asset => ({
         name: 'IMPORT_EPUB',
         data: {
@@ -30,12 +34,11 @@ export default function useImport() {
       })),
     );
   }, []);
-  const resumeImport = () => ServiceManager.manager.resume();
+  const resumeImport = () => backgroundTasks.resumeAll();
 
-  const pauseImport = () => ServiceManager.manager.pause();
+  const pauseImport = () => backgroundTasks.pauseAll();
 
-  const cancelImport = () =>
-    ServiceManager.manager.removeTasksByName('IMPORT_EPUB');
+  const cancelImport = () => backgroundTasks.cancelByType('IMPORT_EPUB');
 
   return {
     importQueue,

@@ -103,7 +103,8 @@ const NovelScreenList = ({
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  const { downloadingChapterIds, downloadChapter } = useDownload();
+  const { downloadingChapterIds, downloadChapter, enqueueTasks } =
+    useDownload();
 
   // Mark chapters as downloaded when their download completes
   const prevDownloadingRef = useRef(downloadingChapterIds);
@@ -245,6 +246,7 @@ const NovelScreenList = ({
       updateNovel(pluginId, novel.path, novel.id, {
         downloadNewChapters,
         refreshNovelMetadata,
+        enqueue: enqueueTasks,
       })
         .then(() => refreshNovel())
         .then(() =>
@@ -261,6 +263,7 @@ const NovelScreenList = ({
     downloadNewChapters,
     refreshNovelMetadata,
     refreshNovel,
+    enqueueTasks,
   ]);
 
   const onRefreshPage = useCallback(
@@ -269,6 +272,7 @@ const NovelScreenList = ({
         setUpdating(true);
         updateNovelPage(pluginId, novel.path, novel.path, novel.id, page, {
           downloadNewChapters,
+          enqueue: enqueueTasks,
         })
           .then(() => refreshNovel())
           .then(() => showToast(`Updated page: ${page}`))
@@ -276,7 +280,7 @@ const NovelScreenList = ({
           .finally(() => setUpdating(false));
       }
     },
-    [novel, pluginId, downloadNewChapters, refreshNovel],
+    [novel, pluginId, downloadNewChapters, refreshNovel, enqueueTasks],
   );
 
   const refreshControlElement = useMemo(

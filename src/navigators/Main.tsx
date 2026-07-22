@@ -35,7 +35,7 @@ import { RootStackParamList } from './types';
 import Color from 'color';
 import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 import ReaderStack from './ReaderStack';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
@@ -60,7 +60,7 @@ const MainNavigator = () => {
 
   useEffect(() => {
     if (updateLibraryOnLaunch) {
-      ServiceManager.manager.addTask({ name: 'UPDATE_LIBRARY' });
+      backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' });
     }
     if (isOnboarded) {
       // hack this helps app has enough time to initialize database;
