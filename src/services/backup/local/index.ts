@@ -1,24 +1,16 @@
 import { showToast } from '@utils/showToast';
-import dayjs from 'dayjs';
-import {
-  saveDocuments,
-  pick,
-  types,
-  keepLocalCopy,
-} from '@react-native-documents/picker';
 import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
 import NativeZipArchive from '@modules/native-zip-archive'
 import { ROOT_STORAGE } from '@utils/Storages';
 import { ZipBackupName } from '../types';
 import NativeFile from '@modules/native-file'
 import { getString } from '@strings/translations';
-import { BackgroundTaskMetadata } from '@services/ServiceManager';
+import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
 
 export const createBackup = async (
-  setMeta?: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  { destinationUri }: { destinationUri: string },
+  setMeta?: TaskProgressUpdater,
 ) => {
   try {
     setMeta?.(meta => ({
@@ -59,15 +51,7 @@ export const createBackup = async (
       progressText: getString('backupScreen.savingBackup'),
     }));
 
-    const datetime = dayjs().format('YYYY-MM-DD_HH_mm');
-    const fileName = 'lnreader_backup_' + datetime + '.zip';
-
-    await saveDocuments({
-      sourceUris: ['file://' + CACHE_DIR_PATH + '.zip'],
-      copy: false,
-      mimeType: 'application/zip',
-      fileName,
-    });
+    await NativeFile.copyFile(CACHE_DIR_PATH + '.zip', destinationUri);
 
     setMeta?.(meta => ({
       ...meta,
@@ -82,13 +66,13 @@ export const createBackup = async (
       isRunning: false,
     }));
     showToast(error.message);
+    throw error;
   }
 };
 
 export const restoreBackup = async (
-  setMeta?: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  { sourceUri }: { sourceUri: string },
+  setMeta?: TaskProgressUpdater,
 ) => {
   try {
     setMeta?.(meta => ({
@@ -98,30 +82,11 @@ export const restoreBackup = async (
       progressText: getString('backupScreen.downloadingData'),
     }));
 
-    const [result] = await pick({
-      mode: 'import',
-      type: [types.zip],
-      allowVirtualFiles: true, // TODO: hopefully this just works
-    });
-
-    if (NativeFile.exists(CACHE_DIR_PATH)) {
-      NativeFile.unlink(CACHE_DIR_PATH);
+    if (await NativeFile.exists(CACHE_DIR_PATH)) {
+      await NativeFile.unlink(CACHE_DIR_PATH);
     }
-
-    const [localRes] = await keepLocalCopy({
-      files: [
-        {
-          uri: result.uri,
-          fileName: 'backup.zip',
-        },
-      ],
-      destination: 'cachesDirectory',
-    });
-    if (localRes.status === 'error') {
-      throw new Error(localRes.copyError);
-    }
-
-    const localPath = localRes.localUri.replace(/^file:(\/\/)?\//, '/');
+    const localPath = CACHE_DIR_PATH + '-source.zip';
+    await NativeFile.copyFile(sourceUri, localPath);
 
     setMeta?.(meta => ({
       ...meta,
@@ -170,5 +135,6 @@ export const restoreBackup = async (
       isRunning: false,
     }));
     showToast(error.message);
+    throw error;
   }
 };

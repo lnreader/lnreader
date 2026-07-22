@@ -44,7 +44,7 @@ import { Row } from '@components/Common';
 import { LibraryScreenProps } from '@navigators/types';
 import { NovelInfo } from '@database/types';
 import * as DocumentPicker from 'expo-document-picker';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 import useImport from '@hooks/persisted/useImport';
 import { ThemeColors } from '@theme/types';
 import { useLibraryContext } from '@components/Context/LibraryContext';
@@ -347,13 +347,13 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       {
         title: getString('libraryScreen.extraMenu.updateLibrary'),
         onPress: () =>
-          ServiceManager.manager.addTask({ name: 'UPDATE_LIBRARY' }),
+          backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
       },
       {
         title: getString('libraryScreen.extraMenu.updateCategory'),
         onPress: () =>
           categories[index]?.id !== 2 &&
-          ServiceManager.manager.addTask({
+          backgroundTasks.enqueue({
             name: 'UPDATE_LIBRARY',
             data: {
               categoryId: categories[index].id,

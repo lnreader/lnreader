@@ -114,9 +114,9 @@ if (title) {
           NativeFile.ExternalCachesDirectoryPath +
           '/imported_custom.' +
           activeCodeTab;
-        NativeFile.copyFile(file.assets[0].uri, tempPath);
-        const content = NativeFile.readFile(tempPath);
-        NativeFile.unlink(tempPath);
+        await NativeFile.copyFile(file.assets[0].uri, tempPath);
+        const content = await NativeFile.readFile(tempPath);
+        await NativeFile.unlink(tempPath);
 
         if (activeCodeTab === 'css') {
           setCssValue(content.trim());

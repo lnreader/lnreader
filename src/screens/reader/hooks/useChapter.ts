@@ -113,8 +113,8 @@ export default function useChapter(
     async (id: number, path: string) => {
       const filePath = `${NOVEL_STORAGE}/${novel.pluginId}/${chapter.novelId}/${id}/index.html`;
       let text = '';
-      if (NativeFile.exists(filePath)) {
-        text = NativeFile.readFile(filePath);
+      if (await NativeFile.exists(filePath)) {
+        text = await NativeFile.readFile(filePath);
       } else {
         await fetchChapter(novel.pluginId, path)
           .then(res => {

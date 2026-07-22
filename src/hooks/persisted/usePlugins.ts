@@ -8,6 +8,7 @@ import {
   installPlugin as _install,
   uninstallPlugin as _uninstall,
   updatePlugin as _update,
+  INSTALLED_PLUGINS_KEY,
 } from '@plugins/pluginManager';
 import { newer } from '@utils/compareVersion';
 import { MMKVStorage, getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
@@ -15,7 +16,7 @@ import { useCallback } from 'react';
 import { getString } from '@strings/translations';
 
 export const AVAILABLE_PLUGINS = 'AVAILABLE_PLUGINS';
-export const INSTALLED_PLUGINS = 'INSTALL_PLUGINS';
+export const INSTALLED_PLUGINS = INSTALLED_PLUGINS_KEY;
 export const LANGUAGES_FILTER = 'LANGUAGES_FILTER';
 export const LAST_USED_PLUGIN = 'LAST_USED_PLUGIN';
 export const PINNED_PLUGINS = 'PINNED_PLUGINS';

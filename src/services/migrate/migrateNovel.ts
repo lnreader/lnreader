@@ -1,4 +1,4 @@
-import { NovelInfo, ChapterInfo } from '@database/types';
+import { ChapterInfo } from '@database/types';
 import {
   getNovelByPath,
   insertNovelAndChapters,
@@ -12,10 +12,12 @@ import {
   novelPersistence,
   type NovelPersistenceInput,
 } from '@hooks/persisted/useNovel/store-helper/contracts';
-import { sleep } from '@utils/sleep';
-import ServiceManager, {
-  BackgroundTaskMetadata,
-} from '@services/ServiceManager';
+import type {
+  BackgroundTaskEnqueuer,
+  ChapterDownload,
+  MigrateNovelData,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
 import { dbManager } from '@database/db';
 import {
   chapterSchema,
@@ -23,12 +25,6 @@ import {
   novelSchema,
 } from '@database/schema';
 import { eq } from 'drizzle-orm';
-
-export interface MigrateNovelData {
-  pluginId: string;
-  fromNovel: NovelInfo;
-  toNovelPath: string;
-}
 
 const sortChaptersByNumber = (novelName: string, chapters: ChapterInfo[]) => {
   for (let i = 0; i < chapters.length; ++i) {
@@ -49,9 +45,8 @@ const sortChaptersByNumber = (novelName: string, chapters: ChapterInfo[]) => {
 
 export const migrateNovel = async (
   { pluginId, fromNovel, toNovelPath }: MigrateNovelData,
-  setMeta: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  setMeta: TaskProgressUpdater,
+  enqueue: BackgroundTaskEnqueuer,
 ) => {
   setMeta(meta => ({
     ...meta,
@@ -117,6 +112,7 @@ export const migrateNovel = async (
 
   let fromPointer = 0,
     toPointer = 0;
+  const chaptersToDownload: ChapterDownload[] = [];
   while (fromPointer < fromChapters.length && toPointer < toChapters.length) {
     const fromChapter = fromChapters[fromPointer];
     const toChapter = toChapters[toPointer];
@@ -148,15 +144,10 @@ export const migrateNovel = async (
     });
 
     if (fromChapter.isDownloaded) {
-      ServiceManager.manager.addTask({
-        name: 'DOWNLOAD_CHAPTER',
-        data: {
-          chapterId: toChapter.id,
-          novelName: toNovel.name,
-          chapterName: toChapter.name,
-        },
+      chaptersToDownload.push({
+        chapterId: toChapter.id,
+        chapterName: toChapter.name,
       });
-      await sleep(1000);
     }
 
     if (lastRead && fromChapter.id === lastRead.id) {
@@ -165,6 +156,16 @@ export const migrateNovel = async (
 
     ++fromPointer;
     ++toPointer;
+  }
+
+  if (chaptersToDownload.length) {
+    enqueue({
+      name: 'DOWNLOAD_CHAPTER',
+      data: {
+        novelName: toNovel.name,
+        chapters: chaptersToDownload,
+      },
+    });
   }
 
   setMeta(meta => ({

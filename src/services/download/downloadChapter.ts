@@ -10,9 +10,13 @@ import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';
 import { getNovelById } from '@database/queries/NovelQueries';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
-import { BackgroundTaskMetadata } from '@services/ServiceManager';
-import NativeFile from '@modules/native-file'
+import type {
+  BackgroundTaskExecutionContext,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
+import NativeFile from '@modules/native-file';
 import { eq } from 'drizzle-orm';
+import { parseDownloadCheckpoint } from './downloadCheckpoint';
 
 const createChapterFolder = async (
   path: string,
@@ -24,9 +28,9 @@ const createChapterFolder = async (
 ): Promise<string> => {
   const { pluginId, novelId, chapterId } = data;
   const chapterFolder = `${path}/${pluginId}/${novelId}/${chapterId}`;
-  NativeFile.mkdir(chapterFolder);
+  await NativeFile.mkdir(chapterFolder);
   const nomediaPath = chapterFolder + '/.nomedia';
-  NativeFile.writeFile(nomediaPath, ',');
+  await NativeFile.writeFile(nomediaPath, ',');
   return chapterFolder;
 };
 
@@ -57,20 +61,10 @@ const downloadFiles = async (
       }
     }
   }
-  NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
+  await NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
 };
 
-export const downloadChapter = async (
-  { chapterId }: { chapterId: number },
-  setMeta: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
-) => {
-  setMeta(meta => ({
-    ...meta,
-    isRunning: true,
-  }));
-
+const downloadChapter = async (chapterId: number) => {
   const chapter = await getChapter(chapterId);
   if (!chapter) {
     throw new Error('Chapter not found with id: ' + chapterId);
@@ -101,10 +95,61 @@ export const downloadChapter = async (
   } else {
     throw new Error(getString('downloadScreen.chapterEmptyOrScrapeError'));
   }
+};
+
+export const downloadChapters = async (
+  {
+    chapters,
+  }: {
+    novelName: string;
+    chapters: { chapterId: number; chapterName: string }[];
+  },
+  setMeta: TaskProgressUpdater,
+  context: BackgroundTaskExecutionContext,
+) => {
+  if (!chapters.length) return;
+
+  const checkpoint = parseDownloadCheckpoint(
+    context.checkpoint,
+    chapters.length,
+  );
+  const failures = [...checkpoint.failures];
+
+  for (let index = checkpoint.nextIndex; index < chapters.length; index++) {
+    const chapter = chapters[index];
+    setMeta(meta => ({
+      ...meta,
+      isRunning: true,
+      progress: index / chapters.length,
+      progressText: `${index + 1}/${chapters.length} · ${chapter.chapterName}`,
+    }));
+
+    try {
+      await downloadChapter(chapter.chapterId);
+    } catch (error) {
+      failures.push(
+        `${chapter.chapterName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+
+    await context.updateCheckpoint(
+      JSON.stringify({ nextIndex: index + 1, failures }),
+    );
+  }
 
   setMeta(meta => ({
     ...meta,
     progress: 1,
     isRunning: false,
   }));
+
+  if (failures.length) {
+    throw new Error(
+      `${failures.length} of ${
+        chapters.length
+      } chapters failed: ${failures.join('; ')}`,
+    );
+  }
 };

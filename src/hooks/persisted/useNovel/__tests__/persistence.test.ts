@@ -11,12 +11,9 @@ import {
   novelPersistence,
 } from '../store-helper/contracts';
 
-jest.mock('@services/ServiceManager', () => ({
-  __esModule: true,
-  default: {
-    manager: {
-      addTask: jest.fn(),
-    },
+jest.mock('@services/backgroundTasks', () => ({
+  backgroundTasks: {
+    enqueue: jest.fn(),
   },
 }));
 

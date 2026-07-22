@@ -52,8 +52,8 @@ export const deleteCachedNovels = async () => {
     });
 
     const novelDir = `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}`;
-    if (NativeFile.exists(novelDir)) {
-      NativeFile.unlink(novelDir);
+    if (await NativeFile.exists(novelDir)) {
+      await NativeFile.unlink(novelDir);
     }
   }
 

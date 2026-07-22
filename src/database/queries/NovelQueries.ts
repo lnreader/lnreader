@@ -53,7 +53,7 @@ export const insertNovelAndChapters = async (
   if (novelId) {
     if (sourceNovel.cover) {
       const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
-      NativeFile.mkdir(novelDir);
+      await NativeFile.mkdir(novelDir);
       const novelCoverPath = novelDir + '/cover.png';
       const novelCoverUri = 'file://' + novelCoverPath;
 
@@ -327,10 +327,10 @@ export const pickCustomNovelCover = async (novel: NovelInfo) => {
   if (image.assets && image.assets[0]) {
     const novelDir = NOVEL_STORAGE + '/' + novel.pluginId + '/' + novel.id;
     let novelCoverUri = 'file://' + novelDir + '/cover.png';
-    if (!NativeFile.exists(novelDir)) {
-      NativeFile.mkdir(novelDir);
+    if (!(await NativeFile.exists(novelDir))) {
+      await NativeFile.mkdir(novelDir);
     }
-    NativeFile.copyFile(image.assets[0].uri, novelCoverUri);
+    await NativeFile.copyFile(image.assets[0].uri, novelCoverUri);
     novelCoverUri += '?' + Date.now();
     await dbManager.write(async tx => {
       await tx

@@ -175,6 +175,19 @@ export const runDatabaseBootstrap = (executor: SqlExecutor) => {
   populateDatabase(executor);
 };
 
+let initialization: Promise<void> | undefined;
+
+export const initializeDatabase = () => {
+  if (!initialization) {
+    setPragmas(_db);
+    repairMigrationHistory(_db);
+    initialization = migrate(drizzleDb, getPendingMigrations(_db)).then(() => {
+      runDatabaseBootstrap(_db);
+    });
+  }
+  return initialization;
+};
+
 type InitDbState = {
   success?: boolean;
   error?: Error;
@@ -217,13 +230,8 @@ export const useInitDatabase = () => {
   const [state, dispatch] = useReducer(fetchReducer, initialState);
   useEffect(() => {
     dispatch({ type: 'migrating' });
-    setPragmas(_db);
-
-    repairMigrationHistory(_db);
-
-    migrate(drizzleDb, getPendingMigrations(_db))
+    initializeDatabase()
       .then(() => {
-        runDatabaseBootstrap(_db);
         dispatch({
           type: 'migrated',
           payload: true,

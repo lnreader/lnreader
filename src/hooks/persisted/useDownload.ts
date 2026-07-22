@@ -1,9 +1,11 @@
 import { ChapterInfo, NovelInfo } from '@database/types';
-import ServiceManager, {
+import {
+  BACKGROUND_TASKS_STORE_KEY,
   BackgroundTaskMetadata,
+  backgroundTasks,
   DownloadChapterTask,
   QueuedBackgroundTask,
-} from '@services/ServiceManager';
+} from '@services/backgroundTasks';
 import { useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 
@@ -12,7 +14,7 @@ export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
 
 export default function useDownload() {
   const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
-    ServiceManager.manager.STORE_KEY,
+    BACKGROUND_TASKS_STORE_KEY,
   );
 
   const downloadQueue = useMemo(
@@ -21,36 +23,39 @@ export default function useDownload() {
   ) as { task: DownloadChapterTask; meta: BackgroundTaskMetadata }[];
 
   const downloadingChapterIds = useMemo(
-    () => new Set(downloadQueue.map(c => c.task.data.chapterId)),
+    () =>
+      new Set(
+        downloadQueue.flatMap(item =>
+          item.task.data.chapters.map(chapter => chapter.chapterId),
+        ),
+      ),
     [downloadQueue],
   );
 
   const downloadChapter = (novel: NovelInfo, chapter: ChapterInfo) =>
-    ServiceManager.manager.addTask({
+    backgroundTasks.enqueue({
       name: 'DOWNLOAD_CHAPTER',
       data: {
-        chapterId: chapter.id,
         novelName: novel.name,
-        chapterName: chapter.name,
+        chapters: [{ chapterId: chapter.id, chapterName: chapter.name }],
       },
     });
   const downloadChapters = (novel: NovelInfo, chapters: ChapterInfo[]) =>
-    ServiceManager.manager.addTask(
-      chapters.map(chapter => ({
-        name: 'DOWNLOAD_CHAPTER',
-        data: {
+    backgroundTasks.enqueue({
+      name: 'DOWNLOAD_CHAPTER',
+      data: {
+        novelName: novel.name,
+        chapters: chapters.map(chapter => ({
           chapterId: chapter.id,
-          novelName: novel.name,
           chapterName: chapter.name,
-        },
-      })),
-    );
-  const resumeDownload = () => ServiceManager.manager.resume();
+        })),
+      },
+    });
+  const resumeDownload = () => backgroundTasks.resumeAll();
 
-  const pauseDownload = () => ServiceManager.manager.pause();
+  const pauseDownload = () => backgroundTasks.pauseAll();
 
-  const cancelDownload = () =>
-    ServiceManager.manager.removeTasksByName('DOWNLOAD_CHAPTER');
+  const cancelDownload = () => backgroundTasks.cancelByType('DOWNLOAD_CHAPTER');
 
   return {
     downloadQueue,
@@ -60,5 +65,6 @@ export default function useDownload() {
     downloadChapters,
     pauseDownload,
     cancelDownload,
+    enqueueTasks: backgroundTasks.enqueue,
   };
 }

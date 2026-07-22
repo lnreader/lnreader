@@ -156,8 +156,8 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
         const chapter = chapters[i];
         const chapterFilePath = `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}/index.html`;
 
-        if (NativeFile.exists(chapterFilePath)) {
-          let chapterContent = NativeFile.readFile(chapterFilePath);
+        if (await NativeFile.exists(chapterFilePath)) {
+          let chapterContent = await NativeFile.readFile(chapterFilePath);
 
           const chapterDir = `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}`;
           const escapedDir = chapterDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -168,7 +168,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
 
           for (const match of chapterContent.matchAll(imagePathRegex)) {
             const imagePath = match[1];
-            if (imagePath && !NativeFile.exists(imagePath)) {
+            if (imagePath && !(await NativeFile.exists(imagePath))) {
               const escapedPath = imagePath.replace(
                 /[.*+?^${}()|[\]\\]/g,
                 '\\$&',

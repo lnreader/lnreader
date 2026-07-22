@@ -17,7 +17,7 @@ import UpdatesSkeletonLoading from './components/UpdatesSkeletonLoading';
 import UpdateNovelCard from './components/UpdateNovelCard';
 import { deleteChapter } from '@database/queries/ChapterQueries';
 import { showToast } from '@utils/showToast';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 import { UpdateScreenProps } from '@navigators/types';
 import { UpdateOverview } from '@database/types';
 import { useUpdateContext } from '@components/Context/UpdateContext';
@@ -63,7 +63,7 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
           {
             iconName: 'reload',
             onPress: () =>
-              ServiceManager.manager.addTask({ name: 'UPDATE_LIBRARY' }),
+              backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
           },
         ]}
       />
@@ -140,7 +140,7 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
             <RefreshControl
               refreshing={false}
               onRefresh={() =>
-                ServiceManager.manager.addTask({ name: 'UPDATE_LIBRARY' })
+                backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' })
               }
               colors={[theme.onPrimary]}
               progressBackgroundColor={theme.primary}

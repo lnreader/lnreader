@@ -4,14 +4,17 @@ import {
 } from '../../database/queries/LibraryQueries';
 
 import { showToast } from '../../utils/showToast';
-import { UpdateNovelOptions, updateNovel } from './LibraryUpdateQueries';
-import { DBNovelInfo } from '@database/types';
+import { updateNovel, type UpdateNovelOptions } from './LibraryUpdateQueries';
+import type { DBNovelInfo } from '@database/types';
 import { sleep } from '@utils/sleep';
 import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';
 import { LAST_UPDATE_TIME } from '@hooks/persisted/useUpdates';
 import dayjs from 'dayjs';
 import { APP_SETTINGS, AppSettings } from '@hooks/persisted/useSettings';
-import { BackgroundTaskMetadata } from '@services/ServiceManager';
+import type {
+  BackgroundTaskEnqueuer,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
 
 const updateLibrary = async (
   {
@@ -19,9 +22,8 @@ const updateLibrary = async (
   }: {
     categoryId?: number;
   },
-  setMeta: (
-    transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
-  ) => void,
+  setMeta: TaskProgressUpdater,
+  enqueue: BackgroundTaskEnqueuer,
 ) => {
   setMeta(meta => ({
     ...meta,
@@ -34,6 +36,7 @@ const updateLibrary = async (
   const options: UpdateNovelOptions = {
     downloadNewChapters: downloadNewChapters || false,
     refreshNovelMetadata: refreshNovelMetadata || false,
+    enqueue,
   };
 
   let libraryNovels: DBNovelInfo[] = [];

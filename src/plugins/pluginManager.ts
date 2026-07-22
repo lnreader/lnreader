@@ -12,6 +12,7 @@ import { newer } from '@utils/compareVersion';
 import NativeFile from '@modules/native-file'
 import { showToast } from '@utils/showToast';
 import { PLUGIN_STORAGE } from '@utils/Storages';
+import { getMMKVObject } from '@utils/mmkv/mmkv';
 
 import {
   store,
@@ -85,6 +86,7 @@ const initPlugin = (pluginId: string, rawCode: string) => {
 };
 
 const plugins: Record<string, Plugin | undefined> = {};
+export const INSTALLED_PLUGINS_KEY = 'INSTALL_PLUGINS';
 
 const installPlugin = async (
   _plugin: PluginItem,
@@ -103,21 +105,21 @@ const installPlugin = async (
 
     // save plugin code;
     const pluginDir = `${PLUGIN_STORAGE}/${plugin.id}`;
-    NativeFile.mkdir(pluginDir);
+    await NativeFile.mkdir(pluginDir);
     const pluginPath = pluginDir + '/index.js';
     const customJSPath = pluginDir + '/custom.js';
     const customCSSPath = pluginDir + '/custom.css';
     if (_plugin.customJS) {
       await downloadFile(_plugin.customJS, customJSPath);
-    } else if (NativeFile.exists(customJSPath)) {
-      NativeFile.unlink(customJSPath);
+    } else if (await NativeFile.exists(customJSPath)) {
+      await NativeFile.unlink(customJSPath);
     }
     if (_plugin.customCSS) {
       await downloadFile(_plugin.customCSS, customCSSPath);
-    } else if (NativeFile.exists(customCSSPath)) {
-      NativeFile.unlink(customCSSPath);
+    } else if (await NativeFile.exists(customCSSPath)) {
+      await NativeFile.unlink(customCSSPath);
     }
-    NativeFile.writeFile(pluginPath, rawCode);
+    await NativeFile.writeFile(pluginPath, rawCode);
   }
   return currentPlugin;
 };
@@ -130,8 +132,8 @@ const uninstallPlugin = async (_plugin: PluginItem) => {
     }
   });
   const pluginFilePath = `${PLUGIN_STORAGE}/${_plugin.id}/index.js`;
-  if (NativeFile.exists(pluginFilePath)) {
-    NativeFile.unlink(pluginFilePath);
+  if (await NativeFile.exists(pluginFilePath)) {
+    await NativeFile.unlink(pluginFilePath);
   }
 };
 
@@ -163,24 +165,40 @@ const getPlugin = (pluginId: string) => {
     return undefined;
   }
 
-  if (!plugins[pluginId]) {
-    const filePath = `${PLUGIN_STORAGE}/${pluginId}/index.js`;
-    try {
-      const code = NativeFile.readFile(filePath);
-      const plugin = initPlugin(pluginId, code);
-      plugins[pluginId] = plugin;
-    } catch {
-      // file doesnt exist
-      return undefined;
-    }
-  }
   return plugins[pluginId];
+};
+
+const loadPlugin = async (pluginId: string) => {
+  if (pluginId === LOCAL_PLUGIN_ID) {
+    return undefined;
+  }
+  if (plugins[pluginId]) {
+    return plugins[pluginId];
+  }
+
+  const filePath = `${PLUGIN_STORAGE}/${pluginId}/index.js`;
+  try {
+    const code = await NativeFile.readFile(filePath);
+    const plugin = initPlugin(pluginId, code);
+    plugins[pluginId] = plugin;
+    return plugin;
+  } catch {
+    return undefined;
+  }
+};
+
+const initializeInstalledPlugins = async () => {
+  const installedPlugins =
+    getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
+  await Promise.all(installedPlugins.map(plugin => loadPlugin(plugin.id)));
 };
 
 const LOCAL_PLUGIN_ID = 'local';
 
 export {
   getPlugin,
+  loadPlugin,
+  initializeInstalledPlugins,
   installPlugin,
   uninstallPlugin,
   updatePlugin,

@@ -4,6 +4,7 @@ export { default as useBoolean } from './common/useBoolean';
 export { usePreviousRouteName } from './common/usePreviousRouteName';
 export { useBackHandler } from './common/useBackHandler';
 export { useDeviceOrientation } from './common/useDeviceOrientation';
+export { useInitializeAppServices } from './common/useInitializeAppServices';
 
 // hook types
 export type { UseBooleanReturnType } from './common/useBoolean';

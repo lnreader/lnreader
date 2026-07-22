@@ -10,7 +10,7 @@ import { NovelInfo } from '@database/types';
 import { getString } from '@strings/translations';
 import { useTheme } from '@hooks/persisted';
 import { LibraryScreenProps } from '@navigators/types';
-import ServiceManager from '@services/ServiceManager';
+import { backgroundTasks } from '@services/backgroundTasks';
 import { getPlugin } from '@plugins/pluginManager';
 import { useSelectionContext } from '../SelectionContext';
 import { ImageRequestInit } from '@plugins/types';
@@ -80,7 +80,7 @@ export const LibraryView: React.FC<Props> = ({
     if (categoryId === 2) {
       return;
     }
-    ServiceManager.manager.addTask({
+    backgroundTasks.enqueue({
       name: 'UPDATE_LIBRARY',
       data: { categoryId, categoryName },
     });

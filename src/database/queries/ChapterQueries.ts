@@ -175,14 +175,14 @@ export const markAllChaptersUnread = async (novelId: number): Promise<void> => {
   });
 };
 
-const deleteDownloadedFiles = (
+const deleteDownloadedFiles = async (
   pluginId: string,
   novelId: number,
   chapterId: number,
 ) => {
   try {
     const chapterFolder = `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapterId}`;
-    NativeFile.unlink(chapterFolder);
+    await NativeFile.unlink(chapterFolder);
   } catch {
     throw new Error(getString('novelScreen.deleteChapterError'));
   }
@@ -194,7 +194,7 @@ export const deleteChapter = async (
   novelId: number,
   chapterId: number,
 ): Promise<void> => {
-  deleteDownloadedFiles(pluginId, novelId, chapterId);
+  await deleteDownloadedFiles(pluginId, novelId, chapterId);
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
@@ -214,8 +214,10 @@ export const deleteChapters = async (
   }
   const chapterIds = chapters.map(chapter => chapter.id);
 
-  chapters.forEach(chapter =>
-    deleteDownloadedFiles(pluginId, novelId, chapter.id),
+  await Promise.all(
+    chapters.map(chapter =>
+      deleteDownloadedFiles(pluginId, novelId, chapter.id),
+    ),
   );
 
   await dbManager.write(async tx => {

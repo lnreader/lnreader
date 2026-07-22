@@ -3,7 +3,7 @@ import { ChapterItem, SourceNovel } from '@plugins/types';
 import { getPlugin, LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { downloadFile } from '@plugins/helpers/fetch';
-import ServiceManager from '@services/ServiceManager';
+import type { BackgroundTaskEnqueuer } from '@services/backgroundTasks/contracts';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import { eq, and, inArray } from 'drizzle-orm';
@@ -22,8 +22,8 @@ const updateNovelMetadata = async (
   let cover = novel.cover;
   const novelDir = `${NOVEL_STORAGE}/${pluginId}/${novelId}`;
 
-  if (!NativeFile.exists(novelDir)) {
-    NativeFile.mkdir(novelDir);
+  if (!(await NativeFile.exists(novelDir))) {
+    await NativeFile.mkdir(novelDir);
   }
 
   if (cover) {
@@ -83,6 +83,7 @@ const updateNovelChapters = async (
   chapters: ChapterItem[],
   downloadNewChapters?: boolean,
   page?: string,
+  enqueue?: BackgroundTaskEnqueuer,
 ) => {
   if (!chapters.length) {
     return;
@@ -114,7 +115,7 @@ const updateNovelChapters = async (
     touchUpdatedTime: true,
   });
 
-  if (downloadNewChapters && newPaths.length) {
+  if (downloadNewChapters && newPaths.length && enqueue) {
     const insertedNewChapters = await dbManager
       .select({
         id: chapterSchema.id,
@@ -137,14 +138,17 @@ const updateNovelChapters = async (
       ]),
     );
 
-    for (const insertedChapter of insertedNewChapters) {
-      ServiceManager.manager.addTask({
+    if (insertedNewChapters.length) {
+      enqueue({
         name: 'DOWNLOAD_CHAPTER',
         data: {
-          chapterId: insertedChapter.id,
           novelName,
-          chapterName:
-            chapterNameByPath.get(insertedChapter.path) || insertedChapter.name,
+          chapters: insertedNewChapters.map(insertedChapter => ({
+            chapterId: insertedChapter.id,
+            chapterName:
+              chapterNameByPath.get(insertedChapter.path) ||
+              insertedChapter.name,
+          })),
         },
       });
     }
@@ -154,6 +158,7 @@ const updateNovelChapters = async (
 export interface UpdateNovelOptions {
   downloadNewChapters?: boolean;
   refreshNovelMetadata?: boolean;
+  enqueue?: BackgroundTaskEnqueuer;
 }
 
 const getStoredTotalPages = async (novelId: number): Promise<number> => {
@@ -178,7 +183,7 @@ const updateNovel = async (
   if (pluginId === LOCAL_PLUGIN_ID) {
     return;
   }
-  const { downloadNewChapters, refreshNovelMetadata } = options;
+  const { downloadNewChapters, refreshNovelMetadata, enqueue } = options;
 
   const oldTotalPages = await getStoredTotalPages(novelId);
 
@@ -194,6 +199,8 @@ const updateNovel = async (
     novelId,
     novel.chapters || [],
     downloadNewChapters,
+    undefined,
+    enqueue,
   );
 
   // For paged novels: re-fetch the last known page and fetch any new pages
@@ -214,6 +221,7 @@ const updateNovel = async (
             sourcePage.chapters || [],
             downloadNewChapters,
             String(oldTotalPages),
+            enqueue,
           );
         } catch {}
       }
@@ -228,6 +236,7 @@ const updateNovel = async (
             sourcePage.chapters || [],
             downloadNewChapters,
             String(page),
+            enqueue,
           );
         } catch {}
       }
@@ -244,7 +253,7 @@ const updateNovelPage = async (
   novelPath: string,
   novelId: number,
   page: string,
-  options: Pick<UpdateNovelOptions, 'downloadNewChapters'>,
+  options: Pick<UpdateNovelOptions, 'downloadNewChapters' | 'enqueue'>,
 ) => {
   const { downloadNewChapters } = options;
   const sourcePage = await fetchPage(pluginId, novelPath, page);
@@ -255,6 +264,7 @@ const updateNovelPage = async (
     sourcePage.chapters || [],
     downloadNewChapters,
     page,
+    options.enqueue,
   );
 };
 
