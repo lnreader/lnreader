@@ -13,8 +13,8 @@ import type {
   EpubImportFile,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
-import NativeFile from '@modules/native-file'
-import NativeZipArchive from '@modules/native-zip-archive'
+import NativeFile from '@modules/native-file';
+import NativeZipArchive from '@modules/native-zip-archive';
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Epub } from '@modules/nitro-import-epub';
 import { showToast } from '@utils/showToast';
@@ -126,83 +126,84 @@ export const importEpub = async (
     progress: 0,
   }));
 
-  const epubFilePath =
-    NativeFile.getConstants().ExternalCachesDirectoryPath + '/novel.epub';
- const epubDirPath =
-    NativeFile.getConstants().ExternalCachesDirectoryPath + '/epub';
+  const epubFilePath = NativeFile.ExternalCachesDirectoryPath + '/novel.epub';
+  const epubDirPath = NativeFile.ExternalCachesDirectoryPath + '/epub';
 
   try {
- if (await NativeFile.exists(epubDirPath)) {
-    await NativeFile.unlink(epubDirPath);
-  }
-  await NativeFile.mkdir(epubDirPath);
-  await NativeFile.copyFile(uri, epubFilePath);
-  await NativeZipArchive.unzip(epubFilePath, epubDirPath);
+    if (await NativeFile.exists(epubDirPath)) {
+      await NativeFile.unlink(epubDirPath);
+    }
+    await NativeFile.mkdir(epubDirPath);
+    await NativeFile.copyFile(uri, epubFilePath);
+    await NativeZipArchive.unzip(epubFilePath, epubDirPath);
 
-  const epub = NitroModules.createHybridObject<Epub>('Epub');
-  const novel = epub.parseNovelAndChapters(epubDirPath);
-  if (!novel.name) {
-    novel.name = filename.replace('.epub', '') || 'Untitled';
-  }
-  const novelId = await insertLocalNovel(
-    novel.name,
-    epubDirPath + novel.name, // temporary
-    novel.cover || '',
-    novel.author || '',
-    novel.artist || '',
-    novel.summary || '',
-  );
-  const now = dayjs().toISOString();
-  if (novel.chapters) {
-    for (let i = 0; i < novel.chapters?.length; i++) {
-      const chapter = novel.chapters[i];
-      if (!chapter.name) {
-        chapter.name = chapter.path.split(/[/\\]/).pop() || 'unknown';
+    const epub = NitroModules.createHybridObject<Epub>('Epub');
+    const novel = epub.parseNovelAndChapters(epubDirPath);
+    if (!novel.name) {
+      novel.name = filename.replace('.epub', '') || 'Untitled';
+    }
+    const novelId = await insertLocalNovel(
+      novel.name,
+      epubDirPath + novel.name, // temporary
+      novel.cover || '',
+      novel.author || '',
+      novel.artist || '',
+      novel.summary || '',
+    );
+    const now = dayjs().toISOString();
+    if (novel.chapters) {
+      for (let i = 0; i < novel.chapters?.length; i++) {
+        const chapter = novel.chapters[i];
+        if (!chapter.name) {
+          chapter.name = chapter.path.split(/[/\\]/).pop() || 'unknown';
+        }
+
+        setMeta(meta => ({
+          ...meta,
+          progressText: chapter.name,
+        }));
+
+        await insertLocalChapter(novelId, i, chapter.name, chapter.path, now);
+
+        setMeta(meta => ({
+          ...meta,
+          progress: i / novel.chapters.length,
+        }));
       }
-
-      setMeta(meta => ({
-        ...meta,
-        progressText: chapter.name,
-      }));
-
-      await insertLocalChapter(novelId, i, chapter.name, chapter.path, now);
-
-      setMeta(meta => ({
-        ...meta,
-        progress: i / novel.chapters.length,
-      }));
     }
-  }
-  const novelDir = NOVEL_STORAGE + '/local/' + novelId;
+    const novelDir = NOVEL_STORAGE + '/local/' + novelId;
 
-  setMeta(meta => ({
-    ...meta,
-    progressText: getString('advancedSettingsScreen.importStaticFiles'),
-  }));
+    setMeta(meta => ({
+      ...meta,
+      progressText: getString('advancedSettingsScreen.importStaticFiles'),
+    }));
 
-  for (const filePath of novel.imagePaths) {
-    const decodedPath = decodePath(filePath);
+    for (const filePath of novel.imagePaths) {
+      const decodedPath = decodePath(filePath);
 
-    if (await NativeFile.exists(decodedPath)) {
-      await NativeFile.moveFile(
-        decodedPath,
-        novelDir + '/' + filePath.split(/[/\\]/).pop(),
-      );
+      if (await NativeFile.exists(decodedPath)) {
+        await NativeFile.moveFile(
+          decodedPath,
+          novelDir + '/' + filePath.split(/[/\\]/).pop(),
+        );
+      }
     }
-  }
 
-  for (const filePath of novel.cssPaths) {
-    const decodedPath = decodePath(filePath);
-    if (await NativeFile.exists(decodedPath)) {
-      await NativeFile.moveFile(
-        decodedPath,
-        novelDir + '/' + filePath.split(/[/\\]/).pop(),
-      );
+    for (const filePath of novel.cssPaths) {
+      const decodedPath = decodePath(filePath);
+      if (await NativeFile.exists(decodedPath)) {
+        await NativeFile.moveFile(
+          decodedPath,
+          novelDir + '/' + filePath.split(/[/\\]/).pop(),
+        );
+      }
     }
-  }
   } catch (error) {
-    showToast(getString('advancedSettingsScreen.importFailed'), (error as Error).message);
-}
+    showToast(
+      getString('advancedSettingsScreen.importFailed'),
+      (error as Error).message,
+    );
+  }
 
   setMeta(meta => ({
     ...meta,

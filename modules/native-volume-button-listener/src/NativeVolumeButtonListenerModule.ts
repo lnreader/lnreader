@@ -1,3 +1,9 @@
 import { requireNativeModule } from 'expo-modules-core';
 
-export default requireNativeModule('NativeVolumeButtonListener');
+type NativeVolumeButtonListenerModule = {
+  setActive(active: boolean): void;
+};
+
+export default requireNativeModule<NativeVolumeButtonListenerModule>(
+  'NativeVolumeButtonListener',
+);
