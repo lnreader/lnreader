@@ -305,7 +305,13 @@
     "updateLibraryDesc": "Not recommended for low devices",
     "updateOngoing": "Only update ongoing novels",
     "updateTime": "Show last update time",
-    "useFAB": "Use FAB in Library"
+    "useFAB": "Use FAB in Library",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "all sources",
@@ -543,8 +549,8 @@
     "topNovelsByTimeSpent": "Top novels by time spent",
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
-	"showNovels": "Group by novel",
-	"showCategories": "Group by category"
+  "showNovels": "Group by novel",
+  "showCategories": "Group by category"
   },
   "tracking": "Tracking",
   "trackingScreen": {

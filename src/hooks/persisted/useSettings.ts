@@ -80,6 +80,14 @@ export interface AppSettings {
 
   hideBackdrop: boolean;
   defaultChapterSort: ChapterOrderKey;
+
+  /**
+   * Time-tracking settings
+   */
+  /** Whether to actually enable time tracking */
+  timeTrackingEnabled: boolean;
+  /** The timeout after which to consider the user inactive and not track time */
+  inactivityTimeoutMs?: number;
 }
 
 export interface BrowseSettings {
@@ -188,6 +196,12 @@ const initialAppSettings: AppSettings = {
 
   hideBackdrop: false,
   defaultChapterSort: 'positionAsc',
+
+  /**
+   * Time-tracking settings
+   */
+  timeTrackingEnabled: true,
+  inactivityTimeoutMs: 5 * 60 * 1000, // 5 minutes
 };
 
 const initialBrowseSettings: BrowseSettings = {

@@ -95,6 +95,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     nextChapter,
     prevChapter,
     webViewRef,
+    onUserInteraction,
+    isTTSReadingRef
   } = useChapterContext();
   const theme = useTheme();
   const initialReaderSettings = useMemo(
@@ -121,7 +123,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
-  const isTTSReadingRef = useRef<boolean>(false);
   const appStateRef = useRef(AppState.currentState);
   const ttsQueueRef = useRef<string[]>([]);
   const ttsQueueIndexRef = useRef<number>(0);
@@ -210,7 +211,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         isPlaying: isTTSReadingRef.current,
       });
     }
-  }, [novel?.name, novel?.cover, chapter.name]);
+  }, [novel?.name, novel?.cover, chapter.name, isTTSReadingRef]);
 
   useEffect(() => {
     return () => {
@@ -301,11 +302,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     });
 
     return () => subscription.remove();
-  }, [webViewRef]);
+  }, [webViewRef, isTTSReadingRef]);
 
   const speakText = (text: string) => {
     Speech.speak(text, {
       onDone() {
+        onUserInteraction();
         const isBackground =
           appStateRef.current === 'background' ||
           appStateRef.current === 'inactive';
@@ -505,9 +507,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             if (event.data && typeof event.data === 'object') {
               const data = event.data as { isReading?: boolean };
               const isReading = data.isReading === true;
+              onUserInteraction();
               isTTSReadingRef.current = isReading;
               updateTTSPlaybackState(isReading);
             }
+            break;
+          case 'interaction':
+            onUserInteraction();
             break;
         }
       }}

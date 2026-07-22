@@ -8,6 +8,7 @@ import {
 import { insertHistory } from '@database/queries/HistoryQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import {
+  useAppSettings,
   useChapterGeneralSettings,
   useLibrarySettings,
   useTrackedNovel,
@@ -70,12 +71,13 @@ export default function useChapter(
     volumeButtonsOffset,
   } = useChapterGeneralSettings();
   const { incognitoMode } = useLibrarySettings();
+  const { timeTrackingEnabled, inactivityTimeoutMs } = useAppSettings();
   const [error, setError] = useState<string>();
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
   const { setImmersiveMode, showStatusAndNavBar } = useFullscreenMode();
 
-  useTimeTracking(chapter.id, incognitoMode || false, increaseTimeSpent);
+  const { onUserInteraction, isTTSReadingRef } = useTimeTracking(chapter.id, incognitoMode || false, inactivityTimeoutMs, timeTrackingEnabled, increaseTimeSpent);
 
   const connectVolumeButton = useCallback(() => {
     const offset = defaultTo(
@@ -411,6 +413,8 @@ export default function useChapter(
       setChapter,
       setLoading,
       getChapter,
+      onUserInteraction,
+      isTTSReadingRef,
     }),
     [
       hidden,
@@ -431,6 +435,8 @@ export default function useChapter(
       setChapter,
       setLoading,
       getChapter,
+      onUserInteraction,
+      isTTSReadingRef,
     ],
   );
 }

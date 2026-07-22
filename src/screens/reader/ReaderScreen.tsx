@@ -65,7 +65,7 @@ export const ChapterContent = ({
   openDrawer,
 }: ChapterContentProps) => {
   const { left, right } = useSafeAreaInsets();
-  const { novel, chapter } = useChapterContext();
+  const { novel, chapter, onUserInteraction } = useChapterContext();
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
@@ -135,7 +135,8 @@ export const ChapterContent = ({
     `);
   }, [hidden, searchVisible, webViewRef]);
 
-  const scrollToStart = () =>
+  const scrollToStart = () => {
+    onUserInteraction();
     requestAnimationFrame(() => {
       webViewRef?.current?.injectJavaScript(
         !pageReader
@@ -147,7 +148,8 @@ export const ChapterContent = ({
               document.querySelector("chapter").style.transform = 'translate(0%)';
             })()`,
       );
-    });
+    })
+  };
 
   const openDrawerI = useCallback(() => {
     openDrawer();
@@ -161,6 +163,7 @@ export const ChapterContent = ({
   }, [searchVisible]);
 
   const handleReaderPress = useCallback(() => {
+    onUserInteraction();
     if (searchVisible) {
       setSearchVisible(false);
       return;

@@ -269,6 +269,12 @@ export interface StringMap {
   'generalSettingsScreen.updateOngoing': 'string';
   'generalSettingsScreen.updateTime': 'string';
   'generalSettingsScreen.useFAB': 'string';
+  'generalSettingsScreen.timeTracking': 'string';
+  'generalSettingsScreen.enableTimeTracking': 'string';
+  'generalSettingsScreen.enableTimeTrackingDesc': 'string';
+  'generalSettingsScreen.inactivityTimeout': 'string';
+  'generalSettingsScreen.inactivityTimeoutNever': 'string';
+  'generalSettingsScreen.inactivityTimeoutDesc': 'string';
   'globalSearch.allSources': 'string';
   'globalSearch.searchIn': 'string';
   'history': 'string';

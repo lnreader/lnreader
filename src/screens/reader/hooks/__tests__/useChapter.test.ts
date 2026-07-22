@@ -5,6 +5,7 @@ import NativeFile from '@modules/native-file'
 const mockUseNovelActions = jest.fn();
 const mockUseChapterGeneralSettings = jest.fn();
 const mockUseLibrarySettings = jest.fn();
+const mockUseAppSettings = jest.fn();
 const mockUseTracker = jest.fn();
 const mockUseTrackedNovel = jest.fn();
 const mockUseFullscreenMode = jest.fn();
@@ -30,6 +31,7 @@ jest.mock('@screens/novel/NovelContext', () => ({
 jest.mock('@hooks/persisted', () => ({
   useChapterGeneralSettings: () => mockUseChapterGeneralSettings(),
   useLibrarySettings: () => mockUseLibrarySettings(),
+  useAppSettings: () => mockUseAppSettings(),
   useTracker: () => mockUseTracker(),
   useTrackedNovel: (...args: unknown[]) => mockUseTrackedNovel(...args),
 }));
@@ -154,6 +156,7 @@ describe('useChapter', () => {
       volumeButtonsOffset: 100,
     });
     mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
+    mockUseAppSettings.mockReturnValue({ timeTrackingEnabled: true, inactivityTimeoutMs: 60000 });
     mockUseTracker.mockReturnValue({ tracker: { id: 'tracker' } });
     mockUseTrackedNovel.mockReturnValue({
       trackedNovel: { progress: 1 },

@@ -24,6 +24,7 @@ import NovelBadgesModal from './modals/NovelBadgesModal';
 import { NavigationState } from '@react-navigation/native';
 import { getString } from '@strings/translations';
 import SettingSwitch from '../components/SettingSwitch';
+import InactivityTimeoutModal from './modals/InactivityTimeoutModal';
 
 interface GenralSettingsProps {
   navigation: NavigationState;
@@ -60,6 +61,8 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
     disableHapticFeedback,
     useLibraryFAB,
     chapterDownloadCooldownMs,
+    timeTrackingEnabled,
+    inactivityTimeoutMs,
     setAppSettings,
   } = useAppSettings();
 
@@ -106,6 +109,10 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
    * Download Cooldown Modal
    */
   const downloadCooldownModalRef = useBoolean();
+  /**
+   * Inactivity Timeout Modal
+   */
+  const inactivityTimeoutModalRef = useBoolean();
   return (
     <SafeAreaView excludeTop>
       <Appbar
@@ -229,6 +236,27 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
           />
           <List.Divider theme={theme} />
           <List.SubHeader theme={theme}>
+            {getString('generalSettingsScreen.timeTracking')}
+          </List.SubHeader>
+          <SettingSwitch
+            label={getString('generalSettingsScreen.enableTimeTracking')}
+            value={timeTrackingEnabled}
+            description={getString('generalSettingsScreen.enableTimeTrackingDesc')}
+            onPress={() =>
+              setAppSettings({ timeTrackingEnabled: !timeTrackingEnabled })
+            }
+            theme={theme}
+          />
+          <List.Item
+            title={getString('generalSettingsScreen.inactivityTimeout')}
+            description={inactivityTimeoutMs === undefined
+              ? getString('generalSettingsScreen.inactivityTimeoutNever')
+              : getString('time.minutes', { count: inactivityTimeoutMs / 60000 })}
+            onPress={inactivityTimeoutModalRef.setTrue}
+            theme={theme}
+          />
+          <List.Divider theme={theme} />
+          <List.SubHeader theme={theme}>
             {getString('generalSettings')}
           </List.SubHeader>
           <List.Item
@@ -297,6 +325,12 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
       <DownloadCooldownModal
         visible={downloadCooldownModalRef.value}
         hideModal={downloadCooldownModalRef.setFalse}
+        theme={theme}
+      />
+      <InactivityTimeoutModal
+        inactivityTimeoutMs={inactivityTimeoutMs}
+        modalVisible={inactivityTimeoutModalRef.value}
+        hideModal={inactivityTimeoutModalRef.setFalse}
         theme={theme}
       />
     </SafeAreaView>

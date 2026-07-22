@@ -1,3 +1,19 @@
+window.onUserInteraction = (() => {
+  let groupStart = 0;
+  // Group multiple interactions within a short time frame to avoid excessive calls
+  const groupTime = 3000;
+  return () => {
+    let now = Date.now();
+    if (now - groupStart < groupTime) {
+      // We're inside the group
+    } else {
+      // We're the first in a while
+      groupStart = now;
+      reader.post({ type: 'interaction' });
+    }
+  }
+})();
+
 /* eslint-disable no-console */
 window.reader = new (function () {
   const {
@@ -100,6 +116,7 @@ window.reader = new (function () {
   });
 
   document.onscrollend = () => {
+    onUserInteraction();
     if (!this.generalSettings.val.pageReader) {
       this.post({
         type: 'save',
@@ -110,6 +127,10 @@ window.reader = new (function () {
       });
     }
   };
+
+  document.onpointerdown = () => onUserInteraction();
+  document.onpointermove = () => onUserInteraction();
+  document.onpointerup = () => onUserInteraction();
 
   if (DEBUG) {
     // eslint-disable-next-line no-global-assign, no-new-object
@@ -505,6 +526,7 @@ window.pageReader = new (function () {
   };
 
   this.movePage = destPage => {
+    onUserInteraction();
     if (this.chapterEndingVisible.val) {
       if (destPage < 0) {
         this.showChapterEnding(false);

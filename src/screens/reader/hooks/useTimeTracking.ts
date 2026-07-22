@@ -3,33 +3,34 @@ import { AppState, AppStateStatus } from 'react-native';
 
 
 /**
- * Starts tracking time spent on the chapter, and flushes the data to the database:
- * - periodically every minute
- * - when the app goes in the background
- * - when the chapter changes
+ * Starts tracking time spent on the chapter and returns a callback to be called on user interaction (to prevent the inactivity timeout from being triggered).
  */
 export default function useTimeTracking(
   chapterId: number,
   incognitoMode: boolean,
+  inactivityTimeoutMs: number | undefined,
+  turnedOn: boolean,
   increaseTimeSpent: (chapterId: number, elapsed: number) => void,
 ) {
-  const startTimestampRef = useRef(Date.now());
+  const lastUserInteractionRef = useRef(Date.now());
+  const isTTSReadingRef = useRef(false);
 
-  /** Increases the time spent on the current chapter since the last time this function was called */
+  /** Increases the time spent on the current chapter since the last user interaction, as long as it was not too long ago */
   const flushElapsedTime = useCallback(() => {
-    if (!incognitoMode) {
-      const elapsed = Date.now() - startTimestampRef.current;
+    console.log("flushed");
+    const enabled = turnedOn && !incognitoMode;
+    const isInactive = inactivityTimeoutMs !== undefined && Date.now() - lastUserInteractionRef.current > inactivityTimeoutMs;
+    if (enabled && (!isInactive || isTTSReadingRef.current)) {
+      const elapsed = Date.now() - lastUserInteractionRef.current;
       if (elapsed > 0) {
         increaseTimeSpent(chapterId, elapsed);
       }
     }
-    startTimestampRef.current = Date.now();
-  }, [chapterId, incognitoMode, increaseTimeSpent]);
+  }, [chapterId, incognitoMode, inactivityTimeoutMs, turnedOn, increaseTimeSpent]);
 
-  // Flush the elapsed time every minute
-  useEffect(() => {
-    const intervalId = setInterval(flushElapsedTime, 60000);
-    return () => clearInterval(intervalId);
+  const onUserInteraction = useCallback(() => {
+    flushElapsedTime();
+    lastUserInteractionRef.current = Date.now();
   }, [flushElapsedTime]);
 
   // Flush the elapsed time when the app goes in the background
@@ -39,9 +40,16 @@ export default function useTimeTracking(
       if (appState === 'active' && nextState.match(/inactive|background/)) {
         // Save the elapsed time when the app goes in the background
         flushElapsedTime();
+        lastUserInteractionRef.current = Date.now();
       } else if (appState.match(/inactive|background/) && nextState === 'active') {
-        // Reset the start timestamp when the app comes back
-        startTimestampRef.current = Date.now();
+        // Reset the start timestamp when the app comes back and the TTS isn't on
+        if (!isTTSReadingRef.current) {
+          lastUserInteractionRef.current = Date.now();
+        } else {
+          // If TTS is on, we want to count the time spent in the background as well
+          flushElapsedTime();
+          lastUserInteractionRef.current = Date.now();
+        }
       }
       appState = nextState;
     };
@@ -51,9 +59,10 @@ export default function useTimeTracking(
 
   // Flush the elapsed time when the chapter changes
   useEffect(() => {
-    startTimestampRef.current = Date.now();
+    lastUserInteractionRef.current = Date.now();
     return () => {
       flushElapsedTime();
     };
   }, [chapterId, flushElapsedTime]);
+  return { onUserInteraction, isTTSReadingRef };
 }
