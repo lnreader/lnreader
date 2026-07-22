@@ -17,7 +17,6 @@ export default function useTimeTracking(
 
   /** Increases the time spent on the current chapter since the last user interaction, as long as it was not too long ago */
   const flushElapsedTime = useCallback(() => {
-    console.log("flushed");
     const enabled = turnedOn && !incognitoMode;
     const isInactive = inactivityTimeoutMs !== undefined && Date.now() - lastUserInteractionRef.current > inactivityTimeoutMs;
     if (enabled && (!isInactive || isTTSReadingRef.current)) {
