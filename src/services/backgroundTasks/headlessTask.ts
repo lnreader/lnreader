@@ -6,8 +6,13 @@ import { backgroundTasks } from './backgroundTasks';
 export const runHeadlessBackgroundTask = async ({
   taskId,
   payload,
+  checkpoint,
 }: HeadlessBackgroundTaskData) => {
   await initializeDatabase();
   await initializeInstalledPlugins();
-  await backgroundTasks.run(taskId, JSON.parse(payload) as BackgroundTask);
+  await backgroundTasks.run(
+    taskId,
+    JSON.parse(payload) as BackgroundTask,
+    checkpoint,
+  );
 };

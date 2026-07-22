@@ -4,6 +4,7 @@ export { runHeadlessBackgroundTask } from './headlessTask';
 export type {
   BackgroundTask,
   BackgroundTaskEnqueuer,
+  BackgroundTaskExecutionContext,
   BackgroundTaskMetadata,
   ChapterDownload,
   DownloadChapterTask,

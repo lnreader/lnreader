@@ -105,6 +105,7 @@ class NativeBackgroundTasks(
         if (TaskExecutionRegistry.isActive(taskId)) {
             emitInterruption(taskId, "cancel")
         }
+        dao.updateCheckpoint(taskId, null, System.currentTimeMillis())
         TaskNotificationFactory.dismiss(context, taskId)
         promise.resolve(null)
     }
@@ -125,7 +126,15 @@ class NativeBackgroundTasks(
         promise.resolve(null)
     }
 
+    override fun updateCheckpoint(taskId: String, checkpoint: String, promise: Promise) =
+        runPromise(promise) {
+            requireTask(taskId)
+            dao.updateCheckpoint(taskId, checkpoint, System.currentTimeMillis())
+            promise.resolve(null)
+        }
+
     override fun complete(taskId: String, promise: Promise) = runPromise(promise) {
+        dao.updateCheckpoint(taskId, null, System.currentTimeMillis())
         dao.finishRunning(taskId, BackgroundTaskState.SUCCEEDED, System.currentTimeMillis())
         TaskExecutionRegistry.complete(taskId, TaskExecutionResult.Success)
         promise.resolve(null)

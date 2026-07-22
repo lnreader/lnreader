@@ -8,6 +8,7 @@ import { updateLibrary } from '../updates';
 import type {
   BackgroundTask,
   BackgroundTaskEnqueuer,
+  BackgroundTaskExecutionContext,
   TaskProgressUpdater,
 } from './contracts';
 
@@ -15,6 +16,7 @@ export const executeBackgroundTask = async (
   task: BackgroundTask,
   updateProgress: TaskProgressUpdater,
   enqueue: BackgroundTaskEnqueuer,
+  context: BackgroundTaskExecutionContext,
 ) => {
   switch (task.name) {
     case 'IMPORT_EPUB':
@@ -36,6 +38,6 @@ export const executeBackgroundTask = async (
     case 'MIGRATE_NOVEL':
       return migrateNovel(task.data, updateProgress, enqueue);
     case 'DOWNLOAD_CHAPTER':
-      return downloadChapters(task.data, updateProgress);
+      return downloadChapters(task.data, updateProgress, context);
   }
 };

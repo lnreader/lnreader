@@ -10,9 +10,13 @@ import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';
 import { getNovelById } from '@database/queries/NovelQueries';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
-import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
+import type {
+  BackgroundTaskExecutionContext,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
 import NativeFile from '@specs/NativeFile';
 import { eq } from 'drizzle-orm';
+import { parseDownloadCheckpoint } from './downloadCheckpoint';
 
 const createChapterFolder = async (
   path: string,
@@ -101,12 +105,17 @@ export const downloadChapters = async (
     chapters: { chapterId: number; chapterName: string }[];
   },
   setMeta: TaskProgressUpdater,
+  context: BackgroundTaskExecutionContext,
 ) => {
   if (!chapters.length) return;
 
-  const failures: string[] = [];
+  const checkpoint = parseDownloadCheckpoint(
+    context.checkpoint,
+    chapters.length,
+  );
+  const failures = [...checkpoint.failures];
 
-  for (let index = 0; index < chapters.length; index++) {
+  for (let index = checkpoint.nextIndex; index < chapters.length; index++) {
     const chapter = chapters[index];
     setMeta(meta => ({
       ...meta,
@@ -124,6 +133,10 @@ export const downloadChapters = async (
         }`,
       );
     }
+
+    await context.updateCheckpoint(
+      JSON.stringify({ nextIndex: index + 1, failures }),
+    );
   }
 
   setMeta(meta => ({

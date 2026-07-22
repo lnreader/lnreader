@@ -32,6 +32,7 @@ export interface Spec extends TurboModule {
     progress: number,
     progressText: string,
   ): Promise<void>;
+  updateCheckpoint(taskId: string, checkpoint: string): Promise<void>;
   complete(taskId: string): Promise<void>;
   fail(taskId: string, error: string, shouldRetry: boolean): Promise<void>;
 }

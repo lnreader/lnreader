@@ -31,6 +31,7 @@ class LNReaderTaskWorker(
                 putExtra("taskId", runningTask.id)
                 putExtra("type", runningTask.type)
                 putExtra("payload", runningTask.payload)
+                runningTask.checkpoint?.let { putExtra("checkpoint", it) }
             },
         )
 

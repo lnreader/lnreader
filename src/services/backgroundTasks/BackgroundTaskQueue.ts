@@ -100,7 +100,7 @@ export class BackgroundTaskQueue {
     this.store([]);
   }
 
-  async run(taskId: string, task: BackgroundTask) {
+  async run(taskId: string, task: BackgroundTask, checkpoint?: string) {
     this.currentTaskId = taskId;
     const queue = this.getSnapshot();
     if (!queue.some(item => item.id === taskId)) {
@@ -118,6 +118,15 @@ export class BackgroundTaskQueue {
         task,
         this.updateProgress.bind(this),
         this.enqueue,
+        {
+          checkpoint,
+          updateCheckpoint: value => {
+            if (this.interruptedTasks.get(taskId) === 'cancel') {
+              this.throwIfInterrupted(taskId);
+            }
+            return NativeBackgroundTasks.updateCheckpoint(taskId, value);
+          },
+        },
       );
       this.throwIfInterrupted(taskId);
       await NativeBackgroundTasks.complete(taskId);

@@ -31,6 +31,9 @@ interface BackgroundTaskDao {
     @Query("UPDATE background_tasks SET progress = :progress, progressText = :progressText, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateProgress(id: String, progress: Double?, progressText: String?, updatedAt: Long)
 
+    @Query("UPDATE background_tasks SET checkpoint = :checkpoint, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateCheckpoint(id: String, checkpoint: String?, updatedAt: Long)
+
     @Query("UPDATE background_tasks SET workId = :workId, updatedAt = :updatedAt WHERE id = :id")
     suspend fun assignWork(id: String, workId: String, updatedAt: Long)
 }

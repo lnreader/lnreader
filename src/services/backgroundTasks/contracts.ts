@@ -54,6 +54,11 @@ export type TaskProgressUpdater = (
   transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
 ) => void;
 
+export type BackgroundTaskExecutionContext = {
+  checkpoint?: string;
+  updateCheckpoint: (checkpoint: string) => Promise<void>;
+};
+
 export type BackgroundTaskEnqueuer = (
   tasks: BackgroundTask | BackgroundTask[],
 ) => void;
@@ -69,4 +74,5 @@ export type HeadlessBackgroundTaskData = {
   taskId: string;
   type: BackgroundTask['name'];
   payload: string;
+  checkpoint?: string;
 };
