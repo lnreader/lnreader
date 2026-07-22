@@ -1,0 +1,251 @@
+android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderTaskWorker.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 34
+src/services/backgroundTasks/index.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 7
+src/services/download/downloadCheckpoint.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 1-29
+specs/NativeBackgroundTasks.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 35
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 103,121-129
+  human 103
+src/services/backgroundTasks/executeTask.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 11,19,41
+  human 39
+src/services/download/downloadChapter.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 13-15,19,108,112-116,118,136-139
+  human 16
+src/services/backgroundTasks/contracts.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 57-61,77
+src/services/backgroundTasks/headlessTask.ts
+  019f8787-8de1-7123-82f1-9676c4a02c00 9,13-17
+  human 12
+android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 108,129-135,137
+android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt
+  019f8787-8de1-7123-82f1-9676c4a02c00 34-36
+src/services/download/__tests__/downloadCheckpoint.test.ts
+  human 1-28
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "34",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/LNReaderTaskWorker.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 29,
+          "added_lines": 29,
+          "deleted_lines": 2,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "1-29",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/download/downloadCheckpoint.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "35",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "specs/NativeBackgroundTasks.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "103,121-129",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "103",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "11,19,41",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/executeTask.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 1,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "13-15,19,108,112-116,118,136-139",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/download/downloadChapter.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "57-61,77",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "9,13-17",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "12",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/headlessTask.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "108,129-135,137",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/NativeBackgroundTasks.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 3,
+          "hash": "019f8787-8de1-7123-82f1-9676c4a02c00",
+          "lines": "34-36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "android/app/src/main/java/com/rajarsheechatterjee/background/BackgroundTaskDao.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-28",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/download/__tests__/downloadCheckpoint.test.ts"
+    }
+  ],
+  "base_commit_sha": "c4e4f316028683a4e808a85fa941ff1a3952e83e",
+  "branch": "refactor/native-background-task-scheduling",
+  "commit_sha": "a64cacf2784ba377f621f67af12a5a1a16459d03",
+  "commit_time": "2026-07-22T09:16:59+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.25",
+  "prompts": {
+    "019f8787-8de1-7123-82f1-9676c4a02c00": {
+      "accepted_lines": 84,
+      "agent_id": {
+        "id": "019f8787-8de1-7123-82f1-9676c4a02c00",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 84,
+      "total_deletions": 6
+    },
+    "human": {
+      "accepted_lines": 29,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 29,
+      "total_deletions": 6
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
