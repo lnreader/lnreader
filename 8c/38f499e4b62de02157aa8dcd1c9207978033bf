@@ -1,0 +1,20 @@
+src/screens/reader/hooks/__tests__/useTimeTracking.test.ts
+  s_70c301ce0bf674::t_5539150f6c157f 15-20,62-65,84-85
+  s_70c301ce0bf674::t_4a4fdf70cc52ec 2,6,14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "8c38f499e4b62de02157aa8dcd1c9207978033bf",
+  "prompts": {},
+  "sessions": {
+    "s_70c301ce0bf674": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8aff-cc56-7fe1-9c05-f124ae945db3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
