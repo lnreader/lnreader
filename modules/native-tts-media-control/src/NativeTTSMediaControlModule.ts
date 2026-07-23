@@ -1,6 +1,16 @@
-import { requireNativeModule } from 'expo-modules-core';
+import { requireNativeModule, NativeModule } from 'expo-modules-core';
 
-type NativeTTSMediaControlModule = {
+type NativeTTSMediaControlEvents = {
+  TTSPlay: () => void;
+  TTSPause: () => void;
+  TTSStop: () => void;
+  TTSPrev: () => void;
+  TTSNext: () => void;
+  TTSRewind: () => void;
+  TTSSeekTo: (params: { position: number }) => void;
+};
+
+declare class NativeTTSMediaControl extends NativeModule<NativeTTSMediaControlEvents> {
   showMediaNotification(
     title: string,
     subtitle: string,
@@ -10,8 +20,6 @@ type NativeTTSMediaControlModule = {
   updatePlaybackState(playing: boolean): void;
   updateProgress(current: number, total: number): void;
   dismiss(): void;
-};
+}
 
-export default requireNativeModule<NativeTTSMediaControlModule>(
-  'NativeTTSMediaControl',
-);
+export default requireNativeModule<NativeTTSMediaControl>('NativeTTSMediaControl');
