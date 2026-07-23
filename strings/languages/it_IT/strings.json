@@ -23,6 +23,7 @@
     "deleteReadChapters": "Elimina capitoli letti",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
     "importEpub": "Importa Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Importa Novel",
     "importStaticFiles": "Importa Static Files",
     "novelInsertFailed": "novel insert failed",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "Default",
     "appTheme": "Tema",
     "darkTheme": "Tema scuro",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Nascondi sfondo",
     "lightTheme": "Tema Chiaro",
     "navbar": "Navbar",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Not recommended for low devices",
     "updateOngoing": "Aggiorna solo le novel in corso",
     "updateTime": "Mostra l'orario dell'ultimo aggiornamento",
-    "useFAB": "Usa FAB nella libreria"
+    "useFAB": "Usa FAB nella libreria",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "Tutte le fonti",
@@ -538,7 +546,12 @@
     "title": "Statistiche",
     "titlesInLibrary": "Titoli nella libreria",
     "totalChapters": "Totale capitoli",
-    "unreadChapters": "Capitoli non letti"
+    "unreadChapters": "Capitoli non letti",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
