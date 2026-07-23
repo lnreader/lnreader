@@ -23,6 +23,7 @@
     "deleteReadChapters": "删除已读章节",
     "deleteReadChaptersDialogTitle": "所有标记为已读的章节将被删除。",
     "importEpub": "导入 EPUB",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "导入小说",
     "importStaticFiles": "导入静态文件",
     "novelInsertFailed": "小说插入失败",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "默认",
     "appTheme": "主题",
     "darkTheme": "深色",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "隐藏背景",
     "lightTheme": "浅色",
     "navbar": "导航栏",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "不推荐在低端设备上启用",
     "updateOngoing": "仅更新连载小说",
     "updateTime": "显示上次更新时间",
-    "useFAB": "在书库中使用浮动操作按钮"
+    "useFAB": "在书库中使用浮动操作按钮",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "所有源",
@@ -538,7 +546,12 @@
     "title": "统计数据",
     "titlesInLibrary": "书库中的小说",
     "totalChapters": "统计数据",
-    "unreadChapters": "未读章节"
+    "unreadChapters": "未读章节",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "进度记录",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "本地恢复",
     "MIGRATE_NOVEL": "正在迁移小说",
     "DOWNLOAD_CHAPTER": "正在下载章节"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
