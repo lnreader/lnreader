@@ -1,0 +1,26 @@
+gradle/android-build-types.gradle
+  s_5e74a92128e3e2::t_f3a69503634e81 12,15-33
+.github/workflows/build.yml
+  s_5e74a92128e3e2::t_2b4cf31c2dbd5c 52,63,71,80,91,105
+  s_5e74a92128e3e2::t_f3a69503634e81 81-87,89-90,97-98,101-103,109
+  s_5e74a92128e3e2::t_0c2f5e3a36b47f 88,108
+  s_5e74a92128e3e2::t_34b7502f771269 27,33,36,43,49
+  s_5e74a92128e3e2::t_6faf9ae65063a9 1,22
+  s_5e74a92128e3e2::t_29ef82be666321 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "ae34d7b4ec6be28f7ad5ae25c663c7d2b3db43ef",
+  "prompts": {},
+  "sessions": {
+    "s_5e74a92128e3e2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8b29-a562-7733-bf20-df9cfce5e19b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
