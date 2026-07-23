@@ -1,0 +1,40 @@
+src/hooks/persisted/useTheme.ts
+  s_97e7b6220ffbc3::t_16b239072e9faa 10,123,125-129,134-136,155-160,163,166-169,173-178,184-191
+  s_97e7b6220ffbc3::t_d820c22c13db70 16,22-27,130-131,152,161-162
+strings/languages/en/strings.json
+  s_97e7b6220ffbc3::t_6c99bbaf71c560 49
+  s_97e7b6220ffbc3::t_41f2a8a9b09a57 547-548
+src/theme/dynamic.ts
+  s_97e7b6220ffbc3::t_d820c22c13db70 1-26
+App.tsx
+  s_97e7b6220ffbc3::t_79184c8bad53ed 3,8-12,22,26-42,74,79
+src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx
+  s_97e7b6220ffbc3::t_bb540cbb4d08d3 71-77
+  s_97e7b6220ffbc3::t_16b239072e9faa 273-279
+  s_97e7b6220ffbc3::t_cd52a93dda5727 1
+  s_97e7b6220ffbc3::t_d820c22c13db70 26-31,65-70,78-79,202,253-261,272
+pnpm-lock.yaml
+  s_97e7b6220ffbc3::t_a55cc854089e7f 32-34,1549-1551,1576-1582,7616-7617,7634-7641
+strings/types/index.ts
+  s_97e7b6220ffbc3::t_41f2a8a9b09a57 46
+src/screens/onboarding/ThemeSelectionStep.tsx
+  s_97e7b6220ffbc3::t_d820c22c13db70 20-24,68-77
+package.json
+  s_97e7b6220ffbc3::t_462909a5b17c2a 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "d0cd6d71d90ef224d38cdeeff10a2c0a28c563bb",
+  "prompts": {},
+  "sessions": {
+    "s_97e7b6220ffbc3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8cf2-7443-7fe1-8e0e-3b94c283b403",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
