@@ -23,6 +23,7 @@
     "deleteReadChapters": "既読の章を削除",
     "deleteReadChaptersDialogTitle": "既読としてマークされたすべての章が削除されます。",
     "importEpub": "EPUBをインポート",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "小説をインポート",
     "importStaticFiles": "静的ファイルをインポート",
     "novelInsertFailed": "小説の挿入に失敗しました",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "デフォルト",
     "appTheme": "アプリのテーマ",
     "darkTheme": "ダークテーマ",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "バックドロップを非表示",
     "lightTheme": "ライトテーマ",
     "navbar": "ナビゲーションバー",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "低スペックのデバイスには推奨されません",
     "updateOngoing": "連載中の小説のみ更新",
     "updateTime": "最終更新時間を表示",
-    "useFAB": "ライブラリでFABを使用する"
+    "useFAB": "ライブラリでFABを使用する",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "all sources",
@@ -538,7 +546,12 @@
     "title": "Statistics",
     "titlesInLibrary": "Titles in library",
     "totalChapters": "Total chapters",
-    "unreadChapters": "Unread chapters"
+    "unreadChapters": "Unread chapters",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "追跡",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "ローカル復元中",
     "MIGRATE_NOVEL": "小説を移行中",
     "DOWNLOAD_CHAPTER": "章をダウンロード中"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
