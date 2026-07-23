@@ -1,0 +1,189 @@
+src/theme/types/index.ts
+  s_4e50fb1136932b::t_03d554ec02d2ca 41
+src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx
+  s_4e50fb1136932b::t_e3c13dfc945b6a 4,29,32-44,47,49,51
+  s_4e50fb1136932b::t_d14fa1533afbe9 31,45
+  s_4e50fb1136932b::t_4c75bd4e80a8b7 30
+src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx
+  s_4e50fb1136932b::t_b2ad9b5c7142e4 1,9-15,29,60-63
+  s_4e50fb1136932b::t_c4008d23c5c41c 65
+  s_4e50fb1136932b::t_e3c13dfc945b6a 4,30-56
+  s_4e50fb1136932b::t_906988ad29e9b4 16
+src/screens/novel/components/SetCategoriesModal.tsx
+  s_4e50fb1136932b::t_22b0bbab5b8b23 5,50-57,76,78,84-113,123-125
+  s_4e50fb1136932b::t_d14fa1533afbe9 58,83
+  s_4e50fb1136932b::t_76351b773ebdd6 77
+src/screens/more/components/RemoveDownloadsDialog.tsx
+  s_4e50fb1136932b::t_c099de153be768 16-18
+  s_4e50fb1136932b::t_b629d9c9df544e 1,14-15,19-23
+src/screens/settings/SettingsReaderScreen/Modals/FontPickerModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 3,8,25-29,42-48
+src/screens/browse/migration/MigrationNovelList.tsx
+  s_4e50fb1136932b::t_679ff2bdb83aae 2,6,91-96,100-121
+  s_4e50fb1136932b::t_13173895ec2cf6 97-99
+  s_4e50fb1136932b::t_58dbd58c1cba74 1
+src/screens/history/HistoryScreen.tsx
+  s_4e50fb1136932b::t_300a04a9826c2e 1
+  s_4e50fb1136932b::t_b629d9c9df544e 145-149
+src/screens/reader/components/ReaderBottomSheet/TTSTab.tsx
+  s_4e50fb1136932b::t_03b16c137d6736 13-14,88-89,91-94,143,162,171,173,177-178,183,185-186,411-412
+  s_4e50fb1136932b::t_a331a36043bfbf 82-85,90,153,184
+  s_4e50fb1136932b::t_d14fa1533afbe9 133,182
+  s_4e50fb1136932b::t_1523b4c696a006 2
+  s_4e50fb1136932b::t_6dcdcaeba0d41a 132
+  s_4e50fb1136932b::t_91946974181605 230,232,242,326
+src/screens/novel/components/Tracker/SetTrackScoreDialog.tsx
+  s_4e50fb1136932b::t_906988ad29e9b4 15
+  s_4e50fb1136932b::t_e3c13dfc945b6a 3,65,71-79
+  s_4e50fb1136932b::t_3d925eab009246 66-70
+  s_4e50fb1136932b::t_b2ad9b5c7142e4 1,13-14,64,83-86
+  s_4e50fb1136932b::t_cea2ad12b07337 88
+src/components/Dialog/index.ts
+  s_4e50fb1136932b::t_27a121ef116ceb 1-8
+src/screens/settings/SettingsAdvancedScreen.tsx
+  s_4e50fb1136932b::t_81e8aa1edd47f4 3,16,18,133-137,139-141,152-154,156,159,161,163,166-169
+  s_4e50fb1136932b::t_b629d9c9df544e 102,105-112,115-120,123-131,138,155,157-158,160,162,164-165
+  s_4e50fb1136932b::t_300a04a9826c2e 1
+  s_4e50fb1136932b::t_c099de153be768 103-104,113-114,121-122
+src/screens/settings/SettingsTrackerScreen.tsx
+  s_4e50fb1136932b::t_78131858084bef 3,315-337
+  s_4e50fb1136932b::t_13173895ec2cf6 6
+  s_4e50fb1136932b::t_58dbd58c1cba74 1
+src/screens/settings/SettingsGeneralScreen/modals/InactivityTimeoutModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 3,24-26,28-29,31-33,45-47,52-53
+src/screens/novel/components/DownloadCustomChapterModal.tsx
+  s_4e50fb1136932b::t_679ff2bdb83aae 2,4,8,51-55,62-66,73-77,101-102,104-105,107-109
+  s_4e50fb1136932b::t_13173895ec2cf6 103
+  s_4e50fb1136932b::t_58dbd58c1cba74 1
+src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx
+  s_4e50fb1136932b::t_c099de153be768 280,287
+  s_4e50fb1136932b::t_4c75bd4e80a8b7 14
+  s_4e50fb1136932b::t_b629d9c9df544e 11,278-279,281-286,288-291
+src/hooks/persisted/useTheme.ts
+  s_4e50fb1136932b::t_03d554ec02d2ca 36-41,44
+src/components/NewUpdateDialog.tsx
+  s_4e50fb1136932b::t_f5f65d376f5bd0 33-37,42,64-65
+  s_4e50fb1136932b::t_679ff2bdb83aae 2,8,23,26-32,43-53
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  s_4e50fb1136932b::t_27a121ef116ceb 5,12-14,23-24,26,28-29,34-45
+  s_4e50fb1136932b::t_03d554ec02d2ca 8,11,19,22
+src/components/__tests__/Dialog.test.tsx
+  s_4e50fb1136932b::t_28e2519e24b931 39-40,75-86
+  s_4e50fb1136932b::t_5fdaa356b3bf9d 1-18,20-22,24-30,32-34,45-52,87-97,103-113,115-120,122-126
+  s_4e50fb1136932b::t_21f36ff0b565f9 31,44,53-63
+  s_4e50fb1136932b::t_066d39cfe1f486 38,64-65,74
+  s_4e50fb1136932b::t_21f7793b9bce59 98-102
+  s_4e50fb1136932b::t_88fc9ae0dd79ec 19,68,72
+  s_4e50fb1136932b::t_dfeda0ac0f074c 35-37
+  s_4e50fb1136932b::t_15e0339fa4cce3 23,41-43,66-67,69-71,73,114,121
+src/screens/browse/settings/modals/ConcurrentSearchesModal.tsx
+  s_4e50fb1136932b::t_c5cd6c2ed82ab4 2,4,25-28,30-42,44,51-52
+  s_4e50fb1136932b::t_d14fa1533afbe9 29,43
+src/screens/settings/SettingsRepositoryScreen/components/AddRepositoryModal.tsx
+  s_4e50fb1136932b::t_93702d93212adf 2,4,28-32,42-56
+src/screens/settings/SettingsGeneralScreen/modals/DownloadCooldownModal.tsx
+  s_4e50fb1136932b::t_81e8aa1edd47f4 2,4,77-79,81-82,84-86,105-110
+src/screens/novel/components/EditInfoModal.tsx
+  s_4e50fb1136932b::t_f5f65d376f5bd0 72-76,206,274-275
+  s_4e50fb1136932b::t_13173895ec2cf6 77-89,91-99,101-172,174-176,178-189,191-204,215
+  s_4e50fb1136932b::t_61e5cd8fdb77cf 12,16,70-71,205,207-212,216-225
+src/components/Dialog/Dialog.tsx
+  s_4e50fb1136932b::t_15e0339fa4cce3 90,151-166,168-176,205,240,265-272
+  s_4e50fb1136932b::t_4c75bd4e80a8b7 131
+  s_4e50fb1136932b::t_27a121ef116ceb 1-50,54-64,78,102-130,132-133,135-144,177-203,206-217,222-239,241-244,246-260,273-279,281
+  s_4e50fb1136932b::t_561ea7355d868f 84-87,92-97
+  s_4e50fb1136932b::t_2becec6defd45a 134,167
+  s_4e50fb1136932b::t_21f7793b9bce59 51-53,65-77,98-101,219-221
+  s_4e50fb1136932b::t_a6a53d548706ec 88-89,91,245,280
+  s_4e50fb1136932b::t_28e2519e24b931 79-83,145-150,204,261-264
+src/components/ColorPickerModal/ColorPickerModal.tsx
+  s_4e50fb1136932b::t_86a81e8a76c452 82-83,85,104-106,149-151
+  s_4e50fb1136932b::t_679ff2bdb83aae 4-5,80-81,120-121,123-128
+  s_4e50fb1136932b::t_13173895ec2cf6 122
+src/screens/Categories/components/DeleteCategoryModal.tsx
+  s_4e50fb1136932b::t_23fafa11f2a443 26-28
+  s_4e50fb1136932b::t_93702d93212adf 3,23-24,29-35
+  s_4e50fb1136932b::t_c099de153be768 25
+src/screens/novel/components/JumpToChapterModal.tsx
+  s_4e50fb1136932b::t_76351b773ebdd6 195-221
+  s_4e50fb1136932b::t_3b5b379fc0b8f6 9,11,190-194,222-238,250-260
+src/screens/Categories/components/AddCategoryModal.tsx
+  s_4e50fb1136932b::t_23fafa11f2a443 48
+  s_4e50fb1136932b::t_93702d93212adf 2,4,45-47,49-51,61-72,74,76-83
+src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx
+  s_4e50fb1136932b::t_61e5cd8fdb77cf 2,11,274-277
+  s_4e50fb1136932b::t_58dbd58c1cba74 8
+  s_4e50fb1136932b::t_afe3a4fc4fca81 103-130
+src/screens/settings/SettingsReaderScreen/Modals/VoicePickerModal.tsx
+  s_4e50fb1136932b::t_2334d697e57e5a 1,3-4,26-33,36-51,55,82,86-87,97
+  s_4e50fb1136932b::t_f575ac9c2e25d2 98-99
+  s_4e50fb1136932b::t_d14fa1533afbe9 52,81
+  s_4e50fb1136932b::t_83dda49dc3f763 10,83-85
+src/screens/novel/components/ExportEpubModal.tsx
+  s_4e50fb1136932b::t_3b5b379fc0b8f6 6,96-100,117-118,125,150,170-188,203
+  s_4e50fb1136932b::t_2334d697e57e5a 3
+src/screens/more/DownloadsScreen.tsx
+  s_4e50fb1136932b::t_300a04a9826c2e 1
+src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 7,28-32,42-43
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  s_4e50fb1136932b::t_13173895ec2cf6 290-299,301-311,313
+  s_4e50fb1136932b::t_afe3a4fc4fca81 180-207
+  s_4e50fb1136932b::t_58dbd58c1cba74 1
+  s_4e50fb1136932b::t_61e5cd8fdb77cf 4,6,285-289,312,314
+src/screens/browse/PluginDetailsScreen.tsx
+  s_4e50fb1136932b::t_c099de153be768 177-178
+  s_4e50fb1136932b::t_b629d9c9df544e 184
+src/screens/novel/components/Tracker/SetTrackStatusDialog.tsx
+  s_4e50fb1136932b::t_906988ad29e9b4 11,15
+  s_4e50fb1136932b::t_c5cd6c2ed82ab4 31,40
+  s_4e50fb1136932b::t_2c571f3d98fa4f 58
+  s_4e50fb1136932b::t_b2ad9b5c7142e4 1,12-14,29,53-56
+  s_4e50fb1136932b::t_e3c13dfc945b6a 3,30,32-39,41-49
+src/screens/settings/components/DefaultChapterSortModal.tsx
+  s_4e50fb1136932b::t_76351b773ebdd6 25
+  s_4e50fb1136932b::t_dfd67bcf817aef 6,26-29,44-50
+src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 3,26-33,64-65
+src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 11,27-31,51-52
+src/screens/settings/components/TrackerLoginDialog.tsx
+  s_4e50fb1136932b::t_81e8aa1edd47f4 2-3,57-59,102-116
+src/screens/settings/components/ConnectionModal.tsx
+  s_4e50fb1136932b::t_93702d93212adf 1,31-56,59,61-65
+src/components/index.ts
+  s_4e50fb1136932b::t_27a121ef116ceb 16-23
+src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx
+  s_4e50fb1136932b::t_dfd67bcf817aef 3,33-35,37-38,42-44,58-59
+src/screens/novel/components/Tracker/TrackSearchDialog.tsx
+  s_4e50fb1136932b::t_13173895ec2cf6 164
+  s_4e50fb1136932b::t_f5f65d376f5bd0 145-146,158
+  s_4e50fb1136932b::t_61e5cd8fdb77cf 2,7,121-144,147-157,159-163,165-167
+src/screens/settings/SettingsRepositoryScreen/components/DeleteRepositoryModal.tsx
+  s_4e50fb1136932b::t_c099de153be768 24
+  s_4e50fb1136932b::t_93702d93212adf 3,22-23,25-32
+src/screens/settings/SettingsAppearanceScreen/LanguagePickerModal.tsx
+  s_4e50fb1136932b::t_d14fa1533afbe9 97,111
+  s_4e50fb1136932b::t_4c75bd4e80a8b7 92
+  s_4e50fb1136932b::t_939007d9b5d44d 3
+  s_4e50fb1136932b::t_e3c13dfc945b6a 6,86-91,93,95-96,112
+src/screens/history/components/ClearHistoryDialog.tsx
+  s_4e50fb1136932b::t_b629d9c9df544e 3,16-17,21-25
+  s_4e50fb1136932b::t_c099de153be768 18-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "dfd620aa292fadd3b8798013701ae1bef954fe57",
+  "prompts": {},
+  "sessions": {
+    "s_4e50fb1136932b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8fdc-efa2-72f2-9425-6ca21d8779cb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
