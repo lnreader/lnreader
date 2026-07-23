@@ -23,6 +23,7 @@
     "deleteReadChapters": "刪除已讀章節",
     "deleteReadChaptersDialogTitle": "所有標記為已讀的章節將被刪除。",
     "importEpub": "匯入 EPUB",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "匯入小說",
     "importStaticFiles": "匯入靜態檔案",
     "novelInsertFailed": "小說插入失敗",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "預設",
     "appTheme": "應用程式主題",
     "darkTheme": "深色主題",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "隱藏背景幕",
     "lightTheme": "淺色主題",
     "navbar": "導覽列",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "不建議低配備裝置使用",
     "updateOngoing": "僅更新連載中的小說",
     "updateTime": "顯示上次更新時間",
-    "useFAB": "在書庫中使用懸浮按鈕（FAB）"
+    "useFAB": "在書庫中使用懸浮按鈕（FAB）",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "所有源",
@@ -538,7 +546,12 @@
     "title": "統計資料",
     "titlesInLibrary": "Titles in library",
     "totalChapters": "總章節",
-    "unreadChapters": "未讀章節"
+    "unreadChapters": "未讀章節",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "追蹤",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "本機還原",
     "MIGRATE_NOVEL": "正在遷移小說",
     "DOWNLOAD_CHAPTER": "正在下載章節"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
