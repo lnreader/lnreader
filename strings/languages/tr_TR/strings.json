@@ -23,6 +23,7 @@
     "deleteReadChapters": "Okunmuş bölümleri sil",
     "deleteReadChaptersDialogTitle": "Okunmuş olarak işaretlenmiş bütün bölümler silinecek.",
     "importEpub": "EPUB içeri aktar",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Romanları içeri aktar",
     "importStaticFiles": "İstatistik Dosyalarını İçeri Aktar",
     "novelInsertFailed": "roman yüklemesi başarısız",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "Varsayılan",
     "appTheme": "Uygulama teması",
     "darkTheme": "Karanlık Tema",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Arka planı gizle",
     "lightTheme": "Açık Tema",
     "navbar": "Menü Çubuğu",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Eski cihazlarda önerilmez",
     "updateOngoing": "Yalnızca devam eden novel'leri güncelle",
     "updateTime": "Son güncelleme süresini göster",
-    "useFAB": "Kitaplıkta FAB kullan"
+    "useFAB": "Kitaplıkta FAB kullan",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "tüm kaynaklarda",
@@ -538,7 +546,12 @@
     "title": "İstatistikler",
     "titlesInLibrary": "Kitaplıktaki başlık",
     "totalChapters": "Toplam bölüm",
-    "unreadChapters": "Okunmamış bölüm"
+    "unreadChapters": "Okunmamış bölüm",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "İzleme",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
