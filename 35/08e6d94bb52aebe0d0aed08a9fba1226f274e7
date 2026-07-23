@@ -1,0 +1,141 @@
+strings/languages/en/strings.json
+  s_e6bba26ade1ac4::t_b415af35a6e3f2 148,167,169-170,172-173,176,179,182,184
+  s_e6bba26ade1ac4::t_f3a069fc31fb5d 166
+  s_e6bba26ade1ac4::t_275049ba730362 141,143,159-165,168,177,180-181,221,261
+src/components/Switch/Switch.tsx
+  s_e6bba26ade1ac4::t_d4ae2f3ea17228 27,33-38,113
+src/screens/browse/utils/buildBrowseEntries.ts
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 76,87,233,242
+  s_e6bba26ade1ac4::t_6dbb331e3a56f2 1-75,77-86,88-232,234-241,243-303
+src/screens/browse/utils/__tests__/buildBrowseEntries.test.ts
+  s_e6bba26ade1ac4::t_6dbb331e3a56f2 1-2,4-108
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 3
+src/hooks/common/__tests__/useSearch.test.ts
+  s_e6bba26ade1ac4::t_ba9c894848ed55 1-36
+src/screens/browse/hooks/usePluginSettings.ts
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 43-44
+  s_e6bba26ade1ac4::t_c5960eae4416cc 1-15,18-42,47-52,54-67
+src/components/Switch/SwitchItem.tsx
+  s_e6bba26ade1ac4::t_d4ae2f3ea17228 31-33,46-51
+src/screens/browse/components/PluginSettingField.tsx
+  s_e6bba26ade1ac4::t_c5960eae4416cc 1-4,6-7,9,11-18,20,23-26,28-38,40-45,48-54,57-88,90-101,104,106-142,144-166,172,176,179-180
+src/navigators/types/index.ts
+  s_e6bba26ade1ac4::t_1ef3e9ffbaf1a6 22,137-139
+  s_e6bba26ade1ac4::t_3a4765114542fd 140
+strings/types/index.ts
+  s_e6bba26ade1ac4::t_66896cfbd973f5 135,152,154-155,157,161,164,167,169
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 128,130,144-150,153,162,165-166,194,234
+src/components/SearchbarV2/SearchbarV2.tsx
+  s_e6bba26ade1ac4::t_17996b44dc29d2 8
+  s_e6bba26ade1ac4::t_c87bcad4708ef4 12,73-77,102,111,125
+  s_e6bba26ade1ac4::t_d4ae2f3ea17228 50-51,67,91,98
+src/hooks/persisted/index.ts
+  s_e6bba26ade1ac4::t_ceb81845eb7a4b 17
+  s_e6bba26ade1ac4::t_8837b662dc7f14 13,15,18,21
+  s_e6bba26ade1ac4::t_2d1428c7da2338 14,19-20,22
+  s_e6bba26ade1ac4::t_d4b9680a5b3f55 16
+src/hooks/persisted/pluginSelectors.ts
+  s_e6bba26ade1ac4::t_ceb81845eb7a4b 3-16
+  s_e6bba26ade1ac4::t_1c28fd4745bfc4 18-19,27-29
+  s_e6bba26ade1ac4::t_8615b7cf031862 23,32,37
+  s_e6bba26ade1ac4::t_23501dada3fe5f 1-2,17,20-22,24-26,30-31,33-36,38-42
+src/hooks/persisted/__tests__/usePlugins.test.ts
+  s_e6bba26ade1ac4::t_23501dada3fe5f 1,3-5,7
+  s_e6bba26ade1ac4::t_d7f4afd8b488e8 2,8,10-29,31-51,59-60
+  s_e6bba26ade1ac4::t_9f9330daf58e9a 6,53-58
+  s_e6bba26ade1ac4::t_d4c1802eb96de1 9,30,52
+src/screens/browse/BrowseScreen.tsx
+  s_e6bba26ade1ac4::t_db4409887c18f5 67-70
+  s_e6bba26ade1ac4::t_17996b44dc29d2 34
+  s_e6bba26ade1ac4::t_af01e5b1453b40 65,106,113
+  s_e6bba26ade1ac4::t_e3db5ee1ecb5c6 15,17-20,66,71-93,102-103,105,107-112,114-116,118-135,149-151,153-155
+  s_e6bba26ade1ac4::t_3c1c6e02205297 148
+  s_e6bba26ade1ac4::t_98fde70722a775 3
+  s_e6bba26ade1ac4::t_071972c1acb0b2 117
+  s_e6bba26ade1ac4::t_b415af35a6e3f2 1,7,10,12-13,16,21-22,42-60,94-101,104,146
+src/screens/browse/PluginDetailsScreen.tsx
+  s_e6bba26ade1ac4::t_1ef3e9ffbaf1a6 2,4-9,11-23,25,31-36,38,51-52,54-57,59-63,65-66,68-81,83,85-96,101,103-110,112-123,126-132,145,174-203,207-213,215-217,219-224,228-232,234,238-240,242-244,246-247,249-251,253-256,268-269
+  s_e6bba26ade1ac4::t_6818b9d8869404 37,154,173,226-227
+  s_e6bba26ade1ac4::t_66896cfbd973f5 39-40,102
+  s_e6bba26ade1ac4::t_f3e00a7c67aedd 41
+  s_e6bba26ade1ac4::t_c3be1fe290f2d7 67,84,133-144
+  s_e6bba26ade1ac4::t_cf9ea6cdcef51c 1,3,28-29,42-49,97-100,146-153,161-168,170,172,263-265
+  s_e6bba26ade1ac4::t_5f1f1b06432f18 155-160,258-262
+src/hooks/common/useSearch.ts
+  s_e6bba26ade1ac4::t_8837b662dc7f14 1,5,12-13,15-17
+src/navigators/BottomNavigator.tsx
+  s_e6bba26ade1ac4::t_3c1c6e02205297 1
+  s_e6bba26ade1ac4::t_8837b662dc7f14 11-15,32,121
+src/screens/GlobalSearchScreen/hooks/useGlobalSearch.ts
+  s_e6bba26ade1ac4::t_8837b662dc7f14 6-9,45
+src/hooks/persisted/usePlugins.ts
+  s_e6bba26ade1ac4::t_8837b662dc7f14 33-34,55-56,59-61,68-69
+  s_e6bba26ade1ac4::t_99f71e81ee46ff 4,7-9,12-13,15,37,39-41,45-48,52-54,63-67,83-91,93-107,109-111,114-116,119,125-129,131-138,140-146,148-149,155-188,190-193,197-200,206-207,212,215-259,261-267,269-270,272-275,278,280
+  s_e6bba26ade1ac4::t_d31c5dea70561d 43-44,50-51,189
+  s_e6bba26ade1ac4::t_bdc60cbb7cfbaf 92,108,205,208,268,276
+  s_e6bba26ade1ac4::t_2e4bd62551b762 35-36,57
+  s_e6bba26ade1ac4::t_ceb81845eb7a4b 1,20,70-72,74,76,78-82,112-113,120-121,123-124,194-196,201,260,271
+  s_e6bba26ade1ac4::t_23501dada3fe5f 17-19,21
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 77,122
+  s_e6bba26ade1ac4::t_d4b9680a5b3f55 42,49
+  s_e6bba26ade1ac4::t_1c28fd4745bfc4 29-32,117-118,130,147,152-154
+  s_e6bba26ade1ac4::t_e62a94bae1181f 62
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  s_e6bba26ade1ac4::t_5d18eeaf2befd9 1
+  s_e6bba26ade1ac4::t_2d1428c7da2338 14,35
+src/screens/browse/discover/DiscoverCard.tsx
+  s_e6bba26ade1ac4::t_1d90014e67ac38 29-36,41,49,75-76
+  s_e6bba26ade1ac4::t_90ddd477e1632e 77
+src/hooks/persisted/__mocks__/usePlugins.ts
+  s_e6bba26ade1ac4::t_d4b9680a5b3f55 13
+  s_e6bba26ade1ac4::t_4432801cf941ca 12,15
+  s_e6bba26ade1ac4::t_2d1428c7da2338 1,9,11,16-17
+  s_e6bba26ade1ac4::t_ceb81845eb7a4b 2,14
+src/screens/browse/components/SourcesTab.tsx
+  s_e6bba26ade1ac4::t_ff21a07a85df28 135
+  s_e6bba26ade1ac4::t_9062fd468a0bdd 32,96
+  s_e6bba26ade1ac4::t_e3cadbfa08604a 5,24,76-79,89-93,104,142-148,152,186-203,218,227-233,255-260
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 20
+  s_e6bba26ade1ac4::t_dc4584f978d459 7
+  s_e6bba26ade1ac4::t_66896cfbd973f5 164
+  s_e6bba26ade1ac4::t_ceb81845eb7a4b 9,106,108,119,121
+  s_e6bba26ade1ac4::t_bd593107c77fce 51,54-55,74,285,288,290,294-300
+  s_e6bba26ade1ac4::t_6a16234b4552d0 1-2,6,8,10-13,16-17,22,26,29-31,33-36,38-46,75,80-88,94-95,97-98,100-103,105,107,109,124-127,129-132,134,136-139,141,149-151,153-157,160-163,165-185,204-206,208-213,223,225-226,243-254,261-267,269-277,279-284,286-287
+  s_e6bba26ade1ac4::t_e438ebc7951e40 47-50,52-53,56-73,99,289,291-293
+src/components/IconButtonV2/IconButtonV2.tsx
+  s_e6bba26ade1ac4::t_8eec083f6d58a8 2
+  s_e6bba26ade1ac4::t_c87bcad4708ef4 12,24,36-37
+src/screens/browse/settings/BrowseSettings.tsx
+  s_e6bba26ade1ac4::t_2d1428c7da2338 6-7,20-21
+src/screens/browse/migration/Migration.tsx
+  s_e6bba26ade1ac4::t_8837b662dc7f14 5,16
+src/screens/browse/migration/MigrationNovels.tsx
+  s_e6bba26ade1ac4::t_8837b662dc7f14 4,36
+src/screens/browse/components/PluginsTab.tsx
+  s_e6bba26ade1ac4::t_9fa89ff53f3940 12,24-28,100-102,110-112,121-123,125-129,228-236,238-245,247-250,325-351,373-374
+  s_e6bba26ade1ac4::t_3f5f51dd98e864 72,77-78,97,401,404,406,411-416
+  s_e6bba26ade1ac4::t_5394de1b497a84 256-259,261,385,430-433
+  s_e6bba26ade1ac4::t_2c366180ec8b45 119-120,130-140,273,276,383,423-429
+  s_e6bba26ade1ac4::t_b4c92416d2ba2b 1-11,13-18,21,23,29-31,35-43,47-58,60,98-99,103-109,113-118,142-144,146-154,156-169,171-186,188-201,203-206,208-227,237,246,251-255,262-272,274-275,277-315,317-324,352-366,369-370,375-378,380,390-391,394-395,397-400,402-403,417-422,434
+  s_e6bba26ade1ac4::t_e438ebc7951e40 61-71,73-76,79,81,83-84,86,89-90,92,94-96,141,405,407-408
+src/navigators/Main.tsx
+  s_e6bba26ade1ac4::t_5d18eeaf2befd9 1
+  s_e6bba26ade1ac4::t_2d1428c7da2338 7,44
+  s_e6bba26ade1ac4::t_1ef3e9ffbaf1a6 30,115-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "3508e6d94bb52aebe0d0aed08a9fba1226f274e7",
+  "prompts": {},
+  "sessions": {
+    "s_e6bba26ade1ac4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8d85-49d7-7182-8579-a487184d58ca",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
