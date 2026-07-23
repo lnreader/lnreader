@@ -23,6 +23,7 @@
     "deleteReadChapters": "Supprimer les chapitres lus",
     "deleteReadChaptersDialogTitle": "Tous les chapitres marqués comme lus seront supprimés.",
     "importEpub": "Importer Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Importer un roman",
     "importStaticFiles": "Importer les fichiers statiques",
     "novelInsertFailed": "Insertion du roman échouée",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "Par défaut",
     "appTheme": "Thème",
     "darkTheme": "Sombre",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Masquer l'arrière-plan",
     "lightTheme": "Clair",
     "navbar": "Barre de navigation",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Non recommandé pour les appareils ????",
     "updateOngoing": "Ne mettre à jour que les romans en cours",
     "updateTime": "Afficher la date de dernière mise à jour",
-    "useFAB": "Utiliser FAB dans la bibliothèque"
+    "useFAB": "Utiliser FAB dans la bibliothèque",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "toutes les sources",
@@ -538,7 +546,12 @@
     "title": "Statistiques",
     "titlesInLibrary": "Titres dans la bibliothèque",
     "totalChapters": "Nombre total de chapitres",
-    "unreadChapters": "Chapitres non lus"
+    "unreadChapters": "Chapitres non lus",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Suivi",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
