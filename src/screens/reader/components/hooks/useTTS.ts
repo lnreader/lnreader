@@ -105,6 +105,9 @@ export function useTTS(options: UseTTSOptions): {
 
   const handleTTSEvent = useCallback(
     (event: WebViewPostEvent): boolean => {
+      if (event.autoStartTTS) {
+        autoStartTTSRef.current = true;
+      }
       switch (event.type) {
         case 'tts-queue': {
           const payload = event.data as

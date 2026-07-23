@@ -21,6 +21,7 @@ import { useChapterContext } from '../ChapterContext';
 import { useTTS, WebViewPostEvent } from './hooks/useTTS';
 import { useUpdateWebview } from './hooks/useUpdateWebview';
 import { ReaderSearchResult } from '../types';
+import { useBoolean } from '@hooks/index';
 
 type WebViewReaderProps = {
   onPress(): void;
@@ -42,6 +43,44 @@ const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
 const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'
   : 'file:///android_asset';
+
+const handleSaveMessage = (
+  event: WebViewPostEvent,
+  saveProgress: (percentage: number) => void,
+) => {
+  if (event.data && typeof event.data === 'number') {
+    saveProgress(event.data);
+  }
+};
+
+const handleSearchResultMessage = (
+  event: WebViewPostEvent,
+  searchTextRef: React.MutableRefObject<string>,
+  onSearchResult: (result: ReaderSearchResult) => void,
+) => {
+  if (event.data && typeof event.data === 'object') {
+    const data = event.data as {
+      query?: unknown;
+      current?: unknown;
+      total?: unknown;
+      renderedTotal?: unknown;
+      isTruncated?: unknown;
+    };
+    const query = typeof data.query === 'string' ? data.query : '';
+    if (query !== searchTextRef.current.trim()) {
+      return;
+    }
+    const total = typeof data.total === 'number' ? data.total : 0;
+    onSearchResult({
+      query,
+      current: typeof data.current === 'number' ? data.current : 0,
+      total,
+      renderedTotal:
+        typeof data.renderedTotal === 'number' ? data.renderedTotal : total,
+      isTruncated: data.isTruncated === true,
+    });
+  }
+};
 
 const WebViewReader: React.FC<WebViewReaderProps> = ({
   onPress,
@@ -83,7 +122,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const plugin = getPlugin(novel?.pluginId);
   const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
-  const nextChapterScreenVisible = useRef<boolean>(false);
+  const nextChapterScreenVisible = useBoolean(false);
 
   const readerSettingsRef = useRef<ChapterReaderSettings>(
     initialReaderSettings,
@@ -130,48 +169,17 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             onPress();
             break;
           case 'next':
-            nextChapterScreenVisible.current = true;
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
+            nextChapterScreenVisible.setTrue();
             navigateChapter('NEXT');
             break;
           case 'prev':
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
             navigateChapter('PREV');
             break;
           case 'save':
-            if (event.data && typeof event.data === 'number') {
-              saveProgress(event.data);
-            }
+            handleSaveMessage(event, saveProgress);
             break;
           case 'search-result':
-            if (event.data && typeof event.data === 'object') {
-              const data = event.data as {
-                query?: unknown;
-                current?: unknown;
-                total?: unknown;
-                renderedTotal?: unknown;
-                isTruncated?: unknown;
-              };
-              const query = typeof data.query === 'string' ? data.query : '';
-              if (query !== searchTextRef.current.trim()) {
-                break;
-              }
-              const total = typeof data.total === 'number' ? data.total : 0;
-              onSearchResult({
-                query,
-                current: typeof data.current === 'number' ? data.current : 0,
-                total,
-                renderedTotal:
-                  typeof data.renderedTotal === 'number'
-                    ? data.renderedTotal
-                    : total,
-                isTruncated: data.isTruncated === true,
-              });
-            }
+            handleSearchResultMessage(event, searchTextRef, onSearchResult);
             break;
           case 'interaction':
             onUserInteraction();
@@ -240,7 +248,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
             }">
               <div class="transition-chapter" style="transform: ${
-                nextChapterScreenVisible.current
+                nextChapterScreenVisible.value
                   ? 'translateX(-100%)'
                   : 'translateX(0%)'
               };
@@ -253,7 +261,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-                  nextChapterScreenVisible: nextChapterScreenVisible.current,
+                  nextChapterScreenVisible: nextChapterScreenVisible.value,
                 })};
 
 
