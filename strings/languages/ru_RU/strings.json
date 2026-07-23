@@ -23,6 +23,7 @@
     "deleteReadChapters": "Удалять прочитанные главы",
     "deleteReadChaptersDialogTitle": "Вы уверены? Все главы, помеченные как прочитанные, будут удалены.",
     "importEpub": "Импорт Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Импорт новеллы",
     "importStaticFiles": "Импорт файлов статики",
     "novelInsertFailed": "ошибка вставки главы",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "По умолчанию",
     "appTheme": "Тема приложения",
     "darkTheme": "Тёмная тема",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Скрыть фон",
     "lightTheme": "Светлая тема",
     "navbar": "Панель навигации",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Не рекомендуется для слабых устройств",
     "updateOngoing": "Обновлять только онгоинги",
     "updateTime": "Показать время последнего обновления",
-    "useFAB": "Использовать FAB в библиотеке"
+    "useFAB": "Использовать FAB в библиотеке",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "все источники",
@@ -538,7 +546,12 @@
     "title": "Статистика",
     "titlesInLibrary": "Названия в библиотеке",
     "totalChapters": "Всего глав",
-    "unreadChapters": "Непрочитанные главы"
+    "unreadChapters": "Непрочитанные главы",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Отслеживание",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Локальное восстановление",
     "MIGRATE_NOVEL": "Миграция новелл",
     "DOWNLOAD_CHAPTER": "Загруженные главы"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
