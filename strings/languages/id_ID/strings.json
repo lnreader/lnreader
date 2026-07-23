@@ -23,6 +23,7 @@
     "deleteReadChapters": "Hapus bab yang telah dibaca\n",
     "deleteReadChaptersDialogTitle": "Semua bab yang ditandai sudah dibaca akan dihapus.",
     "importEpub": "Impor EPUB",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Impor Novel",
     "importStaticFiles": "Impor File Statis",
     "novelInsertFailed": "Gagal memasukkan novel",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "Bawaan",
     "appTheme": "Tema aplikasi",
     "darkTheme": "Tema Gelap",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Sembunyikan latar",
     "lightTheme": "Tema Terang",
     "navbar": "Bilah Navigasi",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Tidak disarankan untuk perangkat spesifikasi rendah",
     "updateOngoing": "Hanya memperbarui novel yang sedang berlangsung\n",
     "updateTime": "Perlihatkan waktu pembaruan terakhir\n",
-    "useFAB": "Gunakan FAB di perpustakaan\n"
+    "useFAB": "Gunakan FAB di perpustakaan\n",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "semua sumber\n",
@@ -538,7 +546,12 @@
     "title": "Statistics\n",
     "titlesInLibrary": "Titles in library\n",
     "totalChapters": "Total chapters\n",
-    "unreadChapters": "Unread chapters\n"
+    "unreadChapters": "Unread chapters\n",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Pelacakan",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Pemulihan Lokal",
     "MIGRATE_NOVEL": "Migrasi Novel",
     "DOWNLOAD_CHAPTER": "Mengunduh Bab"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
