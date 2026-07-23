@@ -23,6 +23,7 @@
     "deleteReadChapters": "Xóa chương đã đọc",
     "deleteReadChaptersDialogTitle": "Tất cả các chương đã đánh dấu đã đọc sẽ bị xóa.",
     "importEpub": "Nhập file Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Nhập truyện",
     "importStaticFiles": "Nhập tệp tin tĩnh",
     "novelInsertFailed": "lỗi khi thêm truyện",
@@ -45,6 +46,7 @@
     "appLanguageDefault": "Mặc định",
     "appTheme": "Chủ đề",
     "darkTheme": "Màu tối",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Ẩn bóng",
     "lightTheme": "Màu sáng",
     "navbar": "Thanh điều hướng",
@@ -304,7 +306,13 @@
     "updateLibraryDesc": "Không khuyến khích cho thiết bị yếu",
     "updateOngoing": "Chỉ cập nhật truyện đang thực hiện",
     "updateTime": "Hiện lần cập nhật trước",
-    "useFAB": "Sử dụng FAB trong thư viện"
+    "useFAB": "Sử dụng FAB trong thư viện",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "toàn bộ nguồn",
@@ -538,7 +546,12 @@
     "title": "Thống kê",
     "titlesInLibrary": "Tiêu đề",
     "totalChapters": "Chương",
-    "unreadChapters": "Chương chưa đọc"
+    "unreadChapters": "Chương chưa đọc",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Theo dõi",
   "trackingScreen": {
@@ -578,5 +591,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
