@@ -1,0 +1,35 @@
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-6
+assets/android-icons/preview/res/values/ic_launcher_background.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-4
+plugins/withAndroidCustomizations.js
+  s_def525e5fd15b4::t_4628e4e83143cc 1-6,17-29,43-84,86-109
+  s_def525e5fd15b4::t_e9734122187674 85
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-6
+assets/android-icons/release/res/values/ic_launcher_background.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-4
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-6
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  019f9309-d668-7f40-ad49-46742c7c91e1 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "1322065290f63141633c30cd3013b7ba81c12fae",
+  "prompts": {
+    "def525e5fd15b462": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9309-d668-7f40-ad49-46742c7c91e1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 119,
+      "total_deletions": 3,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
