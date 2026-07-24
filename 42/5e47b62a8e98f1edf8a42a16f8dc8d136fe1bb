@@ -1,0 +1,45 @@
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_2259385de7ae67::t_7ede0f26880d52 14
+  s_2259385de7ae67::t_920daae5adc14b 20,241
+src/components/TopTabBar/TopTabBar.tsx
+  s_2259385de7ae67::t_920daae5adc14b 1-2,4-12,15-20,23-24
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_2259385de7ae67::t_16daf7b955e018 59-60
+  s_2259385de7ae67::t_5e67bf4e2e539a 2,7-12,15,36-58,61-64,84-85,199-233,363-372,399-402
+  s_2259385de7ae67::t_fb37be90c5f569 180-198
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_2259385de7ae67::t_920daae5adc14b 20,158
+  s_2259385de7ae67::t_7ede0f26880d52 22
+src/screens/library/LibraryScreen.tsx
+  s_2259385de7ae67::t_920daae5adc14b 28,196
+  s_2259385de7ae67::t_7ede0f26880d52 24-27,29
+src/components/index.ts
+  s_2259385de7ae67::t_920daae5adc14b 29
+src/screens/browse/BrowseScreen.tsx
+  s_2259385de7ae67::t_920daae5adc14b 10,118
+  s_2259385de7ae67::t_7ede0f26880d52 3
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_2259385de7ae67::t_e560a9ef6e6e5a 10
+  s_2259385de7ae67::t_920daae5adc14b 27,199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "425e47b62a8e98f1edf8a42a16f8dc8d136fe1bb",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2259385de7ae67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f94d0-cfe5-7863-880d-0beba959a2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
