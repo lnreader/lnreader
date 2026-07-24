@@ -10,7 +10,7 @@ import { Text } from 'react-native-paper';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import { Button, LoadingScreenV2 } from '@components/index';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import renderListChapter from './RenderListChapter';
 import { useChapterContext } from '@screens/reader/ChapterContext';

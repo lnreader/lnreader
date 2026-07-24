@@ -10,7 +10,7 @@ import {
   INSTALLED_PLUGINS_KEY,
 } from '@plugins/pluginManager';
 import { PluginItem } from '@plugins/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { newer } from '@utils/compareVersion';
 import { languagesMapping } from '@utils/constants/languages';
 import { MMKVStorage, getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';

@@ -4,7 +4,7 @@ import { StyleSheet, View, TextInput } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { ThemeColors } from '@theme/types';
 import { ChapterInfo, NovelInfo } from '@database/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Dialog } from '@components';
 
 interface DownloadCustomChapterModalProps {

@@ -21,7 +21,7 @@
       "@hooks/*": ["./src/hooks/*"],
       "@hooks": ["./src/hooks/index"],
       "@screens/*": ["./src/screens/*"],
-      "@strings/*": ["./strings/*"],
+      "@i18n/*": ["./src/i18n/*"],
       "@theme/*": ["./src/theme/*"],
       "@utils/*": ["./src/utils/*"],
       "@plugins/*": ["./src/plugins/*"],
@@ -31,7 +31,7 @@
       "@api/*": ["./src/api/*"],
       "@type/*": ["./src/type/*"],
       "@specs/*": ["./specs/*"],
-      "@test-utils": ["./__tests-modules__/test-utils"],
+      "@test-utils": ["./test/test-utils"],
       "@env": ["./src/generated/build-info"],
       "@modules/nitro-epub": ["./modules/nitro-epub/src/index"],
       "@modules/*": ["./modules/*"]

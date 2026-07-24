@@ -7,7 +7,7 @@ import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { Voice } from 'expo-speech';
 import { LegendList } from '@legendapp/list/react-native';
 import { StyleSheet } from 'react-native';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface VoicePickerModalProps {
   visible: boolean;

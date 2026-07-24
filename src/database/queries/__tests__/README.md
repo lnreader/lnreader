@@ -194,7 +194,7 @@ it('should return chapters for a novel', async () => {
 The setup automatically mocks external dependencies that aren't database-related:
 
 - `@utils/showToast` - Toast notifications
-- `@strings/translations` - i18n translations
+- `@i18n/translations` - i18n translations
 - `@modules/native-file` - Native file system operations
 - `@plugins/helpers/fetch` - Download utilities
 - `@services/plugin/fetch` - Novel fetching service

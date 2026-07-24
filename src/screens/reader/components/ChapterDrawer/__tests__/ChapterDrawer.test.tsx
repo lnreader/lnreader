@@ -35,7 +35,7 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0 }),
 }));
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: (key: string) => key,
 }));
 

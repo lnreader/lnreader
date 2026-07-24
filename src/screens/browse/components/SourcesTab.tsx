@@ -15,7 +15,7 @@ import {
 } from '@hooks/persisted';
 import { BrowseScreenProps } from '@navigators/types';
 import { PluginItem } from '@plugins/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 

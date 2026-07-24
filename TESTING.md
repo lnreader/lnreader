@@ -9,13 +9,13 @@ This guide explains how to write tests in this React Native project using Jest a
 
 The project has global mocks configured in Jest. These are automatically applied:
 
-- `__mocks__/` - Global mocks for native modules (react-native-mmkv, react-navigation, all database queries, etc.)
+- `test/mocks/` - Global mocks for native modules (react-native-mmkv, react-navigation, all database queries, etc.)
 - `src/hooks/__mocks__/index.ts` - Hook-specific mocks (showToast, getString, parseChapterNumber, etc.)
 - `src/hooks/__tests__/mocks.ts` - Extended mocks for persisted hooks
 
 ### Using @test-utils
 
-There's a custom render wrapper at `__tests-modules__/test-utils.tsx` with:
+There's a custom render wrapper at `test/test-utils.tsx` with:
 
 - `render` - wraps with GestureHandlerRootView, SafeAreaProvider, PaperProvider, etc.
 - `renderNovel` - includes NovelContextProvider

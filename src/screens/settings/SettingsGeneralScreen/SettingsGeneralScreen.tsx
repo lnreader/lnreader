@@ -22,7 +22,7 @@ import { Appbar, List, SafeAreaView } from '@components';
 import NovelSortModal from './modals/NovelSortModal';
 import NovelBadgesModal from './modals/NovelBadgesModal';
 import { NavigationState } from '@react-navigation/native';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import SettingSwitch from '../components/SettingSwitch';
 import InactivityTimeoutModal from './modals/InactivityTimeoutModal';
 

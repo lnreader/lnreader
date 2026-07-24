@@ -7,7 +7,7 @@ import {
 import { ThemeColors } from '@theme/types';
 import { ChapterInfo } from '@database/types';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import dayjs from 'dayjs';
 
 interface ChapterItemProps {

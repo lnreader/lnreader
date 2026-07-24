@@ -26,7 +26,8 @@
     "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx}\" ./scripts",
     "format:check": "prettier --check \"./src/**/*.{js,jsx,ts,tsx}\" ./scripts",
     "type-check": "tsc --noEmit",
-    "clean:full": "rm -rf node_modules/ ./android/build/ ./android/app/build/ ./android/app/.cxx && pnpm i && cd android/ && ./gradlew clean && cd .. && npx expo start --clear",
+    "clean:generated": "rm -rf .expo .rock android/build android/app/build android/app/.cxx modules/*/android/build modules/*/android/.cxx modules/*/lib src/generated tsconfig.tsbuildinfo modules/*/tsconfig.tsbuildinfo",
+    "clean:full": "pnpm run clean:generated && rm -rf node_modules && pnpm install && cd android && ./gradlew clean && cd .. && npx expo start --clear",
     "prepare": "husky install",
     "nix:shell": "nix develop --extra-experimental-features nix-command --extra-experimental-features flakes",
     "nix:emulator": "nix develop .#emulator --extra-experimental-features nix-command --extra-experimental-features flakes"

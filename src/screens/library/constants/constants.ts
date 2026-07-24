@@ -1,4 +1,4 @@
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 export enum LibraryFilter {
   Downloaded = '(chaptersDownloaded > 0 OR isLocal = 1)',

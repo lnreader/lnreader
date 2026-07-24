@@ -1,5 +1,5 @@
 import type { NativeBackgroundTaskRecord } from '@modules/native-background-tasks';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import type {
   BackgroundTask,
   BackgroundTaskMetadata,

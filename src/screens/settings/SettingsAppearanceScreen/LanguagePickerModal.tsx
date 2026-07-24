@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 
 import { useTheme } from '@hooks/persisted';
 import { Dialog, RadioButton } from '@components';
-import { getString, setLocale } from '@strings/translations';
+import { getString, setLocale } from '@i18n/translations';
 import { useMMKVString } from 'react-native-mmkv';
 import { FlatList } from 'react-native-gesture-handler';
 

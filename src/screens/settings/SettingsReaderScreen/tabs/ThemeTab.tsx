@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { List, ColorPreferenceItem, Button } from '@components/index';
 import { useBoolean } from '@hooks';
 import { Portal } from 'react-native-paper';

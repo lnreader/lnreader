@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ConfirmationDialog } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface ClearHistoryDialogProps {
   visible: boolean;

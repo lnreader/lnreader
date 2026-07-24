@@ -2,7 +2,7 @@
 // https://en.wikipedia.org/wiki/IETF_language_tag
 // https://en.wikipedia.org/wiki/List_of_language_names
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 export const languagesMapping: Record<string, string> = {
   'id': 'Bahasa Indonesia',

@@ -4,7 +4,7 @@ import {
   updateNovelInfo,
 } from '@database/queries/NovelQueries';
 import { LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';

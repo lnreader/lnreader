@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 
 import { Dialog, RadioButton } from '@components';
 import { ThemeColors } from '@theme/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useBrowseSettings } from '@hooks/persisted/index';
 
 interface DisplayModeModalProps {

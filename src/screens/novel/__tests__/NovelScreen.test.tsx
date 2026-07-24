@@ -37,7 +37,7 @@ jest.mock('@services/plugin/fetch', () => ({
   resolveUrl: jest.fn(() => 'https://example.com'),
 }));
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: (key: string) => key,
 }));
 

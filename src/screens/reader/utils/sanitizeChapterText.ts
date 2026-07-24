@@ -1,4 +1,4 @@
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import sanitizeHtml from 'sanitize-html';
 
 export const sanitizeChapterText = (

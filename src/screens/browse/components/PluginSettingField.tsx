@@ -5,7 +5,7 @@ import { overlay, TextInput } from 'react-native-paper';
 
 import { Checkbox, Menu, SwitchItem } from '@components';
 import { PluginSetting } from '@plugins/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 
 import { PluginSettingValue } from '../hooks/usePluginSettings';

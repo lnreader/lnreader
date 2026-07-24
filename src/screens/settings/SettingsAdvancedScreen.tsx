@@ -5,7 +5,7 @@ import { TextInput } from 'react-native-paper';
 import { deleteCachedNovels, useTheme, useUserAgent } from '@hooks/persisted';
 import { showToast } from '@utils/showToast';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useBoolean } from '@hooks';
 import ConfirmationDialog from '@components/ConfirmationDialog/ConfirmationDialog';
 import {

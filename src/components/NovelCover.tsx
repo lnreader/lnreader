@@ -15,7 +15,7 @@ import { DBNovelInfo, NovelInfo } from '@database/types';
 import { NovelItem, ImageRequestInit } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
 import NovelCoverImage from './NovelCoverImage';
 import { useNovelCoverLayout } from './NovelCoverLayoutContext';

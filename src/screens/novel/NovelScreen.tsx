@@ -17,7 +17,7 @@ import { useBoolean } from '@hooks';
 import NovelScreenLoading from './components/LoadingAnimation/NovelScreenLoading';
 import { NovelScreenProps } from '@navigators/types';
 import { ChapterInfo } from '@database/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { isNumber } from 'lodash-es';
 import NovelAppbar from './components/NovelAppbar';
 import { resolveUrl } from '@services/plugin/fetch';

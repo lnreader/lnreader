@@ -1,5 +1,5 @@
 import { NovelStatus } from '@plugins/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 export const translateNovelStatus = (status?: NovelStatus | string) => {
   switch (status) {

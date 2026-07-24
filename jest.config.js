@@ -6,7 +6,7 @@ const baseModuleNameMapper = {
   '^@hooks$': '<rootDir>/src/hooks/index',
   '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
   '^@screens/(.*)$': '<rootDir>/src/screens/$1',
-  '^@strings/(.*)$': '<rootDir>/strings/$1',
+  '^@i18n/(.*)$': '<rootDir>/src/i18n/$1',
   '^@theme/(.*)$': '<rootDir>/src/theme/$1',
   '^@utils/(.*)$': '<rootDir>/src/utils/$1',
   '^@plugins/(.*)$': '<rootDir>/src/plugins/$1',
@@ -17,10 +17,10 @@ const baseModuleNameMapper = {
   '^@type/(.*)$': '<rootDir>/src/type/$1',
   '^@specs/(.*)$': '<rootDir>/specs/$1',
   '^@modules/(.*)$': '<rootDir>/modules/$1',
-  '^@test-utils$': '<rootDir>/__tests-modules__/test-utils',
+  '^@test-utils$': '<rootDir>/test/test-utils',
   '^@env$': '<rootDir>/src/generated/build-info',
   // Mock static assets
-  '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
+  '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/test/mocks/fileMock.js',
 };
 
 const baseTransform = {
@@ -33,7 +33,7 @@ const baseTransformIgnorePatterns = [
 ];
 
 module.exports = {
-  moduleDirectories: ['node_modules', '__tests-modules__'],
+  moduleDirectories: ['node_modules'],
   projects: [
     // --- Project 1: Database / pure logic tests (node environment) ---
     {
@@ -67,8 +67,8 @@ module.exports = {
       transform: baseTransform,
       transformIgnorePatterns: baseTransformIgnorePatterns,
       moduleNameMapper: baseModuleNameMapper,
-      setupFiles: ['<rootDir>/__mocks__/index.js'],
-      setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],
+      setupFiles: ['<rootDir>/test/mocks/index.js'],
+      setupFilesAfterEnv: ['<rootDir>/test/setup/jest.ts'],
       collectCoverageFrom: [
         'src/**/*.{ts,tsx}',
         '!src/database/queries/**/__tests__/**',

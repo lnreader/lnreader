@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import Slider from '@react-native-community/slider';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 const TRACK_TINT_COLOR = '#000000';
 

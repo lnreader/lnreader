@@ -9,7 +9,7 @@ import {
   useChapterGeneralSettings,
   useChapterReaderSettings,
 } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Dialog, List, Button } from '@components/index';
 import { Chip } from 'react-native-paper';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';

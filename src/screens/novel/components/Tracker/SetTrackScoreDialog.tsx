@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { Dialog } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import {
   AniListScoreSelector,
   KitsuScoreSelector,

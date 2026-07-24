@@ -1,5 +1,5 @@
 import { Dialog } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import React from 'react';
 import { TextInput } from 'react-native-paper';

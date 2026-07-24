@@ -9,7 +9,7 @@ import {
   updateNovel,
   updateNovelPage,
 } from '@services/updates/LibraryUpdateQueries';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
 import {
   Dimensions,

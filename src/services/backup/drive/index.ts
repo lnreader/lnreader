@@ -1,7 +1,7 @@
 import { DriveFile } from '@api/drive/types';
 import { sleep } from '@utils/sleep';
 import { exists } from '@api/drive';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
 import { download, updateMetadata, uploadMedia } from '@api/drive/request';
 import { ZipBackupName } from '../types';

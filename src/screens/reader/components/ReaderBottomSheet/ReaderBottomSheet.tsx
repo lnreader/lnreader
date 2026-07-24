@@ -19,7 +19,7 @@ import { BottomSheetFlashList, BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
 import TextSizeSlider from './TextSizeSlider';
@@ -31,7 +31,7 @@ import TTSTab from './TTSTab';
 import { overlay } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { StringMap } from '@strings/types';
+import { StringMap } from '@i18n/types';
 
 type TabViewLabelProps = {
   route: {

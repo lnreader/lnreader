@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { Dialog, DialogActionTone } from '../Dialog';
 

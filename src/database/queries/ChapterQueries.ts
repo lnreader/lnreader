@@ -20,7 +20,7 @@ import { showToast } from '@utils/showToast';
 import { ChapterInfo, DownloadedChapter, Update } from '../types';
 import { ChapterItem } from '@plugins/types';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';

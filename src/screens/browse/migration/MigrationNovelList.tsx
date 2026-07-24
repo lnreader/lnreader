@@ -4,7 +4,7 @@ import GlobalSearchNovelCover from '../globalsearch/GlobalSearchNovelCover';
 
 import { showToast } from '@utils/showToast';
 import { Dialog } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { MigrateNovelScreenProps } from '@navigators/types';
 import { NovelInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';

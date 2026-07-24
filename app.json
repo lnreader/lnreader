@@ -6,6 +6,7 @@
     "scheme": "lnreader",
     "icon": "./assets/native/ic_launcher.png",
     "plugins": [
+      "./plugins/withAndroidCustomizations",
       [
         "expo-splash-screen",
         {
@@ -32,7 +33,6 @@
       "react-native-edge-to-edge",
       "expo-web-browser",
       "./plugins/withReaderAssets",
-      "./plugins/withAndroidCustomizations",
       [
         "expo-build-properties",
         {

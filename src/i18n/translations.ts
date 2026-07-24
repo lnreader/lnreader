@@ -167,7 +167,9 @@ export { i18n };
 
 type PluralSuffix = '.one' | '.other';
 
-type TrimPlural<T extends string> = T extends `${infer Base}${PluralSuffix}` ? Base : T;
+type TrimPlural<T extends string> = T extends `${infer Base}${PluralSuffix}`
+  ? Base
+  : T;
 
 export const getString = (
   stringKey: keyof StringMap | TrimPlural<keyof StringMap>,

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { IconButtonV2 } from '@components/index';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface ReaderTextSizeProps {
   labelStyle?: TextStyle | TextStyle[];

@@ -13,7 +13,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import * as DocumentPicker from 'expo-document-picker';
 import NativeFile from '@modules/native-file';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { Button, ConfirmationDialog } from '@components/index';
 import { showToast } from '@utils/showToast';

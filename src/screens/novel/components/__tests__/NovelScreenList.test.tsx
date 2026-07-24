@@ -154,7 +154,7 @@ jest.mock('@services/updates/LibraryUpdateQueries', () => ({
   updateNovelPage: jest.fn(),
 }));
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: (key: string) => key,
 }));
 

@@ -2,7 +2,7 @@ import { list } from '@api/remote';
 import { Button, Dialog, EmptyView } from '@components';
 import { useSelfHost } from '@hooks/persisted/useSelfHost';
 import { backgroundTasks } from '@services/backgroundTasks';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { fetchTimeout } from '@utils/fetch/fetch';
 import { useCallback, useEffect, useState } from 'react';

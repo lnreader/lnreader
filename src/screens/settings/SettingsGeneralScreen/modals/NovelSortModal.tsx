@@ -7,7 +7,7 @@ import {
 import { ThemeColors } from '@theme/types';
 import { SortItem } from '@components/Checkbox/Checkbox';
 import { useLibrarySettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Dialog } from '@components';
 
 interface NovelSortModalProps {

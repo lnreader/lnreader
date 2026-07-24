@@ -1,5 +1,5 @@
 import { PluginItem } from '@plugins/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 
 export type SourceEntry =

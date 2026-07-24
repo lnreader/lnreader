@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import React from 'react';
 import { ToggleColorButton } from '@components/Common/ToggleButton';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { presetReaderThemes } from '@utils/constants/readerConstants';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { FlatList } from 'react-native-gesture-handler';

@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 
 import { IconButtonV2, NovelCoverImage } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
 
 import { History } from '@database/types';

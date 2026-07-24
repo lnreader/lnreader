@@ -21,7 +21,7 @@ import {
   useTheme,
 } from '@hooks/persisted';
 import { PluginDetailsScreenProps } from '@navigators/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 import { showToast } from '@utils/showToast';
 

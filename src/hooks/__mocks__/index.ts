@@ -3,7 +3,7 @@ jest.mock('@utils/showToast', () => ({
   showToast: jest.fn(),
 }));
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: jest.fn(key => key),
 }));
 

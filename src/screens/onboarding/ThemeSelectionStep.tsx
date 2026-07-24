@@ -22,7 +22,7 @@ import {
   isDynamicThemeAvailable,
   toDynamicThemeColors,
 } from '@theme/dynamic';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { LegendList } from '@legendapp/list/react-native';
 import Switch from '@components/Switch/Switch';
 import switchTheme from 'react-native-theme-switch-animation';

@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { getPlugin } from '@plugins/pluginManager';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
 
 import { GlobalSearchResult } from '../hooks/useGlobalSearch';

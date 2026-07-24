@@ -5,7 +5,7 @@ import IconButtonV2 from '../IconButtonV2/IconButtonV2';
 import { ThemeColors } from '../../theme/types';
 import { Menu } from '@components';
 import { MaterialDesignIconName } from '@type/icon';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Pressable } from 'react-native-gesture-handler';
 
 export interface RightIcon {

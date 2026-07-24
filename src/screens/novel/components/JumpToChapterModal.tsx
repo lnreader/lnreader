@@ -5,7 +5,7 @@ import {
   Pressable,
   TextInput as RNTextInput,
 } from 'react-native';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Dialog, SwitchItem } from '@components';
 
 import { Text } from 'react-native-paper';

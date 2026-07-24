@@ -16,7 +16,7 @@ import {
 import color from 'color';
 
 import { useLibrarySettings, useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import {
   DisplayModes,

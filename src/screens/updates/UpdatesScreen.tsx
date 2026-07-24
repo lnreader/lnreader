@@ -11,7 +11,7 @@ import {
 
 import { useSearch } from '@hooks';
 import { useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import UpdateNovelChapterGroup from './components/UpdateNovelChapterGroup';
 import { deleteChapter } from '@database/queries/ChapterQueries';

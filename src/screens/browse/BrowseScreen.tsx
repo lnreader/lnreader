@@ -5,7 +5,7 @@ import Color from 'color';
 
 import { useSearch } from '@hooks';
 import { useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { SafeAreaView, SearchbarV2 } from '@components';
 import { BrowseScreenProps } from '@navigators/types';

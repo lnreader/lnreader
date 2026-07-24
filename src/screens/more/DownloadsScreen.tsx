@@ -16,7 +16,7 @@ import { useTheme } from '@hooks/persisted';
 import RemoveDownloadsDialog from './components/RemoveDownloadsDialog';
 import UpdatesSkeletonLoading from '@screens/updates/components/UpdatesSkeletonLoading';
 import DownloadedNovelChapterGroup from './components/DownloadedNovelChapterGroup';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { DownloadsScreenProps } from '@navigators/types';
 import { DownloadedChapter } from '@database/types';
 import { showToast } from '@utils/showToast';

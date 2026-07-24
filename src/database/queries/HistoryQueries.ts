@@ -1,6 +1,6 @@
 import { eq, sql, isNotNull, desc, getColumns } from 'drizzle-orm';
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
 

@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
 import { AppRegistry, I18nManager } from 'react-native';
-import { i18n } from './strings/translations';
+import { i18n } from './src/i18n/translations';
 import { runHeadlessBackgroundTask } from './src/services/backgroundTasks';
 
 AppRegistry.registerHeadlessTask(

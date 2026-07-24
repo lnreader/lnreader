@@ -5,7 +5,7 @@ import { fetchNovel } from '@services/plugin/fetch';
 import { insertChapters } from './ChapterQueries';
 
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { BackupNovel, DBNovelInfo, NovelInfo } from '../types';
 import { SourceNovel } from '@plugins/types';
 import { NOVEL_STORAGE } from '@utils/Storages';

@@ -13,7 +13,7 @@ import { useBrowseSource, useSearchSource } from './useBrowseSource';
 
 import { NovelItem } from '@plugins/types';
 import { getPlugin } from '@plugins/pluginManager';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { StyleSheet } from 'react-native';
 import { NovelInfo } from '@database/types';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';

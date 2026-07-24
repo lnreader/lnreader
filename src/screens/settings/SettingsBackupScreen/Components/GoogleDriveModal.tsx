@@ -7,7 +7,7 @@ import { Button, Dialog, EmptyView } from '@components';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import * as Clipboard from 'expo-clipboard';
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { exists, getBackups, makeDir } from '@api/drive';
 import { DriveFile } from '@api/drive/types';
 import dayjs from 'dayjs';

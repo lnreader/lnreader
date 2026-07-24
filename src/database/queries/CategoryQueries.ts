@@ -1,7 +1,7 @@
 import { eq, sql, inArray, and, ne, count } from 'drizzle-orm';
 import { BackupCategory, Category, NovelCategory, CCategory } from '../types';
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { dbManager } from '@database/db';
 import {
   categorySchema,

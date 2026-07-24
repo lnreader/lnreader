@@ -9,7 +9,7 @@ import WebView from 'react-native-webview';
 import color from 'color';
 
 import { useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { getPlugin } from '@plugins/pluginManager';
 import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';

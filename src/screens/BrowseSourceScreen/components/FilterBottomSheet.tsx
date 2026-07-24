@@ -22,7 +22,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { useBoolean } from '@hooks';
 import { TextInput, overlay } from 'react-native-paper';
 import { getValueFor } from './filterUtils';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Switch from '@components/Switch/Switch';

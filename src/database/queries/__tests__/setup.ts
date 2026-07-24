@@ -63,7 +63,7 @@ jest.mock('@utils/error', () => ({
   ),
 }));
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: jest.fn((key: string) => key),
 }));
 

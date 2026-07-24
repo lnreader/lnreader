@@ -13,7 +13,7 @@ import {
   increaseTimeSpent as _increaseTimeSpent,
 } from '@database/queries/ChapterQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
-import { getString as translateGetString } from '@strings/translations';
+import { getString as translateGetString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
 
 type MutateChapters = (mutation: (chs: ChapterInfo[]) => ChapterInfo[]) => void;

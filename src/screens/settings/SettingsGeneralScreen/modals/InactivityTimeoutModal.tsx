@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, RadioButton } from '@components';
 import { ThemeColors } from '@theme/types';
 import { useAppSettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface InactivityTimeoutModalProps {
   inactivityTimeoutMs: number | undefined;

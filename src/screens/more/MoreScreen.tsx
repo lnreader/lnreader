@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Pressable, Text, ScrollView } from 'react-native';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { List, SafeAreaView } from '@components';
 

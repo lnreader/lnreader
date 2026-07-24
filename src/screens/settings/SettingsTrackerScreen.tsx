@@ -5,7 +5,7 @@ import { Provider, List as PaperList } from 'react-native-paper';
 import { getTracker, useTheme, useTracker } from '@hooks/persisted';
 import { Appbar, ConfirmationDialog, List, SafeAreaView } from '@components';
 import { TrackerSettingsScreenProps } from '@navigators/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import TrackerLoginDialog from './components/TrackerLoginDialog';
 import { authenticateWithCredentials as mangaUpdatesAuth } from '@services/Trackers/mangaUpdates';
 import { authenticateWithCredentials as kitsuAuth } from '@services/Trackers/kitsu';

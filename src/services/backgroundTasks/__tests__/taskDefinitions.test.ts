@@ -7,7 +7,7 @@ import {
   getBackgroundTaskTitle,
 } from '../taskDefinitions';
 
-jest.mock('@strings/translations', () => ({
+jest.mock('@i18n/translations', () => ({
   getString: (key: string) => key,
 }));
 

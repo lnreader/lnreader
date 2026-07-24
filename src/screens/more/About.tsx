@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 
 import * as Linking from 'expo-linking';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { MoreHeader } from './components/MoreHeader';
 import { useTheme } from '@hooks/persisted';
 import { List, SafeAreaView } from '@components';

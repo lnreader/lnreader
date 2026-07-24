@@ -4,7 +4,7 @@ import { ConfirmationDialog } from '@components/index';
 
 import { Repository } from '@database/types';
 import { deleteRepositoryById } from '@database/queries/RepositoryQueries';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 interface DeleteRepositoryModalProps {
   repository: Repository;
   visible: boolean;

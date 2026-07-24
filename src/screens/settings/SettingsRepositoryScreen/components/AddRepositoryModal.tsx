@@ -6,7 +6,7 @@ import { Dialog } from '@components/index';
 import { Repository } from '@database/types';
 import { useTheme } from '@hooks/persisted';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface AddRepositoryModalProps {
   repository?: Repository;

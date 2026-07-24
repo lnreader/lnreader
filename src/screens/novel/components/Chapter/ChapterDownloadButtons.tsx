@@ -3,7 +3,7 @@ import { ThemeColors } from '@theme/types';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { overlay } from 'react-native-paper';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useBoolean } from '@hooks/index';
 import { IconButtonV2, Menu } from '@components';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';

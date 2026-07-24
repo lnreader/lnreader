@@ -7,7 +7,7 @@ import LibraryNovelItem from './LibraryNovelItem';
 
 import { NovelInfo } from '@database/types';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
 import { LibraryScreenProps } from '@navigators/types';
 import { backgroundTasks } from '@services/backgroundTasks';

@@ -6,7 +6,7 @@ import { Button } from '@components';
 import ThemeSelectionStep from './ThemeSelectionStep';
 import { useState } from 'react';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 enum OnboardingStep {
   PICK_THEME,

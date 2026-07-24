@@ -18,7 +18,7 @@ const flatten = (obj, target, prefix) => {
 };
 
 const strings = fs.readFileSync(
-  path.resolve(process.cwd(), 'strings/languages/en/strings.json'),
+  path.resolve(process.cwd(), 'src/i18n/languages/en/strings.json'),
   'utf8',
 );
 
@@ -34,7 +34,7 @@ const formatContent = prettier.format(stringTypes, {
 });
 
 fs.writeFile(
-  path.resolve(process.cwd(), 'strings/types/index.ts'),
+  path.resolve(process.cwd(), 'src/i18n/types/index.ts'),
   formatContent,
   err => {
     if (err) {

@@ -4,7 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Dialog } from '@components';
 import { ThemeColors } from '../../theme/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface ColorPickerModalProps {
   visible: boolean;

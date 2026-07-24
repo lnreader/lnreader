@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions } from 'react-native';
 import * as Linking from 'expo-linking';
 import { ScrollView } from 'react-native-gesture-handler';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { useTheme } from '@hooks/persisted';
 import { Dialog } from '@components';

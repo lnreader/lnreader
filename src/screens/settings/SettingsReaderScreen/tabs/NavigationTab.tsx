@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-paper';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { defaultTo } from 'lodash-es';
 import { useTheme, useChapterGeneralSettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { List, Button } from '@components/index';
 import SettingSwitch from '../../components/SettingSwitch';
 

@@ -7,7 +7,7 @@ import {
   Pressable,
   ImageSourcePropType,
 } from 'react-native';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Button } from '@components';
 
 import { ThemeColors } from '@theme/types';

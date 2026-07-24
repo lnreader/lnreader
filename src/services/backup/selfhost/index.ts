@@ -1,6 +1,6 @@
 import { sleep } from '@utils/sleep';
 import { download, upload } from '@api/remote';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
 import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';

@@ -1,4 +1,4 @@
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';

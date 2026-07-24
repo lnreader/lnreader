@@ -6,7 +6,7 @@ import { FlashList } from '@shopify/flash-list';
 
 import { Dialog, NovelCoverImage } from '@components';
 import { getTracker, useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { SearchResult } from '@services/Trackers';
 import { TrackSearchDialogProps } from './types';
 import { showToast } from '@utils/showToast';

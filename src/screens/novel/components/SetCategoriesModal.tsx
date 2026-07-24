@@ -6,7 +6,7 @@ import { Dialog } from '@components/index';
 
 import { useTheme } from '@hooks/persisted';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getCategoriesWithCount } from '@database/queries/CategoryQueries';
 import { updateNovelCategories } from '@database/queries/NovelQueries';
 import { CCategory, Category } from '@database/types';

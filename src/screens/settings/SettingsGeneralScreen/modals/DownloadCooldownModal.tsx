@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput } from 'react-native';
 import { Dialog } from '@components';
 import { useAppSettings } from '@hooks/persisted';
 import { DEFAULT_CHAPTER_DOWNLOAD_COOLDOWN_MS } from '@hooks/persisted/useSettings';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 
 interface DownloadCooldownModalProps {

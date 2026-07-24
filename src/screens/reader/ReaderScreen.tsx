@@ -10,7 +10,7 @@ import ChapterDrawer from './components/ChapterDrawer';
 import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
 import { ErrorScreenV2 } from '@components';
 import { ChapterScreenProps } from '@navigators/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import KeepScreenAwake from './components/KeepScreenAwake';
 import { ChapterContextProvider, useChapterContext } from './ChapterContext';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';

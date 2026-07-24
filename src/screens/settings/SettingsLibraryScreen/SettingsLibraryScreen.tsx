@@ -1,6 +1,6 @@
 import React from 'react';
 import { Appbar, List } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useBoolean } from '@hooks';
 import { useCategories, useTheme } from '@hooks/persisted';
 import { useNavigation } from '@react-navigation/native';

@@ -11,7 +11,7 @@ import {
 } from '../../../database/queries/CategoryQueries';
 import { useTheme } from '@hooks/persisted';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
 
 interface AddCategoryModalProps {

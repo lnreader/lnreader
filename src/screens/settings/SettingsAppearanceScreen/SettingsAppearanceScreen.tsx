@@ -21,7 +21,7 @@ import {
 } from 'react-native-mmkv';
 import { Appbar, List, SafeAreaView, SegmentedControl } from '@components';
 import { AppearanceSettingsScreenProps } from '@navigators/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { darkThemes, lightThemes } from '@theme/md3';
 import {
   DYNAMIC_THEME_ID,

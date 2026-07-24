@@ -14,7 +14,7 @@ import {
   useChapterReaderSettings,
   useTheme,
 } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import color from 'color';

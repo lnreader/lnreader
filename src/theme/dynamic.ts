@@ -4,7 +4,7 @@ import {
   type Material3Theme,
 } from '@pchmn/expo-material3-theme';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import type { ThemeColors } from '@theme/types';
 
 export const DYNAMIC_THEME_ID = -1;

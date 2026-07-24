@@ -1,4 +1,4 @@
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 export const midnightDusk = {
   light: {

@@ -14,7 +14,7 @@ import color from 'color';
 import { TabView, SceneMap, TabBar, TabViewProps } from 'react-native-tab-view';
 import { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import { Button } from '@components';

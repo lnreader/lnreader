@@ -7,7 +7,7 @@ import GoogleDriveModal from './Components/GoogleDriveModal';
 import SelfHostModal from './Components/SelfHostModal';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { ScrollView } from 'react-native-gesture-handler';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import NativeFile from '@modules/native-file';

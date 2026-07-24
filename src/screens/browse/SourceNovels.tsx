@@ -6,7 +6,7 @@ import ListView from '../../components/ListView';
 import { Appbar } from '@components';
 import { SourceNovelsScreenProps } from '@navigators/types';
 import { NovelInfo } from '@database/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useLibraryContext } from '@components/Context/LibraryContext';
 
 const SourceNovels = ({ navigation, route }: SourceNovelsScreenProps) => {

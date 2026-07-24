@@ -9,7 +9,7 @@ import { Repository } from '@database/types';
 import { useBoolean } from '@hooks/index';
 import { useTheme } from '@hooks/persisted';
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Portal } from 'react-native-paper';
 import AddRepositoryModal from './AddRepositoryModal';
 import DeleteRepositoryModal from './DeleteRepositoryModal';

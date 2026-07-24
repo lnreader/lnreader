@@ -10,7 +10,7 @@ import {
 import { useTheme } from '@hooks/persisted';
 
 import { showToast } from '../../utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Appbar, EmptyView, Menu, SafeAreaView } from '@components';
 import { TaskQueueScreenProps } from '@navigators/types';
 import {

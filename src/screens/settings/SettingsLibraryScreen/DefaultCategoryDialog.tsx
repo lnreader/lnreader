@@ -3,7 +3,7 @@ import { FlatList, StyleSheet } from 'react-native';
 
 import { Dialog, RadioButton } from '@components';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
 
 import { Category } from '@database/types';

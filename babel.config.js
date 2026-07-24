@@ -17,7 +17,7 @@ export default function (api) {
             '@database': './src/database',
             '@hooks': './src/hooks',
             '@screens': './src/screens',
-            '@strings': './strings',
+            '@i18n': './src/i18n',
             '@services': './src/services',
             '@plugins': './src/plugins',
             '@utils': './src/utils',
@@ -26,7 +26,7 @@ export default function (api) {
             '@api': './src/api',
             '@type': './src/type',
             '@specs': './specs',
-            '@test-utils': './__tests-modules__/test-utils',
+            '@test-utils': './test/test-utils',
             '@env': './src/generated/build-info',
             '@modules': './modules',
             'react-native-vector-icons/MaterialCommunityIcons':

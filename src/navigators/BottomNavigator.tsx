@@ -7,7 +7,7 @@ import History from '../screens/history/HistoryScreen';
 import Browse from '../screens/browse/BrowseScreen';
 import More from '../screens/more/MoreScreen';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import {
   useAppSettings,
   useFilteredInstalledPlugins,

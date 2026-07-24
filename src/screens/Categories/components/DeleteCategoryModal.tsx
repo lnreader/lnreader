@@ -4,7 +4,7 @@ import { ConfirmationDialog } from '@components/index';
 
 import { Category } from '@database/types';
 import { deleteCategoryById } from '@database/queries/CategoryQueries';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface DeleteCategoryModalProps {
   category: Category;

@@ -3,7 +3,7 @@ import { NOVEL_STORAGE } from '@utils/Storages';
 import { Plugin } from '@plugins/types';
 import { downloadFile } from '@plugins/helpers/fetch';
 import { getPlugin } from '@plugins/pluginManager';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getChapter } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
 import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';

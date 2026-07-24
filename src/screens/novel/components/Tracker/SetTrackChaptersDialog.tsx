@@ -3,7 +3,7 @@ import { TextInput } from 'react-native-paper';
 
 import { Dialog } from '@components';
 import { useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { TrackChaptersDialogProps } from './types';
 
 type SetTrackChaptersDialogContentProps = Omit<

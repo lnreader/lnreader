@@ -5,7 +5,7 @@ import { Dialog, RadioButton } from '@components';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 
 import { readerFonts } from '@utils/constants/readerConstants';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface FontPickerModalProps {
   visible: boolean;

@@ -20,7 +20,7 @@ import { Row } from '@components/Common';
 import ReadButton from './ReadButton';
 import NovelSummary from '../NovelSummary/NovelSummary';
 import NovelScreenButtonGroup from '../NovelScreenButtonGroup/NovelScreenButtonGroup';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { filterColor } from '@theme/colors';
 import { ChapterInfo, NovelInfo as NovelData } from '@database/types';
 import { ThemeColors } from '@theme/types';

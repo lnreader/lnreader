@@ -1,4 +1,4 @@
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 const escapeSqlString = (value: string) => value.replace(/'/g, "''");
 

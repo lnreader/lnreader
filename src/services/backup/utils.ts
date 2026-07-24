@@ -19,7 +19,7 @@ import { ROOT_STORAGE } from '@utils/Storages';
 import { BACKGROUND_TASKS_STORE_KEY } from '@services/backgroundTasks/BackgroundTaskQueue';
 import NativeFile from '@modules/native-file'
 import { showToast } from '@utils/showToast';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
 

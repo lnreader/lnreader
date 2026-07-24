@@ -4,7 +4,7 @@ import NativeZipArchive from '@modules/native-zip-archive'
 import { ROOT_STORAGE } from '@utils/Storages';
 import { ZipBackupName } from '../types';
 import NativeFile from '@modules/native-file'
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
 

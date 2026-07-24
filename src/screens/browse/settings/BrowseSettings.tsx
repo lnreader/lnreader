@@ -7,7 +7,7 @@ import {
   usePluginActions,
   useTheme,
 } from '@hooks/persisted/index';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getLocaleLanguageName, languages } from '@utils/constants/languages';
 import { BrowseSettingsScreenProp } from '@navigators/types/index';
 import { useBoolean } from '@hooks';

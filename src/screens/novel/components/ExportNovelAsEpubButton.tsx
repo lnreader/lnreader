@@ -11,7 +11,7 @@ import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { useBoolean } from '@hooks/index';
 import { showToast } from '@utils/showToast';
 import { NOVEL_STORAGE } from '@utils/Storages';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 
 import ExportEpubModal from './ExportEpubModal';

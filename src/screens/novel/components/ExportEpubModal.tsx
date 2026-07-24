@@ -6,7 +6,7 @@ import { openDocumentTree } from 'react-native-saf-x';
 import { Dialog, List, SwitchItem } from '@components';
 
 import { useBoolean } from '@hooks';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { showToast } from '@utils/showToast';
 

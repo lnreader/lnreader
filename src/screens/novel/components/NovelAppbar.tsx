@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Appbar } from 'react-native-paper';
 import { Menu as DefaultMenu } from '@components';
 import { ThemeColors } from '@theme/types';

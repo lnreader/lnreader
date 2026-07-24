@@ -5,7 +5,7 @@ import { IconButtonV2 } from '@components';
 import { ThemeColors } from '@theme/types';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface ReaderSearchbarProps {
   theme: ThemeColors;

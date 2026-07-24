@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import ReaderTextSize from '../ReaderTextSize';
 import ReaderValueChange from '@screens/reader/components/ReaderBottomSheet/ReaderValueChange';
 import ReaderTextAlignSelector from '@screens/reader/components/ReaderBottomSheet/ReaderTextAlignSelector';

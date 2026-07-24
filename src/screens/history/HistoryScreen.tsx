@@ -16,7 +16,7 @@ import { useTheme, useHistory } from '@hooks/persisted';
 import { convertDateToISOString } from '@database/utils/convertDateToISOString';
 
 import { History } from '@database/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import ClearHistoryDialog from './components/ClearHistoryDialog';
 import HistorySkeletonLoading from './components/HistorySkeletonLoading';
 import { HistoryScreenProps } from '@navigators/types';

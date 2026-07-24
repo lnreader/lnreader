@@ -7,7 +7,7 @@ import React from 'react';
 import { Dialog, RadioButton } from '@components';
 import { ThemeColors } from '@theme/types';
 import { useLibrarySettings } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface DisplayModeModalProps {
   displayMode: DisplayModes;

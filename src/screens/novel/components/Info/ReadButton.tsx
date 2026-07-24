@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from '@components';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { ChapterInfo } from '@database/types';
 import { useAppSettings } from '@hooks/persisted';
 import Animated, { ZoomIn } from 'react-native-reanimated';

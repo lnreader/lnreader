@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Chip, NovelCoverImage } from '../../../../components';
 import { isMissingNovelCover } from '../../../../components/NovelCoverImage';
 import { ThemeColors } from '@theme/types';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CoverImageProps {

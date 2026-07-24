@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { SelectableChip } from '@components/index';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 
 import { Font, readerFonts } from '@utils/constants/readerConstants';

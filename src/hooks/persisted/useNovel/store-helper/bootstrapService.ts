@@ -20,7 +20,7 @@ import {
   fetchNovel as defaultFetchNovel,
   fetchPage as defaultFetchPage,
 } from '@services/plugin/fetch';
-import { getString as defaultGetString } from '@strings/translations';
+import { getString as defaultGetString } from '@i18n/translations';
 import { BatchInfo } from '../types';
 
 export interface ChapterLoadResult {

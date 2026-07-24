@@ -12,7 +12,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { TextInput } from 'react-native-paper';
 import { updateNovelInfo } from '@database/queries/NovelQueries';
 
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { Dialog } from '@components';
 import { ThemeColors } from '@theme/types';
 import { NovelInfo } from '@database/types';

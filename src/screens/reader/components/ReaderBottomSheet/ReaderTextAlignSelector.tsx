@@ -4,7 +4,7 @@ import React from 'react';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { textAlignments } from '@utils/constants/readerConstants';
 import { ToggleButton } from '@components/Common/ToggleButton';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 interface ReaderTextAlignSelectorProps {
   labelStyle?: TextStyle | TextStyle[];

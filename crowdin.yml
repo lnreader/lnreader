@@ -1,5 +1,5 @@
 pull_request_title: 'chore: Update Translations'
 commit_message: '[ci skip]'
 files:
-  - source: /strings/languages/en/strings.json
-    translation: /strings/languages/%locale_with_underscore%/strings.json
+  - source: /src/i18n/languages/en/strings.json
+    translation: /src/i18n/languages/%locale_with_underscore%/strings.json

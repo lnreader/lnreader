@@ -12,7 +12,7 @@ import {
 import { Repository } from '@database/types';
 import { useBackHandler, useBoolean } from '@hooks/index';
 import { usePluginActions, useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 
 import AddRepositoryModal from './components/AddRepositoryModal';
 import RepositoryCard from './components/RepositoryCard';

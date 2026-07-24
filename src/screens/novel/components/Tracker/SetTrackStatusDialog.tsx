@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog } from '@components';
 import { RadioButton, RadioButtonGroup } from '@components/RadioButton';
 import { useTheme } from '@hooks/persisted';
-import { getString } from '@strings/translations';
+import { getString } from '@i18n/translations';
 import { UserListStatus } from '@services/Trackers';
 import { STATUS_LABELS } from './constants';
 import { TrackStatusDialogProps } from './types';
