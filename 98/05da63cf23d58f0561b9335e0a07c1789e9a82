@@ -1,0 +1,183 @@
+src/services/backgroundTasks/contracts.ts
+  s_cbc40ac965196f::t_974983be8d83cc 43-51
+src/screens/novel/components/Info/NovelInfoSkeletons.tsx
+  s_cbc40ac965196f::t_084bc8b92adc8c 1-199
+src/hooks/persisted/useDownload.ts
+  s_cbc40ac965196f::t_fb118a587cc54f 39
+  s_cbc40ac965196f::t_974983be8d83cc 35-38,40-44,50,59,75
+src/hooks/persisted/useNovel/store/novelStore.actions.ts
+  s_cbc40ac965196f::t_a9df9315db4029 31-36,70,76,107,113,130-137,145,194,214-220
+  s_cbc40ac965196f::t_ac8c762ba97b6f 43,58-61,91,129,151,161,168,186,201
+  s_cbc40ac965196f::t_78e404dca5fb19 138
+  s_cbc40ac965196f::t_843a1088e07578 152-154,162-163,187-189,202-203,229
+  s_cbc40ac965196f::t_4115539cc81eb1 190
+src/hooks/persisted/useNovel/__tests__/chapterActions.test.ts
+  s_cbc40ac965196f::t_ebfa9c0c76ec51 169,189
+  s_cbc40ac965196f::t_99d8cfbf8f1a49 12,53,154-168,170-175,179-188,190
+  s_cbc40ac965196f::t_f47dae76518685 176-178,191,325-329,331,333-335,337-341,343,345-347,349-351,353,355-357,359-361,363-364,366-369
+  s_cbc40ac965196f::t_911f1d35870ed7 192
+src/hooks/persisted/useNovel/__tests__/persistence.test.ts
+  s_cbc40ac965196f::t_4a5e9dc1c10be4 66
+src/screens/novel/components/Tracker/TrackSheet.tsx
+  s_cbc40ac965196f::t_cab3e1b9e18c3d 159-161,207,209,211-237,239,243,247,249
+src/screens/novel/components/EditInfoModal.tsx
+  s_cbc40ac965196f::t_c69d223bf7cfaa 46-48,53,60-62,65-66,115-117,140-142,154-156,166-168,179-181,202-203,234,256
+  s_cbc40ac965196f::t_15f92f3d2eedf8 21,55,70-83,86,232,235,238-242,245,247
+  s_cbc40ac965196f::t_917376a5418c8e 255
+  s_cbc40ac965196f::t_28abf1f3c38d44 257
+src/screens/novel/__tests__/NovelScreen.test.tsx
+  s_cbc40ac965196f::t_b960cf1bc40b23 231,254-255,296,308-311
+  s_cbc40ac965196f::t_f9547bbc4c9617 75,83,91
+  s_cbc40ac965196f::t_9c38ca62404d8a 204-223
+src/screens/novel/components/Info/NovelInfoComponents.tsx
+  s_cbc40ac965196f::t_37a1e3ec00d68e 23-24
+src/screens/novel/components/Info/NovelInfoHeader.tsx
+  s_cbc40ac965196f::t_084bc8b92adc8c 43-47
+  s_cbc40ac965196f::t_098a412fcf8765 42,99
+  s_cbc40ac965196f::t_a21d45b9c27cbb 50,82,156
+  s_cbc40ac965196f::t_e067e6558b85e8 77,134,139-150
+  s_cbc40ac965196f::t_a03d63c1e7b2db 27
+src/hooks/persisted/useNovel/store/chapterActions.ts
+  s_cbc40ac965196f::t_15f92f3d2eedf8 13,38-41,71,102,110,164,169,202,207,218-244,310,322
+  s_cbc40ac965196f::t_f47dae76518685 376,382-386
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_cbc40ac965196f::t_9cf968653ad8d7 192,195,213-220
+  s_cbc40ac965196f::t_79885250bc3e8f 3,21,36,211
+src/screens/novel/components/ExportEpubModal.tsx
+  s_cbc40ac965196f::t_9cf968653ad8d7 21,48,59,90-96,105-106,208,211
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_cbc40ac965196f::t_931017cbda5488 55,57
+  s_cbc40ac965196f::t_f9547bbc4c9617 261
+  s_cbc40ac965196f::t_cce6066728d6c0 14,34-38,84,160,200,220-232,237,243
+src/screens/novel/components/NovelFloatingActions.tsx
+  s_cbc40ac965196f::t_3580def86b7bb5 1-85
+src/screens/novel/components/JumpToChapterModal.tsx
+  s_cbc40ac965196f::t_03ee24e9665836 25,45,49,66,86,96-129,131-133,141,169-170,175,218-219
+  s_cbc40ac965196f::t_bc6cff337725b7 1,46-48
+  s_cbc40ac965196f::t_b838144ba57c03 168,176-178,199-201,220,222-224
+  s_cbc40ac965196f::t_f9547bbc4c9617 130,171-174,179-198,202-209,211,213,217
+src/screens/novel/components/NovelScreenList.tsx
+  s_cbc40ac965196f::t_3580def86b7bb5 37,438-451
+  s_cbc40ac965196f::t_fb118a587cc54f 109
+  s_cbc40ac965196f::t_e17590becd0423 405,418
+  s_cbc40ac965196f::t_835584906ba594 14-19,27-28
+  s_cbc40ac965196f::t_6b964ad725c4f6 137-139,147,153
+  s_cbc40ac965196f::t_931017cbda5488 32-33,199
+  s_cbc40ac965196f::t_8c9ea5291a6b01 34
+  s_cbc40ac965196f::t_65ec4468311651 266-269
+  s_cbc40ac965196f::t_a21d45b9c27cbb 11,120,127,129-132,149,155,319,339,364-401,411,413
+  s_cbc40ac965196f::t_9c38ca62404d8a 43-44,183-185,205-206,210-213,215-219
+  s_cbc40ac965196f::t_39ff665a64cb99 36,241-242,245-247
+  s_cbc40ac965196f::t_89341bd22f6b62 4
+  s_cbc40ac965196f::t_9523b3d5f7abac 35,115,270-272
+  s_cbc40ac965196f::t_401c2ee347702b 79
+  s_cbc40ac965196f::t_79885250bc3e8f 42,166-168,171,174,276,279,282
+  s_cbc40ac965196f::t_974983be8d83cc 104-108,111-114
+  s_cbc40ac965196f::t_508d6b638a4fe1 119,134-136,141-143,146,148,152,154,157,160
+  s_cbc40ac965196f::t_57da7cb443f6a1 140,161,402
+src/hooks/persisted/useNovel/__tests__/novelStore.actions.test.ts
+  s_cbc40ac965196f::t_cd9add3258854e 1-29,31,33-55,57-78,83-90,95-120
+  s_cbc40ac965196f::t_e3b59867aa8195 56
+  s_cbc40ac965196f::t_a66146d723160a 79-82
+  s_cbc40ac965196f::t_23c1a850ac49d2 91-94
+  s_cbc40ac965196f::t_917376a5418c8e 30,32
+src/screens/novel/hooks/useCustomNovelCover.ts
+  s_cbc40ac965196f::t_65ec4468311651 1-18
+src/screens/novel/hooks/useChapterSelection.ts
+  s_cbc40ac965196f::t_099f0bcb61817e 1-24
+src/hooks/persisted/useNovel/store/createStore.ts
+  s_cbc40ac965196f::t_ac8c762ba97b6f 44-48,53,86
+src/hooks/persisted/useNovel/__tests__/bootstrapService.test.ts
+  s_cbc40ac965196f::t_4a5e9dc1c10be4 43-44,61,63
+  s_cbc40ac965196f::t_7b35da9c94d35f 45
+  s_cbc40ac965196f::t_dab2e71f2c3732 287,304-351
+  s_cbc40ac965196f::t_196198ad9ac683 4,46
+  s_cbc40ac965196f::t_a2422bc21a372e 352
+src/hooks/persisted/useNovelSettings.ts
+  s_cbc40ac965196f::t_843a1088e07578 6,55-57,62-64,69-71,76-78,82-83
+src/screens/novel/hooks/useNovelRefresh.ts
+  s_cbc40ac965196f::t_39ff665a64cb99 1-58
+src/services/updates/LibraryUpdateQueries.ts
+  s_cbc40ac965196f::t_fb118a587cc54f 10
+  s_cbc40ac965196f::t_974983be8d83cc 146
+src/hooks/persisted/useNovel/store/novelStore.chapterActions.ts
+  s_cbc40ac965196f::t_ac8c762ba97b6f 21,35,45,49-58,101-109,115-118,124,130-136,139-150,172-174,177-178,184-186,190-194,205-208,212-216,218-220,223-224,336
+  s_cbc40ac965196f::t_fb118a587cc54f 166,339-346
+  s_cbc40ac965196f::t_15f92f3d2eedf8 13,301-306
+  s_cbc40ac965196f::t_6de7b772f57104 307
+src/hooks/persisted/useNovel/__tests__/novelStore.chapterActions.test.ts
+  s_cbc40ac965196f::t_99d8cfbf8f1a49 31,96
+  s_cbc40ac965196f::t_4a5e9dc1c10be4 58-59
+  s_cbc40ac965196f::t_80d4bd7502ab28 78
+  s_cbc40ac965196f::t_e3b59867aa8195 53-55,120-122,141-145,153,164,405,410
+  s_cbc40ac965196f::t_196198ad9ac683 3,61,239
+  s_cbc40ac965196f::t_7b35da9c94d35f 60
+  s_cbc40ac965196f::t_fb118a587cc54f 468-470
+  s_cbc40ac965196f::t_dab2e71f2c3732 235-238,240-255,315-335
+  s_cbc40ac965196f::t_1f70b5e756d601 336
+src/screens/novel/components/Tracker/ScoreSelectors.tsx
+  s_cbc40ac965196f::t_e14abdc796e576 1
+src/screens/novel/NovelContext.tsx
+  s_cbc40ac965196f::t_10e4a1d982cd0c 1
+  s_cbc40ac965196f::t_7f20964c690fa2 51
+  s_cbc40ac965196f::t_72d818565b8627 42-44,49,52,65-66,68
+  s_cbc40ac965196f::t_735d974168e1e7 54-59
+  s_cbc40ac965196f::t_446b092aa94a7d 61
+src/services/migrate/migrateNovel.ts
+  s_cbc40ac965196f::t_974983be8d83cc 166
+src/screens/novel/hooks/useDownloadReconciliation.ts
+  s_cbc40ac965196f::t_9523b3d5f7abac 1-20
+src/screens/novel/components/NovelScreenButtonGroup/NovelScreenButtonGroup.tsx
+  s_cbc40ac965196f::t_e14abdc796e576 143,147,149
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  s_cbc40ac965196f::t_78e404dca5fb19 34
+src/screens/novel/components/__tests__/NovelScreenList.test.tsx
+  s_cbc40ac965196f::t_ef72671e3cfe89 296,299,305-321
+  s_cbc40ac965196f::t_401c2ee347702b 229,251,340
+  s_cbc40ac965196f::t_974983be8d83cc 8,24,282,300,324
+  s_cbc40ac965196f::t_cd9add3258854e 341
+  s_cbc40ac965196f::t_e17590becd0423 46,51
+  s_cbc40ac965196f::t_3f680851afffc9 322
+src/screens/novel/hooks/useSaveNovelCover.ts
+  s_cbc40ac965196f::t_931017cbda5488 1-59
+src/hooks/persisted/useNovel/__tests__/useNovelSettings.test.ts
+  s_cbc40ac965196f::t_cd9add3258854e 128-166
+src/screens/novel/NovelScreen.tsx
+  s_cbc40ac965196f::t_65ec4468311651 25,71
+  s_cbc40ac965196f::t_e92affec58188c 2,10,27,58-60,62-66,69,110-111
+  s_cbc40ac965196f::t_099f0bcb61817e 26,36-42
+  s_cbc40ac965196f::t_ffb4dbf8ae8395 32,160
+  s_cbc40ac965196f::t_1f8d6e6eb00c31 1
+  s_cbc40ac965196f::t_9c38ca62404d8a 68
+src/screens/novel/components/NovelAppbar.tsx
+  s_cbc40ac965196f::t_29f3f60bfb4280 22-50,145-153,232-238
+  s_cbc40ac965196f::t_ffb4dbf8ae8395 228-231
+src/screens/novel/components/SetCategoriesModal.tsx
+  s_cbc40ac965196f::t_2698cc9272d566 51
+  s_cbc40ac965196f::t_e14abdc796e576 1,38-48
+src/screens/novel/hooks/useNovelScreenActions.ts
+  s_cbc40ac965196f::t_ffb4dbf8ae8395 87-90,104-107
+  s_cbc40ac965196f::t_e92affec58188c 1-86,91-103,108-174
+src/hooks/persisted/useNovel/store/novelStore.types.ts
+  s_cbc40ac965196f::t_ac8c762ba97b6f 85-89,93
+  s_cbc40ac965196f::t_15f92f3d2eedf8 51-53
+src/hooks/persisted/useNovel/store-helper/bootstrapService.ts
+  s_cbc40ac965196f::t_a2b6b2f547d24a 38,52-76,78-80,167,214,333-340,358,364,376,423-424,454,469
+  s_cbc40ac965196f::t_735d974168e1e7 32-33,77,177-185,253-261,302-310,448
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "9805da63cf23d58f0561b9335e0a07c1789e9a82",
+  "prompts": {},
+  "sessions": {
+    "s_cbc40ac965196f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9330-269b-77d2-b253-42522c7ff1dd",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
