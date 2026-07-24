@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import React from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { IconButtonV2 } from '@components';
+import { Slider } from '@components';
 import { ChapterReaderSettings } from '@hooks/persisted/useSettings';
 
 type ValueKey<T extends object> = Exclude<
@@ -31,45 +31,34 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
   decimals = 1,
   min = 1.3,
   max = 2,
-  unit = '%',
+  unit = '×',
 }) => {
   const theme = useTheme();
   const { setChapterReaderSettings, ...settings } = useChapterReaderSettings();
 
   return (
     <View style={styles.container}>
-      <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
-        {label}
-      </Text>
-      <View style={styles.buttonContainer}>
-        <IconButtonV2
-          name="minus"
-          color={theme.primary}
-          size={26}
-          disabled={settings[valueKey] <= min}
-          onPress={() =>
-            setChapterReaderSettings({
-              [valueKey]: Math.max(min, settings[valueKey] - valueChange),
-            })
-          }
-          theme={theme}
-        />
+      <View style={styles.labelRow}>
+        <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
+          {label}
+        </Text>
         <Text style={[styles.value, { color: theme.onSurface }]}>
           {`${((settings[valueKey] * 10) / 10).toFixed(decimals)}${unit}`}
         </Text>
-        <IconButtonV2
-          name="plus"
-          color={theme.primary}
-          size={26}
-          disabled={settings[valueKey] >= max}
-          onPress={() =>
-            setChapterReaderSettings({
-              [valueKey]: Math.min(max, settings[valueKey] + valueChange),
-            })
-          }
-          theme={theme}
-        />
       </View>
+      <Slider
+        value={settings[valueKey]}
+        min={min}
+        max={max}
+        step={valueChange}
+        showStops
+        showValueIndicator
+        formatValue={value => `${value.toFixed(decimals)}${unit}`}
+        accessibilityLabel={label}
+        onSlidingComplete={value =>
+          setChapterReaderSettings({ [valueKey]: value })
+        }
+      />
     </View>
   );
 };
@@ -77,20 +66,17 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
 export default ReaderValueChange;
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  container: {
+  labelRow: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  container: {
     marginVertical: 6,
     paddingHorizontal: 16,
   },
   value: {
-    paddingHorizontal: 4,
+    fontVariant: ['tabular-nums'],
     textAlign: 'center',
-    width: 60,
   },
 });
