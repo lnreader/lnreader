@@ -1,0 +1,33 @@
+app.json
+  s_def525e5fd15b4::t_2b24c7906222a3 18-27
+plugins/withAndroidCustomizations.js
+  s_def525e5fd15b4::t_bd3164ec625402 30-35,84-97,126
+  s_def525e5fd15b4::t_9eae218208e3c0 98-99
+  s_def525e5fd15b4::t_2b24c7906222a3 36,73-78
+  s_def525e5fd15b4::t_3bf32234c94c0f 100
+assets/android-icons/preview/res/values/splashscreen_background.xml
+  s_def525e5fd15b4::t_2b24c7906222a3 1-4
+assets/android-icons/preview/res/values-night/splashscreen_background.xml
+  s_def525e5fd15b4::t_2b24c7906222a3 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0a2a6c96ca453fd68ce42d4723c0f42c0a730519",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_def525e5fd15b4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9309-d668-7f40-ad49-46742c7c91e1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
