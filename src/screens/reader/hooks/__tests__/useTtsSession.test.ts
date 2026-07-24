@@ -1,7 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
-import { Tts } from '@modules/nitro-tts';
-import type { TtsSession } from '@modules/nitro-tts';
+import { Tts, type TtsSession } from '@modules/nitro-tts';
 import { useTtsSession } from '../useTtsSession';
 
 const getNativeSession = async (): Promise<jest.Mocked<TtsSession>> => {
