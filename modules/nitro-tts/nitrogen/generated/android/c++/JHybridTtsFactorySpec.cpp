@@ -9,12 +9,23 @@
 
 // Forward declaration of `HybridTtsSessionSpec` to properly resolve imports.
 namespace margelo::nitro::nitrotts { class HybridTtsSessionSpec; }
+// Forward declaration of `TtsEngine` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsEngine; }
+// Forward declaration of `TtsVoice` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
 #include <memory>
 #include "HybridTtsSessionSpec.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JHybridTtsSessionSpec.hpp"
+#include "TtsEngine.hpp"
+#include <vector>
+#include "JTtsEngine.hpp"
+#include <string>
+#include "TtsVoice.hpp"
+#include "JTtsVoice.hpp"
+#include <optional>
 
 namespace margelo::nitro::nitrotts {
 
@@ -57,6 +68,56 @@ namespace margelo::nitro::nitrotts {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JHybridTtsSessionSpec::JavaPart>(__boxedResult);
         __promise->resolve(__result->getJHybridTtsSessionSpec());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<TtsEngine>>> JHybridTtsFactorySpec::getEngines() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getEngines");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<std::vector<TtsEngine>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JTtsEngine>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<TtsEngine> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<TtsVoice>>> JHybridTtsFactorySpec::getVoices(const std::optional<std::string>& engineName) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* engineName */)>("getVoices");
+    auto __result = method(_javaPart, engineName.has_value() ? jni::make_jstring(engineName.value()) : nullptr);
+    return [&]() {
+      auto __promise = Promise<std::vector<TtsVoice>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JTtsVoice>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<TtsVoice> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

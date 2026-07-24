@@ -14,7 +14,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private var paragraphs: [TtsParagraph] = []
   private var currentIndex = 0
   private var metadata: TtsMetadata?
-  private var settings = TtsSettings(voiceIdentifier: nil, rate: 1, pitch: 1)
+  private var settings = TtsSettings(engineName: nil, voiceIdentifier: nil, rate: 1, pitch: 1)
   private var state: TtsPlaybackState = .idle
   private var activeUtterance: AVSpeechUtterance?
 

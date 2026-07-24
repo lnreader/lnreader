@@ -85,6 +85,7 @@ type WebViewPostEvent = {
 const toNativeTtsSettings = (
   settings: ReturnType<typeof useChapterReaderSettings>['tts'],
 ): TtsSettings => ({
+  engineName: settings?.engine?.name,
   voiceIdentifier: settings?.voice?.identifier,
   rate: settings?.rate ?? 1,
   pitch: settings?.pitch ?? 1,

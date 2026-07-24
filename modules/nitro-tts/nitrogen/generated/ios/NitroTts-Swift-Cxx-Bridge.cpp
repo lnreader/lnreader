@@ -47,6 +47,22 @@ namespace margelo::nitro::nitrotts::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::vector<TtsEngine>& /* result */)>
+  Func_void_std__vector_TtsEngine_ create_Func_void_std__vector_TtsEngine_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroTts::Func_void_std__vector_TtsEngine_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<TtsEngine>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<TtsVoice>& /* result */)>
+  Func_void_std__vector_TtsVoice_ create_Func_void_std__vector_TtsVoice_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroTts::Func_void_std__vector_TtsVoice_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<TtsVoice>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::shared_ptr<HybridTtsFactorySpec>
   std::shared_ptr<HybridTtsFactorySpec> create_std__shared_ptr_HybridTtsFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     NitroTts::HybridTtsFactorySpec_cxx swiftPart = NitroTts::HybridTtsFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);

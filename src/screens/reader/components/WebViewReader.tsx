@@ -63,13 +63,15 @@ const areTTSSettingsEqual = (
     a.pitch === b.pitch &&
     a.autoPageAdvance === b.autoPageAdvance &&
     a.scrollToTop === b.scrollToTop &&
-    a.voice?.identifier === b.voice?.identifier
+    a.voice?.identifier === b.voice?.identifier &&
+    a.engine?.name === b.engine?.name
   );
 };
 
 const toNativeTtsSettings = (
   settings: ChapterReaderSettings['tts'],
 ): TtsSettings => ({
+  engineName: settings?.engine?.name,
   voiceIdentifier: settings?.voice?.identifier,
   rate: settings?.rate ?? 1,
   pitch: settings?.pitch ?? 1,

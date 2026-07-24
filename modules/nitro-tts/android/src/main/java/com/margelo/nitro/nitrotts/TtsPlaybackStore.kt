@@ -1,6 +1,8 @@
 package com.margelo.nitro.nitrotts
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,43 +20,116 @@ internal object TtsPlaybackStore {
 
     private var applicationContext: Context? = null
     private var engine: TextToSpeech? = null
+    private var boundEngineName: String? = null
     private var isReady = false
     private var paragraphs: List<TtsParagraph> = emptyList()
     private var currentIndex = 0
     private var metadata: TtsMetadata? = null
-    private var settings = TtsSettings(null, 1.0, 1.0)
+    private var settings = TtsSettings(null, null, 1.0, 1.0)
     private var state = TtsPlaybackState.IDLE
     private var generation = 0L
 
     fun prepare(context: Context, completion: (Result<Unit>) -> Unit) {
         runOnOwner {
             applicationContext = context.applicationContext
-            if (isReady) {
+            if (isReady && boundEngineName == settings.engineName) {
                 completion(Result.success(Unit))
                 return@runOnOwner
             }
 
             pendingInitialization.add(completion)
-            if (engine != null) {
-                return@runOnOwner
-            }
+            bindEngine(settings.engineName)
+        }
+    }
 
-            engine = TextToSpeech(context.applicationContext) { status ->
+    /** Lists text-to-speech engines installed on the device. */
+    fun listEngines(context: Context): List<TtsEngine> {
+        val packageManager = context.packageManager
+        val intent = Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE)
+        val resolveInfos = packageManager.queryIntentServices(
+            intent,
+            PackageManager.GET_META_DATA,
+        )
+        return resolveInfos
+            .map { resolveInfo ->
+                TtsEngine(
+                    name = resolveInfo.serviceInfo.packageName,
+                    label = resolveInfo.serviceInfo.loadLabel(packageManager).toString(),
+                )
+            }
+            .distinctBy { it.name }
+            .sortedBy { it.label.lowercase() }
+    }
+
+    /** Lists voices offered by `engineName`, probing it independently of the active engine. */
+    fun listVoices(
+        context: Context,
+        engineName: String?,
+        completion: (Result<List<TtsVoice>>) -> Unit,
+    ) {
+        runOnOwner {
+            var probe: TextToSpeech? = null
+            val listener = TextToSpeech.OnInitListener { status ->
                 runOnOwner {
-                    if (status == TextToSpeech.SUCCESS) {
-                        isReady = true
-                        engine?.setOnUtteranceProgressListener(progressListener)
-                        completeInitialization(Result.success(Unit))
+                    val result = if (status == TextToSpeech.SUCCESS) {
+                        val voices = probe?.voices
+                            ?.map { voice ->
+                                TtsVoice(
+                                    identifier = voice.name,
+                                    name = voice.name,
+                                    language = voice.locale?.toLanguageTag(),
+                                )
+                            }
+                            ?.sortedBy { it.name }
+                            ?: emptyList()
+                        Result.success(voices)
                     } else {
-                        engine = null
-                        completeInitialization(
-                            Result.failure(
-                                IllegalStateException("The selected text-to-speech engine failed to initialize."),
-                            ),
+                        Result.failure(
+                            IllegalStateException("The selected text-to-speech engine failed to initialize."),
                         )
                     }
+                    probe?.shutdown()
+                    probe = null
+                    completion(result)
                 }
             }
+            probe = if (engineName != null) {
+                TextToSpeech(context.applicationContext, listener, engineName)
+            } else {
+                TextToSpeech(context.applicationContext, listener)
+            }
+        }
+    }
+
+    /** (Re)binds [engine] to [engineName], shutting down any previously bound engine. */
+    private fun bindEngine(engineName: String?) {
+        val context = checkNotNull(applicationContext)
+        isReady = false
+        engine?.stop()
+        engine?.shutdown()
+        engine = null
+
+        val listener = TextToSpeech.OnInitListener { status ->
+            runOnOwner {
+                if (status == TextToSpeech.SUCCESS) {
+                    isReady = true
+                    boundEngineName = engineName
+                    engine?.setOnUtteranceProgressListener(progressListener)
+                    completeInitialization(Result.success(Unit))
+                } else {
+                    engine = null
+                    completeInitialization(
+                        Result.failure(
+                            IllegalStateException("The selected text-to-speech engine failed to initialize."),
+                        ),
+                    )
+                }
+            }
+        }
+        engine = if (engineName != null) {
+            TextToSpeech(context, listener, engineName)
+        } else {
+            TextToSpeech(context, listener)
         }
     }
 
@@ -169,6 +244,17 @@ internal object TtsPlaybackStore {
     }
 
     private fun speakCurrent() {
+        if (engine == null || settings.engineName != boundEngineName) {
+            pendingInitialization.add { result ->
+                result.fold(
+                    onSuccess = { speakCurrent() },
+                    onFailure = { fail("The selected text-to-speech engine failed to initialize.") },
+                )
+            }
+            bindEngine(settings.engineName)
+            return
+        }
+
         val activeEngine = checkNotNull(engine)
         val paragraph = paragraphs[currentIndex]
         generation += 1

@@ -21,6 +21,8 @@ jest.mock('react-native-nitro-modules', () => ({
       if (name === 'TtsFactory') {
         return {
           createSession: jest.fn(async () => mockTtsSession),
+          getEngines: jest.fn(async () => []),
+          getVoices: jest.fn(async () => []),
         };
       }
       return {

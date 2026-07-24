@@ -22,4 +22,21 @@ final class HybridTtsFactory : HybridTtsFactorySpec() {
         }
         return promise
     }
+
+    override fun getEngines(): Promise<Array<TtsEngine>> {
+        val promise = Promise<Array<TtsEngine>>()
+        promise.resolve(TtsPlaybackStore.listEngines(context).toTypedArray())
+        return promise
+    }
+
+    override fun getVoices(engineName: String?): Promise<Array<TtsVoice>> {
+        val promise = Promise<Array<TtsVoice>>()
+        TtsPlaybackStore.listVoices(context, engineName) { result ->
+            result.fold(
+                onSuccess = { promise.resolve(it.toTypedArray()) },
+                onFailure = { promise.reject(it) },
+            )
+        }
+        return promise
+    }
 }

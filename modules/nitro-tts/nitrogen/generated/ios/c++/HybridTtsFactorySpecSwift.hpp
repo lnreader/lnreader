@@ -14,10 +14,19 @@ namespace NitroTts { class HybridTtsFactorySpec_cxx; }
 
 // Forward declaration of `HybridTtsSessionSpec` to properly resolve imports.
 namespace margelo::nitro::nitrotts { class HybridTtsSessionSpec; }
+// Forward declaration of `TtsEngine` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsEngine; }
+// Forward declaration of `TtsVoice` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
 #include <memory>
 #include "HybridTtsSessionSpec.hpp"
 #include <NitroModules/Promise.hpp>
+#include "TtsEngine.hpp"
+#include <vector>
+#include <string>
+#include "TtsVoice.hpp"
+#include <optional>
 
 #include "NitroTts-Swift-Cxx-Umbrella.hpp"
 
@@ -71,6 +80,22 @@ namespace margelo::nitro::nitrotts {
     // Methods
     inline std::shared_ptr<Promise<std::shared_ptr<HybridTtsSessionSpec>>> createSession() override {
       auto __result = _swiftPart.createSession();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<TtsEngine>>> getEngines() override {
+      auto __result = _swiftPart.getEngines();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<TtsVoice>>> getVoices(const std::optional<std::string>& engineName) override {
+      auto __result = _swiftPart.getVoices(engineName);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

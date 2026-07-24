@@ -55,6 +55,8 @@ namespace margelo::nitro::nitrotts {
   public:
     // Methods
     std::shared_ptr<Promise<std::shared_ptr<HybridTtsSessionSpec>>> createSession() override;
+    std::shared_ptr<Promise<std::vector<TtsEngine>>> getEngines() override;
+    std::shared_ptr<Promise<std::vector<TtsVoice>>> getVoices(const std::optional<std::string>& engineName) override;
 
   private:
     jni::global_ref<JHybridTtsFactorySpec::JavaPart> _javaPart;

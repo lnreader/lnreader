@@ -18,8 +18,14 @@ public extension TtsSettings {
   /**
    * Create a new instance of `TtsSettings`.
    */
-  init(voiceIdentifier: String?, rate: Double, pitch: Double) {
+  init(engineName: String?, voiceIdentifier: String?, rate: Double, pitch: Double) {
     self.init({ () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = engineName {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = voiceIdentifier {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -28,6 +34,18 @@ public extension TtsSettings {
     }(), rate, pitch)
   }
 
+  @inline(__always)
+  var engineName: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__engineName) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__engineName)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
   @inline(__always)
   var voiceIdentifier: String? {
     return { () -> String? in

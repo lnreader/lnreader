@@ -14,12 +14,16 @@ namespace margelo::nitro::nitrotts { class HybridTtsFactorySpec; }
 namespace margelo::nitro::nitrotts { class HybridTtsSessionSpec; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
+// Forward declaration of `TtsEngine` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsEngine; }
 // Forward declaration of `TtsParagraph` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsParagraph; }
 // Forward declaration of `TtsPlaybackState` to properly resolve imports.
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsVoice` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridTtsFactorySpec_cxx` to properly resolve imports.
@@ -31,9 +35,11 @@ namespace NitroTts { class HybridTtsSessionSpec_cxx; }
 #include "HybridTtsFactorySpec.hpp"
 #include "HybridTtsSessionSpec.hpp"
 #include "ListenerSubscription.hpp"
+#include "TtsEngine.hpp"
 #include "TtsParagraph.hpp"
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
+#include "TtsVoice.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -118,6 +124,111 @@ namespace margelo::nitro::nitrotts::bridge::swift {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::vector<TtsEngine>
+  /**
+   * Specialized version of `std::vector<TtsEngine>`.
+   */
+  using std__vector_TtsEngine_ = std::vector<TtsEngine>;
+  inline std::vector<TtsEngine> create_std__vector_TtsEngine_(size_t size) noexcept {
+    std::vector<TtsEngine> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<TtsEngine>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<TtsEngine>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_TtsEngine___ = std::shared_ptr<Promise<std::vector<TtsEngine>>>;
+  inline std::shared_ptr<Promise<std::vector<TtsEngine>>> create_std__shared_ptr_Promise_std__vector_TtsEngine___() noexcept {
+    return Promise<std::vector<TtsEngine>>::create();
+  }
+  inline PromiseHolder<std::vector<TtsEngine>> wrap_std__shared_ptr_Promise_std__vector_TtsEngine___(std::shared_ptr<Promise<std::vector<TtsEngine>>> promise) noexcept {
+    return PromiseHolder<std::vector<TtsEngine>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<TtsEngine>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<TtsEngine>&)>`.
+   */
+  using Func_void_std__vector_TtsEngine_ = std::function<void(const std::vector<TtsEngine>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<TtsEngine>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_TtsEngine__Wrapper final {
+  public:
+    explicit Func_void_std__vector_TtsEngine__Wrapper(std::function<void(const std::vector<TtsEngine>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<TtsEngine>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<TtsEngine> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<TtsEngine>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_TtsEngine_ create_Func_void_std__vector_TtsEngine_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_TtsEngine__Wrapper wrap_Func_void_std__vector_TtsEngine_(Func_void_std__vector_TtsEngine_ value) noexcept {
+    return Func_void_std__vector_TtsEngine__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::string>
+  /**
+   * Specialized version of `std::optional<std::string>`.
+   */
+  using std__optional_std__string_ = std::optional<std::string>;
+  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
+    return std::optional<std::string>(value);
+  }
+  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<TtsVoice>
+  /**
+   * Specialized version of `std::vector<TtsVoice>`.
+   */
+  using std__vector_TtsVoice_ = std::vector<TtsVoice>;
+  inline std::vector<TtsVoice> create_std__vector_TtsVoice_(size_t size) noexcept {
+    std::vector<TtsVoice> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<TtsVoice>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<TtsVoice>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_TtsVoice___ = std::shared_ptr<Promise<std::vector<TtsVoice>>>;
+  inline std::shared_ptr<Promise<std::vector<TtsVoice>>> create_std__shared_ptr_Promise_std__vector_TtsVoice___() noexcept {
+    return Promise<std::vector<TtsVoice>>::create();
+  }
+  inline PromiseHolder<std::vector<TtsVoice>> wrap_std__shared_ptr_Promise_std__vector_TtsVoice___(std::shared_ptr<Promise<std::vector<TtsVoice>>> promise) noexcept {
+    return PromiseHolder<std::vector<TtsVoice>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<TtsVoice>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<TtsVoice>&)>`.
+   */
+  using Func_void_std__vector_TtsVoice_ = std::function<void(const std::vector<TtsVoice>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<TtsVoice>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_TtsVoice__Wrapper final {
+  public:
+    explicit Func_void_std__vector_TtsVoice__Wrapper(std::function<void(const std::vector<TtsVoice>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<TtsVoice>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<TtsVoice> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<TtsVoice>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_TtsVoice_ create_Func_void_std__vector_TtsVoice_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_TtsVoice__Wrapper wrap_Func_void_std__vector_TtsVoice_(Func_void_std__vector_TtsVoice_ value) noexcept {
+    return Func_void_std__vector_TtsVoice__Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<HybridTtsFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<HybridTtsFactorySpec>`.
@@ -137,6 +248,24 @@ namespace margelo::nitro::nitrotts::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridTtsSessionSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridTtsSessionSpec____(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<std::shared_ptr<HybridTtsSessionSpec>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<TtsEngine>>>>
+  using Result_std__shared_ptr_Promise_std__vector_TtsEngine____ = Result<std::shared_ptr<Promise<std::vector<TtsEngine>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_TtsEngine____ create_Result_std__shared_ptr_Promise_std__vector_TtsEngine____(const std::shared_ptr<Promise<std::vector<TtsEngine>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<TtsEngine>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_TtsEngine____ create_Result_std__shared_ptr_Promise_std__vector_TtsEngine____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<TtsEngine>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<TtsVoice>>>>
+  using Result_std__shared_ptr_Promise_std__vector_TtsVoice____ = Result<std::shared_ptr<Promise<std::vector<TtsVoice>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_TtsVoice____ create_Result_std__shared_ptr_Promise_std__vector_TtsVoice____(const std::shared_ptr<Promise<std::vector<TtsVoice>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<TtsVoice>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_TtsVoice____ create_Result_std__shared_ptr_Promise_std__vector_TtsVoice____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<TtsVoice>>>>::withError(error);
   }
   
   // pragma MARK: std::shared_ptr<Promise<void>>
@@ -182,21 +311,6 @@ namespace margelo::nitro::nitrotts::bridge::swift {
     std::vector<TtsParagraph> vector;
     vector.reserve(size);
     return vector;
-  }
-  
-  // pragma MARK: std::optional<std::string>
-  /**
-   * Specialized version of `std::optional<std::string>`.
-   */
-  using std__optional_std__string_ = std::optional<std::string>;
-  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
-    return std::optional<std::string>(value);
-  }
-  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return optional.value();
   }
   
   // pragma MARK: std::function<void(TtsPlaybackState /* state */)>

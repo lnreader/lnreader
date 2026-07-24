@@ -20,6 +20,9 @@ import java.util.Objects
 data class TtsSettings(
   @DoNotStrip
   @Keep
+  val engineName: String?,
+  @DoNotStrip
+  @Keep
   val voiceIdentifier: String?,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class TtsSettings(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is TtsSettings) return false
-    return Objects.deepEquals(this.voiceIdentifier, other.voiceIdentifier)
+    return Objects.deepEquals(this.engineName, other.engineName)
+      && Objects.deepEquals(this.voiceIdentifier, other.voiceIdentifier)
       && Objects.deepEquals(this.rate, other.rate)
       && Objects.deepEquals(this.pitch, other.pitch)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      engineName,
       voiceIdentifier,
       rate,
       pitch
@@ -54,8 +59,8 @@ data class TtsSettings(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(voiceIdentifier: String?, rate: Double, pitch: Double): TtsSettings {
-      return TtsSettings(voiceIdentifier, rate, pitch)
+    private fun fromCpp(engineName: String?, voiceIdentifier: String?, rate: Double, pitch: Double): TtsSettings {
+      return TtsSettings(engineName, voiceIdentifier, rate, pitch)
     }
   }
 }

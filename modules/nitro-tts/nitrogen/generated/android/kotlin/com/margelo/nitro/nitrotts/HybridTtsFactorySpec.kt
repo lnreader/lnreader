@@ -32,6 +32,14 @@ abstract class HybridTtsFactorySpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun createSession(): Promise<HybridTtsSessionSpec>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getEngines(): Promise<Array<TtsEngine>>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getVoices(engineName: String?): Promise<Array<TtsVoice>>
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

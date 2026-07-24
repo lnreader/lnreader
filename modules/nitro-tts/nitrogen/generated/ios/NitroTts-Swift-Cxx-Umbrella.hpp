@@ -14,6 +14,8 @@ namespace margelo::nitro::nitrotts { class HybridTtsFactorySpec; }
 namespace margelo::nitro::nitrotts { class HybridTtsSessionSpec; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
+// Forward declaration of `TtsEngine` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsEngine; }
 // Forward declaration of `TtsMetadata` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsMetadata; }
 // Forward declaration of `TtsParagraph` to properly resolve imports.
@@ -24,16 +26,20 @@ namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
 // Forward declaration of `TtsSettings` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsSettings; }
+// Forward declaration of `TtsVoice` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
 // Include C++ defined types
 #include "HybridTtsFactorySpec.hpp"
 #include "HybridTtsSessionSpec.hpp"
 #include "ListenerSubscription.hpp"
+#include "TtsEngine.hpp"
 #include "TtsMetadata.hpp"
 #include "TtsParagraph.hpp"
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
 #include "TtsSettings.hpp"
+#include "TtsVoice.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>

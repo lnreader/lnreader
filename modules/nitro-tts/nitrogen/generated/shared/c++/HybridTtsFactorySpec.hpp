@@ -15,10 +15,19 @@
 
 // Forward declaration of `HybridTtsSessionSpec` to properly resolve imports.
 namespace margelo::nitro::nitrotts { class HybridTtsSessionSpec; }
+// Forward declaration of `TtsEngine` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsEngine; }
+// Forward declaration of `TtsVoice` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
 #include <memory>
 #include "HybridTtsSessionSpec.hpp"
 #include <NitroModules/Promise.hpp>
+#include "TtsEngine.hpp"
+#include <vector>
+#include "TtsVoice.hpp"
+#include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrotts {
 
@@ -52,6 +61,8 @@ namespace margelo::nitro::nitrotts {
     public:
       // Methods
       virtual std::shared_ptr<Promise<std::shared_ptr<HybridTtsSessionSpec>>> createSession() = 0;
+      virtual std::shared_ptr<Promise<std::vector<TtsEngine>>> getEngines() = 0;
+      virtual std::shared_ptr<Promise<std::vector<TtsVoice>>> getVoices(const std::optional<std::string>& engineName) = 0;
 
     protected:
       // Hybrid Setup
