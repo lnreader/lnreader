@@ -1,0 +1,57 @@
+src/screens/reader/components/ReaderBottomSheet/TTSTab.tsx
+  s_5fcb683554a527::t_5ff84004101477 250-251,253-255,269-270,272-274,376
+  s_5fcb683554a527::t_3f7006b5854a61 4
+src/components/__tests__/Slider.test.tsx
+  s_5fcb683554a527::t_3f7006b5854a61 66-71,171-176
+  s_5fcb683554a527::t_28e3c8fce0bf56 77-84,86-91,93-98,100-103
+  s_5fcb683554a527::t_acc3f28f156d3c 85,92,99
+  s_5fcb683554a527::t_91ec490f7a4df2 1-39,41-65,72-76,104-127,156-170,177-184
+  s_5fcb683554a527::t_0f1ec2c5e28ef2 128-155
+  s_5fcb683554a527::t_d2b2f159412bf3 40
+src/components/index.ts
+  s_5fcb683554a527::t_32aa955d1d07d9 32
+  s_5fcb683554a527::t_5ff84004101477 31
+src/screens/reader/components/ReaderBottomSheet/TextSizeSlider.tsx
+  s_5fcb683554a527::t_5ff84004101477 5,21-22,24-26
+src/screens/settings/SettingsReaderScreen/ReaderTextSize.tsx
+  s_5fcb683554a527::t_68ba8192715439 35-37
+  s_5fcb683554a527::t_5ff84004101477 5,18-21,23,26-34,38,46,49,56
+src/screens/reader/components/ReaderBottomSheet/ReaderValueChange.tsx
+  s_5fcb683554a527::t_0410f5a7bcd3fd 34
+  s_5fcb683554a527::t_68ba8192715439 58-60
+  s_5fcb683554a527::t_5ff84004101477 5,41-44,49-57,61,69,72,79
+src/components/Slider/Slider.tsx
+  s_5fcb683554a527::t_3f7006b5854a61 163,180-182,185
+  s_5fcb683554a527::t_de7f1a5213568b 133,207
+  s_5fcb683554a527::t_5ff84004101477 2-19,38-62,64-80,82-96,107-110,132,134-150,158-160,162,164,166-179,183,186-188,191-192,194-206,208-219,223-240,243-245,247-254,256-265,267-270,272,274-275,277-280,325-328,337-340,342-344,354-358,360-369,372,376-390,392-393,397,399,403-404,408,411-412,414-416
+  s_5fcb683554a527::t_5d3b1527ed6924 271,273,301,341,359
+  h_f56025180c46fa 391
+  s_5fcb683554a527::t_68ba8192715439 97,111-113,161,184,189-190,193,266
+  s_5fcb683554a527::t_1c2dce99627c53 118,165,296,324,348-351
+  s_5fcb683554a527::t_0f1ec2c5e28ef2 241-242
+  s_5fcb683554a527::t_ae395e55915b48 20-37,63,81,98-102,114-117,119-131,151-157,220,222,246,276,281-294,297-300,302-322,329-336,345-347,352,370-371,373,375,394-396,398,400-402,405-407,409-410,413
+  s_5fcb683554a527::t_653bab2463e5a5 1
+  s_5fcb683554a527::t_fbb215798cd4f1 103-106,255,295,323,353,374
+  s_5fcb683554a527::t_0410f5a7bcd3fd 221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6ef40cbdec0bb4a31f11f41c140a4fa833c8ac53",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5fcb683554a527": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f94eb-9d1c-7710-a8b0-62345fdea81c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
