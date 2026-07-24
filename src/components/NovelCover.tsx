@@ -3,26 +3,22 @@ import {
   StyleSheet,
   View,
   Text,
-  useWindowDimensions,
   Pressable,
-  Image,
   ActivityIndicator,
 } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import ListView from './ListView';
 
-import { useDeviceOrientation } from '@hooks';
-import { coverPlaceholderColor } from '../theme/colors';
 import { DisplayModes } from '@screens/library/constants/constants';
 import { DBNovelInfo, NovelInfo } from '@database/types';
 import { NovelItem, ImageRequestInit } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
-import { useLibrarySettings } from '@hooks/persisted';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { getString } from '@strings/translations';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
-import { defaultCover } from '@plugins/helpers/constants';
+import NovelCoverImage from './NovelCoverImage';
+import { useNovelCoverLayout } from './NovelCoverLayoutContext';
 
 interface UnreadBadgeProps {
   showDownloadBadges: boolean;
@@ -92,44 +88,25 @@ function NovelCover<
   const selectionActive =
     hasSelection ?? (selectedNovelIds != null && selectedNovelIds.length > 0);
   const {
-    displayMode = DisplayModes.Comfortable,
-    showDownloadBadges = true,
-    showUnreadBadges = true,
-    novelsPerRow = 3,
-  } = useLibrarySettings();
-
-  const window = useWindowDimensions();
-
-  const orientation = useDeviceOrientation();
-
-  const numColumns = useMemo(
-    () => (orientation === 'landscape' ? 6 : novelsPerRow),
-    [orientation, novelsPerRow],
-  );
-
-  const coverHeight = useMemo(() => {
-    if (globalSearch) {
-      return ((window.width / 3 - 16) * 4) / 3;
-    }
-    return (window.width / numColumns) * (4 / 3);
-  }, [globalSearch, window.width, numColumns]);
-
-  const coverWidth = useMemo(() => {
-    if (globalSearch) {
-      return window.width / 3 - 16;
-    }
-    return undefined;
-  }, [globalSearch, window.width]);
+    coverHeight,
+    coverWidth,
+    displayMode,
+    numColumns,
+    showDownloadBadges,
+    showUnreadBadges,
+  } = useNovelCoverLayout();
 
   const selectNovel = () => onLongPress(item);
 
-  const uri = item.cover || defaultCover;
-  const requestInit = imageRequestInit || ({} as ImageRequestInit);
-  if (!requestInit.headers) {
-    requestInit.headers = {
-      'User-Agent': getUserAgent(),
-    };
-  }
+  const requestInit = useMemo<ImageRequestInit>(
+    () => ({
+      ...imageRequestInit,
+      headers: imageRequestInit?.headers || {
+        'User-Agent': getUserAgent(),
+      },
+    }),
+    [imageRequestInit],
+  );
 
   if (item.completeRow) {
     if (!addSkeletonLoading) {
@@ -195,12 +172,14 @@ function NovelCover<
           ) : null}
           {inActivity ? <InActivityBadge theme={theme} /> : null}
         </View>
-        <Image
-          source={{ uri, ...requestInit }}
+        <NovelCoverImage
+          uri={item.cover}
+          requestInit={requestInit}
+          theme={theme}
+          iconSize={36}
           style={[
             {
               height: coverHeight,
-              backgroundColor: coverPlaceholderColor,
             },
             styles.standardBorderRadius,
             libraryStatus && styles.opacityPoint5,

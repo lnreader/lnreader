@@ -6,7 +6,7 @@ import { getErrorMessage } from '@utils/error';
 import { MaterialDesignIconName } from '@type/icon';
 
 interface ErrorScreenProps {
-  error: any;
+  error: unknown;
   actions?: {
     iconName: MaterialDesignIconName;
     title: string;

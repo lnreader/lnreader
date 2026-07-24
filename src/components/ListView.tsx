@@ -1,12 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Text, Pressable, Image } from 'react-native';
-
-import { coverPlaceholderColor } from '../theme/colors';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 
 import color from 'color';
 import { ThemeColors } from '@theme/types';
 import { NovelItem } from '@plugins/types';
 import { NovelInfo } from '@database/types';
+import NovelCoverImage from './NovelCoverImage';
 
 interface ListViewProps {
   item: NovelItem | NovelInfo;
@@ -42,10 +41,10 @@ const ListView = ({
       onPress={onPress}
       onLongPress={onLongPress}
     >
-      <Image
-        source={{
-          uri: item.cover ?? undefined,
-        }}
+      <NovelCoverImage
+        uri={item.cover}
+        theme={theme}
+        iconSize={20}
         style={[styles.extensionIcon, fadedImage]}
       />
       <Text
@@ -72,7 +71,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   extensionIcon: {
-    backgroundColor: coverPlaceholderColor,
     borderRadius: 4,
     height: 40,
     width: 40,

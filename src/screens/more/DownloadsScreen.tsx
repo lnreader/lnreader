@@ -15,7 +15,7 @@ import { useTheme } from '@hooks/persisted';
 
 import RemoveDownloadsDialog from './components/RemoveDownloadsDialog';
 import UpdatesSkeletonLoading from '@screens/updates/components/UpdatesSkeletonLoading';
-import UpdateNovelCard from '@screens/updates/components/UpdateNovelCard';
+import DownloadedNovelChapterGroup from './components/DownloadedNovelChapterGroup';
 import { getString } from '@strings/translations';
 import { DownloadsScreenProps } from '@navigators/types';
 import { DownloadedChapter } from '@database/types';
@@ -25,25 +25,25 @@ import { parseChapterNumber } from '@utils/parseChapterNumber';
 
 type DownloadGroup = Record<number, DownloadedChapter[]>;
 
+const groupChaptersByNovel = (
+  chapters: DownloadedChapter[],
+): DownloadedChapter[][] => {
+  const novelGroups = chapters.reduce((groups, chapter) => {
+    if (!groups[chapter.novelId]) {
+      groups[chapter.novelId] = [];
+    }
+
+    groups[chapter.novelId].push(chapter);
+    return groups;
+  }, {} as DownloadGroup);
+
+  return Object.values(novelGroups);
+};
+
 const Downloads = ({ navigation }: DownloadsScreenProps) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [chapters, setChapters] = useState<DownloadedChapter[]>([]);
-  const groupUpdatesByDate = (
-    localChapters: DownloadedChapter[],
-  ): DownloadedChapter[][] => {
-    const dateGroups = localChapters.reduce((groups, item) => {
-      const novelId = item.novelId;
-      if (!groups[novelId]) {
-        groups[novelId] = [];
-      }
-
-      groups[novelId].push(item);
-
-      return groups;
-    }, {} as DownloadGroup);
-    return Object.values(dateGroups);
-  };
 
   /**
    * Confirm Clear downloads Dialog
@@ -52,7 +52,7 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
 
-  const getChapters = async () => {
+  const getChapters = useCallback(async () => {
     const res = await getDownloadedChapters();
     setChapters(
       res.map(download => {
@@ -68,22 +68,16 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
         };
       }),
     );
-  };
-
-  const ListEmptyComponent = useCallback(
-    () =>
-      !loading ? (
-        <EmptyView
-          icon="(˘･_･˘)"
-          description={getString('downloadScreen.noDownloads')}
-        />
-      ) : null,
-    [loading],
-  );
+  }, []);
 
   useEffect(() => {
-    getChapters().finally(() => setLoading(false));
-  }, []);
+    const timer = setTimeout(
+      () => void getChapters().finally(() => setLoading(false)),
+      0,
+    );
+
+    return () => clearTimeout(timer);
+  }, [getChapters]);
 
   return (
     <SafeAreaView excludeTop>
@@ -107,15 +101,14 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
       ) : (
         <FlatList
           contentContainerStyle={styles.flatList}
-          data={groupUpdatesByDate(chapters)}
-          keyExtractor={(item, index) => 'downloadGroup' + index}
+          data={groupChaptersByNovel(chapters)}
+          keyExtractor={item => `downloadGroup-${item[0]?.novelId}`}
           renderItem={({ item }) => {
             return (
-              <UpdateNovelCard
-                onlyDownloadedChapters
-                chapterList={item}
-                descriptionText={getString('downloadScreen.downloadsLower')}
-                deleteChapter={chapter => {
+              <DownloadedNovelChapterGroup
+                chapters={item}
+                chapterCountLabel={getString('downloadScreen.downloadsLower')}
+                onDeleteChapter={chapter => {
                   deleteChapter(
                     chapter.pluginId,
                     chapter.novelId,
@@ -128,7 +121,12 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
               />
             );
           }}
-          ListEmptyComponent={<ListEmptyComponent />}
+          ListEmptyComponent={
+            <EmptyView
+              icon="(˘･_･˘)"
+              description={getString('downloadScreen.noDownloads')}
+            />
+          }
         />
       )}
       <RemoveDownloadsDialog

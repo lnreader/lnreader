@@ -11,6 +11,7 @@ export { default as SwitchItem } from './Switch/SwitchItem';
 export { default as List } from './List/List';
 export { default as ColorPreferenceItem } from './ColorPreferenceItem/ColorPreferenceItem';
 export { default as LoadingMoreIndicator } from './LoadingMoreIndicator/LoadingMoreIndicator';
+export { default as NovelCoverImage } from './NovelCoverImage';
 export { Checkbox } from './Checkbox/Checkbox';
 export { RadioButton } from './RadioButton/RadioButton';
 export { Dialog } from './Dialog';

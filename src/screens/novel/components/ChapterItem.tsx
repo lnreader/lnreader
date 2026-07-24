@@ -16,7 +16,7 @@ interface ChapterItemProps {
   isBookmarked?: boolean;
   isSelected?: boolean;
   isLocal: boolean;
-  isUpdateCard?: boolean;
+  variant?: 'default' | 'grouped';
   theme: ThemeColors;
   showChapterTitles: boolean;
   novelName: string;
@@ -33,7 +33,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   isBookmarked,
   isSelected,
   isLocal,
-  isUpdateCard,
+  variant = 'default',
   theme,
   showChapterTitles,
   novelName,
@@ -45,6 +45,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 }) => {
   const { id, name, unread, releaseTime, bookmark, chapterNumber, progress } =
     chapter;
+  const isGrouped = variant === 'grouped';
 
   isBookmarked ??= bookmark ?? false;
 
@@ -117,10 +118,10 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
           {left}
           {isBookmarked ? <ChapterBookmarkButton theme={theme} /> : null}
           <View style={styles.flex1}>
-            {isUpdateCard ? (
+            {isGrouped ? (
               <Text
                 style={[
-                  styles.updateCardName,
+                  styles.groupedChapterNovelName,
                   { color: unread ? theme.onSurface : theme.outline },
                 ]}
                 numberOfLines={1}
@@ -140,7 +141,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 
               <Text
                 style={[
-                  isUpdateCard ? styles.textSmall : styles.textNormal,
+                  isGrouped ? styles.textSmall : styles.textNormal,
                   { color: titleColor },
                   styles.flex1,
                 ]}
@@ -155,7 +156,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
               </Text>
             </View>
             <View style={styles.metaRow}>
-              {parsedTime && !isUpdateCard ? (
+              {parsedTime && !isGrouped ? (
                 <Text
                   style={[{ color: releaseColor }, styles.mt4, styles.text]}
                   numberOfLines={1}
@@ -163,7 +164,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                   {parsedTime}
                 </Text>
               ) : null}
-              {chapter.scanlator && !isUpdateCard ? (
+              {chapter.scanlator && !isGrouped ? (
                 <Text
                   style={[
                     { color: releaseColor },
@@ -177,7 +178,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
                   {chapter.scanlator}
                 </Text>
               ) : null}
-              {!isUpdateCard && progress && progress > 0 && chapter.unread ? (
+              {!isGrouped && progress && progress > 0 && chapter.unread ? (
                 <Text
                   style={[styles.text, styles.mt4, releaseTimeStyle]}
                   numberOfLines={1}
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   unreadIcon: {
     marginEnd: 4,
   },
-  updateCardName: {
+  groupedChapterNovelName: {
     fontSize: 14,
   },
   mt4: {

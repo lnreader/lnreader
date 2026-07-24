@@ -1,4 +1,4 @@
-import React, { memo, Suspense, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { RefreshControl, SectionList, StyleSheet, Text } from 'react-native';
 
@@ -13,8 +13,7 @@ import { useSearch } from '@hooks';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@strings/translations';
 import { ThemeColors } from '@theme/types';
-import UpdatesSkeletonLoading from './components/UpdatesSkeletonLoading';
-import UpdateNovelCard from './components/UpdateNovelCard';
+import UpdateNovelChapterGroup from './components/UpdateNovelChapterGroup';
 import { deleteChapter } from '@database/queries/ChapterQueries';
 import { showToast } from '@utils/showToast';
 import { backgroundTasks } from '@services/backgroundTasks';
@@ -35,6 +34,33 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
   const onChangeText = (text: string) => {
     setSearchText(text);
   };
+  const sections = useMemo(
+    () =>
+      updatesOverview
+        .filter(update =>
+          searchText
+            ? update.novelName.toLowerCase().includes(searchText.toLowerCase())
+            : true,
+        )
+        .reduce(
+          (
+            groups: { data: UpdateOverview[]; date: string }[],
+            update: UpdateOverview,
+          ) => {
+            if (
+              groups.length === 0 ||
+              groups[groups.length - 1]?.date !== update.updateDate
+            ) {
+              groups.push({ data: [update], date: update.updateDate });
+              return groups;
+            }
+            groups[groups.length - 1]?.data.push(update);
+            return groups;
+          },
+          [],
+        ),
+    [searchText, updatesOverview],
+  );
 
   useEffect(
     () =>
@@ -62,8 +88,7 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
         rightIcons={[
           {
             iconName: 'reload',
-            onPress: () =>
-              backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
+            onPress: () => backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
           },
         ]}
       />
@@ -71,7 +96,6 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
         <ErrorScreenV2 error={error} />
       ) : (
         <SectionList
-          extraData={[updatesOverview.length]}
           ListHeaderComponent={
             showLastUpdateTime && lastUpdateTime ? (
               <LastUpdateTime lastUpdateTime={lastUpdateTime} theme={theme} />
@@ -83,51 +107,29 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
               {dayjs(date).calendar()}
             </Text>
           )}
-          sections={updatesOverview
-            .filter(v =>
-              searchText
-                ? v.novelName.toLowerCase().includes(searchText.toLowerCase())
-                : true,
-            )
-            .reduce(
-              (
-                acc: { data: UpdateOverview[]; date: string }[],
-                cur: UpdateOverview,
-              ) => {
-                if (
-                  acc.length === 0 ||
-                  acc[acc.length - 1]?.date !== cur.updateDate
-                ) {
-                  acc.push({ data: [cur], date: cur.updateDate });
-                  return acc;
-                }
-                acc[acc.length - 1]?.data.push(cur);
-                return acc;
-              },
-              [],
-            )}
-          keyExtractor={item => 'updatedGroup' + item.novelId}
+          sections={sections}
+          keyExtractor={item =>
+            `updatedGroup-${item.novelId}-${item.updateDate}-${item.updatesPerDay}`
+          }
           renderItem={({ item }) => (
-            <Suspense fallback={<UpdatesSkeletonLoading theme={theme} />}>
-              <UpdateNovelCard
-                deleteChapter={chapter => {
-                  deleteChapter(
-                    chapter.pluginId,
-                    chapter.novelId,
-                    chapter.id,
-                  ).then(() => {
-                    showToast(
-                      getString('common.deleted', {
-                        name: chapter.name,
-                      }),
-                    );
-                    getUpdates();
-                  });
-                }}
-                chapterListInfo={item}
-                descriptionText={getString('updatesScreen.updatesLower')}
-              />
-            </Suspense>
+            <UpdateNovelChapterGroup
+              onDeleteChapter={chapter => {
+                deleteChapter(
+                  chapter.pluginId,
+                  chapter.novelId,
+                  chapter.id,
+                ).then(() => {
+                  showToast(
+                    getString('common.deleted', {
+                      name: chapter.name,
+                    }),
+                  );
+                  getUpdates();
+                });
+              }}
+              overview={item}
+              chapterCountLabel={getString('updatesScreen.updatesLower')}
+            />
           )}
           ListEmptyComponent={
             <EmptyView

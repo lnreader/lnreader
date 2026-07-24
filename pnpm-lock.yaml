@@ -101,6 +101,9 @@ importers:
       expo-haptics:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.7)
+      expo-image:
+        specifier: ~57.0.1
+        version: 57.0.1(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
       expo-keep-awake:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.7)(react@19.2.3)
@@ -3334,6 +3337,17 @@ packages:
     resolution: {integrity: sha512-8VhbnxlIrfXjP0syZr1JT197nafYicQu9119adOJnX62osU9Cw+PdDnAx/6LxuKJRzQdwxOMq7b7eWjhNL5zAQ==}
     peerDependencies:
       expo: '*'
+
+  expo-image@57.0.1:
+    resolution: {integrity: sha512-EP0lisd2bUqtErry4weRcMW9bLMxtKsht/MLLK3/3do5u4ZMiJbWkY5zfYV+WYmeGab7x9G0sjbeFeEagYGjMw==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native-web:
+        optional: true
 
   expo-json-utils@57.0.1:
     resolution: {integrity: sha512-cgTe1NqzQdYs/WN+3nIY5IZg8s0pb0xaTUbhYvxQDn137GbwRfHoGM2se3m3Vsl4Qu+B9G4RPEK5WJDEU2Do7g==}
@@ -9629,6 +9643,13 @@ snapshots:
   expo-haptics@57.0.1(expo@57.0.7):
     dependencies:
       expo: 57.0.7(7682188daf453a5cba4239dd25208922)
+
+  expo-image@57.0.1(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3):
+    dependencies:
+      expo: 57.0.7(7682188daf453a5cba4239dd25208922)
+      react: 19.2.3
+      react-native: 0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0)
+      sf-symbols-typescript: 2.2.0
 
   expo-json-utils@57.0.1: {}
 

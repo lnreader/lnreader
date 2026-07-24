@@ -1,19 +1,15 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 
-import { IconButtonV2 } from '@components';
-
-import { defaultCover } from '@plugins/helpers/constants';
+import { IconButtonV2, NovelCoverImage } from '@components';
 import { getString } from '@strings/translations';
 import { useTheme } from '@hooks/persisted';
 
-import { History, NovelInfo } from '@database/types';
+import { History } from '@database/types';
 import { HistoryScreenProps } from '@navigators/types';
-
-import { coverPlaceholderColor } from '@theme/colors';
 
 interface HistoryCardProps {
   history: History;
@@ -36,10 +32,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           screen: 'Chapter',
           params: {
             novel: {
+              id: history.novelId,
               path: history.novelPath,
               name: history.novelName,
               pluginId: history.pluginId,
-            } as NovelInfo,
+              cover: history.novelCover,
+            },
             chapter: history,
           },
         })
@@ -51,7 +49,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             navigate('ReaderStack', {
               screen: 'Novel',
               params: {
-                name: history.name,
+                name: history.novelName,
                 path: history.novelPath,
                 cover: history.novelCover,
                 pluginId: history.pluginId,
@@ -59,8 +57,10 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             })
           }
         >
-          <Image
-            source={{ uri: history.novelCover || defaultCover }}
+          <NovelCoverImage
+            uri={history.novelCover}
+            theme={theme}
+            iconSize={24}
             style={styles.cover}
           />
         </Pressable>
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   cover: {
-    backgroundColor: coverPlaceholderColor,
     borderRadius: 4,
     height: 80,
     width: 56,

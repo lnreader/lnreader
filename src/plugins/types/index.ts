@@ -107,7 +107,12 @@ export interface PluginItem {
 }
 
 export interface ImageRequestInit {
-  [x: string]: string | Record<string, string> | Headers | FormData | undefined;
+  [x: string]:
+    | string
+    | Record<string, string>
+    | Headers
+    | FormData
+    | undefined;
   method?: string;
   headers: Record<string, string>;
   body?: string;

@@ -1,32 +1,24 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-  ImageBackground,
-  Image,
-  ImageURISource,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ImageBackground, type ImageSource } from 'expo-image';
 import color from 'color';
 import { IconButton, Portal } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Chip } from '../../../../components';
-import { coverPlaceholderColor } from '../../../../theme/colors';
+import { Chip, NovelCoverImage } from '../../../../components';
+import { isMissingNovelCover } from '../../../../components/NovelCoverImage';
 import { ThemeColors } from '@theme/types';
 import { getString } from '@strings/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CoverImageProps {
   children: React.ReactNode;
-  source: ImageURISource;
+  source: ImageSource;
   theme: ThemeColors;
   hideBackdrop: boolean;
 }
 
 interface NovelThumbnailProps {
-  source: ImageURISource;
+  source: ImageSource;
   theme: ThemeColors;
   setCustomNovelCover: () => Promise<void>;
   saveNovelCover: () => Promise<void>;
@@ -45,6 +37,7 @@ const NovelInfoContainer = ({ children }: { children: React.ReactNode }) => (
 
 const CoverImage = memo(
   ({ children, source, theme, hideBackdrop }: CoverImageProps) => {
+    const [failedUri, setFailedUri] = useState<string>();
     const overlayBg = useMemo(
       () => color(theme.background).alpha(0.7).string(),
       [theme.background],
@@ -61,21 +54,44 @@ const CoverImage = memo(
     if (hideBackdrop) {
       return <View>{children}</View>;
     }
-    return (
-      <ImageBackground source={source} style={styles.coverImage}>
-        <View style={overlayStyle}>
-          {source.uri ? (
-            <LinearGradient
-              colors={gradientColors}
-              locations={GRADIENT_LOCATIONS}
-              style={styles.linearGradient}
-            >
-              {children}
-            </LinearGradient>
-          ) : (
-            children
-          )}
+
+    const showPlaceholder =
+      isMissingNovelCover(source.uri) || failedUri === source.uri;
+    const content = (
+      <View style={overlayStyle}>
+        {!showPlaceholder ? (
+          <LinearGradient
+            colors={gradientColors}
+            locations={GRADIENT_LOCATIONS}
+            style={styles.linearGradient}
+          >
+            {children}
+          </LinearGradient>
+        ) : (
+          children
+        )}
+      </View>
+    );
+
+    if (showPlaceholder) {
+      return (
+        <View
+          style={[styles.coverImage, { backgroundColor: theme.background }]}
+        >
+          {content}
         </View>
+      );
+    }
+
+    return (
+      <ImageBackground
+        cachePolicy="memory-disk"
+        contentFit="cover"
+        onError={() => setFailedUri(source.uri)}
+        source={source}
+        style={styles.coverImage}
+      >
+        {content}
       </ImageBackground>
     );
   },
@@ -98,7 +114,12 @@ const NovelThumbnail = ({
       style={styles.novelThumbnailContainer}
     >
       {!expanded ? (
-        <Image source={source} style={styles.novelThumbnail} />
+        <NovelCoverImage
+          uri={source.uri}
+          theme={theme}
+          iconSize={36}
+          style={styles.novelThumbnail}
+        />
       ) : (
         <Portal>
           <IconButton
@@ -125,7 +146,13 @@ const NovelThumbnail = ({
             style={[styles.expandedOverlay]}
             onPress={() => setExpanded(false)}
           >
-            <Image source={source} resizeMode="contain" style={styles.flex1} />
+            <NovelCoverImage
+              uri={source.uri}
+              theme={theme}
+              iconSize={64}
+              contentFit="contain"
+              style={styles.flex1}
+            />
           </Pressable>
         </Portal>
       )}
@@ -334,7 +361,6 @@ const styles = StyleSheet.create({
     paddingTop: 90,
   },
   novelThumbnail: {
-    backgroundColor: coverPlaceholderColor,
     borderRadius: 6,
     height: 150,
     width: 100,

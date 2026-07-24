@@ -1267,6 +1267,26 @@ describe('ChapterQueries', () => {
 
       expect(result.every(c => c.isDownloaded === true)).toBe(true);
     });
+
+    it('should filter updates by their overview date', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        updatedTime: '2024-01-01 10:00:00',
+      });
+      await insertTestChapter(testDb, novelId, {
+        updatedTime: '2024-01-02 10:00:00',
+      });
+
+      const result = await getDetailedUpdatesFromDb(
+        novelId,
+        false,
+        '2024-01-01',
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.updatedTime).toBe('2024-01-01 10:00:00');
+    });
   });
 
   describe('isChapterDownloaded', () => {

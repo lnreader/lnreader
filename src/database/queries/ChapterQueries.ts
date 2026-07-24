@@ -24,7 +24,7 @@ import { getString } from '@strings/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
@@ -235,8 +235,11 @@ export const increaseTimeSpent = async (
   timeSpent: number,
 ): Promise<void> => {
   await dbManager.write(async tx => {
-    await tx.update(chapterSchema)
-      .set({ timeSpent: sql`COALESCE(${chapterSchema.timeSpent}, 0) + ${timeSpent}` })
+    await tx
+      .update(chapterSchema)
+      .set({
+        timeSpent: sql`COALESCE(${chapterSchema.timeSpent}, 0) + ${timeSpent}`,
+      })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
@@ -747,10 +750,7 @@ export const getNovelDownloadedChapters = async (
         eq(chapterSchema.isDownloaded, true),
       ),
     )
-    .orderBy(
-      asc(castInt(chapterSchema.page)),
-      asc(chapterSchema.position),
-    )
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
     .$dynamic();
 
   if (startPosition !== undefined && endPosition !== undefined) {
@@ -764,6 +764,7 @@ export const getUpdatedOverviewFromDb = async () =>
   dbManager
     .select({
       novelId: novelSchema.id,
+      pluginId: novelSchema.pluginId,
       novelName: novelSchema.name,
       novelCover: novelSchema.cover,
       novelPath: novelSchema.path,
@@ -782,6 +783,7 @@ export const getUpdatedOverviewFromDb = async () =>
 export const getDetailedUpdatesFromDb = async (
   novelId: number,
   onlyDownloadableChapters?: boolean,
+  updateDate?: string,
 ): Promise<Update[]> => {
   return dbManager
     .select({
@@ -800,6 +802,9 @@ export const getDetailedUpdatesFromDb = async (
         onlyDownloadableChapters
           ? eq(chapterSchema.isDownloaded, true)
           : isNotNull(chapterSchema.updatedTime),
+        updateDate
+          ? eq(sql<string>`DATE(${chapterSchema.updatedTime})`, updateDate)
+          : undefined,
       ),
     )
     .orderBy(desc(chapterSchema.updatedTime))

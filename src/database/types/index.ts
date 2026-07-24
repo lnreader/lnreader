@@ -68,7 +68,9 @@ export interface Update extends ChapterInfo {
 
 export interface UpdateOverview {
   novelId: number;
+  pluginId: string;
   novelName: string;
+  novelPath: string;
   updateDate: string;
   updatesPerDay: number;
   novelCover: string | null;
@@ -107,9 +109,9 @@ export interface LibraryStats {
     timeSpent: number;
   }[];
   topCategoriesByTimeSpent?: {
-	id: number;
-	name: string;
-	timeSpent: number;
+    id: number;
+    name: string;
+    timeSpent: number;
   }[];
 }
 

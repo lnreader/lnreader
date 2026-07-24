@@ -2,7 +2,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import color from 'color';
 
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
@@ -15,6 +15,11 @@ import GlobalSearchSkeletonLoading from '@screens/browse/loadingAnimation/Global
 import { interpolateColor } from 'react-native-reanimated';
 import { useLibraryContext } from '@components/Context/LibraryContext';
 import NovelCover from '@components/NovelCover';
+import { RootStackParamList } from '@navigators/types';
+import {
+  NovelCoverLayoutProvider,
+  useNovelCoverLayoutValue,
+} from '@components/NovelCoverLayoutContext';
 
 interface GlobalSearchResultsListProps {
   searchResults: GlobalSearchResult[];
@@ -25,19 +30,22 @@ const GlobalSearchResultsList: React.FC<GlobalSearchResultsListProps> = ({
   searchResults,
   ListEmptyComponent,
 }) => {
+  const coverLayout = useNovelCoverLayoutValue(true);
   const keyExtractor = useCallback(
     (item: GlobalSearchResult) => item.plugin.id,
     [],
   );
 
   return (
-    <FlatList<GlobalSearchResult>
-      keyExtractor={keyExtractor}
-      data={searchResults}
-      contentContainerStyle={styles.resultList}
-      renderItem={({ item }) => <GlobalSearchSourceResults item={item} />}
-      ListEmptyComponent={ListEmptyComponent}
-    />
+    <NovelCoverLayoutProvider value={coverLayout}>
+      <FlatList<GlobalSearchResult>
+        keyExtractor={keyExtractor}
+        data={searchResults}
+        contentContainerStyle={styles.resultList}
+        renderItem={({ item }) => <GlobalSearchSourceResults item={item} />}
+        ListEmptyComponent={ListEmptyComponent}
+      />
+    </NovelCoverLayoutProvider>
   );
 };
 
@@ -45,7 +53,8 @@ const GlobalSearchSourceResults: React.FC<{ item: GlobalSearchResult }> = ({
   item,
 }) => {
   const theme = useTheme();
-  const navigation = useNavigation<StackNavigationProp<any>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [inActivity, setInActivity] = useState<Record<string, boolean>>({});
   const { novelInLibrary, switchNovelToLibrary } = useLibraryContext();
   const imageRequestInit = getPlugin(item.plugin.id)?.imageRequestInit;
@@ -111,7 +120,7 @@ const GlobalSearchSourceResults: React.FC<{ item: GlobalSearchResult }> = ({
               contentContainerStyle={styles.novelsContainer}
               keyExtractor={novelItem => item.plugin.id + '_' + novelItem.path}
               data={item.novels}
-              extraData={inActivity.length}
+              extraData={inActivity}
               ListEmptyComponent={
                 <Text style={[styles.listEmpty, { color: noResultsColor }]}>
                   {getString('sourceScreen.noResultsFound')}

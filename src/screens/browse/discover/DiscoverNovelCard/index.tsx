@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { NovelCoverImage } from '@components';
 import { ThemeColors } from '@theme/types';
 
 interface Props {
@@ -22,7 +23,12 @@ const DiscoverNovelCard: React.FC<Props> = ({ novel, onPress, theme }) => {
         onPress={onPress}
         android_ripple={{ color: theme.rippleColor }}
       >
-        <Image source={{ uri: novel.novelCover }} style={styles.cover} />
+        <NovelCoverImage
+          uri={novel.novelCover}
+          theme={theme}
+          iconSize={32}
+          style={styles.cover}
+        />
         <View style={styles.infoContainer}>
           <Text
             style={[styles.title, { color: theme.onSurface }]}

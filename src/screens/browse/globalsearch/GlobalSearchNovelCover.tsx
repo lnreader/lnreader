@@ -1,8 +1,7 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image, Pressable } from 'react-native';
-import { coverPlaceholderColor } from '@theme/colors';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { ThemeColors } from '@theme/types';
 import { NovelItem } from '@plugins/types';
+import { NovelCoverImage } from '@components';
 
 interface GlobalSearchNovelCoverProps {
   novel: NovelItem;
@@ -33,10 +32,11 @@ const GlobalSearchNovelCover = ({
         onPress={onPress}
         onLongPress={onLongPress}
       >
-        <Image
-          source={{ uri }}
+        <NovelCoverImage
+          uri={uri}
+          theme={theme}
+          iconSize={34}
           style={[styles.novelCover, { opacity }]}
-          progressiveRenderingEnabled={true}
         />
         <Text
           numberOfLines={2}
@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   novelCover: {
-    backgroundColor: coverPlaceholderColor,
     borderRadius: 4,
     height: 150,
     width: 115,

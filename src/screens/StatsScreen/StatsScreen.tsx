@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Image } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useTheme } from '@hooks/persisted';
@@ -9,6 +9,7 @@ import {
   Appbar,
   ErrorScreenV2,
   LoadingScreenV2,
+  NovelCoverImage,
   SafeAreaView,
 } from '@components';
 
@@ -69,34 +70,55 @@ const StatsScreen = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<LibraryStats>({});
-  const [error, setError] = useState<any>();
+  const [error, setError] = useState<unknown>();
 
   const [showingNovels, setShowingNovels] = useState(true);
 
-  const getStats = async () => {
-    try {
-      const res = await Promise.all([
-        getLibraryStatsFromDb(),
-        getChaptersTotalCountFromDb(),
-        getChaptersReadCountFromDb(),
-        getChaptersUnreadCountFromDb(),
-        getChaptersDownloadedCountFromDb(),
-        getNovelGenresFromDb(),
-        getNovelStatusFromDb(),
-        getTopNovelsByTimeSpentFromDb(),
-        getTopCategoriesByTimeSpentFromDb(),
-        getTotalTimeSpentFromDb(),
-      ]);
-      setStats(Object.assign(...res));
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    getStats();
+    let cancelled = false;
+
+    const loadStats = async () => {
+      try {
+        const res = await Promise.all([
+          getLibraryStatsFromDb(),
+          getChaptersTotalCountFromDb(),
+          getChaptersReadCountFromDb(),
+          getChaptersUnreadCountFromDb(),
+          getChaptersDownloadedCountFromDb(),
+          getNovelGenresFromDb(),
+          getNovelStatusFromDb(),
+          getTopNovelsByTimeSpentFromDb(),
+          getTopCategoriesByTimeSpentFromDb(),
+          getTotalTimeSpentFromDb(),
+        ]);
+
+        if (!cancelled) {
+          setStats(
+            res.reduce<LibraryStats>(
+              (combinedStats, currentStats) => ({
+                ...combinedStats,
+                ...currentStats,
+              }),
+              {},
+            ),
+          );
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadStats();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const Header = (
@@ -207,10 +229,13 @@ const StatsScreen = () => {
           const headers = plugin?.imageRequestInit?.headers || { 'User-Agent': getUserAgent() };
           const requestInit = {...plugin?.imageRequestInit, headers };
           return <View key={novel.id} style={styles.timeSpentRow}>
-            <Image
-              source={{ uri: novel.cover || undefined, ...requestInit }}
+            <NovelCoverImage
+              uri={novel.cover}
+              requestInit={requestInit}
+              theme={theme}
+              iconSize={22}
               style={styles.timeSpentNovelCover}
-              resizeMode='cover'
+              contentFit='cover'
             />
             <View>
               <Text style={[styles.timeSpentLabel, { color: theme.onSurface }]}>
