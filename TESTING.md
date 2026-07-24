@@ -15,7 +15,7 @@ The project has global mocks configured in Jest. These are automatically applied
 
 ### Using @test-utils
 
-There's a custom render wrapper at `test/test-utils.tsx` with:
+There is a custom render wrapper at `test/test-utils.tsx` with:
 
 - `render` - wraps with GestureHandlerRootView, SafeAreaProvider, PaperProvider, etc.
 - `renderNovel` - includes NovelContextProvider
@@ -40,7 +40,7 @@ jest.mock('@hooks/persisted/usePlugins');
 
 ### 2. Mock Functions Not Working
 
-If `mockReturnValue` throws "not a function", create mock functions at module level:
+If `mockReturnValue` throws "not a function", create mock functions at the module level:
 
 ```typescript
 // CORRECT: Module-level mock functions
