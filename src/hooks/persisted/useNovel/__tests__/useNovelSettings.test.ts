@@ -125,4 +125,43 @@ describe('useNovelSettings', () => {
 
     expect(storeSetNovelSettings).not.toHaveBeenCalled();
   });
+
+  it('preserves newer settings when cycling a filter after rerender', () => {
+    let storeNovelSettings = {
+      sort: 'positionAsc',
+      filter: [] as ['downloaded'] | [],
+      showChapterTitles: true,
+    };
+    const storeSetNovelSettings = jest.fn(nextSettings => {
+      storeNovelSettings = nextSettings;
+    });
+
+    mockUseNovelValue.mockImplementation(key => {
+      if (key === 'novel') return baseNovel;
+      if (key === 'novelSettings') return storeNovelSettings;
+      return undefined;
+    });
+    mockUseNovelAction.mockImplementation(key => {
+      if (key === 'setNovelSettings') return storeSetNovelSettings;
+      return undefined;
+    });
+
+    const { result, rerender } = renderHook(() => useNovelSettings());
+
+    act(() => {
+      result.current.setChapterSort('nameDesc');
+    });
+    rerender({});
+
+    act(() => {
+      result.current.cycleChapterFilter('downloaded');
+    });
+
+    expect(storeSetNovelSettings).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sort: 'nameDesc',
+        filter: ['downloaded'],
+      }),
+    );
+  });
 });

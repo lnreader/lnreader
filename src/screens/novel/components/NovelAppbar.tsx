@@ -19,6 +19,35 @@ import { MaterialDesignIconName } from '@type/icon';
 
 const AnimatedAppbarAction = Animated.createAnimatedComponent(Appbar.Action);
 
+const NovelAppbarAction = memo(
+  ({
+    icon,
+    onPress,
+    theme,
+    style,
+    size = 24,
+  }: {
+    icon: MaterialDesignIconName;
+    onPress: () => void;
+    theme: ThemeColors;
+    style?: StyleProp<ViewStyle>;
+    size?: number;
+  }) => {
+    const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
+    return (
+      <AnimatedAppbarAction
+        entering={FadeIn.duration(250)}
+        exiting={FadeOut.delay(50).duration(250)}
+        theme={appbarTheme}
+        icon={icon}
+        onPress={onPress}
+        style={style}
+        size={size}
+      />
+    );
+  },
+);
+
 const Menu = React.memo(
   ({
     visible,
@@ -113,24 +142,15 @@ const NovelAppbar = ({
 
   const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
 
-  const AppbarAction = useCallback(
-    (props: {
-      icon: MaterialDesignIconName;
-      onPress: () => void;
-      style?: StyleProp<ViewStyle>;
-      size?: number;
-    }) => {
-      return (
-        <AnimatedAppbarAction
-          entering={FadeIn.duration(250)}
-          exiting={FadeOut.delay(50).duration(250)}
-          theme={appbarTheme}
-          size={24}
-          {...props}
-        />
-      );
-    },
-    [appbarTheme],
+  const renderExportIcon = useCallback(
+    (onPress: () => void) => (
+      <NovelAppbarAction
+        theme={theme}
+        icon="book-arrow-down-outline"
+        onPress={onPress}
+      />
+    ),
+    [theme],
   );
 
   const downloadMenuItems = useMemo(() => {
@@ -205,9 +225,17 @@ const NovelAppbar = ({
         <Appbar.BackAction onPress={goBack} />
 
         <View style={styles.row}>
-          <ExportNovelAsEpubButton novel={novel} iconComponent={AppbarAction} />
-          <AppbarAction icon="share-variant" onPress={shareNovel} />
-          <AppbarAction
+          <ExportNovelAsEpubButton
+            novel={novel}
+            renderIcon={renderExportIcon}
+          />
+          <NovelAppbarAction
+            theme={theme}
+            icon="share-variant"
+            onPress={shareNovel}
+          />
+          <NovelAppbarAction
+            theme={theme}
             icon="text-box-search-outline"
             onPress={openJumpToChapter}
           />

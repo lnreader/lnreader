@@ -38,6 +38,7 @@ export interface MD3ThemeType {
 
 export interface ThemeColors extends MD3ThemeType {
   rippleColor?: string;
+  surfaceContainerLow?: string;
   surfaceContainerHigh?: string;
   surface2?: string;
   overlay3?: string;

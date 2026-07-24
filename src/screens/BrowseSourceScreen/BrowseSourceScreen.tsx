@@ -1,10 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { FAB } from 'react-native-paper';
 import { ErrorScreenV2, SafeAreaView, SearchbarV2 } from '@components/index';
 import NovelList from '@components/NovelList';
 import NovelCover from '@components/NovelCover';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import FilterBottomSheet from './components/FilterBottomSheet';
 
 import { useSearch } from '@hooks';
@@ -84,7 +84,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
   );
 
   const { bottom, right } = useSafeAreaInsets();
-  const filterSheetRef = useRef<BottomSheetModal | null>(null);
+  const filterSheetRef = useRef<BottomSheetModalMethods | null>(null);
   return (
     <SafeAreaView>
       <SearchbarV2

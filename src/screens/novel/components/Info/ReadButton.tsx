@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Button } from '@components';
 import { getString } from '@i18n/translations';
 import { ChapterInfo } from '@database/types';

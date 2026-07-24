@@ -140,13 +140,13 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           />
         ) : null}
       </View>
-      {novel.id !== 'NO_ID' && (
+      {novel.id !== 'NO_ID' && setCategoryModalVisible ? (
         <SetCategoryModal
           novelIds={[novel.id]}
           closeModal={closeSetCategoryModal}
-          visible={setCategoryModalVisible}
+          visible
         />
-      )}
+      ) : null}
     </>
   );
 };

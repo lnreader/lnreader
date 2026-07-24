@@ -11,18 +11,16 @@ import {
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import color from 'color';
 
-import { TabView, SceneMap, TabBar, TabViewProps } from 'react-native-tab-view';
+import { TabView, TabViewProps } from 'react-native-tab-view';
 import { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { getString } from '@i18n/translations';
 
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
-import { Button } from '@components';
+import { Button, TopTabBar } from '@components';
 
-import { overlay } from 'react-native-paper';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ThemeColors } from '@theme/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
 import { useNovelValue } from '@screens/novel/NovelContext';
 
@@ -30,6 +28,11 @@ interface ChaptersSettingsSheetProps {
   bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
   theme: ThemeColors;
 }
+
+type SettingsRoute = {
+  key: 'first' | 'second' | 'third';
+  title: string;
+};
 
 const ChaptersSettingsSheet = ({
   bottomSheetRef,
@@ -47,9 +50,9 @@ const ChaptersSettingsSheet = ({
     setExcludedScanlators,
   } = useNovelSettings();
 
-  const rawScanlators = useNovelValue('scanlators') || [];
+  const rawScanlators = useNovelValue('scanlators');
   const scanlators = useMemo(
-    () => [...rawScanlators].sort((a, b) => a.localeCompare(b)),
+    () => [...(rawScanlators ?? [])].sort((a, b) => a.localeCompare(b)),
     [rawScanlators],
   );
   const [scanlatorsModalVisible, setScanlatorsModalVisible] = useState(false);
@@ -67,7 +70,6 @@ const ChaptersSettingsSheet = ({
     [tempExcludedScanlators],
   );
 
-  const { left, right } = useSafeAreaInsets();
   const readStatus = getChapterFilterState('read');
   const unreadStatus =
     readStatus === 'indeterminate'
@@ -76,7 +78,7 @@ const ChaptersSettingsSheet = ({
       ? 'indeterminate'
       : false;
 
-  const FirstRoute = useCallback(
+  const renderFilters = useCallback(
     () => (
       <BottomSheetScrollView style={styles.flex}>
         <Checkbox
@@ -152,7 +154,7 @@ const ChaptersSettingsSheet = ({
     ],
   );
 
-  const SecondRoute = useCallback(
+  const renderSort = useCallback(
     () => (
       <View style={styles.flex}>
         <SortItem
@@ -192,7 +194,7 @@ const ChaptersSettingsSheet = ({
     [sort, setChapterSort, theme],
   );
 
-  const ThirdRoute = useCallback(
+  const renderDisplay = useCallback(
     () => (
       <View style={styles.flex}>
         <Checkbox
@@ -212,28 +214,36 @@ const ChaptersSettingsSheet = ({
     [setShowChapterTitles, showChapterTitles, theme],
   );
 
-  const renderScene = SceneMap({
-    first: FirstRoute,
-    second: SecondRoute,
-    third: ThirdRoute,
-  });
+  const renderScene = useCallback(
+    ({ route }: { route: SettingsRoute }) => {
+      switch (route.key) {
+        case 'first':
+          return renderFilters();
+        case 'second':
+          return renderSort();
+        case 'third':
+          return renderDisplay();
+      }
+    },
+    [renderDisplay, renderFilters, renderSort],
+  );
 
   const layout = useWindowDimensions();
 
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
+  const [routes] = useState<SettingsRoute[]>([
     { key: 'first', title: getString('common.filter') },
     { key: 'second', title: getString('common.sort') },
     { key: 'third', title: getString('common.display') },
   ]);
 
-  const renderTabBar: TabViewProps<any>['renderTabBar'] = props => (
-    <TabBar
+  const renderTabBar: TabViewProps<SettingsRoute>['renderTabBar'] = props => (
+    <TopTabBar
       {...props}
       indicatorStyle={{ backgroundColor: theme.primary }}
       style={[
         {
-          backgroundColor: overlay(2, theme.surface),
+          backgroundColor: theme.surfaceContainerLow ?? theme.surface,
           borderBottomColor: theme.outline,
         },
         styles.tabBar,
@@ -245,28 +255,15 @@ const ChaptersSettingsSheet = ({
   );
 
   const renderLabel = useCallback(
-    ({ route, color: localColor }: { route: any; color: string }) => {
+    ({ route, color: localColor }: { route: SettingsRoute; color: string }) => {
       return <Text style={{ color: localColor }}>{route.title}</Text>;
     },
     [],
   );
   return (
     <>
-      <BottomSheet
-        snapPoints={[290]}
-        bottomSheetRef={bottomSheetRef}
-        backgroundStyle={styles.transparent}
-      >
-        <BottomSheetView
-          style={[
-            styles.contentContainer,
-            {
-              backgroundColor: overlay(2, theme.surface),
-              marginLeft: left,
-              marginRight: right,
-            },
-          ]}
-        >
+      <BottomSheet snapPoints={[290]} bottomSheetRef={bottomSheetRef}>
+        <BottomSheetView style={styles.contentContainer}>
           <TabView
             commonOptions={{
               label: renderLabel,
@@ -337,17 +334,10 @@ export default ChaptersSettingsSheet;
 
 const styles = StyleSheet.create({
   contentContainer: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
     flex: 1,
   },
   tabView: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
     height: 290,
-  },
-  transparent: {
-    backgroundColor: 'transparent',
   },
   flex: {
     flex: 1,

@@ -18,7 +18,7 @@ interface ExportEpubModalProps {
     fileName: string,
     startChapter?: number,
     endChapter?: number,
-  ) => void;
+  ) => Promise<void>;
   hideModal: () => void;
 }
 
@@ -45,6 +45,7 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
   const exportAll = useBoolean(true);
   const [startChapter, setStartChapter] = useState('');
   const [endChapter, setEndChapter] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const onDismiss = () => {
     hideModal();
@@ -55,7 +56,7 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
     setEndChapter('');
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!exportAll.value) {
       const start = parseInt(startChapter, 10);
       const end = parseInt(endChapter, 10);
@@ -86,8 +87,13 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
     const start = exportAll.value ? undefined : parseInt(startChapter, 10);
     const end = exportAll.value ? undefined : parseInt(endChapter, 10);
 
-    onSubmitProp?.(uri, fileName, start, end);
-    hideModal();
+    setSubmitting(true);
+    try {
+      await onSubmitProp?.(uri, fileName, start, end);
+      hideModal();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const openFolderPicker = async () => {
@@ -96,8 +102,8 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
       if (resultUri) {
         setUri(resultUri.uri);
       }
-    } catch (error: any) {
-      showToast(error.message);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -199,10 +205,10 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
         />
       </Dialog.Content>
       <Dialog.Actions>
-        <Dialog.Action onPress={hideModal}>
+        <Dialog.Action disabled={submitting} onPress={onDismiss}>
           {getString('common.cancel')}
         </Dialog.Action>
-        <Dialog.Action onPress={onSubmit}>
+        <Dialog.Action disabled={submitting} onPress={() => void onSubmit()}>
           {getString('common.submit')}
         </Dialog.Action>
       </Dialog.Actions>

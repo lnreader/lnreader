@@ -39,8 +39,15 @@ const getSurfaceContainerHigh = (colors: ThemeColors): string =>
     .rgb()
     .string();
 
+const getSurfaceContainerLow = (colors: ThemeColors): string =>
+  Color(colors.surface)
+    .mix(Color(colors.onSurface), colors.isDark ? 0.05 : 0.04)
+    .rgb()
+    .string();
+
 const addComputedColors = (colors: ThemeColors): ThemeColors => ({
   ...colors,
+  surfaceContainerLow: getSurfaceContainerLow(colors),
   surfaceContainerHigh: getSurfaceContainerHigh(colors),
   surface2: getElevationColor(colors, 0.08),
   overlay3: overlay(3, colors.surface),

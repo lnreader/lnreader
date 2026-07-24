@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Pressable, View, StyleSheet, Text, ScrollView } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import Slider from '@react-native-community/slider';
+import { Button, Dialog, List, Slider } from '@components';
 import { getAvailableVoicesAsync, Voice } from 'expo-speech';
 import { getLocales } from 'expo-localization';
 import {
@@ -10,7 +10,6 @@ import {
   useChapterReaderSettings,
 } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { Dialog, List, Button } from '@components/index';
 import { Chip } from 'react-native-paper';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
 
@@ -248,12 +247,12 @@ const TTSTab: React.FC = () => {
                 <Slider
                   style={styles.slider}
                   value={tts?.rate || 1}
-                  minimumValue={0.1}
-                  maximumValue={5}
+                  min={0.1}
+                  max={5}
                   step={0.1}
-                  minimumTrackTintColor={theme.primary}
-                  maximumTrackTintColor={theme.surfaceVariant}
-                  thumbTintColor={theme.primary}
+                  showValueIndicator
+                  formatValue={value => `${value.toFixed(1)}x`}
+                  accessibilityLabel="Text to speech speed"
                   onSlidingComplete={value =>
                     setChapterReaderSettings({ tts: { ...tts, rate: value } })
                   }
@@ -267,12 +266,12 @@ const TTSTab: React.FC = () => {
                 <Slider
                   style={styles.slider}
                   value={tts?.pitch || 1}
-                  minimumValue={0.1}
-                  maximumValue={5}
+                  min={0.1}
+                  max={5}
                   step={0.1}
-                  minimumTrackTintColor={theme.primary}
-                  maximumTrackTintColor={theme.surfaceVariant}
-                  thumbTintColor={theme.primary}
+                  showValueIndicator
+                  formatValue={value => value.toFixed(1)}
+                  accessibilityLabel="Text to speech pitch"
                   onSlidingComplete={value =>
                     setChapterReaderSettings({ tts: { ...tts, pitch: value } })
                   }
@@ -374,7 +373,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   slider: {
-    height: 40,
+    marginHorizontal: -10,
   },
   resetButtonContainer: {
     paddingHorizontal: 16,

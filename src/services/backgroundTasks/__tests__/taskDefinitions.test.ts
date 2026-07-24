@@ -31,6 +31,7 @@ describe('background task definitions', () => {
       name: 'DOWNLOAD_CHAPTER',
       data: {
         novelName: 'Example Novel',
+        novelId: 42,
         chapters: [{ chapterId: 42, chapterName: 'Chapter 7' }],
       },
     };

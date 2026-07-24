@@ -29,9 +29,6 @@ importers:
       '@preeternal/react-native-cookie-manager':
         specifier: ^6.3.3
         version: 6.3.3(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
-      '@react-native-community/slider':
-        specifier: ^5.2.0
-        version: 5.2.0
       '@react-native-documents/picker':
         specifier: ^12.0.1
         version: 12.0.1(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)
@@ -1573,9 +1570,6 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
-
-  '@react-native-community/slider@5.2.0':
-    resolution: {integrity: sha512-484sH8aWEaSjxaZ7HT3YZ8CKDcNes2synko1vdEz5DFEdvKAduxKJTj22L/qBMD7rtIkfbX69DMzWDAGbOAV6w==}
 
   '@react-native-documents/picker@12.0.1':
     resolution: {integrity: sha512-vpJKb4t/5bnxe9+gQl+plJfKrrIsmYwANGhNH2B9E1dS1+6FDBzg4Dwmcq4ueaGfkRKEPJ606mJttVEH1ZKZaA==}
@@ -7602,8 +7596,6 @@ snapshots:
     dependencies:
       react: 19.2.3
       react-native: 0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0)
-
-  '@react-native-community/slider@5.2.0': {}
 
   '@react-native-documents/picker@12.0.1(react-native@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@9.4.0))(react@19.2.3))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@9.4.0)))(@types/react@19.2.17)(react@19.2.3)(supports-color@9.4.0))(react@19.2.3)':
     dependencies:

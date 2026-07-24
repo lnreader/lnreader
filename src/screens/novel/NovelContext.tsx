@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { RouteProp } from '@react-navigation/native';
 import { useStore } from 'zustand';
 import { ReaderStackParamList } from '@navigators/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDeviceOrientation } from '@hooks/index';
 import { useLibraryContext } from '@components/Context/LibraryContext';
 import { useAppSettings } from '@hooks/persisted';
 import {
@@ -36,57 +35,37 @@ export function NovelContextProvider({ children, route }: Props) {
 
   const { path, pluginId } =
     'novel' in route.params ? route.params.novel : route.params;
-  const storeKey = `${pluginId}:${path}`;
 
   const { switchNovelToLibrary } = useLibraryContext();
   const { defaultChapterSort } = useAppSettings();
 
-  const switchNovelToLibraryRef = useRef(switchNovelToLibrary);
-
-  const storeRef = useRef<{
-    key: string;
-    store: NovelStoreApi;
-  } | null>(null);
-  const queriedNovelRef = useRef<boolean>(false);
-
-  if (storeRef.current?.key !== storeKey) {
-    queriedNovelRef.current = false;
-
-    storeRef.current = {
-      key: storeKey,
-      store: createStore({
+  const novelStore = useMemo(
+    () =>
+      createStore({
         path,
         pluginId,
         novel: initialNovel,
         defaultChapterSort,
-        switchNovelToLibrary: switchNovelToLibraryRef.current,
+        switchNovelToLibrary,
       }),
-    };
-  }
-  const novelStore = storeRef.current.store;
+    [defaultChapterSort, initialNovel, path, pluginId, switchNovelToLibrary],
+  );
+
+  useEffect(() => {
+    const actions = novelStore.getState().actions;
+    if (!actions.bootstrapNovelSync()) {
+      void actions.bootstrapNovel();
+    }
+  }, [novelStore]);
 
   const { bottom, top } = useSafeAreaInsets();
-  const orientation = useDeviceOrientation();
-
-  const navigationBarHeightRef = useRef(bottom);
-  const statusBarHeightRef = useRef(top);
-
-  if (bottom < navigationBarHeightRef.current && orientation === 'landscape') {
-    navigationBarHeightRef.current = bottom;
-  } else if (bottom > navigationBarHeightRef.current) {
-    navigationBarHeightRef.current = bottom;
-  }
-
-  if (top > statusBarHeightRef.current) {
-    statusBarHeightRef.current = top;
-  }
 
   const layoutValue = useMemo(
     () => ({
-      navigationBarHeight: navigationBarHeightRef.current,
-      statusBarHeight: statusBarHeightRef.current,
+      navigationBarHeight: bottom,
+      statusBarHeight: top,
     }),
-    [],
+    [bottom, top],
   );
   return (
     <NovelStoreContext.Provider value={novelStore}>
