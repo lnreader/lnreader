@@ -1,10 +1,4 @@
-import {
-  View,
-  StatusBar,
-  StyleSheet,
-  useWindowDimensions,
-  Alert,
-} from 'react-native';
+import { View, StatusBar, StyleSheet, useWindowDimensions } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from '@react-navigation/native';
@@ -139,7 +133,6 @@ const SettingsReaderScreen = () => {
   const chapterGeneralSettings = useChapterGeneralSettings();
   const {
     command: runTtsCommand,
-    error: ttsError,
     loadAndPlay,
     progress: ttsProgress,
     seekTo: seekTts,
@@ -214,12 +207,6 @@ const SettingsReaderScreen = () => {
       `);
     }
   }, [ttsProgress]);
-
-  useEffect(() => {
-    if (ttsError) {
-      Alert.alert('Text to speech', ttsError);
-    }
-  }, [ttsError]);
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.present();
@@ -369,11 +356,6 @@ const SettingsReaderScreen = () => {
                 }
                 break;
               }
-              case 'tts-error':
-                if (typeof event.data === 'string') {
-                  Alert.alert('Text to speech', event.data);
-                }
-                break;
             }
           }}
           source={{

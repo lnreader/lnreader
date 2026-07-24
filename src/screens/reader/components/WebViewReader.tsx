@@ -1,10 +1,5 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  NativeEventEmitter,
-  NativeModules,
-  StatusBar,
-} from 'react-native';
+import { NativeEventEmitter, NativeModules, StatusBar } from 'react-native';
 import WebView from 'react-native-webview';
 import color from 'color';
 
@@ -130,7 +125,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const activeChapterIdRef = useRef(chapter.id);
   const {
     command: runTtsCommand,
-    error: ttsError,
     loadAndPlay,
     progress: ttsProgress,
     seekTo: seekTts,
@@ -176,13 +170,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       `);
     }
   }, [ttsProgress, webViewRef]);
-
-  useEffect(() => {
-    if (ttsError) {
-      console.warn(`[TTS] ${ttsError}`);
-      Alert.alert('Text to speech', ttsError);
-    }
-  }, [ttsError]);
 
   useEffect(() => {
     if (activeChapterIdRef.current !== chapter.id) {
@@ -341,11 +328,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             }
             break;
           }
-          case 'tts-error':
-            if (typeof event.data === 'string') {
-              Alert.alert('Text to speech', event.data);
-            }
-            break;
           case 'hide':
             onPress();
             break;
