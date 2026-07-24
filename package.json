@@ -8,7 +8,7 @@
     "dev:ios": "npx expo run:ios",
     "dev:start": "npx expo start",
     "dev:clean-start": "npx expo start --clear",
-    "build:release:android": "pnpm run generate:env:release && pnpm dlx eas-cli build --platform android --profile production --local",
+    "build:release:android": "pnpm run generate:env:release && pnpm exec expo prebuild --platform android --clean --no-install && mkdir -p android/app/build/intermediates/sourcemaps/react/release && cd android && NODE_ENV=production ./gradlew :app:assembleRelease --build-cache --parallel",
     "build:open-apk": "open ./android/app/build/outputs/apk/release/",
     "generate:env:debug": "node scripts/generate-env-file.cjs --build-type Debug",
     "generate:env:release": "node scripts/generate-env-file.cjs --build-type Release",

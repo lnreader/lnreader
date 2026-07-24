@@ -110,5 +110,6 @@ src/generated/**/*
 */**/.project
 android/
 !modules/**/android/
+!plugins/android/
 ios/
 !modules/**/ios/

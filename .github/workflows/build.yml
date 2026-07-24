@@ -16,6 +16,7 @@ permissions:
 env:
   CI: 'true'
   EXPO_NO_TELEMETRY: '1'
+  NODE_ENV: 'production'
 
 jobs:
   build-android:
@@ -91,6 +92,8 @@ jobs:
       - name: Build Preview APK
         working-directory: android
         run: |
+          mkdir -p app/build/intermediates/sourcemaps/react/preRelease
+
           ./gradlew :app:assemblePreRelease \
             --build-cache \
             --parallel \

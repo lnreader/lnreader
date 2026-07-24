@@ -1,0 +1,36 @@
+android {
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix "debug"
+            versionNameSuffix "-debug"
+        }
+
+        preRelease {
+            initWith release
+            matchingFallbacks = ["release"]
+            applicationIdSuffix ".preRelease"
+            versionNameSuffix "-pre-release"
+            signingConfig signingConfigs.debug
+            resValue "string", "app_name", "LNReader Preview"
+        }
+    }
+}
+
+def preReleaseVersionCode = providers.gradleProperty("preReleaseVersionCode")
+def preReleaseVersionName = providers.gradleProperty("preReleaseVersionName")
+
+androidComponents {
+    onVariants(selector().withBuildType("preRelease")) { variant ->
+        variant.outputs.each { output ->
+            if (preReleaseVersionCode.isPresent()) {
+                output.versionCode.set(
+                    preReleaseVersionCode.map { value -> value.toInteger() },
+                )
+            }
+            if (preReleaseVersionName.isPresent()) {
+                output.versionName.set(preReleaseVersionName)
+            }
+        }
+    }
+}
