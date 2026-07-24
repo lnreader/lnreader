@@ -48,6 +48,9 @@ export interface NovelStoreChapterActions {
   markChaptersRead: (chapters: ChapterInfo[]) => void;
   markPreviousChaptersUnread: (chapterId: number) => void;
   markChaptersUnread: (chapters: ChapterInfo[]) => void;
+  markChaptersUnreadAndResetProgress: (
+    chapters: ChapterInfo[],
+  ) => Promise<boolean>;
   updateChapterProgress: (chapterId: number, progress: number) => void;
   deleteChapter: (chapter: ChapterInfo) => void;
   deleteChapters: (chapters: ChapterInfo[]) => void;
@@ -79,9 +82,15 @@ export interface NovelStoreState extends NovelStoreData {
 
 export type NovelStoreApi = StoreApi<NovelStoreState>;
 
+export interface ChapterRequestCoordinator {
+  current: () => number;
+  invalidate: () => number;
+}
+
 export interface NovelStoreDependencies {
   bootstrapService: ReturnType<typeof createBootstrapService>;
   chapterActionsDependencies: ChapterActionsDependencies;
+  chapterRequestCoordinator: ChapterRequestCoordinator;
   transformChapters: (chs: ChapterInfo[]) => ChapterInfo[];
   persistPageIndex?: (value: number) => void;
   persistNovelSettings?: (value: NovelSettings) => void;

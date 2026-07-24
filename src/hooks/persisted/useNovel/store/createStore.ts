@@ -41,10 +41,16 @@ export function createStore({
   };
 
   const bootstrapService = createBootstrapService();
+  let chapterRequestVersion = 0;
+  const chapterRequestCoordinator = {
+    current: () => chapterRequestVersion,
+    invalidate: () => ++chapterRequestVersion,
+  };
   let storeRef: { getState: () => NovelStoreState } | null = null;
   const deps: NovelStoreDependencies = {
     bootstrapService,
     chapterActionsDependencies: defaultChapterActionsDependencies,
+    chapterRequestCoordinator,
     transformChapters: c => {
       const excluded =
         storeRef?.getState().novelSettings.excludedScanlators || [];
@@ -77,6 +83,7 @@ export function createStore({
         get,
         bootstrapService: deps.bootstrapService,
         chapterActionsDependencies: deps.chapterActionsDependencies,
+        chapterRequestCoordinator,
         transformChapters: deps.transformChapters,
         defaultChapterSort: novelSettings.sort,
       }),
@@ -99,12 +106,6 @@ export function createStore({
     };
   });
   storeRef = store;
-
-  const success = store.getState().actions.bootstrapNovelSync();
-  if (!success) {
-    // If bootstrapNovelSync fails, it means the novel or chapters are not in the db
-    store.getState().actions.bootstrapNovel();
-  }
 
   return store;
 }

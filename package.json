@@ -40,7 +40,6 @@
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",
     "@preeternal/react-native-cookie-manager": "^6.3.3",
-    "@react-native-community/slider": "^5.2.0",
     "@react-native-documents/picker": "^12.0.1",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-native-vector-icons/common": "^13.0.1",

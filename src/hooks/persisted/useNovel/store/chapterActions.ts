@@ -10,6 +10,7 @@ import {
   markPreviousChaptersUnread as _markPreviousChaptersUnread,
   markPreviuschaptersRead as _markPreviuschaptersRead,
   updateChapterProgress as _updateChapterProgress,
+  updateChapterProgressByIds as _updateChapterProgressByIds,
   increaseTimeSpent as _increaseTimeSpent,
 } from '@database/queries/ChapterQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
@@ -34,6 +35,10 @@ export interface ChapterActionsDependencies {
   ) => Promise<void>;
   markChaptersUnread: (chapterIds: number[]) => Promise<void>;
   updateChapterProgress: (chapterId: number, progress: number) => Promise<void>;
+  updateChapterProgressByIds: (
+    chapterIds: number[],
+    progress: number,
+  ) => Promise<void>;
   deleteChapter: (
     pluginId: string,
     novelId: number,
@@ -63,6 +68,7 @@ export const defaultChapterActionsDependencies: ChapterActionsDependencies = {
   markPreviousChaptersUnread: _markPreviousChaptersUnread,
   markChaptersUnread: _markChaptersUnread,
   updateChapterProgress: _updateChapterProgress,
+  updateChapterProgressByIds: _updateChapterProgressByIds,
   deleteChapter: _deleteChapter,
   deleteChapters: _deleteChapters,
   getPageChapters: _getPageChapters,
@@ -93,6 +99,7 @@ export const bookmarkChaptersAction = (
   mutateChapters: MutateChapters,
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) => {
+  const chapterIds = new Set(_chapters.map(chapter => chapter.id));
   runAsyncAction(
     Promise.all(_chapters.map(_chapter => deps.bookmarkChapter(_chapter.id))),
     deps,
@@ -100,7 +107,7 @@ export const bookmarkChaptersAction = (
 
   mutateChapters(chs =>
     chs.map(chapter => {
-      if (_chapters.some(_c => _c.id === chapter.id)) {
+      if (chapterIds.has(chapter.id)) {
         return {
           ...chapter,
           bookmark: !chapter.bookmark,
@@ -154,11 +161,12 @@ export const markChaptersReadAction = (
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) => {
   const chapterIds = _chapters.map(chapter => chapter.id);
+  const chapterIdSet = new Set(chapterIds);
   runAsyncAction(deps.markChaptersRead(chapterIds), deps);
 
   mutateChapters(chs =>
     chs.map(chapter => {
-      if (chapterIds.includes(chapter.id)) {
+      if (chapterIdSet.has(chapter.id)) {
         return {
           ...chapter,
           unread: false,
@@ -191,11 +199,12 @@ export const markChaptersUnreadAction = (
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) => {
   const chapterIds = _chapters.map(chapter => chapter.id);
+  const chapterIdSet = new Set(chapterIds);
   runAsyncAction(deps.markChaptersUnread(chapterIds), deps);
 
   mutateChapters(chs =>
     chs.map(chapter => {
-      if (chapterIds.includes(chapter.id)) {
+      if (chapterIdSet.has(chapter.id)) {
         return {
           ...chapter,
           unread: true,
@@ -204,6 +213,33 @@ export const markChaptersUnreadAction = (
       return chapter;
     }),
   );
+};
+
+export const markChaptersUnreadAndResetProgressAction = async (
+  chapters: ChapterInfo[],
+  mutateChapters: MutateChapters,
+  deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
+): Promise<boolean> => {
+  const chapterIds = chapters.map(chapter => chapter.id);
+  const chapterIdSet = new Set(chapterIds);
+
+  try {
+    await Promise.all([
+      deps.markChaptersUnread(chapterIds),
+      deps.updateChapterProgressByIds(chapterIds, 0),
+    ]);
+    mutateChapters(current =>
+      current.map(chapter =>
+        chapterIdSet.has(chapter.id)
+          ? { ...chapter, unread: true, progress: 0 }
+          : chapter,
+      ),
+    );
+    return true;
+  } catch (error) {
+    deps.showToast(getErrorMessage(error));
+    return false;
+  }
 };
 
 export const updateChapterProgressAction = (
@@ -271,6 +307,7 @@ export const deleteChaptersAction = (
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) => {
   if (novel) {
+    const chapterIds = new Set(_chapters.map(chapter => chapter.id));
     runAsyncAction(
       (async () => {
         await deps.deleteChapters(novel.pluginId, novel.id, _chapters);
@@ -282,7 +319,7 @@ export const deleteChaptersAction = (
 
         mutateChapters(chs =>
           chs.map(chapter => {
-            if (_chapters.some(_c => _c.id === chapter.id)) {
+            if (chapterIds.has(chapter.id)) {
               return {
                 ...chapter,
                 isDownloaded: false,
@@ -336,18 +373,16 @@ export function increaseTimeSpentAction(
   mutateChapters: MutateChapters,
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) {
-  runAsyncAction(
-    deps.increaseTimeSpent(chapterId, timeSpent),
-    deps,
-  );
+  runAsyncAction(deps.increaseTimeSpent(chapterId, timeSpent), deps);
 
   mutateChapters(chapters =>
     chapters.map(ch =>
       ch.id === chapterId
         ? {
-          ...ch, timeSpent: (ch.timeSpent ?? 0) + timeSpent
-        }
-        : ch
-    )
+            ...ch,
+            timeSpent: (ch.timeSpent ?? 0) + timeSpent,
+          }
+        : ch,
+    ),
   );
 }

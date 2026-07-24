@@ -9,6 +9,7 @@ import {
   markChapterReadAction,
   markChaptersReadAction,
   markChaptersUnreadAction,
+  markChaptersUnreadAndResetProgressAction,
   markPreviouschaptersReadAction,
   markPreviousChaptersUnreadAction,
   refreshChaptersAction,
@@ -49,6 +50,7 @@ const createDeps = (): jest.Mocked<ChapterActionsDependencies> => ({
   markPreviousChaptersUnread: jest.fn().mockResolvedValue(undefined),
   markChaptersUnread: jest.fn().mockResolvedValue(undefined),
   updateChapterProgress: jest.fn().mockResolvedValue(undefined),
+  updateChapterProgressByIds: jest.fn().mockResolvedValue(undefined),
   deleteChapter: jest.fn().mockResolvedValue(undefined),
   deleteChapters: jest.fn().mockResolvedValue(undefined),
   getPageChapters: jest.fn().mockResolvedValue([]),
@@ -147,6 +149,45 @@ describe('chapterActions', () => {
 
     expect(deps.markChaptersUnread).toHaveBeenCalledWith([2]);
     expect(state.getState().map(ch => ch.unread)).toEqual([false, true]);
+  });
+
+  it('marks chapters unread and resets progress only after both writes succeed', async () => {
+    const deps = createDeps();
+    const state = createStateMutator([
+      makeChapter(1, { unread: false, progress: 75 }),
+    ]);
+
+    const success = await markChaptersUnreadAndResetProgressAction(
+      [makeChapter(1)],
+      state.mutate,
+      deps,
+    );
+
+    expect(success).toBe(true);
+    expect(deps.markChaptersUnread).toHaveBeenCalledWith([1]);
+    expect(deps.updateChapterProgressByIds).toHaveBeenCalledWith([1], 0);
+    expect(state.getState()[0]).toEqual(
+      expect.objectContaining({ unread: true, progress: 0 }),
+    );
+  });
+
+  it('keeps chapter state unchanged when unread reset persistence fails', async () => {
+    const deps = createDeps();
+    deps.updateChapterProgressByIds.mockRejectedValue(
+      new Error('write failed'),
+    );
+    const original = makeChapter(1, { unread: false, progress: 75 });
+    const state = createStateMutator([original]);
+
+    const success = await markChaptersUnreadAndResetProgressAction(
+      [makeChapter(1)],
+      state.mutate,
+      deps,
+    );
+
+    expect(success).toBe(false);
+    expect(state.getState()[0]).toEqual(original);
+    expect(deps.showToast).toHaveBeenCalledWith('write failed');
   });
 
   it('updateChapterProgressAction clamps persisted and in-memory progress values', () => {
@@ -281,49 +322,49 @@ describe('chapterActions', () => {
     ]);
   });
   it('increaseTimeSpentAction accumulates timeSpent in db and state', () => {
-	const deps = createDeps();
-	const state = createStateMutator([
-		makeChapter(1, { timeSpent: 500 }),
-		makeChapter(2, { timeSpent: 500 }),
-	]);
+    const deps = createDeps();
+    const state = createStateMutator([
+      makeChapter(1, { timeSpent: 500 }),
+      makeChapter(2, { timeSpent: 500 }),
+    ]);
 
-	increaseTimeSpentAction(1, 200, state.mutate, deps);
+    increaseTimeSpentAction(1, 200, state.mutate, deps);
 
-	expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 200);
-	expect(state.getState().map(ch => ch.timeSpent)).toEqual([700, 500]);
-	});
+    expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 200);
+    expect(state.getState().map(ch => ch.timeSpent)).toEqual([700, 500]);
+  });
 
-	it('increaseTimeSpentAction treats a missing timeSpent as 0 before adding', () => {
-	const deps = createDeps();
-	const state = createStateMutator([
-		makeChapter(1, { timeSpent: undefined }),
-	]);
+  it('increaseTimeSpentAction treats a missing timeSpent as 0 before adding', () => {
+    const deps = createDeps();
+    const state = createStateMutator([
+      makeChapter(1, { timeSpent: undefined }),
+    ]);
 
-	increaseTimeSpentAction(1, 300, state.mutate, deps);
+    increaseTimeSpentAction(1, 300, state.mutate, deps);
 
-	expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 300);
-	expect(state.getState()[0].timeSpent).toBe(300);
-	});
+    expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 300);
+    expect(state.getState()[0].timeSpent).toBe(300);
+  });
 
-	it('increaseTimeSpentAction is a no-op on state for a chapterId not present', () => {
-	const deps = createDeps();
-	const state = createStateMutator([makeChapter(1, { timeSpent: 500 })]);
+  it('increaseTimeSpentAction is a no-op on state for a chapterId not present', () => {
+    const deps = createDeps();
+    const state = createStateMutator([makeChapter(1, { timeSpent: 500 })]);
 
-	increaseTimeSpentAction(999, 200, state.mutate, deps);
+    increaseTimeSpentAction(999, 200, state.mutate, deps);
 
-	expect(deps.increaseTimeSpent).toHaveBeenCalledWith(999, 200);
-	expect(state.getState().map(ch => ch.timeSpent)).toEqual([500]);
-	});
+    expect(deps.increaseTimeSpent).toHaveBeenCalledWith(999, 200);
+    expect(state.getState().map(ch => ch.timeSpent)).toEqual([500]);
+  });
 
-	it('increaseTimeSpentAction supports repeated calls accumulating on the same chapter', () => {
-	const deps = createDeps();
-	const state = createStateMutator([makeChapter(1, { timeSpent: 0 })]);
+  it('increaseTimeSpentAction supports repeated calls accumulating on the same chapter', () => {
+    const deps = createDeps();
+    const state = createStateMutator([makeChapter(1, { timeSpent: 0 })]);
 
-	increaseTimeSpentAction(1, 100, state.mutate, deps);
-	increaseTimeSpentAction(1, 150, state.mutate, deps);
+    increaseTimeSpentAction(1, 100, state.mutate, deps);
+    increaseTimeSpentAction(1, 150, state.mutate, deps);
 
-	expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(1, 1, 100);
-	expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(2, 1, 150);
-	expect(state.getState()[0].timeSpent).toBe(250);
-	});
+    expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(1, 1, 100);
+    expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(2, 1, 150);
+    expect(state.getState()[0].timeSpent).toBe(250);
+  });
 });

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -22,6 +22,7 @@ import {
   LegendListRenderItemProps,
 } from '@legendapp/list/react-native';
 import { useNovelAction, useNovelValue } from '../NovelContext';
+import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/store-helper/bootstrapService';
 
 interface JumpToChapterModalProps {
   hideModal: () => void;
@@ -41,6 +42,11 @@ const JumpToChapterModal = ({
   const minNumber = 1;
 
   const loadedChapters = useNovelValue('chapters');
+  const loadedChaptersRef = useRef(loadedChapters);
+  useEffect(() => {
+    loadedChaptersRef.current = loadedChapters;
+  }, [loadedChapters]);
+  const requestIdRef = useRef(0);
   const batchInformation = useNovelValue('batchInformation');
   const loadUpToBatch = useNovelAction('loadUpToBatch');
 
@@ -57,6 +63,7 @@ const JumpToChapterModal = ({
   const [inputFocused, setInputFocused] = useState(false);
 
   const onDismiss = () => {
+    requestIdRef.current += 1;
     hideModal();
     setText('');
     inputRef.current?.clear();
@@ -74,9 +81,9 @@ const JumpToChapterModal = ({
   };
 
   const scrollToChapter = async (chap: ChapterInfo) => {
-    onDismiss();
     const loadedIndex = loadedChapters.findIndex(c => c.id === chap.id);
     if (loadedIndex >= 0) {
+      onDismiss();
       chapterListRef.current?.scrollToIndex({
         animated: true,
         index: loadedIndex,
@@ -86,15 +93,44 @@ const JumpToChapterModal = ({
     }
 
     if ((chap.position ?? -1) >= 0) {
-      const targetBatch = Math.floor(chap.position! / 300);
-      await loadUpToBatch(targetBatch);
-      setTimeout(() => {
-        chapterListRef.current?.scrollToIndex({
-          animated: true,
-          index: chap.position!,
-          viewPosition: 0.5,
-        });
-      }, 0);
+      const requestId = ++requestIdRef.current;
+      try {
+        const targetBatch = Math.floor(
+          (chap.position ?? 0) / CHAPTER_BATCH_SIZE,
+        );
+        await loadUpToBatch(targetBatch);
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+        setTimeout(() => {
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+          const resolvedIndex = loadedChaptersRef.current.findIndex(
+            chapter => chapter.id === chap.id,
+          );
+          if (resolvedIndex < 0) {
+            setError(
+              getString(
+                'novelScreen.jumpToChapterModal.error.validChapterNumber',
+              ),
+            );
+            return;
+          }
+          onDismiss();
+          chapterListRef.current?.scrollToIndex({
+            animated: true,
+            index: resolvedIndex,
+            viewPosition: 0.5,
+          });
+        }, 0);
+      } catch (loadError) {
+        if (requestId === requestIdRef.current) {
+          setError(
+            loadError instanceof Error ? loadError.message : String(loadError),
+          );
+        }
+      }
     }
   };
 
@@ -102,7 +138,7 @@ const JumpToChapterModal = ({
     if (openChapter) {
       navigateToChapter(item);
     } else {
-      scrollToChapter(item);
+      void scrollToChapter(item);
     }
   };
 
@@ -129,47 +165,65 @@ const JumpToChapterModal = ({
   };
 
   const onSubmit = async () => {
-    if (!mode) {
-      // Number search
-      const num = Number(text);
-      if (num && num >= minNumber && num <= maxNumber) {
-        const chapters = await getNovelChaptersByNumber(novel!.id, num);
-        if (chapters.length > 0) {
-          const chapter = chapters[0];
-          if (openChapter) {
-            return navigateToChapter(chapter);
-          } else {
-            return scrollToChapter(chapter);
+    const requestId = ++requestIdRef.current;
+    setError('');
+    try {
+      if (!mode) {
+        // Number search
+        const num = Number(text);
+        if (num && num >= minNumber && num <= maxNumber) {
+          const chapters = await getNovelChaptersByNumber(novel.id, num);
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+          if (chapters.length > 0) {
+            const chapter = chapters[0];
+            if (openChapter) {
+              return navigateToChapter(chapter);
+            } else {
+              return await scrollToChapter(chapter);
+            }
           }
         }
-      }
 
-      return setError(
-        getString('novelScreen.jumpToChapterModal.error.validChapterNumber') +
-          ` (${num < minNumber ? '≥ ' + minNumber : '≤ ' + maxNumber})`,
-      );
-    } else {
-      // Text search
-      const chapters = await getNovelChaptersByName(
-        novel!.id,
-        text.toLowerCase(),
-      );
-      if (!chapters.length) {
-        setError(
-          getString('novelScreen.jumpToChapterModal.error.validChapterName'),
+        return setError(
+          getString('novelScreen.jumpToChapterModal.error.validChapterNumber') +
+            ` (${num < minNumber ? '≥ ' + minNumber : '≤ ' + maxNumber})`,
         );
-        return;
-      }
-
-      if (chapters.length === 1) {
-        if (openChapter) {
-          return navigateToChapter(chapters[0]);
-        } else {
-          return scrollToChapter(chapters[0]);
+      } else {
+        // Text search
+        const chapters = await getNovelChaptersByName(
+          novel.id,
+          text.toLowerCase(),
+        );
+        if (requestId !== requestIdRef.current) {
+          return;
         }
-      }
+        if (!chapters.length) {
+          setError(
+            getString('novelScreen.jumpToChapterModal.error.validChapterName'),
+          );
+          return;
+        }
 
-      return setResult(chapters);
+        if (chapters.length === 1) {
+          if (openChapter) {
+            return navigateToChapter(chapters[0]);
+          } else {
+            return await scrollToChapter(chapters[0]);
+          }
+        }
+
+        return setResult(chapters);
+      }
+    } catch (searchError) {
+      if (requestId === requestIdRef.current) {
+        setError(
+          searchError instanceof Error
+            ? searchError.message
+            : String(searchError),
+        );
+      }
     }
   };
 

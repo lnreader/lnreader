@@ -5,6 +5,7 @@ const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
 const mockDownloadChapter = jest.fn();
 let mockDownloadingChapterIds = new Set<number>();
+let mockDownloadingNovelIds = new Set<number>();
 
 jest.mock('../../NovelContext', () => ({
   useNovelValue: (key: string) => mockUseNovelValue(key),
@@ -20,6 +21,7 @@ jest.mock('@hooks/persisted', () => ({
   }),
   useDownload: () => ({
     downloadingChapterIds: mockDownloadingChapterIds,
+    downloadingNovelIds: mockDownloadingNovelIds,
     downloadChapter: mockDownloadChapter,
   }),
   useTheme: () => ({
@@ -41,12 +43,12 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0 }),
 }));
 
-jest.mock('@legendapp/list/react-native', () => {
+jest.mock('@legendapp/list/reanimated', () => {
   const React = require('react');
   const { View } = require('react-native');
 
   return {
-    LegendList: ({ data, renderItem, ListHeaderComponent }: any) =>
+    AnimatedLegendList: ({ data, renderItem, ListHeaderComponent }: any) =>
       React.createElement(
         View,
         null,
@@ -224,6 +226,7 @@ const createStore = (overrides: Record<string, unknown> = {}) => {
     novel: baseNovel,
     batchInformation: { batch: 0, total: 1, totalChapters: 2 },
     pageIndex: 0,
+    getChapters: jest.fn(),
     openPage: jest.fn(),
     updateChapter: jest.fn(),
     refreshNovel: jest.fn(),
@@ -245,6 +248,7 @@ const wireStoreSelectors = (store: ReturnType<typeof createStore>) => {
   mockUseNovelActions.mockReturnValue({
     deleteChapter: store.state.deleteChapter,
     setNovel: store.state.setNovel,
+    getChapters: store.state.getChapters,
     openPage: store.state.openPage,
     updateChapter: store.state.updateChapter,
     refreshNovel: store.state.refreshNovel,
@@ -275,6 +279,7 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDownloadingChapterIds = new Set<number>();
+    mockDownloadingNovelIds = new Set<number>();
   });
 
   it('uses novelStore selector actions', () => {
@@ -288,15 +293,16 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
     expect(store.state.deleteChapter).toHaveBeenCalledTimes(1);
   });
 
-  it('marks downloaded chapter when an id leaves downloading set', () => {
+  it('reconciles once after the novel download queue settles', () => {
     const store = createStore();
 
-    mockDownloadingChapterIds = new Set<number>([1]);
+    mockDownloadingChapterIds = new Set<number>([1, 2]);
+    mockDownloadingNovelIds = new Set<number>([baseNovel.id]);
     wireStoreSelectors(store);
 
     const view = renderList();
 
-    mockDownloadingChapterIds = new Set<number>();
+    mockDownloadingChapterIds = new Set<number>([2]);
     view.rerender(
       <NovelScreenList
         headerOpacity={headerOpacity as any}
@@ -312,9 +318,27 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
       />,
     );
 
-    expect(store.state.updateChapter).toHaveBeenCalledWith(0, {
-      isDownloaded: true,
-    });
+    expect(store.state.getChapters).not.toHaveBeenCalled();
+
+    mockDownloadingChapterIds = new Set<number>();
+    mockDownloadingNovelIds = new Set<number>();
+    view.rerender(
+      <NovelScreenList
+        headerOpacity={headerOpacity as any}
+        listRef={listRef as any}
+        navigation={navigation}
+        routeBaseNovel={{
+          name: 'Route Novel',
+          path: '/novel/test',
+          pluginId: 'plugin.test',
+        }}
+        selected={[]}
+        setSelected={jest.fn()}
+      />,
+    );
+
+    expect(store.state.getChapters).toHaveBeenCalledTimes(1);
+    expect(store.state.updateChapter).not.toHaveBeenCalled();
   });
 
   it('uses selector-backed page navigation action from novelStore', () => {

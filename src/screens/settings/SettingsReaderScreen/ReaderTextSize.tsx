@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import React from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { IconButtonV2 } from '@components/index';
+import { Slider } from '@components';
 import { getString } from '@i18n/translations';
 
 interface ReaderTextSizeProps {
@@ -15,29 +15,27 @@ const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
-        {getString('readerScreen.bottomSheet.textSize')}
-      </Text>
-      <View style={styles.buttonContainer}>
-        <IconButtonV2
-          name="minus"
-          color={theme.primary}
-          size={26}
-          disabled={textSize <= 0}
-          onPress={() => setChapterReaderSettings({ textSize: textSize - 1 })}
-          theme={theme}
-        />
-        <Text style={[styles.value, { color: theme.onSurface }]}>
-          {textSize}
+      <View style={styles.labelRow}>
+        <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
+          {getString('readerScreen.bottomSheet.textSize')}
         </Text>
-        <IconButtonV2
-          name="plus"
-          color={theme.primary}
-          size={26}
-          onPress={() => setChapterReaderSettings({ textSize: textSize + 1 })}
-          theme={theme}
-        />
+        <Text style={[styles.value, { color: theme.onSurface }]}>
+          {textSize}px
+        </Text>
       </View>
+      <Slider
+        value={textSize}
+        min={12}
+        max={20}
+        step={1}
+        showStops
+        showValueIndicator
+        formatValue={value => `${value}px`}
+        accessibilityLabel={getString('readerScreen.bottomSheet.textSize')}
+        onSlidingComplete={value =>
+          setChapterReaderSettings({ textSize: value })
+        }
+      />
     </View>
   );
 };
@@ -45,18 +43,16 @@ const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
 export default ReaderTextSize;
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  container: {
+  labelRow: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  container: {
     marginVertical: 6,
     paddingHorizontal: 16,
   },
   value: {
-    paddingHorizontal: 24,
+    fontVariant: ['tabular-nums'],
   },
 });

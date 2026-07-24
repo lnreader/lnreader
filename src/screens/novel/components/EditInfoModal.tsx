@@ -18,6 +18,7 @@ import { ThemeColors } from '@theme/types';
 import { NovelInfo } from '@database/types';
 import { NovelStatus } from '@plugins/types';
 import { translateNovelStatus } from '@utils/translateEnum';
+import { showToast } from '@utils/showToast';
 
 interface EditInfoModalProps {
   theme: ThemeColors;
@@ -42,32 +43,47 @@ const getStatusChipText = (selected: boolean, theme: ThemeColors) => ({
 const getGenreListStyle = () => styles.genreList;
 
 // --- Main Component ---
-const EditInfoModal = ({
+type EditInfoModalContentProps = Omit<EditInfoModalProps, 'modalVisible'>;
+
+const EditInfoModalContent = ({
   theme,
   hideModal,
-  modalVisible,
   novel,
   setNovel,
-}: EditInfoModalProps) => {
-  const initialNovelInfo = { ...novel };
+}: EditInfoModalContentProps) => {
   const [novelInfo, setNovelInfo] = useState(novel);
+  const [saving, setSaving] = useState(false);
 
   const [newGenre, setNewGenre] = useState('');
 
   const removeTag = (t: string) => {
-    setNovelInfo({
-      ...novel,
-      genres: novelInfo.genres
+    setNovelInfo(current => ({
+      ...current,
+      genres: current.genres
         ?.split(',')
         .filter(item => item !== t)
-        ?.join(','),
-    });
+        .join(','),
+    }));
   };
 
   const status = Object.values(NovelStatus);
+  const persistNovelInfo = async (nextNovel: NovelInfo, dismiss: boolean) => {
+    setSaving(true);
+    try {
+      await updateNovelInfo(nextNovel);
+      setNovel(nextNovel);
+      if (dismiss) {
+        hideModal();
+      }
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : String(error));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <Dialog.Root visible={modalVisible} onDismiss={hideModal}>
+    <Dialog.Root visible onDismiss={() => !saving && hideModal()}>
       <Dialog.Title>{getString('novelScreen.edit.info')}</Dialog.Title>
       <Dialog.ScrollArea>
         <ScrollView
@@ -96,7 +112,9 @@ const EditInfoModal = ({
                     android_ripple={{
                       color: theme.rippleColor,
                     }}
-                    onPress={() => setNovelInfo({ ...novel, status: item })}
+                    onPress={() =>
+                      setNovelInfo(current => ({ ...current, status: item }))
+                    }
                   >
                     <Text
                       style={getStatusChipText(
@@ -112,7 +130,6 @@ const EditInfoModal = ({
             </ScrollView>
           </View>
           <TextInput
-            defaultValue={initialNovelInfo.name}
             value={novelInfo.name}
             placeholder={getString('novelScreen.edit.title', {
               title: novel.name,
@@ -120,12 +137,13 @@ const EditInfoModal = ({
             numberOfLines={1}
             mode="outlined"
             theme={{ colors: { ...theme } }}
-            onChangeText={text => setNovelInfo({ ...novel, name: text })}
+            onChangeText={name =>
+              setNovelInfo(current => ({ ...current, name }))
+            }
             dense
             style={styles.inputWrapper}
           />
           <TextInput
-            defaultValue={initialNovelInfo.author ?? undefined}
             value={novelInfo.author ?? undefined}
             placeholder={getString('novelScreen.edit.author', {
               author: novel.author,
@@ -133,30 +151,34 @@ const EditInfoModal = ({
             numberOfLines={1}
             mode="outlined"
             theme={{ colors: { ...theme } }}
-            onChangeText={text => setNovelInfo({ ...novel, author: text })}
+            onChangeText={author =>
+              setNovelInfo(current => ({ ...current, author }))
+            }
             dense
             style={styles.inputWrapper}
           />
           <TextInput
-            defaultValue={initialNovelInfo.artist ?? undefined}
             value={novelInfo.artist ?? undefined}
             placeholder={'Artist: ' + novel.artist}
             numberOfLines={1}
             mode="outlined"
             theme={{ colors: { ...theme } }}
-            onChangeText={text => setNovelInfo({ ...novel, artist: text })}
+            onChangeText={artist =>
+              setNovelInfo(current => ({ ...current, artist }))
+            }
             dense
             style={styles.inputWrapper}
           />
           <TextInput
-            defaultValue={initialNovelInfo.summary ?? undefined}
             value={novelInfo.summary ?? undefined}
             placeholder={getString('novelScreen.edit.summary', {
               summary: novel.summary?.substring(0, 16),
             })}
             numberOfLines={1}
             mode="outlined"
-            onChangeText={text => setNovelInfo({ ...novel, summary: text })}
+            onChangeText={summary =>
+              setNovelInfo(current => ({ ...current, summary }))
+            }
             theme={{ colors: { ...theme } }}
             dense
             style={styles.inputWrapper}
@@ -177,8 +199,8 @@ const EditInfoModal = ({
 
               setNovelInfo(prevVal => ({
                 ...prevVal,
-                genres: novelInfo.genres
-                  ? `${novelInfo.genres},` + newGenreTrimmed
+                genres: prevVal.genres
+                  ? `${prevVal.genres},` + newGenreTrimmed
                   : newGenreTrimmed,
               }));
               setNewGenre('');
@@ -207,24 +229,31 @@ const EditInfoModal = ({
       <Dialog.Actions>
         <Dialog.Action
           title={getString('common.reset')}
+          disabled={saving}
           onPress={() => {
-            setNovelInfo(initialNovelInfo);
-            updateNovelInfo(initialNovelInfo);
+            setNovelInfo(novel);
+            void persistNovelInfo(novel, false);
           }}
         />
-        <Dialog.Action title={getString('common.cancel')} onPress={hideModal} />
+        <Dialog.Action
+          title={getString('common.cancel')}
+          disabled={saving}
+          onPress={hideModal}
+        />
         <Dialog.Action
           title={getString('common.save')}
+          disabled={saving}
           onPress={() => {
-            setNovel(novelInfo);
-            updateNovelInfo(novelInfo);
-            hideModal();
+            void persistNovelInfo(novelInfo, true);
           }}
         />
       </Dialog.Actions>
     </Dialog.Root>
   );
 };
+
+const EditInfoModal = ({ modalVisible, ...props }: EditInfoModalProps) =>
+  modalVisible ? <EditInfoModalContent {...props} /> : null;
 
 export default EditInfoModal;
 

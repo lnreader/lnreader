@@ -1,13 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { TabView, TabBar, type TabBarProps } from 'react-native-tab-view';
+import { TabView, type TabBarProps } from 'react-native-tab-view';
 import Color from 'color';
 
 import { useSearch } from '@hooks';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
-import { SafeAreaView, SearchbarV2 } from '@components';
+import { SafeAreaView, SearchbarV2, TopTabBar } from '@components';
 import { BrowseScreenProps } from '@navigators/types';
 import { PluginsTab } from './components/PluginsTab';
 import { SourcesTab } from './components/SourcesTab';
@@ -115,7 +115,7 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
 
   const renderTabBar = useCallback(
     (props: TabBarProps<BrowseRoute>) => (
-      <TabBar
+      <TopTabBar
         {...props}
         indicatorStyle={indicatorStyle}
         style={tabBarStyle}

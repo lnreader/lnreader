@@ -1,6 +1,7 @@
 import '../../../__tests__/mocks';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { ChapterInfo, DBNovelInfo } from '@database/types';
+import { ChapterRow } from '@database/schema';
 import {
   getChapterCount,
   getChapterCountSync,
@@ -39,7 +40,10 @@ const mockNovel: DBNovelInfo = {
   lastUpdatedAt: null,
 };
 
-const makeChapter = (id: number, overrides: Partial<ChapterInfo> = {}) => ({
+const makeChapter = (
+  id: number,
+  overrides: Partial<ChapterRow> = {},
+): ChapterRow => ({
   id,
   novelId: mockNovel.id,
   name: `Chapter ${id}`,
@@ -54,8 +58,9 @@ const makeChapter = (id: number, overrides: Partial<ChapterInfo> = {}) => ({
   page: '1',
   position: id,
   scanlator: null,
+  timeSpent: 0,
   ...overrides,
-  releaseTime: overrides.releaseTime || '2024-01-01',
+  releaseTime: overrides.releaseTime ?? '2024-01-01',
 });
 
 const mockChapters: ChapterInfo[] = [
@@ -279,6 +284,7 @@ describe('bootstrapService', () => {
     if (!result.ok) return;
 
     expect(result.pages).toEqual(['1', '3']);
+    expect(result.pageIndex).toBe(1);
     expect(mockGetChapterCount).toHaveBeenCalledWith(
       mockNovel.id,
       '3',
@@ -293,6 +299,55 @@ describe('bootstrapService', () => {
       0,
       undefined,
     );
+  });
+
+  it('clamps a persisted page index to the available pages', async () => {
+    setupDbFirstSuccess();
+    mockGetCustomPages.mockReturnValue([
+      { page: '1' },
+      { page: '3' },
+    ] as ReturnType<typeof getCustomPages>);
+    const service = createBootstrapService();
+
+    const result = await service.bootstrapNovelAsync({
+      novel: mockNovel,
+      novelPath: NOVEL_PATH,
+      pluginId: PLUGIN_ID,
+      pageIndex: 99,
+      settingsSort,
+      settingsFilter,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.pageIndex).toBe(1);
+    expect(mockGetChapterCount).toHaveBeenCalledWith(
+      mockNovel.id,
+      '3',
+      settingsFilter,
+      undefined,
+    );
+  });
+
+  it('does not add an empty batch for an exact 1000 chapter page', async () => {
+    setupDbFirstSuccess();
+    mockGetChapterCount.mockResolvedValue(1000);
+    const service = createBootstrapService();
+
+    const result = await service.bootstrapNovelAsync({
+      novel: mockNovel,
+      novelPath: NOVEL_PATH,
+      pluginId: PLUGIN_ID,
+      pageIndex: 0,
+      settingsSort,
+      settingsFilter,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.batchInformation.total).toBe(0);
   });
 
   it('getNextChapterBatch loads the next batch when available', async () => {

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Portal } from 'react-native-paper';
-import { StatusBar, StyleProp, ViewStyle } from 'react-native';
+import { StatusBar } from 'react-native';
 import { copyFile, openDocumentTree } from 'react-native-saf-x';
 
 import { epub, type EpubExportChapter } from '@modules/nitro-epub';
@@ -15,16 +15,10 @@ import { getString } from '@i18n/translations';
 import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 
 import ExportEpubModal from './ExportEpubModal';
-import { MaterialDesignIconName } from '@type/icon';
 
 interface ExportNovelAsEpubButtonProps {
   novel?: NovelInfo;
-  iconComponent: (props: {
-    icon: MaterialDesignIconName;
-    onPress: () => void;
-    style?: StyleProp<ViewStyle>;
-    size?: number;
-  }) => React.JSX.Element;
+  renderIcon: (onPress: () => void) => React.ReactNode;
 }
 
 const sanitizeEpubFileName = (fileName: string) => {
@@ -39,7 +33,7 @@ const sanitizeEpubFileName = (fileName: string) => {
 
 const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
   novel,
-  iconComponent: IconComponent,
+  renderIcon,
 }) => {
   const theme = useTheme();
 
@@ -195,10 +189,10 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
           chapters: result.chapterCount.toString(),
         }),
       );
-    } catch (error: any) {
+    } catch (error) {
       showToast(
         getString('novelScreen.epub.exportFailed', {
-          error: error.message || error,
+          error: error instanceof Error ? error.message : String(error),
         }),
       );
     } finally {
@@ -214,14 +208,16 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
 
   return (
     <>
-      <IconComponent icon="book-arrow-down-outline" onPress={showModal} />
+      {renderIcon(showModal)}
       <Portal>
-        <ExportEpubModal
-          isVisible={isModalVisible}
-          defaultFileName={novel?.name || 'novel'}
-          hideModal={hideModal}
-          onSubmit={exportNovelAsEpub}
-        />
+        {isModalVisible ? (
+          <ExportEpubModal
+            isVisible
+            defaultFileName={novel?.name || 'novel'}
+            hideModal={hideModal}
+            onSubmit={exportNovelAsEpub}
+          />
+        ) : null}
       </Portal>
     </>
   );

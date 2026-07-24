@@ -26,4 +26,7 @@ export { default as ConfirmationDialog } from './ConfirmationDialog/Confirmation
 export { default as SafeAreaView } from './SafeAreaView/SafeAreaView';
 export { SegmentedControl } from './SegmentedControl';
 export { default as BottomTabBar } from './BottomTabBar';
+export { default as TopTabBar } from './TopTabBar/TopTabBar';
 export { default as Menu } from './Menu';
+export { default as Slider } from './Slider/Slider';
+export type { SliderProps, SliderSize } from './Slider/Slider';
