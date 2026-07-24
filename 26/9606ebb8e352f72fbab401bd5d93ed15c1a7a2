@@ -1,0 +1,19 @@
+tsconfig.json
+  s_8318f04f77cd46::t_e8dc3b36526bba 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "269606ebb8e352f72fbab401bd5d93ed15c1a7a2",
+  "prompts": {},
+  "sessions": {
+    "s_8318f04f77cd46": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f92f5-cade-7050-bf43-6f41accd4b5d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
