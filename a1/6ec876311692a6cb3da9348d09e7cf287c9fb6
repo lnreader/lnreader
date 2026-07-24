@@ -1,0 +1,146 @@
+src/screens/novel/components/Tracker/TrackSearchDialog.tsx
+  s_027229454db4c0::t_3f270a0d0ccee4 2,7,178-181
+  s_027229454db4c0::t_e7ec40983eac88 71-73,76-80,82-86,91,94,99,104-105,111,113,117,119,122,127,130,135
+  s_027229454db4c0::t_c9cb1b43f9e099 28,74
+  s_027229454db4c0::t_950778ddf0289c 1
+  s_027229454db4c0::t_516a731d59df0f 31-37,39,41-65,67-69,229-233
+  s_027229454db4c0::t_1bf5d133ed0c9d 5,23,27,38,40,66,70,87-90,92-93,95,98,100-101,106-108,112,114-116,118,123,125-126,128-129,131,134,149-150,198,203-204,224-228,234-238,245-248,280
+  s_027229454db4c0::t_bd7e379e115a7f 25,29,109,124,132-133
+  s_027229454db4c0::t_28635abc4c70ac 137-138
+  s_027229454db4c0::t_2d7e39273826d5 194
+  s_027229454db4c0::t_e1b25a751becb3 81,110
+  s_027229454db4c0::t_7cddf3e29f7aea 136
+src/screens/GlobalSearchScreen/components/GlobalSearchResultsList.tsx
+  s_027229454db4c0::t_9157de456490d7 5,18,56-57
+  s_027229454db4c0::t_e92d310f195f45 19-22,33,40-48,123
+src/plugins/types/index.ts
+  s_027229454db4c0::t_28635abc4c70ac 110-115
+src/screens/StatsScreen/StatsScreen.tsx
+  s_027229454db4c0::t_e7ec40983eac88 78-121
+  s_027229454db4c0::t_3f270a0d0ccee4 2,12
+  s_027229454db4c0::t_9157de456490d7 73
+  s_027229454db4c0::t_bb96be73945c92 232-236
+  s_027229454db4c0::t_5121d13e3142a0 238
+src/screens/novel/components/NovelChapterGroup.tsx
+  s_027229454db4c0::t_7df7c6833d4f96 1-4,6,13,16-28,30-37,42-43,45-52,56-57,60,65-67,69,74-77,80,83,87-96,98-99,101-106,108-110,113-121,123-131,133-141,144,147,149,153-155,157-169,172-174,176-178,182-183,186-194,212-214
+  s_027229454db4c0::t_05654ed2c4f9fb 122
+src/screens/history/components/HistoryCard/HistoryCard.tsx
+  s_027229454db4c0::t_516a731d59df0f 35,39-40
+  s_027229454db4c0::t_9157de456490d7 52
+  s_027229454db4c0::t_28635abc4c70ac 11
+  s_027229454db4c0::t_5114eeddd2eb4f 2,7,60-63
+src/hooks/persisted/useUpdates.ts
+  s_027229454db4c0::t_7df7c6833d4f96 19,24
+  s_027229454db4c0::t_7b3c3dcb41de5e 62-72,74-81
+  s_027229454db4c0::t_8fcd56549aec6b 101
+  s_027229454db4c0::t_7cec32b6c37053 16-18,20-23,25-40
+  s_027229454db4c0::t_28635abc4c70ac 7
+  s_027229454db4c0::t_51630ccb40e148 87-89
+src/screens/novel/components/ChapterItem.tsx
+  s_027229454db4c0::t_05654ed2c4f9fb 19,36,48,121,124,144,159,167,181,246
+src/screens/novel/components/Tracker/__tests__/TrackSearchDialog.test.tsx
+  s_027229454db4c0::t_950778ddf0289c 32-33,80
+  s_027229454db4c0::t_4cf9e8c0bae1dd 1-23,27-31,34-44,48-67,71-79,81-104,113-154,195-196
+  s_027229454db4c0::t_9b082c9426cb39 105-112,155-181,183-194
+  s_027229454db4c0::t_245efc8807e508 24-26,45-47,68-70
+  s_027229454db4c0::t_3ce498a47604ef 182
+src/screens/more/components/DownloadedNovelChapterGroup.tsx
+  s_027229454db4c0::t_7df7c6833d4f96 1-47
+src/screens/more/DownloadsScreen.tsx
+  s_027229454db4c0::t_0fd9615ee4cbb1 110
+  s_027229454db4c0::t_51630ccb40e148 55,71,74-80,124-129
+  s_027229454db4c0::t_7df7c6833d4f96 18,108-109,111
+  s_027229454db4c0::t_05654ed2c4f9fb 28-42,104-105
+src/screens/updates/UpdatesScreen.tsx
+  s_027229454db4c0::t_51630ccb40e148 1,37-41,43-63,110,115-132
+  s_027229454db4c0::t_8fcd56549aec6b 42
+  s_027229454db4c0::t_7df7c6833d4f96 16,111,113
+  s_027229454db4c0::t_0fd9615ee4cbb1 91
+  s_027229454db4c0::t_05654ed2c4f9fb 112
+src/components/NovelCover.tsx
+  s_027229454db4c0::t_e92d310f195f45 21,91-97
+  s_027229454db4c0::t_639c65a4fbf40b 101-109
+  s_027229454db4c0::t_3f270a0d0ccee4 177
+  s_027229454db4c0::t_5114eeddd2eb4f 20,175-176,178-179
+src/components/index.ts
+  s_027229454db4c0::t_5114eeddd2eb4f 14
+package.json
+  s_027229454db4c0::t_cf4f31da00bd72 65
+src/screens/browse/globalsearch/GlobalSearchNovelCover.tsx
+  s_027229454db4c0::t_5114eeddd2eb4f 1,4,35-38
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_027229454db4c0::t_53e5ff01b776cb 1270-1289
+src/components/NovelCoverImage.tsx
+  s_027229454db4c0::t_14743edab365f5 131
+  s_027229454db4c0::t_4e45ab374ac7ac 50-51,54,57,71,73-74,80,119-120,123,132
+  s_027229454db4c0::t_28635abc4c70ac 4,33
+  s_027229454db4c0::t_639c65a4fbf40b 2,5-8
+  s_027229454db4c0::t_3f270a0d0ccee4 1,14-15,32,46
+  s_027229454db4c0::t_5121d13e3142a0 3,17-30,52-53,55-56,58,64-65,78,89-113,121-122,128-130,133,137-143
+  s_027229454db4c0::t_516a731d59df0f 10,66,144-147
+  s_027229454db4c0::t_5114eeddd2eb4f 9,11-13,16,31,34-45,47-49,59-63,67-70,72,75-77,79,81-88,114-118,124-127,134-136,148-160
+src/components/__tests__/NovelCoverImage.test.tsx
+  s_027229454db4c0::t_4e45ab374ac7ac 1-23,25-41,49-57,80-81
+  s_027229454db4c0::t_a28f7a14baab60 42-48,58-79
+  s_027229454db4c0::t_d4c3b29c4509ab 24
+src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx
+  s_027229454db4c0::t_53e5ff01b776cb 8-52,55-57,62-108
+  s_027229454db4c0::t_c793fabe9052a0 1-7
+  s_027229454db4c0::t_546b9d74c2bcf0 53-54,58-61
+src/database/queries/ChapterQueries.ts
+  s_027229454db4c0::t_0fd9615ee4cbb1 27,238-242,753
+  s_027229454db4c0::t_7df7c6833d4f96 767,786,805-807
+src/components/__tests__/NovelList.test.ts
+  s_027229454db4c0::t_6fdec911fe9938 13-25
+  s_027229454db4c0::t_e3d142c5eb771a 1-8,26-65
+  s_027229454db4c0::t_5860312a5433b6 9-12
+src/screens/updates/components/UpdateNovelChapterGroup.tsx
+  s_027229454db4c0::t_7df7c6833d4f96 1-23,29-77,80,82-84,88-105
+  s_027229454db4c0::t_0fd9615ee4cbb1 24-28
+  s_027229454db4c0::t_a8683f36da415a 78-79,81,85-87
+src/components/NovelCoverLayoutContext.tsx
+  s_027229454db4c0::t_28635abc4c70ac 7
+  s_027229454db4c0::t_14af7b7c3d2164 45
+  s_027229454db4c0::t_e92d310f195f45 1-6,8-39,44,46-85
+  s_027229454db4c0::t_516a731d59df0f 40-43
+src/components/NovelList.tsx
+  s_027229454db4c0::t_e92d310f195f45 2,4-7,11-14,22-23,29,67-68,70-71,78-90
+  s_027229454db4c0::t_581dad15470f81 18-20,46,51,56,61
+  s_027229454db4c0::t_14af7b7c3d2164 10,69
+  s_027229454db4c0::t_e3d142c5eb771a 25,28,31-38,40-41,43-45,47-50,53,55,57-60,63-64,72-75
+  s_027229454db4c0::t_1fa576784d38cd 66
+src/screens/novel/components/Info/NovelInfoComponents.tsx
+  s_027229454db4c0::t_516a731d59df0f 2-3
+  s_027229454db4c0::t_3f270a0d0ccee4 8,40,57-81,83-87,90-94,117-122,149-152,154-155
+  s_027229454db4c0::t_5121d13e3142a0 15,21,88-89,153
+  s_027229454db4c0::t_66af4b3a56bd3c 7
+src/components/ListView.tsx
+  s_027229454db4c0::t_5114eeddd2eb4f 2,8,44-47
+src/screens/browse/discover/DiscoverNovelCard/index.tsx
+  s_027229454db4c0::t_3f270a0d0ccee4 2,4,26-31
+src/components/ErrorScreenV2/ErrorScreenV2.tsx
+  s_027229454db4c0::t_9157de456490d7 9
+src/plugins/helpers/constants.ts
+  s_027229454db4c0::t_bb96be73945c92 1
+src/database/types/index.ts
+  s_027229454db4c0::t_0fd9615ee4cbb1 112-114
+  s_027229454db4c0::t_7df7c6833d4f96 71,73
+pnpm-lock.yaml
+  s_027229454db4c0::t_fb111ff2727a85 104-106,3341-3351,9647-9653
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "a16ec876311692a6cb3da9348d09e7cf287c9fb6",
+  "prompts": {},
+  "sessions": {
+    "s_027229454db4c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f927d-512a-7173-8270-b7762c885b50",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
