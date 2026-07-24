@@ -1,0 +1,65 @@
+src/screens/Categories/components/CategorySkeletonLoading.tsx
+  s_8a87a8f674db15::t_dcf4baa97073f9 2,16-17,28
+  s_8a87a8f674db15::t_fb690c3ad33172 5-7,18-19,21,23-24,35-39,48
+src/components/Skeleton/ShimmerPlaceholder.tsx
+  s_8a87a8f674db15::t_bbf738f4e3b8d7 1
+  s_8a87a8f674db15::t_df80199082921f 2-9,23-24
+  s_8a87a8f674db15::t_6641272de006e0 10-22
+src/screens/browse/loadingAnimation/LoadingNovel.tsx
+  s_8a87a8f674db15::t_9789fb4f55295a 1,4,7,9,17,19,25-33,35-36,38-39,46,48,55,59,63,68-94,97-123
+src/screens/browse/loadingAnimation/MalLoading.tsx
+  s_8a87a8f674db15::t_4d3780ae09e17b 2,5,12-18,20-24,26-33,35-36,39-61,63-65,68-93
+src/screens/browse/loadingAnimation/TrackerLoading.tsx
+  s_8a87a8f674db15::t_4d3780ae09e17b 2,5,12-18,20-24,26-33,35-36,39-61,63-65,68-93,95
+src/screens/reader/components/SkeletonLines.tsx
+  s_8a87a8f674db15::t_bbf738f4e3b8d7 1,19
+  s_8a87a8f674db15::t_c7acf07ce1a5b7 62
+  s_8a87a8f674db15::t_5e043277aa52a1 2-7,9-18,20-27,31-32,40-43,45,47-61,63,65-70,72-73,76-78,85-87,95,97
+  s_8a87a8f674db15::t_8c6d17eb35448a 28-30
+src/screens/history/components/HistorySkeletonLoading.tsx
+  s_8a87a8f674db15::t_fb690c3ad33172 2,5-13,20-23,25-28,30-31,35,40,48,52,55,59,64-70,76,114,117
+src/screens/browse/loadingAnimation/GlobalSearchSkeletonLoading.tsx
+  s_8a87a8f674db15::t_9789fb4f55295a 2,13-15,19,23,25,37-50
+src/screens/novel/components/LoadingAnimation/NovelScreenLoading.tsx
+  s_8a87a8f674db15::t_c1bfc6728af78d 1-8,11,17-37,58,69-79,81-82,84-98,102,104,107,116-122,130-138,144-150,152-159,161-162,164-174,176,179-185
+  s_8a87a8f674db15::t_c7acf07ce1a5b7 51-52,139-143,175
+src/screens/browse/loadingAnimation/SourceScreenSkeletonLoading.tsx
+  s_8a87a8f674db15::t_9789fb4f55295a 19-20,45-48,50,52,91-106
+  s_8a87a8f674db15::t_dcf4baa97073f9 29-35,40
+src/screens/reader/ChapterLoadingScreen/ChapterLoadingScreen.tsx
+  s_8a87a8f674db15::t_bbf738f4e3b8d7 1
+  s_8a87a8f674db15::t_5e043277aa52a1 2,15-33,36,41-42,50-54
+  s_8a87a8f674db15::t_4402e4cbbe8272 55
+src/components/Skeleton/Skeleton.tsx
+  s_8a87a8f674db15::t_bdfa1cb06ec6ec 69
+  s_8a87a8f674db15::t_42871cb178545e 1,5-6,11,18,20-21,23,25-29,49,53-55,57-59,164
+  s_8a87a8f674db15::t_bbf738f4e3b8d7 34-48,64
+  s_8a87a8f674db15::t_c7acf07ce1a5b7 15,56
+  s_8a87a8f674db15::t_0f77a7d023ccf7 61
+src/screens/updates/components/UpdatesSkeletonLoading.tsx
+  s_8a87a8f674db15::t_85c21da02c0378 61
+  s_8a87a8f674db15::t_fb690c3ad33172 2,6-8,15-18,20,22-23,30-31,35,38,42,47,64,103-105
+  s_8a87a8f674db15::t_5b4907f4a863da 60,62-63
+  s_8a87a8f674db15::t_a74402b92de52a 106
+src/screens/novel/components/Info/NovelInfoHeader.tsx
+  s_8a87a8f674db15::t_c7acf07ce1a5b7 143-148
+  s_8a87a8f674db15::t_51f04fd9083098 41-42,48,88-99,102-112,114-128,137-142,149-150,168,206
+src/utils/useLoadingColors.ts
+  s_8a87a8f674db15::t_df80199082921f 5,7-10,26,28,34,36-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "22a1efd1e5c548a27b3ab3b8c54909a5092c1e37",
+  "prompts": {},
+  "sessions": {
+    "s_8a87a8f674db15": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f92f6-6939-7231-9614-14587ca1b6a9",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
