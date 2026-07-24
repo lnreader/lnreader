@@ -1,0 +1,76 @@
+src/hooks/persisted/useTheme.ts
+  s_68d069d014a0c4::t_796f1205e3abef 42-47,50
+src/screens/novel/components/PageNavigationBottomSheet.tsx
+  s_68d069d014a0c4::t_b2d164312a1179 81
+src/screens/novel/components/Tracker/TrackSheet.tsx
+  s_68d069d014a0c4::t_b2d164312a1179 3,6,169
+src/components/BottomSheet/BottomSheetBackdrop.tsx
+  s_68d069d014a0c4::t_796f1205e3abef 6-9,25-26,29-30,32-38
+  s_06e9f5e46fb4a4::t_cbb8356b98956a 1,13-17
+src/components/BottomSheet/layout.ts
+  s_68d069d014a0c4::t_00631980dbccb5 38
+  s_68d069d014a0c4::t_22aa16fcabd400 35-37
+  s_68d069d014a0c4::t_8db1382ba373e9 39
+  s_68d069d014a0c4::t_264ecd8a1c59b2 1-34
+src/components/BottomSheet/__tests__/layout.test.ts
+  s_68d069d014a0c4::t_00631980dbccb5 41
+  s_68d069d014a0c4::t_98dc2346db490f 1-40,42-45
+src/screens/library/LibraryScreen.tsx
+  s_68d069d014a0c4::t_253684f4593f29 349
+  s_68d069d014a0c4::t_d0a253e8cad5cd 16,95
+src/screens/BrowseSourceScreen/components/FilterBottomSheet.tsx
+  s_68d069d014a0c4::t_662134d629ec90 349-370,373-374,376,378-388,390,393-395,397-401
+  s_68d069d014a0c4::t_2f13620918d635 348,375,377
+  s_06e9f5e46fb4a4::t_ee9bfda09bb46b 11-12,331
+src/screens/BrowseSourceScreen/BrowseSourceScreen.tsx
+  s_68d069d014a0c4::t_7b7941a7a33b20 1
+  s_68d069d014a0c4::t_8bd24b23de0476 7,87
+src/theme/types/index.ts
+  s_68d069d014a0c4::t_796f1205e3abef 41
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_68d069d014a0c4::t_2f13620918d635 265
+  s_68d069d014a0c4::t_b2d164312a1179 246,266
+src/components/BottomSheet/BottomSheet.tsx
+  s_68d069d014a0c4::t_98dc2346db490f 51-56,72-73
+  s_68d069d014a0c4::t_94df817a6c8b69 13
+  s_68d069d014a0c4::t_796f1205e3abef 16-34,49,83,86-89,96-97
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_68d069d014a0c4::t_662134d629ec90 208,222,258
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_68d069d014a0c4::t_662134d629ec90 141
+  s_68d069d014a0c4::t_2f13620918d635 174
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_68d069d014a0c4::t_7b7941a7a33b20 2
+  s_68d069d014a0c4::t_662134d629ec90 298
+  s_68d069d014a0c4::t_705fe70bd6e729 3
+  s_68d069d014a0c4::t_34a7d739ba70b3 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "45c1518b369a86154f4be813012a2ce7492c661c",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_06e9f5e46fb4a4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93f8-6495-72d0-a582-65d9f7165b0e",
+        "model": "unknown"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_68d069d014a0c4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93f0-4321-7011-9f60-54b343559e86",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
