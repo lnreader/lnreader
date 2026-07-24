@@ -3,7 +3,7 @@ import {
   ChapterFilterPositiveKey,
   ChapterOrderKey,
 } from '@database/constants';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ChapterFilterObject, FilterStates } from '@database/utils/filter';
 import {
   defaultNovelSettings,
@@ -52,35 +52,35 @@ export const useNovelSettings = () => {
     [novel, writeNovelSettings, novelSettings],
   );
 
-  const filterManager = useRef<ChapterFilterObject>(
-    new ChapterFilterObject(_filter, setChapterFilter),
+  const filterManager = useMemo(
+    () => new ChapterFilterObject(_filter, setChapterFilter),
+    [_filter, setChapterFilter],
   );
 
   const cycleChapterFilter = useCallback(
     (key: ChapterFilterPositiveKey) => {
-      filterManager.current?.cycle(key);
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_filter],
+      filterManager.cycle(key);
+    },
+    [filterManager],
   );
 
   const setChapterFilterValue = useCallback(
     (key: ChapterFilterPositiveKey, value: keyof FilterStates) => {
-      filterManager.current?.set(key, value);
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_filter],
+      filterManager.set(key, value);
+    },
+    [filterManager],
   );
 
   const getChapterFilterState = useCallback(
     (key: ChapterFilterPositiveKey) => {
-      return filterManager.current?.state(key) ?? false;
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_filter],
+      return filterManager.state(key);
+    },
+    [filterManager],
   );
 
   const getChapterFilter = useCallback(
-    (key: ChapterFilterPositiveKey) => filterManager.current?.get(key),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_filter],
+    (key: ChapterFilterPositiveKey) => filterManager.get(key),
+    [filterManager],
   );
 
   const setShowChapterTitles = useCallback(

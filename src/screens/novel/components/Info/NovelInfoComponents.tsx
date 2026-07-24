@@ -20,8 +20,8 @@ interface CoverImageProps {
 interface NovelThumbnailProps {
   source: ImageSource;
   theme: ThemeColors;
-  setCustomNovelCover: () => Promise<void>;
-  saveNovelCover: () => Promise<void>;
+  setCustomNovelCover: () => void | Promise<void>;
+  saveNovelCover: () => void | Promise<void>;
 }
 
 interface NovelTitleProps {

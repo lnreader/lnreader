@@ -40,7 +40,15 @@ export type BackgroundTask =
 
 export type DownloadChapterTask = {
   name: 'DOWNLOAD_CHAPTER';
-  data: { novelName: string; chapters: ChapterDownload[] };
+  data: {
+    novelName: string;
+    /**
+     * Optional for compatibility with download tasks persisted before the
+     * per-novel queue identity was introduced.
+     */
+    novelId?: number;
+    chapters: ChapterDownload[];
+  };
 };
 
 export type BackgroundTaskMetadata = {

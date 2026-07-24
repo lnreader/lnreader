@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
@@ -49,11 +49,6 @@ export const MangaUpdatesScoreSelector: React.FC<ScoreSelectorProps> = ({
     trackItem.score === 0 ? '' : trackItem.score.toString(),
   );
   const [error, setError] = useState<string | undefined>();
-
-  useEffect(() => {
-    setScoreText(trackItem.score === 0 ? '' : trackItem.score.toString());
-    setError(undefined);
-  }, [trackItem.score]);
 
   const handleChangeText = (text: string) => {
     setScoreText(text);

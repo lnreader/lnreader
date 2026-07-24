@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
@@ -34,26 +34,21 @@ const SetCategoryModal: React.FC<SetCategoryModalProps> = ({
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [categories = [], setCategories] = useState<CCategory[]>();
 
-  const getCategories = useCallback(async () => {
-    const res = await getCategoriesWithCount(novelIds);
-    setCategories(res);
-    setSelectedCategories(res.filter(c => c.novelsCount));
+  useEffect(() => {
+    let active = true;
+    void getCategoriesWithCount(novelIds).then(result => {
+      if (active) {
+        setCategories(result);
+        setSelectedCategories(result.filter(category => category.novelsCount));
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [novelIds]);
 
-  useEffect(() => {
-    if (visible) {
-      getCategories();
-    }
-  }, [getCategories, visible]);
-
   return (
-    <Dialog.Root
-      visible={visible}
-      onDismiss={() => {
-        closeModal();
-        setSelectedCategories([]);
-      }}
-    >
+    <Dialog.Root visible={visible} onDismiss={closeModal}>
       <Dialog.Title>{getString('categories.setCategories')}</Dialog.Title>
       <Dialog.ScrollArea>
         <FlatList

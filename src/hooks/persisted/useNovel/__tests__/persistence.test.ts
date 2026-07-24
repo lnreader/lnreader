@@ -63,6 +63,7 @@ const sampleChapter: ChapterInfo = {
   bookmark: true,
   progress: 70,
   page: '1',
+  timeSpent: 0,
 };
 
 describe('novelPersistence bridge', () => {

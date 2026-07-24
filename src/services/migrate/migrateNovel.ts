@@ -163,6 +163,7 @@ export const migrateNovel = async (
       name: 'DOWNLOAD_CHAPTER',
       data: {
         novelName: toNovel.name,
+        novelId: toNovel.id,
         chapters: chaptersToDownload,
       },
     });

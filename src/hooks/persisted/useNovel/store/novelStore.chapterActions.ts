@@ -10,14 +10,15 @@ import {
   markChapterReadAction,
   markChaptersReadAction,
   markChaptersUnreadAction,
+  markChaptersUnreadAndResetProgressAction,
   markPreviouschaptersReadAction,
   markPreviousChaptersUnreadAction,
-  refreshChaptersAction,
   updateChapterProgressAction,
 } from './chapterActions';
 import { NovelSettings } from '../types';
 import {
   ChapterTextCacheApi,
+  ChapterRequestCoordinator,
   GetState,
   NovelStoreChapterActions,
   SetState,
@@ -31,6 +32,7 @@ interface CreateNovelStoreChapterActionsParams {
     'getNextChapterBatch' | 'loadUpToBatch'
   >;
   chapterActionsDependencies: ChapterActionsDependencies;
+  chapterRequestCoordinator: ChapterRequestCoordinator;
   transformChapters: (chs: ChapterInfo[]) => ChapterInfo[];
   defaultChapterSort: ChapterOrderKey;
 }
@@ -40,12 +42,20 @@ export const createNovelStoreChapterActions = ({
   get,
   bootstrapService,
   chapterActionsDependencies,
+  chapterRequestCoordinator,
   transformChapters,
   defaultChapterSort,
 }: CreateNovelStoreChapterActionsParams): NovelStoreChapterActions => {
-  let inflightNextChapterBatch: Promise<void> | null = null;
-  let inflightLoadUpToBatch: Promise<void> | null = null;
-  let pendingTargetBatch: number | null = null;
+  let inflightNextChapterBatch:
+    | { version: number; promise: Promise<void> }
+    | undefined;
+  let inflightLoadUpToBatch:
+    | {
+        version: number;
+        pendingTargetBatch: number | null;
+        promise: Promise<void>;
+      }
+    | undefined;
 
   const mutateChapters = (mutation: (chs: ChapterInfo[]) => ChapterInfo[]) => {
     if (get().novel) {
@@ -75,7 +85,6 @@ export const createNovelStoreChapterActions = ({
         });
       },
       remove: chapterId => {
-         
         const { [chapterId]: _ignored, ...rest } = get().chapterTextCache;
         set({
           chapterTextCache: rest,
@@ -89,36 +98,56 @@ export const createNovelStoreChapterActions = ({
     };
   };
 
-  const appendBatch = (batch: number, chapters: ChapterInfo[]) => {
+  const appendBatch = (
+    version: number,
+    batch: number,
+    chapters: ChapterInfo[],
+  ) => {
+    if (version !== chapterRequestCoordinator.current()) {
+      return;
+    }
+
     set(curr => {
       if (batch <= curr.batchInformation.batch) {
         return {};
       }
 
+      const existingIds = new Set(curr.chapters.map(chapter => chapter.id));
+      const newChapters = chapters.filter(
+        chapter => !existingIds.has(chapter.id),
+      );
       return {
         batchInformation: {
           ...curr.batchInformation,
           batch,
         },
-        chapters: curr.chapters.concat(chapters),
+        chapters: curr.chapters.concat(newChapters),
       };
     });
   };
 
   const queueLoadUpToBatch = (targetBatch: number): Promise<void> => {
-    pendingTargetBatch = Math.max(
-      pendingTargetBatch ?? targetBatch,
-      targetBatch,
-    );
-
-    if (inflightLoadUpToBatch) {
-      return inflightLoadUpToBatch;
+    const version = chapterRequestCoordinator.current();
+    if (inflightLoadUpToBatch?.version === version) {
+      inflightLoadUpToBatch.pendingTargetBatch = Math.max(
+        inflightLoadUpToBatch.pendingTargetBatch ?? targetBatch,
+        targetBatch,
+      );
+      return inflightLoadUpToBatch.promise;
     }
 
-    inflightLoadUpToBatch = (async () => {
-      while (pendingTargetBatch !== null) {
-        const nextTarget = pendingTargetBatch;
-        pendingTargetBatch = null;
+    const request = {
+      version,
+      pendingTargetBatch: targetBatch as number | null,
+      promise: Promise.resolve(),
+    };
+    request.promise = (async () => {
+      while (
+        request.pendingTargetBatch !== null &&
+        request.version === chapterRequestCoordinator.current()
+      ) {
+        const nextTarget = request.pendingTargetBatch;
+        request.pendingTargetBatch = null;
         const state = get();
 
         if (nextTarget <= state.batchInformation.batch) {
@@ -134,28 +163,35 @@ export const createNovelStoreChapterActions = ({
           settingsFilter: getSettingsFilter(state.novelSettings),
           batchInformation: state.batchInformation,
           onBatchLoaded: (batch, chapters) => {
-            appendBatch(batch, transformChapters(chapters));
+            appendBatch(request.version, batch, transformChapters(chapters));
           },
           excludedScanlators: state.novelSettings.excludedScanlators,
         });
       }
     })().finally(() => {
-      inflightLoadUpToBatch = null;
-      pendingTargetBatch = null;
+      if (inflightLoadUpToBatch === request) {
+        inflightLoadUpToBatch = undefined;
+      }
     });
 
-    return inflightLoadUpToBatch;
+    inflightLoadUpToBatch = request;
+    return request.promise;
   };
 
   return {
     chapterTextCache: createChapterTextCache(),
     getNextChapterBatch: async () => {
-      if (inflightNextChapterBatch) {
-        return inflightNextChapterBatch;
+      const version = chapterRequestCoordinator.current();
+      if (inflightNextChapterBatch?.version === version) {
+        return inflightNextChapterBatch.promise;
       }
 
       const state = get();
-      inflightNextChapterBatch = (async () => {
+      const request = {
+        version,
+        promise: Promise.resolve(),
+      };
+      request.promise = (async () => {
         const result = await bootstrapService.getNextChapterBatch({
           novel: state.novel,
           pages: state.pages,
@@ -166,16 +202,26 @@ export const createNovelStoreChapterActions = ({
           excludedScanlators: state.novelSettings.excludedScanlators,
         });
 
-        if (!result) {
+        if (
+          !result ||
+          request.version !== chapterRequestCoordinator.current()
+        ) {
           return;
         }
 
-        appendBatch(result.batch, transformChapters(result.chapters));
+        appendBatch(
+          request.version,
+          result.batch,
+          transformChapters(result.chapters),
+        );
       })().finally(() => {
-        inflightNextChapterBatch = null;
+        if (inflightNextChapterBatch === request) {
+          inflightNextChapterBatch = undefined;
+        }
       });
 
-      return inflightNextChapterBatch;
+      inflightNextChapterBatch = request;
+      return request.promise;
     },
 
     loadUpToBatch: async (targetBatch: number) => {
@@ -252,6 +298,13 @@ export const createNovelStoreChapterActions = ({
       );
     },
 
+    markChaptersUnreadAndResetProgress: chaptersState =>
+      markChaptersUnreadAndResetProgressAction(
+        chaptersState,
+        mutateChapters,
+        chapterActionsDependencies,
+      ),
+
     updateChapterProgress: (chapterId, progress) => {
       updateChapterProgressAction(
         chapterId,
@@ -280,26 +333,16 @@ export const createNovelStoreChapterActions = ({
     },
 
     refreshChapters: () => {
-      const state = get();
-      refreshChaptersAction({
-        novel: state.novel,
-        fetching: state.fetching,
-        settingsSort: getSettingsSort(state.novelSettings),
-        settingsFilter: getSettingsFilter(state.novelSettings),
-        currentPage: state.pages[state.pageIndex] ?? '1',
-        transformChapters,
-        setChapters,
-        deps: chapterActionsDependencies,
-      });
+      void get().actions.getChapters();
     },
 
-	increaseTimeSpent: (chapterId, timeSpent) => {
-	  increaseTimeSpentAction(
-		chapterId,
-		timeSpent,
-		mutateChapters,
-		chapterActionsDependencies,
-	  );
-	}
+    increaseTimeSpent: (chapterId, timeSpent) => {
+      increaseTimeSpentAction(
+        chapterId,
+        timeSpent,
+        mutateChapters,
+        chapterActionsDependencies,
+      );
+    },
   };
 };
