@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
-import { Portal, overlay } from 'react-native-paper';
+import { Portal } from 'react-native-paper';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { useTheme, useTracker, useTrackedNovel } from '@hooks/persisted';
+import { useTracker, useTrackedNovel } from '@hooks/persisted';
 import { TrackerName, UserListStatus } from '@services/Trackers';
 import { NovelInfo } from '@database/types';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -21,7 +21,6 @@ interface TrackSheetProps {
 }
 
 const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
-  const theme = useTheme();
   const { getAuthenticatedTrackers } = useTracker();
   const {
     getTrackedNovel,
@@ -167,12 +166,7 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
   return (
     <>
       <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={snapPoints}>
-        <ScrollView
-          style={[
-            styles.contentContainer,
-            { backgroundColor: overlay(2, theme.surface) },
-          ]}
-        >
+        <ScrollView style={styles.contentContainer}>
           {authenticatedTrackers.map(tracker => {
             const trackerIcon = getTrackerIcon(tracker.name);
             const trackedNovel = getTrackedNovel(tracker.name);

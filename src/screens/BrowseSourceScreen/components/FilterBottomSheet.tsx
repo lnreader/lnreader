@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 import { useTheme } from '@hooks/persisted';
 import {
@@ -24,7 +25,6 @@ import { TextInput, overlay } from 'react-native-paper';
 import { getValueFor } from './filterUtils';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Switch from '@components/Switch/Switch';
 
 const insertOrRemoveIntoArray = (array: string[], val: string): string[] =>
@@ -328,7 +328,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
 };
 
 interface BottomSheetProps {
-  filterSheetRef: React.RefObject<BottomSheetModal | null>;
+  filterSheetRef: React.RefObject<BottomSheetModalMethods | null>;
   filters: Filters;
   setFilters: (filters?: SelectedFilters) => void;
   clearFilters: (filters: Filters) => void;
@@ -341,75 +341,64 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
   setFilters,
 }) => {
   const theme = useTheme();
-  const { bottom } = useSafeAreaInsets();
   const [selectedFilters, setSelectedFilters] =
     useState<SelectedFilters>(filters);
 
   return (
-    <BottomSheet
-      bottomSheetRef={filterSheetRef}
-      snapPoints={[400, 600]}
-      bottomInset={bottom}
-      handleComponent={null}
-      children={
-        <View style={styles.flex}>
-          <View
-            style={[
-              styles.buttonContainer,
-              { borderBottomColor: theme.outline },
-            ]}
-          >
-            <Button
-              title={getString('common.reset')}
-              onPress={() => {
-                setSelectedFilters(filters);
-                clearFilters(filters);
-              }}
-            />
-            <Button
-              title={getString('common.filter')}
-              textColor={theme.onPrimary}
-              onPress={() => {
-                setFilters(selectedFilters);
-                filterSheetRef?.current?.close();
-              }}
-              mode="contained"
-            />
-          </View>
-          <BottomSheetFlatList
-            data={
-              filters &&
-              (Object.entries(filters) as [string, Filters[string]][])
-            }
-            keyExtractor={(item: [string, Filters[string]]) =>
-              'filter' + item[0]
-            }
-            renderItem={({ item }: { item: [string, Filters[string]] }) => (
-              <FilterItem
-                theme={theme}
-                filter={item[1]}
-                filterKey={item[0]}
-                selectedFilters={selectedFilters}
-                setSelectedFilters={setSelectedFilters}
-              />
-            )}
+    <BottomSheet bottomSheetRef={filterSheetRef} snapPoints={[400, 600]}>
+      <View style={styles.flex}>
+        <View
+          style={[
+            styles.buttonContainer,
+            { borderBottomColor: theme.outlineVariant },
+          ]}
+        >
+          <Button
+            title={getString('common.reset')}
+            onPress={() => {
+              setSelectedFilters(filters);
+              clearFilters(filters);
+            }}
+          />
+          <Button
+            title={getString('common.filter')}
+            textColor={theme.onPrimary}
+            onPress={() => {
+              setFilters(selectedFilters);
+              filterSheetRef?.current?.close();
+            }}
+            mode="contained"
           />
         </View>
-      }
-    >
+        <BottomSheetFlatList
+          data={
+            filters && (Object.entries(filters) as [string, Filters[string]][])
+          }
+          keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+          renderItem={({ item }: { item: [string, Filters[string]] }) => (
+            <FilterItem
+              theme={theme}
+              filter={item[1]}
+              filterKey={item[0]}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+            />
+          )}
+        />
+      </View>
       {/*<BottomSheetFlatList
-         data={filters && Object.entries(filters)}
+        data={filters && Object.entries(filters)}
         keyExtractor={(item: [string, unknown]) => 'filter' + item[0]}
         renderItem={({ item }: { item: [string, Filters[string]] }) => (
-           <FilterItem
-             theme={theme}
-             filter={item[1]}
+          <FilterItem
+            theme={theme}
+            filter={item[1]}
             filterKey={item[0] as keyof Filters}
-             selectedFilters={selectedFilters}
-             setSelectedFilters={setSelectedFilters}
-           />
-         )}
-       />*/}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+          />
+        )}
+      />*/}
     </BottomSheet>
   );
 };

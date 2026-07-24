@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import {
   NavigationState,
   SceneRendererProps,
@@ -92,7 +92,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
 
   const layout = useWindowDimensions();
 
-  const bottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const bottomSheetRef = useRef<BottomSheetModalMethods | null>(null);
 
   const [index, setIndex] = useState(0);
 
@@ -346,8 +346,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     () => [
       {
         title: getString('libraryScreen.extraMenu.updateLibrary'),
-        onPress: () =>
-          backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
+        onPress: () => backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
       },
       {
         title: getString('libraryScreen.extraMenu.updateCategory'),

@@ -19,10 +19,8 @@ import { getString } from '@i18n/translations';
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import { Button } from '@components';
 
-import { overlay } from 'react-native-paper';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ThemeColors } from '@theme/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
 import { useNovelValue } from '@screens/novel/NovelContext';
 
@@ -72,7 +70,6 @@ const ChaptersSettingsSheet = ({
     [tempExcludedScanlators],
   );
 
-  const { left, right } = useSafeAreaInsets();
   const readStatus = getChapterFilterState('read');
   const unreadStatus =
     readStatus === 'indeterminate'
@@ -246,7 +243,7 @@ const ChaptersSettingsSheet = ({
       indicatorStyle={{ backgroundColor: theme.primary }}
       style={[
         {
-          backgroundColor: overlay(2, theme.surface),
+          backgroundColor: theme.surfaceContainerLow ?? theme.surface,
           borderBottomColor: theme.outline,
         },
         styles.tabBar,
@@ -265,21 +262,8 @@ const ChaptersSettingsSheet = ({
   );
   return (
     <>
-      <BottomSheet
-        snapPoints={[290]}
-        bottomSheetRef={bottomSheetRef}
-        backgroundStyle={styles.transparent}
-      >
-        <BottomSheetView
-          style={[
-            styles.contentContainer,
-            {
-              backgroundColor: overlay(2, theme.surface),
-              marginLeft: left,
-              marginRight: right,
-            },
-          ]}
-        >
+      <BottomSheet snapPoints={[290]} bottomSheetRef={bottomSheetRef}>
+        <BottomSheetView style={styles.contentContainer}>
           <TabView
             commonOptions={{
               label: renderLabel,
@@ -350,17 +334,10 @@ export default ChaptersSettingsSheet;
 
 const styles = StyleSheet.create({
   contentContainer: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
     flex: 1,
   },
   tabView: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
     height: 290,
-  },
-  transparent: {
-    backgroundColor: 'transparent',
   },
   flex: {
     flex: 1,

@@ -1,6 +1,6 @@
 import { View, StatusBar, StyleSheet, useWindowDimensions } from 'react-native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import { FAB } from 'react-native-paper';
@@ -45,7 +45,7 @@ const SettingsReaderScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const webViewRef = useRef<WebView>(null);
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const { bottom, right } = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState<string>('display');
@@ -294,24 +294,8 @@ const SettingsReaderScreen = () => {
       <BottomSheet
         bottomSheetRef={bottomSheetRef}
         snapPoints={[BOTTOM_SHEET_HEIGHT]}
-        enablePanDownToClose={true}
       >
-        <View
-          style={[
-            styles.bottomSheetContent,
-            { backgroundColor: theme.surface },
-          ]}
-        >
-          {/* Drag Handle */}
-          <View style={styles.dragHandleContainer}>
-            <View
-              style={[
-                styles.dragHandle,
-                { backgroundColor: theme.onSurfaceVariant },
-              ]}
-            />
-          </View>
-
+        <View style={styles.bottomSheetContent}>
           {/* Tab Bar */}
           <TabBar
             tabs={tabs}
@@ -337,16 +321,6 @@ const styles = StyleSheet.create({
   },
   bottomSheetContent: {
     flex: 1,
-  },
-  dragHandleContainer: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  dragHandle: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    opacity: 0.4,
   },
   tabContent: {
     flex: 1,

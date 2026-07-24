@@ -28,8 +28,6 @@ import ReaderTextAlignSelector from './ReaderTextAlignSelector';
 import ReaderValueChange from './ReaderValueChange';
 import ReaderFontPicker from './ReaderFontPicker';
 import TTSTab from './TTSTab';
-import { overlay } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { StringMap } from '@i18n/types';
 
@@ -138,11 +136,9 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   bottomSheetRef,
 }) => {
   const theme = useTheme();
-  const { bottom, left, right } = useSafeAreaInsets();
   const layout = useWindowDimensions();
 
-  const tabHeaderColor = overlay(2, theme.surface);
-  const backgroundColor = tabHeaderColor;
+  const tabHeaderColor = theme.surfaceContainerLow ?? theme.surface;
 
   const renderScene = useMemo(
     () =>
@@ -175,16 +171,7 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   }, []);
 
   return (
-    <BottomSheet
-      bottomSheetRef={bottomSheetRef}
-      snapPoints={[360, 600]}
-      backgroundStyle={{ backgroundColor }}
-      bottomInset={bottom}
-      containerStyle={[
-        styles.container,
-        { marginLeft: left, marginRight: right },
-      ]}
-    >
+    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[360, 600]}>
       <BottomSheetView style={styles.flex}>
         <TabView
           commonOptions={{
@@ -205,9 +192,6 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
 export default React.memo(ReaderBottomSheetV2);
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 8,
-  },
   readerTab: {
     paddingVertical: 8,
   },
@@ -216,8 +200,6 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   tabView: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
     height: 600,
   },
   flex: { flex: 1 },
