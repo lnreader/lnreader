@@ -148,7 +148,7 @@ export const ChapterContent = ({
               document.querySelector("chapter").style.transform = 'translate(0%)';
             })()`,
       );
-    })
+    });
   };
 
   const openDrawerI = useCallback(() => {

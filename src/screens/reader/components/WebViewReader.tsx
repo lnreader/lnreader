@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AppState,
+  Alert,
   NativeEventEmitter,
   NativeModules,
   StatusBar,
@@ -22,25 +22,16 @@ import {
   initialChapterReaderSettings,
 } from '@hooks/persisted/useSettings';
 import { getBatteryLevelSync } from 'react-native-device-info';
-import * as Speech from 'expo-speech';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
-import {
-  showTTSNotification,
-  updateTTSNotification,
-  updateTTSPlaybackState,
-  updateTTSProgress,
-  dismissTTSNotification,
-  NativeTTSMediaControl,
-} from '@utils/ttsNotification';
 import { ReaderSearchResult } from '../types';
+import { useTtsSession } from '../hooks/useTtsSession';
+import type { TtsSettings } from '@modules/nitro-tts';
 
 type WebViewPostEvent = {
   type: string;
   data?: unknown;
   autoStartTTS?: boolean;
-  index?: number;
-  total?: number;
 };
 
 type WebViewReaderProps = {
@@ -61,17 +52,28 @@ const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
 };
 
 /** Checks whether two TTS settings objects are equal */
-const areTTSSettingsEqual = (a: ChapterReaderSettings['tts'], b: ChapterReaderSettings['tts']) => {
-    if (a === b) return true;
-    if (!a || !b) return false;
-    return (
-        a.rate === b.rate &&
-        a.pitch === b.pitch &&
-        a.autoPageAdvance === b.autoPageAdvance &&
-        a.scrollToTop === b.scrollToTop &&
-        a.voice?.identifier === b.voice?.identifier
-    );
+const areTTSSettingsEqual = (
+  a: ChapterReaderSettings['tts'],
+  b: ChapterReaderSettings['tts'],
+) => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.rate === b.rate &&
+    a.pitch === b.pitch &&
+    a.autoPageAdvance === b.autoPageAdvance &&
+    a.scrollToTop === b.scrollToTop &&
+    a.voice?.identifier === b.voice?.identifier
+  );
 };
+
+const toNativeTtsSettings = (
+  settings: ChapterReaderSettings['tts'],
+): TtsSettings => ({
+  voiceIdentifier: settings?.voice?.identifier,
+  rate: settings?.rate ?? 1,
+  pitch: settings?.pitch ?? 1,
+});
 
 const { RNDeviceInfo } = NativeModules;
 const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
@@ -96,7 +98,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     prevChapter,
     webViewRef,
     onUserInteraction,
-    isTTSReadingRef
+    isTTSReadingRef,
   } = useChapterContext();
   const theme = useTheme();
   const initialReaderSettings = useMemo(
@@ -123,15 +125,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
-  const appStateRef = useRef(AppState.currentState);
-  const ttsQueueRef = useRef<string[]>([]);
-  const ttsQueueIndexRef = useRef<number>(0);
+  const activeChapterIdRef = useRef(chapter.id);
+  const {
+    command: runTtsCommand,
+    error: ttsError,
+    loadAndPlay,
+    progress: ttsProgress,
+    seekTo: seekTts,
+    state: ttsState,
+    updateSettings: updateTtsSettings,
+  } = useTtsSession();
 
   const [readerSettings, setReaderSettings] = useState(
-  () => getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS)
-      || initialChapterReaderSettings,
+    () =>
+      getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
+      initialChapterReaderSettings,
   );
-
   // Update readerSettings when chapter changes
   useEffect(() => {
     setReaderSettings(
@@ -142,110 +151,60 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   const readerSettingsRef = useRef<ChapterReaderSettings>(readerSettings);
 
-
   useEffect(() => {
     readerSettingsRef.current = readerSettings;
   }, [readerSettings]);
 
   useEffect(() => {
-    const playListener = NativeTTSMediaControl.addListener('TTSPlay', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && !tts.reading) { tts.resume(); }
-      `);
-    });
-    const pauseListener = NativeTTSMediaControl.addListener('TTSPause', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && tts.reading) { tts.pause(); }
-      `);
-    });
-    const stopListener = NativeTTSMediaControl.addListener('TTSStop', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts) { tts.stop(); }
-      `);
-    });
-    const rewindListener = NativeTTSMediaControl.addListener('TTSRewind', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && tts.started) { tts.rewind(); }
-      `);
-    });
-    const prevListener = NativeTTSMediaControl.addListener('TTSPrev', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && window.reader && window.reader.prevChapter) {
-          window.reader.post({ type: 'prev', autoStartTTS: true });
-        }
-      `);
-    });
-    const nextListener = NativeTTSMediaControl.addListener('TTSNext', () => {
-      webViewRef.current?.injectJavaScript(`
-        if (window.tts && window.reader && window.reader.nextChapter) {
-          window.reader.post({ type: 'next', autoStartTTS: true });
-        }
-      `);
-    });
-    const seekToListener = NativeTTSMediaControl.addListener(
-      'TTSSeekTo',
-      (event: { position: number }) => {
-        const position = event.position;
-        webViewRef.current?.injectJavaScript(`
-          if (window.tts && tts.started) { tts.seekTo(${position}); }
-        `);
-      },
-    );
-    return () => {
-      playListener.remove();
-      pauseListener.remove();
-      stopListener.remove();
-      rewindListener.remove();
-      prevListener.remove();
-      nextListener.remove();
-      seekToListener.remove();
-    };
-  }, [webViewRef]);
-
-  useEffect(() => {
-    if (isTTSReadingRef.current) {
-      updateTTSNotification({
-        novelName: novel?.name || 'Unknown',
-        chapterName: chapter.name,
-        coverUri: novel?.cover || '',
-        isPlaying: isTTSReadingRef.current,
-      });
+    isTTSReadingRef.current = ttsState === 'playing';
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
+      true;
+    `);
+    if (ttsState === 'completed') {
+      webViewRef.current?.injectJavaScript('window.tts?.complete?.(); true;');
     }
-  }, [novel?.name, novel?.cover, chapter.name, isTTSReadingRef]);
+  }, [isTTSReadingRef, ttsState, webViewRef]);
 
   useEffect(() => {
-    return () => {
-      dismissTTSNotification();
-    };
-  }, []);
+    if (ttsProgress.total > 0) {
+      webViewRef.current?.injectJavaScript(`
+        window.tts?.setActiveIndex?.(${ttsProgress.index});
+        true;
+      `);
+    }
+  }, [ttsProgress, webViewRef]);
+
+  useEffect(() => {
+    if (ttsError) {
+      console.warn(`[TTS] ${ttsError}`);
+      Alert.alert('Text to speech', ttsError);
+    }
+  }, [ttsError]);
+
+  useEffect(() => {
+    if (activeChapterIdRef.current !== chapter.id) {
+      activeChapterIdRef.current = chapter.id;
+      runTtsCommand('stop');
+    }
+  }, [chapter.id, runTtsCommand]);
 
   useEffect(() => {
     const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
       switch (key) {
         case CHAPTER_READER_SETTINGS: {
           // Update reader settings
-          const newReaderSettings = getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) || initialChapterReaderSettings;
+          const newReaderSettings =
+            getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
+            initialChapterReaderSettings;
           setReaderSettings(newReaderSettings);
-          // Check if the new TTS settings are different from the current ones, so the changes apply instantly and not after finishing the current paragraph
-          if (!areTTSSettingsEqual(readerSettingsRef.current.tts, newReaderSettings.tts)) {
-            // Stop any currently playing speech
-            Speech.stop();
-            // Restart TTS if it was reading before the settings change
-            webViewRef.current?.injectJavaScript(
-              `
-              // Auto-restart TTS if currently reading
-              if (window.tts && tts.reading) {
-                const currentElement = tts.currentElement;
-                const wasReading = tts.reading;
-                tts.stop();
-                if (wasReading) {
-                  setTimeout(() => {
-                    tts.start(currentElement);
-                  }, 100);
-                }
-              }
-              `,
-            );
+          if (
+            !areTTSSettingsEqual(
+              readerSettingsRef.current.tts,
+              newReaderSettings.tts,
+            )
+          ) {
+            updateTtsSettings(toNativeTtsSettings(newReaderSettings.tts));
           }
           // Update WebView settings
           webViewRef.current?.injectJavaScript(
@@ -255,13 +214,17 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           );
           break;
         }
-        case CHAPTER_GENERAL_SETTINGS:
+        case CHAPTER_GENERAL_SETTINGS: {
+          const newGeneralSettings =
+            getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
+            initialChapterGeneralSettings;
           webViewRef.current?.injectJavaScript(
-            `reader.generalSettings.val = ${MMKVStorage.getString(
-              CHAPTER_GENERAL_SETTINGS,
+            `reader.generalSettings.val = ${JSON.stringify(
+              newGeneralSettings,
             )}`,
           );
           break;
+        }
       }
     });
 
@@ -277,69 +240,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       subscription.remove();
       mmkvListener.remove();
     };
-  }, [webViewRef]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextState => {
-      appStateRef.current = nextState;
-      if (nextState === 'active' && isTTSReadingRef.current) {
-        const index = ttsQueueIndexRef.current;
-        webViewRef.current?.injectJavaScript(`
-          if (window.tts && window.tts.allReadableElements) {
-            const idx = ${index};
-            if (idx < tts.allReadableElements.length) {
-              tts.elementsRead = idx;
-              tts.currentElement = tts.allReadableElements[idx];
-              tts.prevElement = null;
-              tts.started = true;
-              tts.reading = true;
-              tts.scrollToElement(tts.currentElement);
-              tts.currentElement.classList.add('highlight');
-            }
-          }
-        `);
-      }
-    });
-
-    return () => subscription.remove();
-  }, [webViewRef, isTTSReadingRef]);
-
-  const speakText = (text: string) => {
-    Speech.speak(text, {
-      onDone() {
-        onUserInteraction();
-        const isBackground =
-          appStateRef.current === 'background' ||
-          appStateRef.current === 'inactive';
-
-        if (
-          isBackground &&
-          ttsQueueRef.current.length > 0 &&
-          ttsQueueIndexRef.current + 1 < ttsQueueRef.current.length
-        ) {
-          const nextIndex = ttsQueueIndexRef.current + 1;
-          const nextText = ttsQueueRef.current[nextIndex];
-          if (nextText) {
-            ttsQueueIndexRef.current = nextIndex;
-            speakText(nextText);
-            return;
-          }
-        }
-
-        if (isBackground) {
-          isTTSReadingRef.current = false;
-          dismissTTSNotification();
-          webViewRef.current?.injectJavaScript('tts.stop?.()');
-          return;
-        }
-
-        webViewRef.current?.injectJavaScript('tts.next?.()');
-      },
-      voice: readerSettingsRef.current.tts?.voice?.identifier,
-      pitch: readerSettingsRef.current.tts?.pitch || 1,
-      rate: readerSettingsRef.current.tts?.rate || 1,
-    });
-  };
+  }, [updateTtsSettings, webViewRef]);
   const isRTL = plugin?.lang === 'Arabic' || plugin?.lang === 'Hebrew';
   const readerDir = isRTL ? 'rtl' : 'ltr';
 
@@ -378,10 +279,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 if (window.tts && reader.generalSettings.val.TTSEnable) {
                   setTimeout(() => {
                     tts.start();
-                    const controller = document.getElementById('TTS-Controller');
-                    if (controller && controller.firstElementChild) {
-                      controller.firstElementChild.innerHTML = pauseIcon;
-                    }
                   }, 500);
                 }
               })();
@@ -403,14 +300,50 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                     typeof item === 'string' && item.trim().length > 0,
                 )
               : [];
-            ttsQueueRef.current = queue;
-            if (typeof payload?.startIndex === 'number') {
-              ttsQueueIndexRef.current = payload.startIndex;
-            } else {
-              ttsQueueIndexRef.current = 0;
+            const startIndex =
+              typeof payload?.startIndex === 'number' ? payload.startIndex : 0;
+            void loadAndPlay(
+              queue,
+              startIndex,
+              {
+                novelName: novel?.name || 'Unknown',
+                chapterName: chapter.name,
+                coverUri: novel?.cover || undefined,
+              },
+              toNativeTtsSettings(readerSettingsRef.current.tts),
+            );
+            break;
+          }
+          case 'tts-command': {
+            if (!event.data || typeof event.data !== 'object') {
+              break;
+            }
+            const data = event.data as {
+              command?: unknown;
+              index?: unknown;
+            };
+            switch (data.command) {
+              case 'next':
+              case 'pause':
+              case 'play':
+              case 'previous':
+              case 'replay':
+              case 'stop':
+                runTtsCommand(data.command);
+                break;
+              case 'seekTo':
+                if (typeof data.index === 'number') {
+                  seekTts(data.index);
+                }
+                break;
             }
             break;
           }
+          case 'tts-error':
+            if (typeof event.data === 'string') {
+              Alert.alert('Text to speech', event.data);
+            }
+            break;
           case 'hide':
             onPress();
             break;
@@ -458,60 +391,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               });
             }
             break;
-          case 'speak':
-            if (event.data && typeof event.data === 'string') {
-              if (typeof event.index === 'number') {
-                ttsQueueIndexRef.current = event.index;
-              }
-              if (!isTTSReadingRef.current) {
-                isTTSReadingRef.current = true;
-                showTTSNotification({
-                  novelName: novel?.name || 'Unknown',
-                  chapterName: chapter.name,
-                  coverUri: novel?.cover || '',
-                  isPlaying: true,
-                });
-              } else {
-                updateTTSNotification({
-                  novelName: novel?.name || 'Unknown',
-                  chapterName: chapter.name,
-                  coverUri: novel?.cover || '',
-                  isPlaying: true,
-                });
-              }
-              if (
-                typeof event.index === 'number' &&
-                typeof event.total === 'number' &&
-                event.total > 0
-              ) {
-                updateTTSProgress(event.index, event.total);
-              }
-              speakText(event.data);
-            } else {
-              webViewRef.current?.injectJavaScript('tts.next?.()');
-            }
-            break;
-          case 'pause-speak':
-            Speech.stop();
-            break;
-          case 'stop-speak':
-            Speech.stop();
-            if (!autoStartTTSRef.current) {
-              isTTSReadingRef.current = false;
-              ttsQueueRef.current = [];
-              ttsQueueIndexRef.current = 0;
-              dismissTTSNotification();
-            }
-            break;
-          case 'tts-state':
-            if (event.data && typeof event.data === 'object') {
-              const data = event.data as { isReading?: boolean };
-              const isReading = data.isReading === true;
-              onUserInteraction();
-              isTTSReadingRef.current = isReading;
-              updateTTSPlaybackState(isReading);
-            }
-            break;
           case 'interaction':
             onUserInteraction();
             break;
@@ -522,7 +401,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         headers: plugin?.imageRequestInit?.headers,
         method: plugin?.imageRequestInit?.method,
         body: plugin?.imageRequestInit?.body,
-        html: ` 
+        html: `
         <!DOCTYPE html>
           <html dir="${readerDir}">
             <head>
@@ -539,8 +418,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 --readerSettings-textSize: ${initialReaderSettings.textSize}px;
                 --readerSettings-textColor: ${initialReaderSettings.textColor};
                 --readerSettings-textAlign: ${initialReaderSettings.textAlign};
-                --readerSettings-lineHeight: ${initialReaderSettings.lineHeight};
-                --readerSettings-fontFamily: ${initialReaderSettings.fontFamily};
+                --readerSettings-lineHeight: ${
+                  initialReaderSettings.lineHeight
+                };
+                --readerSettings-fontFamily: ${
+                  initialReaderSettings.fontFamily
+                };
                 --theme-primary: ${theme.primary};
                 --theme-onPrimary: ${theme.onPrimary};
                 --theme-secondary: ${theme.secondary};
@@ -567,7 +450,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 }
 				</style>
               <link rel="stylesheet" href="${pluginCustomCSS}">
-              <style id="ln-custom-css">${initialReaderSettings.customCSS}</style>
+              <style id="ln-custom-css">${
+                initialReaderSettings.customCSS
+              }</style>
             </head>
             <body class="${
               chapterGeneralSettings.pageReader ? 'page-reader' : ''

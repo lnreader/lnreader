@@ -59,6 +59,7 @@
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.POST_NOTIFICATIONS"
       ]
     },
@@ -68,7 +69,10 @@
       }
     },
     "ios": {
-      "bundleIdentifier": "com.rajarsheechatterjee.LNReader"
+      "bundleIdentifier": "com.rajarsheechatterjee.LNReader",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
     }
   }
 }

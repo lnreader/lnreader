@@ -1,4 +1,4 @@
-const { div, p, img, button } = van.tags;
+const { div, p, img, button, span } = van.tags;
 
 const ChapterEnding = () => {
   return () =>
@@ -258,8 +258,80 @@ const Footer = () => {
 const TTSController = () => {
   let controllerElement = null;
   let hoverElement = null;
-  let clientX = null;
-  let clientY = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let moved = false;
+
+  const stopEvent = e => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const startDrag = e => {
+    stopEvent(e);
+    controllerElement ??= document.getElementById('TTS-Controller');
+    const touch = e.changedTouches[0];
+    const bounds = controllerElement.getBoundingClientRect();
+    dragOffsetX = touch.clientX - bounds.left;
+    dragOffsetY = touch.clientY - bounds.top;
+    moved = false;
+    controllerElement.classList.add('active');
+    controllerElement.style.transition = 'none';
+  };
+
+  const moveDrag = e => {
+    stopEvent(e);
+    const touch = e.changedTouches[0];
+    const maxLeft = Math.max(
+      8,
+      window.innerWidth - controllerElement.offsetWidth - 8,
+    );
+    const maxTop = Math.max(
+      8,
+      window.innerHeight - controllerElement.offsetHeight - 8,
+    );
+    const left = Math.min(maxLeft, Math.max(8, touch.clientX - dragOffsetX));
+    const top = Math.min(maxTop, Math.max(8, touch.clientY - dragOffsetY));
+
+    moved = true;
+    controllerElement.style.left = `${left}px`;
+    controllerElement.style.top = `${top}px`;
+    controllerElement.style.right = 'auto';
+    controllerElement.style.bottom = 'auto';
+
+    const newHoverElement = document
+      .elementsFromPoint(touch.clientX, touch.clientY)
+      .find(
+        element =>
+          !element.closest('#TTS-Controller') &&
+          !element.id.includes('scrollbar') &&
+          tts.readable(element),
+      );
+    hoverElement?.classList.remove('highlight');
+    hoverElement = newHoverElement ?? null;
+    hoverElement?.classList.add('highlight');
+  };
+
+  const endDrag = e => {
+    stopEvent(e);
+    controllerElement.classList.remove('active');
+    controllerElement.style.transition = '';
+
+    if (moved && hoverElement && reader.generalSettings.val.TTSEnable) {
+      tts.start(hoverElement);
+    }
+    hoverElement?.classList.remove('highlight');
+    hoverElement = null;
+    moved = false;
+  };
+
+  const runCommand = command => e => {
+    e.stopPropagation();
+    if (reader.generalSettings.val.TTSEnable) {
+      command();
+    }
+  };
+
   return div(
     {
       id: 'TTS-Controller',
@@ -268,73 +340,50 @@ const TTSController = () => {
         reader.generalSettings.val.TTSEnable
           ? 'pointer-events: auto;'
           : 'pointer-events: none; display: none !important; opacity: 0; transition: none;',
-      ontouchstart: () => {
-        if (!controllerElement) {
-          controllerElement = document.getElementById('TTS-Controller');
-        }
-        controllerElement.classList.add('active');
-        controllerElement.style.transition = '';
-      },
-      ontouchmove: e => {
-        e.preventDefault();
-        e.stopPropagation();
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-        controllerElement.style.left = `${clientX}px`;
-        controllerElement.style.top = `${clientY}px`;
-        const hoverElements = document.elementsFromPoint(clientX, clientY);
-        const newHoverElement = hoverElements.reverse().find(e => {
-          if (e.id.includes('scrollbar')) {
-            return false;
-          }
-          return tts.readable(e);
-        });
-        hoverElement?.classList.remove('highlight');
-        if (newHoverElement) {
-          newHoverElement.classList.add('highlight');
-          hoverElement = newHoverElement;
-        } else {
-          hoverElement = null;
-        }
-      },
-      ontouchend: () => {
-        controllerElement.style.transition = '1s';
-        controllerElement.classList.remove('active');
-        controllerElement.style.left = '20px';
-        if (clientX && clientY) {
-          let top = clientY < 120 ? 120 : clientY;
-          if (top + 120 > reader.layoutHeight) {
-            top = reader.layoutHeight - 120;
-          }
-          controllerElement.style.top = `${top}px`;
-          // Check if TTS is still enabled before starting
-          if (hoverElement && reader.generalSettings.val.TTSEnable) {
-            tts.start(hoverElement);
-            controllerElement.firstElementChild.innerHTML = pauseIcon;
-          }
-        }
-        clientX = null;
-        clientY = null;
-      },
-      onclick: e => {
-        e.stopPropagation();
-        // Don't allow interaction if TTS is disabled
-        if (!reader.generalSettings.val.TTSEnable) {
-          return;
-        }
+      onclick: e => e.stopPropagation(),
+    },
+    button({
+      type: 'button',
+      class: 'tts-drag-handle',
+      'aria-label': 'Move text-to-speech controls',
+      innerHTML: dragHandleIcon,
+      ontouchstart: startDrag,
+      ontouchmove: moveDrag,
+      ontouchend: endDrag,
+      ontouchcancel: endDrag,
+      onclick: stopEvent,
+    }),
+    button({
+      type: 'button',
+      class: 'tts-control-button',
+      'aria-label': 'Previous paragraph',
+      innerHTML: previousParagraphIcon,
+      onclick: runCommand(() => tts.previous()),
+    }),
+    button({
+      id: 'TTS-PlayPause',
+      type: 'button',
+      class: 'tts-control-button tts-play-pause',
+      'aria-label': 'Play text-to-speech',
+      innerHTML: resumeIcon,
+      onclick: runCommand(() => {
         if (tts.reading) {
           tts.pause();
-          controllerElement.firstElementChild.innerHTML = resumeIcon;
         } else if (tts.started) {
           tts.resume();
-          controllerElement.firstElementChild.innerHTML = pauseIcon;
         } else {
           tts.start();
-          controllerElement.firstElementChild.innerHTML = pauseIcon;
         }
-      },
-    },
-    button({ innerHTML: volumnIcon }),
+      }),
+    }),
+    button({
+      type: 'button',
+      class: 'tts-control-button',
+      'aria-label': 'Next paragraph',
+      innerHTML: nextParagraphIcon,
+      onclick: runCommand(() => tts.next()),
+    }),
+    span({ id: 'TTS-Progress', 'aria-hidden': 'true' }),
   );
 };
 

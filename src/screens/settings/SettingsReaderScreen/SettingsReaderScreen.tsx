@@ -1,4 +1,10 @@
-import { View, StatusBar, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  View,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+  Alert,
+} from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from '@react-navigation/native';
@@ -25,13 +31,14 @@ import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import color from 'color';
 import { useBatteryLevel } from 'react-native-device-info';
-import * as Speech from 'expo-speech';
 
 import DisplayTab from './tabs/DisplayTab';
 import ThemeTab from './tabs/ThemeTab';
 import NavigationTab from './tabs/NavigationTab';
 import AccessibilityTab from './tabs/AccessibilityTab';
 import AdvancedTab from './tabs/AdvancedTab';
+import { useTtsSession } from '@screens/reader/hooks/useTtsSession';
+import type { TtsSettings } from '@modules/nitro-tts';
 
 type ReaderSettingsRoute = {
   key: 'display' | 'theme' | 'navigation' | 'accessibility' | 'advanced';
@@ -72,8 +79,16 @@ export type TextAlignments =
 
 type WebViewPostEvent = {
   type: string;
-  data?: { [key: string]: string | number };
+  data?: unknown;
 };
+
+const toNativeTtsSettings = (
+  settings: ReturnType<typeof useChapterReaderSettings>['tts'],
+): TtsSettings => ({
+  voiceIdentifier: settings?.voice?.identifier,
+  rate: settings?.rate ?? 1,
+  pitch: settings?.pitch ?? 1,
+});
 
 const SettingsReaderScreen = () => {
   const theme = useTheme();
@@ -121,6 +136,15 @@ const SettingsReaderScreen = () => {
   const batteryLevel = useBatteryLevel();
   const readerSettings = useChapterReaderSettings();
   const chapterGeneralSettings = useChapterGeneralSettings();
+  const {
+    command: runTtsCommand,
+    error: ttsError,
+    loadAndPlay,
+    progress: ttsProgress,
+    seekTo: seekTts,
+    state: ttsState,
+    updateSettings: updateTtsSettings,
+  } = useTtsSession();
 
   const BOTTOM_SHEET_HEIGHT = screenHeight * 0.7;
   const assetsUriPrefix = useMemo(
@@ -168,10 +192,33 @@ const SettingsReaderScreen = () => {
   const readerBackgroundColor = readerSettings.theme;
 
   useEffect(() => {
-    return () => {
-      Speech.stop();
-    };
-  }, []);
+    updateTtsSettings(toNativeTtsSettings(readerSettings.tts));
+  }, [readerSettings.tts, updateTtsSettings]);
+
+  useEffect(() => {
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
+      true;
+    `);
+    if (ttsState === 'completed') {
+      webViewRef.current?.injectJavaScript('window.tts?.complete?.(); true;');
+    }
+  }, [ttsState]);
+
+  useEffect(() => {
+    if (ttsProgress.total > 0) {
+      webViewRef.current?.injectJavaScript(`
+        window.tts?.setActiveIndex?.(${ttsProgress.index});
+        true;
+      `);
+    }
+  }, [ttsProgress]);
+
+  useEffect(() => {
+    if (ttsError) {
+      Alert.alert('Text to speech', ttsError);
+    }
+  }, [ttsError]);
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.present();
@@ -270,22 +317,61 @@ const SettingsReaderScreen = () => {
                 }
                 setHidden(!hidden);
                 break;
-              case 'speak':
-                if (event.data && typeof event.data === 'string') {
-                  Speech.speak(event.data, {
-                    onDone() {
-                      webViewRef.current?.injectJavaScript('tts.next?.()');
-                    },
-                    voice: readerSettings.tts?.voice?.identifier,
-                    pitch: readerSettings.tts?.pitch || 1,
-                    rate: readerSettings.tts?.rate || 1,
-                  });
-                } else {
-                  webViewRef.current?.injectJavaScript('tts.next?.()');
+              case 'tts-queue': {
+                const payload = event.data as
+                  | { queue?: unknown; startIndex?: unknown }
+                  | undefined;
+                const queue = Array.isArray(payload?.queue)
+                  ? payload.queue.filter(
+                      (item): item is string =>
+                        typeof item === 'string' && item.trim().length > 0,
+                    )
+                  : [];
+                const startIndex =
+                  typeof payload?.startIndex === 'number'
+                    ? payload.startIndex
+                    : 0;
+                void loadAndPlay(
+                  queue,
+                  startIndex,
+                  {
+                    novelName: novel.name,
+                    chapterName: chapter.name,
+                    coverUri: novel.cover,
+                  },
+                  toNativeTtsSettings(readerSettings.tts),
+                );
+                break;
+              }
+              case 'tts-command': {
+                if (!event.data || typeof event.data !== 'object') {
+                  break;
+                }
+                const data = event.data as {
+                  command?: unknown;
+                  index?: unknown;
+                };
+                switch (data.command) {
+                  case 'next':
+                  case 'pause':
+                  case 'play':
+                  case 'previous':
+                  case 'replay':
+                  case 'stop':
+                    runTtsCommand(data.command);
+                    break;
+                  case 'seekTo':
+                    if (typeof data.index === 'number') {
+                      seekTts(data.index);
+                    }
+                    break;
                 }
                 break;
-              case 'stop-speak':
-                Speech.stop();
+              }
+              case 'tts-error':
+                if (typeof event.data === 'string') {
+                  Alert.alert('Text to speech', event.data);
+                }
                 break;
             }
           }}
