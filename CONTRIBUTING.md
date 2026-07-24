@@ -5,11 +5,11 @@ Contributions are welcome and are greatly appreciated!
 ## Setup Your Environment with Nix
 
 If you are on a Linux system, you can install the nix package manager and use the nix flakes to set up your development environment.
-See [CONTRIBUTING-NIX.md](CONTRIBUTING-NIX.md)
+See [CONTRIBUTING-NIX.md](CONTRIBUTING-NIX.md).
 
 ## Setting Up Your Environment
 
-After forking to your own GitHub org or account, do the following steps to get started:
+After forking to your own GitHub organization or account, take the following steps to get started:
 
 ```bash
 # prerequisites
@@ -57,7 +57,7 @@ pnpm run dev:android
 This codebase's linting rules are enforced using [ESLint](http://eslint.org/).
 
 It is recommended that you install an eslint plugin for your editor of choice when working on this
-codebase, however you can always check to see if the source code is compliant by running:
+codebase, however, you can always check to see if the source code is compliant by running:
 
 ```bash
 pnpm run lint
