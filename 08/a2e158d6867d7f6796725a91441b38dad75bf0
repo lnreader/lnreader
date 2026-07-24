@@ -1,0 +1,38 @@
+.gitignore
+  s_80313b86fc7f8d::t_3300be16f69ebc 113
+.github/workflows/build.yml
+  s_80313b86fc7f8d::t_64a8132296b034 19,95-96
+package.json
+  s_80313b86fc7f8d::t_dd8623ca6523e5 11
+plugins/android/android-build-types.gradle
+  s_8ca0f36cb199a8::t_01c5003a1222da 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "08a2e158d6867d7f6796725a91441b38dad75bf0",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_80313b86fc7f8d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f935c-323f-7303-8ba0-6f2e98d8f552",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_8ca0f36cb199a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9377-3979-7e00-8cb7-f6510826ef6d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
