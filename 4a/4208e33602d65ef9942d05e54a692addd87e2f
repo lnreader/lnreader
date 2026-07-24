@@ -1,0 +1,19 @@
+src/hooks/persisted/useTheme.ts
+  s_97e7b6220ffbc3::t_16b239072e9faa 117,120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "4a4208e33602d65ef9942d05e54a692addd87e2f",
+  "prompts": {},
+  "sessions": {
+    "s_97e7b6220ffbc3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8cf2-7443-7fe1-8e0e-3b94c283b403",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
