@@ -1,0 +1,19 @@
+src/navigators/BottomNavigator.tsx
+  s_2c974a2c7e7309::t_20f304176085ca 82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "65e86100304ae27ba8049937558b4e25b49252f6",
+  "prompts": {},
+  "sessions": {
+    "s_2c974a2c7e7309": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f932a-3f18-7272-b4c5-c38f04cd309a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
