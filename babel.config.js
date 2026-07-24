@@ -28,6 +28,7 @@ export default function (api) {
             '@specs': './specs',
             '@test-utils': './test/test-utils',
             '@env': './src/generated/build-info',
+            '@modules/nitro-tts': './modules/nitro-tts/src/index',
             '@modules': './modules',
             'react-native-vector-icons/MaterialCommunityIcons':
               '@react-native-vector-icons/material-design-icons',

@@ -1,0 +1,53 @@
+{
+  "name": "nitro-tts",
+  "version": "0.0.1",
+  "description": "Stateful native text-to-speech playback for LNReader",
+  "main": "lib/index",
+  "module": "lib/index",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/fix-prefab.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "ios/**/*.swift",
+    "nitro.json",
+    "*.podspec"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\""
+  },
+  "keywords": [
+    "react-native",
+    "nitro",
+    "text-to-speech"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LNReader/lnreader"
+  },
+  "author": "LNReader",
+  "license": "MIT",
+  "homepage": "https://github.com/LNReader/lnreader#readme",
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "nitrogen": "*",
+    "react": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-nitro-modules": "*",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": "*"
+  }
+}

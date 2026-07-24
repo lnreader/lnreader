@@ -1,39 +1,53 @@
 #TTS-Controller {
+  align-items: center;
+  background: color-mix(
+    in srgb,
+    var(--readerSettings-theme) 90%,
+    var(--readerSettings-textColor) 10%
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--readerSettings-textColor) 30%,
+      var(--readerSettings-theme) 70%
+    );
+  border-radius: 28px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
   position: fixed;
   top: 50%;
   left: 20px;
-  opacity: 0.5;
+  opacity: 0.78;
+  z-index: 2147483647;
 }
 
 #TTS-Controller button {
-  background: color-mix(
-    in srgb,
-    var(--readerSettings-theme) 85%,
-    var(--readerSettings-textColor) 15%
-  );
-  outline: none;
-  border-width: 1px;
-  border-style: solid;
-  border-color: color-mix(
-    in srgb,
-    var(--readerSettings-textColor) 30%,
-    var(--readerSettings-theme) 70%
-  );
-  display: flex;
-  justify-items: center;
   align-items: center;
-  padding: 4px;
-  border-radius: 100%;
-  transition: 0.5s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  outline: none;
+  padding: 8px;
+  width: 40px;
+}
+
+#TTS-Controller button:active {
+  background: var(--theme-rippleColor);
+}
+
+#TTS-Controller .tts-drag-handle {
+  cursor: move;
+  touch-action: none;
+  width: 32px;
 }
 
 #TTS-Controller.active {
   opacity: 1;
-}
-
-#TTS-Controller.active button {
-  padding: 16px;
 }
 
 #TTS-Controller svg {
@@ -42,7 +56,10 @@
   height: 20px;
 }
 
-#TTS-Controller.active svg {
-  width: 24px;
-  height: 24px;
+#TTS-Progress {
+  color: var(--readerSettings-textColor);
+  font-size: 11px;
+  min-width: 34px;
+  padding-right: 6px;
+  text-align: center;
 }

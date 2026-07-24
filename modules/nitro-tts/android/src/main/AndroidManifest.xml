@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.TTS_SERVICE" />
+    </intent>
+  </queries>
+
+  <application>
+    <service
+      android:name=".TtsPlaybackService"
+      android:exported="false"
+      android:foregroundServiceType="mediaPlayback"
+      android:stopWithTask="false" />
+  </application>
+</manifest>

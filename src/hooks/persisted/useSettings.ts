@@ -4,7 +4,7 @@ import {
   LibraryFilter,
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
-import { Voice } from 'expo-speech';
+import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import { useMMKVObject } from 'react-native-mmkv';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 
@@ -144,7 +144,9 @@ export interface ChapterReaderSettings {
   customJS: string;
   customThemes: ReaderTheme[];
   tts?: {
-    voice?: Voice;
+    /** Android only: the selected engine, or the system default when absent. */
+    engine?: TtsEngine;
+    voice?: TtsVoice;
     rate?: number;
     pitch?: number;
     autoPageAdvance?: boolean;

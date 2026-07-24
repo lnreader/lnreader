@@ -31,25 +31,7 @@ const mockEpubNovel = {
   imagePaths: [],
 };
 
-jest.mock('react-native-nitro-modules', () => ({
-  NitroModules: {
-    createHybridObject: jest.fn(() => ({
-      parseNovelAndChapters: jest.fn(() => mockEpubNovel),
-    })),
-  },
-}));
-
-jest.mock('@modules/native-tts-media-control', () => ({
-  __esModule: true,
-  default: {
-    showMediaNotification: jest.fn(),
-    updatePlaybackState: jest.fn(),
-    updateProgress: jest.fn(),
-    dismiss: jest.fn(),
-    addListener: jest.fn(),
-    removeListeners: jest.fn(),
-  },
-}));
+global.mockEpubNovel = mockEpubNovel;
 
 jest.mock('@modules/native-volume-button-listener', () => ({
   __esModule: true,

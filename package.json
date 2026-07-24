@@ -139,7 +139,7 @@
       "reactNativeDirectoryCheck": {
         "exclude": [
           "native-file",
-          "native-tts-media-control",
+          "nitro-tts",
           "native-volume-button-listener",
           "native-zip-archive",
           "nitro-epub",

@@ -29,7 +29,6 @@ import { parseChapterNumber } from '@utils/parseChapterNumber';
 import WebView from 'react-native-webview';
 import { useFullscreenMode } from '@hooks';
 import { Dimensions } from 'react-native';
-import * as Speech from 'expo-speech';
 import { defaultTo } from 'lodash-es';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
@@ -105,14 +104,9 @@ export default function useChapter(
   useEffect(() => {
     if (useVolumeButtons) {
       const cleanup = connectVolumeButton();
-      return () => {
-        cleanup();
-        Speech.stop();
-      };
+      return cleanup;
     }
-    return () => {
-      Speech.stop();
-    };
+    return undefined;
   }, [useVolumeButtons, chapter, connectVolumeButton]);
 
   const loadChapterText = useCallback(
