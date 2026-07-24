@@ -7,12 +7,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import {
-  SceneMap,
-  TabBar,
-  TabDescriptor,
-  TabView,
-} from 'react-native-tab-view';
+import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
 import color from 'color';
 
 import { useLibrarySettings, useTheme } from '@hooks/persisted';
@@ -29,6 +24,7 @@ import {
 import { RadioButton } from '@components/RadioButton/RadioButton';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
+import { TopTabBar } from '@components';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { LegendList } from '@legendapp/list/react-native';
 
@@ -200,7 +196,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
 
   const renderTabBar = useCallback(
     (props: any) => (
-      <TabBar
+      <TopTabBar
         {...props}
         indicatorStyle={{ backgroundColor: theme.primary }}
         style={[

@@ -17,12 +17,16 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import {
   NavigationState,
   SceneRendererProps,
-  TabBar,
   TabView,
 } from 'react-native-tab-view';
 import Color from 'color';
 
-import { SearchbarV2, Button, SafeAreaView } from '@components/index';
+import {
+  SearchbarV2,
+  Button,
+  SafeAreaView,
+  TopTabBar,
+} from '@components/index';
 import { LibraryView } from './components/LibraryListView';
 import LibraryBottomSheet from './components/LibraryBottomSheet/LibraryBottomSheet';
 import { Banner } from './components/Banner';
@@ -189,7 +193,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   const renderTabBar = useCallback(
     (props: SceneRendererProps & { navigationState: State }) => {
       return categories.length ? (
-        <TabBar
+        <TopTabBar
           {...props}
           scrollEnabled
           indicatorStyle={styles.tabBarIndicator}

@@ -11,13 +11,13 @@ import {
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import color from 'color';
 
-import { TabView, TabBar, TabViewProps } from 'react-native-tab-view';
+import { TabView, TabViewProps } from 'react-native-tab-view';
 import { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { getString } from '@i18n/translations';
 
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
-import { Button } from '@components';
+import { Button, TopTabBar } from '@components';
 
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ThemeColors } from '@theme/types';
@@ -238,7 +238,7 @@ const ChaptersSettingsSheet = ({
   ]);
 
   const renderTabBar: TabViewProps<SettingsRoute>['renderTabBar'] = props => (
-    <TabBar
+    <TopTabBar
       {...props}
       indicatorStyle={{ backgroundColor: theme.primary }}
       style={[

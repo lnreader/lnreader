@@ -1,12 +1,18 @@
 import { View, StatusBar, StyleSheet, useWindowDimensions } from 'react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import { FAB } from 'react-native-paper';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  TabView,
+  type TabBarProps,
+  type TabDescriptor,
+} from 'react-native-tab-view';
 import { dummyHTML } from './utils';
 
-import { Appbar, SafeAreaView } from '@components/index';
+import { Appbar, SafeAreaView, TopTabBar } from '@components/index';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 
 import {
@@ -21,12 +27,40 @@ import color from 'color';
 import { useBatteryLevel } from 'react-native-device-info';
 import * as Speech from 'expo-speech';
 
-import TabBar, { Tab } from './components/TabBar';
 import DisplayTab from './tabs/DisplayTab';
 import ThemeTab from './tabs/ThemeTab';
 import NavigationTab from './tabs/NavigationTab';
 import AccessibilityTab from './tabs/AccessibilityTab';
 import AdvancedTab from './tabs/AdvancedTab';
+
+type ReaderSettingsRoute = {
+  key: 'display' | 'theme' | 'navigation' | 'accessibility' | 'advanced';
+  title: string;
+  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+};
+
+const routes: ReaderSettingsRoute[] = [
+  { key: 'display', title: 'Display', icon: 'format-size' },
+  { key: 'theme', title: 'Theme', icon: 'palette-outline' },
+  {
+    key: 'navigation',
+    title: 'Navigation',
+    icon: 'gesture-swipe-horizontal',
+  },
+  {
+    key: 'accessibility',
+    title: 'Accessibility',
+    icon: 'account-voice',
+  },
+  { key: 'advanced', title: 'Advanced', icon: 'code-braces' },
+];
+
+const tabOptions: TabDescriptor<ReaderSettingsRoute> = {
+  icon: ({ route, color: iconColor }) => (
+    <MaterialCommunityIcons name={route.icon} size={20} color={iconColor} />
+  ),
+  label: () => null,
+};
 
 export type TextAlignments =
   | 'left'
@@ -47,16 +81,8 @@ const SettingsReaderScreen = () => {
   const webViewRef = useRef<WebView>(null);
   const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const { bottom, right } = useSafeAreaInsets();
-  const { height: screenHeight } = useWindowDimensions();
-  const [activeTab, setActiveTab] = useState<string>('display');
-
-  const tabs: Tab[] = [
-    { id: 'display', label: 'Display', icon: 'format-size' },
-    { id: 'theme', label: 'Theme', icon: 'palette-outline' },
-    { id: 'navigation', label: 'Navigation', icon: 'gesture-swipe-horizontal' },
-    { id: 'accessibility', label: 'Accessibility', icon: 'account-voice' },
-    { id: 'advanced', label: 'Advanced', icon: 'code-braces' },
-  ];
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const [tabIndex, setTabIndex] = useState(0);
 
   const novel = {
     'artist': null,
@@ -151,22 +177,60 @@ const SettingsReaderScreen = () => {
     bottomSheetRef.current?.present();
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'display':
-        return <DisplayTab />;
-      case 'theme':
-        return <ThemeTab />;
-      case 'navigation':
-        return <NavigationTab />;
-      case 'accessibility':
-        return <AccessibilityTab />;
-      case 'advanced':
-        return <AdvancedTab />;
-      default:
-        return <DisplayTab />;
-    }
-  };
+  const renderTabContent = useCallback(
+    ({ route }: { route: ReaderSettingsRoute }) => {
+      switch (route.key) {
+        case 'display':
+          return <DisplayTab />;
+        case 'theme':
+          return <ThemeTab />;
+        case 'navigation':
+          return <NavigationTab />;
+        case 'accessibility':
+          return <AccessibilityTab />;
+        case 'advanced':
+          return <AdvancedTab />;
+        default:
+          return <DisplayTab />;
+      }
+    },
+    [],
+  );
+
+  const tabBarBorderColor = useMemo(
+    () =>
+      color(theme.isDark ? '#FFFFFF' : '#000000')
+        .alpha(0.12)
+        .string(),
+    [theme.isDark],
+  );
+
+  const renderTabBar = useCallback(
+    (props: TabBarProps<ReaderSettingsRoute>) => (
+      <TopTabBar
+        {...props}
+        style={[
+          styles.tabBar,
+          {
+            backgroundColor: theme.surfaceContainerLow ?? theme.surface,
+            borderBottomColor: tabBarBorderColor,
+          },
+        ]}
+        indicatorStyle={{ backgroundColor: theme.primary }}
+        activeColor={theme.primary}
+        inactiveColor={theme.onSurfaceVariant}
+        android_ripple={{ color: theme.rippleColor, borderless: false }}
+      />
+    ),
+    [
+      tabBarBorderColor,
+      theme.onSurfaceVariant,
+      theme.primary,
+      theme.rippleColor,
+      theme.surface,
+      theme.surfaceContainerLow,
+    ],
+  );
 
   return (
     <SafeAreaView
@@ -296,16 +360,17 @@ const SettingsReaderScreen = () => {
         snapPoints={[BOTTOM_SHEET_HEIGHT]}
       >
         <View style={styles.bottomSheetContent}>
-          {/* Tab Bar */}
-          <TabBar
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            theme={theme}
+          <TabView
+            commonOptions={tabOptions}
+            navigationState={{ index: tabIndex, routes }}
+            renderTabBar={renderTabBar}
+            renderScene={renderTabContent}
+            onIndexChange={setTabIndex}
+            initialLayout={{ width: screenWidth }}
+            lazy
+            lazyPreloadDistance={0}
+            swipeEnabled={false}
           />
-
-          {/* Tab Content */}
-          <View style={styles.tabContent}>{renderTabContent()}</View>
         </View>
       </BottomSheet>
     </SafeAreaView>
@@ -322,9 +387,6 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     flex: 1,
   },
-  tabContent: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },
@@ -333,5 +395,9 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
+  },
+  tabBar: {
+    borderBottomWidth: 1,
+    elevation: 0,
   },
 });
