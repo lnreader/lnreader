@@ -4,7 +4,7 @@ Contributions are welcome and are greatly appreciated!
 
 ## Setup Your Environment with Nix
 
-If you are on a Linux system, you can install the nix package manager and use the nix flakes to set up your development environment.
+If you are on a Linux system, you can install the Nix package manager and use the nix flakes to set up your development environment.
 See [CONTRIBUTING-NIX.md](CONTRIBUTING-NIX.md).
 
 ## Setting Up Your Environment
