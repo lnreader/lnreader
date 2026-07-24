@@ -7,25 +7,26 @@ import React, {
   useState,
 } from 'react';
 import {
-  Pressable,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
   LayoutRectangle,
+  Modal as NativeModal,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  TextStyle,
+  View,
+  ViewStyle,
+  useWindowDimensions,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Portal } from 'react-native-paper';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  withTiming,
-  ExitAnimationsValues,
-  EntryAnimationsValues,
-  withDelay,
-} from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+
+const HORIZONTAL_MARGIN = 16;
+const VERTICAL_MARGIN = 8;
+const ANCHOR_GAP = 4;
+const MAX_MENU_WIDTH = 280;
+const MAX_MENU_HEIGHT_RATIO = 0.6;
+const ENTER_DURATION = 150;
+const EXIT_DURATION = 75;
 
 interface MenuProps {
   visible: boolean;
@@ -54,7 +55,6 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   const theme = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const anchorRef = useRef<View>(null);
-  const duration = 250;
 
   const [menuLayout, setMenuLayout] = useState<LayoutRectangle | null>(null);
   const [anchorLayout, setAnchorLayout] = useState<LayoutRectangle>({
@@ -64,39 +64,6 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
     height: 0,
   });
 
-  const backdropEntering = FadeIn.duration(duration);
-  const menuEntering = (values: EntryAnimationsValues) => {
-    'worklet';
-    const animations = {
-      height: withTiming(values.targetHeight, { duration }),
-      opacity: withTiming(1, { duration: duration - 100 }),
-    };
-    const initialValues = {
-      height: 0,
-      opacity: 0,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
-
-  const backdropExiting = FadeOut.duration(duration);
-  const menuExiting = (values: ExitAnimationsValues) => {
-    'worklet';
-    const initialValues = {
-      height: values.currentHeight,
-      opacity: 1,
-    };
-    const animations = {
-      height: withTiming(0, { duration }),
-      opacity: withDelay(100, withTiming(0, { duration: duration - 100 })),
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
   const measureAnchor = useCallback(() => {
     anchorRef.current?.measureInWindow((x, y, width, height) => {
       setAnchorLayout({ x, y, width, height });
@@ -106,28 +73,34 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   useLayoutEffect(() => {
     if (visible) {
       measureAnchor();
-    } else {
-      setMenuLayout(null); // Reset layout when closed
     }
-  }, [measureAnchor, visible]);
+  }, [measureAnchor, screenHeight, screenWidth, visible]);
 
   const menuPosition = useMemo(() => {
     if (!menuLayout) return { opacity: 0 };
     const leftPos = Math.max(
-      16,
-      Math.min(anchorLayout.x, screenWidth - menuLayout.width - 16),
+      HORIZONTAL_MARGIN,
+      Math.min(
+        anchorLayout.x,
+        screenWidth - menuLayout.width - HORIZONTAL_MARGIN,
+      ),
     );
 
-    let topPos = anchorLayout.y + anchorLayout.height + 24;
+    let topPos = anchorLayout.y + anchorLayout.height + ANCHOR_GAP;
 
-    const showAbove = topPos + menuLayout.height > screenHeight;
+    const showAbove =
+      topPos + menuLayout.height > screenHeight - VERTICAL_MARGIN;
     if (showAbove) {
-      topPos -= anchorLayout.height + menuLayout.height;
+      topPos = anchorLayout.y - menuLayout.height - ANCHOR_GAP;
     }
+    topPos = Math.max(
+      VERTICAL_MARGIN,
+      Math.min(topPos, screenHeight - menuLayout.height - VERTICAL_MARGIN),
+    );
 
     const maxWidth = fullWidth
       ? anchorLayout.width
-      : Math.min(250, screenWidth - 32);
+      : Math.min(MAX_MENU_WIDTH, screenWidth - HORIZONTAL_MARGIN * 2);
 
     return {
       left: leftPos,
@@ -155,39 +128,56 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
       </View>
 
       {visible && (
-        <Portal>
-          {/* Backdrop */}
-          <Pressable style={StyleSheet.absoluteFillObject} onPress={onDismiss}>
-            <Animated.View
-              style={[
-                styles.backdrop,
-                theme.isDark ? styles.backdropDark : styles.backdropLight,
-              ]}
-              entering={backdropEntering}
-              exiting={backdropExiting}
+        <NativeModal
+          animationType="none"
+          hardwareAccelerated
+          navigationBarTranslucent
+          onRequestClose={onDismiss}
+          onShow={measureAnchor}
+          presentationStyle="overFullScreen"
+          statusBarTranslucent
+          transparent
+          visible
+        >
+          <View style={styles.modal}>
+            <Pressable
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              onPress={onDismiss}
+              style={StyleSheet.absoluteFill}
+              testID="menu-backdrop"
             />
-          </Pressable>
-
-          {/* Menu */}
-          <Animated.View
-            key={menuLayout ? 'ready' : 'measuring'}
-            style={[
-              styles.menuContainer,
-              { backgroundColor: theme.surface2 || theme.surface },
-              contentStyle,
-              menuPosition,
-            ]}
-            onLayout={e => {
-              setMenuLayout(e.nativeEvent.layout);
-            }}
-            entering={menuLayout ? menuEntering : undefined}
-            exiting={menuLayout ? menuExiting : undefined}
-          >
-            <ScrollView style={{ maxHeight: screenHeight * 0.6 }}>
-              {children}
-            </ScrollView>
-          </Animated.View>
-        </Portal>
+            <Animated.View
+              accessibilityRole="menu"
+              accessibilityViewIsModal
+              entering={
+                menuLayout ? FadeIn.duration(ENTER_DURATION) : undefined
+              }
+              exiting={menuLayout ? FadeOut.duration(EXIT_DURATION) : undefined}
+              key={menuLayout ? 'ready' : 'measuring'}
+              onLayout={event => setMenuLayout(event.nativeEvent.layout)}
+              style={[
+                styles.menuContainer,
+                {
+                  backgroundColor:
+                    theme.surfaceContainerLow ??
+                    theme.surface2 ??
+                    theme.surface,
+                },
+                contentStyle,
+                menuPosition,
+              ]}
+              testID="menu"
+            >
+              <ScrollView
+                contentContainerStyle={styles.menuContent}
+                style={{ maxHeight: screenHeight * MAX_MENU_HEIGHT_RATIO }}
+              >
+                {children}
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </NativeModal>
       )}
     </>
   );
@@ -203,6 +193,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <Pressable
+      accessibilityRole="menuitem"
       style={[styles.menuItem, style]}
       onPress={onPress}
       android_ripple={{ color: theme.rippleColor, foreground: true }}
@@ -219,9 +210,14 @@ const MenuItem: React.FC<MenuItemProps> = ({
 Menu.Item = MenuItem;
 
 const styles = StyleSheet.create({
+  modal: {
+    flex: 1,
+  },
   menuContainer: {
+    borderCurve: 'continuous',
     borderRadius: 4,
     elevation: 2,
+    minWidth: 112,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -230,30 +226,22 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     overflow: 'hidden',
     position: 'absolute',
-    zIndex: 1001,
+    zIndex: 1,
   },
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  backdropDark: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-  backdropLight: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  menuContent: {
+    paddingVertical: 8,
   },
   menuItem: {
     paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingVertical: 8,
     minHeight: 48,
     justifyContent: 'center',
   },
   menuItemText: {
-    fontSize: 16,
-    fontWeight: '400',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    lineHeight: 20,
   },
 });
 
