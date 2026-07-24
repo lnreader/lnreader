@@ -27,6 +27,13 @@ const LAUNCHER_RESOURCE_NAMES = [
   'ic_launcher_round',
 ];
 
+const DRAWABLE_RESOURCE_NAMES = [
+  'notification_icon',
+  'splash_icon',
+  'splashscreen_logo',
+];
+const ANDROID_DENSITIES = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
+
 const withBuildGradleCustomizations = config =>
   withAppBuildGradle(config, config => {
     const { contents } = config.modResults;
@@ -63,12 +70,31 @@ const removeGeneratedIconResources = resDir => {
     }
 
     if (resourceDirName.startsWith('drawable-')) {
-      for (const extension of ['png', 'webp', 'xml']) {
-        fs.rmSync(path.join(resourceDir, `notification_icon.${extension}`), {
-          force: true,
-        });
+      for (const resourceName of DRAWABLE_RESOURCE_NAMES) {
+        for (const extension of ['png', 'webp', 'xml']) {
+          fs.rmSync(path.join(resourceDir, `${resourceName}.${extension}`), {
+            force: true,
+          });
+        }
       }
     }
+  }
+};
+
+const installVariantSplashIcons = resDir => {
+  for (const density of ANDROID_DENSITIES) {
+    const drawableDir = path.join(resDir, `drawable-${density}`);
+    const sourcePath = path.join(drawableDir, 'splash_icon.png');
+    const splashPath = path.join(drawableDir, 'splashscreen_logo.png');
+    const nightDrawableDir = path.join(resDir, `drawable-night-${density}`);
+    const nightSplashPath = path.join(
+      nightDrawableDir,
+      'splashscreen_logo.png',
+    );
+
+    fs.renameSync(sourcePath, splashPath);
+    fs.mkdirSync(nightDrawableDir, { recursive: true });
+    fs.copyFileSync(splashPath, nightSplashPath);
   }
 };
 
@@ -97,6 +123,7 @@ const withAndroidVariantAssets = config =>
         removeGeneratedIconResources(targetResDir);
         fs.mkdirSync(targetResDir, { recursive: true });
         fs.cpSync(sourceResDir, targetResDir, { recursive: true });
+        installVariantSplashIcons(targetResDir);
       }
 
       return config;

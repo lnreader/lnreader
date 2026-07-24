@@ -15,6 +15,16 @@
           "dark": {
             "image": "./assets/native/ic_launcher_round.png",
             "backgroundColor": "#000000"
+          },
+          "android": {
+            "image": "./assets/native/splash_icon.png",
+            "backgroundColor": "#132C33",
+            "imageWidth": 288,
+            "resizeMode": "native",
+            "dark": {
+              "image": "./assets/native/splash_icon.png",
+              "backgroundColor": "#132C33"
+            }
           }
         }
       ],
