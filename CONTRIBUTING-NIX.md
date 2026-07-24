@@ -6,7 +6,7 @@ This document outlines how to set up your React Native development environment u
 
 This was tested on an Arch Linux system with AMD CPU and GPU. There are likely problems with NVIDIA GPUs.
 
-Compatibility with Microsoft WSL2 is not guaranteed, but should work withoud major issues, except for the emulator.
+Compatibility with Microsoft WSL2 is not guaranteed, but should work without major issues, except for the emulator.
 
 ## Prerequisites
 
