@@ -1,0 +1,357 @@
+src/hooks/persisted/useNovel/store-helper/bootstrapService.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 23
+src/components/__tests__/mocks.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/reader/components/ReaderBottomSheet/ReaderTextAlignSelector.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/library/LibraryScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 33
+src/screens/novel/components/ExportEpubModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 17
+src/screens/settings/SettingsRepositoryScreen/components/AddRepositoryModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/settings/SettingsReaderScreen/Modals/VoicePickerModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/utils/constants/languages.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/novel/components/DownloadCustomChapterModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/settings/components/ConnectionModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/screens/browse/discover/DiscoverCard.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/GlobalSearchScreen/components/GlobalSearchResultsList.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/components/SearchbarV2/SearchbarV2.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/library/components/LibraryListView.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/components/NovelCover.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 18
+src/screens/reader/components/ReaderBottomSheet/ReaderFontPicker.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/novel/components/NovelScreenList.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 12
+src/screens/novel/components/Chapter/ChapterDownloadButtons.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/novel/NovelScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 20
+test/mocks/fileMock.js
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 1
+src/screens/reader/components/ChapterDrawer/index.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 13
+src/theme/md3/catppuccin.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/theme/md3/lavender.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/reader/utils/sanitizeChapterText.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/settings/SettingsAdvancedScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 12
+src/screens/settings/SettingsGeneralScreen/modals/DownloadCooldownModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/novel/components/NovelSummary/NovelSummary.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/settings/SettingsGeneralScreen/modals/InactivityTimeoutModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/database/queries/__tests__/setup.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 66
+src/screens/WebviewScreen/components/Menu.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/browse/migration/Migration.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/settings/SettingsReaderScreen/tabs/ThemeTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/database/queries/__tests__/README.md
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 197
+src/screens/more/MoreScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 3
+src/theme/dynamic.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/novel/components/Tracker/TrackSearchDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/services/download/downloadChapter.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/novel/components/Info/NovelInfoHeader.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 23
+crowdin.yml
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 4-5
+src/screens/history/HistoryScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 19
+src/screens/novel/components/NovelScreenButtonGroup/NovelScreenButtonGroup.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+plugins/withAndroidCustomizations.js
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 13
+src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/services/backup/drive/index.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/theme/md3/tako.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/theme/md3/tealTurquoise.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/history/components/ClearHistoryDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/browse/components/PluginSettingField.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/settings/components/DefaultChapterSortModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/components/NewUpdateDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 22,34
+babel.config.js
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 20,29
+index.js
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 4
+src/theme/md3/strawberry.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 17
+src/screens/reader/ReaderScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 13
+src/screens/settings/SettingsAppearanceScreen/LanguagePickerModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/novel/components/Info/NovelInfoComponents.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/settings/SettingsReaderScreen/tabs/DisplayTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/utils/translateEnum.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/screens/reader/components/ChapterDrawer/__tests__/ChapterDrawer.test.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 38
+scripts/generate-string-types.cjs
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 21,37
+src/screens/novel/components/Tracker/SetTrackStatusDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/screens/reader/components/WebViewReader.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 12
+src/screens/novel/components/ChapterItem.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/novel/components/NovelAppbar.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/screens/novel/components/JumpToChapterModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/theme/md3/yinyang.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/database/queries/CategoryQueries.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/novel/__tests__/NovelScreen.test.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 40
+src/screens/BrowseSourceScreen/BrowseSourceScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 16
+package.json
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 29-30
+src/screens/reader/components/ReaderBottomSheet/ReaderThemeSelector.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/browse/utils/buildBrowseEntries.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/screens/onboarding/OnboardingScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/reader/components/ReaderBottomSheet/TTSTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 12
+src/database/queryStrings/populate.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/more/DownloadsScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 19
+src/screens/novel/components/EditInfoModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 15
+src/screens/novel/components/SetCategoriesModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/settings/SettingsRepositoryScreen/components/DeleteRepositoryModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/settings/SettingsScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/Categories/CategoriesScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 15
+src/screens/library/constants/constants.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/screens/more/components/RemoveDownloadsDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/screens/reader/components/ReaderBottomSheet/TextSizeSlider.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsReaderScreen/Modals/FontPickerModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/browse/migration/MigrationNovelList.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/services/backup/selfhost/index.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 3
+src/services/epub/import.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/history/components/HistoryCard/HistoryCard.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/theme/md3/defaultTheme.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/database/queries/ChapterQueries.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 23
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 14
+src/i18n/types/index.ts
+  s_8ca0f36cb199a8::t_a757ba88ba637f 1-526
+app.json
+  s_def525e5fd15b4::t_ef8e28a84911a3 9
+src/screens/browse/components/PluginsTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 23
+src/screens/browse/BrowseScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/Categories/components/DeleteCategoryModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/components/ColorPickerModal/ColorPickerModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/reader/components/ReaderSearchbar.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 15
+TESTING.md
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 12,18
+src/i18n/translations.ts
+  s_8ca0f36cb199a8::t_7b4d56e21be3df 1-187
+tsconfig.json
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 24,34
+src/screens/settings/SettingsBackupScreen/index.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/novel/components/__tests__/NovelScreenList.test.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 157
+src/screens/BrowseSourceScreen/components/FilterBottomSheet.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 25
+src/screens/reader/hooks/useChapter.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 35
+src/screens/more/About.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsTrackerScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/hooks/__tests__/mocks.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/hooks/persisted/useNovel/store/chapterActions.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 16
+src/screens/novel/components/Info/ReadButton.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsReaderScreen/ReaderTextSize.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/services/backgroundTasks/taskDefinitions.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 2
+src/theme/md3/yotsuba.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/database/queries/HistoryQueries.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 3
+src/services/backup/local/index.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+src/screens/updates/UpdatesScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 14
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 3
+src/screens/settings/SettingsReaderScreen/tabs/AccessibilityTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 5
+src/services/backup/utils.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 22
+src/theme/md3/mignightDusk.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 1
+src/hooks/__mocks__/index.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/GlobalSearchScreen/GlobalSearchScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 16
+src/screens/more/TaskQueueScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 13
+src/database/queries/NovelQueries.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 8
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/browse/settings/BrowseSettings.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 16
+src/screens/browse/settings/modals/ConcurrentSearchesModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/browse/PluginDetailsScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 24
+src/screens/browse/components/SourcesTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 18
+src/navigators/BottomNavigator.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 10
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 3
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 19
+src/screens/browse/SourceNovels.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 9
+src/screens/novel/components/Tracker/SetTrackScoreDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 4
+jest.config.js
+  s_8ca0f36cb199a8::t_70542f1aa3b44a 9,20,23,36,70-71
+src/screens/Categories/components/AddCategoryModal.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 14
+src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 24
+src/screens/novel/components/Tracker/SetTrackChaptersDialog.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 25
+src/hooks/persisted/usePlugins.ts
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 13
+src/screens/onboarding/ThemeSelectionStep.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 25
+src/screens/StatsScreen/StatsScreen.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 6
+src/screens/settings/SettingsReaderScreen/tabs/NavigationTab.tsx
+  s_8ca0f36cb199a8::t_5f79bbe065ed4d 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "916374b5df3cfa3b09d464109340ad81bdbef457",
+  "prompts": {
+    "80313b86fc7f8df0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f935c-323f-7303-8ba0-6f2e98d8f552",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_8ca0f36cb199a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9377-3979-7e00-8cb7-f6510826ef6d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_def525e5fd15b4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9309-d668-7f40-ad49-46742c7c91e1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
