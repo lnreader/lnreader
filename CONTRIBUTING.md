@@ -2,14 +2,14 @@
 
 Contributions are welcome and are greatly appreciated!
 
-## Setup your environment with nix
+## Setup Your Environment with Nix
 
 If you are on a Linux system, you can install the nix package manager and use the nix flakes to set up your development environment.
 See [CONTRIBUTING-NIX.md](CONTRIBUTING-NIX.md)
 
-## Setting up your environment
+## Setting Up Your Environment
 
-After forking to your own github org or account, do the following steps to get started:
+After forking to your own GitHub org or account, do the following steps to get started:
 
 ```bash
 # prerequisites
@@ -35,7 +35,7 @@ pnpm run build:release:android
 
 ### Developing on Android
 
-You will need an Android device or emulator connected to your computer as well as an IDE of your choice. (eg: vscode)
+You will need an Android device or emulator connected to your computer as well as an IDE of your choice (e.g., VS Code).
 
 ```bash
 # prerequisites
