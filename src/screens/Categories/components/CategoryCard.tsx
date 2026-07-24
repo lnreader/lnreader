@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import { Pressable } from 'react-native-gesture-handler';
 
 import { Category } from '@database/types';
 import { useTheme } from '@hooks/persisted';
@@ -51,18 +50,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         ]}
       >
         <View style={styles.buttonsCtn}>
-          <Pressable
+          <IconButton
+            name="drag-horizontal-variant"
+            color={theme.onSurface}
+            theme={theme}
+            padding={8}
             onPressIn={drag}
             style={styles.dragHandle}
-            //activeOpacity={0.6}
-          >
-            <IconButton
-              name="drag-horizontal-variant"
-              color={theme.onSurface}
-              theme={theme}
-              padding={8}
-            />
-          </Pressable>
+          />
           <View style={styles.nameCtn}>
             <Text
               style={[
@@ -73,23 +68,24 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               ]}
               onPress={showCategoryModal}
               disabled={category.id === 2}
+              numberOfLines={1}
             >
               {category.name}
             </Text>
-            {category.id <= 2 && (
-              <Badge
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor: theme.tertiaryContainer,
-                  },
-                ]}
-              >
-                System
-              </Badge>
-            )}
           </View>
-          <View style={styles.flex} />
+          {category.id <= 2 && (
+            <Badge
+              style={[
+                styles.badge,
+                {
+                  backgroundColor: theme.tertiaryContainer,
+                  color: theme.onTertiaryContainer,
+                },
+              ]}
+            >
+              System
+            </Badge>
+          )}
 
           <View style={{ opacity }}>
             <IconButton
@@ -150,19 +146,17 @@ const styles = StyleSheet.create({
   dragHandle: {
     marginEnd: 4,
   },
-  flex: {
-    flex: 1,
-  },
   manageBtn: {
     marginStart: 16,
   },
   name: {
-    marginStart: 16,
+    flexShrink: 1,
+    marginStart: 0,
     marginEnd: 8,
   },
   nameCtn: {
     alignItems: 'center',
-    flexGrow: 1,
+    flex: 1,
     flexDirection: 'row',
     marginStart: 8,
     paddingEnd: 16,
@@ -173,6 +167,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   badge: {
+    alignSelf: 'center',
     paddingHorizontal: 8,
   },
   disabledOpacity: {
