@@ -1,0 +1,185 @@
+modules/nitro-tts/android/src/main/java/com/margelo/nitro/nitrotts/TtsMediaNotification.kt
+  s_c79281e7dd6af1::t_cb8ac2060b3ae1 33,50-51,109,113,129-131,137-143
+  human 144-145
+assets/reader/js/index.js
+  s_c79281e7dd6af1::t_976e4c21d4d743 354
+  s_c79281e7dd6af1::t_2d671d638ec85d 300,345,352,356,408,424,446,459,472,497-503
+  s_c79281e7dd6af1::t_de802f49cc8a7a 297-298,301-302,309-344,346-351,353,355,357,359-361,379,407,409-423,425-430,432-441,443-445,447-458,460-464,467-471,473-474,482-484,487-492,521
+  s_c79281e7dd6af1::t_cb8ac2060b3ae1 358,485-486
+  s_c79281e7dd6af1::t_ab088054ae6231 431
+  human 442,465-466,493
+assets/reader/js/icons.js
+  s_c79281e7dd6af1::t_cb8ac2060b3ae1 11-12
+  s_c79281e7dd6af1::t_de802f49cc8a7a 13-14
+modules/nitro-tts/ios/TtsNowPlayingController.swift
+  s_c79281e7dd6af1::t_cb8ac2060b3ae1 14,19-25
+  human 14,17-18
+assets/reader/css/tts.css
+  s_c79281e7dd6af1::t_de802f49cc8a7a 49-67
+modules/nitro-tts/android/src/main/java/com/margelo/nitro/nitrotts/TtsMediaSessionCallback.kt
+  human 25-28
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_cb8ac2060b3ae1",
+          "lines": "33,50-51,109,113,129-131,137-143",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "144-145",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-tts/android/src/main/java/com/margelo/nitro/nitrotts/TtsMediaNotification.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_976e4c21d4d743",
+          "lines": "354",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_2d671d638ec85d",
+          "lines": "300,345,352,356,408,424,446,459,472,497-503",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 122,
+          "added_lines": 122,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_de802f49cc8a7a",
+          "lines": "297-298,301-302,309-344,346-351,353,355,357,359-361,379,407,409-423,425-430,432-441,443-445,447-458,460-464,467-471,473-474,482-484,487-492,521",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_cb8ac2060b3ae1",
+          "lines": "358,485-486",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_ab088054ae6231",
+          "lines": "431",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 15,
+          "hash": "human",
+          "lines": "442,465-466,493",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/index.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_cb8ac2060b3ae1",
+          "lines": "11-12",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_de802f49cc8a7a",
+          "lines": "13-14",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/icons.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_cb8ac2060b3ae1",
+          "lines": "14,19-25",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "14,17-18",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-tts/ios/TtsNowPlayingController.swift"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_c79281e7dd6af1::t_de802f49cc8a7a",
+          "lines": "49-67",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/css/tts.css"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "25-28",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-tts/android/src/main/java/com/margelo/nitro/nitrotts/TtsMediaSessionCallback.kt"
+    }
+  ],
+  "base_commit_sha": "c30441b9493d5e75fbe82a608b034c6239fa493f",
+  "branch": "master",
+  "commit_sha": "67d2c7c01b101d83d0033aad2c0a99247f04620e",
+  "commit_time": "2026-07-25T14:47:36+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 6,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 6,
+      "total_deletions": 30
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
