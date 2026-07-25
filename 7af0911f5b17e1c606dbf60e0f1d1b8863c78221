@@ -1,0 +1,272 @@
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  human 3
+assets/android-icons/preview/res/drawable/ic_launcher_background.xml
+  s_b9bb91f97b5e12::t_ae039214be8371 1-9
+assets/android-icons/debug/res/drawable/ic_launcher_background.xml
+  s_b9bb91f97b5e12::t_ae039214be8371 1-9
+assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  s_b9bb91f97b5e12::t_b7e4d7c6c4a275 1-2,4-6
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  human 3
+assets/android-icons/release/res/drawable/ic_launcher_background.xml
+  s_b9bb91f97b5e12::t_ae039214be8371 1-9
+assets/android-icons/debug/res/values-night/splashscreen_background.xml
+  s_b9bb91f97b5e12::t_ae039214be8371 1-4
+assets/android-icons/debug/res/values/ic_launcher_background.xml
+  s_b9bb91f97b5e12::t_b7e4d7c6c4a275 1-4
+plugins/withAndroidCustomizations.js
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 20
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  human 3
+assets/android-icons/debug/res/values/splashscreen_background.xml
+  s_b9bb91f97b5e12::t_ae039214be8371 1-4
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  human 3
+assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_b9bb91f97b5e12::t_f4cf1b7d40eaed 3
+  s_b9bb91f97b5e12::t_b7e4d7c6c4a275 1-2,4-6
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_ae039214be8371",
+          "lines": "1-9",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/preview/res/drawable/ic_launcher_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_ae039214be8371",
+          "lines": "1-9",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/drawable/ic_launcher_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_b7e4d7c6c4a275",
+          "lines": "1-2,4-6",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_ae039214be8371",
+          "lines": "1-9",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/release/res/drawable/ic_launcher_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_ae039214be8371",
+          "lines": "1-4",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/values-night/splashscreen_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_b7e4d7c6c4a275",
+          "lines": "1-4",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/values/ic_launcher_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "20",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "plugins/withAndroidCustomizations.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_ae039214be8371",
+          "lines": "1-4",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/values/splashscreen_background.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_f4cf1b7d40eaed",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_b9bb91f97b5e12::t_b7e4d7c6c4a275",
+          "lines": "1-2,4-6",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+  ],
+  "base_commit_sha": "098782d6aa9a188bf007402155bd66e3dbc14523",
+  "branch": "master",
+  "commit_sha": "7af0911f5b17e1c606dbf60e0f1d1b8863c78221",
+  "commit_time": "2026-07-25T11:54:21+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 4
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
