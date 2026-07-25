@@ -1,0 +1,86 @@
+assets/reader/js/search.js
+  s_d8205c0e934938::t_81f08a03e92fbf 1-442
+assets/reader/css/index.css
+  s_d8205c0e934938::t_2ae5aac2cb05ba 56-59,98
+  human 86-87
+assets/reader/js/core.js
+  s_d8205c0e934938::t_2ae5aac2cb05ba 781,787
+  human 781,787
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 442,
+          "added_lines": 442,
+          "deleted_lines": 0,
+          "hash": "s_d8205c0e934938::t_81f08a03e92fbf",
+          "lines": "1-442",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/search.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_d8205c0e934938::t_2ae5aac2cb05ba",
+          "lines": "56-59,98",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "86-87",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/css/index.css"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_d8205c0e934938::t_2ae5aac2cb05ba",
+          "lines": "781,787",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "781,787",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/core.js"
+    }
+  ],
+  "base_commit_sha": "4de82472ee70fd0c36114f0ee2e213ff6bf81099",
+  "branch": "master",
+  "commit_sha": "805d418ec67b8ef6efc1d45675dff9b0fee05f6d",
+  "commit_time": "2026-07-25T09:19:57+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 4
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
