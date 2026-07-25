@@ -23,6 +23,7 @@
     "deleteReadChapters": "Delete read chapters",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
     "importEpub": "Import Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Import Novel",
     "importStaticFiles": "Import Static Files",
     "novelInsertFailed": "novel insert failed",
@@ -45,11 +46,16 @@
     "appLanguageDefault": "Default",
     "appTheme": "App theme",
     "darkTheme": "Dark Theme",
+    "dateFormat": "Date format",
+    "dateFormatDefault": "Default (%{date})",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Hide backdrop",
     "lightTheme": "Light Theme",
     "navbar": "Navbar",
     "novelInfo": "Novel info",
     "pureBlackDarkMode": "Pure black dark mode",
+    "relativeTimestamps": "Relative timestamps",
+    "relativeTimestampsDescription": "\"Today\" instead of \"%{date}\"",
     "showHistoryInTheNav": "Show history in the nav",
     "showUpdatesInTheNav": "Show updates in the nav",
     "themeMode": "Theme mode",
@@ -130,20 +136,23 @@
     "uploadingData": "Uploading Data",
     "uploadingDownloadedFiles": "Uploading Downloaded Files"
   },
-  "browse": "閲覧",
+  "browse": "Browse",
   "browseScreen": {
-    "addedToLibrary": "ライブラリに追加",
+    "addedToLibrary": "Added to library",
     "available": "Available",
     "deletePluginMessage": "Are you sure you want to uninstall %{name}?",
     "discover": "Discover",
-    "globalSearch": "グローバル検索",
+    "editPluginSetting": "Edit %{name}",
+    "globalSearch": "Global search",
+    "installPlugin": "Install %{name}",
     "installFailed": "Installation failed: %{name}",
     "installed": "Installed",
     "installedPlugin": "Installed %{name}",
     "installedPlugins": "Installed plugins",
+    "language": "Language",
     "lastUsed": "Last used",
     "latest": "Latest",
-    "listEmpty": "設定から言語を有効にする",
+    "listEmpty": "Enable languages from settings",
     "migration": {
       "dialogMessage": "Migrate %{url}?",
       "novelAlreadyInLibrary": "Novel already in library",
@@ -151,15 +160,32 @@
       "selectSourceDesc": "Select a Source To Migrate From"
     },
     "noSource": "Your library does not have any novels from this source",
-    "pinnedPlugin": "Pinned %{name}",
-    "pinnedPlugins": "Pinned plugins",
-    "removeFromLibrary": "ライブラリから削除",
-    "searchbar": "ソースを検索",
+    "noPlugins": "No plugins found. Add a repository or enable more languages in Browse Settings.",
+    "noSearchResults": "No matching results",
+    "noSources": "No sources installed. Install a plugin to start browsing novels.",
+    "openPluginDetails": "Open details for %{name}",
+    "openPluginSettings": "Open settings for %{name}",
+    "openWebsite": "Open the website for %{name}",
+    "pinSource": "Pin %{name}",
+    "pinnedPlugins": "Pinned",
+    "pluginDetails": "Plugin details",
+    "pluginIcon": "plugin icon",
+    "pluginNotInstalled": "This plugin is not installed",
+    "plugins": "Plugins",
+    "removeFromLibrary": "Removed from Library",
+    "repositories": "Repositories",
+    "searchbar": "Search sources and plugins",
     "searchResults": "Search results",
     "selectNovel": "Select Novel",
+    "sources": "Sources",
+    "togglePluginSetting": "Toggle %{name}",
     "uninstalledPlugin": "Uninstalled %{name}",
-    "unpinnedPlugin": "Unpinned %{name}",
+    "uninstall": "Uninstall",
+    "unpinSource": "Unpin %{name}",
+    "updatePlugin": "Update %{name}",
+    "updateAll": "Update all",
     "updateFailed": "Update failed",
+    "updatesPending": "Updates pending",
     "updatedTo": "Updated to %{version}",
     "settings": {
       "title": "Plugin Settings",
@@ -173,34 +199,35 @@
     "languages": "Languages"
   },
   "categories": {
-    "addCategories": "カテゴリーを追加",
+    "addCategories": "Add category",
     "cantDeleteDefault": "You cant delete default category",
     "default": "Default",
-    "defaultCategory": "デフォルトカテゴリー",
+    "defaultCategory": "Default category",
     "deleteModal": {
-      "desc": "カテゴリーを削除しますか?",
-      "header": "カテゴリーを削除"
+      "desc": "Do you wish to delete category",
+      "header": "Delete category"
     },
-    "duplicateError": "この名前のカテゴリーはすでに存在します。",
-    "editCategories": "カテゴリー名を変更",
-    "emptyMsg": "カテゴリーがありません。ライブラリを整理したい場合、プラスボタンをタップしてカテゴリーを作成してください。",
-    "header": "カテゴリーを編集",
+    "duplicateError": "A category with this name already exists!",
+    "editCategories": "Rename category",
+    "emptyMsg": "You have no categories. Tap the plus button to create one for organizing your library",
+    "header": "Edit categories",
     "local": "Local",
-    "setCategories": "カテゴリーを設定",
-    "setModalEmptyMsg": "カテゴリーがありません。ライブラリを整理したい場合、プラスボタンをタップしてカテゴリーを作成してください。"
+    "setCategories": "Set categories",
+    "setModalEmptyMsg": "You have no categories. Tap the Edit button to create one for organizing your library"
   },
   "repositories": {
     "emptyMsg": "You have no repositories. Add your first plugin repository to get started."
   },
   "common": {
     "about": "About",
-    "add": "追加",
+    "add": "Add",
     "all": "All",
+    "back": "Back",
     "backup": "Backup",
-    "cancel": "キャンセル",
-    "categories": "カテゴリー",
+    "cancel": "Cancel",
+    "categories": "Categories",
     "chapters": "Chapters",
-    "clear": "クリア",
+    "clear": "Clear",
     "copiedToClipboard": "Copied to clipboard: %{name}",
     "delete": "Delete",
     "deleted": "Deleted %{name}",
@@ -208,26 +235,27 @@
     "display": "Display",
     "done": "Done",
     "downloads": "Downloads",
-    "edit": "編集",
+    "edit": "Edit",
     "example": "Example",
     "filter": "Filter",
-    "globally": "世界的に",
-    "install": "インストール",
+    "globally": "globally",
+    "install": "Install",
     "logout": "Logout",
-    "name": "名前",
-    "newUpdateAvailable": "新しいアップデートが見つかりました",
-    "ok": "わかりました",
+    "name": "Name",
+    "newUpdateAvailable": "New update available",
+    "none": "None",
+    "ok": "Ok",
     "pause": "Pause",
     "preparing": "Preparing",
     "remove": "Remove",
-    "reset": "リセット",
+    "reset": "Reset",
     "restore": "Restore",
     "resume": "Resume",
     "retry": "Retry",
-    "save": "保存",
-    "search": "検索",
-    "searchFor": "検索する",
-    "searchResults": "検索結果",
+    "save": "Save",
+    "search": "Search",
+    "searchFor": "Search for",
+    "searchResults": "Search results",
     "settings": "Settings",
     "show": "Show",
     "signIn": "Sign in",
@@ -235,6 +263,7 @@
     "sort": "Sort",
     "submit": "Submit",
     "loading": "Loading ...",
+    "moreOptions": "More options",
     "warning": "Warning"
   },
   "webview": {
@@ -279,12 +308,20 @@
     "disableLoadingAnimationsDesc": "May improve performance on slower devices",
     "disableHapticFeedback": "Disable haptic feedback",
     "disableHapticFeedbackDescription": "Turn off vibrations for touch interactions.",
+    "chapterDownloadCooldown": "Chapter download cooldown",
+    "chapterDownloadCooldownDesc": "Wait between sequential chapter downloads (seconds). Helps avoid source rate limits during batch downloads.",
+    "chapterDownloadCooldownPlaceholder": "Cooldown in seconds (e.g. 1.5)",
+    "chapterDownloadCooldownWarning": "Very low cooldowns may trigger rate limiting or temporary IP bans from sources.",
     "displayMode": "Display Mode",
     "downloadNewChapters": "Download new chapters",
     "epub": "EPUB",
     "epubLocation": "EPUB Location",
     "epubLocationDescription": "The place where you open and export your EPUB files.",
     "globalUpdate": "Global update",
+    "globalUpdateCategories": "Categories",
+    "globalUpdateCategoriesDescription": "Novels in excluded categories will not be updated, even when they are also in an included category. Tap a category to cycle between included, excluded, and neither.",
+    "globalUpdateExclude": "Exclude: %{categories}",
+    "globalUpdateInclude": "Include: %{categories}",
     "gridSize": "Grid size",
     "gridSizeDesc": "%{num} per row",
     "itemsPerRow": "Items per row",
@@ -295,55 +332,66 @@
     "novelSort": "Novel Sort",
     "refreshMetadata": "Automatically refresh metadata",
     "refreshMetadataDescription": "Check for new cover and details when updating library",
+    "smartUpdate": "Smart update",
+    "smartUpdateSkipCompleted": "Skip entries with \"Completed\" status",
+    "smartUpdateSkipUnstarted": "Skip unstarted entries",
+    "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
     "updateLibrary": "Update library on launch",
     "updateLibraryDesc": "Not recommended for low devices",
-    "updateOngoing": "Only update ongoing novels",
     "updateTime": "Show last update time",
-    "useFAB": "Use FAB in Library"
+    "useFAB": "Use FAB in Library",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "all sources",
     "searchIn": "Search a novel in"
   },
-  "history": "履歴",
+  "history": "History",
   "historyScreen": {
     "chapter": "Chapter",
-    "clearHistorWarning": "本当によろしいですか？すべての履歴は失われます。",
+    "clearHistorWarning": "Are you sure? All history will be lost.",
     "deleted": "History deleted.",
     "nothingReadRecently": "Nothing read recently",
-    "searchbar": "閲覧履歴"
+    "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
+    "resetAllChapters": "Reset all chapters for this entry",
+    "searchbar": "Search history"
   },
-  "library": "ライブラリ",
+  "library": "Library",
   "libraryScreen": {
     "bottomSheet": {
       "display": {
-        "badges": "バッジ",
-        "comfortable": "快適グリッド",
-        "compact": "コンパクトグリッド",
-        "displayMode": "表示モード",
+        "badges": "Badges",
+        "comfortable": "Comfortable grid",
+        "compact": "Compact grid",
+        "displayMode": "Display mode",
         "download": "Download",
-        "downloadBadges": "ダウンロードバッジ",
-        "list": "一覧",
-        "noTitle": "カバーだけグリッド",
+        "downloadBadges": "Download badges",
+        "list": "List",
+        "noTitle": "Cover only grid",
         "numberOfItems": "Number of Items",
-        "showNoOfItems": "アイテム数を表示",
+        "showNoOfItems": "Show number of items",
         "unread": "Unread",
-        "unreadBadges": "未読バッジ"
+        "unreadBadges": "Unread badges"
       },
       "filters": {
-        "completed": "完成",
-        "downloaded": "ダウンロード",
-        "started": "読み始めた",
-        "unread": "未読"
+        "completed": "Completed",
+        "downloaded": "Downloaded",
+        "started": "Started",
+        "unread": "Unread"
       },
       "sortOrders": {
-        "alphabetically": "アルファベット順",
-        "dateAdded": "追加日",
+        "alphabetically": "Alphabetically",
+        "dateAdded": "Date added",
         "download": "Downloaded",
         "lastRead": "Last read",
         "lastUpdated": "Last updated",
-        "totalChapters": "合計章数",
+        "totalChapters": "Total chapters",
         "unread": "Unread"
       }
     },
@@ -354,18 +402,18 @@
       "updateCategory": "Update Category",
       "updateLibrary": "Update Library"
     },
-    "searchbar": "ライブラリを検索"
+    "searchbar": "Search library"
   },
   "more": "More",
   "moreScreen": {
-    "downloadOnly": "ダウンロードのみ",
+    "downloadOnly": "Downloaded only",
     "downloadOnlyDesc": "Filters all novels in your library",
     "downloadQueue": "Download queue",
-    "incognitoMode": "シークレットモード",
+    "incognitoMode": "Incognito mode",
     "incognitoModeDesc": "Pauses reading history"
   },
   "novelScreen": {
-    "addToLibaray": "ライブラリに追加",
+    "addToLibaray": "Add to library",
     "bottomSheet": {
       "displays": {
         "chapterNumber": "Chapter number",
@@ -374,7 +422,8 @@
       "filters": {
         "bookmarked": "Bookmarked",
         "downloaded": "Downloaded",
-        "unread": "Unread"
+        "unread": "Unread",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "By chapter name",
@@ -382,7 +431,7 @@
       }
     },
     "chapterChapnum": "Chapter %{num}",
-    "chapters": "章",
+    "chapters": "chapters",
     "continueReading": "Continue reading",
     "exportEpubModal": {
       "applyReaderTheme": "Apply reader theme to EPUB",
@@ -390,6 +439,7 @@
       "downloadedChaptersOnly": "Only downloaded chapters will be included in the EPUB file",
       "endChapter": "End Chapter",
       "exportAll": "Export All Chapters",
+      "fileName": "File name",
       "includeCustomCSS": "Include Custom CSS",
       "includeCustomJS": "Include Custom JS",
       "invalidRange": "Please enter valid chapter numbers",
@@ -438,7 +488,7 @@
       "jumpToChapter": "Jump to Chapter",
       "openChapter": "Open Chapter"
     },
-    "migrate": "移行",
+    "migrate": "Migrate",
     "noSummary": "No summary",
     "noCoverFound": "No cover found",
     "progress": "Progress %{progress} %",
@@ -465,8 +515,8 @@
       "bionicReading": "Bionic reading",
       "tapToScroll": "Tap to scroll",
       "color": "Color",
-      "fontStyle": "フォントスタイル",
-      "fullscreen": "全画面",
+      "fontStyle": "Font style",
+      "fullscreen": "Fullscreen",
       "lineHeight": "Line height",
       "padding": "Padding",
       "pageReader": "Paged reading (Experimental)",
@@ -476,7 +526,7 @@
       "showProgressPercentage": "Reading progress",
       "swipeGestures": "Swipe between chapters",
       "textAlign": "Text alignment",
-      "textSize": "文字サイズ",
+      "textSize": "Text size",
       "useChapterDrawerSwipeNavigation": "Swipe to open drawer",
       "verticalSeekbar": "Vertical seekbar",
       "keepScreenOn": "Keep screen on",
@@ -490,8 +540,10 @@
     "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Finished",
     "nextChapter": "Next: %{name}",
-    "noNextChapter": "次の章はありません",
-    "noPreviousChapter": "There's no previous chapter"
+    "noNextChapter": "There's no next chapter",
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
@@ -516,7 +568,8 @@
     "textColor": "Text color",
     "textColorModal": "Text color",
     "title": "Reader",
-    "verticalSeekbarDesc": "Use vertical seekbar"
+    "verticalSeekbarDesc": "Use vertical seekbar",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "No results found"
@@ -530,7 +583,12 @@
     "title": "Statistics",
     "titlesInLibrary": "Titles in library",
     "totalChapters": "Total chapters",
-    "unreadChapters": "Unread chapters"
+    "unreadChapters": "Unread chapters",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -538,15 +596,15 @@
     "revalidate": "Revalidate",
     "services": "Services"
   },
-  "updates": "更新",
+  "updates": "Updates",
   "updatesScreen": {
     "deletedChapters": "Deleted %{num} chapters",
     "emptyView": "No recent updates",
-    "lastUpdatedAt": "ライブラリの最終更新日",
+    "lastUpdatedAt": "Library last updated:",
     "libraryUpdated": "Library Updated",
     "newChapters": "new Chapters",
     "novelsUpdated": "%{num} novels updated",
-    "searchbar": "更新を検索",
+    "searchbar": "Search updates",
     "unableToGetNovel": "Unable to get novel",
     "updatesLower": "updates",
     "updatingLibrary": "Updating library"
@@ -570,5 +628,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
