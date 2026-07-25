@@ -28,6 +28,7 @@ import { useNovelScreenActions } from './hooks/useNovelScreenActions';
 import { useNovelRefresh } from './hooks/useNovelRefresh';
 import SetCategoryModal from './components/SetCategoriesModal';
 import { backgroundTasks } from '@services/backgroundTasks';
+import { runWhenIdle } from '@utils/runWhenIdle';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
@@ -45,6 +46,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     selectAll,
   } = useChapterSelection(chapters);
   const [editInfoModal, showEditInfoModal] = useState(false);
+  const [editInfoModalMounted, setEditInfoModalMounted] = useState(false);
 
   const chapterListRef = useRef<LegendListRef | null>(null);
 
@@ -54,15 +56,18 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     setTrue: showSetCategoriesModal,
     setFalse: closeSetCategoriesModal,
   } = useBoolean();
+  const [categoriesModalMounted, setCategoriesModalMounted] = useState(false);
 
   const headerOpacity = useSharedValue(0);
 
   const [jumpToChapterModal, showJumpToChapterModal] = useState(false);
+  const [jumpToChapterModalMounted, setJumpToChapterModalMounted] = useState(false);
   const {
     value: dlChapterModalVisible,
     setTrue: openDlChapterModal,
     setFalse: closeDlChapterModal,
   } = useBoolean();
+  const [dlChapterModalMounted, setDlChapterModalMounted] = useState(false);
 
   const {
     deleteDownloadedChapters,
@@ -86,11 +91,32 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     enqueue: backgroundTasks.enqueue,
   });
 
-  const hideJumpToChapterModal = useCallback(
-    () => showJumpToChapterModal(false),
-    [],
-  );
+  const hideJumpToChapterModal = useCallback(() => {
+    showJumpToChapterModal(false);
+  }, []);
+
+  const showJumpToChapterModalHandler = useCallback(() => {
+    setJumpToChapterModalMounted(true);
+    showJumpToChapterModal(true);
+  }, []);
+
   const hideEditInfoModal = useCallback(() => showEditInfoModal(false), []);
+
+  const showEditInfoModalHandler = useCallback(() => {
+    setEditInfoModalMounted(true);
+    showEditInfoModal(true);
+  }, []);
+
+  const showSetCategoriesModalHandler = useCallback(() => {
+    setCategoriesModalMounted(true);
+    showSetCategoriesModal();
+  }, [showSetCategoriesModal]);
+
+  const openDlChapterModalHandler = useCallback(() => {
+    setDlChapterModalMounted(true);
+    openDlChapterModal();
+  }, [openDlChapterModal]);
+
   const snackbarTheme = useMemo(() => ({ colors: theme }), [theme]);
   const snackbarTextStyle = useMemo(
     () => ({ color: theme.onSurface }),
@@ -125,13 +151,13 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               novel={novel}
               deleteChapters={deleteDownloadedChapters}
               downloadChapters={downloadAvailableChapters}
-              showEditInfoModal={showEditInfoModal}
+              showEditInfoModal={showEditInfoModalHandler}
               setCustomNovelCover={setCustomNovelCover}
-              downloadCustomChapterModal={openDlChapterModal}
-              showJumpToChapterModal={showJumpToChapterModal}
+              downloadCustomChapterModal={openDlChapterModalHandler}
+              showJumpToChapterModal={showJumpToChapterModalHandler}
               shareNovel={shareNovel}
               refreshNovel={onRefresh}
-              editCategories={showSetCategoriesModal}
+              editCategories={showSetCategoriesModalHandler}
               theme={theme}
               isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
@@ -176,7 +202,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
           </Suspense>
         </SafeAreaView>
 
-        {novel && setCategoriesModalVisible ? (
+        {novel && categoriesModalMounted && setCategoriesModalVisible ? (
           <SetCategoryModal
             novelIds={[novel.id]}
             closeModal={closeSetCategoriesModal}
@@ -201,28 +227,34 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
         <Portal>
           {novel ? (
             <>
-              <JumpToChapterModal
-                modalVisible={jumpToChapterModal}
-                hideModal={hideJumpToChapterModal}
-                novel={novel}
-                chapterListRef={chapterListRef}
-                navigation={navigation}
-              />
-              <EditInfoModal
-                modalVisible={editInfoModal}
-                hideModal={hideEditInfoModal}
-                novel={novel}
-                setNovel={setNovel}
-                theme={theme}
-              />
-              <DownloadCustomChapterModal
-                modalVisible={dlChapterModalVisible}
-                hideModal={closeDlChapterModal}
-                novel={novel}
-                chapters={chapters}
-                theme={theme}
-                downloadChapters={downloadChapters}
-              />
+              {jumpToChapterModalMounted ? (
+                <JumpToChapterModal
+                  modalVisible={jumpToChapterModal}
+                  hideModal={hideJumpToChapterModal}
+                  novel={novel}
+                  chapterListRef={chapterListRef}
+                  navigation={navigation}
+                />
+              ) : null}
+              {editInfoModalMounted ? (
+                <EditInfoModal
+                  modalVisible={editInfoModal}
+                  hideModal={hideEditInfoModal}
+                  novel={novel}
+                  setNovel={setNovel}
+                  theme={theme}
+                />
+              ) : null}
+              {dlChapterModalMounted ? (
+                <DownloadCustomChapterModal
+                  modalVisible={dlChapterModalVisible}
+                  hideModal={closeDlChapterModal}
+                  novel={novel}
+                  chapters={chapters}
+                  theme={theme}
+                  downloadChapters={downloadChapters}
+                />
+              ) : null}
             </>
           ) : null}
         </Portal>

@@ -34,6 +34,7 @@ import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
+import { runWhenIdle } from '@utils/runWhenIdle';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -91,12 +92,21 @@ const NovelScreenList = ({
     id: 'NO_ID',
   };
   const novel = fetchedNovel ?? routeNovel;
-  const {
-    useFabForContinueReading,
-    disableHapticFeedback,
-    dateFormat = 'default',
-    relativeTimestamps = true,
-  } = useAppSettings();
+  const appSettings = useAppSettings();
+  const memoizedAppSettings = useMemo(
+    () => ({
+      useFabForContinueReading: appSettings.useFabForContinueReading,
+      disableHapticFeedback: appSettings.disableHapticFeedback,
+      dateFormat: appSettings.dateFormat ?? 'default',
+      relativeTimestamps: appSettings.relativeTimestamps ?? true,
+    }),
+    [
+      appSettings.useFabForContinueReading,
+      appSettings.disableHapticFeedback,
+      appSettings.dateFormat,
+      appSettings.relativeTimestamps,
+    ],
+  );
 
   const { filter, showChapterTitles = false } = novelSettings;
 
@@ -121,6 +131,10 @@ const NovelScreenList = ({
   const trackerSheetRef = useRef<BottomSheetModalMethods>(null);
   const pageNavigationSheetRef = useRef<BottomSheetModalMethods>(null);
 
+  const [novelBottomSheetMounted, setNovelBottomSheetMounted] = useState(false);
+  const [trackerSheetMounted, setTrackerSheetMounted] = useState(false);
+  const [pageNavigationSheetMounted, setPageNavigationSheetMounted] = useState(false);
+
   // Derive selectedIds Set for O(1) lookups
   const selectedIds = useMemo(() => new Set(selected), [selected]);
   const isSelectionMode = selected.length > 0;
@@ -140,7 +154,7 @@ const NovelScreenList = ({
         return;
       }
 
-      if (useFabForContinueReading && lastRead) {
+      if (memoizedAppSettings.useFabForContinueReading && lastRead) {
         const isExtended = currentOffset <= 0;
         if (isExtended !== previousOffset <= 0) {
           runOnJS(setIsFabExtended)(isExtended);
@@ -152,7 +166,7 @@ const NovelScreenList = ({
         runOnJS(setShowScrollToTop)(shouldShowScrollToTop);
       }
     },
-    [headerOpacity, lastRead, screenHeight, useFabForContinueReading],
+    [headerOpacity, lastRead, screenHeight, memoizedAppSettings.useFabForContinueReading],
   );
 
   const listSharedValues = useMemo(() => ({ scrollOffset }), [scrollOffset]);
@@ -191,7 +205,7 @@ const NovelScreenList = ({
     (chapter: ChapterInfo) => {
       setSelected(sel => {
         if (sel.length === 0) {
-          if (!disableHapticFeedback) {
+          if (!memoizedAppSettings.disableHapticFeedback) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           }
           return [...sel, chapter.id];
@@ -217,7 +231,7 @@ const NovelScreenList = ({
         );
       });
     },
-    [chapters, disableHapticFeedback, setSelected],
+    [chapters, memoizedAppSettings.disableHapticFeedback, setSelected],
   );
 
   const handleDeleteChapter = useCallback(
@@ -273,10 +287,20 @@ const NovelScreenList = ({
 
   const hasMultiplePages = pages.length > 1 || (novel?.totalPages ?? 0) > 1;
 
-  const openPageNavDrawer = useCallback(
-    () => pageNavigationSheetRef.current?.present(),
-    [],
-  );
+  const openPageNavDrawer = useCallback(() => {
+    setPageNavigationSheetMounted(true);
+    pageNavigationSheetRef.current?.present();
+  }, []);
+
+  const openNovelBottomSheet = useCallback(() => {
+    setNovelBottomSheetMounted(true);
+    novelBottomSheetRef.current?.present();
+  }, []);
+
+  const openTrackerSheet = useCallback(() => {
+    setTrackerSheetMounted(true);
+    trackerSheetRef.current?.present();
+  }, []);
 
   // --- Memoized list components ---
 
@@ -316,11 +340,13 @@ const NovelScreenList = ({
           navigateToChapter={navigateToChapter}
           novel={novel}
           novelBottomSheetRef={novelBottomSheetRef}
+          openNovelBottomSheet={openNovelBottomSheet}
           setCustomNovelCover={setCustomNovelCover}
           saveNovelCover={saveNovelCover}
           theme={theme}
           totalChapters={batchInformation.totalChapters}
           trackerSheetRef={trackerSheetRef}
+          openTrackerSheet={openTrackerSheet}
         />
         {paginationControl}
       </>
@@ -335,6 +361,8 @@ const NovelScreenList = ({
       lastRead,
       navigateToChapter,
       novel,
+      openNovelBottomSheet,
+      openTrackerSheet,
       setCustomNovelCover,
       saveNovelCover,
       theme,
@@ -370,8 +398,8 @@ const NovelScreenList = ({
           onDownloadChapter={handleDownloadChapter}
           onSelectPress={onSelectPress}
           onSelectLongPress={onSelectLongPress}
-          dateFormat={dateFormat}
-          relativeTimestamps={relativeTimestamps}
+          dateFormat={memoizedAppSettings.dateFormat}
+          relativeTimestamps={memoizedAppSettings.relativeTimestamps}
         />
       );
     },
@@ -385,8 +413,8 @@ const NovelScreenList = ({
       selectedIds,
       showChapterTitles,
       theme,
-      dateFormat,
-      relativeTimestamps,
+      memoizedAppSettings.dateFormat,
+      memoizedAppSettings.relativeTimestamps,
     ],
   );
   const listExtraData = useMemo(
@@ -415,12 +443,16 @@ const NovelScreenList = ({
       />
       {novel.id !== 'NO_ID' ? (
         <>
-          <NovelBottomSheet
-            bottomSheetRef={novelBottomSheetRef}
-            theme={theme}
-          />
-          <TrackSheet bottomSheetRef={trackerSheetRef} novel={novel} />
-          {(novel.totalPages ?? 0) > 1 || pages.length > 1 ? (
+          {novelBottomSheetMounted ? (
+            <NovelBottomSheet
+              bottomSheetRef={novelBottomSheetRef}
+              theme={theme}
+            />
+          ) : null}
+          {trackerSheetMounted ? (
+            <TrackSheet bottomSheetRef={trackerSheetRef} novel={novel} />
+          ) : null}
+          {pageNavigationSheetMounted && ((novel.totalPages ?? 0) > 1 || pages.length > 1) ? (
             <PageNavigationBottomSheet
               bottomSheetRef={pageNavigationSheetRef}
               theme={theme}
@@ -437,7 +469,7 @@ const NovelScreenList = ({
             onContinue={onFabPress}
             onScrollToTop={scrollToTop}
             showContinue={
-              useFabForContinueReading &&
+              memoizedAppSettings.useFabForContinueReading &&
               Boolean(lastRead || firstUnreadChapter)
             }
             showScrollToTop={showScrollToTop}

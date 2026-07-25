@@ -77,6 +77,28 @@ export const useNovelScreenActions = ({
     }
   }, [novel]);
 
+  const hasDownloadableChapters = useMemo(
+    () => selectedChapters.some(chapter => !chapter.isDownloaded),
+    [selectedChapters],
+  );
+
+  const hasDownloadedChapters = useMemo(
+    () => selectedChapters.some(chapter => chapter.isDownloaded),
+    [selectedChapters],
+  );
+
+  const hasUnreadChapters = useMemo(
+    () => selectedChapters.some(chapter => chapter.unread),
+    [selectedChapters],
+  );
+
+  const hasReadChapters = useMemo(
+    () => selectedChapters.some(chapter => !chapter.unread),
+    [selectedChapters],
+  );
+
+  const isSingleSelection = selectedChapters.length === 1;
+
   const selectionActions = useMemo(() => {
     const actions: SelectionAction[] = [];
     const finish = (action: () => void) => () => {
@@ -84,10 +106,7 @@ export const useNovelScreenActions = ({
       clearSelection();
     };
 
-    if (
-      !novel?.isLocal &&
-      selectedChapters.some(chapter => !chapter.isDownloaded)
-    ) {
+    if (!novel?.isLocal && hasDownloadableChapters) {
       actions.push({
         icon: 'download-outline',
         onPress: finish(() => {
@@ -101,10 +120,7 @@ export const useNovelScreenActions = ({
       });
     }
 
-    if (
-      !novel?.isLocal &&
-      selectedChapters.some(chapter => chapter.isDownloaded)
-    ) {
+    if (!novel?.isLocal && hasDownloadedChapters) {
       actions.push({
         icon: 'trash-can-outline',
         onPress: finish(() =>
@@ -120,14 +136,14 @@ export const useNovelScreenActions = ({
       onPress: finish(() => bookmarkChapters(selectedChapters)),
     });
 
-    if (selectedChapters.some(chapter => chapter.unread)) {
+    if (hasUnreadChapters) {
       actions.push({
         icon: 'check',
         onPress: finish(() => markChaptersRead(selectedChapters)),
       });
     }
 
-    if (selectedChapters.some(chapter => !chapter.unread)) {
+    if (hasReadChapters) {
       actions.push({
         icon: 'check-outline',
         onPress: finish(() => {
@@ -136,7 +152,7 @@ export const useNovelScreenActions = ({
       });
     }
 
-    if (selectedChapters.length === 1) {
+    if (isSingleSelection) {
       const selectedChapter = selectedChapters[0];
       actions.push({
         icon: selectedChapter.unread ? 'playlist-check' : 'playlist-remove',
@@ -156,6 +172,11 @@ export const useNovelScreenActions = ({
     clearSelection,
     deleteChapters,
     downloadChapters,
+    hasDownloadableChapters,
+    hasDownloadedChapters,
+    hasReadChapters,
+    hasUnreadChapters,
+    isSingleSelection,
     markChaptersRead,
     markChaptersUnreadAndResetProgress,
     markPreviousChaptersUnread,

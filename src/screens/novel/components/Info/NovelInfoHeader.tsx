@@ -57,11 +57,13 @@ interface NovelInfoHeaderProps {
   navigateToChapter: (chapter: ChapterInfo) => void;
   novel: NovelData | (Omit<NovelData, 'id'> & { id: 'NO_ID' });
   novelBottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  openNovelBottomSheet?: () => void;
   setCustomNovelCover: () => Promise<void>;
   saveNovelCover: () => Promise<void>;
   theme: ThemeColors;
   totalChapters?: number;
   trackerSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  openTrackerSheet?: () => void;
 }
 
 const getStatusIcon = (status?: string) => {
@@ -89,11 +91,13 @@ const NovelInfoHeader = ({
   navigateToChapter,
   novel,
   novelBottomSheetRef,
+  openNovelBottomSheet,
   setCustomNovelCover,
   saveNovelCover,
   theme,
   totalChapters,
   trackerSheetRef,
+  openTrackerSheet,
 }: NovelInfoHeaderProps) => {
   const { hideBackdrop = false } = useAppSettings();
   const navigation = useNavigation<NovelScreenProps['navigation']>();
@@ -157,15 +161,21 @@ const NovelInfoHeader = ({
     deleteDownloadSnackbar,
   ]);
 
-  const handleTrackerSheet = useCallback(
-    () => trackerSheetRef.current?.present(),
-    [trackerSheetRef],
-  );
+  const handleTrackerSheet = useCallback(() => {
+    if (openTrackerSheet) {
+      openTrackerSheet();
+    } else {
+      trackerSheetRef.current?.present();
+    }
+  }, [trackerSheetRef, openTrackerSheet]);
 
-  const handleOpenBottomSheet = useCallback(
-    () => novelBottomSheetRef.current?.present(),
-    [novelBottomSheetRef],
-  );
+  const handleOpenBottomSheet = useCallback(() => {
+    if (openNovelBottomSheet) {
+      openNovelBottomSheet();
+    } else {
+      novelBottomSheetRef.current?.present();
+    }
+  }, [novelBottomSheetRef, openNovelBottomSheet]);
 
   const ripple = useMemo(
     () => ({ color: theme.rippleColor }),
