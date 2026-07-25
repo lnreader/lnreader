@@ -1,0 +1,98 @@
+src/hooks/persisted/useSettings.ts
+  human 106-107
+src/screens/library/constants/constants.ts
+  human 3-10
+src/screens/library/LibraryScreen.tsx
+  human 57,90-96,108-120,505-519
+src/screens/library/constants/__tests__/constants.test.ts
+  human 1-19
+src/components/Context/LibraryContext.tsx
+  human 11
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "106-107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "3-10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/constants/constants.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 13,
+          "hash": "human",
+          "lines": "57,90-96,108-120,505-519",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/LibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-19",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/constants/__tests__/constants.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "11",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Context/LibraryContext.tsx"
+    }
+  ],
+  "base_commit_sha": "7af0911f5b17e1c606dbf60e0f1d1b8863c78221",
+  "branch": "master",
+  "commit_sha": "d02291c22c079e5faee9817b00c7bd87ed7f47da",
+  "commit_time": "2026-07-25T12:21:53+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 66,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 66,
+      "total_deletions": 15
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
