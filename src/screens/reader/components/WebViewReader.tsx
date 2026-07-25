@@ -16,7 +16,7 @@ import {
   initialChapterGeneralSettings,
   initialChapterReaderSettings,
 } from '@hooks/persisted/useSettings';
-import { getBatteryLevelSync } from 'react-native-device-info';
+import { getBatteryLevel } from 'react-native-device-info';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
@@ -97,6 +97,13 @@ const buildAdjacentChapterScript = (
 const { RNDeviceInfo } = NativeModules;
 const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
 
+/**
+ * Last level seen, so a chapter can be rendered without the synchronous native
+ * call the sync variant of this API performs. It is refreshed asynchronously
+ * and pushed into the page, which also happens on every battery change event.
+ */
+let lastKnownBatteryLevel = 0;
+
 const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'
   : 'file:///android_asset';
@@ -137,8 +144,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     [chapter.id],
   );
 
-  // Update battery level when chapter changes to ensure fresh value on navigation
-  const batteryLevel = useMemo(() => getBatteryLevelSync(), []);
+  const [batteryLevel] = useState(lastKnownBatteryLevel);
   const plugin = getPlugin(novel?.pluginId);
   const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
@@ -244,11 +250,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     const subscription = deviceInfoEmitter.addListener(
       'RNDeviceInfo_batteryLevelDidChange',
       (level: number) => {
+        lastKnownBatteryLevel = level;
         webViewRef.current?.injectJavaScript(
           `reader.batteryLevel.val = ${level}`,
         );
       },
     );
+
+    getBatteryLevel().then(level => {
+      lastKnownBatteryLevel = level;
+      webViewRef.current?.injectJavaScript(
+        `if (window.reader?.batteryLevel) {
+          window.reader.batteryLevel.val = ${level};
+        }`,
+      );
+    });
+
     return () => {
       subscription.remove();
       mmkvListener.remove();
@@ -401,11 +418,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       javaScriptEnabled={true}
       webviewDebuggingEnabled={__DEV__}
       onLoadEnd={() => {
-        // Update battery level when WebView finishes loading
-        const currentBatteryLevel = getBatteryLevelSync();
         webViewRef.current?.injectJavaScript(
           `if (window.reader && window.reader.batteryLevel) {
-            window.reader.batteryLevel.val = ${currentBatteryLevel};
+            window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
           }`,
         );
         webViewRef.current?.injectJavaScript(adjacentChapterScriptRef.current);

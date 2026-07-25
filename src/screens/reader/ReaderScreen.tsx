@@ -12,7 +12,11 @@ import { ErrorScreenV2 } from '@components';
 import { ChapterScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
 import KeepScreenAwake from './components/KeepScreenAwake';
-import { ChapterContextProvider, useChapterContext } from './ChapterContext';
+import {
+  ChapterContextProvider,
+  useChapterContext,
+  useReaderChromeHidden,
+} from './ChapterContext';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -83,13 +87,13 @@ export const ChapterContent = ({
     novel,
     chapter,
     onUserInteraction,
-    hidden,
     loading,
     error,
     webViewRef,
     hideHeader,
     refetch,
   } = useChapterContext();
+  const hidden = useReaderChromeHidden();
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();

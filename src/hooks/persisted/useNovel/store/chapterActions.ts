@@ -381,22 +381,17 @@ export const refreshChaptersAction = ({
   }
 };
 
+/**
+ * Persists reading time only. The reader reports it every few seconds for as
+ * long as a chapter is open, and mirroring it into the in-memory chapter list
+ * would rebuild that list (and re-render every screen showing it) on each
+ * report - for a field no screen renders: the statistics screen aggregates
+ * `timeSpent` straight from the database.
+ */
 export function increaseTimeSpentAction(
   chapterId: number,
   timeSpent: number,
-  mutateChapters: MutateChapters,
   deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
 ) {
   runAsyncAction(deps.increaseTimeSpent(chapterId, timeSpent), deps);
-
-  mutateChapters(chapters =>
-    chapters.map(ch =>
-      ch.id === chapterId
-        ? {
-            ...ch,
-            timeSpent: (ch.timeSpent ?? 0) + timeSpent,
-          }
-        : ch,
-    ),
-  );
 }

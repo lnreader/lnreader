@@ -462,30 +462,18 @@ describe('novelStore.chapterActions', () => {
       harness.chapterDeps,
     );
   });
-  it('increaseTimeSpent delegates mutation to low-level action with dependencies', () => {
+  it('increaseTimeSpent delegates to the low-level action with dependencies', () => {
     const harness = createHarness();
-    (
-      increaseTimeSpentAction as jest.MockedFunction<
-        typeof increaseTimeSpentAction
-      >
-    ).mockImplementation((chapterId, timeSpent, mutate) => {
-      mutate(chs =>
-        chs.map(ch =>
-          ch.id === chapterId
-            ? { ...ch, timeSpent: (ch.timeSpent ?? 0) + timeSpent }
-            : ch,
-        ),
-      );
-    });
+    const chaptersBefore = harness.getState().chapters;
 
     harness.actions.increaseTimeSpent(1, 200);
 
     expect(increaseTimeSpentAction).toHaveBeenCalledWith(
       1,
       200,
-      expect.any(Function),
       harness.chapterDeps,
     );
-    expect(harness.getState().chapters[0].timeSpent).toBe(200);
+    // Persisted only: the chapter list is not rebuilt for reading time.
+    expect(harness.getState().chapters).toBe(chaptersBefore);
   });
 });

@@ -510,9 +510,13 @@ export default function useChapter(
     getChapter();
   }, [getChapter]);
 
-  return useMemo(
+  /**
+   * Everything except `hidden`, which toggles on every tap on the page. Keeping
+   * it out of this object is what lets the WebView, the drawer and the searchbar
+   * skip re-rendering when the reader UI is shown or hidden.
+   */
+  const chapterContext = useMemo(
     () => ({
-      hidden,
       chapter,
       nextChapter,
       prevChapter,
@@ -534,7 +538,6 @@ export default function useChapter(
       isTTSReadingRef,
     }),
     [
-      hidden,
       chapter,
       nextChapter,
       prevChapter,
@@ -553,4 +556,6 @@ export default function useChapter(
       isTTSReadingRef,
     ],
   );
+
+  return { hidden, chapterContext };
 }

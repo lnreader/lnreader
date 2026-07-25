@@ -6,6 +6,7 @@ import {
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import { useMMKVObject } from 'react-native-mmkv';
+import { useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 
 export const APP_SETTINGS = 'APP_SETTINGS';
@@ -321,19 +322,24 @@ export const useChapterReaderSettings = () => {
   const [storedSettings = initialChapterReaderSettings, setSettings] =
     useMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS);
 
-  // Ensure TTS settings have proper defaults (migration for existing users)
-  const chapterReaderSettings = {
-    ...storedSettings,
-    tts: {
-      ...initialChapterReaderSettings.tts,
-      ...storedSettings.tts,
-      // Explicitly ensure these defaults if undefined
-      autoPageAdvance: storedSettings.tts?.autoPageAdvance ?? false,
-      scrollToTop: storedSettings.tts?.scrollToTop ?? true,
-      rate: storedSettings.tts?.rate ?? 1,
-      pitch: storedSettings.tts?.pitch ?? 1,
-    },
-  };
+  // Ensure TTS settings have proper defaults (migration for existing users).
+  // Memoized because several reader components read these settings, and a new
+  // object on every render invalidates everything derived from them.
+  const chapterReaderSettings = useMemo(
+    () => ({
+      ...storedSettings,
+      tts: {
+        ...initialChapterReaderSettings.tts,
+        ...storedSettings.tts,
+        // Explicitly ensure these defaults if undefined
+        autoPageAdvance: storedSettings.tts?.autoPageAdvance ?? false,
+        scrollToTop: storedSettings.tts?.scrollToTop ?? true,
+        rate: storedSettings.tts?.rate ?? 1,
+        pitch: storedSettings.tts?.pitch ?? 1,
+      },
+    }),
+    [storedSettings],
+  );
 
   const setChapterReaderSettings = (values: Partial<ChapterReaderSettings>) =>
     setSettings({ ...chapterReaderSettings, ...values });

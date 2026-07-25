@@ -321,50 +321,33 @@ describe('chapterActions', () => {
       expect.objectContaining({ id: 2, unread: false }),
     ]);
   });
-  it('increaseTimeSpentAction accumulates timeSpent in db and state', () => {
+  it('increaseTimeSpentAction persists the elapsed time', () => {
     const deps = createDeps();
-    const state = createStateMutator([
-      makeChapter(1, { timeSpent: 500 }),
-      makeChapter(2, { timeSpent: 500 }),
-    ]);
 
-    increaseTimeSpentAction(1, 200, state.mutate, deps);
+    increaseTimeSpentAction(1, 200, deps);
 
     expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 200);
-    expect(state.getState().map(ch => ch.timeSpent)).toEqual([700, 500]);
   });
 
-  it('increaseTimeSpentAction treats a missing timeSpent as 0 before adding', () => {
+  it('increaseTimeSpentAction supports repeated calls on the same chapter', () => {
     const deps = createDeps();
-    const state = createStateMutator([
-      makeChapter(1, { timeSpent: undefined }),
-    ]);
 
-    increaseTimeSpentAction(1, 300, state.mutate, deps);
-
-    expect(deps.increaseTimeSpent).toHaveBeenCalledWith(1, 300);
-    expect(state.getState()[0].timeSpent).toBe(300);
-  });
-
-  it('increaseTimeSpentAction is a no-op on state for a chapterId not present', () => {
-    const deps = createDeps();
-    const state = createStateMutator([makeChapter(1, { timeSpent: 500 })]);
-
-    increaseTimeSpentAction(999, 200, state.mutate, deps);
-
-    expect(deps.increaseTimeSpent).toHaveBeenCalledWith(999, 200);
-    expect(state.getState().map(ch => ch.timeSpent)).toEqual([500]);
-  });
-
-  it('increaseTimeSpentAction supports repeated calls accumulating on the same chapter', () => {
-    const deps = createDeps();
-    const state = createStateMutator([makeChapter(1, { timeSpent: 0 })]);
-
-    increaseTimeSpentAction(1, 100, state.mutate, deps);
-    increaseTimeSpentAction(1, 150, state.mutate, deps);
+    increaseTimeSpentAction(1, 100, deps);
+    increaseTimeSpentAction(1, 150, deps);
 
     expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(1, 1, 100);
     expect(deps.increaseTimeSpent).toHaveBeenNthCalledWith(2, 1, 150);
-    expect(state.getState()[0].timeSpent).toBe(250);
+  });
+
+  it('increaseTimeSpentAction leaves the in-memory chapter list untouched', () => {
+    const deps = createDeps();
+    const state = createStateMutator([makeChapter(1, { timeSpent: 500 })]);
+    const before = state.getState();
+
+    increaseTimeSpentAction(1, 200, deps);
+
+    // Reading time is reported every few seconds and no screen renders it from
+    // the store, so the list must not be rebuilt for it.
+    expect(state.getState()).toBe(before);
   });
 });

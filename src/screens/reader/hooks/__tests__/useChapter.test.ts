@@ -143,6 +143,21 @@ describe('useChapter', () => {
   const nextChapter = makeChapter(2, '1');
   const novel = makeNovel();
 
+  /**
+   * The hook keeps `hidden` separate from the rest so the reader chrome can
+   * toggle without invalidating the chapter context; flattening both keeps the
+   * assertions below focused on behaviour.
+   */
+  const useFlatChapter = (chapter: ReturnType<typeof makeChapter>) => {
+    const { hidden, chapterContext } = useChapter(
+      { current: null },
+      chapter,
+      novel,
+    );
+
+    return { hidden, ...chapterContext };
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (NativeFile.exists as jest.Mock).mockReturnValue(false);
@@ -196,9 +211,7 @@ describe('useChapter', () => {
     const store = createStore({ [initialChapter.id]: 'cached chapter body' });
     mockUseNovelActions.mockReturnValue(store.state);
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -217,9 +230,7 @@ describe('useChapter', () => {
     mockUseNovelActions.mockReturnValue(store.state);
     (NativeFile.readFile as jest.Mock).mockResolvedValue('downloaded body');
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -238,9 +249,7 @@ describe('useChapter', () => {
     const deferredNextChapter = createDeferred<unknown>();
     mockGetNextChapter.mockReturnValue(deferredNextChapter.promise);
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     // The neighbouring chapter lookups must not gate the first render.
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -263,9 +272,7 @@ describe('useChapter', () => {
     mockUseNovelActions.mockReturnValue(store.state);
     mockGetDbChapter.mockResolvedValue(hydratedChapter);
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -279,9 +286,7 @@ describe('useChapter', () => {
     mockUseNovelActions.mockReturnValue(store.state);
     mockGetDbChapter.mockResolvedValue(dbChapter);
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, routeChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(routeChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -297,9 +302,7 @@ describe('useChapter', () => {
     });
     mockUseNovelActions.mockReturnValue(store.state);
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -332,9 +335,7 @@ describe('useChapter', () => {
     mockUseNovelActions.mockReturnValue(store.state);
     mockFetchChapter.mockRejectedValueOnce(new Error('network failed'));
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.error).toBe('network failed'));
     expect(result.current.loading).toBe(false);
@@ -371,9 +372,7 @@ describe('useChapter', () => {
       },
     );
 
-    const { result } = renderHook(() =>
-      useChapter({ current: null }, initialChapter, novel),
-    );
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 

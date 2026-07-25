@@ -337,12 +337,7 @@ export const createNovelStoreChapterActions = ({
     },
 
     increaseTimeSpent: (chapterId, timeSpent) => {
-      increaseTimeSpentAction(
-        chapterId,
-        timeSpent,
-        mutateChapters,
-        chapterActionsDependencies,
-      );
+      increaseTimeSpentAction(chapterId, timeSpent, chapterActionsDependencies);
     },
   };
 };

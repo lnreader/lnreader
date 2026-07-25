@@ -211,11 +211,19 @@ export const createNovelStoreActions = ({
       deps.persistPageIndex?.(index);
     },
     openPage: async index => {
-      const pages = get().pages;
-      if (pages.length === 0) {
+      const state = get();
+      if (state.pages.length === 0) {
         return;
       }
-      const resolvedIndex = Math.min(Math.max(index, 0), pages.length - 1);
+      const resolvedIndex = Math.min(
+        Math.max(index, 0),
+        state.pages.length - 1,
+      );
+      // Callers open the page a chapter belongs to without knowing whether it
+      // is already open; re-querying it would rebuild the whole chapter list.
+      if (resolvedIndex === state.pageIndex && state.chapters.length > 0) {
+        return;
+      }
       set({ pageIndex: resolvedIndex });
       deps.persistPageIndex?.(resolvedIndex);
       await get().actions.getChapters();
