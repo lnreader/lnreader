@@ -1,0 +1,755 @@
+src/i18n/types/index.ts
+  s_53bebad4b19e73::t_7a42241965e1e9 298-301
+  human 301
+src/services/updates/index.ts
+  s_53bebad4b19e73::t_15da5014dcebda 75
+  human 55-66,79
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  s_53bebad4b19e73::t_9402263edc54bf 301-304
+  human 27,66-68,81,99-103,134-151,174-186,305-306,383-389
+src/database/queries/__tests__/LibraryQueries.test.ts
+  s_53bebad4b19e73::t_15da5014dcebda 161,183,308,347,355,375,380-383,545,567
+  s_53bebad4b19e73::t_9402263edc54bf 385-432
+  human 384
+src/database/queries/LibraryQueries.ts
+  s_53bebad4b19e73::t_815ddfc7a7bc21 17-20
+  human 11-12,21-32,76-80,114
+src/screens/settings/SettingsLibraryScreen/SmartUpdateDialog.tsx
+  s_53bebad4b19e73::t_9d4e07bf5c36e7 1-73
+src/services/updates/__tests__/index.test.ts
+  s_53bebad4b19e73::t_9402263edc54bf 6,41,60,135-156
+  s_53bebad4b19e73::t_15da5014dcebda 132
+  human 157
+src/hooks/persisted/__mocks__/useSettings.ts
+  human 19-21
+src/i18n/languages/en/strings.json
+  human 335-338
+src/hooks/persisted/useSettings.ts
+  human 69-71,128-133,249-251
+src/i18n/languages/fi_FI/strings.json
+  human 301
+src/i18n/languages/fr_FR/strings.json
+  human 301
+src/i18n/languages/ar_SA/strings.json
+  human 301
+src/i18n/languages/ca_ES/strings.json
+  human 301
+src/i18n/languages/de_DE/strings.json
+  human 301
+src/i18n/languages/id_ID/strings.json
+  human 301
+src/i18n/languages/as_IN/strings.json
+  human 301
+src/i18n/languages/pl_PL/strings.json
+  human 301
+src/i18n/languages/no_NO/strings.json
+  human 301
+src/i18n/languages/sv_SE/strings.json
+  human 301
+src/i18n/languages/el_GR/strings.json
+  human 301
+src/i18n/languages/tr_TR/strings.json
+  human 301
+src/i18n/languages/zh_TW/strings.json
+  human 301
+src/i18n/languages/es_ES/strings.json
+  human 301
+src/i18n/languages/ja_JP/strings.json
+  human 301
+src/i18n/languages/ko_KR/strings.json
+  human 301
+src/i18n/languages/ro_RO/strings.json
+  human 301
+src/i18n/languages/hu_HU/strings.json
+  human 301
+src/i18n/languages/he_IL/strings.json
+  human 301
+src/i18n/languages/zh_CN/strings.json
+  human 301
+src/i18n/languages/af_ZA/strings.json
+  human 301
+src/i18n/languages/sq_AL/strings.json
+  human 301
+src/i18n/languages/ru_RU/strings.json
+  human 301
+src/i18n/languages/nl_NL/strings.json
+  human 301
+src/i18n/languages/pt_PT/strings.json
+  human 301
+src/i18n/languages/da_DK/strings.json
+  human 301
+src/i18n/languages/or_IN/strings.json
+  human 301
+src/i18n/languages/cs_CZ/strings.json
+  human 301
+src/i18n/languages/hi_IN/strings.json
+  human 301
+src/i18n/languages/pt_BR/strings.json
+  human 301
+src/i18n/languages/sr_SP/strings.json
+  human 301
+src/i18n/languages/uk_UA/strings.json
+  human 301
+src/i18n/languages/it_IT/strings.json
+  human 301
+src/i18n/languages/vi_VN/strings.json
+  human 301
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_7a42241965e1e9",
+          "lines": "298-301",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_15da5014dcebda",
+          "lines": "75",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "55-66,79",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_9402263edc54bf",
+          "lines": "301-304",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 50,
+          "added_lines": 50,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "27,66-68,81,99-103,134-151,174-186,305-306,383-389",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_15da5014dcebda",
+          "lines": "161,183,308,347,355,375,380-383,545,567",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 48,
+          "added_lines": 48,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_9402263edc54bf",
+          "lines": "385-432",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 61,
+          "hash": "human",
+          "lines": "384",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/LibraryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_815ddfc7a7bc21",
+          "lines": "17-20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "11-12,21-32,76-80,114",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/LibraryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 73,
+          "added_lines": 73,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_9d4e07bf5c36e7",
+          "lines": "1-73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/SmartUpdateDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_9402263edc54bf",
+          "lines": "6,41,60,135-156",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_53bebad4b19e73::t_15da5014dcebda",
+          "lines": "132",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "157",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/__tests__/index.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "19-21",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "335-338",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "69-71,128-133,249-251",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fi_FI/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fr_FR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ar_SA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ca_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/de_DE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/id_ID/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/as_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pl_PL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/no_NO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sv_SE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/el_GR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/tr_TR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_TW/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/es_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ja_JP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ko_KR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ro_RO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hu_HU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/he_IL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_CN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/af_ZA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sq_AL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ru_RU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/nl_NL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_PT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/da_DK/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/or_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/cs_CZ/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hi_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_BR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sr_SP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/uk_UA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/it_IT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "301",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/vi_VN/strings.json"
+    }
+  ],
+  "base_commit_sha": "6d2a9f8e1530604860375a9be3abb92b4502d01b",
+  "branch": "master",
+  "commit_sha": "c30441b9493d5e75fbe82a608b034c6239fa493f",
+  "commit_time": "2026-07-25T14:29:41+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 104,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 104,
+      "total_deletions": 129
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
