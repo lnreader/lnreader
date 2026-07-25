@@ -1,0 +1,1952 @@
+src/i18n/languages/es_ES/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_30bc355252b706::t_13ba333a544201 20,47-98,109-139,152-171,174-175,178-185
+  s_30bc355252b706::t_a0c436dc567bd9 267-269
+  s_30bc355252b706::t_41eced7245c499 99-103
+  s_30bc355252b706::t_7baf2ac150ae06 104-108
+  human 20,47-69,82-97,100-101,104-114,196
+src/i18n/languages/ca_ES/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/browse/discover/DiscoverCard.tsx
+  s_30bc355252b706::t_9ce4f07b3e4e9b 39-41,80-82
+  human 83
+src/i18n/languages/pl_PL/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/nl_NL/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_30bc355252b706::t_04ef0cf75b9fe8 1290-1310
+src/database/queries/ChapterQueries.ts
+  s_30bc355252b706::t_d4d43b660cce44 787,812
+src/i18n/languages/cs_CZ/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/el_GR/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/de_DE/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/or_IN/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/components/index.ts
+  s_30bc355252b706::t_304a4a9bb1d23b 28-31
+src/i18n/languages/sv_SE/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/ja_JP/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/navigators/MoreStack.tsx
+  s_30bc355252b706::t_9afb4603fe99b7 19,25-26,28-49,52-53,55-71
+  s_30bc355252b706::t_746802bab1e176 50
+  human 54
+src/i18n/languages/id_ID/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 350
+  human 263,351
+src/screens/reader/components/ReaderBottomSheet/ReaderValueChange.tsx
+  s_30bc355252b706::t_0ce1d8efa55dcc 76
+  human 75
+src/i18n/languages/fr_FR/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/components/Slider/Slider.tsx
+  s_30bc355252b706::t_28da68352f8f01 129-132,285,290-292,294,296,302,307-309,311,313,323
+  human 22-23,131-137,290,295-308,310,312,318,323-336,338,340,350
+src/i18n/languages/pt_PT/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/en/strings.json
+  s_30bc355252b706::t_eab7e9a3105dd2 527,532
+  s_30bc355252b706::t_0abd9a9a283463 525
+  s_30bc355252b706::t_8e0472d9fcba83 25,402
+  s_30bc355252b706::t_d4d43b660cce44 400
+  s_30bc355252b706::t_39ebe0e429c0b7 293
+  s_30bc355252b706::t_f9f0b6b6844ff0 617
+  s_30bc355252b706::t_680c4e321ac357 272
+  s_30bc355252b706::t_1755296df83379 515-518,521,523,530,535,537,540,542,544,547-549,552,554-555
+  human 25,292,400,533
+src/screens/updates/components/UpdateNovelChapterGroup.tsx
+  s_30bc355252b706::t_d4d43b660cce44 24-25,61
+src/screens/reader/components/ReaderBottomSheet/TTSTab.tsx
+  s_30bc355252b706::t_680c4e321ac357 4
+  s_30bc355252b706::t_7baf2ac150ae06 356-358,361,365-367,369-370
+  s_30bc355252b706::t_43599d1e3b9b2f 360
+  s_30bc355252b706::t_5aa7b5a54d0ffc 362,371,410-412,427-429
+  human 4,356-357,359-368,371-372,374-381,388,407,445-464,502-514,523-532
+src/i18n/languages/hi_IN/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/types/index.ts
+  s_30bc355252b706::t_b9c2f7719cab25 445,450
+  s_30bc355252b706::t_8e0472d9fcba83 349
+  s_30bc355252b706::t_680c4e321ac357 243
+  s_30bc355252b706::t_c55bc486d766a9 258
+  s_30bc355252b706::t_1de59ef08f7735 433-436,439,441,448,453,455,458,460,462,465-467,470,473
+  s_30bc355252b706::t_776da9179fe188 443
+  s_30bc355252b706::t_a743cfb699f8a0 524
+  human 257
+src/screens/browse/components/PluginsTab.tsx
+  s_30bc355252b706::t_d4d43b660cce44 373-374,397-398
+  human 373-374,397-398
+src/screens/settings/SettingsTrackerScreen.tsx
+  s_30bc355252b706::t_f9f0b6b6844ff0 253-256
+src/screens/reader/ReaderScreen.tsx
+  s_30bc355252b706::t_680c4e321ac357 23,26-27,223-237,292-294
+  s_30bc355252b706::t_3e8ebf0afb9da8 1
+  human 1,23,280
+src/i18n/languages/sq_AL/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/components/Common/ToggleButton.tsx
+  s_30bc355252b706::t_79413c42d77a4d 58,66,69-71,73-81,83-86,94-95,110-115,117,119,121-122,124
+  s_30bc355252b706::t_16f7ee37990465 72
+  human 19-22,71-73,75-76,78,85-86,101,103-105,107-109
+src/i18n/languages/af_ZA/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderFooter.tsx
+  s_30bc355252b706::t_87371298df5937 122,133
+  s_30bc355252b706::t_680c4e321ac357 69
+  human 10,18,69,72-73,120-134,141,152
+src/i18n/languages/as_IN/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderBottomSheet/ReaderThemeSelector.tsx
+  s_30bc355252b706::t_a0c436dc567bd9 68,71
+  s_30bc355252b706::t_79413c42d77a4d 46
+  human 66-69,71-74,77
+src/i18n/languages/ar_SA/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 350
+  human 263,351
+src/i18n/languages/it_IT/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/library/components/LibraryListView.tsx
+  s_30bc355252b706::t_d4d43b660cce44 94
+  human 94
+src/screens/reader/components/ReaderBottomSheet/TextSizeSlider.tsx
+  s_30bc355252b706::t_1766aff2224543 4,6-16
+  human 1,4-5,8-33,36-50
+src/navigators/ReaderStack.tsx
+  s_30bc355252b706::t_9afb4603fe99b7 15,22,32-37
+  human 18-19,32
+src/screens/browse/utils/buildBrowseEntries.ts
+  s_30bc355252b706::t_d4d43b660cce44 94-115
+  human 126-147
+src/screens/browse/utils/__tests__/buildBrowseEntries.test.ts
+  s_30bc355252b706::t_d4d43b660cce44 26,37-38
+  human 26,41-42
+src/screens/browse/components/SourcesTab.tsx
+  s_30bc355252b706::t_9ce4f07b3e4e9b 247-248,275-276
+  human 247-248,275-276
+src/i18n/languages/ru_RU/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/zh_CN/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 350
+  human 263,351
+src/i18n/languages/pt_BR/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25
+  human 25,263
+src/screens/reader/components/ReaderBottomSheet/ReaderFontPicker.tsx
+  s_30bc355252b706::t_0ce1d8efa55dcc 65
+  human 65
+src/i18n/languages/vi_VN/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/ro_RO/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderBottomSheet/ReaderSheetPreferenceItem.tsx
+  s_30bc355252b706::t_655a1823b42e5a 30
+  s_30bc355252b706::t_80b4993d90c0ad 7,15,27-29,31-34,53-60
+  human 25-27
+src/i18n/languages/uk_UA/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 350
+  human 263,351
+src/i18n/languages/sr_SP/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/hu_HU/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/components/__tests__/Slider.test.tsx
+  s_30bc355252b706::t_28da68352f8f01 76,88,91,94,97
+  human 76,88-89,92,95-96,99
+src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx
+  s_30bc355252b706::t_d4d43b660cce44 80
+src/components/SegmentedControl/SegmentedControl.tsx
+  s_30bc355252b706::t_827636c3d02f63 24,33,62-64,80,85,88-92
+  human 75,80,83-85
+src/i18n/languages/ko_KR/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderBottomSheet/ReaderTextAlignSelector.tsx
+  s_30bc355252b706::t_827636c3d02f63 19,24,29,34,50
+  s_30bc355252b706::t_304a4a9bb1d23b 5,17
+  s_30bc355252b706::t_80b4993d90c0ad 18,20-23,25-28,30-33,35-38,45-49,51-52,61
+  s_30bc355252b706::t_0ce1d8efa55dcc 63
+  human 5-6,24-34,42-44,46-49
+src/i18n/languages/fi_FI/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/more/DownloadsScreen.tsx
+  s_30bc355252b706::t_39ebe0e429c0b7 93-96
+  human 93
+src/hooks/persisted/useUpdates.ts
+  s_30bc355252b706::t_d4d43b660cce44 20,26
+src/i18n/languages/no_NO/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/navigators/Main.tsx
+  s_30bc355252b706::t_39ebe0e429c0b7 107-108,111-113
+  s_30bc355252b706::t_9afb4603fe99b7 109-110
+  human 107
+src/i18n/languages/da_DK/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/i18n/languages/he_IL/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderAppbar.tsx
+  s_30bc355252b706::t_680c4e321ac357 1,6,32-34,51-53,57,59-62,155-163,165-184,204,206-207,219-220,224,228
+  s_30bc355252b706::t_4bb3ffe6c8a908 18
+  s_30bc355252b706::t_845c02da03f7f2 138,140,142,148,152,164
+  human 58
+src/i18n/languages/zh_TW/strings.json
+  s_30bc355252b706::t_8e0472d9fcba83 25,350
+  human 25,263,351
+src/screens/reader/components/ReaderSearchbar.tsx
+  s_30bc355252b706::t_50dbfc72218cc7 135,206
+  s_30bc355252b706::t_845c02da03f7f2 140,167,175,183,218,220-221,227,232
+  s_30bc355252b706::t_70cf94f4f9601a 1
+  s_30bc355252b706::t_700da62615868f 211-213,215,219
+  human 1,135-140,145,147,173,181-182,190-191,213-215,217-218,223,227-228,234-237,241,243-244
+assets/reader/js/index.js
+  s_30bc355252b706::t_39ebe0e429c0b7 300,485-486
+  human 300,485-486
+src/i18n/languages/tr_TR/strings.json
+  human 263
+src/utils/constants/readerConstants.ts
+  human 2,15-26
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/es_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 114,
+          "added_lines": 114,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_13ba333a544201",
+          "lines": "20,47-98,109-139,152-171,174-175,178-185",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_a0c436dc567bd9",
+          "lines": "267-269",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_41eced7245c499",
+          "lines": "99-103",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_7baf2ac150ae06",
+          "lines": "104-108",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 54,
+          "hash": "human",
+          "lines": "20,47-69,82-97,100-101,104-114,196",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ca_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_9ce4f07b3e4e9b",
+          "lines": "39-41,80-82",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "83",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/discover/DiscoverCard.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pl_PL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/nl_NL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 21,
+          "added_lines": 21,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_04ef0cf75b9fe8",
+          "lines": "1290-1310",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/ChapterQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "787,812",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/ChapterQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/cs_CZ/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/el_GR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/de_DE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/or_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_304a4a9bb1d23b",
+          "lines": "28-31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sv_SE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ja_JP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_9afb4603fe99b7",
+          "lines": "19,25-26,28-49,52-53,55-71",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_746802bab1e176",
+          "lines": "50",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 24,
+          "hash": "human",
+          "lines": "54",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/MoreStack.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/id_ID/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_0ce1d8efa55dcc",
+          "lines": "76",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "75",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderValueChange.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fr_FR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_28da68352f8f01",
+          "lines": "129-132,285,290-292,294,296,302,307-309,311,313,323",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 44,
+          "hash": "human",
+          "lines": "22-23,131-137,290,295-308,310,312,318,323-336,338,340,350",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Slider/Slider.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_PT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_eab7e9a3105dd2",
+          "lines": "527,532",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_0abd9a9a283463",
+          "lines": "525",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,402",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "400",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_39ebe0e429c0b7",
+          "lines": "293",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_f9f0b6b6844ff0",
+          "lines": "617",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "272",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_1755296df83379",
+          "lines": "515-518,521,523,530,535,537,540,542,544,547-549,552,554-555",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "25,292,400,533",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "24-25,61",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/updates/components/UpdateNovelChapterGroup.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "4",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_7baf2ac150ae06",
+          "lines": "356-358,361,365-367,369-370",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_43599d1e3b9b2f",
+          "lines": "360",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_5aa7b5a54d0ffc",
+          "lines": "362,371,410-412,427-429",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 68,
+          "hash": "human",
+          "lines": "4,356-357,359-368,371-372,374-381,388,407,445-464,502-514,523-532",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/TTSTab.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hi_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_b9c2f7719cab25",
+          "lines": "445,450",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "349",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "243",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_c55bc486d766a9",
+          "lines": "258",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_1de59ef08f7735",
+          "lines": "433-436,439,441,448,453,455,458,460,462,465-467,470,473",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_776da9179fe188",
+          "lines": "443",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_a743cfb699f8a0",
+          "lines": "524",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "257",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "373-374,397-398",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "373-374,397-398",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/components/PluginsTab.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_f9f0b6b6844ff0",
+          "lines": "253-256",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsTrackerScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 21,
+          "added_lines": 21,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "23,26-27,223-237,292-294",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_3e8ebf0afb9da8",
+          "lines": "1",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "1,23,280",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sq_AL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 31,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_79413c42d77a4d",
+          "lines": "58,66,69-71,73-81,83-86,94-95,110-115,117,119,121-122,124",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_16f7ee37990465",
+          "lines": "72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 19,
+          "hash": "human",
+          "lines": "19-22,71-73,75-76,78,85-86,101,103-105,107-109",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Common/ToggleButton.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/af_ZA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_87371298df5937",
+          "lines": "122,133",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "69",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 22,
+          "hash": "human",
+          "lines": "10,18,69,72-73,120-134,141,152",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderFooter.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/as_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_a0c436dc567bd9",
+          "lines": "68,71",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_79413c42d77a4d",
+          "lines": "46",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "66-69,71-74,77",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderThemeSelector.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ar_SA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/it_IT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "94",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "94",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/components/LibraryListView.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_1766aff2224543",
+          "lines": "4,6-16",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 44,
+          "hash": "human",
+          "lines": "1,4-5,8-33,36-50",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/TextSizeSlider.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_9afb4603fe99b7",
+          "lines": "15,22,32-37",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "18-19,32",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/ReaderStack.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "94-115",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 22,
+          "hash": "human",
+          "lines": "126-147",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/utils/buildBrowseEntries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "26,37-38",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "26,41-42",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/utils/__tests__/buildBrowseEntries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_9ce4f07b3e4e9b",
+          "lines": "247-248,275-276",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "247-248,275-276",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/components/SourcesTab.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ru_RU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_CN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "25,263",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_BR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_0ce1d8efa55dcc",
+          "lines": "65",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "65",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderFontPicker.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/vi_VN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ro_RO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_655a1823b42e5a",
+          "lines": "30",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_80b4993d90c0ad",
+          "lines": "7,15,27-29,31-34,53-60",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25-27",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderSheetPreferenceItem.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/uk_UA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sr_SP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hu_HU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_28da68352f8f01",
+          "lines": "76,88,91,94,97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "76,88-89,92,95-96,99",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/Slider.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "80",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_827636c3d02f63",
+          "lines": "24,33,62-64,80,85,88-92",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "75,80,83-85",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/SegmentedControl/SegmentedControl.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ko_KR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_827636c3d02f63",
+          "lines": "19,24,29,34,50",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_304a4a9bb1d23b",
+          "lines": "5,17",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_80b4993d90c0ad",
+          "lines": "18,20-23,25-28,30-33,35-38,45-49,51-52,61",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_0ce1d8efa55dcc",
+          "lines": "63",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 20,
+          "hash": "human",
+          "lines": "5-6,24-34,42-44,46-49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderTextAlignSelector.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fi_FI/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_39ebe0e429c0b7",
+          "lines": "93-96",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "93",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/DownloadsScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_d4d43b660cce44",
+          "lines": "20,26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useUpdates.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/no_NO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_39ebe0e429c0b7",
+          "lines": "107-108,111-113",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_9afb4603fe99b7",
+          "lines": "109-110",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/Main.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/da_DK/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/he_IL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 49,
+          "added_lines": 49,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_680c4e321ac357",
+          "lines": "1,6,32-34,51-53,57,59-62,155-163,165-184,204,206-207,219-220,224,228",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_4bb3ffe6c8a908",
+          "lines": "18",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_845c02da03f7f2",
+          "lines": "138,140,142,148,152,164",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 10,
+          "hash": "human",
+          "lines": "58",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderAppbar.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_8e0472d9fcba83",
+          "lines": "25,350",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "25,263,351",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_TW/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_50dbfc72218cc7",
+          "lines": "135,206",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_845c02da03f7f2",
+          "lines": "140,167,175,183,218,220-221,227,232",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_70cf94f4f9601a",
+          "lines": "1",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_700da62615868f",
+          "lines": "211-213,215,219",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 29,
+          "hash": "human",
+          "lines": "1,135-140,145,147,173,181-182,190-191,213-215,217-218,223,227-228,234-237,241,243-244",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderSearchbar.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_30bc355252b706::t_39ebe0e429c0b7",
+          "lines": "300,485-486",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "300,485-486",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/index.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "263",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/tr_TR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 13,
+          "hash": "human",
+          "lines": "2,15-26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/utils/constants/readerConstants.ts"
+    }
+  ],
+  "base_commit_sha": "c9358b3a9fc49ad6a98ac0293da46bf9eab39bf8",
+  "branch": "master",
+  "commit_sha": "93fe04c28cc4776a96f86aa157b729ddf3c218c3",
+  "commit_time": "2026-07-25T18:16:08+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 3,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 3,
+      "total_deletions": 519
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
