@@ -1,0 +1,398 @@
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  human 1-4,6-20,22-24,26-35,37-46,48-69,72,74-94,96-115,117-122,125-166,168,171-330,335-336,339-348,351,356-361
+src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx
+  human 15-16,36
+src/screens/settings/SettingsLibraryScreen/modals/DisplayModeModal.tsx
+  human 1-47
+src/screens/settings/SettingsLibraryScreen/modals/NovelBadgesModal.tsx
+  human 1-69
+src/screens/settings/SettingsLibraryScreen/GlobalUpdateCategoriesDialog.tsx
+  human 1-147
+src/navigators/types/index.ts
+  human 181-184
+src/database/queries/__tests__/LibraryQueries.test.ts
+  human 11,289-387
+src/hooks/persisted/useCategories.ts
+  human 1-2,12,25-31
+src/i18n/languages/en/strings.json
+  human 242,317-320
+src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx
+  human 4,7-9,11,14-17,19,23-24,27,30-31,48-50,58-65,77,107-108,113-114,121,124-126
+src/database/queries/NovelQueries.ts
+  human 21-45,160,197,293,405-407
+src/services/updates/index.ts
+  human 2,13-17,54-56
+src/database/queries/__tests__/NovelQueries.test.ts
+  human 18-23,44,210-262
+src/screens/settings/SettingsScreen.tsx
+  human 40-49
+src/screens/settings/SettingsLibraryScreen/modals/GridSizeModal.tsx
+  human 1-63
+src/navigators/MoreStack.tsx
+  human 16,36
+src/hooks/persisted/useSettings.ts
+  human 101-104,116-154
+src/database/queries/LibraryQueries.ts
+  human 1-11,15,53-98
+src/i18n/types/index.ts
+  human 215,280-283
+src/hooks/persisted/__mocks__/useSettings.ts
+  human 32-34
+src/screens/settings/SettingsLibraryScreen/modals/NovelSortModal.tsx
+  human 1-56
+src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx
+  human 1-63
+src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx
+  human 1-47
+src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx
+  human 1-69
+src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx
+  human 1-56
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 334,
+          "added_lines": 334,
+          "deleted_lines": 32,
+          "hash": "human",
+          "lines": "1-4,6-20,22-24,26-35,37-46,48-69,72,74-94,96-115,117-122,125-166,168,171-330,335-336,339-348,351,356-361",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "15-16,36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 47,
+          "added_lines": 47,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-47",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/DisplayModeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 69,
+          "added_lines": 69,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-69",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/NovelBadgesModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 147,
+          "added_lines": 147,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-147",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/GlobalUpdateCategoriesDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "181-184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 100,
+          "added_lines": 100,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "11,289-387",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/LibraryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "1-2,12,25-31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useCategories.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "242,317-320",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 35,
+          "added_lines": 35,
+          "deleted_lines": 252,
+          "hash": "human",
+          "lines": "4,7-9,11,14-17,19,23-24,27,30-31,48-50,58-65,77,107-108,113-114,121,124-126",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 31,
+          "deleted_lines": 22,
+          "hash": "human",
+          "lines": "21-45,160,197,293,405-407",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/NovelQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "2,13-17,54-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 60,
+          "added_lines": 60,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "18-23,44,210-262",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/NovelQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "40-49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 63,
+          "added_lines": 63,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/GridSizeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "16,36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/MoreStack.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 43,
+          "added_lines": 43,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "101-104,116-154",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 58,
+          "added_lines": 58,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1-11,15,53-98",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/LibraryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "215,280-283",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "32-34",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 56,
+          "added_lines": 56,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/NovelSortModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 63,
+          "hash": "human",
+          "lines": "1-63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 47,
+          "hash": "human",
+          "lines": "1-47",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 69,
+          "hash": "human",
+          "lines": "1-69",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 56,
+          "hash": "human",
+          "lines": "1-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx"
+    }
+  ],
+  "base_commit_sha": "3d102a52a7d780b096afd78c6d5214e46b670b47",
+  "branch": "master",
+  "commit_sha": "5e62c36a9b0c0d7ca562383f2d9938e722216f00",
+  "commit_time": "2026-07-25T10:48:39+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 1094,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 1094,
+      "total_deletions": 563
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
