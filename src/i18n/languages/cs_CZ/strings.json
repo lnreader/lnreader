@@ -23,6 +23,7 @@
     "deleteReadChapters": "Delete read chapters",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
     "importEpub": "Import Epub",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Import Novel",
     "importStaticFiles": "Import Static Files",
     "novelInsertFailed": "novel insert failed",
@@ -45,11 +46,16 @@
     "appLanguageDefault": "Default",
     "appTheme": "App theme",
     "darkTheme": "Dark Theme",
+    "dateFormat": "Date format",
+    "dateFormatDefault": "Default (%{date})",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Hide backdrop",
     "lightTheme": "Light Theme",
     "navbar": "Navbar",
     "novelInfo": "Novel info",
     "pureBlackDarkMode": "Pure black dark mode",
+    "relativeTimestamps": "Relative timestamps",
+    "relativeTimestampsDescription": "\"Today\" instead of \"%{date}\"",
     "showHistoryInTheNav": "Show history in the nav",
     "showUpdatesInTheNav": "Show updates in the nav",
     "themeMode": "Theme mode",
@@ -130,20 +136,23 @@
     "uploadingData": "Uploading Data",
     "uploadingDownloadedFiles": "Uploading Downloaded Files"
   },
-  "browse": "Procházet",
+  "browse": "Browse",
   "browseScreen": {
-    "addedToLibrary": "Přidáno do knihovny",
+    "addedToLibrary": "Added to library",
     "available": "Available",
     "deletePluginMessage": "Are you sure you want to uninstall %{name}?",
-    "discover": "Objevit",
-    "globalSearch": "Globální vyhledávání",
+    "discover": "Discover",
+    "editPluginSetting": "Edit %{name}",
+    "globalSearch": "Global search",
+    "installPlugin": "Install %{name}",
     "installFailed": "Installation failed: %{name}",
     "installed": "Installed",
     "installedPlugin": "Installed %{name}",
     "installedPlugins": "Installed plugins",
-    "lastUsed": "Naposledy použité",
-    "latest": "Poslední",
-    "listEmpty": "Povolit jazyky z nastavení",
+    "language": "Language",
+    "lastUsed": "Last used",
+    "latest": "Latest",
+    "listEmpty": "Enable languages from settings",
     "migration": {
       "dialogMessage": "Migrate %{url}?",
       "novelAlreadyInLibrary": "Novel already in library",
@@ -151,15 +160,32 @@
       "selectSourceDesc": "Select a Source To Migrate From"
     },
     "noSource": "Your library does not have any novels from this source",
-    "pinnedPlugin": "Pinned %{name}",
-    "pinnedPlugins": "Pinned plugins",
-    "removeFromLibrary": "Odstraněno z knihovny",
-    "searchbar": "Zdroje hledání",
+    "noPlugins": "No plugins found. Add a repository or enable more languages in Browse Settings.",
+    "noSearchResults": "No matching results",
+    "noSources": "No sources installed. Install a plugin to start browsing novels.",
+    "openPluginDetails": "Open details for %{name}",
+    "openPluginSettings": "Open settings for %{name}",
+    "openWebsite": "Open the website for %{name}",
+    "pinSource": "Pin %{name}",
+    "pinnedPlugins": "Pinned",
+    "pluginDetails": "Plugin details",
+    "pluginIcon": "plugin icon",
+    "pluginNotInstalled": "This plugin is not installed",
+    "plugins": "Plugins",
+    "removeFromLibrary": "Removed from Library",
+    "repositories": "Repositories",
+    "searchbar": "Search sources and plugins",
     "searchResults": "Search results",
     "selectNovel": "Select Novel",
+    "sources": "Sources",
+    "togglePluginSetting": "Toggle %{name}",
     "uninstalledPlugin": "Uninstalled %{name}",
-    "unpinnedPlugin": "Unpinned %{name}",
+    "uninstall": "Uninstall",
+    "unpinSource": "Unpin %{name}",
+    "updatePlugin": "Update %{name}",
+    "updateAll": "Update all",
     "updateFailed": "Update failed",
+    "updatesPending": "Updates pending",
     "updatedTo": "Updated to %{version}",
     "settings": {
       "title": "Plugin Settings",
@@ -173,34 +199,35 @@
     "languages": "Languages"
   },
   "categories": {
-    "addCategories": "Přidat kategorii",
+    "addCategories": "Add category",
     "cantDeleteDefault": "You cant delete default category",
     "default": "Default",
-    "defaultCategory": "Výchozí kategorie",
+    "defaultCategory": "Default category",
     "deleteModal": {
-      "desc": "Přejete si odstranit kategorii",
-      "header": "Smazat kategorii"
+      "desc": "Do you wish to delete category",
+      "header": "Delete category"
     },
-    "duplicateError": "Kategorie s tímto názvem již existuje!",
-    "editCategories": "Přejmenovat kategorii",
-    "emptyMsg": "Nemáte žádné kategorie. Klepněte na tlačítko plus pro vytvoření nové kategorie",
-    "header": "Upravit kategorie",
+    "duplicateError": "A category with this name already exists!",
+    "editCategories": "Rename category",
+    "emptyMsg": "You have no categories. Tap the plus button to create one for organizing your library",
+    "header": "Edit categories",
     "local": "Local",
-    "setCategories": "Nastavit kategorie",
-    "setModalEmptyMsg": "Nemáte žádné kategorie. Klepněte na tlačítko editovat pro vytvoření nové kategorie"
+    "setCategories": "Set categories",
+    "setModalEmptyMsg": "You have no categories. Tap the Edit button to create one for organizing your library"
   },
   "repositories": {
     "emptyMsg": "You have no repositories. Add your first plugin repository to get started."
   },
   "common": {
     "about": "About",
-    "add": "Přidat",
+    "add": "Add",
     "all": "All",
+    "back": "Back",
     "backup": "Backup",
-    "cancel": "Zrušit",
-    "categories": "Kategorie",
-    "chapters": "Kapitoly",
-    "clear": "Vymazat",
+    "cancel": "Cancel",
+    "categories": "Categories",
+    "chapters": "Chapters",
+    "clear": "Clear",
     "copiedToClipboard": "Copied to clipboard: %{name}",
     "delete": "Delete",
     "deleted": "Deleted %{name}",
@@ -208,33 +235,35 @@
     "display": "Display",
     "done": "Done",
     "downloads": "Downloads",
-    "edit": "Upravit",
+    "edit": "Edit",
     "example": "Example",
     "filter": "Filter",
-    "globally": "globálně",
-    "install": "Instalovat",
+    "globally": "globally",
+    "install": "Install",
     "logout": "Logout",
-    "name": "Jméno",
-    "newUpdateAvailable": "Nová aktualizace k dispozici",
+    "name": "Name",
+    "newUpdateAvailable": "New update available",
+    "none": "None",
     "ok": "Ok",
     "pause": "Pause",
     "preparing": "Preparing",
     "remove": "Remove",
-    "reset": "Resetovat",
+    "reset": "Reset",
     "restore": "Restore",
     "resume": "Resume",
-    "retry": "Opakovat",
-    "save": "Uložit",
-    "search": "Hledat",
-    "searchFor": "Hledat",
-    "searchResults": "Výsledky hledání",
+    "retry": "Retry",
+    "save": "Save",
+    "search": "Search",
+    "searchFor": "Search for",
+    "searchResults": "Search results",
     "settings": "Settings",
     "show": "Show",
     "signIn": "Sign in",
     "signOut": "Sign out",
     "sort": "Sort",
-    "submit": "Odeslat",
+    "submit": "Submit",
     "loading": "Loading ...",
+    "moreOptions": "More options",
     "warning": "Warning"
   },
   "webview": {
@@ -248,10 +277,10 @@
   },
   "date": {
     "calendar": {
-      "lastDay": "[Včera]",
-      "lastWeek": "[poslední] dddd",
-      "nextDay": "[Zítra]",
-      "sameDay": "[Dnes]"
+      "lastDay": "[Yesterday]",
+      "lastWeek": "[Last] dddd",
+      "nextDay": "[Tomorrow]",
+      "sameDay": "[Today]"
     }
   },
   "downloadScreen": {
@@ -260,11 +289,11 @@
     "chapterEmptyOrScrapeError": "Either chapter is empty or the app couldn't scrape it",
     "chapterName": "Chapter: %{name}",
     "completed": "Download completed",
-    "dbInfo": "Stahování jsou uložena v databázi SQLite.",
+    "dbInfo": "Downloads are saved in a SQLite Database.",
     "downloading": "Downloading",
     "downloadingNovel": "Downloading: %{name}",
-    "downloadsLower": "stažené",
-    "noDownloads": "Žádné stažené",
+    "downloadsLower": "downloads",
+    "noDownloads": "No downloads",
     "pluginNotFound": "Plugin not found!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
   },
@@ -279,12 +308,20 @@
     "disableLoadingAnimationsDesc": "May improve performance on slower devices",
     "disableHapticFeedback": "Disable haptic feedback",
     "disableHapticFeedbackDescription": "Turn off vibrations for touch interactions.",
+    "chapterDownloadCooldown": "Chapter download cooldown",
+    "chapterDownloadCooldownDesc": "Wait between sequential chapter downloads (seconds). Helps avoid source rate limits during batch downloads.",
+    "chapterDownloadCooldownPlaceholder": "Cooldown in seconds (e.g. 1.5)",
+    "chapterDownloadCooldownWarning": "Very low cooldowns may trigger rate limiting or temporary IP bans from sources.",
     "displayMode": "Display Mode",
     "downloadNewChapters": "Download new chapters",
     "epub": "EPUB",
     "epubLocation": "EPUB Location",
     "epubLocationDescription": "The place where you open and export your EPUB files.",
     "globalUpdate": "Global update",
+    "globalUpdateCategories": "Categories",
+    "globalUpdateCategoriesDescription": "Novels in excluded categories will not be updated, even when they are also in an included category. Tap a category to cycle between included, excluded, and neither.",
+    "globalUpdateExclude": "Exclude: %{categories}",
+    "globalUpdateInclude": "Include: %{categories}",
     "gridSize": "Grid size",
     "gridSizeDesc": "%{num} per row",
     "itemsPerRow": "Items per row",
@@ -295,68 +332,79 @@
     "novelSort": "Novel Sort",
     "refreshMetadata": "Automatically refresh metadata",
     "refreshMetadataDescription": "Check for new cover and details when updating library",
+    "smartUpdate": "Smart update",
+    "smartUpdateSkipCompleted": "Skip entries with \"Completed\" status",
+    "smartUpdateSkipUnstarted": "Skip unstarted entries",
+    "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
     "updateLibrary": "Update library on launch",
     "updateLibraryDesc": "Not recommended for low devices",
-    "updateOngoing": "Only update ongoing novels",
     "updateTime": "Show last update time",
-    "useFAB": "Use FAB in Library"
+    "useFAB": "Use FAB in Library",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
-    "allSources": "všechny zdroje",
-    "searchIn": "Hledat novelu v"
+    "allSources": "all sources",
+    "searchIn": "Search a novel in"
   },
-  "history": "Historie",
+  "history": "History",
   "historyScreen": {
     "chapter": "Chapter",
-    "clearHistorWarning": "Jste si jistí? Celá historie bude stracena.",
+    "clearHistorWarning": "Are you sure? All history will be lost.",
     "deleted": "History deleted.",
     "nothingReadRecently": "Nothing read recently",
-    "searchbar": "Historie hledání"
+    "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
+    "resetAllChapters": "Reset all chapters for this entry",
+    "searchbar": "Search history"
   },
-  "library": "Knihovna",
+  "library": "Library",
   "libraryScreen": {
     "bottomSheet": {
       "display": {
-        "badges": "Odznaky",
-        "comfortable": "Komfortní mřížka",
-        "compact": "Kompaktní mřížka",
-        "displayMode": "Režim zobrazení",
+        "badges": "Badges",
+        "comfortable": "Comfortable grid",
+        "compact": "Compact grid",
+        "displayMode": "Display mode",
         "download": "Download",
-        "downloadBadges": "Stáhnout odznaky",
-        "list": "Seznam",
-        "noTitle": "Mřížka jen s přebaly",
+        "downloadBadges": "Download badges",
+        "list": "List",
+        "noTitle": "Cover only grid",
         "numberOfItems": "Number of Items",
-        "showNoOfItems": "Zobrazit počet položek",
+        "showNoOfItems": "Show number of items",
         "unread": "Unread",
-        "unreadBadges": "Nepřečtené odznaky"
+        "unreadBadges": "Unread badges"
       },
       "filters": {
-        "completed": "Dokončeno",
-        "downloaded": "Staženo",
-        "started": "Zahájeno",
-        "unread": "Nepřečteno"
+        "completed": "Completed",
+        "downloaded": "Downloaded",
+        "started": "Started",
+        "unread": "Unread"
       },
       "sortOrders": {
-        "alphabetically": "Abecedně",
-        "dateAdded": "Datum přidání",
-        "download": "Staženo",
-        "lastRead": "Naposledy přečteno",
-        "lastUpdated": "Naposledy aktualizováno",
-        "totalChapters": "Celkem kapitol",
-        "unread": "Nepřečteno"
+        "alphabetically": "Alphabetically",
+        "dateAdded": "Date added",
+        "download": "Downloaded",
+        "lastRead": "Last read",
+        "lastUpdated": "Last updated",
+        "totalChapters": "Total chapters",
+        "unread": "Unread"
       }
     },
-    "empty": "Vaše knihovna je prázdná. Přidejte sérii do knihovny z procházet.",
+    "empty": "Your library is empty. Add series to your library from Browse.",
     "extraMenu": {
       "importEpub": "Import Epub",
       "openRandom": "Open Random Entry",
       "updateCategory": "Update Category",
       "updateLibrary": "Update Library"
     },
-    "searchbar": "Hledat v knihovně"
+    "searchbar": "Search library"
   },
-  "more": "Více",
+  "more": "More",
   "moreScreen": {
     "downloadOnly": "Downloaded only",
     "downloadOnlyDesc": "Filters all novels in your library",
@@ -365,7 +413,7 @@
     "incognitoModeDesc": "Pauses reading history"
   },
   "novelScreen": {
-    "addToLibaray": "Přidat do knihovny",
+    "addToLibaray": "Add to library",
     "bottomSheet": {
       "displays": {
         "chapterNumber": "Chapter number",
@@ -374,7 +422,8 @@
       "filters": {
         "bookmarked": "Bookmarked",
         "downloaded": "Downloaded",
-        "unread": "Unread"
+        "unread": "Unread",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "By chapter name",
@@ -382,14 +431,15 @@
       }
     },
     "chapterChapnum": "Chapter %{num}",
-    "chapters": "kapitoly",
-    "continueReading": "Pokračovat ve čtení",
+    "chapters": "chapters",
+    "continueReading": "Continue reading",
     "exportEpubModal": {
       "applyReaderTheme": "Apply reader theme to EPUB",
       "customJSWarning": "Custom JS may not be supported by all EPUB readers",
       "downloadedChaptersOnly": "Only downloaded chapters will be included in the EPUB file",
       "endChapter": "End Chapter",
       "exportAll": "Export All Chapters",
+      "fileName": "File name",
       "includeCustomCSS": "Include Custom CSS",
       "includeCustomJS": "Include Custom JS",
       "invalidRange": "Please enter valid chapter numbers",
@@ -427,19 +477,19 @@
       "summary": "Description: %{summary}...",
       "title": "Title: %{title}"
     },
-    "inLibaray": "V knihovně",
+    "inLibaray": "In library",
     "jumpToChapterModal": {
-      "chapterName": "Název kapitoly",
-      "chapterNumber": "Číslo kapitoly",
+      "chapterName": "Chapter Name",
+      "chapterNumber": "Chapter Number",
       "error": {
-        "validChapterName": "Zadejte platný název kapitoly",
-        "validChapterNumber": "Zadejte platné číslo kapitoly"
+        "validChapterName": "Enter a valid chapter name",
+        "validChapterNumber": "Enter a valid chapter number"
       },
-      "jumpToChapter": "Přeskočit na kapitolu",
-      "openChapter": "Otevřít kapitolu"
+      "jumpToChapter": "Jump to Chapter",
+      "openChapter": "Open Chapter"
     },
-    "migrate": "Migrovat",
-    "noSummary": "Žádné shrnutí",
+    "migrate": "Migrate",
+    "noSummary": "No summary",
     "noCoverFound": "No cover found",
     "progress": "Progress %{progress} %",
     "readChaptersDeleted": "Read chapters deleted",
@@ -464,34 +514,36 @@
       "autoscroll": "Auto-scroll",
       "bionicReading": "Bionic reading",
       "tapToScroll": "Tap to scroll",
-      "color": "Barva",
-      "fontStyle": "Styl písma",
-      "fullscreen": "Celá obrazovka",
+      "color": "Color",
+      "fontStyle": "Font style",
+      "fullscreen": "Fullscreen",
       "lineHeight": "Line height",
       "padding": "Padding",
       "pageReader": "Paged reading (Experimental)",
       "removeExtraSpacing": "Remove extra spacing",
-      "scrollAmount": "Vzdálenost posunu (jako výchozí velikost výška obrazovky)",
+      "scrollAmount": "Scroll amount (screen height by default)",
       "showBatteryAndTime": "Battery & time",
       "showProgressPercentage": "Reading progress",
       "swipeGestures": "Swipe between chapters",
       "textAlign": "Text alignment",
-      "textSize": "Velikost textu",
+      "textSize": "Text size",
       "useChapterDrawerSwipeNavigation": "Swipe to open drawer",
       "verticalSeekbar": "Vertical seekbar",
       "keepScreenOn": "Keep screen on",
       "volumeButtonsScroll": "Volume button scrolling"
     },
     "drawer": {
-      "scrollToBottom": "Přejít na konec",
-      "scrollToCurrentChapter": "Přejít na aktuální kapitolu",
-      "scrollToTop": "Přejít na začátek"
+      "scrollToBottom": "Scroll to bottom",
+      "scrollToCurrentChapter": "Scroll to current chapter",
+      "scrollToTop": "Scroll to top"
     },
     "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='https://github.com/lnreader/lnreader-plugins/issues/new/choose'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
-    "finished": "Dokončeno",
+    "finished": "Finished",
     "nextChapter": "Next: %{name}",
-    "noNextChapter": "Nejsou žádné další kapitoly",
-    "noPreviousChapter": "There's no previous chapter"
+    "noNextChapter": "There's no next chapter",
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
@@ -516,21 +568,27 @@
     "textColor": "Text color",
     "textColorModal": "Text color",
     "title": "Reader",
-    "verticalSeekbarDesc": "Use vertical seekbar"
+    "verticalSeekbarDesc": "Use vertical seekbar",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
-    "noResultsFound": "Nebyly nalezeny žádné výsledky"
+    "noResultsFound": "No results found"
   },
   "statsScreen": {
-    "downloadedChapters": "Stažené kapitoly",
-    "genreDistribution": "Rozložení žánrů",
-    "readChapters": "Prečíst kapitoly",
+    "downloadedChapters": "Downloaded chapters",
+    "genreDistribution": "Genre distribution",
+    "readChapters": "Read chapters",
     "sources": "Sources",
-    "statusDistribution": "Rozložení statusu",
-    "title": "Statistiky",
-    "titlesInLibrary": "Názvy v knihovně",
-    "totalChapters": "Kapitol dohromady",
-    "unreadChapters": "Nepřečtené kapitoly"
+    "statusDistribution": "Status distribution",
+    "title": "Statistics",
+    "titlesInLibrary": "Titles in library",
+    "totalChapters": "Total chapters",
+    "unreadChapters": "Unread chapters",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -538,17 +596,17 @@
     "revalidate": "Revalidate",
     "services": "Services"
   },
-  "updates": "Aktualizace",
+  "updates": "Updates",
   "updatesScreen": {
     "deletedChapters": "Deleted %{num} chapters",
-    "emptyView": "Žádné nedávné aktualizace",
-    "lastUpdatedAt": "Poslední aktualizace knihovny:",
+    "emptyView": "No recent updates",
+    "lastUpdatedAt": "Library last updated:",
     "libraryUpdated": "Library Updated",
-    "newChapters": "nová kapitola",
+    "newChapters": "new Chapters",
     "novelsUpdated": "%{num} novels updated",
-    "searchbar": "Hledat aktualizace",
+    "searchbar": "Search updates",
     "unableToGetNovel": "Unable to get novel",
-    "updatesLower": "aktualizace",
+    "updatesLower": "updates",
     "updatingLibrary": "Updating library"
   },
   "onboardingScreen": {
@@ -570,5 +628,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
