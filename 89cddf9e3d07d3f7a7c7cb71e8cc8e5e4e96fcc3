@@ -1,0 +1,47 @@
+src/screens/browse/discover/DiscoverCard.tsx
+  s_de6f8825f24e49::t_0400aed3307fdb 29-36,43,46-47,52
+  human 29-36,43,48,51
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_de6f8825f24e49::t_0400aed3307fdb",
+          "lines": "29-36,43,46-47,52",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "29-36,43,48,51",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/discover/DiscoverCard.tsx"
+    }
+  ],
+  "base_commit_sha": "eac6ad584e85d4ed72cf76fafcde1c4d0551687d",
+  "branch": "master",
+  "commit_sha": "89cddf9e3d07d3f7a7c7cb71e8cc8e5e4e96fcc3",
+  "commit_time": "2026-07-25T20:34:30+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 11
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
