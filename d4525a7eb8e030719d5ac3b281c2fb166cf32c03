@@ -1,0 +1,668 @@
+src/database/queries/__tests__/LibraryQueries.test.ts
+  s_867a3e4450ce98::t_35df79dc730bff 11,289-384
+  human 385-387
+src/services/updates/index.ts
+  s_867a3e4450ce98::t_35df79dc730bff 2,13-17,54-56
+  human 3,13,50-55
+src/navigators/types/index.ts
+  s_867a3e4450ce98::t_665781f1b29bae 181-184
+src/hooks/persisted/useCategories.ts
+  s_867a3e4450ce98::t_8dfbc74d92922b 1-2,12,25-30
+  human 31
+src/navigators/MoreStack.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 16,36
+  human 1-2,18,38
+src/hooks/persisted/__mocks__/useSettings.ts
+  s_867a3e4450ce98::t_ebc9ef066ae611 32
+  s_867a3e4450ce98::t_9032cc95261610 33-34
+src/screens/settings/SettingsLibraryScreen/modals/NovelBadgesModal.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 1-69
+src/screens/settings/SettingsScreen.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 41-49
+  human 40
+src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx
+  s_867a3e4450ce98::t_31f0453746a91f 15-16,36
+  human 15-16
+src/database/queries/NovelQueries.ts
+  s_867a3e4450ce98::t_bf6d11af2239a7 21-45,160,197,293,405-407
+  human 21,136-140,177-181,277-281,393-398
+src/i18n/languages/en/strings.json
+  s_867a3e4450ce98::t_ed1908fbf7f1d4 242
+  s_867a3e4450ce98::t_855ce01de40fb1 317-320
+src/hooks/persisted/useSettings.ts
+  s_867a3e4450ce98::t_9032cc95261610 103-104,116,130-131,136,139
+  s_867a3e4450ce98::t_ebc9ef066ae611 101-102,143-153
+  s_867a3e4450ce98::t_03ee28a9ea1808 117-129,132-135,137-138,140-142
+  human 154
+src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 4,7-9,11,14-17,19,23-24,27,30-31,48-50,58-65,77,107-108,113-114,121,124-126
+  human 1,4-19,22-24,29-31,33,35-53,55-62,64,69-88,90-115,120,126-237,244,252-255,267,296-324,326-327,332-333,340,343
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  s_867a3e4450ce98::t_2fca2706f16718 262-272,340-348
+  s_867a3e4450ce98::t_e7f028c6e2db30 32-35,37-45,149-151,201
+  s_867a3e4450ce98::t_fcb53005a40f09 1,109-115
+  s_867a3e4450ce98::t_31f0453746a91f 8,100-101,147,209-211,213-216,220,335,339
+  s_867a3e4450ce98::t_665781f1b29bae 2-4,6-7,9-13,15-20,22-24,27-31,48-54,59-69,72,75-78,148,153-165,168,171-200,202-208,212,221-261,273-330,351,356-361
+  s_867a3e4450ce98::t_ebc9ef066ae611 55,58,79-85,96-99,217-219,336
+  s_867a3e4450ce98::t_0b645d46455ce1 46
+  s_867a3e4450ce98::t_d54a5355e4b449 14
+  s_867a3e4450ce98::t_46a17a386e60aa 26,56-57,74,89-94,102-108,117-122,125-146
+  s_867a3e4450ce98::t_30ee84bf4be375 86-88
+  human 152,166
+src/screens/settings/SettingsLibraryScreen/GlobalUpdateCategoriesDialog.tsx
+  s_867a3e4450ce98::t_4e13571a4c2abd 1
+  s_867a3e4450ce98::t_3ad79ba48a35d4 2-79,81-108,110-124,126-147
+  s_867a3e4450ce98::t_30ee84bf4be375 80,109,125
+src/i18n/types/index.ts
+  s_867a3e4450ce98::t_30ee84bf4be375 215,280-283
+src/screens/settings/SettingsLibraryScreen/modals/GridSizeModal.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 1-63
+src/screens/settings/SettingsLibraryScreen/modals/NovelSortModal.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 1-56
+src/database/queries/LibraryQueries.ts
+  s_867a3e4450ce98::t_0300eb3c7c88ee 59,91
+  s_867a3e4450ce98::t_35df79dc730bff 1-11,15,53-58,60-90,92-96
+  human 97-98
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_867a3e4450ce98::t_e6b101443b2c39 18-23,44,221
+  s_867a3e4450ce98::t_e5076498f3bbb4 238-262
+  s_867a3e4450ce98::t_bf6d11af2239a7 210-220,222-236
+  human 237
+src/screens/settings/SettingsLibraryScreen/modals/DisplayModeModal.tsx
+  s_867a3e4450ce98::t_665781f1b29bae 1-47
+src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx
+  human 1-56
+src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx
+  human 1-63
+src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx
+  human 1-69
+src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx
+  human 1-47
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 97,
+          "added_lines": 97,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_35df79dc730bff",
+          "lines": "11,289-384",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "385-387",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/LibraryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_35df79dc730bff",
+          "lines": "2,13-17,54-56",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "3,13,50-55",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "181-184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_8dfbc74d92922b",
+          "lines": "1-2,12,25-30",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useCategories.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "16,36",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "1-2,18,38",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/MoreStack.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_ebc9ef066ae611",
+          "lines": "32",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_9032cc95261610",
+          "lines": "33-34",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 69,
+          "added_lines": 69,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "1-69",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/NovelBadgesModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "41-49",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "40",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_31f0453746a91f",
+          "lines": "15-16,36",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "15-16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 31,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_bf6d11af2239a7",
+          "lines": "21-45,160,197,293,405-407",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 22,
+          "hash": "human",
+          "lines": "21,136-140,177-181,277-281,393-398",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/NovelQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_ed1908fbf7f1d4",
+          "lines": "242",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_855ce01de40fb1",
+          "lines": "317-320",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_9032cc95261610",
+          "lines": "103-104,116,130-131,136,139",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_ebc9ef066ae611",
+          "lines": "101-102,143-153",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_03ee28a9ea1808",
+          "lines": "117-129,132-135,137-138,140-142",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "154",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 35,
+          "added_lines": 35,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "4,7-9,11,14-17,19,23-24,27,30-31,48-50,58-65,77,107-108,113-114,121,124-126",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 252,
+          "hash": "human",
+          "lines": "1,4-19,22-24,29-31,33,35-53,55-62,64,69-88,90-115,120,126-237,244,252-255,267,296-324,326-327,332-333,340,343",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_2fca2706f16718",
+          "lines": "262-272,340-348",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_e7f028c6e2db30",
+          "lines": "32-35,37-45,149-151,201",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_fcb53005a40f09",
+          "lines": "1,109-115",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_31f0453746a91f",
+          "lines": "8,100-101,147,209-211,213-216,220,335,339",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 206,
+          "added_lines": 206,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "2-4,6-7,9-13,15-20,22-24,27-31,48-54,59-69,72,75-78,148,153-165,168,171-200,202-208,212,221-261,273-330,351,356-361",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_ebc9ef066ae611",
+          "lines": "55,58,79-85,96-99,217-219,336",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_0b645d46455ce1",
+          "lines": "46",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_d54a5355e4b449",
+          "lines": "14",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 45,
+          "added_lines": 45,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_46a17a386e60aa",
+          "lines": "26,56-57,74,89-94,102-108,117-122,125-146",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_30ee84bf4be375",
+          "lines": "86-88",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 32,
+          "hash": "human",
+          "lines": "152,166",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_4e13571a4c2abd",
+          "lines": "1",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 143,
+          "added_lines": 143,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_3ad79ba48a35d4",
+          "lines": "2-79,81-108,110-124,126-147",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_30ee84bf4be375",
+          "lines": "80,109,125",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/GlobalUpdateCategoriesDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_30ee84bf4be375",
+          "lines": "215,280-283",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 63,
+          "added_lines": 63,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "1-63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/GridSizeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 56,
+          "added_lines": 56,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "1-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/NovelSortModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_0300eb3c7c88ee",
+          "lines": "59,91",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 54,
+          "added_lines": 54,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_35df79dc730bff",
+          "lines": "1-11,15,53-58,60-90,92-96",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "97-98",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/LibraryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_e6b101443b2c39",
+          "lines": "18-23,44,221",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_e5076498f3bbb4",
+          "lines": "238-262",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 26,
+          "added_lines": 26,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_bf6d11af2239a7",
+          "lines": "210-220,222-236",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "237",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/NovelQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 47,
+          "added_lines": 47,
+          "deleted_lines": 0,
+          "hash": "s_867a3e4450ce98::t_665781f1b29bae",
+          "lines": "1-47",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/modals/DisplayModeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 56,
+          "hash": "human",
+          "lines": "1-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/NovelSortModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 63,
+          "hash": "human",
+          "lines": "1-63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/GridSizeModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 69,
+          "hash": "human",
+          "lines": "1-69",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/NovelBadgesModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 47,
+          "hash": "human",
+          "lines": "1-47",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/DisplayModeModal.tsx"
+    }
+  ],
+  "base_commit_sha": "780684d5a23783a028ed93f7cb20923ba57c8fcf",
+  "branch": "claude/lnreader-chapter-perf-hudi37",
+  "commit_sha": "d4525a7eb8e030719d5ac3b281c2fb166cf32c03",
+  "commit_time": "2026-07-25T10:46:36+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 11,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 11,
+      "total_deletions": 563
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
