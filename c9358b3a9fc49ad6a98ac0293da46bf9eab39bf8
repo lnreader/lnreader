@@ -1,0 +1,167 @@
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_e9d5752c051021::t_0bb891454a4bc7 3
+  human 3
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_e9d5752c051021::t_0bb891454a4bc7 3
+  human 3
+assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_e9d5752c051021::t_df6b6e698945f0 3
+  human 3
+assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_e9d5752c051021::t_0bb891454a4bc7 3
+  human 3
+assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_e9d5752c051021::t_df6b6e698945f0 3
+  human 3
+assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_e9d5752c051021::t_0bb891454a4bc7 3
+  human 3
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_0bb891454a4bc7",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_0bb891454a4bc7",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_df6b6e698945f0",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_0bb891454a4bc7",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/preview/res/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_df6b6e698945f0",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/debug/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e9d5752c051021::t_0bb891454a4bc7",
+          "lines": "3",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/android-icons/release/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+    }
+  ],
+  "base_commit_sha": "67d2c7c01b101d83d0033aad2c0a99247f04620e",
+  "branch": "master",
+  "commit_sha": "c9358b3a9fc49ad6a98ac0293da46bf9eab39bf8",
+  "commit_time": "2026-07-25T15:52:13+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 6
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
