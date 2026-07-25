@@ -1,0 +1,239 @@
+src/screens/history/components/RemoveHistoryDialog.tsx
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 1-60
+src/hooks/persisted/__mocks__/useHistory.ts
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 6
+src/i18n/types/index.ts
+  s_6fb1756980d3b1::t_eb04ef6ef85293 317-318
+src/hooks/persisted/useHistory.ts
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 9,19-40,42-44,48-54,59-60,68
+  human 41
+src/database/queries/HistoryQueries.ts
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 61-72
+  human 60
+src/i18n/languages/en/strings.json
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 358-359
+src/screens/history/components/HistoryCard/HistoryCard.tsx
+  s_6fb1756980d3b1::t_06bfc65fce8bcc 19
+  s_6fb1756980d3b1::t_41953ece2f88a1 26,45-46,55-56,83,101-105,107-108,110
+  s_6fb1756980d3b1::t_99feabac6e5a66 24
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 16,25,27-33,35,37,39,41-43,84,87,90,93,126
+  human 34,36,38,109
+src/database/queries/__tests__/HistoryQueries.test.ts
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 15,105-122
+  human 123-125
+src/screens/history/HistoryScreen.tsx
+  s_6fb1756980d3b1::t_bc80b6acbe6e63 1,21,34,39,45-53,88-96,143,166-169
+  s_6fb1756980d3b1::t_06bfc65fce8bcc 151
+  human 54,97,170
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 60,
+          "added_lines": 60,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "1-60",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/history/components/RemoveHistoryDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "6",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useHistory.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_eb04ef6ef85293",
+          "lines": "317-318",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "9,19-40,42-44,48-54,59-60,68",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 24,
+          "hash": "human",
+          "lines": "41",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useHistory.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "61-72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "60",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/HistoryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "358-359",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_06bfc65fce8bcc",
+          "lines": "19",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_41953ece2f88a1",
+          "lines": "26,45-46,55-56,83,101-105,107-108,110",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_99feabac6e5a66",
+          "lines": "24",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "16,25,27-33,35,37,39,41-43,84,87,90,93,126",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 39,
+          "hash": "human",
+          "lines": "34,36,38,109",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/history/components/HistoryCard/HistoryCard.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "15,105-122",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "123-125",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/HistoryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_bc80b6acbe6e63",
+          "lines": "1,21,34,39,45-53,88-96,143,166-169",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fb1756980d3b1::t_06bfc65fce8bcc",
+          "lines": "151",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 12,
+          "hash": "human",
+          "lines": "54,97,170",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/history/HistoryScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "d02291c22c079e5faee9817b00c7bd87ed7f47da",
+  "branch": "master",
+  "commit_sha": "8ac628b3deda367f68af93f9f43d7a1da8c80f9d",
+  "commit_time": "2026-07-25T13:47:26+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 12,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 12,
+      "total_deletions": 75
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
