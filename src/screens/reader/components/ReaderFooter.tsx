@@ -7,14 +7,13 @@ import Animated, {
   ReduceMotion,
   withTiming,
 } from 'react-native-reanimated';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ChapterScreenProps } from '@navigators/types';
 import { useChapterContext } from '../ChapterContext';
 import { useTheme } from '@hooks/persisted';
 import { useNovelLayout } from '@screens/novel/NovelContext';
 
 interface ChapterFooterProps {
-  readerSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  openReaderSheet: () => void;
   scrollToStart: () => void;
   navigation: ChapterScreenProps['navigation'];
   openDrawer: () => void;
@@ -64,11 +63,8 @@ const createExiting = (navigationBarHeight: number) => () => {
   return { initialValues, animations };
 };
 
-
-
-
 const ChapterFooter = ({
-  readerSheetRef,
+  openReaderSheet,
   scrollToStart,
   navigation,
   openDrawer,
@@ -161,7 +157,7 @@ const ChapterFooter = ({
         <Pressable
           android_ripple={rippleConfig}
           style={styles.buttonStyles}
-          onPress={() => readerSheetRef.current?.present()}
+          onPress={openReaderSheet}
         >
           <IconButton
             icon="cog-outline"

@@ -133,6 +133,8 @@ const routes = [
   { key: 'ttsTab', title: 'TTS' },
 ];
 
+const renderLazyPlaceholder = () => <View style={styles.flex} />;
+
 const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   bottomSheetRef,
 }) => {
@@ -184,6 +186,10 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
           style={styles.tabView}
+          // Without this every tab is mounted at once – the TTS tab alone
+          // enumerates the device's engines and voices over the bridge.
+          lazy
+          renderLazyPlaceholder={renderLazyPlaceholder}
         />
       </BottomSheetView>
     </BottomSheet>

@@ -5,7 +5,9 @@ const ChapterEnding = () => {
     reader.generalSettings.val.pageReader
       ? div()
       : div(div({ class: 'info-text' }, reader.strings.finished), () =>
-          reader.nextChapter
+          // Reading `adjacentVersion` subscribes this binding to the adjacent
+          // chapters being pushed in after the chapter itself was rendered.
+          reader.adjacentVersion.val >= 0 && reader.nextChapter
             ? button(
                 {
                   class: 'next-button',

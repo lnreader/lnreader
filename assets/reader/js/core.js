@@ -21,8 +21,6 @@ window.reader = new (function () {
     chapterGeneralSettings,
     novel,
     chapter,
-    nextChapter,
-    prevChapter,
     batteryLevel,
     autoSaveInterval,
     DEBUG,
@@ -34,6 +32,12 @@ window.reader = new (function () {
   this.batteryLevel = van.state(batteryLevel);
   this.readerSettings = van.state(readerSettings);
   this.generalSettings = van.state(chapterGeneralSettings);
+  /**
+   * Bumped whenever the app pushes new adjacent chapters. The chapter is
+   * rendered before its neighbours are known, so any UI that depends on them
+   * has to read this state to re-render when they arrive.
+   */
+  this.adjacentVersion = van.state(0);
 
   this.chapterElement = document.querySelector('#LNReader-chapter');
   this.selection = window.getSelection();
@@ -41,9 +45,17 @@ window.reader = new (function () {
 
   this.novel = novel;
   this.chapter = chapter;
-  this.nextChapter = nextChapter;
-  this.prevChapter = prevChapter;
+  this.nextChapter = undefined;
+  this.prevChapter = undefined;
   this.strings = strings;
+
+  /** Called by the app once the neighbouring chapters have been resolved. */
+  this.setAdjacentChapters = ({ nextChapter, prevChapter, strings: texts }) => {
+    this.nextChapter = nextChapter ?? undefined;
+    this.prevChapter = prevChapter ?? undefined;
+    Object.assign(this.strings, texts);
+    this.adjacentVersion.val++;
+  };
   this.autoSaveInterval = autoSaveInterval;
   this.rawHTML = this.chapterElement.innerHTML;
 
@@ -517,6 +529,7 @@ window.pageReader = new (function () {
     }
     destPage = parseInt(destPage, 10);
     if (destPage < 0) {
+      if (!reader.prevChapter) return;
       document.getElementsByClassName('transition-chapter')[0].innerText =
         reader.prevChapter.name;
       this.showChapterEnding(true, false, true);
@@ -526,6 +539,7 @@ window.pageReader = new (function () {
       return;
     }
     if (destPage >= this.totalPages.val) {
+      if (!reader.nextChapter) return;
       document.getElementsByClassName('transition-chapter')[0].innerText =
         reader.nextChapter.name;
       this.showChapterEnding(true);

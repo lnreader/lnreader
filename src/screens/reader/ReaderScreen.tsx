@@ -22,6 +22,12 @@ import { EMPTY_READER_SEARCH_RESULT, ReaderSearchResult } from './types';
 
 const Chapter = ({ route, navigation }: ChapterScreenProps) => {
   const [open, setOpen] = useState(false);
+  /**
+   * The drawer renders a list of every chapter in the novel and is mounted
+   * off-screen by `Drawer`. Mounting it up front competes with the chapter load
+   * for the JS thread, so it is only created once the drawer is actually used.
+   */
+  const [drawerMounted, setDrawerMounted] = useState(false);
 
   useBackHandler(() => {
     if (open) {
@@ -32,8 +38,16 @@ const Chapter = ({ route, navigation }: ChapterScreenProps) => {
   });
 
   const openDrawer = useCallback(() => {
+    setDrawerMounted(true);
     setOpen(true);
   }, []);
+
+  const closeDrawer = useCallback(() => setOpen(false), []);
+
+  const renderDrawerContent = useCallback(
+    () => (drawerMounted ? <ChapterDrawer /> : null),
+    [drawerMounted],
+  );
 
   return (
     <ChapterContextProvider
@@ -42,9 +56,9 @@ const Chapter = ({ route, navigation }: ChapterScreenProps) => {
     >
       <Drawer
         open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        renderDrawerContent={() => <ChapterDrawer />}
+        onOpen={openDrawer}
+        onClose={closeDrawer}
+        renderDrawerContent={renderDrawerContent}
       >
         <ChapterContent
           route={route}
@@ -65,7 +79,17 @@ export const ChapterContent = ({
   openDrawer,
 }: ChapterContentProps) => {
   const { left, right } = useSafeAreaInsets();
-  const { novel, chapter, onUserInteraction } = useChapterContext();
+  const {
+    novel,
+    chapter,
+    onUserInteraction,
+    hidden,
+    loading,
+    error,
+    webViewRef,
+    hideHeader,
+    refetch,
+  } = useChapterContext();
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
@@ -78,6 +102,12 @@ export const ChapterContent = ({
   );
   const [searchText, setSearchTextState] = useState('');
   const searchTextRef = useRef('');
+  /**
+   * The settings sheet mounts a tab view (including the TTS engine/voice
+   * pickers), which is far too much work to do while the chapter is loading.
+   */
+  const [readerSheetMounted, setReaderSheetMounted] = useState(false);
+  const pendingSheetPresentRef = useRef(false);
 
   const setSearchText = useCallback((text: string) => {
     searchTextRef.current = text;
@@ -92,6 +122,22 @@ export const ChapterContent = ({
     setSearchText('');
     resetSearchResult();
   }, [resetSearchResult, setSearchText]);
+
+  const openReaderSheet = useCallback(() => {
+    if (readerSheetMounted) {
+      readerSheetRef.current?.present();
+      return;
+    }
+    pendingSheetPresentRef.current = true;
+    setReaderSheetMounted(true);
+  }, [readerSheetMounted]);
+
+  useEffect(() => {
+    if (readerSheetMounted && pendingSheetPresentRef.current) {
+      pendingSheetPresentRef.current = false;
+      readerSheetRef.current?.present();
+    }
+  }, [readerSheetMounted]);
 
   useBackHandler(
     useCallback(() => {
@@ -113,9 +159,6 @@ export const ChapterContent = ({
     resetSearch();
   }, [chapter.id, resetSearch]);
 
-  const { hidden, loading, error, webViewRef, hideHeader, refetch } =
-    useChapterContext();
-
   useEffect(() => {
     if (hidden) {
       setSearchVisible(false);
@@ -135,7 +178,7 @@ export const ChapterContent = ({
     `);
   }, [hidden, searchVisible, webViewRef]);
 
-  const scrollToStart = () => {
+  const scrollToStart = useCallback(() => {
     onUserInteraction();
     requestAnimationFrame(() => {
       webViewRef?.current?.injectJavaScript(
@@ -149,7 +192,7 @@ export const ChapterContent = ({
             })()`,
       );
     });
-  };
+  }, [onUserInteraction, pageReader, webViewRef]);
 
   const openDrawerI = useCallback(() => {
     openDrawer();
@@ -169,7 +212,7 @@ export const ChapterContent = ({
       return;
     }
     hideHeader();
-  }, [hideHeader, searchVisible]);
+  }, [hideHeader, onUserInteraction, searchVisible]);
 
   if (error) {
     return (
@@ -208,7 +251,9 @@ export const ChapterContent = ({
           searchTextRef={searchTextRef}
         />
       )}
-      <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+      {readerSheetMounted ? (
+        <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+      ) : null}
       {!hidden ? (
         <>
           <ReaderAppbar
@@ -226,7 +271,7 @@ export const ChapterContent = ({
           />
           {!searchVisible ? (
             <ReaderFooter
-              readerSheetRef={readerSheetRef}
+              openReaderSheet={openReaderSheet}
               scrollToStart={scrollToStart}
               navigation={navigation}
               openDrawer={openDrawerI}

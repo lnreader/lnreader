@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import WebView, { WebViewNavigation } from 'react-native-webview';
+import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
 import { ProgressBar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,7 +26,11 @@ type StorageData = {
 const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
   const { name, url, pluginId, isNovel } = route.params;
   const isSave = getPlugin(pluginId)?.webStorageUtilized;
-  const uri = resolveUrl(pluginId, url, isNovel);
+  const uri = useMemo(
+    () => resolveUrl(pluginId, url, isNovel),
+    [isNovel, pluginId, url],
+  );
+  const userAgent = useMemo(() => getUserAgent(), []);
   const { bottom } = useSafeAreaInsets();
 
   const theme = useTheme();
@@ -47,6 +52,18 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
     setCanGoBack(e.canGoBack);
     setCanGoForward(e.canGoForward);
   };
+
+  const handleLoadProgress = useCallback(
+    ({ nativeEvent }: WebViewProgressEvent) => {
+      const next = nativeEvent.progress;
+      // Progress is reported continuously: re-rendering the screen (and with
+      // it the WebView element) for sub-percent changes is wasted work.
+      setProgress(current =>
+        next === 1 || Math.abs(next - current) >= 0.05 ? next : current,
+      );
+    },
+    [],
+  );
 
   const saveData = () => {
     if (pluginId && tempData && isSave) {
@@ -77,6 +94,11 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
   const injectJavaScriptCode =
     'window.ReactNativeWebView.postMessage(JSON.stringify({localStorage, sessionStorage}))';
 
+  // Stable object props: a new `source` reloads the page, and a new
+  // `containerStyle` re-applies layout on every progress update.
+  const source = useMemo(() => ({ uri }), [uri]);
+  const containerStyle = useMemo(() => ({ paddingBottom: bottom }), [bottom]);
+
   return (
     <>
       <Appbar
@@ -98,19 +120,19 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
         visible={progress !== 1}
       />
       <WebView
-        userAgent={getUserAgent()}
+        userAgent={userAgent}
         ref={webViewRef}
-        source={{ uri }}
+        source={source}
         setDisplayZoomControls={true}
         setBuiltInZoomControls={false}
         setSupportMultipleWindows={false}
         injectedJavaScript={injectJavaScriptCode}
         onNavigationStateChange={handleNavigation}
-        onLoadProgress={({ nativeEvent }) => setProgress(nativeEvent.progress)}
-        onMessage={({ nativeEvent }) =>
+        onLoadProgress={handleLoadProgress}
+        onMessage={({ nativeEvent }: { nativeEvent: { data: string } }) =>
           setTempData(JSON.parse(nativeEvent.data))
         }
-        containerStyle={{ paddingBottom: bottom }}
+        containerStyle={containerStyle}
       />
       {menuVisible ? (
         <Menu

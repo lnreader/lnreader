@@ -16,10 +16,13 @@ export interface Reader {
   generalSettings: State<ChapterGeneralSettings>;
   readerSettings: State<ChapterReaderSettings>;
   batteryLevel: State<number>;
+  /** Bumped whenever the app pushes newly resolved adjacent chapters. */
+  adjacentVersion: State<number>;
 
   novel: NovelInfo;
   chapter: ChapterInfo;
   nextChapter?: ChapterInfo;
+  prevChapter?: ChapterInfo;
   autoSaveInterval: number;
   rawHTML: string;
   strings: {
@@ -27,6 +30,12 @@ export interface Reader {
     nextChapter: string;
     noNextChapter: string;
   };
+
+  setAdjacentChapters: (adjacent: {
+    nextChapter?: ChapterInfo;
+    prevChapter?: ChapterInfo;
+    strings?: Partial<Reader['strings']>;
+  }) => void;
 
   //layout props
   paddingTop: number;

@@ -17,10 +17,16 @@ type Props = {
   styles: Styles;
   theme: ThemeColors;
   chapterId: number;
-  onPress: () => void;
+  /** Takes the chapter so the caller can pass a stable handler. */
+  onPress: (chapter: ChapterInfo) => void;
 };
 
-const renderListChapter = ({
+/**
+ * A component rather than a render function so that rows can bail out of
+ * re-rendering: the chapter list is re-created whenever reading progress is
+ * written, which happens continuously while a chapter is open.
+ */
+const RenderListChapter = ({
   item,
   styles,
   theme,
@@ -38,7 +44,7 @@ const renderListChapter = ({
     >
       <Pressable
         android_ripple={{ color: theme.rippleColor }}
-        onPress={onPress}
+        onPress={() => onPress(item)}
         style={styles.chapterCtn}
       >
         <Text
@@ -64,4 +70,5 @@ const renderListChapter = ({
     </View>
   );
 };
-export default renderListChapter;
+
+export default React.memo(RenderListChapter);

@@ -12,7 +12,7 @@ import { Button, LoadingScreenV2 } from '@components/index';
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
-import renderListChapter from './RenderListChapter';
+import RenderListChapter from './RenderListChapter';
 import { useChapterContext } from '@screens/reader/ChapterContext';
 import {
   LegendList,
@@ -21,6 +21,7 @@ import {
 } from '@legendapp/list/react-native';
 import { noop } from 'lodash-es';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
+import { ChapterInfo } from '@database/types';
 
 type ButtonProperties = {
   text: string;
@@ -30,6 +31,11 @@ type ButtonProperties = {
 type ButtonsProperties = {
   up: ButtonProperties;
   down: ButtonProperties;
+};
+
+const viewabilityConfig = {
+  minimumViewTime: 100,
+  itemVisiblePercentThreshold: 90,
 };
 
 const ChapterDrawer = () => {
@@ -47,7 +53,10 @@ const ChapterDrawer = () => {
   const listRef = useRef<LegendListRef | null>(null);
   // ChapterInfo is used via the hooks
 
-  const styles = createStylesheet(theme, insets);
+  const styles = useMemo(
+    () => createStylesheet(theme, insets),
+    [theme, insets],
+  );
 
   const { sort = defaultChapterSort } = novelSettings;
   const listAscending = sort.endsWith('Asc');
@@ -72,7 +81,9 @@ const ChapterDrawer = () => {
       pageIndex = 0;
     }
     openPage(pageIndex);
-  }, [chapter, pages, openPage]);
+    // Only the page matters here; depending on the whole chapter object would
+    // re-run this on every progress update.
+  }, [chapter.page, pages, openPage]);
 
   const calculateScrollToIndex = useCallback(() => {
     if (chapters.length < 1) {
@@ -87,7 +98,13 @@ const ChapterDrawer = () => {
     return indexOfCurrentChapter >= 2 ? indexOfCurrentChapter - 2 : 0;
   }, [chapters, chapter.id]);
 
-  const scrollToIndex = useRef<number | undefined>(calculateScrollToIndex());
+  /**
+   * Index the list should sit at, or `undefined` while the chapters are still
+   * loading. Derived during render (rather than read back from the ref) so the
+   * list actually appears once the chapters arrive.
+   */
+  const currentScrollIndex = calculateScrollToIndex();
+  const scrollToIndex = useRef<number | undefined>(currentScrollIndex);
 
   const [footerBtnProps, setButtonProperties] =
     useState<ButtonsProperties>(defaultButtonLayout);
@@ -126,6 +143,29 @@ const ChapterDrawer = () => {
     },
     [defaultButtonLayout, listAscending],
   );
+  const openChapter = useCallback(
+    (item: ChapterInfo) => {
+      setLoading(true);
+      getChapter(item);
+    },
+    [getChapter, setLoading],
+  );
+
+  // Every prop here is stable for a given chapter, so unchanged rows can skip
+  // re-rendering when the chapter list is rebuilt.
+  const renderItem = useCallback(
+    ({ item }: { item: ChapterInfo }) => (
+      <RenderListChapter
+        item={item}
+        styles={styles}
+        theme={theme}
+        chapterId={chapter.id}
+        onPress={openChapter}
+      />
+    ),
+    [chapter.id, openChapter, styles, theme],
+  );
+
   const scroll = useCallback((index?: number) => {
     if (index !== undefined) {
       listRef.current?.scrollToIndex({
@@ -140,51 +180,36 @@ const ChapterDrawer = () => {
   }, []);
 
   useEffect(() => {
-    const next = calculateScrollToIndex();
-    if (next !== undefined) {
+    if (currentScrollIndex !== undefined) {
       if (
         scrollToIndex.current === undefined ||
-        next !== scrollToIndex.current
+        currentScrollIndex !== scrollToIndex.current
       ) {
-        scroll(next);
+        scroll(currentScrollIndex);
       }
-      scrollToIndex.current = next;
+      scrollToIndex.current = currentScrollIndex;
     }
-  }, [chapters, chapter.id, calculateScrollToIndex, scroll]);
+  }, [currentScrollIndex, scroll]);
 
   return (
     <View style={styles.drawer}>
       <Text style={styles.headerCtn}>{getString('common.chapters')}</Text>
-      {scrollToIndex === undefined ? (
+      {currentScrollIndex === undefined ? (
         <LoadingScreenV2 theme={theme} />
       ) : (
         <LegendList
           ref={listRef}
           recycleItems
-          viewabilityConfig={{
-            minimumViewTime: 100,
-            itemVisiblePercentThreshold: 90,
-          }}
+          viewabilityConfig={viewabilityConfig}
           onViewableItemsChanged={checkViewableItems}
           data={chapters}
-          extraData={[chapter, scrollToIndex.current]}
+          extraData={chapter.id}
           keyExtractor={item =>
             `chapter_${item.id}_${item.position ?? 'no_pos'}`
           }
-          renderItem={val =>
-            renderListChapter({
-              item: val.item,
-              styles,
-              theme,
-              chapterId: chapter.id,
-              onPress: () => {
-                setLoading(true);
-                getChapter(val.item);
-              },
-            })
-          }
+          renderItem={renderItem}
           estimatedItemSize={60}
-          initialScrollIndex={scrollToIndex.current}
+          initialScrollIndex={currentScrollIndex}
           onEndReached={
             batchInformation.batch < batchInformation.total && !fetching
               ? getNextChapterBatch
