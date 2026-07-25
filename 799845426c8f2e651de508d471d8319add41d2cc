@@ -1,0 +1,121 @@
+src/services/updates/index.ts
+  s_bfda4d6d809497::t_ce7ea39883f7e4 23-39,79-85,88-89,91,93-96,98-107,109-126,134
+  human 92
+src/services/updates/__tests__/index.test.ts
+  s_bfda4d6d809497::t_4c5a0fde6c105b 41-45,51
+  s_bfda4d6d809497::t_4e5bdb9055a495 1-40,46-50,52-92,98-136
+  s_bfda4d6d809497::t_421a7e397bcd6a 93-97
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt
+  s_bfda4d6d809497::t_ce7ea39883f7e4 56-62,66,87-97,99,127
+  019f9857-e5d0-7e70-bcdb-5688d7091a29
+  human 98
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 60,
+          "added_lines": 60,
+          "deleted_lines": 0,
+          "hash": "s_bfda4d6d809497::t_ce7ea39883f7e4",
+          "lines": "23-39,79-85,88-89,91,93-96,98-107,109-126,134",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 15,
+          "hash": "human",
+          "lines": "92",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_bfda4d6d809497::t_4c5a0fde6c105b",
+          "lines": "41-45,51",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 125,
+          "added_lines": 125,
+          "deleted_lines": 0,
+          "hash": "s_bfda4d6d809497::t_4e5bdb9055a495",
+          "lines": "1-40,46-50,52-92,98-136",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_bfda4d6d809497::t_421a7e397bcd6a",
+          "lines": "93-97",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/__tests__/index.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 21,
+          "added_lines": 21,
+          "deleted_lines": 0,
+          "hash": "s_bfda4d6d809497::t_ce7ea39883f7e4",
+          "lines": "56-62,66,87-97,99,127",
+          "overridden_lines": 0
+        },
+        {
+          "hash": "019f9857-e5d0-7e70-bcdb-5688d7091a29",
+          "lines": ""
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "98",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt"
+    }
+  ],
+  "base_commit_sha": "8ac628b3deda367f68af93f9f43d7a1da8c80f9d",
+  "branch": "master",
+  "commit_sha": "799845426c8f2e651de508d471d8319add41d2cc",
+  "commit_time": "2026-07-25T13:54:46+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "019f9857-e5d0-7e70-bcdb-5688d7091a29": {
+      "accepted_lines": 0,
+      "agent_id": {
+        "id": "019f9857-e5d0-7e70-bcdb-5688d7091a29",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 32,
+      "total_deletions": 0
+    },
+    "human": {
+      "accepted_lines": 2,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 2,
+      "total_deletions": 17
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
