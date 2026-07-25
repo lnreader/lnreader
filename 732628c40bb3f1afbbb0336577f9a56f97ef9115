@@ -1,0 +1,440 @@
+src/hooks/persisted/__mocks__/useSettings.ts
+  s_a41cdaf8085094::t_5846d778636a2c 15-16
+src/screens/novel/components/ChapterItem.tsx
+  s_a41cdaf8085094::t_48179c95e424af 11,28-29,47-48,108
+  human 11,104-105
+src/screens/updates/UpdatesScreen.tsx
+  s_a41cdaf8085094::t_48179c95e424af 13,23,110
+  s_a41cdaf8085094::t_2d33b3341f540a 27-28
+  human 13,107
+src/i18n/languages/en/strings.json
+  s_a41cdaf8085094::t_5846d778636a2c 49-50,57-58
+src/utils/dateFormat.ts
+  s_a41cdaf8085094::t_5846d778636a2c 1,3-6,8-26,35-56,63-77,79
+  s_a41cdaf8085094::t_a5d1528cfe567a 2,7,57-62
+  s_a41cdaf8085094::t_b68e871063fa12 27-34,78
+src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx
+  s_a41cdaf8085094::t_c395f3ebe13ea6 290
+  s_a41cdaf8085094::t_1bd21db04f86d4 15,36,57-58,100-103,288-289,291,298-301,304-319,380-382
+  human 302-303,383
+src/utils/__tests__/dateFormat.test.ts
+  s_a41cdaf8085094::t_025b0c2aa49ae9 1-17,21-23,30,32-38
+  s_a41cdaf8085094::t_2d33b3341f540a 18-20
+  s_a41cdaf8085094::t_c6a3f88f1d6a27 25-27
+  s_a41cdaf8085094::t_b68e871063fa12 31
+  s_a41cdaf8085094::t_a55d7e4460cd4b 24,28-29
+src/screens/settings/SettingsAppearanceScreen/DateFormatModal.tsx
+  s_a41cdaf8085094::t_5846d778636a2c 1-30,32-52
+  s_a41cdaf8085094::t_2d33b3341f540a 31
+src/screens/novel/components/NovelScreenList.tsx
+  s_a41cdaf8085094::t_48179c95e424af 97-98,385-386,400-401
+src/hooks/persisted/useSettings.ts
+  s_a41cdaf8085094::t_5846d778636a2c 11,55-56,225-226
+src/screens/history/HistoryScreen.tsx
+  s_a41cdaf8085094::t_48179c95e424af 13,22,130
+  s_a41cdaf8085094::t_2d33b3341f540a 26-27
+  human 3,14,128
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  s_a41cdaf8085094::t_2d33b3341f540a 162-163,205
+  s_a41cdaf8085094::t_e7264f563135ba 14-15,204,206
+  human 13,201
+src/screens/novel/components/NovelChapterGroup.tsx
+  s_a41cdaf8085094::t_48179c95e424af 13,133-134,145-146
+  s_a41cdaf8085094::t_2d33b3341f540a 42-43
+  human 13
+src/i18n/types/index.ts
+  human 46-47,54-55
+src/screens/more/DownloadsScreen.tsx
+  human 23,59,62-64
+src/hooks/persisted/useHistory.ts
+  human 11,24,27-29
+src/hooks/persisted/useUpdates.ts
+  human 28,31-33
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_5846d778636a2c",
+          "lines": "15-16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_48179c95e424af",
+          "lines": "11,28-29,47-48,108",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "11,104-105",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ChapterItem.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_48179c95e424af",
+          "lines": "13,23,110",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "27-28",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "13,107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/updates/UpdatesScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_5846d778636a2c",
+          "lines": "49-50,57-58",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 62,
+          "added_lines": 62,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_5846d778636a2c",
+          "lines": "1,3-6,8-26,35-56,63-77,79",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_a5d1528cfe567a",
+          "lines": "2,7,57-62",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_b68e871063fa12",
+          "lines": "27-34,78",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/utils/dateFormat.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_c395f3ebe13ea6",
+          "lines": "290",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 34,
+          "added_lines": 34,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_1bd21db04f86d4",
+          "lines": "15,36,57-58,100-103,288-289,291,298-301,304-319,380-382",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "302-303,383",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_025b0c2aa49ae9",
+          "lines": "1-17,21-23,30,32-38",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "18-20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_c6a3f88f1d6a27",
+          "lines": "25-27",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_b68e871063fa12",
+          "lines": "31",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_a55d7e4460cd4b",
+          "lines": "24,28-29",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/utils/__tests__/dateFormat.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 51,
+          "added_lines": 51,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_5846d778636a2c",
+          "lines": "1-30,32-52",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsAppearanceScreen/DateFormatModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_48179c95e424af",
+          "lines": "97-98,385-386,400-401",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelScreenList.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_5846d778636a2c",
+          "lines": "11,55-56,225-226",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_48179c95e424af",
+          "lines": "13,22,130",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "26-27",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "3,14,128",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/history/HistoryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "162-163,205",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_e7264f563135ba",
+          "lines": "14-15,204,206",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "13,201",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_48179c95e424af",
+          "lines": "13,133-134,145-146",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a41cdaf8085094::t_2d33b3341f540a",
+          "lines": "42-43",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "13",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelChapterGroup.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "46-47,54-55",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "23,59,62-64",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/DownloadsScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "11,24,27-29",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useHistory.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "28,31-33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useUpdates.ts"
+    }
+  ],
+  "base_commit_sha": "5e62c36a9b0c0d7ca562383f2d9938e722216f00",
+  "branch": "master",
+  "commit_sha": "732628c40bb3f1afbbb0336577f9a56f97ef9115",
+  "commit_time": "2026-07-25T11:03:20+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 7,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 7,
+      "total_deletions": 25
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
