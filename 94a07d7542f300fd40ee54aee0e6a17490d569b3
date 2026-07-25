@@ -1,0 +1,152 @@
+src/screens/library/constants/constants.ts
+  s_b23d408b98386f::t_c9cfb415e5e27a 3-10
+src/hooks/persisted/useSettings.ts
+  s_b23d408b98386f::t_d580c767ca63d4 106-107
+src/screens/library/constants/__tests__/constants.test.ts
+  s_b23d408b98386f::t_86d27e8c7826c2 15-17
+  s_b23d408b98386f::t_c9cfb415e5e27a 1-14,18-19
+src/components/Context/LibraryContext.tsx
+  s_b23d408b98386f::t_d580c767ca63d4 11
+  human 7,12
+src/screens/library/LibraryScreen.tsx
+  s_b23d408b98386f::t_c9cfb415e5e27a 57,108-109,111-113,115-119
+  s_b23d408b98386f::t_d580c767ca63d4 90-96,120
+  s_b23d408b98386f::t_450b3e1923f25e 110,114
+  s_b23d408b98386f::t_5df4b172a4fd19 505-519
+  human 89,101,486-496
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_c9cfb415e5e27a",
+          "lines": "3-10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/constants/constants.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_d580c767ca63d4",
+          "lines": "106-107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_86d27e8c7826c2",
+          "lines": "15-17",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_c9cfb415e5e27a",
+          "lines": "1-14,18-19",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/constants/__tests__/constants.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_d580c767ca63d4",
+          "lines": "11",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "7,12",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Context/LibraryContext.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_c9cfb415e5e27a",
+          "lines": "57,108-109,111-113,115-119",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_d580c767ca63d4",
+          "lines": "90-96,120",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_450b3e1923f25e",
+          "lines": "110,114",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_b23d408b98386f::t_5df4b172a4fd19",
+          "lines": "505-519",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 13,
+          "hash": "human",
+          "lines": "89,101,486-496",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/LibraryScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "7af0911f5b17e1c606dbf60e0f1d1b8863c78221",
+  "branch": "master",
+  "commit_sha": "94a07d7542f300fd40ee54aee0e6a17490d569b3",
+  "commit_time": "2026-07-25T12:21:17+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 15
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
