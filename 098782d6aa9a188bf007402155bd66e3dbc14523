@@ -1,0 +1,203 @@
+src/screens/onboarding/ThemeSelectionStep.tsx
+  s_6204b35404cbb3::t_75b050eae73ea9 2,90-91,94,121
+  human 2-8,28,97-111,114-117,119-131,157
+src/components/List/List.tsx
+  s_6204b35404cbb3::t_4d50218e6df524 37
+  human 37
+src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx
+  s_6204b35404cbb3::t_22bdf03f1c2cc9 2
+  s_6204b35404cbb3::t_75b050eae73ea9 159-160,163,196,206,336,340,344
+  s_6204b35404cbb3::t_4d50218e6df524 339
+  human 2-8,34,166-202,205-208,211-223,254-257,267,288,320,340,397-400,402-406,411,415
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  human 205,248,290
+src/screens/settings/SettingsTrackerScreen.tsx
+  human 262
+package.json
+  human 95
+src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx
+  human 68
+pnpm-lock.yaml
+  human 191-193,5066-5071,11666-11670
+src/components/ThemePicker/ThemePicker.tsx
+  human 1,143
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_6204b35404cbb3::t_75b050eae73ea9",
+          "lines": "2,90-91,94,121",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 41,
+          "hash": "human",
+          "lines": "2-8,28,97-111,114-117,119-131,157",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/onboarding/ThemeSelectionStep.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6204b35404cbb3::t_4d50218e6df524",
+          "lines": "37",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "37",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/List/List.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6204b35404cbb3::t_22bdf03f1c2cc9",
+          "lines": "2",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_6204b35404cbb3::t_75b050eae73ea9",
+          "lines": "159-160,163,196,206,336,340,344",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6204b35404cbb3::t_4d50218e6df524",
+          "lines": "339",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 81,
+          "hash": "human",
+          "lines": "2-8,34,166-202,205-208,211-223,254-257,267,288,320,340,397-400,402-406,411,415",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "205,248,290",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "262",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsTrackerScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "95",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "package.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "68",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/SettingsGeneralScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 14,
+          "hash": "human",
+          "lines": "191-193,5066-5071,11666-11670",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "pnpm-lock.yaml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "1,143",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/ThemePicker/ThemePicker.tsx"
+    }
+  ],
+  "base_commit_sha": "732628c40bb3f1afbbb0336577f9a56f97ef9115",
+  "branch": "master",
+  "commit_sha": "098782d6aa9a188bf007402155bd66e3dbc14523",
+  "commit_time": "2026-07-25T11:23:41+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 145
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
