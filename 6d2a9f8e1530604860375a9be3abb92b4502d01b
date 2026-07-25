@@ -1,0 +1,89 @@
+src/components/Slider/Slider.tsx
+  s_d609110ae8d0fe::t_1f3acc44bcb4aa 112-116
+  s_d609110ae8d0fe::t_40e13387ddec57 190-192,197-199,203-209
+  s_d609110ae8d0fe::t_2028496f48940d 111
+  human 184,189,193
+src/components/__tests__/Slider.test.tsx
+  s_d609110ae8d0fe::t_40e13387ddec57 155-195
+  human 2
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_d609110ae8d0fe::t_1f3acc44bcb4aa",
+          "lines": "112-116",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_d609110ae8d0fe::t_40e13387ddec57",
+          "lines": "190-192,197-199,203-209",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_d609110ae8d0fe::t_2028496f48940d",
+          "lines": "111",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "184,189,193",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Slider/Slider.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 41,
+          "added_lines": 41,
+          "deleted_lines": 0,
+          "hash": "s_d609110ae8d0fe::t_40e13387ddec57",
+          "lines": "155-195",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/Slider.test.tsx"
+    }
+  ],
+  "base_commit_sha": "799845426c8f2e651de508d471d8319add41d2cc",
+  "branch": "master",
+  "commit_sha": "6d2a9f8e1530604860375a9be3abb92b4502d01b",
+  "commit_time": "2026-07-25T14:13:25+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 4
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
