@@ -1,0 +1,302 @@
+src/components/SearchbarV2/SearchbarV2.tsx
+  s_2ea0402d5315f9::t_f3757d35fb1a67 6
+  human 6
+src/services/backgroundTasks/constants.ts
+  s_2ea0402d5315f9::t_f3757d35fb1a67 1
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  s_2ea0402d5315f9::t_f3757d35fb1a67 20
+  human 20-21
+src/database/manager/manager.ts
+  s_2ea0402d5315f9::t_33d0a193374bb8 23
+  s_2ea0402d5315f9::t_f3757d35fb1a67 1,142
+  human 1,6,24,143-178
+src/services/backgroundTasks/index.ts
+  s_2ea0402d5315f9::t_f3757d35fb1a67 2
+  human 2
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  s_2ea0402d5315f9::t_f3757d35fb1a67 25
+  human 25
+src/database/manager/liveQuery.ts
+  s_2ea0402d5315f9::t_f3757d35fb1a67 1-21,23,27-28,37-50
+  s_2ea0402d5315f9::t_33d0a193374bb8 22,24-26,29-36
+src/services/backup/utils.ts
+  s_2ea0402d5315f9::t_f3757d35fb1a67 19
+  s_2ea0402d5315f9::t_af1568a9cf4824 20
+  human 19-20
+patches/@legendapp__list@3.3.3.patch
+  s_2ea0402d5315f9::t_1e6d2d54d45b1c 1-62
+pnpm-workspace.yaml
+  s_2ea0402d5315f9::t_1e6d2d54d45b1c 32-34
+src/components/__tests__/LegendListPatch.test.tsx
+  s_2ea0402d5315f9::t_570f01a92299db 13,22,30
+  s_2ea0402d5315f9::t_2466639ce073bd 17,23-28,34,39-40
+  s_2ea0402d5315f9::t_ba5689651b45f7 1-12,14-16,18-21,29,31-33,35-38,41-43
+pnpm-lock.yaml
+  human 7-9,22,7565
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "6",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "6",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/SearchbarV2/SearchbarV2.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/constants.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "20-21",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_33d0a193374bb8",
+          "lines": "23",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "1,142",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 39,
+          "hash": "human",
+          "lines": "1,6,24,143-178",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/manager/manager.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "2",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "25",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "25",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 38,
+          "added_lines": 38,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "1-21,23,27-28,37-50",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_33d0a193374bb8",
+          "lines": "22,24-26,29-36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/manager/liveQuery.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_f3757d35fb1a67",
+          "lines": "19",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_af1568a9cf4824",
+          "lines": "20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "19-20",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/utils.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 62,
+          "added_lines": 62,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_1e6d2d54d45b1c",
+          "lines": "1-62",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "patches/@legendapp__list@3.3.3.patch"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_1e6d2d54d45b1c",
+          "lines": "32-34",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "pnpm-workspace.yaml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_570f01a92299db",
+          "lines": "13,22,30",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_2466639ce073bd",
+          "lines": "17,23-28,34,39-40",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 30,
+          "added_lines": 30,
+          "deleted_lines": 0,
+          "hash": "s_2ea0402d5315f9::t_ba5689651b45f7",
+          "lines": "1-12,14-16,18-21,29,31-33,35-38,41-43",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/LegendListPatch.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "7-9,22,7565",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "pnpm-lock.yaml"
+    }
+  ],
+  "base_commit_sha": "58db0352e6359d4b1c69391d260105abbe4ede60",
+  "branch": "master",
+  "commit_sha": "4de82472ee70fd0c36114f0ee2e213ff6bf81099",
+  "commit_time": "2026-07-25T09:09:23+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 5,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 5,
+      "total_deletions": 48
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
