@@ -1,6 +1,6 @@
 window.readerSearch = new (function () {
   const MIN_QUERY_LENGTH = 3;
-  const SEGMENT_BATCH_SIZE = 80;
+  const SEGMENT_BATCH_SIZE = 40;
   const MAX_RENDERED_MATCHES = 1500;
   const SPECIAL_CHARACTER_REGEX = /[^\p{L}\p{N}\s]/u;
   const INLINE_TEXT_ELEMENTS = new Set([
@@ -41,6 +41,9 @@ window.readerSearch = new (function () {
   this.isTruncated = false;
   this.searchToken = 0;
   this.pendingSearchTimer = null;
+  this.cachedSegments = null;
+  this.lastSegmentedChapterId = null;
+  this.isValidState = true;
 
   this.emit = (query = this.query) => {
     reader.post({
@@ -60,6 +63,9 @@ window.readerSearch = new (function () {
 
     if (this.pendingSearchTimer !== null) {
       clearTimeout(this.pendingSearchTimer);
+      if (typeof cancelIdleCallback !== 'undefined') {
+        cancelIdleCallback(this.pendingSearchTimer);
+      }
       this.pendingSearchTimer = null;
     }
   };
@@ -90,17 +96,19 @@ window.readerSearch = new (function () {
 
   this.resetMatches = () => {
     const touchedParents = new Set();
+    const marks = document.querySelectorAll('mark.lnreader-search-match');
+    const fragment = document.createDocumentFragment();
 
-    document.querySelectorAll('mark.lnreader-search-match').forEach(mark => {
+    marks.forEach(mark => {
       const parent = mark.parentNode;
       if (!parent) {
         return;
       }
 
       while (mark.firstChild) {
-        parent.insertBefore(mark.firstChild, mark);
+        fragment.appendChild(mark.firstChild);
       }
-      parent.removeChild(mark);
+      parent.replaceChild(fragment, mark);
       touchedParents.add(parent);
     });
 
@@ -112,6 +120,8 @@ window.readerSearch = new (function () {
     this.index = -1;
     this.total = 0;
     this.isTruncated = false;
+    this.isValidState = true;
+    this.cachedSegments = null;
     this.refreshLayout();
   };
 
@@ -123,6 +133,7 @@ window.readerSearch = new (function () {
     }
 
     this.resetMatches();
+    this.invalidateCache();
 
     if (emit) {
       this.emit();
@@ -144,20 +155,20 @@ window.readerSearch = new (function () {
   };
 
   this.hasElementBetween = (previousNode, nextNode, selector) => {
-    const range = document.createRange();
-
-    try {
-      range.setStartAfter(previousNode);
-      range.setEndBefore(nextNode);
-      return !!range.cloneContents().querySelector(selector);
-    } catch {
-      return false;
-    } finally {
-      range.detach?.();
+    let current = previousNode.nextSibling;
+    while (current && current !== nextNode) {
+      if (current.nodeType === Node.ELEMENT_NODE && current.matches(selector)) {
+        return true;
+      }
+      if (current.querySelector?.(selector)) {
+        return true;
+      }
+      current = current.nextSibling;
     }
+    return false;
   };
 
-  this.getTextSegments = () => {
+  this.buildTextSegments = () => {
     const segments = [];
     const textNodes = [];
     const walker = document.createTreeWalker(
@@ -217,6 +228,14 @@ window.readerSearch = new (function () {
     });
 
     return segments.filter(segment => segment.text.trim());
+  };
+
+  this.getTextSegments = () => {
+    if (this.cachedSegments) {
+      return this.cachedSegments;
+    }
+    this.cachedSegments = this.buildTextSegments();
+    return this.cachedSegments;
   };
 
   this.findSegmentMatches = (segment, normalizedTerm) => {
@@ -292,13 +311,6 @@ window.readerSearch = new (function () {
     range.detach?.();
   };
 
-  this.hasLiveMatches = () => {
-    return (
-      this.matches.length > 0 &&
-      this.matches.every(match => reader.chapterElement.contains(match))
-    );
-  };
-
   this.ensureSearch = query => {
     const term = String(query ?? this.query ?? '').trim();
     if (!term) {
@@ -306,7 +318,7 @@ window.readerSearch = new (function () {
       return false;
     }
 
-    if (term !== this.query || !this.hasLiveMatches()) {
+    if (term !== this.query || !this.isValidState) {
       this.search(term, Math.max(0, this.index));
     }
 
@@ -330,7 +342,9 @@ window.readerSearch = new (function () {
       return;
     }
 
-    match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
   };
 
   this.focus = index => {
@@ -340,14 +354,19 @@ window.readerSearch = new (function () {
       return;
     }
 
-    this.matches[this.index]?.classList.remove('lnreader-search-match-active');
+    const oldIndex = this.index;
     this.index =
       ((index % this.matches.length) + this.matches.length) %
       this.matches.length;
 
-    const match = this.matches[this.index];
-    match.classList.add('lnreader-search-match-active');
-    this.scrollToMatch(match);
+    if (oldIndex !== this.index) {
+      if (oldIndex >= 0) {
+        this.matches[oldIndex]?.classList.remove('lnreader-search-match-active');
+      }
+      this.matches[this.index].classList.add('lnreader-search-match-active');
+      this.scrollToMatch(this.matches[this.index]);
+    }
+
     this.emit();
   };
 
@@ -358,6 +377,7 @@ window.readerSearch = new (function () {
     );
     this.total = total;
     this.isTruncated = this.matches.length < this.total;
+    this.isValidState = true;
     this.refreshLayout();
 
     if (!this.matches.length) {
@@ -366,6 +386,11 @@ window.readerSearch = new (function () {
     }
 
     this.focus(Math.max(0, Math.min(preferredIndex, this.matches.length - 1)));
+  };
+
+  this.invalidateCache = () => {
+    this.cachedSegments = null;
+    this.isValidState = false;
   };
 
   this.search = (query, preferredIndex = 0) => {
@@ -418,7 +443,13 @@ window.readerSearch = new (function () {
       }
 
       if (textSegmentIndex < textSegments.length) {
-        this.pendingSearchTimer = setTimeout(processBatch, 0);
+        if (typeof requestIdleCallback !== 'undefined') {
+          this.pendingSearchTimer = requestIdleCallback(processBatch, {
+            timeout: 50,
+          });
+        } else {
+          this.pendingSearchTimer = setTimeout(processBatch, 0);
+        }
         return;
       }
 
