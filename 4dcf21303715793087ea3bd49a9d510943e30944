@@ -1,0 +1,68 @@
+assets/reader/js/search.js
+  human 1-442
+assets/reader/css/index.css
+  human 56-59,98
+assets/reader/js/core.js
+  human 781,787
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 442,
+          "added_lines": 442,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1-442",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/search.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "56-59,98",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/css/index.css"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "781,787",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/core.js"
+    }
+  ],
+  "base_commit_sha": "4de82472ee70fd0c36114f0ee2e213ff6bf81099",
+  "branch": "master",
+  "commit_sha": "4dcf21303715793087ea3bd49a9d510943e30944",
+  "commit_time": "2026-07-25T09:20:13+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 449,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 449,
+      "total_deletions": 4
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
