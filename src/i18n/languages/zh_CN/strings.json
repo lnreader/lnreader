@@ -259,6 +259,7 @@
     "newUpdateAvailable": "New update available",
     "none": "None",
     "ok": "Ok",
+    "close": "Close",
     "pause": "Pause",
     "preparing": "Preparing",
     "remove": "Remove",
@@ -470,6 +471,7 @@
       "fileNameRequired": "Enter a file name",
       "includeCustomCSS": "Include Custom CSS",
       "includeCustomJS": "Include Custom JS",
+      "includeChapterNumber": "Include chapter number in chapter titles",
       "invalidRange": "Please enter valid chapter numbers",
       "selectFolder": "Select destination folder for EPUB file",
       "startChapter": "Start Chapter",
@@ -478,9 +480,12 @@
     },
     "epub": {
       "exportFailed": "Failed to export EPUB: %{error}",
+      "exportingChapter": "%{current}/%{total} · %{chapter}",
       "exportSuccess": "Successfully exported %{chapters} chapters as EPUB",
       "noDownloadedChapters": "No downloaded chapters found. Please download chapters before exporting.",
-      "noNovelSelected": "No novel selected for export"
+      "noNovelSelected": "No novel selected for export",
+      "preparingExport": "Preparing EPUB",
+      "savingExport": "Saving EPUB"
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
@@ -672,6 +677,7 @@
   },
   "notifications": {
     "IMPORT_EPUB": "Importing EPUB",
+    "EXPORT_EPUB": "Exporting EPUB",
     "UPDATE_LIBRARY": "Updating Library",
     "DRIVE_BACKUP": "Google Drive Backup",
     "DRIVE_RESTORE": "Google Drive Restore",
