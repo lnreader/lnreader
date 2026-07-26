@@ -1,0 +1,18 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "harness_aidlc_version": "1.4.29",
+  "base_commit_sha": "72bfcad03469440c1e9cf5ff88b5ff97a544c45e",
+  "commit_sha": "",
+  "commit_type": "rebase_interactive",
+  "prompts": {
+    "human": {
+      "agent_id": null,
+      "human_author": "Patrick Loser <github.verify097@passmail.com>",
+      "total_additions": 167,
+      "total_deletions": 146,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
