@@ -1,0 +1,188 @@
+src/services/backgroundTasks/index.ts
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 18-19
+src/services/backgroundTasks/contracts.ts
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 10-17,22-26
+src/screens/browse/migration/MigrationNovelList.tsx
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 12-16,31-36,45-46,71,76-90,114-121
+  s_0430c8dc2ee086::t_4bcf1727c7750e 47
+  human 91-92,122
+src/i18n/types/index.ts
+  s_0430c8dc2ee086::t_ad2240ef198458 148,150-151,153-156,159
+AGENTS.md
+  h_f56025180c46fa 1-5
+src/services/migrate/migrateNovel.ts
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 19,48-56,58-62,64-69,97-126,192
+  s_0430c8dc2ee086::t_1c8185644d4327 20,57
+  human 47,75-80,146
+src/i18n/languages/en/strings.json
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 162,164-165,167-170,172-173
+  human 165
+src/screens/browse/migration/MigrationReviewDialog.tsx
+  s_0430c8dc2ee086::t_cbbd18ca6970f8 1-116
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "18-19",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "10-17,22-26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 37,
+          "added_lines": 37,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "12-16,31-36,45-46,71,76-90,114-121",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_4bcf1727c7750e",
+          "lines": "47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 40,
+          "hash": "human",
+          "lines": "91-92,122",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/migration/MigrationNovelList.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_ad2240ef198458",
+          "lines": "148,150-151,153-156,159",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "h_f56025180c46fa",
+          "lines": "1-5",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "AGENTS.md"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 52,
+          "added_lines": 52,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "19,48-56,58-62,64-69,97-126,192",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_1c8185644d4327",
+          "lines": "20,57",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "47,75-80,146",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/migrate/migrateNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "162,164-165,167-170,172-173",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "165",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 116,
+          "added_lines": 116,
+          "deleted_lines": 0,
+          "hash": "s_0430c8dc2ee086::t_cbbd18ca6970f8",
+          "lines": "1-116",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/migration/MigrationReviewDialog.tsx"
+    }
+  ],
+  "base_commit_sha": "cbe7d70e2df349db7ebf36a448e1f84b3903fb78",
+  "branch": "master",
+  "commit_sha": "97be48dfe17b6a5261284cc3052ab5dcbab8d20d",
+  "commit_time": "2026-07-26T15:44:09+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 3,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 3,
+      "total_deletions": 49
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
