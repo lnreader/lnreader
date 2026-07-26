@@ -22,16 +22,22 @@
     "dataManagement": "Manejo de informação",
     "deleteReadChapters": "Excluir capítulos lidos",
     "deleteReadChaptersDialogTitle": "Você tem certeza? Todos os capítulos marcados como lidos serão excluídos.",
+    "disabled": "Disabled",
+    "dnsOverHttps": "DNS over HTTPS (DoH)",
+    "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
     "importEpub": "Importar EPUB",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "Importar livro",
     "importStaticFiles": "Importar arquivo estático",
     "novelInsertFailed": "falha ao inserir livro",
+    "networking": "Networking",
     "useFAB": "Utilize FAV invez do botão",
     "userAgent": "Agente usuário",
     "recreateDBIndexes": "Recriar índices do BD",
     "recreateDBIndexesToast": "Índices do BD foi recriado",
     "recreateDBIndexesDialogTitle": "Todos os índices do BD vai ser Recriado.\nIsso pode demorar um pouco.",
-    "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos."
+    "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos.",
+    "restartRequired": "Restart LNReader to apply this change."
   },
   "appearance": "Aparência",
   "appearanceScreen": {
@@ -45,11 +51,16 @@
     "appLanguageDefault": "Padrão",
     "appTheme": "Tema do aplicativo",
     "darkTheme": "Tema escuro",
+    "dateFormat": "Date format",
+    "dateFormatDefault": "Default (%{date})",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "Esconder fundo",
     "lightTheme": "Tema claro",
     "navbar": "Barra de navegação",
     "novelInfo": "Informação do livro",
     "pureBlackDarkMode": "Modo escuridão",
+    "relativeTimestamps": "Relative timestamps",
+    "relativeTimestampsDescription": "\"Today\" instead of \"%{date}\"",
     "showHistoryInTheNav": "Mostrar histórico no navegador",
     "showUpdatesInTheNav": "Mostrar novidades no navegador",
     "themeMode": "Aparência",
@@ -66,7 +77,7 @@
       "teal": "Ciano",
       "turquoise": "Turquesa",
       "yotsuba": "Japonês",
-      "catppuccin": "",
+      "catppuccin": "Catppuccin",
       "yinyang": "Yin & Yang"
     }
   },
@@ -104,11 +115,11 @@
     "drive": {
       "backup": "Salvar no Drive",
       "backupInterruped": "Backup do Drive interrompido",
-      "googleDriveBackup": "",
-      "restore": "",
+      "googleDriveBackup": "Google Drive Backup",
+      "restore": "Drive Restore",
       "restoreInterruped": "Restauração do Drive interrompida"
     },
-    "googeDrive": "",
+    "googeDrive": "Googe Drive",
     "googeDriveDesc": "Fazer backup no Google Drive",
     "invalidBackupFolder": "Pasta de backup inválida",
     "localBackup": "Backup local",
@@ -136,30 +147,58 @@
     "available": "Disponível",
     "deletePluginMessage": "Tem certeza de que deseja desinstalar o %{name}?",
     "discover": "Descubra",
+    "editPluginSetting": "Edit %{name}",
     "globalSearch": "Pesquisa global",
+    "installPlugin": "Install %{name}",
     "installFailed": "A instalação falhou: %{name}",
     "installed": "Instalado",
     "installedPlugin": "%{name} Instalado",
     "installedPlugins": "Extensões Instalado",
+    "language": "Language",
     "lastUsed": "Usado por último",
     "latest": "Mais recentes",
     "listEmpty": "Habilitar idiomas a partir das configurações",
     "migration": {
+      "cover": "Cover",
       "dialogMessage": "Migrar %{url}?",
+      "keepCurrent": "Keep current",
+      "metadata": "Novel details",
       "novelAlreadyInLibrary": "Novel já está na biblioteca",
+      "preservedState": "Categories, matched chapter progress and bookmarks, and reader settings will be preserved.",
+      "redownloadChapters": "Re-download matching downloaded chapters",
+      "reviewDescription": "Choose what to keep when migrating to %{name}.",
+      "reviewTitle": "Review migration",
       "selectSource": "Selecionar fonte",
-      "selectSourceDesc": "Selecione uma fonte para migrar"
+      "selectSourceDesc": "Selecione uma fonte para migrar",
+      "useDestination": "Use destination source"
     },
     "noSource": "Sua biblioteca não tem nenhuma novel desta fonte",
-    "pinnedPlugin": "%{name} fixado",
+    "noPlugins": "No plugins found. Add a repository or enable more languages in Browse Settings.",
+    "noSearchResults": "No matching results",
+    "noSources": "No sources installed. Install a plugin to start browsing novels.",
+    "openPluginDetails": "Open details for %{name}",
+    "openPluginSettings": "Open settings for %{name}",
+    "openWebsite": "Open the website for %{name}",
+    "pinSource": "Pin %{name}",
     "pinnedPlugins": "Extensões fixadas",
+    "pluginDetails": "Plugin details",
+    "pluginIcon": "plugin icon",
+    "pluginNotInstalled": "This plugin is not installed",
+    "plugins": "Plugins",
     "removeFromLibrary": "Removido da biblioteca",
+    "repositories": "Repositories",
     "searchbar": "Pesquisar nas fontes",
     "searchResults": "Resultados da pesquisa",
     "selectNovel": "Selecionar novel",
+    "sources": "Sources",
+    "togglePluginSetting": "Toggle %{name}",
     "uninstalledPlugin": "%{name} desinstalada",
-    "unpinnedPlugin": "%{name} desfixada",
+    "uninstall": "Uninstall",
+    "unpinSource": "Unpin %{name}",
+    "updatePlugin": "Update %{name}",
+    "updateAll": "Update all",
     "updateFailed": "Atualização falhou",
+    "updatesPending": "Updates pending",
     "updatedTo": "Atualizado para %{version}",
     "settings": {
       "title": "Configurações da extensão",
@@ -196,6 +235,7 @@
     "about": "Sobre",
     "add": "Adicionar",
     "all": "Todos",
+    "back": "Back",
     "backup": "Salvo",
     "cancel": "Cancelar",
     "categories": "Categorias",
@@ -213,10 +253,13 @@
     "filter": "Filtro",
     "globally": "globalmente",
     "install": "Instalar",
+    "imported": "Imported",
     "logout": "Desconectar",
     "name": "Nome",
     "newUpdateAvailable": "Nova atualização disponível",
+    "none": "None",
     "ok": "Confirmar",
+    "close": "Close",
     "pause": "Pausar",
     "preparing": "Preparando",
     "remove": "Remover",
@@ -225,6 +268,7 @@
     "resume": "Continuar",
     "retry": "Tente novamente",
     "save": "Salvar",
+    "saved": "Saved",
     "search": "Pesquisar",
     "searchFor": "Pesquisar por",
     "searchResults": "Resultados da busca",
@@ -235,11 +279,13 @@
     "sort": "Ordenar por",
     "submit": "Aplicar",
     "loading": "Carregando...",
+    "moreOptions": "More options",
     "warning": "Aviso"
   },
   "webview": {
     "refresh": "Rever",
     "share": "Compartilhar",
+    "openInWebView": "Open in WebView",
     "openInBrowser": "Abrir na internet",
     "clearCookies": "Limpar dados temporários",
     "cookiesCleared": "Dados temporários limpos",
@@ -260,6 +306,7 @@
     "chapterEmptyOrScrapeError": "Either chapter is empty or the app couldn't scrape it",
     "chapterName": "Capítulo: %{name}",
     "completed": "Transferência completa",
+    "storageInfo": "Downloaded chapters are stored in the app's private storage on this device.",
     "downloading": "Transferindo",
     "downloadingNovel": "Transferindo: %{name}",
     "downloadsLower": "baixados",
@@ -271,6 +318,14 @@
   "generalSettingsScreen": {
     "asc": "(Crescente)",
     "autoDownload": "Download automático",
+    "automaticUpdates": "Automatic updates",
+    "automaticUpdatesDaily": "Daily",
+    "automaticUpdatesDescription": "Runs when a network connection is available. Android may delay background work to save battery.",
+    "automaticUpdatesEvery12Hours": "Every 12 hours",
+    "automaticUpdatesEvery2Days": "Every 2 days",
+    "automaticUpdatesEvery3Days": "Every 3 days",
+    "automaticUpdatesOff": "Off",
+    "automaticUpdatesWeekly": "Weekly",
     "bySource": "Por fonte",
     "chapterSort": "Ordem padrão dos capítulos",
     "desc": "(Decrescente)",
@@ -278,12 +333,20 @@
     "disableLoadingAnimationsDesc": "Pode aumentar o desempenho em dispositivos mais lentos",
     "disableHapticFeedback": "Desativar o feedback tátil",
     "disableHapticFeedbackDescription": "Turn off vibrations for touch interactions.",
+    "chapterDownloadCooldown": "Chapter download cooldown",
+    "chapterDownloadCooldownDesc": "Wait between sequential chapter downloads (seconds). Helps avoid source rate limits during batch downloads.",
+    "chapterDownloadCooldownPlaceholder": "Cooldown in seconds (e.g. 1.5)",
+    "chapterDownloadCooldownWarning": "Very low cooldowns may trigger rate limiting or temporary IP bans from sources.",
     "displayMode": "Modo de exibição",
     "downloadNewChapters": "Baixar novos capítulos",
     "epub": "EPUB",
     "epubLocation": "Localização do EPUB",
     "epubLocationDescription": "O local onde você abre e exporta seus arquivos EPUB.",
     "globalUpdate": "Atualização global",
+    "globalUpdateCategories": "Categories",
+    "globalUpdateCategoriesDescription": "Novels in excluded categories will not be updated, even when they are also in an included category. Tap a category to cycle between included, excluded, and neither.",
+    "globalUpdateExclude": "Exclude: %{categories}",
+    "globalUpdateInclude": "Include: %{categories}",
     "gridSize": "Grid size",
     "gridSizeDesc": "%{num} per row",
     "itemsPerRow": "Itens por linha",
@@ -294,11 +357,21 @@
     "novelSort": "Ordenar Novel",
     "refreshMetadata": "Atualizar os metadados automaticamente",
     "refreshMetadataDescription": "Verificar por novas capas e detalhes durante a atualização da biblioteca",
+    "smartUpdate": "Smart update",
+    "smartUpdateSkipCompleted": "Skip entries with \"Completed\" status",
+    "smartUpdateSkipUnstarted": "Skip unstarted entries",
+    "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordenar",
     "updateLibrary": "Atualizar biblioteca ao iniciar",
     "updateLibraryDesc": "Not recommended for low devices",
     "updateTime": "Mostrar horário da última atualização",
-    "useFAB": "Usar Botões flutuantes na Biblioteca"
+    "useFAB": "Usar Botões flutuantes na Biblioteca",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "todas as fontes",
@@ -310,6 +383,8 @@
     "clearHistorWarning": "Você tem certeza? Todo o histórico será perdido.",
     "deleted": "Histórico deletado",
     "nothingReadRecently": "Nothing read recently",
+    "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
+    "resetAllChapters": "Reset all chapters for this entry",
     "searchbar": "Histórico de pesquisa"
   },
   "library": "Biblioteca",
@@ -346,6 +421,7 @@
       }
     },
     "empty": "Sua biblioteca está vazia. Adicione séries à sua biblioteca pelo Navegador.",
+    "emptyCategory": "This category is empty.",
     "extraMenu": {
       "importEpub": "Importar EPUB",
       "openRandom": "Open Random Entry",
@@ -372,7 +448,8 @@
       "filters": {
         "bookmarked": "Favoritado",
         "downloaded": "Transferido",
-        "unread": "Não lido"
+        "unread": "Não lido",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "Por nome do capítulo",
@@ -385,11 +462,16 @@
     "exportEpubModal": {
       "applyReaderTheme": "Apply reader theme to EPUB",
       "customJSWarning": "Custom JS may not be supported by all EPUB readers",
-      "downloadedChaptersOnly": "Only downloaded chapters will be included in the EPUB file",
+      "description": "Choose a destination and which downloaded chapters to include in the EPUB.",
+      "directory": "Directory",
       "endChapter": "Finalizar capítulo",
+      "export": "Export",
       "exportAll": "Exportar todos os capítulos",
+      "fileName": "File name",
+      "fileNameRequired": "Enter a file name",
       "includeCustomCSS": "Incluir CSS personalizado",
       "includeCustomJS": "Incluir JS personalizado",
+      "includeChapterNumber": "Include chapter number in chapter titles",
       "invalidRange": "Por favor, insira um número válido de capítulos",
       "selectFolder": "Select destination folder for EPUB file",
       "startChapter": "Iniciar capítulo",
@@ -398,9 +480,12 @@
     },
     "epub": {
       "exportFailed": "Failed to export EPUB: %{error}",
+      "exportingChapter": "%{current}/%{total} · %{chapter}",
       "exportSuccess": "Successfully exported %{chapters} chapters as EPUB",
       "noDownloadedChapters": "No downloaded chapters found. Please download chapters before exporting.",
-      "noNovelSelected": "No novel selected for export"
+      "noNovelSelected": "No novel selected for export",
+      "preparingExport": "Preparing EPUB",
+      "savingExport": "Saving EPUB"
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
@@ -429,12 +514,16 @@
     "jumpToChapterModal": {
       "chapterName": "Nome do capítulo",
       "chapterNumber": "Número do Capítulo",
+      "description": "Search by chapter number or name, then choose whether to open it or scroll to it in the chapter list.",
       "error": {
         "validChapterName": "Insira um nome de capítulo válido",
         "validChapterNumber": "Insira um número de capítulo válido"
       },
       "jumpToChapter": "Pular para o Capítulo",
-      "openChapter": "Abrir Capítulo"
+      "openChapter": "Abrir Capítulo",
+      "openChapterDescription": "Turn off to scroll to it in the chapter list.",
+      "searchByName": "Search by Chapter Name",
+      "searchByNameDescription": "Turn off to search by chapter number."
     },
     "migrate": "Migrar",
     "noSummary": "Nenhum resumo",
@@ -458,27 +547,47 @@
   },
   "readerScreen": {
     "bottomSheet": {
+      "alignCenter": "Center",
+      "alignJustify": "Justify",
+      "alignLeft": "Left",
+      "alignRight": "Right",
       "allowTextSelection": "Text selection",
       "autoscroll": "Auto-scroll",
+      "autoscrollDescription": "Scroll the page automatically at a steady pace",
       "bionicReading": "Bionic reading",
+      "bionicReadingDescription": "Bold the start of each word to help your eyes track faster",
       "tapToScroll": "Tap to scroll",
+      "tapToScrollDescription": "Tap the top or bottom of the screen to scroll through the chapter",
       "color": "Cor",
+      "display": "Display",
       "fontStyle": "Estilo da fonte",
       "fullscreen": "Tela cheia",
+      "fullscreenDescription": "Hide the status bar and navigation bar while reading",
       "lineHeight": "Line height",
+      "navigation": "Navigation",
       "padding": "Padding",
       "pageReader": "Paged reading (Experimental)",
+      "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
       "removeExtraSpacing": "Remove extra spacing",
+      "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "Valor da rolagem (Padrão: altura da tela)",
       "showBatteryAndTime": "Battery & time",
+      "showBatteryAndTimeDescription": "Show battery level and clock over the reading screen",
       "showProgressPercentage": "Reading progress",
+      "showProgressPercentageDescription": "Show the percentage read at the bottom of the screen",
       "swipeGestures": "Swipe between chapters",
+      "swipeGesturesDescription": "Swipe left or right to jump to the next or previous chapter",
       "textAlign": "Text alignment",
       "textSize": "Tamanho do texto",
+      "ttsAutoPageAdvanceDescription": "Move to the next chapter automatically when narration ends",
+      "ttsEngineDescription": "Text-to-speech engine used to generate audio",
+      "ttsScrollToTopDescription": "Jump back to the top of the chapter when narration starts",
       "useChapterDrawerSwipeNavigation": "Swipe to open drawer",
       "verticalSeekbar": "Vertical seekbar",
+      "verticalSeekbarDescription": "Show a slider on the side to jump to any point in the chapter",
       "keepScreenOn": "Keep screen on",
-      "volumeButtonsScroll": "Volume button scrolling"
+      "volumeButtonsScroll": "Volume button scrolling",
+      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume"
     },
     "drawer": {
       "scrollToBottom": "Rolar para o final",
@@ -489,7 +598,9 @@
     "finished": "Finalizado",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Não há próximo capítulo",
-    "noPreviousChapter": "There's no previous chapter"
+    "noPreviousChapter": "There's no previous chapter",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
@@ -514,7 +625,8 @@
     "textColor": "Cor do Texto",
     "textColorModal": "Text color",
     "title": "Leitor",
-    "verticalSeekbarDesc": "Use vertical seekbar"
+    "verticalSeekbarDesc": "Use vertical seekbar",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "Nenhum resultado encontrado"
@@ -528,10 +640,16 @@
     "title": "Estatísticas",
     "titlesInLibrary": "Títulos na biblioteca",
     "totalChapters": "Total de capítulos",
-    "unreadChapters": "Capítulos não lidos"
+    "unreadChapters": "Capítulos não lidos",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "Tracking",
   "trackingScreen": {
+    "info": "Tracking is one-way: reading progress is sent to external services. Link each novel individually using its tracking button.",
     "logOutMessage": "Log out from %{name}?",
     "revalidate": "Revalidate",
     "services": "Services"
@@ -559,6 +677,7 @@
   },
   "notifications": {
     "IMPORT_EPUB": "Importing EPUB",
+    "EXPORT_EPUB": "Exporting EPUB",
     "UPDATE_LIBRARY": "Updating Library",
     "DRIVE_BACKUP": "Google Drive Backup",
     "DRIVE_RESTORE": "Google Drive Restore",
@@ -568,5 +687,23 @@
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
     "DOWNLOAD_CHAPTER": "Downloading Chapter"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
