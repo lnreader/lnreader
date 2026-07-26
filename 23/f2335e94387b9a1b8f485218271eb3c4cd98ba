@@ -1,0 +1,71 @@
+.github/workflows/release.yml
+  s_80313b86fc7f8d::t_3f8a0e84bd3068 10,13-15
+  human 10,13-15,187-188,201-212
+scripts/resolve-release-version.cjs
+  s_80313b86fc7f8d::t_3f8a0e84bd3068 7
+  human 7
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_3f8a0e84bd3068",
+          "lines": "10,13-15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 18,
+          "hash": "human",
+          "lines": "10,13-15,187-188,201-212",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/release.yml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_3f8a0e84bd3068",
+          "lines": "7",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "scripts/resolve-release-version.cjs"
+    }
+  ],
+  "base_commit_sha": "7ddd934c2b834ba8fbed6969dab89728e3316251",
+  "branch": "master",
+  "commit_sha": "23f2335e94387b9a1b8f485218271eb3c4cd98ba",
+  "commit_time": "2026-07-26T23:10:17+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 19
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
