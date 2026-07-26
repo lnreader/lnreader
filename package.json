@@ -30,6 +30,7 @@
     "type-check": "tsc --noEmit",
     "clean:generated": "rm -rf .expo .rock android/build android/app/build android/app/.cxx modules/*/android/build modules/*/android/.cxx modules/*/lib src/generated tsconfig.tsbuildinfo modules/*/tsconfig.tsbuildinfo",
     "clean:full": "pnpm run clean:generated && rm -rf node_modules && pnpm install && cd android && ./gradlew clean && cd .. && npx expo start --clear",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck",
     "prepare": "husky install",
     "nix:shell": "nix develop --extra-experimental-features nix-command --extra-experimental-features flakes",
     "nix:emulator": "nix develop .#emulator --extra-experimental-features nix-command --extra-experimental-features flakes"
@@ -153,9 +154,12 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --check"
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css,scss,yml,yaml}": [
+      "prettier --write"
     ]
   },
   "engines": {
