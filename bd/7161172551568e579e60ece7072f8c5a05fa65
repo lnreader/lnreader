@@ -1,0 +1,191 @@
+src/screens/reader/components/ChapterDrawer/RenderListChapter.tsx
+  s_f6a7630ff92ddd::t_6e1a641d0612cc 35-36,41-42,55-61,70-76
+  human 4,40-41,54,63
+src/screens/reader/components/ChapterDrawer/index.tsx
+  s_f6a7630ff92ddd::t_59e7d36e907ce7 266,294,315
+  s_f6a7630ff92ddd::t_3db73613e4bdf6 92,97-99,101-104,118-120,122-135,139-140,142,144,150-155,157
+  s_f6a7630ff92ddd::t_e0ac1c4b761b9b 283,292-293
+  s_f6a7630ff92ddd::t_af94a9727d4669 234
+  s_f6a7630ff92ddd::t_b702d4d8c73ac9 236,271,286,313-314,316
+  h_f56025180c46fa 291,299
+  s_f6a7630ff92ddd::t_6f6f71cd68aeea 12,42-46,208-219,298,301,303-304,306-307,309
+  s_f6a7630ff92ddd::t_4c4edcbb474f31 302,305
+  s_f6a7630ff92ddd::t_5571e0230d16a6 276-277,310-312,320-321
+  human 41,54,88,93-96,98-99,106,114-117,119-122,124,127-128,130-133,135-138,144,196,211,242-244,249,254,260,263-265,270-273,277,280-283,287
+src/screens/reader/ReaderScreen.tsx
+  s_f6a7630ff92ddd::t_6f6f71cd68aeea 54-55
+  human 54-55
+src/screens/WebviewScreen/components/Appbar.tsx
+  s_f6a7630ff92ddd::t_2babf1217bf897 39,41,43-44,47-85,94-95,97-101,106,110,115-116,120
+  human 39-67,69,71-79,90,92,100-101,109
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_6e1a641d0612cc",
+          "lines": "35-36,41-42,55-61,70-76",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "4,40-41,54,63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ChapterDrawer/RenderListChapter.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_59e7d36e907ce7",
+          "lines": "266,294,315",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_3db73613e4bdf6",
+          "lines": "92,97-99,101-104,118-120,122-135,139-140,142,144,150-155,157",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_e0ac1c4b761b9b",
+          "lines": "283,292-293",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_af94a9727d4669",
+          "lines": "234",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_b702d4d8c73ac9",
+          "lines": "236,271,286,313-314,316",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "h_f56025180c46fa",
+          "lines": "291,299",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_6f6f71cd68aeea",
+          "lines": "12,42-46,208-219,298,301,303-304,306-307,309",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_4c4edcbb474f31",
+          "lines": "302,305",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_5571e0230d16a6",
+          "lines": "276-277,310-312,320-321",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 51,
+          "hash": "human",
+          "lines": "41,54,88,93-96,98-99,106,114-117,119-122,124,127-128,130-133,135-138,144,196,211,242-244,249,254,260,263-265,270-273,277,280-283,287",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ChapterDrawer/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_6f6f71cd68aeea",
+          "lines": "54-55",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "54-55",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 55,
+          "added_lines": 55,
+          "deleted_lines": 0,
+          "hash": "s_f6a7630ff92ddd::t_2babf1217bf897",
+          "lines": "39,41,43-44,47-85,94-95,97-101,106,110,115-116,120",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 44,
+          "hash": "human",
+          "lines": "39-67,69,71-79,90,92,100-101,109",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/WebviewScreen/components/Appbar.tsx"
+    }
+  ],
+  "base_commit_sha": "8f53550d2c6ec75b8d9cefe0142218aaec26f726",
+  "branch": "master",
+  "commit_sha": "bd7161172551568e579e60ece7072f8c5a05fa65",
+  "commit_time": "2026-07-26T20:26:34+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 102
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
