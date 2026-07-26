@@ -1,0 +1,56 @@
+.gitignore
+  s_80313b86fc7f8d::t_3300be16f69ebc 113
+.github/workflows/build.yml
+  s_80313b86fc7f8d::t_64a8132296b034 19,95-96
+package.json
+  s_80313b86fc7f8d::t_dd8623ca6523e5 11
+plugins/android/android-build-types.gradle
+  s_8ca0f36cb199a8::t_01c5003a1222da 1-36
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "hash": "s_80313b86fc7f8d::t_3300be16f69ebc",
+          "lines": "113"
+        }
+      ],
+      "file": ".gitignore"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_80313b86fc7f8d::t_64a8132296b034",
+          "lines": "19,95-96"
+        }
+      ],
+      "file": ".github/workflows/build.yml"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_80313b86fc7f8d::t_dd8623ca6523e5",
+          "lines": "11"
+        }
+      ],
+      "file": "package.json"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_8ca0f36cb199a8::t_01c5003a1222da",
+          "lines": "1-36"
+        }
+      ],
+      "file": "plugins/android/android-build-types.gradle"
+    }
+  ],
+  "base_commit_sha": "14061d207b77d8930c4d15af135189ccb4f4bd9e",
+  "commit_sha": "afc20277e0f8a8d4b49d1ebd1c7689c599ba2e06",
+  "commit_time": "2026-07-24T15:46:29+05:30",
+  "commit_type": "rebase",
+  "harness_aidlc_version": "1.6.16",
+  "prompts": {},
+  "schema_version": "authorship/3.0.0"
+}
