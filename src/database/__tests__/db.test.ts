@@ -240,7 +240,7 @@ describe('production migrations', () => {
 
       const appliedMigrations = sqlite.executeSync(
         'SELECT name FROM __drizzle_migrations ORDER BY created_at',
-      ).rows as Array<{ name: string }>;
+      ).rows as { name: string }[];
       expect(appliedMigrations.map(row => row.name)).toEqual([
         '20251222152612_past_mandrill',
         '20260612232322_normal_saracen',

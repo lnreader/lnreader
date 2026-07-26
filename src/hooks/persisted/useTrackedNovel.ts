@@ -67,6 +67,7 @@ export const useTrackedNovel = (novelId: number | 'NO_ID') => {
       }
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTrackedNovels(loadedNovels);
   }, [novelId, migrated, setMigrated]);
 

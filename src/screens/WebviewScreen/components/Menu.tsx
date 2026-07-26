@@ -11,7 +11,7 @@ import { showToast } from '@utils/showToast';
 interface MenuProps {
   theme: ThemeColors;
   currentUrl: string;
-  webView: RefObject<WebView | null>;
+  webView: RefObject<WebView<object> | null>;
   setMenuVisible: (value: boolean) => void;
 }
 

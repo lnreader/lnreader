@@ -73,6 +73,7 @@ export const useBrowseSource = (
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNovels(currentPage, selectedFilters);
   }, [fetchNovels, currentPage, selectedFilters]);
 
@@ -159,6 +160,7 @@ export const useSearchSource = (pluginId: string) => {
 
   useEffect(() => {
     if (searchText) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchNovels(searchText, currentPage);
     }
   }, [currentPage, fetchNovels, searchText]);

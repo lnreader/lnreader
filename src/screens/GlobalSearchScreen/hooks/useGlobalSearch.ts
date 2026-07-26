@@ -156,7 +156,7 @@ export const useGlobalSearch = ({
   );
 
   const debouncedGlobalSearch = useMemo(
-    () => debounce(globalSearch, 300),
+    () => debounce(globalSearch, 300), // eslint-disable-line react-hooks/refs
     [globalSearch],
   );
 

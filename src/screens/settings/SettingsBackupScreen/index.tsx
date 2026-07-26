@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTheme } from '@hooks/persisted';
 import { Appbar, List, SafeAreaView } from '@components';
 import { useBoolean } from '@hooks';

@@ -12,3 +12,9 @@ declare class NativeVolumeButtonListenerModule extends NativeModule<NativeVolume
 export default requireNativeModule<NativeVolumeButtonListenerModule>(
   'NativeVolumeButtonListener',
 );
+  setActive(active: boolean): void;
+}
+
+export default requireNativeModule<NativeVolumeButtonListenerModule>(
+  'NativeVolumeButtonListener',
+);

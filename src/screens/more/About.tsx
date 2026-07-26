@@ -1,20 +1,21 @@
-import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import * as Linking from 'expo-linking';
-
-import { getString } from '@i18n/translations';
-import { MoreHeader } from './components/MoreHeader';
-import { useTheme } from '@hooks/persisted';
-import { List, SafeAreaView } from '@components';
-import { AboutScreenProps } from '@navigators/types';
-import Config from '@env';
-import * as Clipboard from 'expo-clipboard';
 import { version } from '../../../package.json';
 
+import { getString } from '@i18n/translations';
+import { setStringAsync } from 'expo-clipboard';
+import { useTheme } from '@hooks/persisted';
+import { List, SafeAreaView } from '@components';
+import { MoreHeader } from './components/MoreHeader';
+import { AboutScreenProps } from '@navigators/types';
+import Config from '@env';
+
+/* eslint-disable import/no-named-as-default-member */
 const GIT_HASH = Config.GIT_HASH;
 const RELEASE_DATE = Config.RELEASE_DATE;
 const BUILD_TYPE = Config.BUILD_TYPE;
+/* eslint-enable import/no-named-as-default-member */
 
 const AboutScreen = ({ navigation }: AboutScreenProps) => {
   const theme = useTheme();
@@ -32,7 +33,6 @@ const AboutScreen = ({ navigation }: AboutScreenProps) => {
       return `${BUILD_TYPE} ${version} (${localDateTime}) Commit: ${GIT_HASH}`;
     }
   }
-
   return (
     <SafeAreaView excludeTop>
       <MoreHeader
@@ -48,7 +48,7 @@ const AboutScreen = ({ navigation }: AboutScreenProps) => {
             description={getBuildName()}
             theme={theme}
             onPress={() => {
-              Clipboard.setStringAsync(getBuildName());
+              setStringAsync(getBuildName());
             }}
           />
           <List.Item

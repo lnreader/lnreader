@@ -19,7 +19,11 @@ const Button: React.FC<ButtonProps> = props => {
     [props.children, props.title],
   );
 
-  return <PaperButton {...props} theme={theme} children={Children} />;
+  return (
+    <PaperButton {...props} theme={theme}>
+      {Children}
+    </PaperButton>
+  );
 };
 
 export default React.memo(Button);

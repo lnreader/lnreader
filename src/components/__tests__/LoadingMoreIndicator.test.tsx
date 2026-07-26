@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from '@testing-library/react-native';
 import LoadingMoreIndicator from '../LoadingMoreIndicator/LoadingMoreIndicator';
 import { ThemeColors } from '../../theme/types';

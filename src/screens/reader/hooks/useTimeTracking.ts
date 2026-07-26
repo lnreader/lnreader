@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 
-
 /**
  * Starts tracking time spent on the chapter and returns a callback to be called on user interaction (to prevent the inactivity timeout from being triggered).
  */
@@ -12,20 +11,28 @@ export default function useTimeTracking(
   turnedOn: boolean,
   increaseTimeSpent: (chapterId: number, elapsed: number) => void,
 ) {
-  const lastUserInteractionRef = useRef(Date.now());
+  const lastUserInteractionRef = useRef(0);
   const isTTSReadingRef = useRef(false);
 
   /** Increases the time spent on the current chapter since the last user interaction, as long as it was not too long ago */
   const flushElapsedTime = useCallback(() => {
     const enabled = turnedOn && !incognitoMode;
-    const isInactive = inactivityTimeoutMs !== undefined && Date.now() - lastUserInteractionRef.current > inactivityTimeoutMs;
+    const isInactive =
+      inactivityTimeoutMs !== undefined &&
+      Date.now() - lastUserInteractionRef.current > inactivityTimeoutMs;
     if (enabled && (!isInactive || isTTSReadingRef.current)) {
       const elapsed = Date.now() - lastUserInteractionRef.current;
       if (elapsed > 0) {
         increaseTimeSpent(chapterId, elapsed);
       }
     }
-  }, [chapterId, incognitoMode, inactivityTimeoutMs, turnedOn, increaseTimeSpent]);
+  }, [
+    chapterId,
+    incognitoMode,
+    inactivityTimeoutMs,
+    turnedOn,
+    increaseTimeSpent,
+  ]);
 
   const onUserInteraction = useCallback(() => {
     flushElapsedTime();
@@ -40,7 +47,10 @@ export default function useTimeTracking(
         // Save the elapsed time when the app goes in the background
         flushElapsedTime();
         lastUserInteractionRef.current = Date.now();
-      } else if (appState.match(/inactive|background/) && nextState === 'active') {
+      } else if (
+        appState.match(/inactive|background/) &&
+        nextState === 'active'
+      ) {
         // Reset the start timestamp when the app comes back and the TTS isn't on
         if (!isTTSReadingRef.current) {
           lastUserInteractionRef.current = Date.now();

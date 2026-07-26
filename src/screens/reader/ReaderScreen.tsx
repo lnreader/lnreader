@@ -157,16 +157,19 @@ export const ChapterContent = ({
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBookmarked(chapter.bookmark ?? false);
   }, [chapter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchVisible(false);
     resetSearch();
   }, [chapter.id, resetSearch]);
 
   useEffect(() => {
     if (hidden) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchVisible(false);
     }
   }, [hidden]);

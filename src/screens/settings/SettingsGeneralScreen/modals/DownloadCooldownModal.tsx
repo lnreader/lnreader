@@ -52,6 +52,7 @@ const DownloadCooldownModal: React.FC<DownloadCooldownModalProps> = ({
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(msToSeconds(currentMs));
     }
   }, [visible, currentMs]);

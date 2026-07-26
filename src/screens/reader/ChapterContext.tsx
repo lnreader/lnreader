@@ -5,7 +5,7 @@ import useChapter from './hooks/useChapter';
 
 type ChapterContextType = ReturnType<typeof useChapter>['chapterContext'] & {
   novel: NovelInfo;
-  webViewRef: React.RefObject<WebView<{}> | null>;
+  webViewRef: React.RefObject<WebView<object> | null>;
 };
 
 const defaultValue = {} as ChapterContextType;

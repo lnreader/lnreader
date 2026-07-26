@@ -15,12 +15,6 @@ import {
 import { categorySchema, novelCategorySchema } from '@database/schema';
 import { eq, sql } from 'drizzle-orm';
 
-const mockGetLibraryDefaultCategoryId = jest.fn<number | undefined, []>();
-
-jest.mock('@hooks/persisted/useSettings', () => ({
-  getLibraryDefaultCategoryId: () => mockGetLibraryDefaultCategoryId(),
-}));
-
 import {
   getAllNovels,
   getNovelById,
@@ -36,6 +30,12 @@ import {
   updateNovelCategoryById,
   updateNovelCategories,
 } from '../NovelQueries';
+
+const mockGetLibraryDefaultCategoryId = jest.fn<number | undefined, []>();
+
+jest.mock('@hooks/persisted/useSettings', () => ({
+  getLibraryDefaultCategoryId: () => mockGetLibraryDefaultCategoryId(),
+}));
 
 describe('NovelQueries', () => {
   beforeEach(() => {

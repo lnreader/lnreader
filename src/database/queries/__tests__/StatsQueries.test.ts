@@ -346,12 +346,12 @@ describe('StatsQueries', () => {
       const result = await getTopNovelsByTimeSpentFromDb();
 
       expect(result.topNovelsByTimeSpent).toHaveLength(2);
-      expect(result.topNovelsByTimeSpent!![0]).toMatchObject({
+      expect(result.topNovelsByTimeSpent![0]).toMatchObject({
         id: novelId2,
         name: 'Novel B',
         timeSpent: 500,
       });
-      expect(result.topNovelsByTimeSpent!![1]).toMatchObject({
+      expect(result.topNovelsByTimeSpent![1]).toMatchObject({
         id: novelId1,
         name: 'Novel A',
         timeSpent: 300,
@@ -370,7 +370,7 @@ describe('StatsQueries', () => {
       const result = await getTopNovelsByTimeSpentFromDb();
 
       expect(result.topNovelsByTimeSpent).toHaveLength(1);
-      expect(result.topNovelsByTimeSpent!![0].id).toBe(libraryNovelId);
+      expect(result.topNovelsByTimeSpent![0].id).toBe(libraryNovelId);
     });
 
     it('should exclude novels with 0 or null time spent', async () => {
@@ -401,7 +401,7 @@ describe('StatsQueries', () => {
       const result = await getTopNovelsByTimeSpentFromDb();
 
       expect(result.topNovelsByTimeSpent).toHaveLength(10);
-      expect(result.topNovelsByTimeSpent!![0].name).toBe('Novel 12');
+      expect(result.topNovelsByTimeSpent![0].name).toBe('Novel 12');
     });
   });
 
@@ -426,12 +426,12 @@ describe('StatsQueries', () => {
       const result = await getTopCategoriesByTimeSpentFromDb();
 
       expect(result.topCategoriesByTimeSpent).toHaveLength(2);
-      expect(result.topCategoriesByTimeSpent!![0]).toMatchObject({
+      expect(result.topCategoriesByTimeSpent![0]).toMatchObject({
         id: scifiCat,
         name: 'Sci-Fi',
         timeSpent: 300,
       });
-      expect(result.topCategoriesByTimeSpent!![1]).toMatchObject({
+      expect(result.topCategoriesByTimeSpent![1]).toMatchObject({
         id: fantasyCat,
         name: 'Fantasy',
         timeSpent: 100,
@@ -455,7 +455,7 @@ describe('StatsQueries', () => {
       const result = await getTopCategoriesByTimeSpentFromDb();
 
       expect(result.topCategoriesByTimeSpent).toHaveLength(1);
-      expect(result.topCategoriesByTimeSpent!![0].timeSpent).toBe(350);
+      expect(result.topCategoriesByTimeSpent![0].timeSpent).toBe(350);
     });
 
     it('should return an empty array when no category chapters have spent time', async () => {

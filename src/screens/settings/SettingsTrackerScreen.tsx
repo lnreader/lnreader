@@ -165,6 +165,8 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
     [theme, isTrackerAuthenticated],
   );
 
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   return (
     <SafeAreaView excludeTop>
       <Provider>
@@ -256,12 +258,10 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
             />
             {(isTrackerAuthenticated('MyAnimeList') &&
               getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
-              getTrackerAuth('MyAnimeList')!.auth.expiresAt <
-                new Date(Date.now())) ||
+              getTrackerAuth('MyAnimeList')!.auth.expiresAt < new Date(now)) ||
             (isTrackerAuthenticated('Kitsu') &&
               getTrackerAuth('Kitsu')?.auth?.expiresAt &&
-              getTrackerAuth('Kitsu')!.auth.expiresAt <
-                new Date(Date.now())) ? (
+              getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now)) ? (
               <>
                 <List.SubHeader theme={theme}>
                   {getString('common.settings')}
@@ -269,7 +269,7 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
                 {isTrackerAuthenticated('MyAnimeList') &&
                   getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
                   getTrackerAuth('MyAnimeList')!.auth.expiresAt <
-                    new Date(Date.now()) && (
+                    new Date(now) && (
                     <List.Item
                       title={
                         getString('trackingScreen.revalidate') + ' MyAnimeList'
@@ -288,8 +288,7 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
                   )}
                 {isTrackerAuthenticated('Kitsu') &&
                   getTrackerAuth('Kitsu')?.auth?.expiresAt &&
-                  getTrackerAuth('Kitsu')!.auth.expiresAt <
-                    new Date(Date.now()) && (
+                  getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now) && (
                     <List.Item
                       title={getString('trackingScreen.revalidate') + ' Kitsu'}
                       onPress={async () => {

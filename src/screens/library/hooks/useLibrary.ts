@@ -71,7 +71,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       setIsLoading(true);
     }
 
-    const [_, novels] = await Promise.all([
+    const [, novels] = await Promise.all([
       refreshCategories(),
       getLibraryNovelsFromDb(sortOrder, filter, searchText, downloadedOnlyMode),
     ]);
@@ -117,9 +117,9 @@ export const useLibrary = (): UseLibraryReturnType => {
     getLibrary();
   });
 
-  const [taskQueue] = useMMKVObject<
-    (BackgroundTask | QueuedBackgroundTask)[]
-  >(BACKGROUND_TASKS_STORE_KEY);
+  const [taskQueue] = useMMKVObject<(BackgroundTask | QueuedBackgroundTask)[]>(
+    BACKGROUND_TASKS_STORE_KEY,
+  );
   const restoreTasksCount = useMemo(
     () =>
       taskQueue?.filter(t => {

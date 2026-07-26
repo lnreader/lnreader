@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import NovelCover from '@components/NovelCover';
 import { NovelInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
@@ -14,7 +14,7 @@ interface LibraryNovelItemProps {
   imageRequestInit: ImageRequestInit | undefined;
 }
 
-const LibraryNovelItem = memo(function LibraryNovelItem({
+const LibraryNovelItem = memo(function LibraryNovelItem_({
   item,
   theme,
   isSelected,

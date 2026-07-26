@@ -7,12 +7,12 @@ type NativeZipArchiveModule = {
     distDirPath: string,
     urlString: string,
     headers: Record<string, string>,
-  ): Promise<void>;
+  ): Promise<string>;
   remoteZip(
     sourceDirPath: string,
     urlString: string,
     headers: Record<string, string>,
-  ): Promise<void>;
+  ): Promise<string>;
 };
 
 export default requireNativeModule<NativeZipArchiveModule>('NativeZipArchive');

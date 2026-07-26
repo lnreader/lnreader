@@ -20,7 +20,7 @@ const initialProgress: TtsProgress = {
 export const useTtsSession = () => {
   const sessionRef = useRef<TtsSession | null>(null);
   const sessionPromiseRef = useRef<Promise<TtsSession> | null>(null);
-  const subscriptionsRef = useRef<Array<{ remove(): void }>>([]);
+  const subscriptionsRef = useRef<{ remove(): void }[]>([]);
   const mountedRef = useRef(true);
   const [state, setState] = useState<TtsPlaybackState>('idle');
   const [progress, setProgress] = useState<TtsProgress>(initialProgress);

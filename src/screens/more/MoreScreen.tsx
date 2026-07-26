@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { StyleSheet, View, Pressable, Text, ScrollView } from 'react-native';
 import { getString } from '@i18n/translations';
 

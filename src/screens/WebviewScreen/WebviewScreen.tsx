@@ -32,7 +32,7 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
   const userAgent = useMemo(() => getUserAgent(), []);
 
   const theme = useTheme();
-  const webViewRef = useRef<WebView | null>(null);
+  const webViewRef = useRef<WebView<object> | null>(null);
 
   const [progress, setProgress] = useState(0);
   const [title, setTitle] = useState(name || '');
@@ -115,7 +115,7 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
         progress={Math.round(1000 * progress) / 1000}
         visible={progress !== 1}
       />
-      <WebView
+      <WebView<object>
         userAgent={userAgent}
         ref={webViewRef}
         source={source}

@@ -1,5 +1,4 @@
 import './mocks';
-import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import EmptyView from '../EmptyView';

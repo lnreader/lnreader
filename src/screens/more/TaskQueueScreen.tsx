@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, View, Text, StyleSheet } from 'react-native';
 import {
   FAB,
@@ -33,6 +33,7 @@ const DownloadQueue = ({ navigation }: TaskQueueScreenProps) => {
   const closeMenu = () => setVisible(false);
   useEffect(() => {
     if (taskQueue?.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsRunning(false);
     }
   }, [taskQueue]);

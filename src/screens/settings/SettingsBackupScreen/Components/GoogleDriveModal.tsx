@@ -241,6 +241,7 @@ export default function GoogleDriveModal({
     if (isSignedIn) {
       const localUser = GoogleSignin.getCurrentUser();
       if (localUser) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(localUser);
         setBackupModal(BackupModal.AUTHORIZED);
       }

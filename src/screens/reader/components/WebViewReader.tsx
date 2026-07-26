@@ -282,8 +282,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
    * page, so nothing that changes while a chapter is on screen may be part of
    * it – those updates go through `injectJavaScript` instead.
    */
-  const source = useMemo(
-    () => ({
+  const source = useMemo(() => {
+    // eslint-disable-next-line react-hooks/refs
+    const isNextChapterScreenVisible = nextChapterScreenVisible.current;
+    return {
       baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
@@ -345,7 +347,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
             }">
               <div class="transition-chapter" style="transform: ${
-                nextChapterScreenVisible.current
+                isNextChapterScreenVisible
                   ? 'translateX(-100%)'
                   : 'translateX(0%)'
               };
@@ -358,7 +360,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-                  nextChapterScreenVisible: nextChapterScreenVisible.current,
+                  nextChapterScreenVisible: isNextChapterScreenVisible,
                 })};
 
 
@@ -392,21 +394,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               </script>
           </html>
           `,
-    }),
-    [
-      batteryLevel,
-      chapter,
-      chapterGeneralSettings,
-      html,
-      initialReaderSettings,
-      novel,
-      plugin,
-      pluginCustomCSS,
-      pluginCustomJS,
-      readerDir,
-      theme,
-    ],
-  );
+    };
+  }, [
+    batteryLevel,
+    chapter,
+    chapterGeneralSettings,
+    html,
+    initialReaderSettings,
+    novel,
+    plugin,
+    pluginCustomCSS,
+    pluginCustomJS,
+    readerDir,
+    theme,
+  ]);
 
   return (
     <WebView

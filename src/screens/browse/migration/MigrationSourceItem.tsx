@@ -1,6 +1,5 @@
 import { PluginItem } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
-import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { TouchableRipple } from 'react-native-paper';
 

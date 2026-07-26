@@ -9,12 +9,6 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import calendar from 'dayjs/plugin/calendar';
 import duration from 'dayjs/plugin/duration';
-dayjs.extend(customParseFormat);
-dayjs.extend(localeData);
-dayjs.extend(localizedFormat);
-dayjs.extend(relativeTime);
-dayjs.extend(calendar);
-dayjs.extend(duration);
 
 import 'dayjs/locale/ar';
 import 'dayjs/locale/ca';
@@ -85,6 +79,12 @@ import zhTw from './languages/zh_TW/strings.json';
 
 import { StringMap } from './types';
 import { showToast } from '@utils/showToast';
+dayjs.extend(customParseFormat);
+dayjs.extend(localeData);
+dayjs.extend(localizedFormat);
+dayjs.extend(relativeTime);
+dayjs.extend(calendar);
+dayjs.extend(duration);
 
 const i18n = new I18n({
   af,

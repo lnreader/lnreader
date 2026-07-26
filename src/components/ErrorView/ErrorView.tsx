@@ -1,5 +1,5 @@
 import { ThemeColors } from '@theme/types';
-import React from 'react';
+
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 

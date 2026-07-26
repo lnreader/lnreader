@@ -88,7 +88,7 @@ const toNativeTtsSettings = (
 const SettingsReaderScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<WebView<object>>(null);
   const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const { bottom, right } = useSafeAreaInsets();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
@@ -171,7 +171,7 @@ const SettingsReaderScreen = () => {
       --theme-outline: ${theme.outline};
       --theme-rippleColor: ${theme.rippleColor};
       }
-      
+
       @font-face {
         font-family: ${readerSettings.fontFamily};
         src: url("file:///android_asset/fonts/${
@@ -273,7 +273,7 @@ const SettingsReaderScreen = () => {
 
       {/* Large Preview Area */}
       <View style={styles.previewContainer}>
-        <WebView
+        <WebView<object>
           ref={webViewRef}
           originWhitelist={['*']}
           allowFileAccess={true}
@@ -359,7 +359,7 @@ const SettingsReaderScreen = () => {
               </head>
               <body class="${
                 chapterGeneralSettings.pageReader ? 'page-reader' : ''
-              }"> 
+              }">
                 <div id="LNReader-chapter">
                 ${dummyHTML}
                 </div>

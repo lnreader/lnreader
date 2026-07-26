@@ -12,7 +12,7 @@ interface AppbarProps {
   theme: ThemeColors;
   canGoBack: boolean;
   canGoForward: boolean;
-  webView: RefObject<WebView | null>;
+  webView: RefObject<WebView<object> | null>;
   setMenuVisible: (value: boolean) => void;
   goBack: () => void;
 }
