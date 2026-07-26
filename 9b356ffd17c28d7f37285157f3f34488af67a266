@@ -1,0 +1,74 @@
+scripts/generate-env-file.cjs
+  s_ed3b99ceb85200::t_a5f056854fd5c5 102,204-206
+  s_ed3b99ceb85200::t_67ec45be4c39a6 80-81,87-101,103-121,156-165,174-179,181-183,207,221-222
+  s_ed3b99ceb85200::t_223cb8fd2114bf 59-79,82-86,153
+  s_ed3b99ceb85200::t_3f88d781dd4802 224-230,234,244-247,250
+  human 92-93,102-107,109,118,131-132,146-147,149,153,165
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_ed3b99ceb85200::t_a5f056854fd5c5",
+          "lines": "102,204-206",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 58,
+          "added_lines": 58,
+          "deleted_lines": 0,
+          "hash": "s_ed3b99ceb85200::t_67ec45be4c39a6",
+          "lines": "80-81,87-101,103-121,156-165,174-179,181-183,207,221-222",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_ed3b99ceb85200::t_223cb8fd2114bf",
+          "lines": "59-79,82-86,153",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_ed3b99ceb85200::t_3f88d781dd4802",
+          "lines": "224-230,234,244-247,250",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 17,
+          "hash": "human",
+          "lines": "92-93,102-107,109,118,131-132,146-147,149,153,165",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "scripts/generate-env-file.cjs"
+    }
+  ],
+  "base_commit_sha": "5cf7e15d7631f3ada56d4cb979694214745bd10d",
+  "branch": "master",
+  "commit_sha": "9b356ffd17c28d7f37285157f3f34488af67a266",
+  "commit_time": "2026-07-26T13:42:41+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 17
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
