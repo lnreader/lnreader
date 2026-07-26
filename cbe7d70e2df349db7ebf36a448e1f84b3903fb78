@@ -1,0 +1,29 @@
+assets/reader/js/index.js
+  s_1259feb1d3956e::t_2fbf591c112463 426
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_1259feb1d3956e::t_2fbf591c112463",
+          "lines": "426",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/index.js"
+    }
+  ],
+  "base_commit_sha": "6548e9a6f8efc0bb21e46af005072d7599b326e9",
+  "branch": "master",
+  "commit_sha": "cbe7d70e2df349db7ebf36a448e1f84b3903fb78",
+  "commit_time": "2026-07-26T15:08:02+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {},
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
