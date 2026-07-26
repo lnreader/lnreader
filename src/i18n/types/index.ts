@@ -232,6 +232,7 @@ export interface StringMap {
   'common.newUpdateAvailable': 'string';
   'common.none': 'string';
   'common.ok': 'string';
+  'common.close': 'string';
   'common.pause': 'string';
   'common.preparing': 'string';
   'common.remove': 'string';
