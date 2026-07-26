@@ -47,5 +47,8 @@ jobs:
       - name: Generate Environment Variables
         run: pnpm generate:env:debug
 
+      - name: Check Types
+        run: pnpm run type-check
+
       - name: Run Tests
         run: pnpm run test
