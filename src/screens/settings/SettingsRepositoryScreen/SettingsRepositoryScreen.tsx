@@ -17,10 +17,7 @@ import { getString } from '@i18n/translations';
 import AddRepositoryModal from './components/AddRepositoryModal';
 import RepositoryCard from './components/RepositoryCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  RespositorySettingsScreenProps,
-  RootStackParamList,
-} from '@navigators/types';
+import { RespositorySettingsScreenProps } from '@navigators/types';
 import { showToast } from '@utils/showToast';
 import { useLiveQuery } from '@database/manager/liveQuery';
 import { repositorySchema } from '@database/schema';
@@ -81,7 +78,6 @@ const SettingsBrowseScreen = ({
           if (navigation.canGoBack()) {
             navigation.goBack();
           }
-          navigation.popTo<keyof RootStackParamList>('BottomNavigator');
         }}
         theme={theme}
       />
