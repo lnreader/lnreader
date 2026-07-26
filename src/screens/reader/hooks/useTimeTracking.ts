@@ -11,7 +11,8 @@ export default function useTimeTracking(
   turnedOn: boolean,
   increaseTimeSpent: (chapterId: number, elapsed: number) => void,
 ) {
-  const lastUserInteractionRef = useRef(0);
+  // eslint-disable-next-line react-hooks/purity
+  const lastUserInteractionRef = useRef(Date.now());
   const isTTSReadingRef = useRef(false);
 
   /** Increases the time spent on the current chapter since the last user interaction, as long as it was not too long ago */
