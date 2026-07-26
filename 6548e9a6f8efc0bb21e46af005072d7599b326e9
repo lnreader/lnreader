@@ -1,0 +1,206 @@
+assets/reader/css/pageReader.css
+  s_3e58a77bce4608::t_958d6d64191276 3-8,12,15-16
+  human 3,7,10
+assets/reader/js/search.js
+  s_3e58a77bce4608::t_1a0c2c78160df0 75,79
+  s_3e58a77bce4608::t_a770c63a209d08 349-351
+  human 74-75,80-94,364
+assets/reader/js/index.js
+  s_3e58a77bce4608::t_958d6d64191276 243,290-303
+  human 243
+assets/reader/js/core.js
+  s_3e58a77bce4608::t_d838022927b934 662,956-959
+  s_3e58a77bce4608::t_eb0e5f8890a510 513-516,522
+  s_3e58a77bce4608::t_3ba6514be2205c 449-463,727-731
+  s_3e58a77bce4608::t_1a0c2c78160df0 520,536-538,543-545,556,572,583
+  s_3e58a77bce4608::t_958d6d64191276 70-71,78-83,91,122-123,131,133-134,138,551-554,598-599,602,607-615,620-621,626-630,632-642,659,661,663-664,666,669,672,691,700-711,713-718,723,732-743,796-800,824-826,890-892,968
+  s_3e58a77bce4608::t_c82a337200384f 519,616-619,622-625,722,893
+  s_3e58a77bce4608::t_3c0ca6d2e0403e 563-564
+  human 559-560,631,643-644,712,719-720
+src/screens/reader/ReaderScreen.tsx
+  s_3e58a77bce4608::t_3ba6514be2205c 196
+  human 196-197
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_958d6d64191276",
+          "lines": "3-8,12,15-16",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "3,7,10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/css/pageReader.css"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_1a0c2c78160df0",
+          "lines": "75,79",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_a770c63a209d08",
+          "lines": "349-351",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 18,
+          "hash": "human",
+          "lines": "74-75,80-94,364",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/search.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_958d6d64191276",
+          "lines": "243,290-303",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "243",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/index.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_d838022927b934",
+          "lines": "662,956-959",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_eb0e5f8890a510",
+          "lines": "513-516,522",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_3ba6514be2205c",
+          "lines": "449-463,727-731",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_1a0c2c78160df0",
+          "lines": "520,536-538,543-545,556,572,583",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 100,
+          "added_lines": 100,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_958d6d64191276",
+          "lines": "70-71,78-83,91,122-123,131,133-134,138,551-554,598-599,602,607-615,620-621,626-630,632-642,659,661,663-664,666,669,672,691,700-711,713-718,723,732-743,796-800,824-826,890-892,968",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_c82a337200384f",
+          "lines": "519,616-619,622-625,722,893",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_3c0ca6d2e0403e",
+          "lines": "563-564",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 57,
+          "hash": "human",
+          "lines": "559-560,631,643-644,712,719-720",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "assets/reader/js/core.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3e58a77bce4608::t_3ba6514be2205c",
+          "lines": "196",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "196-197",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ReaderScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "138fdff2e57e55e02f9775d11dfb47482701f5c5",
+  "branch": "master",
+  "commit_sha": "6548e9a6f8efc0bb21e46af005072d7599b326e9",
+  "commit_time": "2026-07-26T15:07:46+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 8,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 8,
+      "total_deletions": 81
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
