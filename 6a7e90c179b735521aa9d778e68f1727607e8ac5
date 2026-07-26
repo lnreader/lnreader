@@ -1,0 +1,77 @@
+src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx
+  s_f60c8818f487d5::t_e346415783ddb0 80,128,149-152,178-185,189-192,218-225,277-281,338,348-354
+  human 355
+src/i18n/languages/en/strings.json
+  s_f60c8818f487d5::t_e346415783ddb0 248,262
+src/i18n/types/index.ts
+  s_f60c8818f487d5::t_a55c541c9d4fad 221,235
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 39,
+          "added_lines": 39,
+          "deleted_lines": 0,
+          "hash": "s_f60c8818f487d5::t_e346415783ddb0",
+          "lines": "80,128,149-152,178-185,189-192,218-225,277-281,338,348-354",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 10,
+          "hash": "human",
+          "lines": "355",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/tabs/AdvancedTab.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_f60c8818f487d5::t_e346415783ddb0",
+          "lines": "248,262",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_f60c8818f487d5::t_a55c541c9d4fad",
+          "lines": "221,235",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    }
+  ],
+  "base_commit_sha": "99c31d56bb45c6e04fe96cff3f14c3ca55fccba4",
+  "branch": "master",
+  "commit_sha": "6a7e90c179b735521aa9d778e68f1727607e8ac5",
+  "commit_time": "2026-07-26T12:55:39+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 1,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 1,
+      "total_deletions": 10
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
