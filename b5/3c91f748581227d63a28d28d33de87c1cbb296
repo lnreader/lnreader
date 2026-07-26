@@ -1,0 +1,161 @@
+.husky/pre-push
+  s_8ff151d2142b4a::t_cc0eb1ad748026 1
+  human 1
+.github/workflows/testing.yml
+  s_8ff151d2142b4a::t_e1b01b08ee0469 1,16,20,31,36,47
+  s_8ff151d2142b4a::t_cc0eb1ad748026 15
+  human 1,15-16,20,31,36,47,50-52
+.github/workflows/types.yml
+  s_8ff151d2142b4a::t_e1b01b08ee0469 16,20,31,36,47
+  s_8ff151d2142b4a::t_cc0eb1ad748026 3-8,10-12,15,18,48
+  human 9,49
+src/services/Trackers/myAnimeList.ts
+  s_8ff151d2142b4a::t_3117839e6c96bc 57
+  human 57
+package.json
+  s_8ff151d2142b4a::t_cc0eb1ad748026 33
+  human 33
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_cc0eb1ad748026",
+          "lines": "1",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".husky/pre-push"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_e1b01b08ee0469",
+          "lines": "1,16,20,31,36,47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_cc0eb1ad748026",
+          "lines": "15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 10,
+          "hash": "human",
+          "lines": "1,15-16,20,31,36,47,50-52",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/testing.yml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_e1b01b08ee0469",
+          "lines": "16,20,31,36,47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_cc0eb1ad748026",
+          "lines": "3-8,10-12,15,18,48",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 13,
+          "hash": "human",
+          "lines": "9,49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/types.yml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_3117839e6c96bc",
+          "lines": "57",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "57",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/myAnimeList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_cc0eb1ad748026",
+          "lines": "33",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "package.json"
+    }
+  ],
+  "base_commit_sha": "9d106a371620a513f1f4cf57f511936866a77fd2",
+  "branch": "master",
+  "commit_sha": "b53c91f748581227d63a28d28d33de87c1cbb296",
+  "commit_time": "2026-07-26T22:33:56+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 2,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 2,
+      "total_deletions": 26
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
