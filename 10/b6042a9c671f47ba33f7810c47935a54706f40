@@ -1,0 +1,491 @@
+src/services/epub/export.ts
+  s_3a82ee33d9872a::t_cd8fc227c27e5b 22-23,32,52-53,55-59,75
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 46-47,49,54,63,66-67
+  s_3a82ee33d9872a::t_c4a0892a5d5368 1-21,24-31,33-45,48,50-51,60-62,64-65,68-74,76-109
+src/i18n/languages/en/strings.json
+  s_3a82ee33d9872a::t_00fd1b4c8ace22 481,484-486,678
+  human 483
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt
+  s_3a82ee33d9872a::t_00fd1b4c8ace22 28,82-83
+  human 28
+src/services/backgroundTasks/taskDefinitions.ts
+  s_3a82ee33d9872a::t_c4a0892a5d5368 18,39-42,70-71
+modules/nitro-epub/nitrogen/generated/shared/c++/HybridEpubSpec.hpp
+  s_3a82ee33d9872a::t_dc9498d393ffa5 32
+  s_3a82ee33d9872a::t_8b94090bb5142a 66
+  human 65
+src/screens/novel/components/ExportEpubModal.tsx
+  s_3a82ee33d9872a::t_69b0c51abfdc38 178-187
+  s_3a82ee33d9872a::t_17be4bb38fb43b 19,26-31,117-127
+  human 110,161
+src/services/backgroundTasks/executeTask.ts
+  s_3a82ee33d9872a::t_c4a0892a5d5368 5,25-26
+modules/nitro-epub/cpp/HybridEpub.cpp
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 42-43,72-74,76-78
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 40,46,68-71,82
+  s_3a82ee33d9872a::t_e5d868fb0e6d5b 41,44,75,79-81
+  human 40,42,64
+src/services/backgroundTasks/contracts.ts
+  s_3a82ee33d9872a::t_c4a0892a5d5368 4-7,38-45,53
+modules/nitro-epub/cpp/export/EpubExporter.hpp
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 37-38
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 4,36
+  human 35
+src/i18n/types/index.ts
+  s_3a82ee33d9872a::t_9688402375cc65 413,417-418,579
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_3a82ee33d9872a::t_17be4bb38fb43b 4,6,15,17,37,42,72-73,75-78,80-83,105,146-164,166
+  human 4,6-7,17,24-33,47-53,58-59,89-90,92-96,98-99,129-130,152-155,167-176,178-191,198-205
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_3a82ee33d9872a::t_2f539f3ee36ab5 143-151
+  human 143-148
+modules/nitro-epub/cpp/HybridEpub.hpp
+  s_3a82ee33d9872a::t_e5d868fb0e6d5b 18,21
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 17
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 19-20
+  human 17
+modules/nitro-epub/cpp/export/EpubExporter.cpp
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 17,83,87
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 18-19,84-86
+  human 17
+src/services/backgroundTasks/index.ts
+  s_3a82ee33d9872a::t_c4a0892a5d5368 15
+modules/nitro-epub/README.md
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 16
+modules/nitro-epub/src/specs/Epub.nitro.ts
+  s_3a82ee33d9872a::t_a40f98a1d07ee8 26-30
+  s_3a82ee33d9872a::t_9f8f12114f6cc2 25
+  human 25
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_cd8fc227c27e5b",
+          "lines": "22-23,32,52-53,55-59,75",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "46-47,49,54,63,66-67",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 91,
+          "added_lines": 91,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_c4a0892a5d5368",
+          "lines": "1-21,24-31,33-45,48,50-51,60-62,64-65,68-74,76-109",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/epub/export.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_00fd1b4c8ace22",
+          "lines": "481,484-486,678",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "483",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_00fd1b4c8ace22",
+          "lines": "28,82-83",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "28",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_c4a0892a5d5368",
+          "lines": "18,39-42,70-71",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/taskDefinitions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_dc9498d393ffa5",
+          "lines": "32",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_8b94090bb5142a",
+          "lines": "66",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "65",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/nitrogen/generated/shared/c++/HybridEpubSpec.hpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_69b0c51abfdc38",
+          "lines": "178-187",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_17be4bb38fb43b",
+          "lines": "19,26-31,117-127",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "110,161",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ExportEpubModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_c4a0892a5d5368",
+          "lines": "5,25-26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/executeTask.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "42-43,72-74,76-78",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "40,46,68-71,82",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_e5d868fb0e6d5b",
+          "lines": "41,44,75,79-81",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "40,42,64",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/HybridEpub.cpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_c4a0892a5d5368",
+          "lines": "4-7,38-45,53",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "37-38",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "4,36",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "35",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/export/EpubExporter.hpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9688402375cc65",
+          "lines": "413,417-418,579",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 37,
+          "added_lines": 37,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_17be4bb38fb43b",
+          "lines": "4,6,15,17,37,42,72-73,75-78,80-83,105,146-164,166",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 70,
+          "hash": "human",
+          "lines": "4,6-7,17,24-33,47-53,58-59,89-90,92-96,98-99,129-130,152-155,167-176,178-191,198-205",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ExportNovelAsEpubButton.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_2f539f3ee36ab5",
+          "lines": "143-151",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "143-148",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_e5d868fb0e6d5b",
+          "lines": "18,21",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "17",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "19-20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/HybridEpub.hpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "17,83,87",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "18-19,84-86",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/export/EpubExporter.cpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_c4a0892a5d5368",
+          "lines": "15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/README.md"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_a40f98a1d07ee8",
+          "lines": "26-30",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_9f8f12114f6cc2",
+          "lines": "25",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "25",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/src/specs/Epub.nitro.ts"
+    }
+  ],
+  "base_commit_sha": "bd7161172551568e579e60ece7072f8c5a05fa65",
+  "branch": "master",
+  "commit_sha": "10b6042a9c671f47ba33f7810c47935a54706f40",
+  "commit_time": "2026-07-26T20:53:25+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 88
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
