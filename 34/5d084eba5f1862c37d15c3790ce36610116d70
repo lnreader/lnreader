@@ -1,0 +1,116 @@
+src/i18n/types/index.ts
+  s_3a82ee33d9872a::t_1b8de089c57858 407
+src/screens/novel/components/ExportEpubModal.tsx
+  s_3a82ee33d9872a::t_344dd9858dcd34 30,45,54,116,128,232-237
+  human 238-239
+src/hooks/persisted/useSettings.ts
+  s_3a82ee33d9872a::t_344dd9858dcd34 218,320
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_3a82ee33d9872a::t_344dd9858dcd34 136-152
+  human 136-143
+src/i18n/languages/en/strings.json
+  s_3a82ee33d9872a::t_344dd9858dcd34 473
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_1b8de089c57858",
+          "lines": "407",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_344dd9858dcd34",
+          "lines": "30,45,54,116,128,232-237",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "238-239",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ExportEpubModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_344dd9858dcd34",
+          "lines": "218,320",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_344dd9858dcd34",
+          "lines": "136-152",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "136-143",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/ExportNovelAsEpubButton.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3a82ee33d9872a::t_344dd9858dcd34",
+          "lines": "473",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    }
+  ],
+  "base_commit_sha": "10b6042a9c671f47ba33f7810c47935a54706f40",
+  "branch": "master",
+  "commit_sha": "345d084eba5f1862c37d15c3790ce36610116d70",
+  "commit_time": "2026-07-26T21:07:04+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 2,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 2,
+      "total_deletions": 8
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
