@@ -1,0 +1,127 @@
+.husky/pre-push
+  human 1
+src/i18n/languages/en/strings.json
+  human 262
+package.json
+  human 33,157-162
+.github/workflows/testing.yml
+  human 50-52
+src/screens/reader/hooks/useTimeTracking.ts
+  human 14-15
+src/i18n/types/index.ts
+  human 235
+modules/native-volume-button-listener/src/NativeVolumeButtonListenerModule.ts
+  human 12-17
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".husky/pre-push"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "262",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "33,157-162",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "package.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "50-52",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/testing.yml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "14-15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/hooks/useTimeTracking.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "235",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "12-17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-volume-button-listener/src/NativeVolumeButtonListenerModule.ts"
+    }
+  ],
+  "base_commit_sha": "72bfcad03469440c1e9cf5ff88b5ff97a544c45e",
+  "branch": "master",
+  "commit_sha": "8b0a8dc4c07b6d77532ef9b070bbce288afd92d4",
+  "commit_type": "commit_amend",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 15,
+      "agent_id": null,
+      "human_author": null,
+      "overriden_lines": 0,
+      "total_additions": 15,
+      "total_deletions": 10
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
