@@ -1,0 +1,176 @@
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 243,253
+  human 235-242,251,261
+src/screens/library/LibraryScreen.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 213,230
+  human 22,204-211,222,239
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 196,212
+  human 11,189-196,205,221
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 231
+  s_bfca3c2a8fe1ec::t_d808ef8ed630cb 227-230,232-233
+  human 227
+src/screens/browse/BrowseScreen.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 79,81
+  human 4,80-82,84
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_bfca3c2a8fe1ec::t_ac56bcce20823a 247
+  human 247
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "243,253",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 10,
+          "hash": "human",
+          "lines": "235-242,251,261",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "213,230",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "22,204-211,222,239",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/LibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "196,212",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "11,189-196,205,221",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "231",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_d808ef8ed630cb",
+          "lines": "227-230,232-233",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "227",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "79,81",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "4,80-82,84",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/BrowseScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_bfca3c2a8fe1ec::t_ac56bcce20823a",
+          "lines": "247",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "247",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelBottomSheet.tsx"
+    }
+  ],
+  "base_commit_sha": "4d98247980c21f892df6cf0da19ecad8a6f0d136",
+  "branch": "master",
+  "commit_sha": "99c31d56bb45c6e04fe96cff3f14c3ca55fccba4",
+  "commit_time": "2026-07-26T12:38:39+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 39
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
