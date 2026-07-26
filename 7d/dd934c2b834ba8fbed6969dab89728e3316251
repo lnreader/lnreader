@@ -1,0 +1,95 @@
+src/services/Trackers/aniList.ts
+  s_8ff151d2142b4a::t_c6518a843915e5 47-51
+  human 11-12
+scripts/generate-env-file.cjs
+  s_8ff151d2142b4a::t_1f0334a4ae369a 204,207-209
+  human 204,207
+src/services/Trackers/myAnimeList.ts
+  s_8ff151d2142b4a::t_73756562f895e4 36-40
+  human 16
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_c6518a843915e5",
+          "lines": "47-51",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "11-12",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/aniList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_1f0334a4ae369a",
+          "lines": "204,207-209",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "204,207",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "scripts/generate-env-file.cjs"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8ff151d2142b4a::t_73756562f895e4",
+          "lines": "36-40",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/myAnimeList.ts"
+    }
+  ],
+  "base_commit_sha": "b53c91f748581227d63a28d28d33de87c1cbb296",
+  "branch": "master",
+  "commit_sha": "7ddd934c2b834ba8fbed6969dab89728e3316251",
+  "commit_time": "2026-07-26T22:46:23+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 5
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
