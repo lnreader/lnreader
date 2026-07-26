@@ -1,0 +1,728 @@
+src/screens/WebviewScreen/WebviewScreen.tsx
+  human 35,118
+src/screens/reader/hooks/useTtsSession.ts
+  human 23
+src/database/queries/__tests__/NovelQueries.test.ts
+  human 34-39
+src/services/Trackers/myAnimeList.ts
+  human 3,11
+src/screens/GlobalSearchScreen/hooks/useGlobalSearch.ts
+  human 159
+src/screens/settings/SettingsTrackerScreen.tsx
+  human 168-169,261,264,272,291
+src/navigators/types/index.ts
+  human 193
+src/hooks/persisted/useTrackedNovel.ts
+  human 70
+src/screens/WebviewScreen/components/Menu.tsx
+  human 14
+src/hooks/common/useGithubUpdateChecker.ts
+  human 118
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  human 91,174,276,362
+src/screens/reader/ChapterContext.tsx
+  human 8
+src/screens/more/TaskQueueScreen.tsx
+  human 1,36
+src/components/ErrorView/ErrorView.tsx
+  human 2
+src/screens/library/components/LibraryNovelItem.tsx
+  human 1,17
+src/screens/reader/components/ChapterDrawer/index.tsx
+  human 1
+src/database/__tests__/db.test.ts
+  human 243
+src/database/queries/__tests__/setup.ts
+  human 10
+src/screens/reader/ReaderScreen.tsx
+  human 160,165,172
+src/screens/more/MoreScreen.tsx
+  human 1
+src/screens/reader/hooks/useTimeTracking.ts
+  human 14,20-22,29-35,50-53
+src/navigators/ReaderStack.tsx
+  human 1,23-24,29
+src/screens/library/hooks/useLibrary.ts
+  human 74,120-122
+src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx
+  human 1
+src/services/Trackers/aniList.ts
+  human 3,7
+modules/native-volume-button-listener/src/NativeVolumeButtonListenerModule.ts
+  human 12-17
+modules/native-zip-archive/src/NativeZipArchiveModule.ts
+  human 10,15,18
+src/screens/more/About.tsx
+  human 4,7,10,14,18,51
+src/i18n/translations.ts
+  human 82-87
+eslint.config.js
+  human 2-3,10-11,16-21,25-26,32,34-59
+src/screens/reader/components/WebViewReader.tsx
+  human 285-288,350,363,397-410
+src/screens/settings/SettingsGeneralScreen/modals/DownloadCooldownModal.tsx
+  human 55
+src/database/queries/__tests__/StatsQueries.test.ts
+  human 349,354,373,404,429,434,458
+src/screens/BrowseSourceScreen/useBrowseSource.ts
+  human 76,163
+src/screens/GlobalSearchScreen/GlobalSearchScreen.tsx
+  human 1
+src/components/Button/Button.tsx
+  human 22-26
+src/screens/WebviewScreen/components/Appbar.tsx
+  human 15
+src/screens/browse/discover/MalTopNovels.tsx
+  human 1,73
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  human 244
+src/screens/browse/discover/AniListTopNovels.tsx
+  human 1,150
+src/components/__tests__/LoadingMoreIndicator.test.tsx
+  human 1
+src/components/__tests__/Button.test.tsx
+  human 2
+src/screens/settings/SettingsBackupScreen/index.tsx
+  human 1
+src/components/__tests__/EmptyView.test.tsx
+  human 2
+src/screens/browse/SourceNovels.tsx
+  human 1
+src/screens/more/components/MoreHeader.tsx
+  human 1
+src/screens/browse/migration/MigrationSourceItem.tsx
+  human 3
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "35,118",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/WebviewScreen/WebviewScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "23",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/hooks/useTtsSession.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "34-39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/NovelQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "3,11",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/myAnimeList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "159",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/GlobalSearchScreen/hooks/useGlobalSearch.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "168-169,261,264,272,291",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsTrackerScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "193",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "70",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useTrackedNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "14",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/WebviewScreen/components/Menu.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "118",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/common/useGithubUpdateChecker.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "91,174,276,362",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "8",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ChapterContext.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1,36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/TaskQueueScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/ErrorView/ErrorView.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "1,17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/components/LibraryNovelItem.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/ChapterDrawer/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "243",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/setup.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "160,165,172",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/MoreScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "14,20-22,29-35,50-53",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/hooks/useTimeTracking.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "1,23-24,29",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/ReaderStack.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "74,120-122",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/library/hooks/useLibrary.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "3,7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/Trackers/aniList.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "12-17",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-volume-button-listener/src/NativeVolumeButtonListenerModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "10,15,18",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-zip-archive/src/NativeZipArchiveModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "4,7,10,14,18,51",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/About.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "82-87",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/translations.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 39,
+          "added_lines": 39,
+          "deleted_lines": 38,
+          "hash": "human",
+          "lines": "2-3,10-11,16-21,25-26,32,34-59",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "eslint.config.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 19,
+          "hash": "human",
+          "lines": "285-288,350,363,397-410",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/WebViewReader.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "55",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsGeneralScreen/modals/DownloadCooldownModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "349,354,373,404,429,434,458",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/StatsQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "76,163",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/BrowseSourceScreen/useBrowseSource.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/GlobalSearchScreen/GlobalSearchScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "22-26",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Button/Button.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/WebviewScreen/components/Appbar.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1,73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/discover/MalTopNovels.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "244",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1,150",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/discover/AniListTopNovels.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/LoadingMoreIndicator.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/Button.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/EmptyView.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/SourceNovels.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/more/components/MoreHeader.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "3",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/browse/migration/MigrationSourceItem.tsx"
+    }
+  ],
+  "base_commit_sha": "345d084eba5f1862c37d15c3790ce36610116d70",
+  "branch": "master",
+  "commit_sha": "f6c679b0dab8975d2f3da1fd7b780ec3f0e18d24",
+  "commit_time": "2026-07-26T18:37:53+02:00",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 167,
+      "agent_id": null,
+      "human_author": "Patrick Loser <github.verify097@passmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 167,
+      "total_deletions": 146
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
