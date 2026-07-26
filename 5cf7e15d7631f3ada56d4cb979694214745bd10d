@@ -1,0 +1,62 @@
+src/screens/settings/SettingsReaderScreen/tabs/AccessibilityTab.tsx
+  s_29f0ece30928d0::t_6930f3daaa1280 32-34,43-45,56-58,81-83
+src/screens/settings/SettingsReaderScreen/tabs/NavigationTab.tsx
+  s_29f0ece30928d0::t_6930f3daaa1280 41-43,78-80,89-91,100-102,115-117,130-132
+  human 75
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_29f0ece30928d0::t_6930f3daaa1280",
+          "lines": "32-34,43-45,56-58,81-83",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/tabs/AccessibilityTab.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_29f0ece30928d0::t_6930f3daaa1280",
+          "lines": "41-43,78-80,89-91,100-102,115-117,130-132",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "75",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/tabs/NavigationTab.tsx"
+    }
+  ],
+  "base_commit_sha": "6a7e90c179b735521aa9d778e68f1727607e8ac5",
+  "branch": "master",
+  "commit_sha": "5cf7e15d7631f3ada56d4cb979694214745bd10d",
+  "commit_time": "2026-07-26T12:59:53+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 1
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
