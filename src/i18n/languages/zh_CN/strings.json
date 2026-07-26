@@ -22,16 +22,22 @@
     "dataManagement": "数据",
     "deleteReadChapters": "删除已读章节",
     "deleteReadChaptersDialogTitle": "所有标记为已读的章节将被删除。",
+    "disabled": "Disabled",
+    "dnsOverHttps": "DNS over HTTPS (DoH)",
+    "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
     "importEpub": "导入 EPUB",
+    "importFailed": "Error importing EPUB:",
     "importNovel": "导入小说",
     "importStaticFiles": "导入静态文件",
     "novelInsertFailed": "小说插入失败",
+    "networking": "Networking",
     "useFAB": "使用浮动操作按钮",
     "userAgent": "用户代理",
     "recreateDBIndexes": "重建数据库索引",
     "recreateDBIndexesToast": "数据库索引已重建",
     "recreateDBIndexesDialogTitle": "所有数据库索引将被重建。\n此操作可能需要一些时间。",
-    "recreateDBIndexesDesc": "重建数据库索引，可提升低性能设备运行效率。"
+    "recreateDBIndexesDesc": "重建数据库索引，可提升低性能设备运行效率。",
+    "restartRequired": "Restart LNReader to apply this change."
   },
   "appearance": "外观",
   "appearanceScreen": {
@@ -45,11 +51,16 @@
     "appLanguageDefault": "默认",
     "appTheme": "主题",
     "darkTheme": "深色",
+    "dateFormat": "Date format",
+    "dateFormatDefault": "Default (%{date})",
+    "dynamicColors": "Dynamic",
     "hideBackdrop": "隐藏背景",
     "lightTheme": "浅色",
     "navbar": "导航栏",
     "novelInfo": "小说信息",
     "pureBlackDarkMode": "纯黑深色模式",
+    "relativeTimestamps": "Relative timestamps",
+    "relativeTimestampsDescription": "\"Today\" instead of \"%{date}\"",
     "showHistoryInTheNav": "在导航中显示历史",
     "showUpdatesInTheNav": "在导航中显示更新",
     "themeMode": "主题模式",
@@ -136,30 +147,58 @@
     "available": "可用",
     "deletePluginMessage": "您确定要卸载 %{name} 吗？",
     "discover": "发现",
+    "editPluginSetting": "Edit %{name}",
     "globalSearch": "全局搜索",
+    "installPlugin": "Install %{name}",
     "installFailed": "安装失败：%{name}",
     "installed": "已安装",
     "installedPlugin": "已安装 %{name}",
     "installedPlugins": "已安装插件",
+    "language": "Language",
     "lastUsed": "最近使用",
     "latest": "最新",
     "listEmpty": "从设置中启用语言",
     "migration": {
+      "cover": "Cover",
       "dialogMessage": "迁移 %{url}？",
+      "keepCurrent": "Keep current",
+      "metadata": "Novel details",
       "novelAlreadyInLibrary": "小说已经在书库中",
+      "preservedState": "Categories, matched chapter progress and bookmarks, and reader settings will be preserved.",
+      "redownloadChapters": "Re-download matching downloaded chapters",
+      "reviewDescription": "Choose what to keep when migrating to %{name}.",
+      "reviewTitle": "Review migration",
       "selectSource": "选择源",
-      "selectSourceDesc": "选择要迁移的源"
+      "selectSourceDesc": "选择要迁移的源",
+      "useDestination": "Use destination source"
     },
     "noSource": "您的图书馆没有该源的任何小说",
-    "pinnedPlugin": "已置顶%{name}",
+    "noPlugins": "No plugins found. Add a repository or enable more languages in Browse Settings.",
+    "noSearchResults": "No matching results",
+    "noSources": "No sources installed. Install a plugin to start browsing novels.",
+    "openPluginDetails": "Open details for %{name}",
+    "openPluginSettings": "Open settings for %{name}",
+    "openWebsite": "Open the website for %{name}",
+    "pinSource": "Pin %{name}",
     "pinnedPlugins": "已置顶的插件",
+    "pluginDetails": "Plugin details",
+    "pluginIcon": "plugin icon",
+    "pluginNotInstalled": "This plugin is not installed",
+    "plugins": "Plugins",
     "removeFromLibrary": "已从书库中删除",
+    "repositories": "Repositories",
     "searchbar": "搜索资源",
     "searchResults": "搜索结果",
     "selectNovel": "选择小说",
+    "sources": "Sources",
+    "togglePluginSetting": "Toggle %{name}",
     "uninstalledPlugin": "已卸载 %{name}",
-    "unpinnedPlugin": "已取消置顶%{name}",
+    "uninstall": "Uninstall",
+    "unpinSource": "Unpin %{name}",
+    "updatePlugin": "Update %{name}",
+    "updateAll": "Update all",
     "updateFailed": "更新失败",
+    "updatesPending": "Updates pending",
     "updatedTo": "已更新至 %{version}",
     "settings": {
       "title": "插件设置",
@@ -196,6 +235,7 @@
     "about": "关于",
     "add": "添加",
     "all": "全部",
+    "back": "Back",
     "backup": "备份",
     "cancel": "取消",
     "categories": "分类",
@@ -213,10 +253,13 @@
     "filter": "筛选",
     "globally": "全局",
     "install": "安装",
+    "imported": "Imported",
     "logout": "登出",
     "name": "名称",
     "newUpdateAvailable": "新版本可用",
+    "none": "None",
     "ok": "确定",
+    "close": "Close",
     "pause": "暂停",
     "preparing": "准备中",
     "remove": "移除",
@@ -225,6 +268,7 @@
     "resume": "继续",
     "retry": "重试",
     "save": "保存",
+    "saved": "Saved",
     "search": "搜索",
     "searchFor": "搜索",
     "searchResults": "搜索结果",
@@ -235,11 +279,13 @@
     "sort": "排序",
     "submit": "确定",
     "loading": "正在加载...",
+    "moreOptions": "More options",
     "warning": "警告"
   },
   "webview": {
     "refresh": "刷新",
     "share": "分享",
+    "openInWebView": "Open in WebView",
     "openInBrowser": "在浏览器中打开",
     "clearCookies": "清除Cookie",
     "cookiesCleared": "Cookie已清除",
@@ -260,6 +306,7 @@
     "chapterEmptyOrScrapeError": "章节为空或应用无法抓取",
     "chapterName": "章节：%{name}",
     "completed": "下载完成",
+    "storageInfo": "Downloaded chapters are stored in the app's private storage on this device.",
     "downloading": "正在下载",
     "downloadingNovel": "正在下载：%{name}",
     "downloadsLower": "下载",
@@ -271,6 +318,14 @@
   "generalSettingsScreen": {
     "asc": "(递增)",
     "autoDownload": "自动下载",
+    "automaticUpdates": "Automatic updates",
+    "automaticUpdatesDaily": "Daily",
+    "automaticUpdatesDescription": "Runs when a network connection is available. Android may delay background work to save battery.",
+    "automaticUpdatesEvery12Hours": "Every 12 hours",
+    "automaticUpdatesEvery2Days": "Every 2 days",
+    "automaticUpdatesEvery3Days": "Every 3 days",
+    "automaticUpdatesOff": "Off",
+    "automaticUpdatesWeekly": "Weekly",
     "bySource": "按源",
     "chapterSort": "默认章节排序",
     "desc": "(递减)",
@@ -278,12 +333,20 @@
     "disableLoadingAnimationsDesc": "可能会在运行缓慢的设备上提高性能",
     "disableHapticFeedback": "禁用振动反馈",
     "disableHapticFeedbackDescription": "关闭交互时产生的振动。",
+    "chapterDownloadCooldown": "Chapter download cooldown",
+    "chapterDownloadCooldownDesc": "Wait between sequential chapter downloads (seconds). Helps avoid source rate limits during batch downloads.",
+    "chapterDownloadCooldownPlaceholder": "Cooldown in seconds (e.g. 1.5)",
+    "chapterDownloadCooldownWarning": "Very low cooldowns may trigger rate limiting or temporary IP bans from sources.",
     "displayMode": "显示模式",
     "downloadNewChapters": "下载新章节",
     "epub": "EPUB",
     "epubLocation": "EPUB 位置",
     "epubLocationDescription": "打开或导入您的 EPUB 文件的位置。",
     "globalUpdate": "全局更新",
+    "globalUpdateCategories": "Categories",
+    "globalUpdateCategoriesDescription": "Novels in excluded categories will not be updated, even when they are also in an included category. Tap a category to cycle between included, excluded, and neither.",
+    "globalUpdateExclude": "Exclude: %{categories}",
+    "globalUpdateInclude": "Include: %{categories}",
     "gridSize": "网格尺寸",
     "gridSizeDesc": "每行 %{num} 列",
     "itemsPerRow": "每行的项目数",
@@ -294,11 +357,21 @@
     "novelSort": "小说排序",
     "refreshMetadata": "自动更新元数据",
     "refreshMetadataDescription": "更新书库时同时更新封面和详情",
+    "smartUpdate": "Smart update",
+    "smartUpdateSkipCompleted": "Skip entries with \"Completed\" status",
+    "smartUpdateSkipUnstarted": "Skip unstarted entries",
+    "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "排序",
     "updateLibrary": "打开应用时更新书库",
     "updateLibraryDesc": "不推荐在低端设备上启用",
     "updateTime": "显示上次更新时间",
-    "useFAB": "在书库中使用浮动操作按钮"
+    "useFAB": "在书库中使用浮动操作按钮",
+    "timeTracking": "Time Tracking",
+    "enableTimeTracking": "Enable time tracking",
+    "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
+    "inactivityTimeout": "Inactivity Timeout",
+    "inactivityTimeoutNever": "Never",
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
   },
   "globalSearch": {
     "allSources": "所有源",
@@ -310,6 +383,8 @@
     "clearHistorWarning": "您确定吗？所有历史记录都将删除。",
     "deleted": "历史记录已删除。",
     "nothingReadRecently": "最近没读过什么",
+    "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
+    "resetAllChapters": "Reset all chapters for this entry",
     "searchbar": "搜索历史记录"
   },
   "library": "书库",
@@ -346,6 +421,7 @@
       }
     },
     "empty": "您的书库是空的。请从浏览将小说添加到您的书库中。",
+    "emptyCategory": "This category is empty.",
     "extraMenu": {
       "importEpub": "导入EPUB",
       "openRandom": "随机打开",
@@ -372,7 +448,8 @@
       "filters": {
         "bookmarked": "已添加书签",
         "downloaded": "已下载",
-        "unread": "未读"
+        "unread": "未读",
+        "scanlators": "Ignore scanlators"
       },
       "order": {
         "byChapterName": "按章节名",
@@ -385,11 +462,16 @@
     "exportEpubModal": {
       "applyReaderTheme": "将阅读器主题应用到EPUB",
       "customJSWarning": "不是所有EPUB阅读器都能够支持自定义JS",
-      "downloadedChaptersOnly": "EPUB文件中只包含已下载的章节",
+      "description": "Choose a destination and which downloaded chapters to include in the EPUB.",
+      "directory": "Directory",
       "endChapter": "结束章节",
+      "export": "Export",
       "exportAll": "导出所有章节",
+      "fileName": "File name",
+      "fileNameRequired": "Enter a file name",
       "includeCustomCSS": "包含自定义CSS",
       "includeCustomJS": "包括自定义JS",
+      "includeChapterNumber": "Include chapter number in chapter titles",
       "invalidRange": "请输入有效的章节数字",
       "selectFolder": "选择EPUB文件的目标文件夹",
       "startChapter": "起始章节",
@@ -398,9 +480,12 @@
     },
     "epub": {
       "exportFailed": "导出EPUB失败：%{error}",
+      "exportingChapter": "%{current}/%{total} · %{chapter}",
       "exportSuccess": "成功将%{chapters}个章节导出为EPUB",
       "noDownloadedChapters": "未找到已下载的章节，请在导出前下载章节。",
-      "noNovelSelected": "没有小说被选中导出"
+      "noNovelSelected": "没有小说被选中导出",
+      "preparingExport": "Preparing EPUB",
+      "savingExport": "Saving EPUB"
     },
     "coverSaved": "封面已保存",
     "coverNotSaved": "封面未保存",
@@ -429,12 +514,16 @@
     "jumpToChapterModal": {
       "chapterName": "章节名",
       "chapterNumber": "章节编号",
+      "description": "Search by chapter number or name, then choose whether to open it or scroll to it in the chapter list.",
       "error": {
         "validChapterName": "输入有效的章节名",
         "validChapterNumber": "输入有效的章节编号"
       },
       "jumpToChapter": "跳转到章节",
-      "openChapter": "打开章节"
+      "openChapter": "打开章节",
+      "openChapterDescription": "Turn off to scroll to it in the chapter list.",
+      "searchByName": "Search by Chapter Name",
+      "searchByNameDescription": "Turn off to search by chapter number."
     },
     "migrate": "迁移",
     "noSummary": "无简介",
@@ -458,27 +547,47 @@
   },
   "readerScreen": {
     "bottomSheet": {
+      "alignCenter": "Center",
+      "alignJustify": "Justify",
+      "alignLeft": "Left",
+      "alignRight": "Right",
       "allowTextSelection": "文本选择",
       "autoscroll": "自动滚屏",
+      "autoscrollDescription": "Scroll the page automatically at a steady pace",
       "bionicReading": "仿真阅读",
+      "bionicReadingDescription": "Bold the start of each word to help your eyes track faster",
       "tapToScroll": "点击滚屏",
+      "tapToScrollDescription": "Tap the top or bottom of the screen to scroll through the chapter",
       "color": "颜色",
+      "display": "Display",
       "fontStyle": "字体样式",
       "fullscreen": "全屏",
+      "fullscreenDescription": "Hide the status bar and navigation bar while reading",
       "lineHeight": "行高",
+      "navigation": "Navigation",
       "padding": "内边距",
       "pageReader": "分页阅读（实验性）",
+      "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
       "removeExtraSpacing": "删除额外间距",
+      "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "滚动长度 (默认屏幕高度)",
       "showBatteryAndTime": "电池和时间",
+      "showBatteryAndTimeDescription": "Show battery level and clock over the reading screen",
       "showProgressPercentage": "阅读进度",
+      "showProgressPercentageDescription": "Show the percentage read at the bottom of the screen",
       "swipeGestures": "在章节之间滑动",
+      "swipeGesturesDescription": "Swipe left or right to jump to the next or previous chapter",
       "textAlign": "文本对齐",
       "textSize": "文本大小",
+      "ttsAutoPageAdvanceDescription": "Move to the next chapter automatically when narration ends",
+      "ttsEngineDescription": "Text-to-speech engine used to generate audio",
+      "ttsScrollToTopDescription": "Jump back to the top of the chapter when narration starts",
       "useChapterDrawerSwipeNavigation": "滑动打开抽屉栏",
       "verticalSeekbar": "垂直进度条",
+      "verticalSeekbarDescription": "Show a slider on the side to jump to any point in the chapter",
       "keepScreenOn": "保持屏幕开启",
-      "volumeButtonsScroll": "音量按键滚屏"
+      "volumeButtonsScroll": "音量按键滚屏",
+      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume"
     },
     "drawer": {
       "scrollToBottom": "滚动到底部",
@@ -489,7 +598,9 @@
     "finished": "已完成",
     "nextChapter": "下一章: %{name}",
     "noNextChapter": "没有下一章节",
-    "noPreviousChapter": "没有上一章节"
+    "noPreviousChapter": "没有上一章节",
+    "searchMinLength": "Enter at least %{count} characters to search",
+    "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "滚屏间隔 (秒)",
@@ -514,7 +625,8 @@
     "textColor": "文字颜色",
     "textColorModal": "文字颜色",
     "title": "阅读器",
-    "verticalSeekbarDesc": "使用垂直进度条"
+    "verticalSeekbarDesc": "使用垂直进度条",
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
   },
   "sourceScreen": {
     "noResultsFound": "未找到相应结果"
@@ -528,10 +640,16 @@
     "title": "统计数据",
     "titlesInLibrary": "书库中的小说",
     "totalChapters": "统计数据",
-    "unreadChapters": "未读章节"
+    "unreadChapters": "未读章节",
+    "topNovelsByTimeSpent": "Top novels by time spent",
+    "topCategoriesByTimeSpent": "Top categories by time spent",
+    "totalTimeSpent": "Total time spent",
+    "showNovels": "Group by novel",
+    "showCategories": "Group by category"
   },
   "tracking": "进度记录",
   "trackingScreen": {
+    "info": "Tracking is one-way: reading progress is sent to external services. Link each novel individually using its tracking button.",
     "logOutMessage": "从 %{name} 注销？",
     "revalidate": "重新认证",
     "services": "服务"
@@ -559,6 +677,7 @@
   },
   "notifications": {
     "IMPORT_EPUB": "导入EPUB",
+    "EXPORT_EPUB": "Exporting EPUB",
     "UPDATE_LIBRARY": "正在更新书库",
     "DRIVE_BACKUP": "Google云端硬盘备份",
     "DRIVE_RESTORE": "Google云端硬盘恢复",
@@ -568,5 +687,23 @@
     "LOCAL_RESTORE": "本地恢复",
     "MIGRATE_NOVEL": "正在迁移小说",
     "DOWNLOAD_CHAPTER": "正在下载章节"
+  },
+  "time": {
+    "seconds": {
+      "one": "%{count} second",
+      "other": "%{count} seconds"
+    },
+    "minutes": {
+      "one": "%{count} minute",
+      "other": "%{count} minutes"
+    },
+    "hours": {
+      "one": "%{count} hour",
+      "other": "%{count} hours"
+    },
+    "days": {
+      "one": "%{count} day",
+      "other": "%{count} days"
+    }
   }
 }
