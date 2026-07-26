@@ -1,0 +1,227 @@
+scripts/package-release-artifacts.cjs
+  s_80313b86fc7f8d::t_2337be6add9db1 37-47
+  s_80313b86fc7f8d::t_9a2423a0c50ff5 52-54
+  s_80313b86fc7f8d::t_971f7766e39dec 1-36,48-51,55-103
+scripts/prepare-release.cjs
+  s_80313b86fc7f8d::t_8c3bdc7c263ef4 8,73,75-81,85,117-121,126-134,139-140
+  s_80313b86fc7f8d::t_9a2423a0c50ff5 45-47,122-125
+  s_80313b86fc7f8d::t_4b634751c6686f 37-40,82-84,86-116,136-137
+  s_80313b86fc7f8d::t_f9b47b47476fb4 1-7,9-36,41-44,48-72,74,135,138,141-146
+.github/workflows/release.yml
+  s_80313b86fc7f8d::t_971f7766e39dec 1-89,106-148,178-189,191-198
+  s_80313b86fc7f8d::t_4b634751c6686f 90-105
+  s_80313b86fc7f8d::t_efe57e684d9331 190,199
+  s_80313b86fc7f8d::t_2337be6add9db1 149-177
+plugins/android/android-build-types.gradle
+  s_80313b86fc7f8d::t_1ff220d98d4d5b 1-5,7-15
+package.json
+  s_80313b86fc7f8d::t_971f7766e39dec 15
+  s_80313b86fc7f8d::t_f9b47b47476fb4 16
+.gitignore
+  s_80313b86fc7f8d::t_4b634751c6686f 112
+src/hooks/common/useGithubUpdateChecker.ts
+  s_80313b86fc7f8d::t_1ff220d98d4d5b 5,15-46,48-50,53,91,95
+  s_80313b86fc7f8d::t_9a2423a0c50ff5 47
+  human 16,57
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_2337be6add9db1",
+          "lines": "37-47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_9a2423a0c50ff5",
+          "lines": "52-54",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 89,
+          "added_lines": 89,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_971f7766e39dec",
+          "lines": "1-36,48-51,55-103",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "scripts/package-release-artifacts.cjs"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 26,
+          "added_lines": 26,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_8c3bdc7c263ef4",
+          "lines": "8,73,75-81,85,117-121,126-134,139-140",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_9a2423a0c50ff5",
+          "lines": "45-47,122-125",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 40,
+          "added_lines": 40,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_4b634751c6686f",
+          "lines": "37-40,82-84,86-116,136-137",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 73,
+          "added_lines": 73,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_f9b47b47476fb4",
+          "lines": "1-7,9-36,41-44,48-72,74,135,138,141-146",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "scripts/prepare-release.cjs"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 152,
+          "added_lines": 152,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_971f7766e39dec",
+          "lines": "1-89,106-148,178-189,191-198",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_4b634751c6686f",
+          "lines": "90-105",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_efe57e684d9331",
+          "lines": "190,199",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 29,
+          "added_lines": 29,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_2337be6add9db1",
+          "lines": "149-177",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/release.yml"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_1ff220d98d4d5b",
+          "lines": "1-5,7-15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "plugins/android/android-build-types.gradle"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_971f7766e39dec",
+          "lines": "15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_f9b47b47476fb4",
+          "lines": "16",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "package.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_4b634751c6686f",
+          "lines": "112",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".gitignore"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 39,
+          "added_lines": 39,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_1ff220d98d4d5b",
+          "lines": "5,15-46,48-50,53,91,95",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_80313b86fc7f8d::t_9a2423a0c50ff5",
+          "lines": "47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "16,57",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/common/useGithubUpdateChecker.ts"
+    }
+  ],
+  "base_commit_sha": "97be48dfe17b6a5261284cc3052ab5dcbab8d20d",
+  "branch": "master",
+  "commit_sha": "e62868b82ccd1784ad83cd00d338c47d2818df94",
+  "commit_time": "2026-07-26T18:27:18+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
