@@ -1,0 +1,998 @@
+src/i18n/languages/ja_JP/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/id_ID/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/ko_KR/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/or_IN/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/nl_NL/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/sr_SP/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/sv_SE/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/fr_FR/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/as_IN/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/pl_PL/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/pt_BR/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/af_ZA/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/ca_ES/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/ro_RO/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/tr_TR/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/it_IT/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/da_DK/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/hu_HU/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/ru_RU/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/zh_TW/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/he_IL/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/uk_UA/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/screens/reader/components/WebViewReader.tsx
+  h_f56025180c46fa 422-427
+  s_a8d299959b01e7::t_327379432cb9f3 4,27,428
+src/i18n/languages/en/strings.json
+  s_a8d299959b01e7::t_ddaa7fa6174d8b 584
+  human 584
+src/i18n/languages/ar_SA/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/cs_CZ/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/fi_FI/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/es_ES/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/screens/reader/utils/sanitizeChapterText.ts
+  s_a8d299959b01e7::t_327379432cb9f3 7-10
+  h_f56025180c46fa 29,31-33
+  s_a8d299959b01e7::t_90bb128c8ddc89 4-6,11-20,22-28,34-35
+  s_a8d299959b01e7::t_2493a6199bb658 30,109-114
+  s_a8d299959b01e7::t_199195c4ae390e 21
+  human 77-79
+src/i18n/languages/de_DE/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/hi_IN/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/zh_CN/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/el_GR/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/screens/reader/utils/__tests__/sanitizeChapterText.test.ts
+  s_a8d299959b01e7::t_90bb128c8ddc89 1-2,7-27,42-72,75,91-92
+  s_a8d299959b01e7::t_327379432cb9f3 3-6,76-90
+  s_a8d299959b01e7::t_543387fdc89372 29-33
+  s_a8d299959b01e7::t_11d609abdb5f9b 28,34-41
+  h_f56025180c46fa 73-74
+src/i18n/languages/no_NO/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/pt_PT/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/sq_AL/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+src/i18n/languages/vi_VN/strings.json
+  s_a8d299959b01e7::t_095701f9eafafc 488
+  human 488
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ja_JP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/id_ID/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ko_KR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/or_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/nl_NL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sr_SP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sv_SE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fr_FR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/as_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pl_PL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_BR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/af_ZA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ca_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ro_RO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/tr_TR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/it_IT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/da_DK/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hu_HU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ru_RU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_TW/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/he_IL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/uk_UA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "h_f56025180c46fa",
+          "lines": "422-427",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_327379432cb9f3",
+          "lines": "4,27,428",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/components/WebViewReader.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_ddaa7fa6174d8b",
+          "lines": "584",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "584",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ar_SA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/cs_CZ/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fi_FI/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/es_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_327379432cb9f3",
+          "lines": "7-10",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "h_f56025180c46fa",
+          "lines": "29,31-33",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_90bb128c8ddc89",
+          "lines": "4-6,11-20,22-28,34-35",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_2493a6199bb658",
+          "lines": "30,109-114",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_199195c4ae390e",
+          "lines": "21",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "77-79",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/utils/sanitizeChapterText.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/de_DE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hi_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_CN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/el_GR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 57,
+          "added_lines": 57,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_90bb128c8ddc89",
+          "lines": "1-2,7-27,42-72,75,91-92",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_327379432cb9f3",
+          "lines": "3-6,76-90",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_543387fdc89372",
+          "lines": "29-33",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_11d609abdb5f9b",
+          "lines": "28,34-41",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "h_f56025180c46fa",
+          "lines": "73-74",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/utils/__tests__/sanitizeChapterText.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/no_NO/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pt_PT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sq_AL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a8d299959b01e7::t_095701f9eafafc",
+          "lines": "488",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "488",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/vi_VN/strings.json"
+    }
+  ],
+  "base_commit_sha": "9b356ffd17c28d7f37285157f3f34488af67a266",
+  "branch": "master",
+  "commit_sha": "1b45eb88da9b557cc23f52d0a336439e36938853",
+  "commit_time": "2026-07-26T14:18:55+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 38
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
