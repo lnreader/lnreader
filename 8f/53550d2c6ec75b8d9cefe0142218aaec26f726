@@ -1,0 +1,56 @@
+src/screens/novel/components/Tracker/TrackSearchDialog.tsx
+  s_7121db36c25dbf::t_79007397219d26 2-7,109,113,124-130,216
+  s_7121db36c25dbf::t_744fa9bf83ed70 110-112
+  human 2,104-105,116-119
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_7121db36c25dbf::t_79007397219d26",
+          "lines": "2-7,109,113,124-130,216",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_7121db36c25dbf::t_744fa9bf83ed70",
+          "lines": "110-112",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "2,104-105,116-119",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/Tracker/TrackSearchDialog.tsx"
+    }
+  ],
+  "base_commit_sha": "52914b978df3267342b9cd3d18270bf19ae5a7cb",
+  "branch": "master",
+  "commit_sha": "8f53550d2c6ec75b8d9cefe0142218aaec26f726",
+  "commit_time": "2026-07-26T19:42:48+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 7
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
