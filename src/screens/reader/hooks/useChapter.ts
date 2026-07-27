@@ -162,7 +162,7 @@ export default function useChapter(
 
         // Pre-fetch adjacent page chapters if at a page boundary
         const currentPage = Number(chap.page);
-        if (!nextChap && totalPages > 0 && currentPage < totalPages) {
+        if (!nextChap && totalPages > 0 && currentPage <= totalPages) {
           const nextPage = String(currentPage + 1);
           try {
             const count = await getChapterCount(chap.novelId, nextPage);
