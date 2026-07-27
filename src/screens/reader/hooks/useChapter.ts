@@ -116,11 +116,7 @@ export default function useChapter(
       if (await NativeFile.exists(filePath)) {
         text = await NativeFile.readFile(filePath);
       } else {
-        await fetchChapter(novel.pluginId, path)
-          .then(res => {
-            text = res;
-          })
-          .catch(e => setError(e.message));
+        text = await fetchChapter(novel.pluginId, path);
       }
       return text;
     },
