@@ -1,0 +1,95 @@
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt
+  s_8a0fce108ec33c::t_96db262b354fe2 18,37-39,73-79,127-128,130-137
+  human 69,117,119
+src/services/epub/export.ts
+  s_8a0fce108ec33c::t_96db262b354fe2 86-88,93-94
+  human 90-92
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderTaskWorker.kt
+  s_8a0fce108ec33c::t_96db262b354fe2 63-65,78-80
+  human 63,76
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 21,
+          "added_lines": 21,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_96db262b354fe2",
+          "lines": "18,37-39,73-79,127-128,130-137",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "69,117,119",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_96db262b354fe2",
+          "lines": "86-88,93-94",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "90-92",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/epub/export.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_96db262b354fe2",
+          "lines": "63-65,78-80",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "63,76",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderTaskWorker.kt"
+    }
+  ],
+  "base_commit_sha": "648d21062f8812ae2a8526954a374424c0dede3c",
+  "branch": "master",
+  "commit_sha": "ac1b2f5ce446ae90db315be11d1494bc49539f40",
+  "commit_time": "2026-07-27T22:27:04+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 8
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
