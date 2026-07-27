@@ -93,6 +93,18 @@ export const repairMigrationHistory = (executor: MigrationExecutor) => {
       AND created_at = ${INITIAL_MIGRATION_CREATED_AT};
   `);
 
+  const novelColumns = executor.executeRawSync('PRAGMA table_info(Novel);');
+  const hasChaptersDownloaded = novelColumns.some(row => row[1] === 'chaptersDownloaded');
+  if (novelColumns.length > 0 && !hasChaptersDownloaded) {
+    try {
+      executor.executeSync(
+        "ALTER TABLE 'Novel' ADD COLUMN 'chaptersDownloaded' integer DEFAULT 0;",
+      );
+    } catch {
+      // column already exists
+    }
+  }
+
   const chapterColumns = executor.executeRawSync('PRAGMA table_info(Chapter);');
   const hasScanlator = chapterColumns.some(row => row[1] === 'scanlator');
 
