@@ -239,7 +239,9 @@ const updateNovel = async (
             String(page),
             enqueue,
           );
-        } catch {}
+        } catch (err) {
+          console.warn(`[LibraryUpdate] Failed to fetch page ${page} for novel ${novelName}:`, err);
+        }
       }
     }
   }
