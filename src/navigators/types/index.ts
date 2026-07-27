@@ -77,6 +77,7 @@ export type SettingsStackParamList = {
   Settings: undefined;
   GeneralSettings: undefined;
   ReaderSettings: undefined;
+  TranslationSettings: undefined;
   TrackerSettings: undefined;
   BackupSettings: undefined;
   AppearanceSettings: undefined;

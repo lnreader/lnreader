@@ -66,7 +66,15 @@ const ChapterFooter = ({
   scrollToStart,
   openDrawer,
 }: ChapterFooterProps) => {
-  const { nextChapter, prevChapter, navigateChapter } = useChapterContext();
+  const {
+    nextChapter,
+    prevChapter,
+    navigateChapter,
+    translationAvailable,
+    showTranslation,
+    translating,
+    toggleTranslation,
+  } = useChapterContext();
   const theme = useTheme();
   const rippleConfig = {
     color: theme.rippleColor,
@@ -135,6 +143,25 @@ const ChapterFooter = ({
             iconColor={theme.onSurface}
           />
         </Pressable>
+        {/*
+          Rendered only once a usable provider is configured. The footer
+          already carries five controls, so an always-present sixth would cost
+          every user spacing for a feature most never enable (spec §6.1 (c)).
+        */}
+        {translationAvailable ? (
+          <Pressable
+            android_ripple={rippleConfig}
+            style={styles.buttonStyles}
+            onPress={toggleTranslation}
+          >
+            <IconButton
+              icon={showTranslation ? 'translate-off' : 'translate'}
+              size={26}
+              disabled={translating}
+              iconColor={showTranslation ? theme.primary : theme.onSurface}
+            />
+          </Pressable>
+        ) : null}
         <Pressable
           android_ripple={rippleConfig}
           style={styles.buttonStyles}

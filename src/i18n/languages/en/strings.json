@@ -758,5 +758,25 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "translation": {
+    "failed": "Translation failed",
+    "nothingToTranslate": "Nothing to translate in this chapter",
+    "partialFailure": "{{failed}} of {{total}} sections failed to translate"
+  },
+  "translationSettings": {
+    "title": "Translation",
+    "enable": "Enable translation",
+    "enableDesc": "Show a translate button in the reader",
+    "provider": "Translation provider",
+    "targetLanguage": "Translate into",
+    "serverUrl": "Server URL",
+    "model": "Model",
+    "apiKey": "API key",
+    "apiKeyDesc": "Stored encrypted on this device and sent only to the provider you selected.",
+    "apiKeySet": "Saved",
+    "apiKeyRequired": "Required — not set",
+    "apiKeyOptional": "Optional for this provider",
+    "keyStoreUnavailable": "Secure storage is unavailable, so the API key was not saved"
   }
 }

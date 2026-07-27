@@ -633,4 +633,20 @@ export interface StringMap {
   'time.hours.other': 'string';
   'time.days.one': 'string';
   'time.days.other': 'string';
+  'translation.failed': 'string';
+  'translation.nothingToTranslate': 'string';
+  'translation.partialFailure': 'string';
+  'translationSettings.title': 'string';
+  'translationSettings.enable': 'string';
+  'translationSettings.enableDesc': 'string';
+  'translationSettings.provider': 'string';
+  'translationSettings.targetLanguage': 'string';
+  'translationSettings.serverUrl': 'string';
+  'translationSettings.model': 'string';
+  'translationSettings.apiKey': 'string';
+  'translationSettings.apiKeyDesc': 'string';
+  'translationSettings.apiKeySet': 'string';
+  'translationSettings.apiKeyRequired': 'string';
+  'translationSettings.apiKeyOptional': 'string';
+  'translationSettings.keyStoreUnavailable': 'string';
 }
