@@ -1,0 +1,404 @@
+src/i18n/languages/en/strings.json
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 740
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  s_8a0fce108ec33c::t_a23abd89aeac81 72
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 7,36,52-71,73-77
+  human 78-79
+src/services/backgroundTasks/contracts.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 84-88
+src/services/updates/LibraryUpdateQueries.ts
+  s_8a0fce108ec33c::t_1d4abfe55ef7d3 268
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 81,148,201,223,239
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 30,42
+  human 30
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskDao.kt
+  s_8a0fce108ec33c::t_1d31389ccd2c12 28-49,59
+  human 28-29,39
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderTaskWorker.kt
+  s_8a0fce108ec33c::t_1d31389ccd2c12 24-36,101-103,105
+  human 104
+src/services/migrate/migrateNovel.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 213
+src/hooks/persisted/useDownload.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 51,61
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskDatabase.kt
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 5,8,10,23-25,27-35,37
+  human 8,21,24
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 19,62,66-68,123-124,158,185,192-196,208
+  human 63-65
+src/i18n/types/index.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 625
+modules/native-background-tasks/src/NativeBackgroundTasksModule.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 25
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskEntity.kt
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 13,33
+  human 32
+src/services/backgroundTasks/taskDefinitions.ts
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 22-23,27-32
+  human 33
+src/services/backgroundTasks/__tests__/BackgroundTaskQueue.test.ts
+  s_8a0fce108ec33c::t_c7a49db11bdb26 119
+  s_8a0fce108ec33c::t_1d4abfe55ef7d3 2,12,37-42,46-49,58,93-103,105-118,120-123,127-141,143-150
+  s_8a0fce108ec33c::t_e8a94b6ae9cd22 124-126
+  human 104,142,151
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskScheduler.kt
+  s_8a0fce108ec33c::t_e5b592b7b7ca86 30,54
+  human 13,31
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "740",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_a23abd89aeac81",
+          "lines": "72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "7,36,52-71,73-77",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "78-79",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/taskDefinitions.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "84-88",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_1d4abfe55ef7d3",
+          "lines": "268",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "81,148,201,223,239",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/updates/LibraryUpdateQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "30,42",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "30",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 23,
+          "added_lines": 23,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_1d31389ccd2c12",
+          "lines": "28-49,59",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "28-29,39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskDao.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_1d31389ccd2c12",
+          "lines": "24-36,101-103,105",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "104",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderTaskWorker.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "213",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/migrate/migrateNovel.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "51,61",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useDownload.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "5,8,10,23-25,27-35,37",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "8,21,24",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskDatabase.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "19,62,66-68,123-124,158,185,192-196,208",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "63-65",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "625",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "25",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/src/NativeBackgroundTasksModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "13,33",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "32",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskEntity.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "22-23,27-32",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/taskDefinitions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_c7a49db11bdb26",
+          "lines": "119",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 65,
+          "added_lines": 65,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_1d4abfe55ef7d3",
+          "lines": "2,12,37-42,46-49,58,93-103,105-118,120-123,127-141,143-150",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e8a94b6ae9cd22",
+          "lines": "124-126",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "104,142,151",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/BackgroundTaskQueue.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_8a0fce108ec33c::t_e5b592b7b7ca86",
+          "lines": "30,54",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "13,31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskScheduler.kt"
+    }
+  ],
+  "base_commit_sha": "89d715ce6bc22ea15885ff86b3359033f3253b4c",
+  "branch": "master",
+  "commit_sha": "92759e93c03028bd1d4f4fc976c7043ad3bceac0",
+  "commit_time": "2026-07-27T22:10:47+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 10,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 10,
+      "total_deletions": 21
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
