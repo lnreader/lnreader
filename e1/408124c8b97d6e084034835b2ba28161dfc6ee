@@ -1,0 +1,47 @@
+.github/workflows/build.yml
+  s_f6ca5b3c4808ba::t_77c3ca9d49b814 170-184
+  human 168,171-172
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_f6ca5b3c4808ba::t_77c3ca9d49b814",
+          "lines": "170-184",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "168,171-172",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/build.yml"
+    }
+  ],
+  "base_commit_sha": "31cb4b994a332bd6f99864ba792aaa988bf4720b",
+  "branch": "master",
+  "commit_sha": "e1408124c8b97d6e084034835b2ba28161dfc6ee",
+  "commit_time": "2026-07-27T17:12:35+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 3
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
