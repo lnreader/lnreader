@@ -1,0 +1,1397 @@
+src/services/backup/__tests__/restoreResult.test.ts
+  s_e0d6abfb6cad6a::t_9cacd7bfc661d3 15-16,25-36,38-41,45
+  s_e0d6abfb6cad6a::t_37b1f208a0db8b 80-83
+  s_e0d6abfb6cad6a::t_588b9e515af866 20-23
+  s_e0d6abfb6cad6a::t_64d187d436b4c4 86,103
+  s_e0d6abfb6cad6a::t_ae660d2fc49306 113
+  s_e0d6abfb6cad6a::t_92da5a511019d4 147-166
+  s_e0d6abfb6cad6a::t_e52af5f681acd2 2,4,52,116-145
+  s_e0d6abfb6cad6a::t_1c387b68f14f96 67-76
+  s_e0d6abfb6cad6a::t_7fab732015ba58 17-19,24
+  s_e0d6abfb6cad6a::t_7e8f23a58bd61d 1,3,5-14,37,42-44,46-51,53-66,77-79,84-85,87-102,104-112,114-115,146,167
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 81,83,90-94
+  human 95-96
+src/screens/settings/SettingsBackupScreen/index.tsx
+  s_e0d6abfb6cad6a::t_79ea6bc34f6250 13-18,22-24,26-29,36-39,41-42,53,138-144
+  human 25,40,145
+src/screens/settings/SettingsBackupScreen/Components/BackupOptions.tsx
+  s_e0d6abfb6cad6a::t_1c4cc0f1bd261d 4-5
+  s_e0d6abfb6cad6a::t_66ba300475ec4f 2,105-114,165
+  s_e0d6abfb6cad6a::t_32964aec81558b 25-28,147,149
+  s_e0d6abfb6cad6a::t_fd56f17e09621f 1,3,6-9,11-24,29-104,115-146,148,150-164,166-171
+  s_e0d6abfb6cad6a::t_afcb4dd56c1569 10
+src/services/backup/drive/index.ts
+  s_e0d6abfb6cad6a::t_4f4aff2eba106c 125
+  s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78 12,149
+  s_e0d6abfb6cad6a::t_730dd9bacb7a2b 119,150-153,159-160
+  s_e0d6abfb6cad6a::t_a3d5757f8df8a3 72
+  s_e0d6abfb6cad6a::t_32964aec81558b 142
+  s_e0d6abfb6cad6a::t_d249bd220f47f9 6-11,19-41,49,57,67,75-81,105,109,128-141,143-148
+  s_e0d6abfb6cad6a::t_064b9bad936616 15,83,88-89
+  s_e0d6abfb6cad6a::t_0935509a05f43f 5,13-14
+  s_e0d6abfb6cad6a::t_c739c4b72361f5 44,47-48
+  human 5,9,12,22,32-42,47,50-59,80-85,98,104,107
+src/screens/settings/SettingsBackupScreen/Components/__tests__/BackupOptions.test.tsx
+  s_e0d6abfb6cad6a::t_1c4cc0f1bd261d 11,13-14
+  s_e0d6abfb6cad6a::t_0086da6d6cd7ff 1-10,16-37,39-61,63-88,90-99
+  s_e0d6abfb6cad6a::t_a344a213bf5fea 12,15,38,62,89
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 133,135-138
+  human 133,135-136
+src/services/backup/fileSections.ts
+  s_e0d6abfb6cad6a::t_cb628b2834b12a 1-29
+src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx
+  s_e0d6abfb6cad6a::t_4330f7afa191a7 16-21,107-109,138-142,145-149,156-159
+  human 131,138
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 131-136,138-144
+  human 131,133
+modules/native-background-tasks/src/NativeBackgroundTasksModule.ts
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 36
+  human 36
+src/services/backup/local/index.ts
+  s_e0d6abfb6cad6a::t_730dd9bacb7a2b 1,124,152-154,161-162
+  s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78 8,151
+  s_e0d6abfb6cad6a::t_0935509a05f43f 9-10
+  s_e0d6abfb6cad6a::t_064b9bad936616 11,73,78-79
+  s_e0d6abfb6cad6a::t_4f4aff2eba106c 43,129
+  s_e0d6abfb6cad6a::t_15d76aa7dcf2fe 135-138,144-147
+  s_e0d6abfb6cad6a::t_3cd6df970fe4ab 139,148
+  s_e0d6abfb6cad6a::t_305136ed18dd5d 2-7,19-20,23-26,30,38,48-53,102,134,140-143,149-150
+  s_e0d6abfb6cad6a::t_ae660d2fc49306 12,15
+  human 1-3,6,12,23,28,33-36,61-62,68,85-87,109,114,119-122,130-131,137
+src/services/backup/types.ts
+  s_e0d6abfb6cad6a::t_b6dbca8a9afc2b 14
+  s_e0d6abfb6cad6a::t_e318c5e3f0d5ab 1-2,6-7,17-30
+src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx
+  s_e0d6abfb6cad6a::t_32964aec81558b 67
+  s_e0d6abfb6cad6a::t_4330f7afa191a7 12-17,44-46,59-63,66,68,77
+  human 52
+src/services/backup/backupResult.ts
+  s_e0d6abfb6cad6a::t_064b9bad936616 1-33
+src/services/backup/__tests__/options.test.ts
+  s_e0d6abfb6cad6a::t_370748c5fcafb6 1-63
+src/services/backgroundTasks/__tests__/BackgroundTaskQueue.test.ts
+  s_e0d6abfb6cad6a::t_3e2dcfc3da26e5 1-48,52-55,57-80
+  s_e0d6abfb6cad6a::t_cad02142bca056 49-51,56
+src/services/backup/__tests__/backupResult.test.ts
+  s_e0d6abfb6cad6a::t_7d0ed0604450a3 2-38,40-52
+  s_e0d6abfb6cad6a::t_cdbe80272f3a22 1,39
+src/components/__tests__/Checkbox.test.tsx
+  s_e0d6abfb6cad6a::t_e33a3c6df2aa6f 46
+  s_e0d6abfb6cad6a::t_020b2a44cac99a 1-27,32-45,47-51
+  s_e0d6abfb6cad6a::t_12922ed07c8db9 28-31
+src/services/backup/options.ts
+  s_e0d6abfb6cad6a::t_e318c5e3f0d5ab 1-16,28-33
+  s_e0d6abfb6cad6a::t_370748c5fcafb6 17-27
+src/plugins/__tests__/pluginManager.test.ts
+  s_e0d6abfb6cad6a::t_d9beba9d29c90e 2
+  s_e0d6abfb6cad6a::t_e52af5f681acd2 1,3-13,31-71
+  s_e0d6abfb6cad6a::t_37b1f208a0db8b 14-22
+  s_e0d6abfb6cad6a::t_83ca57a71a2b66 23-30
+src/plugins/pluginManager.ts
+  s_e0d6abfb6cad6a::t_a822e858490696 15,196-220,227
+  s_e0d6abfb6cad6a::t_d9beba9d29c90e 12
+  human 12,15
+src/services/backup/restoreResult.ts
+  s_e0d6abfb6cad6a::t_0935509a05f43f 1-2,7,9-17,19-27,29-34,48-88,101-103,105-107
+  s_e0d6abfb6cad6a::t_ae660d2fc49306 28
+  s_e0d6abfb6cad6a::t_64d187d436b4c4 92-93,100,104
+  s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78 3-6,35-47
+  s_e0d6abfb6cad6a::t_e318c5e3f0d5ab 8,18
+  s_e0d6abfb6cad6a::t_92da5a511019d4 89-91,94-99
+src/services/backup/__tests__/local.test.ts
+  s_e0d6abfb6cad6a::t_1f5de740a6309b 1-2,6-13,23-72,113-115
+  s_e0d6abfb6cad6a::t_e4180814cd9276 3-5,15,73-112
+  s_e0d6abfb6cad6a::t_cc5d3ea2282640 14,16-22
+src/services/backgroundTasks/contracts.ts
+  s_e0d6abfb6cad6a::t_e318c5e3f0d5ab 8,13,22,67,71-74
+  s_e0d6abfb6cad6a::t_c739c4b72361f5 16-21
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 97
+  human 58,62
+src/services/backup/__tests__/utils.test.ts
+  s_e0d6abfb6cad6a::t_3cd6df970fe4ab 172-177,180
+  s_e0d6abfb6cad6a::t_33a4cc17b5c942 1-11,13-55,64-84,86-93,98-100,114-128,195-215
+  s_e0d6abfb6cad6a::t_125fc3ac8185c1 12,165-171,178-179,181-193
+  s_e0d6abfb6cad6a::t_798471289c4cd3 85,94-97,101-113,129
+  s_e0d6abfb6cad6a::t_d9ebfe42fa161d 56-63,130-164,194
+src/services/backup/selfhost/index.ts
+  s_e0d6abfb6cad6a::t_064b9bad936616 14,60,65-66
+  s_e0d6abfb6cad6a::t_a3d5757f8df8a3 51
+  s_e0d6abfb6cad6a::t_4f4aff2eba106c 97
+  s_e0d6abfb6cad6a::t_32964aec81558b 57
+  s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78 11,116
+  s_e0d6abfb6cad6a::t_d5a71200a4c122 5-10,21-22,25,28,36,56,58,81,102-115
+  s_e0d6abfb6cad6a::t_730dd9bacb7a2b 92,117-120,126-127
+  s_e0d6abfb6cad6a::t_0935509a05f43f 4,12-13
+  human 4,13,23,38,43,73,78,83
+src/components/Checkbox/Checkbox.tsx
+  s_e0d6abfb6cad6a::t_bb42b0dbe2899c 42-46
+  s_e0d6abfb6cad6a::t_66ba300475ec4f 8,24-25,36-37,40-41,68,72-89,119-125,139-143
+  s_e0d6abfb6cad6a::t_d71b4dbcae72f4 69-71
+  human 56-58,88
+src/i18n/types/index.ts
+  s_e0d6abfb6cad6a::t_b88d00c7243c39 164
+  s_e0d6abfb6cad6a::t_290b72cf2dfe3a 83-86
+  s_e0d6abfb6cad6a::t_ae660d2fc49306 90-91,106-107,118-119
+  s_e0d6abfb6cad6a::t_cdbe80272f3a22 80,104-105,120-121
+  s_e0d6abfb6cad6a::t_bc4e6f3a6a03ad 113,115,117,123,625-626
+  s_e0d6abfb6cad6a::t_881940a8b7e79d 82
+  s_e0d6abfb6cad6a::t_32964aec81558b 138-148,150,160
+src/services/backup/utils.ts
+  s_e0d6abfb6cad6a::t_b6dbca8a9afc2b 166-177,342-356
+  s_e0d6abfb6cad6a::t_cb628b2834b12a 44-46
+  s_e0d6abfb6cad6a::t_730dd9bacb7a2b 24,215-228,231,242,247,250-264,266-267,269-273,276-277,295,301-308,310,312,316-317,337-339,359-367,369
+  s_e0d6abfb6cad6a::t_7ec91ed0b594d4 41-43,87
+  s_e0d6abfb6cad6a::t_439f4d043a4aab 34,47,53,108-114,118,120-123,159
+  s_e0d6abfb6cad6a::t_e318c5e3f0d5ab 17-21,29-33,80,82,88,91-95,98,102-107,115-117,119,124-128,130,132-151,155-158,160-163,182-186,188-189,191-211,229,237-239,244-246,282-287,292-294,322-324,326,328-330,368
+  s_e0d6abfb6cad6a::t_0935509a05f43f 27,331
+  s_e0d6abfb6cad6a::t_064b9bad936616 28,78-79,81,84-85,165,178-181
+  s_e0d6abfb6cad6a::t_7d0ed0604450a3 96-97,99
+  human 164,357-358
+src/i18n/languages/en/strings.json
+  s_e0d6abfb6cad6a::t_7fab732015ba58 90-93
+  s_e0d6abfb6cad6a::t_92da5a511019d4 89
+  s_e0d6abfb6cad6a::t_3a7ba3465b9e8a 739-741
+  s_e0d6abfb6cad6a::t_588b9e515af866 94-97
+  s_e0d6abfb6cad6a::t_9cacd7bfc661d3 101-104,121-124,135,140-142
+  s_e0d6abfb6cad6a::t_064b9bad936616 87,117-120,136-139
+  s_e0d6abfb6cad6a::t_730dd9bacb7a2b 130,132,134,144
+  s_e0d6abfb6cad6a::t_4f4aff2eba106c 161-173,175,187
+  s_e0d6abfb6cad6a::t_a3d5757f8df8a3 191
+  human 689
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_9cacd7bfc661d3",
+          "lines": "15-16,25-36,38-41,45",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_37b1f208a0db8b",
+          "lines": "80-83",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_588b9e515af866",
+          "lines": "20-23",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_64d187d436b4c4",
+          "lines": "86,103",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_ae660d2fc49306",
+          "lines": "113",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_92da5a511019d4",
+          "lines": "147-166",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 33,
+          "added_lines": 33,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e52af5f681acd2",
+          "lines": "2,4,52,116-145",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 10,
+          "added_lines": 10,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_1c387b68f14f96",
+          "lines": "67-76",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7fab732015ba58",
+          "lines": "17-19,24",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 70,
+          "added_lines": 70,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7e8f23a58bd61d",
+          "lines": "1,3,5-14,37,42-44,46-51,53-66,77-79,84-85,87-102,104-112,114-115,146,167",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/__tests__/restoreResult.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "81,83,90-94",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "95-96",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskNotificationFactory.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_79ea6bc34f6250",
+          "lines": "13-18,22-24,26-29,36-39,41-42,53,138-144",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "25,40,145",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_1c4cc0f1bd261d",
+          "lines": "4-5",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_66ba300475ec4f",
+          "lines": "2,105-114,165",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_32964aec81558b",
+          "lines": "25-28,147,149",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 150,
+          "added_lines": 150,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_fd56f17e09621f",
+          "lines": "1,3,6-9,11-24,29-104,115-146,148,150-164,166-171",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_afcb4dd56c1569",
+          "lines": "10",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/BackupOptions.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4f4aff2eba106c",
+          "lines": "125",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78",
+          "lines": "12,149",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_730dd9bacb7a2b",
+          "lines": "119,150-153,159-160",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_a3d5757f8df8a3",
+          "lines": "72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_32964aec81558b",
+          "lines": "142",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 61,
+          "added_lines": 61,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d249bd220f47f9",
+          "lines": "6-11,19-41,49,57,67,75-81,105,109,128-141,143-148",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "15,83,88-89",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0935509a05f43f",
+          "lines": "5,13-14",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_c739c4b72361f5",
+          "lines": "44,47-48",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 35,
+          "hash": "human",
+          "lines": "5,9,12,22,32-42,47,50-59,80-85,98,104,107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/drive/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_1c4cc0f1bd261d",
+          "lines": "11,13-14",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 91,
+          "added_lines": 91,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0086da6d6cd7ff",
+          "lines": "1-10,16-37,39-61,63-88,90-99",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_a344a213bf5fea",
+          "lines": "12,15,38,62,89",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/__tests__/BackupOptions.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "133,135-138",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "133,135-136",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 29,
+          "added_lines": 29,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cb628b2834b12a",
+          "lines": "1-29",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/fileSections.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 23,
+          "added_lines": 23,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4330f7afa191a7",
+          "lines": "16-21,107-109,138-142,145-149,156-159",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "131,138",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/GoogleDriveModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "131-136,138-144",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "131,133",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/BackgroundTaskQueue.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "36",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/src/NativeBackgroundTasksModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_730dd9bacb7a2b",
+          "lines": "1,124,152-154,161-162",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78",
+          "lines": "8,151",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0935509a05f43f",
+          "lines": "9-10",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "11,73,78-79",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4f4aff2eba106c",
+          "lines": "43,129",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_15d76aa7dcf2fe",
+          "lines": "135-138,144-147",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3cd6df970fe4ab",
+          "lines": "139,148",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_305136ed18dd5d",
+          "lines": "2-7,19-20,23-26,30,38,48-53,102,134,140-143,149-150",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_ae660d2fc49306",
+          "lines": "12,15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 26,
+          "hash": "human",
+          "lines": "1-3,6,12,23,28,33-36,61-62,68,85-87,109,114,119-122,130-131,137",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/local/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_b6dbca8a9afc2b",
+          "lines": "14",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e318c5e3f0d5ab",
+          "lines": "1-2,6-7,17-30",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/types.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_32964aec81558b",
+          "lines": "67",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4330f7afa191a7",
+          "lines": "12-17,44-46,59-63,66,68,77",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "52",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/SelfHostModal.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 33,
+          "added_lines": 33,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "1-33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/backupResult.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 63,
+          "added_lines": 63,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_370748c5fcafb6",
+          "lines": "1-63",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/__tests__/options.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 76,
+          "added_lines": 76,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3e2dcfc3da26e5",
+          "lines": "1-48,52-55,57-80",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cad02142bca056",
+          "lines": "49-51,56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/BackgroundTaskQueue.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 50,
+          "added_lines": 50,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7d0ed0604450a3",
+          "lines": "2-38,40-52",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cdbe80272f3a22",
+          "lines": "1,39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/__tests__/backupResult.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e33a3c6df2aa6f",
+          "lines": "46",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 46,
+          "added_lines": 46,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_020b2a44cac99a",
+          "lines": "1-27,32-45,47-51",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_12922ed07c8db9",
+          "lines": "28-31",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/__tests__/Checkbox.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e318c5e3f0d5ab",
+          "lines": "1-16,28-33",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_370748c5fcafb6",
+          "lines": "17-27",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/options.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d9beba9d29c90e",
+          "lines": "2",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 53,
+          "added_lines": 53,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e52af5f681acd2",
+          "lines": "1,3-13,31-71",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_37b1f208a0db8b",
+          "lines": "14-22",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_83ca57a71a2b66",
+          "lines": "23-30",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/__tests__/pluginManager.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_a822e858490696",
+          "lines": "15,196-220,227",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d9beba9d29c90e",
+          "lines": "12",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "12,15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/pluginManager.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 74,
+          "added_lines": 74,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0935509a05f43f",
+          "lines": "1-2,7,9-17,19-27,29-34,48-88,101-103,105-107",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_ae660d2fc49306",
+          "lines": "28",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_64d187d436b4c4",
+          "lines": "92-93,100,104",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 17,
+          "added_lines": 17,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78",
+          "lines": "3-6,35-47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e318c5e3f0d5ab",
+          "lines": "8,18",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_92da5a511019d4",
+          "lines": "89-91,94-99",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/restoreResult.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 63,
+          "added_lines": 63,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_1f5de740a6309b",
+          "lines": "1-2,6-13,23-72,113-115",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e4180814cd9276",
+          "lines": "3-5,15,73-112",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cc5d3ea2282640",
+          "lines": "14,16-22",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/__tests__/local.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e318c5e3f0d5ab",
+          "lines": "8,13,22,67,71-74",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_c739c4b72361f5",
+          "lines": "16-21",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "58,62",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3cd6df970fe4ab",
+          "lines": "172-177,180",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 122,
+          "added_lines": 122,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_33a4cc17b5c942",
+          "lines": "1-11,13-55,64-84,86-93,98-100,114-128,195-215",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 23,
+          "added_lines": 23,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_125fc3ac8185c1",
+          "lines": "12,165-171,178-179,181-193",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_798471289c4cd3",
+          "lines": "85,94-97,101-113,129",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d9ebfe42fa161d",
+          "lines": "56-63,130-164,194",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/__tests__/utils.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "14,60,65-66",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_a3d5757f8df8a3",
+          "lines": "51",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4f4aff2eba106c",
+          "lines": "97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_32964aec81558b",
+          "lines": "57",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_2ef4f5d2cf5b78",
+          "lines": "11,116",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d5a71200a4c122",
+          "lines": "5-10,21-22,25,28,36,56,58,81,102-115",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_730dd9bacb7a2b",
+          "lines": "92,117-120,126-127",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0935509a05f43f",
+          "lines": "4,12-13",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "4,13,23,38,43,73,78,83",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/selfhost/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_bb42b0dbe2899c",
+          "lines": "42-46",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 38,
+          "added_lines": 38,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_66ba300475ec4f",
+          "lines": "8,24-25,36-37,40-41,68,72-89,119-125,139-143",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_d71b4dbcae72f4",
+          "lines": "69-71",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "56-58,88",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Checkbox/Checkbox.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_b88d00c7243c39",
+          "lines": "164",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_290b72cf2dfe3a",
+          "lines": "83-86",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_ae660d2fc49306",
+          "lines": "90-91,106-107,118-119",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cdbe80272f3a22",
+          "lines": "80,104-105,120-121",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_bc4e6f3a6a03ad",
+          "lines": "113,115,117,123,625-626",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_881940a8b7e79d",
+          "lines": "82",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 13,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_32964aec81558b",
+          "lines": "138-148,150,160",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_b6dbca8a9afc2b",
+          "lines": "166-177,342-356",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_cb628b2834b12a",
+          "lines": "44-46",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 68,
+          "added_lines": 68,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_730dd9bacb7a2b",
+          "lines": "24,215-228,231,242,247,250-264,266-267,269-273,276-277,295,301-308,310,312,316-317,337-339,359-367,369",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7ec91ed0b594d4",
+          "lines": "41-43,87",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_439f4d043a4aab",
+          "lines": "34,47,53,108-114,118,120-123,159",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 115,
+          "added_lines": 115,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_e318c5e3f0d5ab",
+          "lines": "17-21,29-33,80,82,88,91-95,98,102-107,115-117,119,124-128,130,132-151,155-158,160-163,182-186,188-189,191-211,229,237-239,244-246,282-287,292-294,322-324,326,328-330,368",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_0935509a05f43f",
+          "lines": "27,331",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "28,78-79,81,84-85,165,178-181",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7d0ed0604450a3",
+          "lines": "96-97,99",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 158,
+          "hash": "human",
+          "lines": "164,357-358",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backup/utils.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_7fab732015ba58",
+          "lines": "90-93",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_92da5a511019d4",
+          "lines": "89",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_3a7ba3465b9e8a",
+          "lines": "739-741",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_588b9e515af866",
+          "lines": "94-97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_9cacd7bfc661d3",
+          "lines": "101-104,121-124,135,140-142",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_064b9bad936616",
+          "lines": "87,117-120,136-139",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_730dd9bacb7a2b",
+          "lines": "130,132,134,144",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 15,
+          "added_lines": 15,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_4f4aff2eba106c",
+          "lines": "161-173,175,187",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_e0d6abfb6cad6a::t_a3d5757f8df8a3",
+          "lines": "191",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "689",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    }
+  ],
+  "base_commit_sha": "11117c1b5404820868683522242296d4f61d7642",
+  "branch": "master",
+  "commit_sha": "bd527a02efa9d642b7168e432bfb965a0ae85f51",
+  "commit_time": "2026-07-27T20:03:03+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 8,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 8,
+      "total_deletions": 249
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
