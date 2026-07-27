@@ -227,20 +227,24 @@ const updateNovel = async (
         } catch {}
       }
 
-      // Fetch any new pages that were added
-      for (let page = oldTotalPages + 1; page <= novel.totalPages; page++) {
-        try {
-          const sourcePage = await fetchPage(pluginId, novelPath, String(page));
-          await updateNovelChapters(
-            novel.name,
-            novelId,
-            sourcePage.chapters || [],
-            downloadNewChapters,
-            String(page),
-            enqueue,
-          );
-        } catch {}
-      }
+        // Fetch any new pages that were added
+        if (oldTotalPages > 0 && oldTotalPages <= novel.totalPages) {
+          for (let page = oldTotalPages + 1; page <= novel.totalPages; page++) {
+            try {
+              const sourcePage = await fetchPage(pluginId, novelPath, String(page));
+              await updateNovelChapters(
+                novel.name,
+                novelId,
+                sourcePage.chapters || [],
+                downloadNewChapters,
+                String(page),
+                enqueue,
+              );
+            } catch (err) {
+              console.warn(`Failed to fetch page ${page} for '${novel.name}':`, err);
+            }
+          }
+        }
     }
   }
 };
