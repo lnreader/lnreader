@@ -1,0 +1,29 @@
+.github/workflows/build.yml
+  s_f6ca5b3c4808ba::t_7b8791c98bb851 152,160-178
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 20,
+          "added_lines": 20,
+          "deleted_lines": 0,
+          "hash": "s_f6ca5b3c4808ba::t_7b8791c98bb851",
+          "lines": "152,160-178",
+          "overridden_lines": 0
+        }
+      ],
+      "file": ".github/workflows/build.yml"
+    }
+  ],
+  "base_commit_sha": "6d26438d2dd5b7faf21786bc390ae83b43aca6d5",
+  "branch": "master",
+  "commit_sha": "936fd223bbde71c3e0496f22ea4f28c9714d7987",
+  "commit_time": "2026-07-27T10:49:30+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {},
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
