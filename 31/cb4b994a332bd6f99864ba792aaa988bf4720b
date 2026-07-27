@@ -1,0 +1,47 @@
+src/components/BottomTabBar/index.tsx
+  s_148983de09e955::t_d3faa30be5dca6 56
+  human 56,151
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_148983de09e955::t_d3faa30be5dca6",
+          "lines": "56",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "56,151",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/BottomTabBar/index.tsx"
+    }
+  ],
+  "base_commit_sha": "72ef618af1bdb6a40783ab119649e302a89e12d8",
+  "branch": "master",
+  "commit_sha": "31cb4b994a332bd6f99864ba792aaa988bf4720b",
+  "commit_time": "2026-07-27T15:11:38+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
