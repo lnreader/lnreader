@@ -1,0 +1,53 @@
+drizzle/20260727081855_calm_chimera/migration.sql
+  s_3b1b39a483fd0f::t_5f3e301772da8a 92-93
+src/database/__tests__/db.test.ts
+  s_3b1b39a483fd0f::t_e5632dbe207682 250-251
+  s_3b1b39a483fd0f::t_5f3e301772da8a 181-215,232-249,252
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_5f3e301772da8a",
+          "lines": "92-93",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260727081855_calm_chimera/migration.sql"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_e5632dbe207682",
+          "lines": "250-251",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 54,
+          "added_lines": 54,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_5f3e301772da8a",
+          "lines": "181-215,232-249,252",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    }
+  ],
+  "base_commit_sha": "936fd223bbde71c3e0496f22ea4f28c9714d7987",
+  "branch": "master",
+  "commit_sha": "72ef618af1bdb6a40783ab119649e302a89e12d8",
+  "commit_time": "2026-07-27T15:06:36+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {},
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
