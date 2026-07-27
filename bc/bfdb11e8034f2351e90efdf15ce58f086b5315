@@ -1,0 +1,80 @@
+drizzle/20260727081855_calm_chimera/migration.sql
+  s_3b1b39a483fd0f::t_d52003ca231eb2 5-6,90-91,94-97
+  s_3b1b39a483fd0f::t_8b76bb6518469d 1-4,7-89,92-93,98-99
+drizzle/migrations.js
+  s_3b1b39a483fd0f::t_571c6707ff9ae7 10-15
+  s_3b1b39a483fd0f::t_8b76bb6518469d 6
+  human 9-13
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_d52003ca231eb2",
+          "lines": "5-6,90-91,94-97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 91,
+          "added_lines": 91,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_8b76bb6518469d",
+          "lines": "1-4,7-89,92-93,98-99",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260727081855_calm_chimera/migration.sql"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_571c6707ff9ae7",
+          "lines": "10-15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_3b1b39a483fd0f::t_8b76bb6518469d",
+          "lines": "6",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "9-13",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/migrations.js"
+    }
+  ],
+  "base_commit_sha": "3d32ddd6e933d5b5208f7813b99b8755e700d483",
+  "branch": "master",
+  "commit_sha": "bcbfdb11e8034f2351e90efdf15ce58f086b5315",
+  "commit_time": "2026-07-27T08:41:32+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 5
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
