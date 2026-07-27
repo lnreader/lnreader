@@ -298,15 +298,19 @@ A "Clear all translations" action in settings removes cached translated content
 - **Security:** provider API keys are stored in an encrypted store with a
   runtime-generated encryption key held in Android keychain/secure storage — never
   a hardcoded encryption key, never plaintext in the regular settings store.
-  Note that AES-GCM is **already available** in the dependency tree:
-  `@noble/ciphers` is a direct dependency and `src/plugins/pluginManager.ts`
-  already imports `gcm` from `@noble/ciphers/aes.js`. So app-level encryption needs
-  no new library.
-  `[UNVERIFIED]` Whether `react-native-mmkv` v4.3.2 (the pinned version) still
-  exposes a built-in `encryptionKey` option on `createMMKV()` was not confirmed —
-  `node_modules` was not installed in the environment where this was checked.
-  Decide between MMKV-native encryption and app-level AES-GCM only after checking
-  the v4 API; do not assume the v2/v3 constructor shape carries over.
+  **Resolved during Phase 1 implementation.** `react-native-mmkv` v4.3.2 does
+  still accept `encryptionKey` (plus `encryptionType: 'AES-256'`) on
+  `createMMKV()`, so MMKV-native encryption is used rather than hand-rolling
+  AES-GCM over `@noble/ciphers` — fewer moving parts, and the ciphertext never
+  passes through JS. Two caveats found while wiring it up:
+  - MMKV caps the key at **32 bytes** for AES-256, so base64-encoding 32 random
+    bytes (44 characters) overflows it. `secureStorage.ts` instead maps random
+    bytes onto a 64-character alphabet to get exactly 32 characters.
+  - The tree has **no WebCrypto polyfill**, so `randomBytes` from
+    `@noble/ciphers/utils.js` would fail at runtime in React Native. `expo-crypto`
+    (`getRandomBytesAsync`) supplies the entropy and `expo-secure-store` holds the
+    key in the Android Keystore; both were added as dependencies at the SDK 57
+    pinned versions.
 - **Resilience:** a failed chunk (timeout, rate-limit, malformed response) should
   not corrupt the whole chapter — partial failure should be visible and retryable
   rather than silently dropped or silently left in the source language mid-chapter.
@@ -434,3 +438,27 @@ rather than inventing structure.
 | Top-level settings list | eight entries routed via `SettingsStack` | `src/screens/settings/SettingsScreen.tsx`, `src/navigators/` |
 | i18n | `getString` from `@i18n/translations`; English source at `languages/en/strings.json`; `pnpm generate:string-types` regenerates key types | `src/i18n/`, `package.json` |
 | Provider-abstraction analogue | the plugin system is the closest existing "pluggable third-party backend behind a common interface" pattern in the codebase and is worth reading before designing the translation provider interface | `src/plugins/pluginManager.ts`, `src/plugins/types/` |
+
+## Appendix C: Implementation Status
+
+**Phase 1 service layer — landed.** `src/services/translation/`:
+
+| Module | Responsibility |
+|---|---|
+| `types.ts` | Provider interface, discriminated-union config, `TranslationError` with a retryable/non-retryable classification |
+| `secureStorage.ts` | Encrypted MMKV store; key generated via `expo-crypto`, held in `expo-secure-store` |
+| `storage.ts` | Filesystem read/write/delete of `index.<lang>.html`, plus the §6.6 sweep |
+| `htmlSegments.ts` | Extracts text nodes for translation and writes them back, leaving markup and `file://` image sources untouched |
+| `chunking.ts` | Chunk sizing and splitting, with offsets that map failures back to segment positions |
+| `providers/` | `libretranslate`, `gemini`, `ollama`, plus shared HTTP error classification and LLM prompt/JSON handling |
+| `translateChapter.ts` | Orchestration: chunk pacing, per-request timeouts, partial-failure survival, retry-only-failed-chunks |
+
+Covered by 64 tests. Not yet built: the settings screen, the per-chapter reader
+toggle, and the `useChapter` integration — all of which depend on open question
+6 (control placement) being decided first.
+
+A note for whoever picks this up: `clearMocks`/`restoreMocks` are set at the top
+level of `jest.config.js`, but the repo uses `projects`, and Jest ignores those
+keys outside a project config — so mock state currently leaks between tests
+repo-wide. `__tests__/storage.test.ts` clears mocks itself rather than depending
+on it. Worth fixing globally, but that is not this feature's change to make.
