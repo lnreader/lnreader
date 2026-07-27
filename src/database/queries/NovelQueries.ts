@@ -24,6 +24,10 @@ import NativeFile from '@modules/native-file'
  * Inserts a novel and its chapters into the database using Drizzle ORM.
  * Also handles downloading the novel cover if available.
  */
+const sanitizePath = (path: string): string => {
+  return path.replace(/\.\.[/\\]/g, '').replace(/^[/\\]+/, '');
+};
+
 export const insertNovelAndChapters = async (
   pluginId: string,
   sourceNovel: SourceNovel,
@@ -32,7 +36,7 @@ export const insertNovelAndChapters = async (
     return tx
       .insert(novelSchema)
       .values({
-        path: sourceNovel.path,
+        path: sanitizePath(sourceNovel.path),
         pluginId,
         name: sourceNovel.name,
         cover: sourceNovel.cover || null,
