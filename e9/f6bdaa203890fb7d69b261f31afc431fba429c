@@ -1,0 +1,54 @@
+src/components/Menu/index.tsx
+  s_d8ca3cd74dd19f::t_f36105cbf63159 153-155
+  s_d8ca3cd74dd19f::t_43cace2b6ee163 77
+  s_d8ca3cd74dd19f::t_2aaed600639fbb 10-11,13,15,18,21-29,82-86,89,91-92,94,96-99,103,131-149,151-152,156-158,160-168,170-180,196,213-215,217,220,229,231-232,236,241-244
+src/components/__tests__/Menu.test.tsx
+  s_d8ca3cd74dd19f::t_f36105cbf63159 29,61
+  s_d8ca3cd74dd19f::t_2aaed600639fbb 1-28,30-42,59-60,62-86
+  s_d8ca3cd74dd19f::t_cdc8b094592be4 43-58
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "hash": "s_d8ca3cd74dd19f::t_f36105cbf63159",
+          "lines": "153-155"
+        },
+        {
+          "hash": "s_d8ca3cd74dd19f::t_43cace2b6ee163",
+          "lines": "77"
+        },
+        {
+          "hash": "s_d8ca3cd74dd19f::t_2aaed600639fbb",
+          "lines": "10-11,13,15,18,21-29,82-86,89,91-92,94,96-99,103,131-149,151-152,156-158,160-168,170-180,196,213-215,217,220,229,231-232,236,241-244"
+        }
+      ],
+      "file": "src/components/Menu/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_d8ca3cd74dd19f::t_f36105cbf63159",
+          "lines": "29,61"
+        },
+        {
+          "hash": "s_d8ca3cd74dd19f::t_2aaed600639fbb",
+          "lines": "1-28,30-42,59-60,62-86"
+        },
+        {
+          "hash": "s_d8ca3cd74dd19f::t_cdc8b094592be4",
+          "lines": "43-58"
+        }
+      ],
+      "file": "src/components/__tests__/Menu.test.tsx"
+    }
+  ],
+  "base_commit_sha": "3d34658d0faee3f1a1dce6ed77f745804851c4c0",
+  "commit_sha": "e9f6bdaa203890fb7d69b261f31afc431fba429c",
+  "commit_time": "2026-07-24T22:16:17+05:30",
+  "commit_type": "rebase",
+  "harness_aidlc_version": "1.6.16",
+  "prompts": {},
+  "schema_version": "authorship/3.0.0"
+}

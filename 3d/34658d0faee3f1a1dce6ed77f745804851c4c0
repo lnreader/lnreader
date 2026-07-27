@@ -1,0 +1,135 @@
+src/screens/novel/components/NovelBottomSheet.tsx
+  s_2259385de7ae67::t_7ede0f26880d52 14
+  s_2259385de7ae67::t_920daae5adc14b 20,241
+src/components/TopTabBar/TopTabBar.tsx
+  s_2259385de7ae67::t_920daae5adc14b 1-2,4-12,15-20,23-24
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_2259385de7ae67::t_16daf7b955e018 59-60
+  s_2259385de7ae67::t_5e67bf4e2e539a 2,7-12,15,36-58,61-64,84-85,199-233,363-372,399-402
+  s_2259385de7ae67::t_fb37be90c5f569 180-198
+src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx
+  s_2259385de7ae67::t_920daae5adc14b 20,158
+  s_2259385de7ae67::t_7ede0f26880d52 22
+src/screens/library/LibraryScreen.tsx
+  s_2259385de7ae67::t_920daae5adc14b 28,196
+  s_2259385de7ae67::t_7ede0f26880d52 24-27,29
+src/components/index.ts
+  s_2259385de7ae67::t_920daae5adc14b 29
+src/screens/browse/BrowseScreen.tsx
+  s_2259385de7ae67::t_920daae5adc14b 10,118
+  s_2259385de7ae67::t_7ede0f26880d52 3
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_2259385de7ae67::t_e560a9ef6e6e5a 10
+  s_2259385de7ae67::t_920daae5adc14b 27,199
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_7ede0f26880d52",
+          "lines": "14"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "20,241"
+        }
+      ],
+      "file": "src/screens/novel/components/NovelBottomSheet.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "1-2,4-12,15-20,23-24"
+        }
+      ],
+      "file": "src/components/TopTabBar/TopTabBar.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_16daf7b955e018",
+          "lines": "59-60"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_5e67bf4e2e539a",
+          "lines": "2,7-12,15,36-58,61-64,84-85,199-233,363-372,399-402"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_fb37be90c5f569",
+          "lines": "180-198"
+        }
+      ],
+      "file": "src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "20,158"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_7ede0f26880d52",
+          "lines": "22"
+        }
+      ],
+      "file": "src/screens/reader/components/ReaderBottomSheet/ReaderBottomSheet.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "28,196"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_7ede0f26880d52",
+          "lines": "24-27,29"
+        }
+      ],
+      "file": "src/screens/library/LibraryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "29"
+        }
+      ],
+      "file": "src/components/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "10,118"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_7ede0f26880d52",
+          "lines": "3"
+        }
+      ],
+      "file": "src/screens/browse/BrowseScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "hash": "s_2259385de7ae67::t_e560a9ef6e6e5a",
+          "lines": "10"
+        },
+        {
+          "hash": "s_2259385de7ae67::t_920daae5adc14b",
+          "lines": "27,199"
+        }
+      ],
+      "file": "src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx"
+    }
+  ],
+  "base_commit_sha": "d44ce7412ac512b392d35e33d6dc9d98587a2350",
+  "commit_sha": "3d34658d0faee3f1a1dce6ed77f745804851c4c0",
+  "commit_time": "2026-07-24T22:16:17+05:30",
+  "commit_type": "rebase",
+  "harness_aidlc_version": "1.6.16",
+  "prompts": {},
+  "schema_version": "authorship/3.0.0"
+}
