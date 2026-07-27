@@ -1,0 +1,47 @@
+README.md
+  s_68ff28df1a50c0::t_2087f8e27db883 38-39
+  human 38-39
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_68ff28df1a50c0::t_2087f8e27db883",
+          "lines": "38-39",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "38-39",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "README.md"
+    }
+  ],
+  "base_commit_sha": "bd527a02efa9d642b7168e432bfb965a0ae85f51",
+  "branch": "master",
+  "commit_sha": "89d715ce6bc22ea15885ff86b3359033f3253b4c",
+  "commit_time": "2026-07-27T21:54:45+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
