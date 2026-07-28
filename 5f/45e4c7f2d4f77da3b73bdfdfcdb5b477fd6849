@@ -1,0 +1,89 @@
+src/database/db.ts
+  019fa7c0-e96e-7662-9cbc-2963fdd361a9 39,45,113-121,123-136,263
+  human 122,137-138
+src/database/__tests__/db.test.ts
+  human 9,468-587
+drizzle/20260727081855_calm_chimera/migration.sql
+  human 95-130
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 26,
+          "added_lines": 107,
+          "deleted_lines": 0,
+          "hash": "019fa7c0-e96e-7662-9cbc-2963fdd361a9",
+          "lines": "39,45,113-121,123-136,263",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "122,137-138",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/db.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 121,
+          "added_lines": 121,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "9,468-587",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "95-130",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260727081855_calm_chimera/migration.sql"
+    }
+  ],
+  "base_commit_sha": "ca24671a2f847c5722009b6b8451e9c54d3a2c12",
+  "branch": "master",
+  "commit_sha": "5f45e4c7f2d4f77da3b73bdfdfcdb5b477fd6849",
+  "commit_time": "2026-07-28T20:36:59+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "019fa7c0-e96e-7662-9cbc-2963fdd361a9": {
+      "accepted_lines": 26,
+      "agent_id": {
+        "id": "019fa7c0-e96e-7662-9cbc-2963fdd361a9",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 107,
+      "total_deletions": 0
+    },
+    "human": {
+      "accepted_lines": 160,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 160,
+      "total_deletions": 1
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
