@@ -3,6 +3,10 @@ def releaseAbiSplitsEnabled = providers
     .map { value -> value.toBoolean() }
     .getOrElse(false)
 
+react {
+    hermesFlags = ["-O", "-output-source-map"]
+}
+
 android {
     splits {
         abi {
