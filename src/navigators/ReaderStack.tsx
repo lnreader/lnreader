@@ -12,7 +12,7 @@ import {
   ReaderStackParamList,
 } from './types';
 import { NovelContextProvider } from '@screens/novel/NovelContext';
-import { useTheme } from '@hooks/persisted';
+import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 
 const Stack = createNativeStackNavigator<ReaderStackParamList>();
 
@@ -20,6 +20,9 @@ const Stack = createNativeStackNavigator<ReaderStackParamList>();
 const ReaderStack = ({ route }) => {
   const params = useRef(route?.params);
   const theme = useTheme();
+  // The reader has a background of its own, so the screen is given the same one
+  // to keep the app background from showing while the chapter is pushed.
+  const { theme: readerBackground } = useChapterReaderSettings();
   // eslint-disable-next-line react-hooks/refs
   const routeParams = route?.params ?? params.current;
 
@@ -36,7 +39,11 @@ const ReaderStack = ({ route }) => {
         }}
       >
         <Stack.Screen name="Novel" component={Novel} />
-        <Stack.Screen name="Chapter" component={Reader} />
+        <Stack.Screen
+          name="Chapter"
+          component={Reader}
+          options={{ contentStyle: { backgroundColor: readerBackground } }}
+        />
       </Stack.Navigator>
     </NovelContextProvider>
   );

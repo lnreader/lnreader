@@ -1,4 +1,8 @@
 const {
+  AndroidConfig,
+  withAndroidColors,
+  withAndroidColorsNight,
+  withAndroidStyles,
   withAppBuildGradle,
   withDangerousMod,
 } = require('@expo/config-plugins');
@@ -34,6 +38,53 @@ const DRAWABLE_RESOURCE_NAMES = [
   'splashscreen_logo',
 ];
 const ANDROID_DENSITIES = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
+
+/**
+ * `AppTheme` inherits `android:windowBackground` from
+ * `Theme.AppCompat.DayNight.NoActionBar`, which resolves to a near-white colour
+ * whenever the system is in light mode. The window is visible for the frames
+ * between the splash screen going away and React drawing its first frame, so
+ * the app opens with a white flash for anyone using a dark theme on a light
+ * system. These are the backgrounds of the default light and dark themes.
+ */
+const WINDOW_BACKGROUND_RESOURCE = 'lnreaderWindowBackground';
+const WINDOW_BACKGROUND_LIGHT = '#FEFBFF';
+const WINDOW_BACKGROUND_DARK = '#1B1B1F';
+
+const withWindowBackgroundColors = config => {
+  config = withAndroidColors(config, config => {
+    config.modResults = AndroidConfig.Colors.assignColorValue(
+      config.modResults,
+      { name: WINDOW_BACKGROUND_RESOURCE, value: WINDOW_BACKGROUND_LIGHT },
+    );
+
+    return config;
+  });
+
+  return withAndroidColorsNight(config, config => {
+    config.modResults = AndroidConfig.Colors.assignColorValue(
+      config.modResults,
+      { name: WINDOW_BACKGROUND_RESOURCE, value: WINDOW_BACKGROUND_DARK },
+    );
+
+    return config;
+  });
+};
+
+const withWindowBackgroundStyle = config =>
+  withAndroidStyles(config, config => {
+    config.modResults = AndroidConfig.Styles.assignStylesValue(
+      config.modResults,
+      {
+        add: true,
+        parent: AndroidConfig.Styles.getAppThemeGroup(),
+        name: 'android:windowBackground',
+        value: `@color/${WINDOW_BACKGROUND_RESOURCE}`,
+      },
+    );
+
+    return config;
+  });
 
 const withBuildGradleCustomizations = config =>
   withAppBuildGradle(config, config => {
@@ -133,5 +184,7 @@ const withAndroidVariantAssets = config =>
 
 module.exports = config => {
   config = withBuildGradleCustomizations(config);
+  config = withWindowBackgroundColors(config);
+  config = withWindowBackgroundStyle(config);
   return withAndroidVariantAssets(config);
 };
