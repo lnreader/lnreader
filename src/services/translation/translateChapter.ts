@@ -14,8 +14,10 @@ import { sleep } from '@utils/sleep';
 
 import {
   DEFAULT_CHUNK_SIZE,
+  DEFAULT_MAX_PARALLEL_TRANSLATIONS,
   DEFAULT_REQUEST_DELAY_MS,
   DEFAULT_REQUEST_TIMEOUT_MS,
+  clampParallelTranslations,
   splitIntoChunks,
   type TranslationChunk,
 } from './chunking';
@@ -47,6 +49,8 @@ export interface TranslateChapterOptions {
   chunkSize?: number;
   requestDelayMs?: number;
   requestTimeoutMs?: number;
+  /** Concurrent chunk requests. Ignored for non-local providers. */
+  maxParallel?: number;
   /** Cancels the whole run — e.g. the reader navigating away. */
   signal?: AbortSignal;
   onProgress?: (completed: number, total: number) => void;
@@ -119,6 +123,7 @@ export const translateChapterHtml = async ({
   chunkSize = DEFAULT_CHUNK_SIZE,
   requestDelayMs = DEFAULT_REQUEST_DELAY_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+  maxParallel = DEFAULT_MAX_PARALLEL_TRANSLATIONS,
   signal,
   onProgress,
   onlyChunks,
@@ -152,14 +157,10 @@ export const translateChapterHtml = async ({
 
   const translations = new Array<string | undefined>(segments.length);
   const failures: ChunkFailure[] = [];
+  let completed = 0;
 
-  for (let i = 0; i < pending.length; i++) {
-    if (signal?.aborted) {
-      throw new TranslationError('timeout', 'Translation was cancelled.');
-    }
-
-    const chunk = pending[i];
-
+  /** Translates one chunk, writing results in place. Never throws per-chunk. */
+  const runChunk = async (chunk: TranslationChunk) => {
     try {
       const result = await withTimeout(requestTimeoutMs, signal, chunkSignal =>
         provider.translateBatch(chunk.texts, {
@@ -192,12 +193,51 @@ export const translateChapterHtml = async ({
       failures.push(toChunkFailure(chunk, error));
     }
 
-    onProgress?.(i + 1, pending.length);
+    completed += 1;
+    onProgress?.(completed, pending.length);
+  };
 
-    // Pace requests to the same provider, but never pay the delay after the
-    // final chunk.
-    if (requestDelayMs > 0 && i < pending.length - 1) {
-      await sleep(requestDelayMs);
+  /**
+   * Parallelism is a local-engine-only control: firing concurrent requests at
+   * a rate-limited cloud API just converts throughput into 429s. Cloud
+   * providers therefore stay strictly sequential regardless of the setting.
+   */
+  const parallel = provider.isLocal
+    ? Math.min(clampParallelTranslations(maxParallel), pending.length)
+    : 1;
+
+  if (parallel > 1) {
+    // Workers pull from a shared cursor so a slow chunk doesn't stall a lane
+    // that could be doing useful work. The inter-request delay is skipped:
+    // it exists to respect cloud rate limits, which is precisely the case
+    // this branch never runs in.
+    let cursor = 0;
+    const worker = async () => {
+      for (;;) {
+        if (signal?.aborted) {
+          throw new TranslationError('timeout', 'Translation was cancelled.');
+        }
+        const index = cursor++;
+        if (index >= pending.length) {
+          return;
+        }
+        await runChunk(pending[index]);
+      }
+    };
+    await Promise.all(Array.from({ length: parallel }, () => worker()));
+  } else {
+    for (let i = 0; i < pending.length; i++) {
+      if (signal?.aborted) {
+        throw new TranslationError('timeout', 'Translation was cancelled.');
+      }
+
+      await runChunk(pending[i]);
+
+      // Pace requests to the same provider, but never pay the delay after the
+      // final chunk.
+      if (requestDelayMs > 0 && i < pending.length - 1) {
+        await sleep(requestDelayMs);
+      }
     }
   }
 

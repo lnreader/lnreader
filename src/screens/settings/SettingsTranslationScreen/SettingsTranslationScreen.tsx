@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Appbar, List, SafeAreaView } from '@components';
+import { Appbar, ConfirmationDialog, List, SafeAreaView } from '@components';
 import { useBoolean } from '@hooks';
 import { useTheme } from '@hooks/persisted';
 import { useTranslationSettings } from '@hooks/persisted/useTranslationSettings';
@@ -10,8 +10,12 @@ import { getString } from '@i18n/translations';
 import { SettingsStackParamList } from '@navigators/types';
 import {
   MAX_CHUNK_SIZE,
+  MAX_PARALLEL_TRANSLATIONS,
   MIN_CHUNK_SIZE,
+  MIN_PARALLEL_TRANSLATIONS,
   TARGET_LANGUAGES,
+  deleteAllTranslations,
+  isLocalProvider,
   TRANSLATION_PROVIDER_IDS,
   deleteApiKey,
   getTranslationProvider,
@@ -61,6 +65,7 @@ const SettingsTranslationScreen = ({
     chunkSize,
     requestDelayMs,
     requestTimeoutMs,
+    maxParallelTranslations,
     setTranslationSettings,
     setProvider,
     setProviderConfig,
@@ -72,6 +77,8 @@ const SettingsTranslationScreen = ({
   const chunkSizeModal = useBoolean();
   const delayModal = useBoolean();
   const timeoutModal = useBoolean();
+  const parallelModal = useBoolean();
+  const clearConfirm = useBoolean();
 
   const [keyStored, setKeyStored] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -162,6 +169,13 @@ const SettingsTranslationScreen = ({
   );
 
   const activeFields = PROVIDER_FIELDS[config.provider];
+  /** Parallelism only applies to local engines, so the row is hidden otherwise. */
+  const showParallel = isLocalProvider(config.provider);
+
+  const clearTranslations = useCallback(async () => {
+    const removed = await deleteAllTranslations();
+    showToast(getString('translationSettings.cleared', { count: removed }));
+  }, []);
 
   return (
     <SafeAreaView excludeTop>
@@ -260,6 +274,26 @@ const SettingsTranslationScreen = ({
             onPress={timeoutModal.setTrue}
             theme={theme}
           />
+          {showParallel ? (
+            <List.Item
+              title={getString('translationSettings.maxParallel')}
+              description={getString('translationSettings.maxParallelDesc', {
+                count: maxParallelTranslations,
+              })}
+              onPress={parallelModal.setTrue}
+              theme={theme}
+            />
+          ) : null}
+
+          <List.SubHeader theme={theme}>
+            {getString('translationSettings.storage')}
+          </List.SubHeader>
+          <List.Item
+            title={getString('translationSettings.clearAll')}
+            description={getString('translationSettings.clearAllDesc')}
+            onPress={clearConfirm.setTrue}
+            theme={theme}
+          />
         </List.Section>
       </ScrollView>
 
@@ -287,9 +321,24 @@ const SettingsTranslationScreen = ({
         visible={editingField !== undefined}
         onDismiss={() => setEditingField(undefined)}
         onSubmit={value => {
-          if (editingField) {
-            setProviderConfig({ [editingField.key]: value });
+          if (!editingField) {
+            return;
           }
+          // A prompt template that lost {TEXT} would send the model an
+          // instruction with nothing to translate, and every chunk would come
+          // back unusable. Reject rather than persist it.
+          if (
+            editingField.requiredPlaceholder &&
+            !value.includes(editingField.requiredPlaceholder)
+          ) {
+            showToast(
+              getString('translationSettings.missingPlaceholder', {
+                placeholder: editingField.requiredPlaceholder,
+              }),
+            );
+            return;
+          }
+          setProviderConfig({ [editingField.key]: value });
         }}
       />
       <TextFieldModal
@@ -333,6 +382,26 @@ const SettingsTranslationScreen = ({
         onSubmit={seconds =>
           setTranslationSettings({ requestTimeoutMs: seconds * 1000 })
         }
+      />
+      <NumberFieldModal
+        title={getString('translationSettings.maxParallel')}
+        description={getString('translationSettings.maxParallelHint')}
+        value={maxParallelTranslations}
+        min={MIN_PARALLEL_TRANSLATIONS}
+        max={MAX_PARALLEL_TRANSLATIONS}
+        visible={parallelModal.value}
+        onDismiss={parallelModal.setFalse}
+        onSubmit={value =>
+          setTranslationSettings({ maxParallelTranslations: value })
+        }
+      />
+      <ConfirmationDialog
+        title={getString('translationSettings.clearAll')}
+        message={getString('translationSettings.clearAllConfirm')}
+        confirmLabel={getString('common.delete')}
+        visible={clearConfirm.value}
+        onConfirm={clearTranslations}
+        onDismiss={clearConfirm.setFalse}
       />
     </SafeAreaView>
   );

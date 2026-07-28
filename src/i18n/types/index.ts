@@ -673,6 +673,17 @@ export interface StringMap {
   'translationSettings.requestDelayDesc': 'string';
   'translationSettings.requestTimeout': 'string';
   'translationSettings.requestTimeoutDesc': 'string';
+  'translationSettings.systemPrompt': 'string';
+  'translationSettings.userPrompt': 'string';
+  'translationSettings.missingPlaceholder': 'string';
+  'translationSettings.maxParallel': 'string';
+  'translationSettings.maxParallelDesc': 'string';
+  'translationSettings.maxParallelHint': 'string';
+  'translationSettings.storage': 'string';
+  'translationSettings.clearAll': 'string';
+  'translationSettings.clearAllDesc': 'string';
+  'translationSettings.clearAllConfirm': 'string';
+  'translationSettings.cleared': 'string';
   'novelTranslation.title': 'string';
   'novelTranslation.autoTranslate': 'string';
   'novelTranslation.autoTranslateDesc': 'string';

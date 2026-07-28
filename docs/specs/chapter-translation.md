@@ -386,7 +386,7 @@ silently resolved:
 - User-configurable chunk size, delay, timeout in settings.
 - "Test" action per provider.
 
-**Phase 3 — Bulk & polish**
+**Phase 3 — Bulk & polish** *(landed — see Appendix C)*
 
 - Bulk "translate all chapters" per novel, with a queue/progress UI.
   Library-wide translation is cut (see §6.3).
@@ -490,7 +490,10 @@ Two Phase 2 decisions worth recording:
   connection without the reader present, which is the surprise the question was
   raised about. Revisit if bulk translation (Phase 3) makes it moot.
 
-**Phase 3 (partial) — per-novel bulk translation landed.**
+**Phase 3 — landed.**
+
+Per-novel bulk translation, max-parallel for local engines, prompt-template
+editing, and "clear all translations".
 
 `translateNovel.ts` runs as a `TRANSLATE_NOVEL` background task on the existing
 `BackgroundTaskQueue`, so it survives leaving the novel screen and reports
@@ -510,12 +513,35 @@ Three details that matter:
   its checkpoint is what stops the user paying their provider twice for the same
   chapters.
 
-Library-wide bulk translation is **cut** (see §6.3). Remaining for Phase 3:
-max-parallel for local engines, prompt-template editing, and a "clear all
-translations" action (the service function exists and is tested; only the UI is
-missing).
+Library-wide bulk translation is **cut** (see §6.3).
 
-Covered by 146 tests across the translation service and reader hook.
+The rest of Phase 3:
+
+- **Max parallel translations** is applied *only* to local engines, as §6.5
+  specifies. The orchestrator ignores the setting entirely for cloud providers
+  — firing concurrent requests at a rate-limited API converts throughput into
+  429s rather than speed. The parallel path also skips the inter-request delay,
+  which exists to respect cloud rate limits and so has no meaning there. Worker
+  lanes pull from a shared cursor, and results are written by source index, so
+  out-of-order completion cannot scramble the document (tested).
+- **Prompt templates** are editable for the six LLM providers. The user prompt
+  editor refuses to save a template that no longer contains `{TEXT}`: losing it
+  would send the model an instruction with nothing to translate and every chunk
+  would come back unusable. A test asserts the shipped defaults satisfy their
+  own guard, and another asserts no provider advertises a field its config
+  doesn't actually have.
+- **Clear all translations** is wired to the already-tested
+  `deleteAllTranslations()` sweep, behind a confirmation dialog, and reports how
+  many files it removed.
+
+**§6.5's "Translation Queue" view needed no new UI.** `TRANSLATE_NOVEL` runs on
+the shared `BackgroundTaskQueue`, and the existing Task Queue screen renders
+queued tasks generically from their metadata — so translation jobs already
+appear there with title and progress alongside downloads. Building a separate
+translation-only queue screen would have duplicated it.
+
+Covered by 164 tests across the translation service, reader hook and settings
+metadata (589 repo-wide).
 
 A note for whoever picks this up: `clearMocks`/`restoreMocks` are set at the top
 level of `jest.config.js`, but the repo uses `projects`, and Jest ignores those

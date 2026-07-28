@@ -12,6 +12,7 @@ import { useCallback, useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import {
   DEFAULT_CHUNK_SIZE,
+  DEFAULT_MAX_PARALLEL_TRANSLATIONS,
   DEFAULT_REQUEST_DELAY_MS,
   DEFAULT_REQUEST_TIMEOUT_MS,
   getDefaultConfig,
@@ -35,6 +36,8 @@ export interface TranslationSettings {
   chunkSize: number;
   requestDelayMs: number;
   requestTimeoutMs: number;
+  /** Concurrent chunk requests. Only ever applied to local engines. */
+  maxParallelTranslations: number;
 }
 
 export const defaultTranslationSettings: TranslationSettings = {
@@ -45,6 +48,7 @@ export const defaultTranslationSettings: TranslationSettings = {
   chunkSize: DEFAULT_CHUNK_SIZE,
   requestDelayMs: DEFAULT_REQUEST_DELAY_MS,
   requestTimeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
+  maxParallelTranslations: DEFAULT_MAX_PARALLEL_TRANSLATIONS,
 };
 
 /** Non-reactive read, for background services outside the React tree. */

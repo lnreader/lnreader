@@ -158,6 +158,7 @@ export default function useChapterTranslation(
           chunkSize: settings.chunkSize,
           requestDelayMs: settings.requestDelayMs,
           requestTimeoutMs: settings.requestTimeoutMs,
+          maxParallel: settings.maxParallelTranslations,
           signal: controller.signal,
         });
 
@@ -211,6 +212,7 @@ export default function useChapterTranslation(
       settings.chunkSize,
       settings.requestDelayMs,
       settings.requestTimeoutMs,
+      settings.maxParallelTranslations,
     ],
   );
 

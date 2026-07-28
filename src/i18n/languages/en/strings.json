@@ -801,7 +801,18 @@
     "requestDelay": "Delay between requests",
     "requestDelayDesc": "{{ms}} ms",
     "requestTimeout": "Request timeout",
-    "requestTimeoutDesc": "{{seconds}} seconds"
+    "requestTimeoutDesc": "{{seconds}} seconds",
+    "systemPrompt": "System prompt",
+    "userPrompt": "User prompt template",
+    "missingPlaceholder": "The template must still contain {{placeholder}}",
+    "maxParallel": "Max parallel translations",
+    "maxParallelDesc": "{{count}} at a time",
+    "maxParallelHint": "Only applies to local engines. Cloud providers stay sequential to avoid rate limits.",
+    "storage": "Storage",
+    "clearAll": "Clear all translations",
+    "clearAllDesc": "Delete cached translated chapters. Originals are kept.",
+    "clearAllConfirm": "Translated chapters will be deleted for every novel. Downloaded originals are not affected.",
+    "cleared": "Deleted {{count}} translated chapters"
   },
   "novelTranslation": {
     "title": "Translation",

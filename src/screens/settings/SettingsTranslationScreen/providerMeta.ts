@@ -52,7 +52,9 @@ export type ProviderFieldKey =
   | 'url'
   | 'headersTemplate'
   | 'bodyTemplate'
-  | 'responsePath';
+  | 'responsePath'
+  | 'systemPrompt'
+  | 'userPromptTemplate';
 
 export interface ProviderFieldSpec {
   key: ProviderFieldKey;
@@ -60,6 +62,8 @@ export interface ProviderFieldSpec {
   /** Rendered as a multi-line editor and not truncated in the row. */
   multiline?: boolean;
   keyboardType?: 'default' | 'url';
+  /** Save is rejected unless the value contains this substring. */
+  requiredPlaceholder?: string;
 }
 
 const FIELD_SPECS: Record<ProviderFieldKey, ProviderFieldSpec> = {
@@ -89,22 +93,40 @@ const FIELD_SPECS: Record<ProviderFieldKey, ProviderFieldSpec> = {
     key: 'responsePath',
     labelKey: 'translationSettings.responsePath',
   },
+  systemPrompt: {
+    key: 'systemPrompt',
+    labelKey: 'translationSettings.systemPrompt',
+    multiline: true,
+  },
+  userPromptTemplate: {
+    key: 'userPromptTemplate',
+    labelKey: 'translationSettings.userPrompt',
+    multiline: true,
+    // Losing {TEXT} would send the model an instruction with no text to
+    // translate, so the editor refuses to save without it.
+    requiredPlaceholder: '{TEXT}',
+  },
 };
 
 const fields = (...keys: ProviderFieldKey[]): ProviderFieldSpec[] =>
   keys.map(key => FIELD_SPECS[key]);
+
+const PROMPT_FIELDS: ProviderFieldKey[] = [
+  'systemPrompt',
+  'userPromptTemplate',
+];
 
 export const PROVIDER_FIELDS: Record<
   TranslationProviderId,
   ProviderFieldSpec[]
 > = {
   libretranslate: fields('endpoint'),
-  gemini: fields('model'),
-  ollama: fields('endpoint', 'model'),
-  openai: fields('endpoint', 'model'),
-  deepseek: fields('endpoint', 'model'),
-  nvidianim: fields('endpoint', 'model'),
-  huggingface: fields('endpoint', 'model'),
+  gemini: fields('model', ...PROMPT_FIELDS),
+  ollama: fields('endpoint', 'model', ...PROMPT_FIELDS),
+  openai: fields('endpoint', 'model', ...PROMPT_FIELDS),
+  deepseek: fields('endpoint', 'model', ...PROMPT_FIELDS),
+  nvidianim: fields('endpoint', 'model', ...PROMPT_FIELDS),
+  huggingface: fields('endpoint', 'model', ...PROMPT_FIELDS),
   microsoft: fields('endpoint', 'region'),
   systran: fields('endpoint'),
   customhttp: fields('url', 'headersTemplate', 'bodyTemplate', 'responsePath'),

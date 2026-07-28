@@ -119,6 +119,7 @@ export const translateNovelChapters = async (
           chunkSize: settings.chunkSize,
           requestDelayMs: settings.requestDelayMs,
           requestTimeoutMs: settings.requestTimeoutMs,
+          maxParallel: settings.maxParallelTranslations,
         });
 
         if (!result.complete && !result.empty) {

@@ -11,7 +11,11 @@ export {
   DEFAULT_REQUEST_TIMEOUT_MS,
   MAX_CHUNK_SIZE,
   MIN_CHUNK_SIZE,
+  DEFAULT_MAX_PARALLEL_TRANSLATIONS,
+  MAX_PARALLEL_TRANSLATIONS,
+  MIN_PARALLEL_TRANSLATIONS,
   clampChunkSize,
+  clampParallelTranslations,
   splitIntoChunks,
   type TranslationChunk,
 } from './chunking';

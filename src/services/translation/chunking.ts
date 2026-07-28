@@ -11,9 +11,27 @@ export const MIN_CHUNK_SIZE = 1;
 export const MAX_CHUNK_SIZE = 100;
 export const DEFAULT_CHUNK_SIZE = 40;
 
-/** Phase 1 ships a fixed delay; Phase 2 makes it user-configurable. */
 export const DEFAULT_REQUEST_DELAY_MS = 500;
 export const DEFAULT_REQUEST_TIMEOUT_MS = 60_000;
+
+/**
+ * Concurrent chunk requests. Only ever applied to local engines (spec §6.5):
+ * local hardware can usually serve several requests at once, where a
+ * rate-limited cloud API would just start returning 429s.
+ */
+export const MIN_PARALLEL_TRANSLATIONS = 1;
+export const MAX_PARALLEL_TRANSLATIONS = 8;
+export const DEFAULT_MAX_PARALLEL_TRANSLATIONS = 1;
+
+export const clampParallelTranslations = (value: number): number => {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_MAX_PARALLEL_TRANSLATIONS;
+  }
+  return Math.min(
+    MAX_PARALLEL_TRANSLATIONS,
+    Math.max(MIN_PARALLEL_TRANSLATIONS, Math.floor(value)),
+  );
+};
 
 export const clampChunkSize = (size: number): number => {
   if (!Number.isFinite(size)) {
