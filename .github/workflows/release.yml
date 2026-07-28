@@ -185,7 +185,7 @@ jobs:
 
       - name: Upload Sourcemaps
         run: |
-          cp android/app/build/intermediates/sourcemaps/react/release/index.android.bundle.map \
+          cp android/app/build/generated/sourcemaps/react/release/index.android.bundle.map \
             "release-artifacts/LNReader-v${RELEASE_VERSION}-sourcemap.map"
 
       - name: Verify APK Signatures
