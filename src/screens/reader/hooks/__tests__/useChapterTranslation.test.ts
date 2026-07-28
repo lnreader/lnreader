@@ -8,6 +8,7 @@ import {
   translateChapter,
 } from '@services/translation';
 import { useTranslationSettings } from '@hooks/persisted/useTranslationSettings';
+import { useNovelTranslationSettings } from '@hooks/persisted/useNovelTranslationSettings';
 import { ChapterInfo, NovelInfo } from '@database/types';
 
 jest.mock('@services/translation', () => ({
@@ -20,10 +21,16 @@ jest.mock('@services/translation', () => ({
 jest.mock('@hooks/persisted/useTranslationSettings', () => ({
   useTranslationSettings: jest.fn(),
 }));
+jest.mock('@hooks/persisted/useNovelTranslationSettings', () => ({
+  useNovelTranslationSettings: jest.fn(),
+}));
 jest.mock('@utils/showToast', () => ({ showToast: jest.fn() }));
 
 const mockedSettings = useTranslationSettings as jest.MockedFunction<
   typeof useTranslationSettings
+>;
+const mockedNovelSettings = useNovelTranslationSettings as jest.MockedFunction<
+  typeof useNovelTranslationSettings
 >;
 const mockedProvider = getTranslationProvider as jest.Mock;
 const mockedHasApiKey = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
@@ -74,9 +81,19 @@ const okResult = (html: string) => ({
   empty: false,
 });
 
+const setNovelSettings = (overrides: Record<string, unknown> = {}) => {
+  mockedNovelSettings.mockReturnValue({
+    autoTranslate: false,
+    targetLang: undefined,
+    setNovelTranslationSettings: jest.fn(),
+    ...overrides,
+  } as unknown as ReturnType<typeof useNovelTranslationSettings>);
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   setSettings();
+  setNovelSettings();
   setProviderRequiresKey(false);
   mockedReadCached.mockResolvedValue(undefined);
   mockedTranslate.mockResolvedValue(okResult('<p>traduit</p>'));
@@ -280,5 +297,68 @@ describe('chapter changes', () => {
     // Critical: never show chapter 7's translation against chapter 8's text.
     expect(result.current.displayedHtml).toBe('<p>next chapter</p>');
     expect(result.current.translation.showTranslation).toBe(false);
+  });
+});
+
+describe('per-novel settings', () => {
+  it('translates on open when auto-translate is on for the novel', async () => {
+    setNovelSettings({ autoTranslate: true });
+
+    const { result } = render();
+
+    await waitFor(() =>
+      expect(result.current.displayedHtml).toBe('<p>traduit</p>'),
+    );
+    expect(mockedTranslate).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not translate on open when auto-translate is off', async () => {
+    const { result } = render();
+
+    await waitFor(() =>
+      expect(result.current.translation.translating).toBe(false),
+    );
+    expect(mockedTranslate).not.toHaveBeenCalled();
+    expect(result.current.displayedHtml).toBe(ORIGINAL);
+  });
+
+  it('respects an explicit toggle-off over auto-translate', async () => {
+    setNovelSettings({ autoTranslate: true });
+    const { result } = render();
+
+    await waitFor(() =>
+      expect(result.current.translation.showTranslation).toBe(true),
+    );
+
+    await act(async () => result.current.translation.toggleTranslation());
+
+    // Auto-translate must not immediately undo the reader's own choice.
+    expect(result.current.translation.showTranslation).toBe(false);
+    expect(result.current.displayedHtml).toBe(ORIGINAL);
+  });
+
+  it('uses the per-novel language override when set', async () => {
+    setNovelSettings({ targetLang: 'de' });
+    const { result } = render();
+
+    await act(async () => result.current.translation.toggleTranslation());
+
+    await waitFor(() => expect(mockedTranslate).toHaveBeenCalled());
+    expect(mockedTranslate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ targetLang: 'de' }),
+    );
+  });
+
+  it('falls back to the global language when no override is set', async () => {
+    const { result } = render();
+
+    await act(async () => result.current.translation.toggleTranslation());
+
+    await waitFor(() => expect(mockedTranslate).toHaveBeenCalled());
+    expect(mockedTranslate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ targetLang: 'fr' }),
+    );
   });
 });

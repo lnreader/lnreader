@@ -23,6 +23,7 @@ import {
   type ChunkFailure,
 } from '@services/translation';
 import { useTranslationSettings } from '@hooks/persisted/useTranslationSettings';
+import { useNovelTranslationSettings } from '@hooks/persisted/useNovelTranslationSettings';
 
 /** Stable identity so resetting failures never triggers a render loop. */
 const NO_FAILURES: ChunkFailure[] = [];
@@ -43,8 +44,18 @@ export default function useChapterTranslation(
   chapter: ChapterInfo,
   originalHtml: string,
 ) {
-  const { enabled, config, targetLang, sourceLang, ...settings } =
-    useTranslationSettings();
+  const {
+    enabled,
+    config,
+    targetLang: globalTargetLang,
+    sourceLang,
+    ...settings
+  } = useTranslationSettings();
+  const { autoTranslate, targetLang: novelTargetLang } =
+    useNovelTranslationSettings(novel.id);
+
+  /** A per-novel language overrides the global one; otherwise it follows it. */
+  const targetLang = novelTargetLang ?? globalTargetLang;
 
   const [keyPresent, setKeyPresent] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
@@ -224,18 +235,23 @@ export default function useChapterTranslation(
   );
 
   /**
-   * Restores a chapter the reader had already translated this session. Only
-   * runs once the chapter's own text has loaded, since a cache miss falls
-   * through to translating `originalHtml`.
+   * Translates without being asked, in two cases: restoring a chapter the
+   * reader already translated this session, and per-novel auto-translate.
+   *
+   * An explicit per-chapter choice always wins over auto-translate, so a
+   * reader who toggled this chapter back to the original is not overridden on
+   * the next render. Only runs once the chapter's own text has loaded, since
+   * a cache miss falls through to translating `originalHtml`.
    */
   useEffect(() => {
-    if (
-      !configured ||
-      !originalHtml ||
-      translatedHtml ||
-      translating ||
-      !sessionToggles.current.get(chapter.id)
-    ) {
+    if (!configured || !originalHtml || translatedHtml || translating) {
+      return;
+    }
+    // Read inside the effect, not during render: an explicit per-chapter
+    // choice wins over auto-translate, so a reader who toggled this chapter
+    // back to the original is not immediately overridden.
+    const toggledThisSession = sessionToggles.current.get(chapter.id);
+    if (!(toggledThisSession ?? autoTranslate)) {
       return;
     }
     void runTranslation(chapter.id);
@@ -244,6 +260,7 @@ export default function useChapterTranslation(
     originalHtml,
     translatedHtml,
     translating,
+    autoTranslate,
     chapter.id,
     runTranslation,
   ]);

@@ -358,7 +358,7 @@ silently resolved:
 
 ## 9. Phased Rollout
 
-**Phase 1 — MVP**
+**Phase 1 — MVP** *(landed — see Appendix C)*
 
 - Provider abstraction interface + 3 providers: one free/no-key (GTX or public
   LibreTranslate), one BYOK cloud (Gemini or DeepL), one local (Ollama).
@@ -369,7 +369,7 @@ silently resolved:
   in PR #1851's early iterations, not a nice-to-have).
 - Filesystem-based storage for translated content from day one.
 
-**Phase 2 — Provider breadth + per-novel auto-translate**
+**Phase 2 — Provider breadth + per-novel auto-translate** *(landed — see Appendix C)*
 
 - Round out the provider list (OpenAI, DeepSeek, Microsoft, SYSTRAN, HuggingFace,
   NVIDIA NIM, Custom HTTP escape hatch).
@@ -453,9 +453,40 @@ rather than inventing structure.
 | `providers/` | `libretranslate`, `gemini`, `ollama`, plus shared HTTP error classification and LLM prompt/JSON handling |
 | `translateChapter.ts` | Orchestration: chunk pacing, per-request timeouts, partial-failure survival, retry-only-failed-chunks |
 
-Covered by 64 tests. Not yet built: the settings screen, the per-chapter reader
-toggle, and the `useChapter` integration — all of which depend on open question
-6 (control placement) being decided first.
+**Phase 1 reader integration — landed.** Open question 6 was resolved as
+**option (c)**: the translate control is a sixth footer icon rendered only once
+a usable provider is configured. "Configured" is stricter than "enabled" — a
+provider needing an API key it does not have keeps the control hidden rather
+than showing a button that fails on tap. State lives in
+`screens/reader/hooks/useChapterTranslation.ts`, composed in `ChapterContext`
+so the `useChapter` loading pipeline is untouched.
+
+**Phase 2 — landed.**
+
+| Area | What shipped |
+|---|---|
+| Provider breadth | Ten providers. OpenAI, DeepSeek, NVIDIA NIM and HuggingFace share one `openaiCompatible.ts` implementation (same `/chat/completions` contract, different defaults) but stay distinct ids so each gets its own key in the encrypted store. Microsoft and SYSTRAN are literal MT engines with their own response shapes. `customHttp.ts` is the templated escape hatch. |
+| Per-novel auto-translate | `useNovelTranslationSettings`, reachable from the novel overflow menu — offered for local novels too. |
+| Configurable pacing | Chunk size, inter-request delay and request timeout are editable in settings. |
+| Test action | `testProvider.ts` sends one sample string through the *same* `translateBatch` path a real translation uses, so a passing test cannot mask a broken translation path. |
+
+Two Phase 2 decisions worth recording:
+
+- **Per-novel settings use their own MMKV key** (`NOVEL_TRANSLATION_SETTINGS_<id>`)
+  rather than extending `NovelSettings`. That store is a validated zustand
+  domain store bound to the novel screen's lifecycle, and translation needs to
+  be readable from background paths that never mount it. The §4 constraint —
+  settings, not a `Novel` column — is still satisfied.
+- **Open question 5 (auto-translate trigger) is answered "on open" only.**
+  Translating at download time would mean background API calls on a metered
+  connection without the reader present, which is the surprise the question was
+  raised about. Revisit if bulk translation (Phase 3) makes it moot.
+
+Covered by 128 tests across the translation service and reader hook (555
+repo-wide). Remaining for Phase 3: bulk "translate all", the queue/progress UI,
+max-parallel for local engines, prompt-template editing, and a "clear all
+translations" action (the service function exists and is tested; only the UI is
+missing).
 
 A note for whoever picks this up: `clearMocks`/`restoreMocks` are set at the top
 level of `jest.config.js`, but the repo uses `projects`, and Jest ignores those

@@ -106,6 +106,7 @@ const NovelAppbar = ({
   refreshNovel,
   editCategories,
   showJumpToChapterModal,
+  showTranslationModal,
   headerOpacity,
 }: {
   novel: NovelInfo | undefined;
@@ -121,6 +122,7 @@ const NovelAppbar = ({
   refreshNovel: () => void;
   editCategories: () => void;
   showJumpToChapterModal: (arg: boolean) => void;
+  showTranslationModal: () => void;
   headerOpacity: SharedValue<number>;
 }) => {
   const headerOpacityStyle = useAnimatedStyle(() => {
@@ -213,6 +215,12 @@ const NovelAppbar = ({
         label: getString('novelScreen.edit.cover'),
         onPress: () => setCustomNovelCover(),
       },
+      // Offered for local novels too: translation is deliberately not gated
+      // on the novel having a remote source (spec §4).
+      {
+        label: getString('novelTranslation.title'),
+        onPress: showTranslationModal,
+      },
     );
 
     return items;
@@ -224,6 +232,7 @@ const NovelAppbar = ({
     setCustomNovelCover,
     shareNovel,
     showEditInfoModal,
+    showTranslationModal,
   ]);
 
   const openDlMenu = useCallback(() => showDownloadMenu(true), []);

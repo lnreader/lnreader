@@ -7,17 +7,38 @@
  */
 import { TranslationError } from '../types';
 
-export const postJson = async <T>(
+export const postJson = <T>(
   url: string,
   body: unknown,
   init: { headers?: Record<string, string>; signal: AbortSignal },
+): Promise<T> =>
+  requestJson<T>(url, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: init.headers,
+    signal: init.signal,
+  });
+
+/**
+ * Generalised form for the Custom HTTP provider, which owns its own method,
+ * headers and already-rendered body string.
+ */
+export const requestJson = async <T>(
+  url: string,
+  init: {
+    method: string;
+    /** Pre-serialised. Omitted entirely for GET. */
+    body?: string;
+    headers?: Record<string, string>;
+    signal: AbortSignal;
+  },
 ): Promise<T> => {
   let response: Response;
   try {
     response = await fetch(url, {
-      method: 'POST',
+      method: init.method,
       headers: { 'Content-Type': 'application/json', ...init.headers },
-      body: JSON.stringify(body),
+      body: init.method === 'GET' ? undefined : init.body,
       signal: init.signal,
     });
   } catch (e) {

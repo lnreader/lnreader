@@ -39,12 +39,13 @@ const mockFetchJson = (body: unknown, ok = true, status = 200) => {
 };
 
 describe('provider registry', () => {
-  it('exposes the three Phase 1 providers', () => {
-    expect(TRANSLATION_PROVIDER_IDS.sort()).toEqual([
-      'gemini',
-      'libretranslate',
-      'ollama',
-    ]);
+  it('still registers the Phase 1 providers', () => {
+    // Copied before sorting: TRANSLATION_PROVIDER_IDS is a shared module-level
+    // array, and sorting it in place would reorder it for every other test.
+    // The exhaustive count lives in phase2Providers.test.ts.
+    expect([...TRANSLATION_PROVIDER_IDS].sort()).toEqual(
+      expect.arrayContaining(['gemini', 'libretranslate', 'ollama']),
+    );
   });
 
   it('resolves each id to a provider carrying that id', () => {

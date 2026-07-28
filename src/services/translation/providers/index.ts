@@ -1,7 +1,7 @@
 /**
  * Provider registry.
  *
- * Adding a Phase 2 provider means writing the module and adding one line here;
+ * Adding a provider means writing the module and adding one line here;
  * nothing outside this directory switches on provider identity.
  */
 import type {
@@ -12,11 +12,27 @@ import type {
 import { libreTranslateProvider } from './libretranslate';
 import { geminiProvider } from './gemini';
 import { ollamaProvider } from './ollama';
+import {
+  deepSeekProvider,
+  huggingFaceProvider,
+  nvidiaNimProvider,
+  openAIProvider,
+} from './openaiCompatible';
+import { microsoftProvider } from './microsoft';
+import { systranProvider } from './systran';
+import { customHttpProvider } from './customHttp';
 
 const registry = {
   libretranslate: libreTranslateProvider,
   gemini: geminiProvider,
   ollama: ollamaProvider,
+  openai: openAIProvider,
+  deepseek: deepSeekProvider,
+  nvidianim: nvidiaNimProvider,
+  huggingface: huggingFaceProvider,
+  microsoft: microsoftProvider,
+  systran: systranProvider,
+  customhttp: customHttpProvider,
 } as const;
 
 /**
@@ -52,4 +68,18 @@ export {
   DEFAULT_OLLAMA_MODEL,
   ollamaProvider,
 } from './ollama';
+export {
+  deepSeekProvider,
+  huggingFaceProvider,
+  nvidiaNimProvider,
+  openAIProvider,
+} from './openaiCompatible';
+export { DEFAULT_MICROSOFT_ENDPOINT, microsoftProvider } from './microsoft';
+export { DEFAULT_SYSTRAN_ENDPOINT, systranProvider } from './systran';
+export {
+  customHttpProvider,
+  fillHttpTemplate,
+  languageDisplayName,
+  resolveJsonPath,
+} from './customHttp';
 export { DEFAULT_SYSTEM_PROMPT, DEFAULT_USER_PROMPT_TEMPLATE } from './llm';

@@ -12,6 +12,8 @@ interface TextFieldModalProps {
   placeholder?: string;
   /** Masks input and disables autocorrect — used for API keys. */
   secure?: boolean;
+  /** For JSON header/body templates, which need room to read. */
+  multiline?: boolean;
   keyboardType?: 'default' | 'url' | 'numeric';
   visible: boolean;
   onDismiss: () => void;
@@ -30,6 +32,7 @@ const TextFieldModal = ({
   value,
   placeholder,
   secure,
+  multiline,
   keyboardType = 'default',
   visible,
   onDismiss,
@@ -62,6 +65,8 @@ const TextFieldModal = ({
           onChangeText={setDraft}
           mode="outlined"
           secureTextEntry={secure}
+          multiline={multiline}
+          numberOfLines={multiline ? 6 : 1}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType={keyboardType}

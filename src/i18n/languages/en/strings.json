@@ -777,6 +777,35 @@
     "apiKeySet": "Saved",
     "apiKeyRequired": "Required — not set",
     "apiKeyOptional": "Optional for this provider",
-    "keyStoreUnavailable": "Secure storage is unavailable, so the API key was not saved"
+    "keyStoreUnavailable": "Secure storage is unavailable, so the API key was not saved",
+    "region": "Region",
+    "requestUrl": "Request URL",
+    "headers": "Headers (JSON)",
+    "bodyTemplate": "Request body template",
+    "responsePath": "Response path",
+    "categoryFreeNoKey": "Free, no key",
+    "categoryApiKey": "API key",
+    "categorySelfHosted": "Self-hosted",
+    "categoryEscapeHatch": "Custom",
+    "test": "Test provider",
+    "testDesc": "Send a short sample to check your settings",
+    "testRunning": "Testing…",
+    "testSuccess": "Translation works: “{{text}}”",
+    "testFailed": "Test failed: {{reason}}",
+    "queue": "Translation queue",
+    "chunkSize": "Chunk size",
+    "chunkSizeDesc": "{{count}} paragraphs per request",
+    "chunkSizeHint": "Smaller chunks are slower but less likely to hit provider limits. 20–100 is typical.",
+    "requestDelay": "Delay between requests",
+    "requestDelayDesc": "{{ms}} ms",
+    "requestTimeout": "Request timeout",
+    "requestTimeoutDesc": "{{seconds}} seconds"
+  },
+  "novelTranslation": {
+    "title": "Translation",
+    "autoTranslate": "Auto-translate",
+    "autoTranslateDesc": "Translate chapters of this novel when you open them",
+    "followGlobal": "Use default ({{language}})",
+    "disabledWarning": "Translation is turned off in settings, so these preferences will not take effect yet."
   }
 }

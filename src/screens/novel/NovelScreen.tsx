@@ -27,6 +27,7 @@ import { useChapterSelection } from './hooks/useChapterSelection';
 import { useNovelScreenActions } from './hooks/useNovelScreenActions';
 import { useNovelRefresh } from './hooks/useNovelRefresh';
 import SetCategoryModal from './components/SetCategoriesModal';
+import NovelTranslationModal from './components/NovelTranslationModal';
 import { backgroundTasks } from '@services/backgroundTasks';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
@@ -53,6 +54,11 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     value: setCategoriesModalVisible,
     setTrue: showSetCategoriesModal,
     setFalse: closeSetCategoriesModal,
+  } = useBoolean();
+  const {
+    value: translationModalVisible,
+    setTrue: showTranslationModal,
+    setFalse: closeTranslationModal,
   } = useBoolean();
 
   const headerOpacity = useSharedValue(0);
@@ -132,6 +138,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               shareNovel={shareNovel}
               refreshNovel={onRefresh}
               editCategories={showSetCategoriesModal}
+              showTranslationModal={showTranslationModal}
               theme={theme}
               isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
@@ -180,6 +187,14 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
           <SetCategoryModal
             novelIds={[novel.id]}
             closeModal={closeSetCategoriesModal}
+            visible
+          />
+        ) : null}
+
+        {novel && translationModalVisible ? (
+          <NovelTranslationModal
+            novelId={novel.id}
+            hideModal={closeTranslationModal}
             visible
           />
         ) : null}

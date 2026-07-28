@@ -17,6 +17,11 @@ export {
 } from './chunking';
 export { segmentHtml, type SegmentedDocument } from './htmlSegments';
 export {
+  TARGET_LANGUAGES,
+  languageLabel,
+  type TranslationLanguage,
+} from './languages';
+export {
   chapterFolderPath,
   deleteAllTranslations,
   deleteTranslatedChapter,
@@ -33,7 +38,15 @@ export {
   getDefaultConfig,
   getTranslationProvider,
   isLocalProvider,
+  fillHttpTemplate,
+  languageDisplayName,
+  resolveJsonPath,
 } from './providers';
+export {
+  TEST_PHRASE,
+  testProvider,
+  type TestProviderResult,
+} from './testProvider';
 export {
   translateChapter,
   translateChapterHtml,

@@ -15,8 +15,19 @@
  * at call time via `TranslateContext.apiKey`.
  */
 
-/** Providers shipped in Phase 1. Phase 2 extends this union. */
-export type TranslationProviderId = 'libretranslate' | 'gemini' | 'ollama';
+export type TranslationProviderId =
+  // Phase 1
+  | 'libretranslate'
+  | 'gemini'
+  | 'ollama'
+  // Phase 2
+  | 'openai'
+  | 'deepseek'
+  | 'nvidianim'
+  | 'huggingface'
+  | 'microsoft'
+  | 'systran'
+  | 'customhttp';
 
 /**
  * `auto` asks the provider to detect the source language. Everything else is
@@ -33,26 +44,85 @@ export interface LibreTranslateConfig {
   requiresApiKey: boolean;
 }
 
-export interface GeminiConfig {
-  provider: 'gemini';
+/**
+ * Fields every LLM-backed provider carries. Prose translation quality depends
+ * on instruction, so these providers expose the prompts rather than hiding
+ * them (spec §6.4).
+ */
+export interface LlmPrompts {
   model: string;
   systemPrompt: string;
   userPromptTemplate: string;
 }
 
-export interface OllamaConfig {
+export interface GeminiConfig extends LlmPrompts {
+  provider: 'gemini';
+}
+
+export interface OllamaConfig extends LlmPrompts {
   provider: 'ollama';
   /** Base URL of the user's Ollama server, e.g. `http://192.168.1.10:11434`. */
   endpoint: string;
-  model: string;
-  systemPrompt: string;
-  userPromptTemplate: string;
+}
+
+/**
+ * OpenAI, DeepSeek, NVIDIA NIM and HuggingFace all speak the OpenAI
+ * chat-completions protocol, so they share a config shape and an
+ * implementation — only the base URL and default model differ. `endpoint` is
+ * editable because NIM and HuggingFace users routinely point at their own
+ * deployments.
+ */
+export interface OpenAICompatibleConfig extends LlmPrompts {
+  provider: 'openai' | 'deepseek' | 'nvidianim' | 'huggingface';
+  endpoint: string;
+}
+
+/** Azure AI Translator. Not an LLM, so no prompts. */
+export interface MicrosoftConfig {
+  provider: 'microsoft';
+  /** Global endpoint by default; regional resources use their own. */
+  endpoint: string;
+  /** Required for regional (non-global) resources, ignored otherwise. */
+  region: string;
+}
+
+export interface SystranConfig {
+  provider: 'systran';
+  endpoint: string;
+}
+
+/**
+ * The generalised escape hatch (spec §6.4): covers any provider not integrated
+ * explicitly. The user supplies the request shape and where the translated
+ * text sits in the response.
+ */
+export interface CustomHttpConfig {
+  provider: 'customhttp';
+  url: string;
+  method: 'POST' | 'GET' | 'PUT';
+  /** JSON object of headers; `{apiKey}` is substituted at request time. */
+  headersTemplate: string;
+  /**
+   * Request body. Supports `{texts}` (JSON array of all segments in the
+   * chunk), `{text}` / `{text_esc}` (a single segment), `{source}`,
+   * `{target}`, `{source_name}` and `{target_name}`.
+   *
+   * A template using `{texts}` batches the whole chunk into one request; one
+   * using `{text}` is sent once per segment.
+   */
+  bodyTemplate: string;
+  /** Dotted path to the translated text, e.g. `data.translations.0.text`. */
+  responsePath: string;
 }
 
 export type TranslationConfig =
   | LibreTranslateConfig
   | GeminiConfig
-  | OllamaConfig;
+  | OllamaConfig
+  | OpenAICompatibleConfig
+  | MicrosoftConfig
+  | SystranConfig
+  | CustomHttpConfig;
 
 /** Narrows the union to the member matching a given provider id. */
 export type ConfigFor<Id extends TranslationProviderId> = Extract<
