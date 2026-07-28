@@ -1,0 +1,131 @@
+src/database/db.ts
+  s_5bfc8edeb5c4e8::t_94deb056da9914 87
+  s_5bfc8edeb5c4e8::t_9ef89561b01ade 33-47,145,147-150,154-155,158
+  s_5bfc8edeb5c4e8::t_c6a6ec90644e04 79-86,88-110,234
+  human 78
+drizzle/20260727081855_calm_chimera/migration.sql
+  s_5bfc8edeb5c4e8::t_445f480197f426 95-96
+  s_5bfc8edeb5c4e8::t_9ef89561b01ade 4-6,50-62,65-67,71-73,77-78,81-83,86-88,90,93,97
+  human 5-6,49-61,64-66,70-72,76-77,80-82,85-87,89-91,94,96-97
+src/database/__tests__/db.test.ts
+  s_5bfc8edeb5c4e8::t_b92886b9cfcb49 9,75-93,95-100,161,202,281-360,363-375,377-411,413-455,457-458,461,467,472,496-500,509-512
+  s_5bfc8edeb5c4e8::t_94deb056da9914 94,361-362,376,412,456,459-460,474
+  human 462-466
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_94deb056da9914",
+          "lines": "87",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 23,
+          "added_lines": 23,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_9ef89561b01ade",
+          "lines": "33-47,145,147-150,154-155,158",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 32,
+          "added_lines": 32,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_c6a6ec90644e04",
+          "lines": "79-86,88-110,234",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "78",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/db.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_445f480197f426",
+          "lines": "95-96",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 33,
+          "added_lines": 33,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_9ef89561b01ade",
+          "lines": "4-6,50-62,65-67,71-73,77-78,81-83,86-88,90,93,97",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 35,
+          "hash": "human",
+          "lines": "5-6,49-61,64-66,70-72,76-77,80-82,85-87,89-91,94,96-97",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260727081855_calm_chimera/migration.sql"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 213,
+          "added_lines": 213,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_b92886b9cfcb49",
+          "lines": "9,75-93,95-100,161,202,281-360,363-375,377-411,413-455,457-458,461,467,472,496-500,509-512",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_5bfc8edeb5c4e8::t_94deb056da9914",
+          "lines": "94,361-362,376,412,456,459-460,474",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 10,
+          "hash": "human",
+          "lines": "462-466",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    }
+  ],
+  "base_commit_sha": "ac1b2f5ce446ae90db315be11d1494bc49539f40",
+  "branch": "master",
+  "commit_sha": "594b078fad3308c284b3b9cd8484056b40d3c821",
+  "commit_time": "2026-07-28T07:32:55+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 6,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 6,
+      "total_deletions": 50
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
