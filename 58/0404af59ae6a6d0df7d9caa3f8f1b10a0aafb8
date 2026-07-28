@@ -1,0 +1,176 @@
+src/database/constants.ts
+  s_09349a7dfcc7a0::t_6716af71fb3490 31-35
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_09349a7dfcc7a0::t_6716af71fb3490 16-17,182,190-199,211-215,217,219-220,272-275
+  s_09349a7dfcc7a0::t_6635cd47665492 218
+  human 216
+src/database/queries/CategoryQueries.ts
+  s_09349a7dfcc7a0::t_6716af71fb3490 189,192
+  human 189,192
+src/database/queries/NovelQueries.ts
+  s_09349a7dfcc7a0::t_6716af71fb3490 24,44,178
+  s_09349a7dfcc7a0::t_6635cd47665492 390
+  human 43,177,389
+src/database/queries/__tests__/CategoryQueries.test.ts
+  s_09349a7dfcc7a0::t_6716af71fb3490 215,234-235
+  human 215,234-235
+src/screens/Categories/CategoriesScreen.tsx
+  s_09349a7dfcc7a0::t_ba9c96e31137b2 54-55
+  human 54-60
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6716af71fb3490",
+          "lines": "31-35",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/constants.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6716af71fb3490",
+          "lines": "16-17,182,190-199,211-215,217,219-220,272-275",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6635cd47665492",
+          "lines": "218",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 12,
+          "hash": "human",
+          "lines": "216",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/NovelQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6716af71fb3490",
+          "lines": "189,192",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "189,192",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/CategoryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6716af71fb3490",
+          "lines": "24,44,178",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6635cd47665492",
+          "lines": "390",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "43,177,389",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/NovelQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_6716af71fb3490",
+          "lines": "215,234-235",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "215,234-235",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/CategoryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_09349a7dfcc7a0::t_ba9c96e31137b2",
+          "lines": "54-55",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "54-60",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/Categories/CategoriesScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "ea9bb920c2cd302d8325987fae397bcbbf5f4ef1",
+  "branch": "master",
+  "commit_sha": "580404af59ae6a6d0df7d9caa3f8f1b10a0aafb8",
+  "commit_time": "2026-07-28T13:36:37+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 1,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 1,
+      "total_deletions": 27
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
