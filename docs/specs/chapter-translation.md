@@ -41,8 +41,9 @@ back-and-forth. See [§4](#4-prior-art--inputs) for its current state.
 
 ## 2. Goals
 
-- Let a reader translate a chapter (or a whole novel, or their whole library) into
-  a target language, inline in the reader, without leaving the app.
+- Let a reader translate a chapter, or a whole novel, into a target language,
+  inline in the reader, without leaving the app. (Library-wide translation was
+  cut — see [§6.3](#63-bulk-translation).)
 - Support enough providers that most users find at least one free/no-signup option
   and power users can plug in the paid or local engine of their choice.
 - Keep LNReader's operating cost at zero. No LNReader-held API keys, no proxying
@@ -208,10 +209,17 @@ user tapping translate each time.
 
 ### 6.3 Bulk translation
 
-From the novel screen or the translation settings screen, a user can trigger
-"translate all chapters" for a single novel, or (from settings) across their whole
-library. This runs as a queued background job with progress notification,
+From the novel screen, a user can trigger "translate all chapters" for a single
+novel. This runs as a queued background job with progress notification,
 respecting the rate-limiting settings in [§6.5](#65-rate-limiting--batching-controls).
+
+> **Scope change (decided during Phase 3).** Library-wide "translate everything"
+> is **cut**. The original draft offered it from the settings screen, but a
+> single tap would fan out to thousands of chapters against a metered,
+> user-paid API with no natural stopping point and no obvious way to reason
+> about the cost before committing. A novel is a bounded unit the user can see
+> the size of. Per-novel bulk translation covers the actual ask in story #5
+> (catching up on a backlog), which is phrased per-novel anyway.
 
 ### 6.4 Provider selection & configuration
 
@@ -380,8 +388,8 @@ silently resolved:
 
 **Phase 3 — Bulk & polish**
 
-- Bulk "translate all chapters" per novel and library-wide, with a queue/progress
-  UI.
+- Bulk "translate all chapters" per novel, with a queue/progress UI.
+  Library-wide translation is cut (see §6.3).
 - Max-parallel-translations control for local engines.
 - Prompt template customization for LLM-based providers.
 - "Clear all translations" action.
@@ -482,11 +490,32 @@ Two Phase 2 decisions worth recording:
   connection without the reader present, which is the surprise the question was
   raised about. Revisit if bulk translation (Phase 3) makes it moot.
 
-Covered by 128 tests across the translation service and reader hook (555
-repo-wide). Remaining for Phase 3: bulk "translate all", the queue/progress UI,
+**Phase 3 (partial) — per-novel bulk translation landed.**
+
+`translateNovel.ts` runs as a `TRANSLATE_NOVEL` background task on the existing
+`BackgroundTaskQueue`, so it survives leaving the novel screen and reports
+progress through the same notification path as downloads. It is modelled on
+`downloadChapters`: sequential, checkpointed after every chapter, and reporting
+per-chapter failures at the end rather than aborting on the first.
+
+Three details that matter:
+
+- **It sanitizes before translating.** The reader translates already-sanitized
+  HTML and renders cached translations directly, so a task writing raw plugin
+  HTML into the same cache would put unsanitized markup on screen.
+- **It skips chapters already translated** into the target language, so a re-run
+  after a partial failure is cheap and a novel partly translated in the reader
+  isn't paid for twice.
+- **Checkpointing is about money, not just time.** Resuming a killed run from
+  its checkpoint is what stops the user paying their provider twice for the same
+  chapters.
+
+Library-wide bulk translation is **cut** (see §6.3). Remaining for Phase 3:
 max-parallel for local engines, prompt-template editing, and a "clear all
 translations" action (the service function exists and is tested; only the UI is
 missing).
+
+Covered by 146 tests across the translation service and reader hook.
 
 A note for whoever picks this up: `clearMocks`/`restoreMocks` are set at the top
 level of `jest.config.js`, but the repo uses `projects`, and Jest ignores those

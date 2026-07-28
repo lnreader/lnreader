@@ -6,6 +6,7 @@ import type {
   EpubExportMetadata,
 } from '@modules/nitro-epub';
 import type { BackupOptions } from '@services/backup/options';
+import type { TranslateNovelData } from '@services/translation/translateNovel';
 
 export type SelfHostData = {
   host: string;
@@ -74,6 +75,7 @@ export type BackgroundTask =
     }
   | { name: 'LOCAL_RESTORE'; data: { sourceUri: string } }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
+  | { name: 'TRANSLATE_NOVEL'; data: TranslateNovelData }
   | DownloadChapterTask;
 
 export type DownloadChapterTask = {

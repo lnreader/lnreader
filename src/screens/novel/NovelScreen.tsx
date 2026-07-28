@@ -193,7 +193,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
         {novel && translationModalVisible ? (
           <NovelTranslationModal
-            novelId={novel.id}
+            novel={novel}
+            chapters={chapters}
             hideModal={closeTranslationModal}
             visible
           />

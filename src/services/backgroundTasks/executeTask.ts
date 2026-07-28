@@ -6,6 +6,7 @@ import { exportEpub } from '../epub/export';
 import { importEpubBatch } from '../epub/import';
 import { migrateNovel } from '../migrate/migrateNovel';
 import { updateLibrary } from '../updates';
+import { translateNovelChapters } from '../translation/translateNovel';
 import type {
   BackgroundTask,
   BackgroundTaskEnqueuer,
@@ -42,5 +43,7 @@ export const executeBackgroundTask = async (
       return migrateNovel(task.data, updateProgress, enqueue);
     case 'DOWNLOAD_CHAPTER':
       return downloadChapters(task.data, updateProgress, context);
+    case 'TRANSLATE_NOVEL':
+      return translateNovelChapters(task.data, updateProgress, context);
   }
 };

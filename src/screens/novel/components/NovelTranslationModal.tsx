@@ -8,9 +8,13 @@ import { useNovelTranslationSettings } from '@hooks/persisted/useNovelTranslatio
 import { useTranslationSettings } from '@hooks/persisted/useTranslationSettings';
 import { getString } from '@i18n/translations';
 import { TARGET_LANGUAGES, languageLabel } from '@services/translation';
+import { backgroundTasks } from '@services/backgroundTasks';
+import { showToast } from '@utils/showToast';
+import type { ChapterInfo, NovelInfo } from '@database/types';
 
 interface NovelTranslationModalProps {
-  novelId: number;
+  novel: NovelInfo;
+  chapters: ChapterInfo[];
   visible: boolean;
   hideModal: () => void;
 }
@@ -26,14 +30,37 @@ interface NovelTranslationModalProps {
 const FOLLOW_GLOBAL = '';
 
 const NovelTranslationModal = ({
-  novelId,
+  novel,
+  chapters,
   visible,
   hideModal,
 }: NovelTranslationModalProps) => {
   const theme = useTheme();
   const { enabled, targetLang: globalTargetLang } = useTranslationSettings();
   const { autoTranslate, targetLang, setNovelTranslationSettings } =
-    useNovelTranslationSettings(novelId);
+    useNovelTranslationSettings(novel.id);
+
+  const translateAll = () => {
+    if (!chapters.length) {
+      showToast(getString('novelTranslation.noChapters'));
+      return;
+    }
+    backgroundTasks.enqueue({
+      name: 'TRANSLATE_NOVEL',
+      data: {
+        novelId: novel.id,
+        novelName: novel.name,
+        pluginId: novel.pluginId,
+        chapters: chapters.map(chapter => ({
+          chapterId: chapter.id,
+          chapterName: chapter.name,
+          chapterPath: chapter.path,
+        })),
+      },
+    });
+    showToast(getString('novelTranslation.queued', { count: chapters.length }));
+    hideModal();
+  };
 
   const [showLanguages, setShowLanguages] = useState(false);
 
@@ -104,6 +131,14 @@ const NovelTranslationModal = ({
         )}
       </Dialog.Content>
       <Dialog.Actions>
+        {/*
+          Per-novel only. Library-wide bulk translation is deliberately not
+          offered: one tap would fan out to thousands of chapters against a
+          metered, user-paid API with no natural stopping point.
+        */}
+        <Dialog.Action onPress={translateAll} disabled={!enabled}>
+          {getString('novelTranslation.translateAll')}
+        </Dialog.Action>
         <Dialog.Action onPress={hideModal}>
           {getString('common.done')}
         </Dialog.Action>

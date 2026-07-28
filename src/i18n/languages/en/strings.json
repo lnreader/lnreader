@@ -739,7 +739,8 @@
     "DOWNLOAD_CHAPTER": "Downloading Chapter",
     "taskQueued": "%{task} queued",
     "taskCompleted": "Completed",
-    "taskFailed": "Failed: %{error}"
+    "taskFailed": "Failed: %{error}",
+    "TRANSLATE_NOVEL": "Translating"
   },
   "time": {
     "seconds": {
@@ -762,7 +763,8 @@
   "translation": {
     "failed": "Translation failed",
     "nothingToTranslate": "Nothing to translate in this chapter",
-    "partialFailure": "{{failed}} of {{total}} sections failed to translate"
+    "partialFailure": "{{failed}} of {{total}} sections failed to translate",
+    "bulkFailures": "{{failed}} of {{total}} chapters failed to translate"
   },
   "translationSettings": {
     "title": "Translation",
@@ -806,6 +808,9 @@
     "autoTranslate": "Auto-translate",
     "autoTranslateDesc": "Translate chapters of this novel when you open them",
     "followGlobal": "Use default ({{language}})",
-    "disabledWarning": "Translation is turned off in settings, so these preferences will not take effect yet."
+    "disabledWarning": "Translation is turned off in settings, so these preferences will not take effect yet.",
+    "translateAll": "Translate all",
+    "queued": "Queued {{count}} chapters for translation",
+    "noChapters": "This novel has no chapters to translate"
   }
 }

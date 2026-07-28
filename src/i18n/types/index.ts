@@ -625,6 +625,7 @@ export interface StringMap {
   'notifications.taskQueued': 'string';
   'notifications.taskCompleted': 'string';
   'notifications.taskFailed': 'string';
+  'notifications.TRANSLATE_NOVEL': 'string';
   'time.seconds.one': 'string';
   'time.seconds.other': 'string';
   'time.minutes.one': 'string';
@@ -636,6 +637,7 @@ export interface StringMap {
   'translation.failed': 'string';
   'translation.nothingToTranslate': 'string';
   'translation.partialFailure': 'string';
+  'translation.bulkFailures': 'string';
   'translationSettings.title': 'string';
   'translationSettings.enable': 'string';
   'translationSettings.enableDesc': 'string';
@@ -676,4 +678,7 @@ export interface StringMap {
   'novelTranslation.autoTranslateDesc': 'string';
   'novelTranslation.followGlobal': 'string';
   'novelTranslation.disabledWarning': 'string';
+  'novelTranslation.translateAll': 'string';
+  'novelTranslation.queued': 'string';
+  'novelTranslation.noChapters': 'string';
 }

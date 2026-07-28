@@ -17,6 +17,7 @@ const MULTIPLICABLE_TASKS: BackgroundTask['name'][] = [
   'IMPORT_EPUB',
   'EXPORT_EPUB',
   'MIGRATE_NOVEL',
+  'TRANSLATE_NOVEL',
 ];
 
 const BACKGROUND_TASK_QUEUE_PREFIX = 'lnreader-background-task';
@@ -82,6 +83,10 @@ export const getBackgroundTaskTitle = (task: BackgroundTask) => {
     case 'MIGRATE_NOVEL':
       return `${getString('notifications.MIGRATE_NOVEL')}: ${
         task.data.fromNovel.name
+      }`;
+    case 'TRANSLATE_NOVEL':
+      return `${getString('notifications.TRANSLATE_NOVEL')}: ${
+        task.data.novelName
       }`;
     case 'UPDATE_LIBRARY':
       return task.data?.categoryName
