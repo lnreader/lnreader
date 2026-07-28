@@ -159,6 +159,7 @@ jobs:
           compression-level: 0
 
       - name: Notify Discord
+        if: github.repository == 'lnreader/lnreader'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK }}
           ARTIFACT_URL: ${{ steps.upload-nightly.outputs.artifact-url }}
