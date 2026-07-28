@@ -314,6 +314,12 @@
     "pluginNotFound": "Plugin not found!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
   },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
+  },
   "generalSettings": "General",
   "generalSettingsScreen": {
     "asc": "(Ascending)",

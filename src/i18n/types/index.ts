@@ -278,6 +278,10 @@ export interface StringMap {
   'downloadScreen.noDownloads': 'string';
   'downloadScreen.pluginNotFound': 'string';
   'downloadScreen.removeDownloadsWarning': 'string';
+  'errorBoundary.title': 'string';
+  'errorBoundary.description': 'string';
+  'errorBoundary.copyStackTrace': 'string';
+  'errorBoundary.restart': 'string';
   'generalSettings': 'string';
   'generalSettingsScreen.asc': 'string';
   'generalSettingsScreen.autoDownload': 'string';

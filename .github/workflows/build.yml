@@ -148,6 +148,15 @@ jobs:
             app/build/outputs/apk/preRelease/app-preRelease.apk \
             "app/build/outputs/apk/preRelease/$PRERELEASE_APK_NAME"
 
+
+      - name: Upload Preview Sourcemap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PRERELEASE_ARTIFACT_NAME }}-sourcemap
+          path: android/app/build/intermediates/sourcemaps/react/preRelease/index.android.bundle.map
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
       - name: Upload Preview APK
         id: upload-nightly
         uses: actions/upload-artifact@v4
