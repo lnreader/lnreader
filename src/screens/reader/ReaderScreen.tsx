@@ -89,6 +89,7 @@ export const ChapterContent = ({
   const {
     novel,
     chapter,
+    documentChapter,
     onUserInteraction,
     loading,
     error,
@@ -162,11 +163,13 @@ export const ChapterContent = ({
     setBookmarked(chapter.bookmark ?? false);
   }, [chapter]);
 
+  // Tied to the document, not the chapter being read: a search spans whatever
+  // is loaded, which in continuous reading outlives the active chapter.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchVisible(false);
     resetSearch();
-  }, [chapter.id, resetSearch]);
+  }, [documentChapter.id, resetSearch]);
 
   useEffect(() => {
     if (hidden) {

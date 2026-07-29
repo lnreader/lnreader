@@ -48,6 +48,15 @@ window.reader = new (function () {
   this.nextChapter = undefined;
   this.prevChapter = undefined;
   this.strings = strings;
+  /**
+   * Whether this document holds a continuously scrolling stream of chapters
+   * instead of a single one. Decided when the document is built - the app
+   * rebuilds it when the setting is toggled - so everything that has to branch
+   * on it can rely on it never changing while the page is alive.
+   */
+  this.continuousReading =
+    chapterGeneralSettings.continuousReading === true &&
+    !chapterGeneralSettings.pageReader;
 
   /** Called by the app once the neighbouring chapters have been resolved. */
   this.setAdjacentChapters = ({ nextChapter, prevChapter, strings: texts }) => {
@@ -140,15 +149,22 @@ window.reader = new (function () {
 
   document.onscrollend = () => {
     onUserInteraction();
-    if (!this.generalSettings.val.pageReader) {
-      this.post({
-        type: 'save',
-        data: parseInt(
-          ((window.scrollY + this.layoutHeight) / this.chapterHeight) * 100,
-          10,
-        ),
-      });
+    if (this.generalSettings.val.pageReader) {
+      return;
     }
+    if (this.continuousReading) {
+      // Progress belongs to whichever chapter is on screen, which only the
+      // continuous reader knows about.
+      window.continuousReader?.saveProgress();
+      return;
+    }
+    this.post({
+      type: 'save',
+      data: parseInt(
+        ((window.scrollY + this.layoutHeight) / this.chapterHeight) * 100,
+        10,
+      ),
+    });
   };
 
   document.onpointerdown = () => onUserInteraction();
@@ -684,6 +700,15 @@ document.addEventListener('DOMContentLoaded', () => {
 let restoredScrollTop = null;
 let positionRestored = false;
 
+/**
+ * Gives up on correcting the restored reading position. Continuous reading
+ * calls this as soon as it grows the document: past that point the saved
+ * progress no longer describes a fraction of the document's height.
+ */
+window.releaseReadingPosition = () => {
+  restoredScrollTop = null;
+};
+
 function calculatePages(behavior = 'instant') {
   reader.refresh();
 
@@ -768,6 +793,9 @@ const restoreReadingPosition = () => {
     setTimeout(() => {
       positionRestored = true;
       calculatePages();
+      // Only now is the reader where it belongs, which is what decides whether
+      // there is anything to stream in yet.
+      window.continuousReader?.start();
       // Deliberately not awaited before restoring: `document.fonts.ready` does
       // not resolve until the document has finished loading, which is what this
       // is trying to avoid waiting for.
@@ -909,6 +937,9 @@ window.addEventListener('load', () => {
     }
     if (
       reader.generalSettings.val.swipeGestures &&
+      // Chapters follow each other by scrolling here, so a swipe that reloads
+      // the document at the next one would only throw the reader's place away.
+      !reader.continuousReading &&
       Math.abs(diffX) > Math.abs(diffY) * 2 &&
       Math.abs(diffX) > 180
     ) {
@@ -923,21 +954,21 @@ window.addEventListener('load', () => {
   });
 })();
 
-// text options
-(function () {
-  // What the chapter element currently holds. The document is delivered with
-  // the untransformed chapter already parsed, so writing the same markup back
-  // would re-parse and re-layout the whole chapter (and restart image loads)
-  // for nothing - which is exactly what happens when neither transform is on.
-  let appliedHTML = reader.rawHTML;
+/**
+ * Owns the text transforms (bionic reading, paragraph spacing) for every piece
+ * of chapter markup in the document. Continuous reading keeps several chapters
+ * on the page at once, so each of them is registered as its own section and the
+ * transforms are re-applied to all of them when the settings change.
+ */
+window.readerContent = new (function () {
+  const sections = [];
 
-  van.derive(() => {
-    let html = reader.rawHTML;
-    if (reader.generalSettings.val.bionicReading) {
-      html = textVide.textVide(reader.rawHTML);
+  const transform = (html, settings) => {
+    if (settings.bionicReading) {
+      html = textVide.textVide(html);
     }
 
-    if (reader.generalSettings.val.removeExtraParagraphSpacing) {
+    if (settings.removeExtraParagraphSpacing) {
       html = html
         .replace(/(?:&nbsp;\s*|[\u200b]\s*)+(?=<\/?p[> ])/g, '')
         .replace(/<br>\s*<br>\s*(?:<br>\s*)+/g, '<br><br>') //force max 2 consecutive <br>, chaining regex
@@ -958,12 +989,62 @@ window.addEventListener('load', () => {
           '',
         );
     }
-    if (html === appliedHTML) {
+    return html;
+  };
+
+  const render = (section, settings = reader.generalSettings.val) => {
+    const html = transform(section.rawHTML, settings);
+    // Writing the same markup back would re-parse and re-layout the whole
+    // chapter (and restart image loads) for nothing - which is exactly what
+    // happens when neither transform is on.
+    if (html === section.appliedHTML) {
+      return false;
+    }
+    section.element.innerHTML = html;
+    section.appliedHTML = html;
+    return true;
+  };
+
+  /**
+   * @param element container the markup lives in
+   * @param rawHTML the untransformed markup
+   * @param rendered whether `element` already holds `rawHTML` parsed - true for
+   *   the chapter the document was built with, false for markup handed to us as
+   *   a string.
+   */
+  this.addSection = (element, rawHTML, rendered) => {
+    const section = {
+      element,
+      rawHTML,
+      appliedHTML: rendered ? rawHTML : null,
+    };
+    sections.push(section);
+    if (render(section)) {
+      reader.refresh();
+    }
+    return section;
+  };
+
+  this.removeSection = element => {
+    const index = sections.findIndex(section => section.element === element);
+    if (index !== -1) {
+      sections.splice(index, 1);
+    }
+  };
+
+  van.derive(() => {
+    // Read up front, not per section: a derivation that reaches no state at all
+    // - which is what an empty section list would mean - never runs again.
+    const settings = reader.generalSettings.val;
+
+    let changed = false;
+    for (const section of sections) {
+      changed = render(section, settings) || changed;
+    }
+    if (!changed) {
       return;
     }
 
-    reader.chapterElement.innerHTML = html;
-    appliedHTML = html;
     reader.refresh();
     schedulePageCalculation();
 
@@ -975,3 +1056,9 @@ window.addEventListener('load', () => {
     }
   });
 })();
+
+// In continuous reading the chapter element is a list of chapter sections, each
+// registered by the continuous reader as it is inserted.
+if (!reader.continuousReading) {
+  readerContent.addSection(reader.chapterElement, reader.rawHTML, true);
+}

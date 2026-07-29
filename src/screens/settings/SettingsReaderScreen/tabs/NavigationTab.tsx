@@ -16,6 +16,7 @@ const NavigationTab: React.FC = () => {
     verticalSeekbar = true,
     swipeGestures = false,
     pageReader = false,
+    continuousReading = false,
     autoScroll = false,
     autoScrollInterval = 10,
     autoScrollOffset = null,
@@ -109,14 +110,37 @@ const NavigationTab: React.FC = () => {
       </View>
 
       <View style={styles.section}>
-        <List.SubHeader theme={theme}>Reading Mode</List.SubHeader>
+        <List.SubHeader theme={theme}>
+          {getString('readerScreen.bottomSheet.readingMode')}
+        </List.SubHeader>
         <SettingSwitch
           label={getString('readerScreen.bottomSheet.pageReader')}
           description={getString(
             'readerScreen.bottomSheet.pageReaderDescription',
           )}
           value={pageReader}
-          onPress={() => setChapterGeneralSettings({ pageReader: !pageReader })}
+          onPress={() =>
+            // Paged and continuous reading are two answers to the same
+            // question, so turning one on turns the other off.
+            setChapterGeneralSettings({
+              pageReader: !pageReader,
+              continuousReading: pageReader ? continuousReading : false,
+            })
+          }
+          theme={theme}
+        />
+        <SettingSwitch
+          label={getString('readerScreen.bottomSheet.continuousReading')}
+          description={getString(
+            'readerScreen.bottomSheet.continuousReadingDescription',
+          )}
+          value={continuousReading}
+          onPress={() =>
+            setChapterGeneralSettings({
+              continuousReading: !continuousReading,
+              pageReader: continuousReading ? pageReader : false,
+            })
+          }
           theme={theme}
         />
       </View>

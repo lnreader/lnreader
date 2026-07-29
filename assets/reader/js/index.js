@@ -19,10 +19,14 @@ const onScrollRatio = (() => {
       queued = true;
       requestAnimationFrame(() => {
         queued = false;
-        const ratio = Math.min(
-          1,
-          (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
-        );
+        // Progress is always reported against the chapter being read, which in
+        // continuous reading is only a part of the document.
+        const ratio = reader.continuousReading
+          ? continuousReader.activeRatio()
+          : Math.min(
+              1,
+              (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
+            );
         for (const callback of callbacks) {
           callback(ratio);
         }
@@ -35,6 +39,17 @@ const onScrollRatio = (() => {
 })();
 
 const ChapterEnding = () => {
+  // Nothing ends in continuous reading: the next chapter arrives by scrolling,
+  // and the only thing worth saying is when there is no more of it.
+  if (reader.continuousReading) {
+    return div(
+      {
+        class: () =>
+          `info-text ${continuousReader.statusText.val ? '' : 'd-none'}`,
+      },
+      () => continuousReader.statusText.val,
+    );
+  }
   return () =>
     reader.generalSettings.val.pageReader
       ? div()
@@ -64,7 +79,9 @@ const Scrollbar = () => {
   const percentage = van.state(0);
   const update = ratio => {
     if (ratio === undefined) {
-      ratio = (window.scrollY + reader.layoutHeight) / reader.chapterHeight;
+      ratio = reader.continuousReading
+        ? continuousReader.activeRatio()
+        : (window.scrollY + reader.layoutHeight) / reader.chapterHeight;
     }
     if (ratio > 1) {
       ratio = 1;
@@ -77,6 +94,10 @@ const Scrollbar = () => {
     }
     percentage.val = parseInt(ratio * 100);
     if (lock) {
+      if (reader.continuousReading) {
+        continuousReader.scrollToRatio(ratio);
+        return;
+      }
       window.scrollTo({
         top: reader.chapterHeight * ratio - reader.layoutHeight,
         behavior: 'instant',

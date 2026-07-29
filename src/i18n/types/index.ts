@@ -552,6 +552,9 @@ export interface StringMap {
   'readerScreen.bottomSheet.keepScreenOn': 'string';
   'readerScreen.bottomSheet.volumeButtonsScroll': 'string';
   'readerScreen.bottomSheet.volumeButtonsScrollDescription': 'string';
+  'readerScreen.bottomSheet.continuousReading': 'string';
+  'readerScreen.bottomSheet.continuousReadingDescription': 'string';
+  'readerScreen.bottomSheet.readingMode': 'string';
   'readerScreen.drawer.scrollToBottom': 'string';
   'readerScreen.drawer.scrollToCurrentChapter': 'string';
   'readerScreen.drawer.scrollToTop': 'string';
@@ -562,6 +565,7 @@ export interface StringMap {
   'readerScreen.noPreviousChapter': 'string';
   'readerScreen.searchMinLength': 'string';
   'readerScreen.searchPlaceholder': 'string';
+  'readerScreen.loadingNextChapter': 'string';
   'readerSettings.autoScrollInterval': 'string';
   'readerSettings.autoScrollOffset': 'string';
   'readerSettings.backgroundColor': 'string';

@@ -651,7 +651,10 @@
       "verticalSeekbarDescription": "Show a slider on the side to jump to any point in the chapter",
       "keepScreenOn": "Keep screen on",
       "volumeButtonsScroll": "Volume button scrolling",
-      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume"
+      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume",
+      "continuousReading": "Continuous reading",
+      "continuousReadingDescription": "Scroll straight into the next chapter instead of stopping at the end of each one",
+      "readingMode": "Reading mode"
     },
     "drawer": {
       "scrollToBottom": "Scroll to bottom",
@@ -664,7 +667,8 @@
     "noNextChapter": "There's no next chapter",
     "noPreviousChapter": "There's no previous chapter",
     "searchMinLength": "Enter at least %{count} characters to search",
-    "searchPlaceholder": "Search chapter"
+    "searchPlaceholder": "Search chapter",
+    "loadingNextChapter": "Loading next chapter…"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",

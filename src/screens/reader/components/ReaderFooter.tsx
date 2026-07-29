@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useChapterContext } from '../ChapterContext';
-import { useTheme } from '@hooks/persisted';
+import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { useNovelLayout } from '@screens/novel/NovelContext';
 
 interface ChapterFooterProps {
@@ -68,6 +68,9 @@ const ChapterFooter = ({
 }: ChapterFooterProps) => {
   const { nextChapter, prevChapter, navigateChapter } = useChapterContext();
   const theme = useTheme();
+  // Continuous reading has no chapter boundaries to step over - the next
+  // chapter is simply further down the page.
+  const { continuousReading = false } = useChapterGeneralSettings();
   const rippleConfig = {
     color: theme.rippleColor,
     borderless: true,
@@ -101,18 +104,20 @@ const ChapterFooter = ({
       style={[styles.footer, style]}
     >
       <View style={styles.buttonsContainer}>
-        <Pressable
-          android_ripple={rippleConfig}
-          style={styles.buttonStyles}
-          onPress={() => navigateChapter('PREV')}
-        >
-          <IconButton
-            icon="chevron-left"
-            size={26}
-            disabled={!prevChapter}
-            iconColor={theme.onSurface}
-          />
-        </Pressable>
+        {continuousReading ? null : (
+          <Pressable
+            android_ripple={rippleConfig}
+            style={styles.buttonStyles}
+            onPress={() => navigateChapter('PREV')}
+          >
+            <IconButton
+              icon="chevron-left"
+              size={26}
+              disabled={!prevChapter}
+              iconColor={theme.onSurface}
+            />
+          </Pressable>
+        )}
         <Pressable
           android_ripple={rippleConfig}
           style={styles.buttonStyles}
@@ -146,18 +151,20 @@ const ChapterFooter = ({
             iconColor={theme.onSurface}
           />
         </Pressable>
-        <Pressable
-          android_ripple={rippleConfig}
-          style={styles.buttonStyles}
-          onPress={() => navigateChapter('NEXT')}
-        >
-          <IconButton
-            icon="chevron-right"
-            size={26}
-            disabled={!nextChapter}
-            iconColor={theme.onSurface}
-          />
-        </Pressable>
+        {continuousReading ? null : (
+          <Pressable
+            android_ripple={rippleConfig}
+            style={styles.buttonStyles}
+            onPress={() => navigateChapter('NEXT')}
+          >
+            <IconButton
+              icon="chevron-right"
+              size={26}
+              disabled={!nextChapter}
+              iconColor={theme.onSurface}
+            />
+          </Pressable>
+        )}
       </View>
     </Animated.View>
   );

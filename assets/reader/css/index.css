@@ -33,6 +33,38 @@ body {
   padding-right: var(--readerSettings-padding);
 }
 
+/*
+ * Continuous reading inserts and removes chapters around the reading position
+ * and compensates the scroll offset itself; the browser's own scroll anchoring
+ * on top of that would double the correction. `flow-root` is what makes that
+ * arithmetic work: without it the margins of a chapter's first and last
+ * elements collapse out of the section, and its measured height - which is how
+ * far the page is scrolled to compensate - would be short by exactly those.
+ */
+.chapter-section {
+  display: flow-root;
+  overflow-anchor: none;
+}
+
+.chapter-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 16px;
+  font-size: 0.8em;
+  line-height: 1.2;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.chapter-section-header::before,
+.chapter-section-header::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid currentColor;
+  opacity: 0.5;
+}
+
 hr {
   margin-top: 20px;
   margin-bottom: 20px;

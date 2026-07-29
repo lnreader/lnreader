@@ -47,6 +47,17 @@ type AdjacentChapters = [
 /** Stable identity so resetting the adjacent chapters never renders twice. */
 const NO_ADJACENT_CHAPTERS: AdjacentChapters = [undefined, undefined];
 
+export type ChapterDirection = 'NEXT' | 'PREV';
+
+/**
+ * `injectJavaScript` evaluates its argument as source, where the line separator
+ * characters JSON leaves unescaped are not valid inside a string literal.
+ */
+const toInjectableJSON = (value: unknown) =>
+  JSON.stringify(value)
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
 export default function useChapter(
   webViewRef: RefObject<WebView | null>,
   initialChapter: ChapterInfo,
@@ -63,6 +74,13 @@ export default function useChapter(
 
   const [hidden, setHidden] = useState(true);
   const [chapter, setChapter] = useState(initialChapter);
+  /**
+   * The chapter the WebView document was built from. In continuous reading the
+   * document outlives the chapter being read - it grows with every chapter
+   * scrolled into - so anything that would rebuild (and therefore reload) the
+   * document has to key off this instead of the active chapter.
+   */
+  const [documentChapter, setDocumentChapter] = useState(initialChapter);
   const [loading, setLoading] = useState(true);
   const [chapterText, setChapterText] = useState('');
 
@@ -102,6 +120,22 @@ export default function useChapter(
   const hiddenRef = useRef(hidden);
   /** Increments on every load so a superseded load can never publish state. */
   const loadIdRef = useRef(0);
+
+  /**
+   * Continuous reading bookkeeping. Every chapter that has been streamed into
+   * the document, plus the two chapters at its ends - the ones the next
+   * inline load extends from. The WebView drops chapters it has scrolled far
+   * past and reports the new ends, so `edges` is not simply first/last loaded.
+   */
+  const streamedChaptersRef = useRef(new Map<number, ChapterInfo>());
+  const streamEdgesRef = useRef<{
+    head: ChapterInfo | undefined;
+    tail: ChapterInfo | undefined;
+  }>({ head: undefined, tail: undefined });
+  const inlineLoadRef = useRef<Record<ChapterDirection, boolean>>({
+    NEXT: false,
+    PREV: false,
+  });
 
   useEffect(() => {
     chapterRef.current = chapter;
@@ -237,13 +271,61 @@ export default function useChapter(
   );
 
   /**
+   * Resolves the chapter next to `chap`, pulling in the adjacent source page
+   * when `chap` sits on a page boundary. `onDbResult` reports what the database
+   * alone had, which is everything except at a boundary - where finding the
+   * neighbour means going to the network.
+   */
+  const resolveNeighbour = useCallback(
+    async (
+      chap: ChapterInfo,
+      direction: ChapterDirection,
+      onDbResult?: (result: ChapterInfo | undefined) => void,
+    ) => {
+      const excludedScanlators = excludedScanlatorsRef.current || [];
+      const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
+      const fromDb = await query(
+        chap.novelId,
+        chap.position!,
+        chap.page ?? '',
+        excludedScanlators,
+      );
+      onDbResult?.(fromDb);
+      if (fromDb) {
+        return fromDb;
+      }
+
+      const currentPage = Number(chap.page);
+      if (direction === 'NEXT') {
+        const totalPages = novel.totalPages ?? 0;
+        if (totalPages > 0 && currentPage < totalPages) {
+          return loadPageBoundaryChapter(
+            chap,
+            String(currentPage + 1),
+            'NEXT',
+            excludedScanlators,
+          );
+        }
+      } else if (currentPage > 1) {
+        return loadPageBoundaryChapter(
+          chap,
+          String(currentPage - 1),
+          'PREV',
+          excludedScanlators,
+        );
+      }
+      return undefined;
+    },
+    [loadPageBoundaryChapter, novel.totalPages],
+  );
+
+  /**
    * Resolves the neighbouring chapters *after* the current one is on screen.
    * These queries (and the page-boundary fetch above, which can hit the
    * network) used to gate the first paint even for downloaded chapters.
    */
   const resolveAdjacentChapters = useCallback(
     async (chap: ChapterInfo, loadId: number) => {
-      const excludedScanlators = excludedScanlatorsRef.current || [];
       const isStale = () => loadId !== loadIdRef.current;
       const publish = (adjacent: AdjacentChapters) => {
         if (!isStale()) {
@@ -252,67 +334,39 @@ export default function useChapter(
       };
 
       try {
-        const [nextChapResult, prevChapResult] = await Promise.all([
-          getNextChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
-          getPrevChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
+        // Published as soon as both database lookups are in, so the reader is
+        // not left without a next chapter while a page boundary is fetched.
+        let dbNext: ChapterInfo | undefined;
+        let dbPrev: ChapterInfo | undefined;
+        let dbResults = 0;
+        const onDbResults = () => {
+          if (++dbResults === 2) {
+            publish([dbNext, dbPrev]);
+            prefetchChapter(dbNext);
+          }
+        };
+
+        const [nextChap, prevChap] = await Promise.all([
+          resolveNeighbour(chap, 'NEXT', result => {
+            dbNext = result;
+            onDbResults();
+          }),
+          resolveNeighbour(chap, 'PREV', result => {
+            dbPrev = result;
+            onDbResults();
+          }),
         ]);
         if (isStale()) {
           return;
         }
 
-        let nextChap = nextChapResult;
-        let prevChap = prevChapResult;
         publish([nextChap, prevChap]);
         prefetchChapter(nextChap);
-
-        const totalPages = novel.totalPages ?? 0;
-        const currentPage = Number(chap.page);
-
-        // Pull in the adjacent source pages if we are at a page boundary.
-        if (!nextChap && totalPages > 0 && currentPage < totalPages) {
-          nextChap = await loadPageBoundaryChapter(
-            chap,
-            String(currentPage + 1),
-            'NEXT',
-            excludedScanlators,
-          );
-          if (isStale()) {
-            return;
-          }
-          if (nextChap) {
-            publish([nextChap, prevChap]);
-            prefetchChapter(nextChap);
-          }
-        }
-        if (!prevChap && currentPage > 1) {
-          prevChap = await loadPageBoundaryChapter(
-            chap,
-            String(currentPage - 1),
-            'PREV',
-            excludedScanlators,
-          );
-          if (isStale()) {
-            return;
-          }
-          if (prevChap) {
-            publish([nextChap, prevChap]);
-          }
-        }
       } catch {
         // Neighbouring chapters are optional; the current chapter stays usable.
       }
     },
-    [loadPageBoundaryChapter, novel.totalPages, prefetchChapter],
+    [prefetchChapter, resolveNeighbour],
   );
 
   const getChapter = useCallback(
@@ -334,9 +388,14 @@ export default function useChapter(
 
         const chap = dbChapter ?? requested;
         setChapter(chap);
+        setDocumentChapter(chap);
         setChapterText(html);
         setAdjacentChapter(NO_ADJACENT_CHAPTERS);
         setLoading(false);
+
+        // The document about to be built holds this chapter and nothing else.
+        streamedChaptersRef.current = new Map([[chap.id, chap]]);
+        streamEdgesRef.current = { head: chap, tail: chap };
 
         void resolveAdjacentChapters(chap, loadId);
       } catch (e: any) {
@@ -348,6 +407,123 @@ export default function useChapter(
       }
     },
     [loadChapterHtml, resolveAdjacentChapters],
+  );
+
+  /**
+   * Streams the chapter following (or preceding) the loaded ones into the open
+   * document, for continuous reading. Nothing here reloads the WebView: the
+   * markup is handed to the page, which splices it in around the reading
+   * position itself.
+   */
+  const loadInlineChapter = useCallback(
+    async (direction: ChapterDirection) => {
+      if (inlineLoadRef.current[direction]) {
+        return;
+      }
+      inlineLoadRef.current[direction] = true;
+      const loadId = loadIdRef.current;
+      const isStale = () => loadId !== loadIdRef.current;
+      let inserted = false;
+
+      try {
+        const edge =
+          direction === 'NEXT'
+            ? streamEdgesRef.current.tail
+            : streamEdgesRef.current.head;
+        if (!edge) {
+          return;
+        }
+
+        const neighbour = await resolveNeighbour(edge, direction);
+        if (isStale()) {
+          return;
+        }
+        if (!neighbour) {
+          inserted = true;
+          webViewRef.current?.injectJavaScript(
+            `window.continuousReader?.setEdgeReached(${toInjectableJSON(
+              direction,
+            )}); true;`,
+          );
+          return;
+        }
+
+        const html = await loadChapterHtml(neighbour);
+        if (isStale()) {
+          return;
+        }
+
+        streamedChaptersRef.current.set(neighbour.id, neighbour);
+        if (direction === 'NEXT') {
+          streamEdgesRef.current.tail = neighbour;
+        } else {
+          streamEdgesRef.current.head = neighbour;
+        }
+        inserted = true;
+        webViewRef.current?.injectJavaScript(
+          `window.continuousReader?.insertChapter(${toInjectableJSON({
+            direction,
+            chapter: neighbour,
+            html,
+          })}); true;`,
+        );
+
+        // Keep the one after it warm so the next hand-off costs a lookup and
+        // nothing else.
+        void resolveNeighbour(neighbour, direction)
+          .then(prefetchChapter)
+          .catch(() => {});
+      } catch {
+        // Leaves the reader where it is; the page asks again on the next scroll.
+      } finally {
+        inlineLoadRef.current[direction] = false;
+        if (!inserted && !isStale()) {
+          webViewRef.current?.injectJavaScript(
+            `window.continuousReader?.cancelPending(${toInjectableJSON(
+              direction,
+            )}); true;`,
+          );
+        }
+      }
+    },
+    [loadChapterHtml, prefetchChapter, resolveNeighbour, webViewRef],
+  );
+
+  /**
+   * Follows the chapter the reader has scrolled into, in continuous reading.
+   * Everything chapter-scoped outside the document - the appbar title, the
+   * bookmark, history, the drawer's highlight - keys off this.
+   */
+  const setActiveChapter = useCallback(
+    (chapterId: number) => {
+      const chap = streamedChaptersRef.current.get(chapterId);
+      if (!chap || chap.id === chapterRef.current.id) {
+        return;
+      }
+      chapterRef.current = chap;
+      setChapter(chap);
+      setAdjacentChapter(NO_ADJACENT_CHAPTERS);
+      void resolveAdjacentChapters(chap, loadIdRef.current);
+    },
+    [resolveAdjacentChapters],
+  );
+
+  /**
+   * The page drops chapters it has scrolled well past, so it - not this hook -
+   * knows which chapters the stream currently extends from.
+   */
+  const setStreamEdges = useCallback(
+    (headChapterId: number, tailChapterId: number) => {
+      const head = streamedChaptersRef.current.get(headChapterId);
+      const tail = streamedChaptersRef.current.get(tailChapterId);
+      if (head) {
+        streamEdgesRef.current.head = head;
+      }
+      if (tail) {
+        streamEdgesRef.current.tail = tail;
+      }
+    },
+    [],
   );
 
   const searchChapterText = useCallback(
@@ -396,37 +572,45 @@ export default function useChapter(
     };
   }, [autoScroll, autoScrollInterval, autoScrollOffset, webViewRef]);
 
-  const updateTracker = useCallback(() => {
-    const chapterNumber = parseChapterNumber(novel.name, chapter.name);
-    if (tracker && trackedNovel && chapterNumber > trackedNovel.progress) {
-      updateAllTrackedNovels({ progress: chapterNumber });
-    }
-  }, [chapter.name, novel.name, trackedNovel, tracker, updateAllTrackedNovels]);
-
-  const markedReadRef = useRef<number | undefined>(undefined);
-  const saveProgress = useCallback(
-    (percentage: number) => {
-      if (!incognitoMode) {
-        updateChapterProgress(chapter.id, percentage > 100 ? 100 : percentage);
-
-        // Progress is reported repeatedly while reading the end of a chapter;
-        // marking it read (and pushing it to the tracker, which is a network
-        // call) only has to happen once.
-        if (percentage >= 97 && markedReadRef.current !== chapter.id) {
-          // a relative number
-          markedReadRef.current = chapter.id;
-          markChapterRead(chapter.id);
-          updateTracker();
-        }
+  const updateTracker = useCallback(
+    (chap: ChapterInfo) => {
+      const chapterNumber = parseChapterNumber(novel.name, chap.name);
+      if (tracker && trackedNovel && chapterNumber > trackedNovel.progress) {
+        updateAllTrackedNovels({ progress: chapterNumber });
       }
     },
-    [
-      chapter.id,
-      incognitoMode,
-      markChapterRead,
-      updateChapterProgress,
-      updateTracker,
-    ],
+    [novel.name, trackedNovel, tracker, updateAllTrackedNovels],
+  );
+
+  const markedReadRef = useRef(new Set<number>());
+  /**
+   * `chapterId` is only passed in continuous reading, where progress can land
+   * on a chapter that is no longer the one being read - the reader has already
+   * scrolled into the next one.
+   */
+  const saveProgress = useCallback(
+    (percentage: number, chapterId?: number) => {
+      if (incognitoMode) {
+        return;
+      }
+
+      const chap =
+        (chapterId === undefined
+          ? undefined
+          : streamedChaptersRef.current.get(chapterId)) ?? chapterRef.current;
+      updateChapterProgress(chap.id, percentage > 100 ? 100 : percentage);
+
+      // Progress is reported repeatedly while reading the end of a chapter;
+      // marking it read (and pushing it to the tracker, which is a network
+      // call) only has to happen once.
+      if (percentage >= 97 && !markedReadRef.current.has(chap.id)) {
+        // a relative number
+        markedReadRef.current.add(chap.id);
+        markChapterRead(chap.id);
+        updateTracker(chap);
+      }
+    },
+    [incognitoMode, markChapterRead, updateChapterProgress, updateTracker],
   );
 
   const hideHeader = useCallback(() => {
@@ -510,6 +694,7 @@ export default function useChapter(
   const chapterContext = useMemo(
     () => ({
       chapter,
+      documentChapter,
       nextChapter,
       prevChapter,
       error,
@@ -526,11 +711,15 @@ export default function useChapter(
       setChapter,
       setLoading,
       getChapter,
+      loadInlineChapter,
+      setActiveChapter,
+      setStreamEdges,
       onUserInteraction,
       isTTSReadingRef,
     }),
     [
       chapter,
+      documentChapter,
       nextChapter,
       prevChapter,
       error,
@@ -544,6 +733,9 @@ export default function useChapter(
       clearChapterSearch,
       refetch,
       getChapter,
+      loadInlineChapter,
+      setActiveChapter,
+      setStreamEdges,
       onUserInteraction,
       isTTSReadingRef,
     ],

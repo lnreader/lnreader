@@ -74,6 +74,8 @@ interface GeneralPreference {
   description?: string;
   key: string;
   label: string;
+  /** Turned off when this one is turned on, for mutually exclusive modes. */
+  exclusiveWith?: string;
 }
 
 const displayPreferences: GeneralPreference[] = [
@@ -130,6 +132,13 @@ const navigationPreferences: GeneralPreference[] = [
     key: 'pageReader',
     label: 'pageReader',
     description: 'pageReaderDescription',
+    exclusiveWith: 'continuousReading',
+  },
+  {
+    key: 'continuousReading',
+    label: 'continuousReading',
+    description: 'continuousReadingDescription',
+    exclusiveWith: 'pageReader',
   },
   {
     key: 'tapToScroll',
@@ -144,8 +153,13 @@ const GeneralTab: React.FC = React.memo(() => {
     useChapterGeneralSettings();
 
   const toggleSetting = useCallback(
-    (key: keyof typeof settings) =>
-      setChapterGeneralSettings({ [key]: !settings[key] }),
+    (key: keyof typeof settings, exclusiveWith?: string) => {
+      const enabling = !settings[key];
+      setChapterGeneralSettings({
+        [key]: enabling,
+        ...(enabling && exclusiveWith ? { [exclusiveWith]: false } : {}),
+      });
+    },
     [setChapterGeneralSettings, settings],
   );
 
@@ -163,7 +177,9 @@ const GeneralTab: React.FC = React.memo(() => {
         label={getString(
           `readerScreen.bottomSheet.${item.label}` as keyof StringMap,
         )}
-        onPress={() => toggleSetting(item.key as keyof typeof settings)} // @ts-ignore
+        onPress={() =>
+          toggleSetting(item.key as keyof typeof settings, item.exclusiveWith)
+        } // @ts-ignore
         value={settings[item.key]}
         theme={theme}
       />

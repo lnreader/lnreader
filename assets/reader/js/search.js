@@ -164,7 +164,11 @@ window.readerSearch = new (function () {
           if (!node.nodeValue) {
             return NodeFilter.FILTER_REJECT;
           }
-          if (node.parentElement?.closest('script, style')) {
+          if (
+            node.parentElement?.closest(
+              'script, style, .chapter-section-header',
+            )
+          ) {
             return NodeFilter.FILTER_REJECT;
           }
           return NodeFilter.FILTER_ACCEPT;

@@ -106,6 +106,13 @@ const createDeferred = <T>() => {
   return { promise, resolve, reject };
 };
 
+type WebViewRef = Parameters<typeof useChapter>[0];
+
+/** A WebView stand-in that records the scripts the hook hands the page. */
+const createWebViewRef = (injectJavaScript: jest.Mock) => {
+  return { current: { injectJavaScript } } as unknown as WebViewRef;
+};
+
 const createStore = (
   cacheSeed: Record<number, string | Promise<string>> = {},
 ) => {
@@ -148,12 +155,11 @@ describe('useChapter', () => {
    * toggle without invalidating the chapter context; flattening both keeps the
    * assertions below focused on behaviour.
    */
-  const useFlatChapter = (chapter: ReturnType<typeof makeChapter>) => {
-    const { hidden, chapterContext } = useChapter(
-      { current: null },
-      chapter,
-      novel,
-    );
+  const useFlatChapter = (
+    chapter: ReturnType<typeof makeChapter>,
+    webViewRef: WebViewRef = { current: null },
+  ) => {
+    const { hidden, chapterContext } = useChapter(webViewRef, chapter, novel);
 
     return { hidden, ...chapterContext };
   };
@@ -400,5 +406,90 @@ describe('useChapter', () => {
 
     expect(result.current.chapter.id).toBe(nextChapter.id);
     expect(result.current.chapterText).toBe('SANITIZED:next body');
+  });
+
+  describe('continuous reading', () => {
+    const streamChapter = async () => {
+      const injectJavaScript = jest.fn();
+      const { result } = renderHook(() =>
+        useFlatChapter(initialChapter, createWebViewRef(injectJavaScript)),
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadInlineChapter('NEXT');
+      });
+
+      const scripts = injectJavaScript.mock.calls.map(([script]) => script);
+      return { result, scripts };
+    };
+
+    it('hands the following chapter to the open document', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetNextChapter.mockImplementation(
+        async (_novelId: number, position: number) =>
+          position === initialChapter.position ? nextChapter : undefined,
+      );
+
+      const { result, scripts } = await streamChapter();
+
+      const insert = scripts.find((script: string) =>
+        script.includes('insertChapter'),
+      );
+      expect(insert).toContain('"direction":"NEXT"');
+      expect(insert).toContain(`"id":${nextChapter.id}`);
+      expect(insert).toContain('SANITIZED:chapter body');
+
+      await act(async () => {
+        result.current.setActiveChapter(nextChapter.id);
+      });
+
+      // The reader follows what is on screen, while the document it was built
+      // from stays put - anything else would reload the WebView.
+      expect(result.current.chapter.id).toBe(nextChapter.id);
+      expect(result.current.documentChapter.id).toBe(initialChapter.id);
+    });
+
+    it('tells the document when the novel has run out', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { scripts } = await streamChapter();
+
+      expect(
+        scripts.some((script: string) => script.includes('setEdgeReached')),
+      ).toBe(true);
+      expect(
+        scripts.some((script: string) => script.includes('insertChapter')),
+      ).toBe(false);
+    });
+
+    it('saves progress against the chapter it was reported for', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetNextChapter.mockImplementation(
+        async (_novelId: number, position: number) =>
+          position === initialChapter.position ? nextChapter : undefined,
+      );
+
+      const { result } = await streamChapter();
+
+      await act(async () => {
+        result.current.setActiveChapter(nextChapter.id);
+      });
+
+      act(() => {
+        result.current.saveProgress(100, initialChapter.id);
+      });
+
+      expect(store.state.updateChapterProgress).toHaveBeenCalledWith(
+        initialChapter.id,
+        100,
+      );
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(
+        initialChapter.id,
+      );
+    });
   });
 });

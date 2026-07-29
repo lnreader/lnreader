@@ -4,7 +4,7 @@ import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
 import color from 'color';
 
-import { useTheme } from '@hooks/persisted';
+import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
 import { getPlugin } from '@plugins/pluginManager';
@@ -30,6 +30,8 @@ type WebViewPostEvent = {
   type: string;
   data?: unknown;
   autoStartTTS?: boolean;
+  /** Continuous reading: which chapter an event is about. */
+  chapterId?: number;
 };
 
 type WebViewReaderProps = {
@@ -119,6 +121,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const {
     novel,
     chapter,
+    documentChapter,
     chapterText: html,
     navigateChapter,
     saveProgress,
@@ -127,23 +130,33 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     webViewRef,
     onUserInteraction,
     isTTSReadingRef,
+    loadInlineChapter,
+    setActiveChapter,
+    setStreamEdges,
   } = useChapterContext();
   const theme = useTheme();
+  /**
+   * Toggling continuous reading changes what the document *is*, so unlike every
+   * other setting it is read live and rebuilds (and thereby reloads) the page.
+   */
+  const { continuousReading = false } = useChapterGeneralSettings();
   const initialReaderSettings = useMemo(
     () =>
       getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
       initialChapterReaderSettings,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
+    [documentChapter.id],
   );
 
   const chapterGeneralSettings = useMemo(
-    () =>
-      getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
-      initialChapterGeneralSettings,
+    () => ({
+      ...(getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
+        initialChapterGeneralSettings),
+      continuousReading,
+    }),
     // needed to preserve settings during chapter change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
+    [documentChapter.id, continuousReading],
   );
 
   const [batteryLevel] = useState(lastKnownBatteryLevel);
@@ -152,7 +165,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
-  const activeChapterIdRef = useRef(chapter.id);
+  const documentChapterIdRef = useRef(documentChapter.id);
   const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
   const {
     command: runTtsCommand,
@@ -195,12 +208,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     }
   }, [ttsProgress, webViewRef]);
 
+  // Keyed to the document rather than the chapter being read: scrolling into
+  // the next chapter of a continuous document must not interrupt narration.
   useEffect(() => {
-    if (activeChapterIdRef.current !== chapter.id) {
-      activeChapterIdRef.current = chapter.id;
+    if (documentChapterIdRef.current !== documentChapter.id) {
+      documentChapterIdRef.current = documentChapter.id;
       runTtsCommand('stop');
     }
-  }, [chapter.id, runTtsCommand]);
+  }, [documentChapter.id, runTtsCommand]);
 
   useEffect(() => {
     const script = buildAdjacentChapterScript(nextChapter, prevChapter);
@@ -286,7 +301,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     // eslint-disable-next-line react-hooks/refs
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
     return {
-      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
+      baseUrl: !documentChapter.isDownloaded ? plugin?.site : undefined,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
       body: plugin?.imageRequestInit?.body,
@@ -352,7 +367,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   : 'translateX(0%)'
               };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
-              ">${chapter.name}</div>
+              ">${documentChapter.name}</div>
               <div id="LNReader-chapter">
                 ${html}
               </div>
@@ -368,7 +383,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   readerSettings: initialReaderSettings,
                   chapterGeneralSettings,
                   novel,
-                  chapter,
+                  chapter: documentChapter,
                   batteryLevel,
                   autoSaveInterval: 2222,
                   DEBUG: __DEV__,
@@ -376,8 +391,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                     finished:
                       getString('readerScreen.finished') +
                       ': ' +
-                      chapter.name.trim(),
+                      documentChapter.name.trim(),
                     noNextChapter: getString('readerScreen.noNextChapter'),
+                    loadingNextChapter: getString(
+                      'readerScreen.loadingNextChapter',
+                    ),
                   },
                 })}
               </script>
@@ -386,6 +404,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/van.js"></script>
               <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
               <script src="${assetsUriPrefix}/js/core.js"></script>
+              <script src="${assetsUriPrefix}/js/continuousReader.js"></script>
               <script src="${assetsUriPrefix}/js/search.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script src="${pluginCustomJS}"></script>
@@ -397,7 +416,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     };
   }, [
     batteryLevel,
-    chapter,
+    documentChapter,
     chapterGeneralSettings,
     html,
     initialReaderSettings,
@@ -527,10 +546,36 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             navigateChapter('PREV');
             break;
           case 'save':
-            if (event.data && typeof event.data === 'number') {
-              saveProgress(event.data);
+            if (typeof event.data === 'number') {
+              saveProgress(event.data, event.chapterId);
             }
             break;
+          case 'load-inline': {
+            const data = event.data as { direction?: unknown } | undefined;
+            if (data?.direction === 'NEXT' || data?.direction === 'PREV') {
+              void loadInlineChapter(data.direction);
+            }
+            break;
+          }
+          case 'chapter-changed': {
+            const data = event.data as { chapterId?: unknown } | undefined;
+            if (typeof data?.chapterId === 'number') {
+              setActiveChapter(data.chapterId);
+            }
+            break;
+          }
+          case 'inline-bounds': {
+            const data = event.data as
+              | { headChapterId?: unknown; tailChapterId?: unknown }
+              | undefined;
+            if (
+              typeof data?.headChapterId === 'number' &&
+              typeof data?.tailChapterId === 'number'
+            ) {
+              setStreamEdges(data.headChapterId, data.tailChapterId);
+            }
+            break;
+          }
           case 'search-result':
             if (event.data && typeof event.data === 'object') {
               const data = event.data as {
