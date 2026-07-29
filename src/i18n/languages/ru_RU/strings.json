@@ -84,10 +84,24 @@
   "backupScreen": {
     "backupName": "Имя резервной копии",
     "backupCreated": "Резервная копия успешно создана",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Резервная копия успешно восстановлена",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "Сохранение резервной копии",
     "categoriesRestored": "Восстановлены %{count} категории",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
     "categoryFileReadFailed": "Failed to read category file: %{error}",
@@ -100,14 +114,34 @@
     "failed": "Резервное копирование не удалось",
     "novelsRestored": "Восстановлено %{count} новелл",
     "novelsRestoredWithErrors": "Restored %{count} novels (%{failedCount} failed)",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "Failed to backup novel: %{novelName} - %{error}",
     "novelRestoreFailed": "Failed to restore novel: %{novelName} - %{error}",
     "novelDirectoryNotFound": "Novel directory not found in backup",
     "novelDirectoryReadFailed": "Failed to read novel directory: %{error}",
     "restoringCategories": "Восстановление категорий",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "Восстановление новелл",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Восстановление настроек",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "Настройки восстановлены",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "Файл настроек в резервной копии не найден",
     "settingsRestoreFailed": "Failed to restore settings: %{error}",
     "settingsFileWriteFailed": "Failed to write settings file: %{error}",
@@ -124,7 +158,21 @@
     "invalidBackupFolder": "Неверная папка резервной копии",
     "localBackup": "Локальное резервное копирование",
     "noBackupFound": "Резервные копии не найдены",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "Подготовка данных",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "Резервное копирование на свой сервер",
       "host": "Сервер",
@@ -136,9 +184,11 @@
     "restoreLargeBackupsWarning": "Восстановление больших резервных копий может привести к зависанию приложения до завершения восстановления",
     "restorinBackup": "Восстановление резервной копии",
     "restoringData": "Восстановление данных",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Свой сервер",
     "selfHostDesc": "Резервное копирование на свой сервер",
     "uploadingData": "Выгрузка данных",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Выгрузка скаченных файлов"
   },
   "browse": "Обзор",
@@ -686,7 +736,10 @@
     "LOCAL_BACKUP": "Локальное резервное копирование",
     "LOCAL_RESTORE": "Локальное восстановление",
     "MIGRATE_NOVEL": "Миграция новелл",
-    "DOWNLOAD_CHAPTER": "Загруженные главы"
+    "DOWNLOAD_CHAPTER": "Загруженные главы",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {
