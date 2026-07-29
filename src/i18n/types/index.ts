@@ -502,10 +502,12 @@ export interface StringMap {
   'novelScreen.startReadingChapters': 'string';
   'novelScreen.status.cancelled': 'string';
   'novelScreen.status.completed': 'string';
+  'novelScreen.status.inactive': 'string';
   'novelScreen.status.licensed': 'string';
   'novelScreen.status.onHiatus': 'string';
   'novelScreen.status.ongoing': 'string';
   'novelScreen.status.publishingFinished': 'string';
+  'novelScreen.status.stub': 'string';
   'novelScreen.status.unknown': 'string';
   'novelScreen.tracked': 'string';
   'novelScreen.tracking': 'string';

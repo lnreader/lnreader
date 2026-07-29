@@ -598,10 +598,12 @@
     "status": {
       "cancelled": "Cancelled",
       "completed": "Completed",
+      "inactive": "Inactive",
       "licensed": "Licensed",
       "onHiatus": "On Hiatus",
       "ongoing": "Ongoing",
       "publishingFinished": "Publishing Finished",
+      "stub": "STUB",
       "unknown": "Unknown"
     },
     "tracked": "Tracked",
