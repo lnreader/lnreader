@@ -1,0 +1,29 @@
+src/screens/reader/ReaderScreen.tsx
+  s_abd08534d78ef6::t_285bd3cdb9a78c 64,316
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_abd08534d78ef6::t_285bd3cdb9a78c",
+          "lines": "64,316",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/reader/ReaderScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "5f45e4c7f2d4f77da3b73bdfdfcdb5b477fd6849",
+  "branch": "master",
+  "commit_sha": "0ed7d878b4b75e1f6ebc83d0978f05cad5920014",
+  "commit_time": "2026-07-29T14:21:59+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {},
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
