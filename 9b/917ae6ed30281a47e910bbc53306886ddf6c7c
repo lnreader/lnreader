@@ -1,132 +1,132 @@
-modules/native-background-tasks/src/NativeBackgroundTasksModule.ts
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 45-48,50-51
-  s_2a1dd0d5a01da7::t_af0055278205ee 49
-src/i18n/languages/en/strings.json
-  s_2a1dd0d5a01da7::t_41a6d003559987 85-92,94
-  s_2a1dd0d5a01da7::t_af0055278205ee 93
-  human 111,184
-src/services/backgroundTasks/__tests__/automaticBackupSchedule.test.ts
-  s_2a1dd0d5a01da7::t_af0055278205ee 56-69
-  s_2a1dd0d5a01da7::t_169573bdd911da 1-55,70-72
-src/services/backgroundTasks/automaticBackupSchedule.ts
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-11,13-23,25-26
-  s_2a1dd0d5a01da7::t_af0055278205ee 12,24
-modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 171,173-177,179-184
-  s_2a1dd0d5a01da7::t_af0055278205ee 172,178
-modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduleWorker.kt
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-15,17-22,24-30
-  s_2a1dd0d5a01da7::t_af0055278205ee 16,23
-src/screens/settings/SettingsBackupScreen/index.tsx
-  s_2a1dd0d5a01da7::t_0713f6e8549f64 7-11
-  s_2a1dd0d5a01da7::t_af0055278205ee 33-34,57-60,65-68,70,78-87,183-189
-  s_2a1dd0d5a01da7::t_5c2dcdb60f166c 71-77,88-89
-  s_2a1dd0d5a01da7::t_169573bdd911da 1
-  s_2a1dd0d5a01da7::t_b6779ca4d2e0a0 18,24-27,31-32,35-37,46,53-56,61-64,90-91,175-180,192-199,220-227
-  s_2a1dd0d5a01da7::t_2646a8bd7e9965 69
-  human 92
+src/services/backgroundTasks/index.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 7-10,30
 src/services/backgroundTasks/executeTask.ts
   s_2a1dd0d5a01da7::t_dea85290bdeebc 9,39-40,44-45,47-48
   s_2a1dd0d5a01da7::t_b6779ca4d2e0a0 41-43,46
   human 38
-modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
-  s_2a1dd0d5a01da7::t_af0055278205ee 7,51-55,70-87,220-223,419,421
-  human 224-227
-src/services/backgroundTasks/index.ts
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 7-10,30
-src/screens/settings/SettingsBackupScreen/Components/AutomaticBackupDialog.tsx
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-82
-src/services/backgroundTasks/contracts.ts
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 73-77
-  human 73
-src/hooks/persisted/__mocks__/useSettings.ts
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 23
-src/i18n/types/index.ts
-  s_2a1dd0d5a01da7::t_148f2469a8e128 86
-  s_2a1dd0d5a01da7::t_aae1548ac7d8ae 78-85,87
-  human 98,157
-src/hooks/persisted/useSettings.ts
-  s_2a1dd0d5a01da7::t_af0055278205ee 78-79
-  s_2a1dd0d5a01da7::t_0713f6e8549f64 12-15
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 77,80,263
-  human 12
-modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduler.kt
-  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-12,14-24,26-40,42-56
-  s_2a1dd0d5a01da7::t_af0055278205ee 13,25,41
 modules/native-file/src/NativeFileModule.ts
   s_2a1dd0d5a01da7::t_af0055278205ee 9-13,19,37
   human 31
+src/hooks/persisted/__mocks__/useSettings.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 23
 modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskScheduler.kt
   s_2a1dd0d5a01da7::t_af0055278205ee 4-5,81-100
   s_2a1dd0d5a01da7::t_dea85290bdeebc 70-73,75-80,101-125,137
   s_2a1dd0d5a01da7::t_ce9073f130703e 74
-src/i18n/languages/no_NO/strings.json
-  human 111,184
-src/i18n/languages/cs_CZ/strings.json
+src/hooks/persisted/useSettings.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 77,80,263
+  s_2a1dd0d5a01da7::t_af0055278205ee 78-79
+  s_2a1dd0d5a01da7::t_0713f6e8549f64 12-15
+  human 12
+src/services/backgroundTasks/automaticBackupSchedule.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-11,13-23,25-26
+  s_2a1dd0d5a01da7::t_af0055278205ee 12,24
+src/services/backgroundTasks/contracts.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 73-77
+  human 73
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduler.kt
+  s_2a1dd0d5a01da7::t_af0055278205ee 13,25,41
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-12,14-24,26-40,42-56
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduleWorker.kt
+  s_2a1dd0d5a01da7::t_af0055278205ee 16,23
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-15,17-22,24-30
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 171,173-177,179-184
+  s_2a1dd0d5a01da7::t_af0055278205ee 172,178
+src/screens/settings/SettingsBackupScreen/index.tsx
+  s_2a1dd0d5a01da7::t_0713f6e8549f64 7-11
+  s_2a1dd0d5a01da7::t_169573bdd911da 1
+  s_2a1dd0d5a01da7::t_af0055278205ee 33-34,57-60,65-68,70,78-87,183-189
+  s_2a1dd0d5a01da7::t_2646a8bd7e9965 69
+  s_2a1dd0d5a01da7::t_5c2dcdb60f166c 71-77,88-89
+  s_2a1dd0d5a01da7::t_b6779ca4d2e0a0 18,24-27,31-32,35-37,46,53-56,61-64,90-91,175-180,192-199,220-227
+  human 92
+modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
+  s_2a1dd0d5a01da7::t_af0055278205ee 7,51-55,70-87,220-223,419,421
+  human 224-227
+modules/native-background-tasks/src/NativeBackgroundTasksModule.ts
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 45-48,50-51
+  s_2a1dd0d5a01da7::t_af0055278205ee 49
+src/screens/settings/SettingsBackupScreen/Components/AutomaticBackupDialog.tsx
+  s_2a1dd0d5a01da7::t_dea85290bdeebc 1-82
+src/i18n/types/index.ts
+  s_2a1dd0d5a01da7::t_148f2469a8e128 86
+  s_2a1dd0d5a01da7::t_aae1548ac7d8ae 78-85,87
+  human 98,157
+src/services/backgroundTasks/__tests__/automaticBackupSchedule.test.ts
+  s_2a1dd0d5a01da7::t_169573bdd911da 1-55,70-72
+  s_2a1dd0d5a01da7::t_af0055278205ee 56-69
+src/i18n/languages/en/strings.json
+  s_2a1dd0d5a01da7::t_41a6d003559987 85-92,94
+  s_2a1dd0d5a01da7::t_af0055278205ee 93
   human 111,184
 src/i18n/languages/or_IN/strings.json
-  human 111,184
-src/i18n/languages/nl_NL/strings.json
-  human 111,184
-src/i18n/languages/sv_SE/strings.json
-  human 111,184
-src/i18n/languages/as_IN/strings.json
-  human 111,184
-src/i18n/languages/hi_IN/strings.json
-  human 111,184
-src/i18n/languages/vi_VN/strings.json
-  human 111,184
-src/i18n/languages/da_DK/strings.json
-  human 111,184
-src/i18n/languages/de_DE/strings.json
-  human 111,184
-src/i18n/languages/zh_TW/strings.json
-  human 111,184
-src/i18n/languages/ar_SA/strings.json
-  human 111,184
-src/i18n/languages/af_ZA/strings.json
-  human 111,184
-src/i18n/languages/sr_SP/strings.json
-  human 111,184
-src/i18n/languages/he_IL/strings.json
-  human 111,184
-src/i18n/languages/fr_FR/strings.json
-  human 111,184
-src/i18n/languages/ko_KR/strings.json
   human 111,184
 src/i18n/languages/hu_HU/strings.json
   human 111,184
 src/i18n/languages/id_ID/strings.json
   human 111,184
-src/i18n/languages/es_ES/strings.json
-  human 111,184
-src/i18n/languages/pl_PL/strings.json
-  human 111,184
-src/i18n/languages/pt_PT/strings.json
-  human 111,184
-src/i18n/languages/ru_RU/strings.json
-  human 111,184
-src/i18n/languages/pt_BR/strings.json
-  human 111,184
-src/i18n/languages/sq_AL/strings.json
-  human 111,184
 src/i18n/languages/el_GR/strings.json
   human 111,184
-src/i18n/languages/fi_FI/strings.json
+src/i18n/languages/nl_NL/strings.json
   human 111,184
-src/i18n/languages/ca_ES/strings.json
+src/i18n/languages/no_NO/strings.json
   human 111,184
-src/i18n/languages/it_IT/strings.json
+src/i18n/languages/cs_CZ/strings.json
   human 111,184
-src/i18n/languages/ja_JP/strings.json
+src/i18n/languages/he_IL/strings.json
+  human 111,184
+src/i18n/languages/sr_SP/strings.json
+  human 111,184
+src/i18n/languages/ko_KR/strings.json
   human 111,184
 src/i18n/languages/ro_RO/strings.json
   human 97,136
+src/i18n/languages/pt_PT/strings.json
+  human 111,184
+src/i18n/languages/da_DK/strings.json
+  human 111,184
+src/i18n/languages/vi_VN/strings.json
+  human 111,184
+src/i18n/languages/ar_SA/strings.json
+  human 111,184
+src/i18n/languages/fi_FI/strings.json
+  human 111,184
+src/i18n/languages/ru_RU/strings.json
+  human 111,184
+src/i18n/languages/sq_AL/strings.json
+  human 111,184
+src/i18n/languages/zh_TW/strings.json
+  human 111,184
 src/i18n/languages/tr_TR/strings.json
+  human 111,184
+src/i18n/languages/ja_JP/strings.json
+  human 111,184
+src/i18n/languages/zh_CN/strings.json
+  human 111,184
+src/i18n/languages/fr_FR/strings.json
   human 111,184
 src/i18n/languages/uk_UA/strings.json
   human 111,184
-src/i18n/languages/zh_CN/strings.json
+src/i18n/languages/pt_BR/strings.json
+  human 111,184
+src/i18n/languages/af_ZA/strings.json
+  human 111,184
+src/i18n/languages/es_ES/strings.json
+  human 111,184
+src/i18n/languages/ca_ES/strings.json
+  human 111,184
+src/i18n/languages/pl_PL/strings.json
+  human 111,184
+src/i18n/languages/sv_SE/strings.json
+  human 111,184
+src/i18n/languages/de_DE/strings.json
+  human 111,184
+src/i18n/languages/as_IN/strings.json
+  human 111,184
+src/i18n/languages/hi_IN/strings.json
+  human 111,184
+src/i18n/languages/it_IT/strings.json
   human 111,184
 ---
 {
@@ -134,197 +134,15 @@ src/i18n/languages/zh_CN/strings.json
     {
       "entries": [
         {
-          "accepted_lines": 6,
-          "added_lines": 6,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "45-48,50-51",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "49",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "modules/native-background-tasks/src/NativeBackgroundTasksModule.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 9,
-          "added_lines": 9,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_41a6d003559987",
-          "lines": "85-92,94",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "93",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/en/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 14,
-          "added_lines": 14,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "56-69",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 58,
-          "added_lines": 58,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_169573bdd911da",
-          "lines": "1-55,70-72",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/__tests__/automaticBackupSchedule.test.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 24,
-          "added_lines": 24,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "1-11,13-23,25-26",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "12,24",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/automaticBackupSchedule.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 12,
-          "added_lines": 12,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "171,173-177,179-184",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "172,178",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 28,
-          "added_lines": 28,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "1-15,17-22,24-30",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "16,23",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduleWorker.kt"
-    },
-    {
-      "entries": [
-        {
           "accepted_lines": 5,
           "added_lines": 5,
           "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_0713f6e8549f64",
-          "lines": "7-11",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 28,
-          "added_lines": 28,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "33-34,57-60,65-68,70,78-87,183-189",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 9,
-          "added_lines": 9,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_5c2dcdb60f166c",
-          "lines": "71-77,88-89",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_169573bdd911da",
-          "lines": "1",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 43,
-          "added_lines": 43,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_b6779ca4d2e0a0",
-          "lines": "18,24-27,31-32,35-37,46,53-56,61-64,90-91,175-180,192-199,220-227",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_2646a8bd7e9965",
-          "lines": "69",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 6,
-          "hash": "human",
-          "lines": "92",
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "7-10,30",
           "overridden_lines": 0
         }
       ],
-      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
+      "file": "src/services/backgroundTasks/index.ts"
     },
     {
       "entries": [
@@ -358,174 +176,6 @@ src/i18n/languages/zh_CN/strings.json
     {
       "entries": [
         {
-          "accepted_lines": 30,
-          "added_lines": 30,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "7,51-55,70-87,220-223,419,421",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 4,
-          "added_lines": 4,
-          "deleted_lines": 3,
-          "hash": "human",
-          "lines": "224-227",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 5,
-          "added_lines": 5,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "7-10,30",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 82,
-          "added_lines": 82,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "1-82",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/screens/settings/SettingsBackupScreen/Components/AutomaticBackupDialog.tsx"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 5,
-          "added_lines": 5,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "73-77",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 1,
-          "hash": "human",
-          "lines": "73",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/services/backgroundTasks/contracts.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "23",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 1,
-          "added_lines": 1,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_148f2469a8e128",
-          "lines": "86",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 9,
-          "added_lines": 9,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_aae1548ac7d8ae",
-          "lines": "78-85,87",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "98,157",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/types/index.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 2,
-          "added_lines": 2,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "78-79",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 4,
-          "added_lines": 4,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_0713f6e8549f64",
-          "lines": "12-15",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "77,80,263",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 1,
-          "hash": "human",
-          "lines": "12",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/hooks/persisted/useSettings.ts"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 53,
-          "added_lines": 53,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
-          "lines": "1-12,14-24,26-40,42-56",
-          "overridden_lines": 0
-        },
-        {
-          "accepted_lines": 3,
-          "added_lines": 3,
-          "deleted_lines": 0,
-          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
-          "lines": "13,25,41",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduler.kt"
-    },
-    {
-      "entries": [
-        {
           "accepted_lines": 7,
           "added_lines": 7,
           "deleted_lines": 0,
@@ -543,6 +193,19 @@ src/i18n/languages/zh_CN/strings.json
         }
       ],
       "file": "modules/native-file/src/NativeFileModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "23",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__mocks__/useSettings.ts"
     },
     {
       "entries": [
@@ -576,18 +239,329 @@ src/i18n/languages/zh_CN/strings.json
     {
       "entries": [
         {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "77,80,263",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "78-79",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_0713f6e8549f64",
+          "lines": "12-15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "12",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useSettings.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 24,
+          "added_lines": 24,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "1-11,13-23,25-26",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "12,24",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/automaticBackupSchedule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "73-77",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/contracts.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "13,25,41",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 53,
+          "added_lines": 53,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "1-12,14-24,26-40,42-56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduler.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "16,23",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "1-15,17-22,24-30",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/AutomaticBackupScheduleWorker.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "171,173-177,179-184",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "172,178",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_0713f6e8549f64",
+          "lines": "7-11",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_169573bdd911da",
+          "lines": "1",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "33-34,57-60,65-68,70,78-87,183-189",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_2646a8bd7e9965",
+          "lines": "69",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_5c2dcdb60f166c",
+          "lines": "71-77,88-89",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 43,
+          "added_lines": 43,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_b6779ca4d2e0a0",
+          "lines": "18,24-27,31-32,35-37,46,53-56,61-64,90-91,175-180,192-199,220-227",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 6,
+          "hash": "human",
+          "lines": "92",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/index.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 30,
+          "added_lines": 30,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "7,51-55,70-87,220-223,419,421",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "224-227",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "45-48,50-51",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "49",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/src/NativeBackgroundTasksModule.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 82,
+          "added_lines": 82,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_dea85290bdeebc",
+          "lines": "1-82",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsBackupScreen/Components/AutomaticBackupDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_148f2469a8e128",
+          "lines": "86",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_aae1548ac7d8ae",
+          "lines": "78-85,87",
+          "overridden_lines": 0
+        },
+        {
           "accepted_lines": 0,
           "added_lines": 0,
           "deleted_lines": 2,
           "hash": "human",
-          "lines": "111,184",
+          "lines": "98,157",
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/no_NO/strings.json"
+      "file": "src/i18n/types/index.ts"
     },
     {
       "entries": [
+        {
+          "accepted_lines": 58,
+          "added_lines": 58,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_169573bdd911da",
+          "lines": "1-55,70-72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "56-69",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/services/backgroundTasks/__tests__/automaticBackupSchedule.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_41a6d003559987",
+          "lines": "85-92,94",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_2a1dd0d5a01da7::t_af0055278205ee",
+          "lines": "93",
+          "overridden_lines": 0
+        },
         {
           "accepted_lines": 0,
           "added_lines": 0,
@@ -597,7 +571,7 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/cs_CZ/strings.json"
+      "file": "src/i18n/languages/en/strings.json"
     },
     {
       "entries": [
@@ -611,188 +585,6 @@ src/i18n/languages/zh_CN/strings.json
         }
       ],
       "file": "src/i18n/languages/or_IN/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/nl_NL/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/sv_SE/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/as_IN/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/hi_IN/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/vi_VN/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/da_DK/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/de_DE/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/zh_TW/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/ar_SA/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/af_ZA/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/sr_SP/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/he_IL/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/fr_FR/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/ko_KR/strings.json"
     },
     {
       "entries": [
@@ -831,84 +623,6 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/es_ES/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/pl_PL/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/pt_PT/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/ru_RU/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/pt_BR/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
-      "file": "src/i18n/languages/sq_AL/strings.json"
-    },
-    {
-      "entries": [
-        {
-          "accepted_lines": 0,
-          "added_lines": 0,
-          "deleted_lines": 2,
-          "hash": "human",
-          "lines": "111,184",
-          "overridden_lines": 0
-        }
-      ],
       "file": "src/i18n/languages/el_GR/strings.json"
     },
     {
@@ -922,7 +636,7 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/fi_FI/strings.json"
+      "file": "src/i18n/languages/nl_NL/strings.json"
     },
     {
       "entries": [
@@ -935,7 +649,7 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/ca_ES/strings.json"
+      "file": "src/i18n/languages/no_NO/strings.json"
     },
     {
       "entries": [
@@ -948,7 +662,7 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/it_IT/strings.json"
+      "file": "src/i18n/languages/cs_CZ/strings.json"
     },
     {
       "entries": [
@@ -961,7 +675,33 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/ja_JP/strings.json"
+      "file": "src/i18n/languages/he_IL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sr_SP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ko_KR/strings.json"
     },
     {
       "entries": [
@@ -987,7 +727,150 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
+      "file": "src/i18n/languages/pt_PT/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/da_DK/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/vi_VN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ar_SA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fi_FI/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ru_RU/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sq_AL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_TW/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
       "file": "src/i18n/languages/tr_TR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ja_JP/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/zh_CN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/fr_FR/strings.json"
     },
     {
       "entries": [
@@ -1013,7 +896,124 @@ src/i18n/languages/zh_CN/strings.json
           "overridden_lines": 0
         }
       ],
-      "file": "src/i18n/languages/zh_CN/strings.json"
+      "file": "src/i18n/languages/pt_BR/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/af_ZA/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/es_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/ca_ES/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/pl_PL/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/sv_SE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/de_DE/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/as_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/hi_IN/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "111,184",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/it_IT/strings.json"
     }
   ],
   "base_commit_sha": "eb12bdfd623bd28c2c3f88f585fefca9352711a4",
