@@ -1,0 +1,152 @@
+src/screens/novel/utils/__tests__/genres.test.ts
+  s_a25187b99d6316::t_da00205e4a6f78 1-18
+src/screens/novel/components/Info/NovelInfoComponents.tsx
+  s_a25187b99d6316::t_da00205e4a6f78 12,279
+  s_a25187b99d6316::t_a3cb1bb69af63c 273-276
+  s_a25187b99d6316::t_aa2f2d062df493 278,280-283,285-295
+  human 284
+src/screens/novel/components/Info/__tests__/NovelInfoComponents.test.tsx
+  s_a25187b99d6316::t_092df8ed3c3ef8 5-12
+  s_a25187b99d6316::t_aa2f2d062df493 19,32-34
+  s_a25187b99d6316::t_a3cb1bb69af63c 1-4,13-18,20-31,35-36
+src/screens/novel/utils/genres.ts
+  s_a25187b99d6316::t_da00205e4a6f78 1-7
+src/screens/novel/components/EditInfoModal.tsx
+  s_a25187b99d6316::t_da00205e4a6f78 1,22,59-62,67,206-208,217,221
+  human 1,62-63,202-204,213,217
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 18,
+          "added_lines": 18,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_da00205e4a6f78",
+          "lines": "1-18",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/utils/__tests__/genres.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_da00205e4a6f78",
+          "lines": "12,279",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_a3cb1bb69af63c",
+          "lines": "273-276",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_aa2f2d062df493",
+          "lines": "278,280-283,285-295",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 19,
+          "hash": "human",
+          "lines": "284",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/Info/NovelInfoComponents.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_092df8ed3c3ef8",
+          "lines": "5-12",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_aa2f2d062df493",
+          "lines": "19,32-34",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 24,
+          "added_lines": 24,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_a3cb1bb69af63c",
+          "lines": "1-4,13-18,20-31,35-36",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/Info/__tests__/NovelInfoComponents.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_da00205e4a6f78",
+          "lines": "1-7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/utils/genres.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_a25187b99d6316::t_da00205e4a6f78",
+          "lines": "1,22,59-62,67,206-208,217,221",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "1,62-63,202-204,213,217",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/EditInfoModal.tsx"
+    }
+  ],
+  "base_commit_sha": "0ed7d878b4b75e1f6ebc83d0978f05cad5920014",
+  "branch": "master",
+  "commit_sha": "39204eeb1e61a4c5c789107c8978ea85776a4278",
+  "commit_time": "2026-07-29T15:43:00+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.29",
+  "prompts": {
+    "human": {
+      "accepted_lines": 1,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 1,
+      "total_deletions": 27
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
