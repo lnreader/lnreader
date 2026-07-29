@@ -84,10 +84,24 @@
   "backupScreen": {
     "backupName": "Salvar nome",
     "backupCreated": "Backup criado com sucesso",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Backup restaurado com sucesso!",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "Salvando Backup",
     "categoriesRestored": "Categorias %{count} restauradas",
     "categoriesRestoredWithErrors": "Categorias %{count} restauradas (%{failedCount} falhou)",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "Falha ao restaurar a categoria: %{categoryName} - %{error}",
     "categoryFileNotFound": "Arquivo de categoria não encontrado no backup",
     "categoryFileReadFailed": "Falha ao ler arquivo de categoria: %{error}",
@@ -100,14 +114,34 @@
     "failed": "Backup falhou",
     "novelsRestored": "%{count} novels restaurados",
     "novelsRestoredWithErrors": "%{count} novels restaurados (%{failedCount} falhou)",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "Falha ao fazer backup da novel: %{novelName} - %{error}",
     "novelRestoreFailed": "Falha ao restaurar a novel: %{novelName} - %{error}",
     "novelDirectoryNotFound": "Diretório da novel não foi encontrado no backup",
     "novelDirectoryReadFailed": "Falha ao ler o diretório da novel: %{error}",
     "restoringCategories": "Restaurando Categorias",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "Restaurando novels",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Restaurando Configurações",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "Configurações restauradas",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "Arquivo de configurações não encontrado no backup",
     "settingsRestoreFailed": "Falha ao restaurar as configurações: %{error}",
     "settingsFileWriteFailed": "Falha ao escrever o arquivo de configurações: %{error}",
@@ -124,7 +158,21 @@
     "invalidBackupFolder": "Pasta de backup inválida",
     "localBackup": "Backup local",
     "noBackupFound": "Nenhum backup encontrado",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "Preparando os dados",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "“Backup” do servidor pessoal",
       "host": "Servidor",
@@ -136,9 +184,11 @@
     "restoreLargeBackupsWarning": "Restaurar “backups” grandes pode congelar o aplicativo até que a restauração seja concluída",
     "restorinBackup": "Restaurando cópia de segurança",
     "restoringData": "Restaurando dados",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Auto hospedar",
     "selfHostDesc": "Fazer “backup” em seu servidor",
     "uploadingData": "Enviando dados",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Baixando arquivos salvos"
   },
   "browse": "Navegar",
@@ -686,7 +736,10 @@
     "LOCAL_BACKUP": "Local Backup",
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
-    "DOWNLOAD_CHAPTER": "Downloading Chapter"
+    "DOWNLOAD_CHAPTER": "Downloading Chapter",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {
