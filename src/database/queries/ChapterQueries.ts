@@ -410,6 +410,23 @@ export const getNovelChapters = async (
     .all();
 };
 
+/**
+ * Returns every chapter row for a novel.
+ *
+ * This is intentionally separate from getNovelChapters, whose default limit is
+ * used to keep interactive screens responsive. Backup creation must never use
+ * a paginated UI query because doing so silently produces incomplete backups.
+ */
+export const getAllNovelChaptersForBackup = async (
+  novelId: number,
+): Promise<ChapterInfo[]> =>
+  dbManager
+    .select()
+    .from(chapterSchema)
+    .where(eq(chapterSchema.novelId, novelId))
+    .orderBy(asc(chapterSchema.id))
+    .all();
+
 export const getNovelChaptersSync = (
   novelId: number,
   sort?: ChapterOrderKey,

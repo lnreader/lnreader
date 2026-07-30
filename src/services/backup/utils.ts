@@ -7,7 +7,7 @@ import {
   _restoreNovelAndChapters,
   getAllNovels,
 } from '@database/queries/NovelQueries';
-import { getNovelChapters } from '@database/queries/ChapterQueries';
+import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
 import {
   _restoreCategory,
   getAllNovelCategories,
@@ -83,7 +83,7 @@ export const prepareBackupData = async (cacheDirPath: string) => {
   await getAllNovels().then(async novels => {
     for (const novel of novels) {
       try {
-        const chapters = await getNovelChapters(novel.id);
+        const chapters = await getAllNovelChaptersForBackup(novel.id);
         await NativeFile.writeFile(
           novelDirPath + '/' + novel.id + '.json',
           JSON.stringify({

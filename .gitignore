@@ -114,3 +114,7 @@ release-artifacts/
 !plugins/android/
 ios/
 !modules/**/ios/
+lnreader_backup_2026-07-27_09_35.zip
+lnreader_backup_2026-07-27-deduplicated.zip
+lnreader_backup_2026-07-27-fixed.zip
+lnreader_backup_2026-07-27-ready-to-restore.zip
