@@ -100,9 +100,7 @@ jobs:
         run: |
           pnpm generate:env:release \
             --build-type "GitHub Action" \
-            --node-env "production" \
-            --myanimelist-client-id "$MYANIMELIST_CLIENT_ID" \
-            --anilist-client-id "$ANILIST_CLIENT_ID"
+            --node-env "production"
 
       - name: Generate Native Android Project
         run: |
@@ -148,6 +146,14 @@ jobs:
             app/build/outputs/apk/preRelease/app-preRelease.apk \
             "app/build/outputs/apk/preRelease/$PRERELEASE_APK_NAME"
 
+      - name: Upload Preview Sourcemap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PRERELEASE_ARTIFACT_NAME }}-sourcemap
+          path: android/app/build/generated/sourcemaps/react/preRelease/index.android.bundle.map
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
       - name: Upload Preview APK
         id: upload-nightly
         uses: actions/upload-artifact@v4
@@ -158,18 +164,42 @@ jobs:
           retention-days: 14
           compression-level: 0
 
+      - name: Check Discord Notification
+        id: discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK }}
+        run: |
+          if [ -n "$DISCORD_WEBHOOK_URL" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Notify Discord
+        if: steps.discord.outputs.configured == 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK }}
           ARTIFACT_URL: ${{ steps.upload-nightly.outputs.artifact-url }}
         run: |
           short_sha="${GITHUB_SHA::8}"
           message="[${GITHUB_REPOSITORY}] New nightly build published: \`${short_sha}\`"
-          content="**[${message}](${ARTIFACT_URL})**"
 
           payload=$(jq -n \
-            --arg content "$content" \
-            '{content: $content}')
+            --arg title "$message" \
+            --arg url "$ARTIFACT_URL" \
+            '{
+              username: "GitHub",
+              avatar_url: "https://github.com/github.png",
+              embeds: [{
+                author: {
+                  name: "github-actions[bot]",
+                  icon_url: "https://github.com/github.png"
+                },
+                title: $title,
+                url: $url,
+                color: 3092790
+              }]
+            }')
 
           curl --fail-with-body \
             --request POST \

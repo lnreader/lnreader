@@ -19,9 +19,32 @@ import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useInitDatabase } from '@database/db';
 import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
+import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
+import { useRozeniteSqlitePlugin } from '@rozenite/sqlite-plugin';
 import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
 
 enableFreeze(true);
+const sqliteAdapters = __DEV__ && opSqliteAdapter ? [opSqliteAdapter] : [];
+
+/**
+ * The Android window background is resolved from the system light/dark setting,
+ * so it is bright white whenever the system is light – regardless of the theme
+ * picked inside the app. Nothing between it and the navigators paints a
+ * background of its own, so every frame in which no screen is drawn (mounting a
+ * nested navigator, freezing the screen being left) shows through as a flash.
+ * Painting the root view keeps the window covered at all times.
+ */
+const ThemedRootView = ({ children }: PropsWithChildren) => {
+  const theme = useTheme();
+
+  return (
+    <GestureHandlerRootView
+      style={[styles.flex, { backgroundColor: theme.background }]}
+    >
+      {children}
+    </GestureHandlerRootView>
+  );
+};
 
 const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
   const theme = useTheme();
@@ -41,6 +64,7 @@ const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
 };
 
 const App = () => {
+  useRozeniteSqlitePlugin({ adapters: sqliteAdapters });
   const { success: databaseReady, error: databaseError } = useInitDatabase();
   const { ready: servicesReady, error: servicesError } =
     useInitializeAppServices(Boolean(databaseReady));
@@ -67,8 +91,8 @@ const App = () => {
 
   return (
     <Suspense fallback={null}>
-      <GestureHandlerRootView style={styles.flex}>
-        <ThemeProvider>
+      <ThemeProvider>
+        <ThemedRootView>
           <AppErrorBoundary>
             <SafeAreaProvider>
               <ThemedPaperProvider>
@@ -79,8 +103,8 @@ const App = () => {
               </ThemedPaperProvider>
             </SafeAreaProvider>
           </AppErrorBoundary>
-        </ThemeProvider>
-      </GestureHandlerRootView>
+        </ThemedRootView>
+      </ThemeProvider>
     </Suspense>
   );
 };

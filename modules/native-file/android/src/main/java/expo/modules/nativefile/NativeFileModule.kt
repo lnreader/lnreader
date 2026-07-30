@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.DocumentsContract
 import com.facebook.react.bridge.BaseActivityEventListener
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.modules.network.CookieJarContainer
@@ -47,7 +48,11 @@ class NativeFileModule : Module() {
 
     private val activityEventListener = object : BaseActivityEventListener() {
         override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-            if (requestCode != CREATE_DOCUMENT_REQUEST && requestCode != PICK_DOCUMENT_REQUEST) return
+            if (
+                requestCode != CREATE_DOCUMENT_REQUEST &&
+                requestCode != PICK_DOCUMENT_REQUEST &&
+                requestCode != PICK_DIRECTORY_REQUEST
+            ) return
             val promise = pendingDocumentPromise ?: return
             pendingDocumentPromise = null
             val uri = data?.data
@@ -62,7 +67,24 @@ class NativeFileModule : Module() {
             } catch (_: SecurityException) {
                 // Some providers do not support persisted grants.
             }
-            promise.resolve(uri.toString())
+            if (requestCode == PICK_DIRECTORY_REQUEST) {
+                val documentId = try {
+                    DocumentsContract.getTreeDocumentId(uri)
+                } catch (_: IllegalArgumentException) {
+                    uri.lastPathSegment.orEmpty()
+                }
+                promise.resolve(
+                    mapOf(
+                        "uri" to uri.toString(),
+                        "name" to documentId
+                            .substringAfterLast(':')
+                            .substringAfterLast('/')
+                            .ifEmpty { "Selected folder" },
+                    ),
+                )
+            } else {
+                promise.resolve(uri.toString())
+            }
         }
     }
 
@@ -191,6 +213,14 @@ class NativeFileModule : Module() {
                     type = mimeType
                 },
                 PICK_DOCUMENT_REQUEST,
+                promise,
+            )
+        }
+
+        AsyncFunction("pickDirectory") { promise: Promise ->
+            launchDocumentIntent(
+                Intent(Intent.ACTION_OPEN_DOCUMENT_TREE),
+                PICK_DIRECTORY_REQUEST,
                 promise,
             )
         }
@@ -386,5 +416,6 @@ class NativeFileModule : Module() {
     companion object {
         private const val CREATE_DOCUMENT_REQUEST = 48120
         private const val PICK_DOCUMENT_REQUEST = 48121
+        private const val PICK_DIRECTORY_REQUEST = 48122
     }
 }

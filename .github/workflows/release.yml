@@ -183,6 +183,11 @@ jobs:
       - name: Package Release APKs
         run: pnpm release:package "$RELEASE_VERSION"
 
+      - name: Upload Sourcemaps
+        run: |
+          cp android/app/build/generated/sourcemaps/react/release/index.android.bundle.map \
+            "release-artifacts/LNReader-v${RELEASE_VERSION}-sourcemap.map"
+
       - name: Verify APK Signatures
         run: |
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner |

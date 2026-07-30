@@ -1,6 +1,6 @@
 {
   "name": "lnreader",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "dev:android:release": "pnpm run generate:env:release && npx expo run:android --variant release",
@@ -108,6 +108,9 @@
     "@babel/preset-env": "^7.29.7",
     "@babel/runtime": "^7.29.7",
     "@eslint/eslintrc": "^3.3.6",
+    "@rozenite/expo-atlas-plugin": "^1.13.0",
+    "@rozenite/metro": "^1.13.0",
+    "@rozenite/sqlite-plugin": "^1.13.0",
     "@testing-library/react-native": "^13.3.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/color": "^4.2.1",

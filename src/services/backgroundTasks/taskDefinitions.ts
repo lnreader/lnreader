@@ -19,8 +19,47 @@ const MULTIPLICABLE_TASKS: BackgroundTask['name'][] = [
   'MIGRATE_NOVEL',
 ];
 
+const BACKGROUND_TASK_QUEUE_PREFIX = 'lnreader-background-task';
+const MAX_CONCURRENT_DOWNLOADS = 3;
+
 export const allowsDuplicateTask = (task: BackgroundTask) =>
   MULTIPLICABLE_TASKS.includes(task.name);
+
+export const getBackgroundTaskQueueName = (task: BackgroundTask) =>
+  task.name === 'DOWNLOAD_CHAPTER'
+    ? `${BACKGROUND_TASK_QUEUE_PREFIX}:download:${
+        task.data.pluginId || 'legacy'
+      }`
+    : `${BACKGROUND_TASK_QUEUE_PREFIX}:task:${task.name}`;
+
+export const willTaskWaitInQueue = (
+  task: BackgroundTask,
+  activeTasks: QueuedBackgroundTask[],
+) => {
+  const queueName = getBackgroundTaskQueueName(task);
+  if (
+    activeTasks.some(
+      activeTask => getBackgroundTaskQueueName(activeTask.task) === queueName,
+    )
+  ) {
+    return true;
+  }
+
+  if (task.name !== 'DOWNLOAD_CHAPTER') {
+    return false;
+  }
+
+  const activeDownloadLanes = new Set(
+    activeTasks
+      .filter(
+        activeTask =>
+          activeTask.task.name === 'DOWNLOAD_CHAPTER' &&
+          activeTask.state !== 'paused',
+      )
+      .map(activeTask => getBackgroundTaskQueueName(activeTask.task)),
+  );
+  return activeDownloadLanes.size >= MAX_CONCURRENT_DOWNLOADS;
+};
 
 export const getBackgroundTaskTitle = (task: BackgroundTask) => {
   switch (task.name) {

@@ -1,6 +1,7 @@
 const { defineConfig, globalIgnores } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 const { FlatCompat } = require('@eslint/eslintrc');
+const typescriptEslint = require('@typescript-eslint/eslint-plugin');
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -30,6 +31,9 @@ module.exports = defineConfig([
 
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+    },
     rules: {
       'no-shadow': 'off',
       'no-undef': 'off',

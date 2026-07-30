@@ -20,6 +20,7 @@ export const initialAppSettings = {
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
   automaticLibraryUpdateIntervalHours: 0,
+  automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,

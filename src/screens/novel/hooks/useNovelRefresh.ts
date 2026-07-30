@@ -4,6 +4,7 @@ import { BackgroundTaskEnqueuer } from '@services/backgroundTasks';
 import { updateNovel } from '@services/updates/LibraryUpdateQueries';
 import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
+import { useLibraryContext } from '@components/Context/LibraryContext';
 
 interface UseNovelRefreshOptions {
   novel: NovelInfo | undefined;
@@ -21,6 +22,7 @@ export const useNovelRefresh = ({
   reloadNovel,
 }: UseNovelRefreshOptions) => {
   const [updating, setUpdating] = useState(false);
+  const { refetchLibrary } = useLibraryContext();
 
   const refresh = useCallback(async () => {
     if (!novel || updating) {
@@ -34,7 +36,10 @@ export const useNovelRefresh = ({
         refreshNovelMetadata,
         enqueue,
       });
-      await reloadNovel();
+      await Promise.all([
+        reloadNovel(),
+        novel.inLibrary ? refetchLibrary() : Promise.resolve(),
+      ]);
       showToast(getString('novelScreen.updatedToast', { name: novel.name }));
     } catch (error) {
       showToast(
@@ -49,6 +54,7 @@ export const useNovelRefresh = ({
     downloadNewChapters,
     enqueue,
     novel,
+    refetchLibrary,
     refreshNovelMetadata,
     reloadNovel,
     updating,

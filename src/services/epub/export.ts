@@ -83,13 +83,15 @@ export const exportEpub = async (
       { replaceIfDestinationExists: true },
     );
 
+    const completionText = getString('novelScreen.epub.exportSuccess', {
+      chapters: result.chapterCount.toString(),
+    });
     updateProgress(meta => ({
       ...meta,
       isRunning: false,
       progress: 1,
-      progressText: getString('novelScreen.epub.exportSuccess', {
-        chapters: result.chapterCount.toString(),
-      }),
+      progressText: completionText,
+      completionText,
     }));
   } catch (error) {
     updateProgress(meta => ({

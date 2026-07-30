@@ -5,11 +5,20 @@ import type {
   EpubExportChapter,
   EpubExportMetadata,
 } from '@modules/nitro-epub';
+import type { BackupOptions } from '@services/backup/options';
 
 export type SelfHostData = {
   host: string;
   backupFolder: string;
+  options?: BackupOptions;
 };
+
+export type DriveBackupData =
+  | DriveFile
+  | {
+      backupFolder: DriveFile;
+      options?: BackupOptions;
+    };
 
 export type MigrationNovelPreference = 'current' | 'destination';
 
@@ -55,11 +64,18 @@ export type BackgroundTask =
       name: 'UPDATE_LIBRARY';
       data?: { categoryId?: number; categoryName?: string };
     }
-  | { name: 'DRIVE_BACKUP'; data: DriveFile }
+  | { name: 'DRIVE_BACKUP'; data: DriveBackupData }
   | { name: 'DRIVE_RESTORE'; data: DriveFile }
   | { name: 'SELF_HOST_BACKUP'; data: SelfHostData }
   | { name: 'SELF_HOST_RESTORE'; data: SelfHostData }
-  | { name: 'LOCAL_BACKUP'; data: { destinationUri: string } }
+  | {
+      name: 'LOCAL_BACKUP';
+      data: {
+        destinationUri: string;
+        options?: BackupOptions;
+        automatic?: boolean;
+      };
+    }
   | { name: 'LOCAL_RESTORE'; data: { sourceUri: string } }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
   | DownloadChapterTask;
@@ -68,6 +84,11 @@ export type DownloadChapterTask = {
   name: 'DOWNLOAD_CHAPTER';
   data: {
     novelName: string;
+    /**
+     * Optional for compatibility with download tasks queued before
+     * per-plugin execution lanes were introduced.
+     */
+    pluginId?: string;
     /**
      * Optional for compatibility with download tasks persisted before the
      * per-novel queue identity was introduced.
@@ -82,6 +103,7 @@ export type BackgroundTaskMetadata = {
   isRunning: boolean;
   progress: number | undefined;
   progressText: string | undefined;
+  completionText?: string;
 };
 
 export type TaskProgressUpdater = (

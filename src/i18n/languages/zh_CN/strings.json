@@ -84,30 +84,63 @@
   "backupScreen": {
     "backupName": "备份名称",
     "backupCreated": "成功创建备份",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "成功恢复备份",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "正在保存备份",
     "categoriesRestored": "已恢复%{count}个分类",
     "categoriesRestoredWithErrors": "已恢复%{count}个分类（%{failedCount}个恢复失败）",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "恢复分类失败：%{categoryName} - %{error}",
     "categoryFileNotFound": "未能在备份中找到分类文件",
     "categoryFileReadFailed": "读取分类文件失败：%{error}",
     "categoryFileWriteFailed": "写入分类文件失败：%{error}",
     "createBackup": "创建备份",
     "createBackupDesc": "可用于恢复当前书库",
-    "createBackupWarning": "创建备份可能无法在 Android 9 或更低版本的设备上运行。",
     "downloadingData": "下载数据",
     "downloadingDownloadedFiles": "正在下载已下载过的文件",
     "failed": "备份失败",
     "novelsRestored": "已恢复%{count}部小说",
     "novelsRestoredWithErrors": "已恢复%{count}部小说（%{failedCount}部恢复失败）",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "备份小说失败：%{novelName} - %{error}",
     "novelRestoreFailed": "恢复小说失败：%{novelName} - %{error}",
     "novelDirectoryNotFound": "未能在备份中找到小说目录",
     "novelDirectoryReadFailed": "读取小说目录失败：%{error}",
     "restoringCategories": "正在恢复分类",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "正在恢复小说",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "正在恢复设置",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "设置已恢复",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "未能在备份文件中找到设置文件",
     "settingsRestoreFailed": "恢复设置失败：%{error}",
     "settingsFileWriteFailed": "写入设置文件失败：%{error}",
@@ -124,7 +157,21 @@
     "invalidBackupFolder": "备份文件夹有误",
     "localBackup": "本地备份",
     "noBackupFound": "没有找到备份",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "准备数据",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "自托管备份",
       "host": "主机",
@@ -133,12 +180,13 @@
     "remoteBackup": "远程备份",
     "restoreBackup": "恢复备份",
     "restoreBackupDesc": "从备份文件恢复书库",
-    "restoreLargeBackupsWarning": "恢复大量备份可能会冻结应用程序，直到恢复完成",
     "restorinBackup": "恢复备份",
     "restoringData": "恢复数据",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "自托管",
     "selfHostDesc": "备份到您的服务器",
     "uploadingData": "上传数据",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "正在上传已下载的文件"
   },
   "browse": "浏览",
@@ -686,7 +734,10 @@
     "LOCAL_BACKUP": "本地备份",
     "LOCAL_RESTORE": "本地恢复",
     "MIGRATE_NOVEL": "正在迁移小说",
-    "DOWNLOAD_CHAPTER": "正在下载章节"
+    "DOWNLOAD_CHAPTER": "正在下载章节",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {

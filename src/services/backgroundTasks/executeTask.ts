@@ -6,6 +6,7 @@ import { exportEpub } from '../epub/export';
 import { importEpubBatch } from '../epub/import';
 import { migrateNovel } from '../migrate/migrateNovel';
 import { updateLibrary } from '../updates';
+import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import type {
   BackgroundTask,
   BackgroundTaskEnqueuer,
@@ -35,7 +36,16 @@ export const executeBackgroundTask = async (
     case 'SELF_HOST_RESTORE':
       return selfHostRestore(task.data, updateProgress);
     case 'LOCAL_BACKUP':
-      return createBackup(task.data, updateProgress);
+      await createBackup(task.data, updateProgress);
+      if (task.data.automatic) {
+        const settings =
+          getMMKVObject<Record<string, unknown>>('APP_SETTINGS') ?? {};
+        setMMKVObject('APP_SETTINGS', {
+          ...settings,
+          lastAutomaticBackupAt: Date.now(),
+        });
+      }
+      return;
     case 'LOCAL_RESTORE':
       return restoreBackup(task.data, updateProgress);
     case 'MIGRATE_NOVEL':

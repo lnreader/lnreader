@@ -27,7 +27,7 @@ export type UseLibraryReturnType = {
   setLibrary: React.Dispatch<React.SetStateAction<NovelInfo[]>>;
   novelInLibrary: (pluginId: string, novelPath: string) => boolean;
   switchNovelToLibrary: (novelPath: string, pluginId: string) => Promise<void>;
-  refetchLibrary: () => void;
+  refetchLibrary: () => Promise<void>;
   setLibrarySearchText: (text: string) => void;
 };
 

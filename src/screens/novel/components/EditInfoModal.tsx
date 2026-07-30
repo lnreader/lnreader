@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -19,6 +19,7 @@ import { NovelInfo } from '@database/types';
 import { NovelStatus } from '@plugins/types';
 import { translateNovelStatus } from '@utils/translateEnum';
 import { showToast } from '@utils/showToast';
+import { parseGenres } from '../utils/genres';
 
 interface EditInfoModalProps {
   theme: ThemeColors;
@@ -55,12 +56,15 @@ const EditInfoModalContent = ({
   const [saving, setSaving] = useState(false);
 
   const [newGenre, setNewGenre] = useState('');
+  const genres = useMemo(
+    () => parseGenres(novelInfo.genres),
+    [novelInfo.genres],
+  );
 
   const removeTag = (t: string) => {
     setNovelInfo(current => ({
       ...current,
-      genres: current.genres
-        ?.split(',')
+      genres: parseGenres(current.genres)
         .filter(item => item !== t)
         .join(','),
     }));
@@ -199,9 +203,9 @@ const EditInfoModalContent = ({
 
               setNovelInfo(prevVal => ({
                 ...prevVal,
-                genres: prevVal.genres
-                  ? `${prevVal.genres},` + newGenreTrimmed
-                  : newGenreTrimmed,
+                genres: [...parseGenres(prevVal.genres), newGenreTrimmed].join(
+                  ',',
+                ),
               }));
               setNewGenre('');
             }}
@@ -210,11 +214,11 @@ const EditInfoModalContent = ({
             style={styles.inputWrapper}
           />
 
-          {novelInfo.genres !== undefined && novelInfo.genres !== '' ? (
+          {genres.length > 0 ? (
             <FlatList
               style={getGenreListStyle()}
               horizontal
-              data={novelInfo.genres?.split(',')}
+              data={genres}
               keyExtractor={(_, index) => 'novelTag' + index}
               renderItem={({ item }) => (
                 <GenreChip theme={theme} onPress={() => removeTag(item)}>

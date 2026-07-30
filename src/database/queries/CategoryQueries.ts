@@ -186,10 +186,10 @@ export const updateCategoryOrderInDb = async (
   }
 
   await dbManager.write(async tx => {
-    for (const category of categories) {
+    for (const [index, category] of categories.entries()) {
       await tx
         .update(categorySchema)
-        .set({ sort: category.sort })
+        .set({ sort: index + 1 })
         .where(eq(categorySchema.id, category.id))
         .run();
     }

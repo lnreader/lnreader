@@ -4,6 +4,10 @@ export {
   AUTOMATIC_LIBRARY_UPDATE_INTERVALS,
   configureAutomaticLibraryUpdates,
 } from './libraryUpdateSchedule';
+export {
+  AUTOMATIC_BACKUP_INTERVALS,
+  configureAutomaticBackups,
+} from './automaticBackupSchedule';
 export { runHeadlessBackgroundTask } from './headlessTask';
 export type {
   BackgroundTask,
@@ -23,3 +27,4 @@ export type {
   TaskProgressUpdater,
 } from './contracts';
 export type { AutomaticLibraryUpdateInterval } from './libraryUpdateSchedule';
+export type { AutomaticBackupInterval } from './automaticBackupSchedule';

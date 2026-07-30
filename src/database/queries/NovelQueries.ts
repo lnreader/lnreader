@@ -21,6 +21,7 @@ import {
 import type { TransactionParameter } from '@database/manager/manager.d';
 import { getLibraryDefaultCategoryId } from '@hooks/persisted/useSettings';
 import NativeFile from '@modules/native-file';
+import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
 
 const getCategoryForNewNovel = async (tx: TransactionParameter) => {
   const preferredCategoryId = getLibraryDefaultCategoryId();
@@ -40,7 +41,7 @@ const getCategoryForNewNovel = async (tx: TransactionParameter) => {
   return tx
     .select({ id: categorySchema.id })
     .from(categorySchema)
-    .where(eq(categorySchema.sort, 1))
+    .where(eq(categorySchema.id, BUILT_IN_CATEGORY_IDS.default))
     .get();
 };
 
@@ -174,7 +175,7 @@ export const switchNovelToLibraryQuery = async (
             .insert(novelCategorySchema)
             .values({
               novelId: novel.id,
-              categoryId: 2,
+              categoryId: BUILT_IN_CATEGORY_IDS.local,
             })
             .onConflictDoNothing()
             .run();
@@ -386,7 +387,7 @@ export const updateNovelCategories = async (
       .where(
         and(
           inArray(novelCategorySchema.novelId, novelIds),
-          ne(novelCategorySchema.categoryId, 2),
+          ne(novelCategorySchema.categoryId, BUILT_IN_CATEGORY_IDS.local),
         ),
       )
       .run();

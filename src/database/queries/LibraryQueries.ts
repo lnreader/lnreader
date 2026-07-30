@@ -61,7 +61,11 @@ export const getLibraryNovelsFromDb = (
     .$dynamic();
 
   if (sortOrder) {
-    query.orderBy(sql.raw(sortOrder));
+    const dateAwareSortOrder = sortOrder.replace(
+      /^lastUpdatedAt (ASC|DESC)$/,
+      'julianday(lastUpdatedAt) $1',
+    );
+    query.orderBy(sql.raw(dateAwareSortOrder));
   }
 
   return query.all();

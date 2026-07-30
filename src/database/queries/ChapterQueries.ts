@@ -47,7 +47,7 @@ export const insertChapters = async (
     return;
   }
 
-  const nowSql = sql`datetime('now','localtime')`;
+  const nowSql = sql`strftime('%Y-%m-%dT%H:%M:%fZ','now')`;
 
   const rows = chapters.map((c, index) => {
     let scanlatorStr: string | null = null;

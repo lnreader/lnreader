@@ -52,6 +52,40 @@ describe('LibraryQueries', () => {
       expect(novels.map(n => n.name)).toEqual(['Novel B', 'Novel A']);
     });
 
+    it('should sort mixed timestamp formats by their actual date', async () => {
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'ISO timestamp',
+        lastUpdatedAt: '2026-07-28T09:00:00.000Z',
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'SQLite timestamp',
+        lastUpdatedAt: '2026-07-28 10:00:00',
+      });
+
+      const novels = await getLibraryNovelsFromDb('lastUpdatedAt DESC');
+
+      expect(novels.map(n => n.name)).toEqual([
+        'SQLite timestamp',
+        'ISO timestamp',
+      ]);
+    });
+
+    it('should update lastUpdatedAt across mixed timestamp formats', async () => {
+      const novelId = await insertTestNovel(testDb, {
+        inLibrary: true,
+        lastUpdatedAt: '2026-07-28T09:00:00.000Z',
+      });
+
+      await insertTestChapter(testDb, novelId, {
+        updatedTime: '2026-07-28 10:00:00',
+      });
+
+      const novel = await getLibraryNovelsFromDb();
+      expect(novel[0].lastUpdatedAt).toBe('2026-07-28 10:00:00');
+    });
+
     it('should filter novels by raw SQL filter', async () => {
       await insertTestNovel(testDb, {
         inLibrary: true,

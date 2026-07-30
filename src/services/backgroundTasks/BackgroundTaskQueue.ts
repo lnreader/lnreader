@@ -16,6 +16,8 @@ import {
   allowsDuplicateTask,
   createBackgroundTaskMetadata,
   fromNativeTaskRecord,
+  getBackgroundTaskQueueName,
+  willTaskWaitInQueue,
 } from './taskDefinitions';
 import { BACKGROUND_TASKS_STORE_KEY } from './constants';
 
@@ -23,7 +25,6 @@ const makeTemporaryId = () =>
   `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export class BackgroundTaskQueue {
-  private currentTaskId?: string;
   private interruptedTasks = new Map<string, 'pause' | 'cancel'>();
   private notificationPermissionRequest?: Promise<boolean>;
 
@@ -59,7 +60,13 @@ export class BackgroundTaskQueue {
 
   enqueue = (tasks: BackgroundTask | BackgroundTask[]) => {
     for (const task of Array.isArray(tasks) ? tasks : [tasks]) {
-      this.enqueueOne(task).catch(() => undefined);
+      this.enqueueOne(task, true).catch(() => undefined);
+    }
+  };
+
+  private enqueueSilently = (tasks: BackgroundTask | BackgroundTask[]) => {
+    for (const task of Array.isArray(tasks) ? tasks : [tasks]) {
+      this.enqueueOne(task, false).catch(() => undefined);
     }
   };
 
@@ -100,7 +107,6 @@ export class BackgroundTaskQueue {
   }
 
   async run(taskId: string, task: BackgroundTask, checkpoint?: string) {
-    this.currentTaskId = taskId;
     const queue = this.getSnapshot();
     if (!queue.some(item => item.id === taskId)) {
       queue.push({
@@ -115,8 +121,8 @@ export class BackgroundTaskQueue {
     try {
       await executeBackgroundTask(
         task,
-        this.updateProgress.bind(this),
-        this.enqueue,
+        transformer => this.updateProgress(taskId, transformer),
+        this.enqueueSilently,
         {
           checkpoint,
           updateCheckpoint: value => {
@@ -128,9 +134,20 @@ export class BackgroundTaskQueue {
         },
       );
       this.throwIfInterrupted(taskId);
-      await NativeBackgroundTasks.complete(taskId);
+      const completedTask = this.getSnapshot().find(item => item.id === taskId);
+      await NativeBackgroundTasks.complete(
+        taskId,
+        completedTask?.meta.completionText ??
+          getString('notifications.taskCompleted'),
+      );
     } catch (error) {
-      await NativeBackgroundTasks.fail(taskId, String(error), false);
+      await NativeBackgroundTasks.fail(
+        taskId,
+        getString('notifications.taskFailed', {
+          error: error instanceof Error ? error.message : String(error),
+        }),
+        false,
+      );
       if (!this.interruptedTasks.has(taskId)) {
         throw error;
       }
@@ -139,7 +156,7 @@ export class BackgroundTaskQueue {
     }
   }
 
-  private async enqueueOne(task: BackgroundTask) {
+  private async enqueueOne(task: BackgroundTask, showQueuedToast: boolean) {
     this.notificationPermissionRequest ??= askForPostNotificationsPermission();
     await this.notificationPermissionRequest;
 
@@ -157,6 +174,8 @@ export class BackgroundTaskQueue {
       state: 'queued',
       meta: createBackgroundTaskMetadata(task, false),
     };
+    const shouldShowQueuedToast =
+      showQueuedToast && willTaskWaitInQueue(task, current);
     this.store([...current, pending]);
 
     try {
@@ -166,12 +185,18 @@ export class BackgroundTaskQueue {
         pending.meta.name,
         pending.meta.progressText || getString('common.preparing'),
         allowsDuplicateTask(task),
+        getBackgroundTaskQueueName(task),
       );
       const latest = this.getSnapshot().filter(item => item.id !== pending.id);
       if (!latest.some(item => item.id === id)) {
         latest.push({ ...pending, id });
       }
       this.store(latest);
+      if (shouldShowQueuedToast) {
+        showToast(
+          getString('notifications.taskQueued', { task: pending.meta.name }),
+        );
+      }
     } catch (error) {
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));
       showToast(
@@ -183,10 +208,9 @@ export class BackgroundTaskQueue {
   }
 
   private updateProgress(
+    taskId: string,
     transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
   ) {
-    const taskId = this.currentTaskId;
-    if (!taskId) return;
     this.throwIfInterrupted(taskId);
 
     const queue = this.getSnapshot();
@@ -224,7 +248,6 @@ export class BackgroundTaskQueue {
     } else {
       this.store(this.getSnapshot().filter(item => item.id !== taskId));
     }
-    this.currentTaskId = undefined;
     this.interruptedTasks.delete(taskId);
   }
 

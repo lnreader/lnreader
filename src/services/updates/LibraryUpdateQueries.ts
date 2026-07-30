@@ -78,6 +78,7 @@ const updateNovelTotalPages = async (novelId: number, totalPages: number) => {
  * Distinguishes between new chapters (triggers download) and existing chapters (updates metadata).
  */
 const updateNovelChapters = async (
+  pluginId: string,
   novelName: string,
   novelId: number,
   chapters: ChapterItem[],
@@ -144,6 +145,7 @@ const updateNovelChapters = async (
         data: {
           novelName,
           novelId,
+          pluginId,
           chapters: insertedNewChapters.map(insertedChapter => ({
             chapterId: insertedChapter.id,
             chapterName:
@@ -196,6 +198,7 @@ const updateNovel = async (
     await updateNovelTotalPages(novelId, novel.totalPages);
   }
   await updateNovelChapters(
+    pluginId,
     novel.name,
     novelId,
     novel.chapters || [],
@@ -217,6 +220,7 @@ const updateNovel = async (
             String(oldTotalPages),
           );
           await updateNovelChapters(
+            pluginId,
             novel.name,
             novelId,
             sourcePage.chapters || [],
@@ -232,6 +236,7 @@ const updateNovel = async (
         try {
           const sourcePage = await fetchPage(pluginId, novelPath, String(page));
           await updateNovelChapters(
+            pluginId,
             novel.name,
             novelId,
             sourcePage.chapters || [],
@@ -260,6 +265,7 @@ const updateNovelPage = async (
   const sourcePage = await fetchPage(pluginId, novelPath, page);
 
   await updateNovelChapters(
+    pluginId,
     novelName,
     novelId,
     sourcePage.chapters || [],

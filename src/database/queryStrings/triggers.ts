@@ -8,7 +8,10 @@ BEGIN
         chaptersUnread = chaptersUnread + CASE WHEN NEW.unread = 1 THEN 1 ELSE 0 END,
         lastUpdatedAt = CASE 
             WHEN NEW.updatedTime IS NOT NULL 
-                 AND (lastUpdatedAt IS NULL OR NEW.updatedTime > lastUpdatedAt)
+                 AND (
+                    lastUpdatedAt IS NULL
+                    OR julianday(NEW.updatedTime) > julianday(lastUpdatedAt)
+                 )
             THEN NEW.updatedTime
             ELSE lastUpdatedAt
         END
@@ -24,7 +27,13 @@ BEGIN
         chaptersDownloaded = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id AND Chapter.isDownloaded = 1),
         chaptersUnread = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id AND Chapter.unread = 1),
         lastReadAt = (SELECT MAX(readTime) FROM Chapter WHERE Chapter.novelId = Novel.id),
-        lastUpdatedAt = (SELECT MAX(updatedTime) FROM Chapter WHERE Chapter.novelId = Novel.id)
+        lastUpdatedAt = (
+            SELECT updatedTime
+            FROM Chapter
+            WHERE Chapter.novelId = Novel.id AND updatedTime IS NOT NULL
+            ORDER BY julianday(updatedTime) DESC
+            LIMIT 1
+        )
     WHERE id = NEW.novelId;
 END;
 `;
@@ -37,7 +46,13 @@ BEGIN
         chaptersUnread = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id AND Chapter.unread = 1),
         totalChapters = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id),
         lastReadAt = (SELECT MAX(readTime) FROM Chapter WHERE Chapter.novelId = Novel.id),
-        lastUpdatedAt = (SELECT MAX(updatedTime) FROM Chapter WHERE Chapter.novelId = Novel.id)
+        lastUpdatedAt = (
+            SELECT updatedTime
+            FROM Chapter
+            WHERE Chapter.novelId = Novel.id AND updatedTime IS NOT NULL
+            ORDER BY julianday(updatedTime) DESC
+            LIMIT 1
+        )
     WHERE id = OLD.novelId;
 END;
 `;

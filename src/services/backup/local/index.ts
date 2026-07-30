@@ -1,18 +1,33 @@
-import { showToast } from '@utils/showToast';
-import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
-import NativeZipArchive from '@modules/native-zip-archive'
+import {
+  CACHE_DIR_PATH,
+  clearBackupCache,
+  prepareBackupData,
+  restoreData,
+} from '../utils';
+import {
+  finalizeRestoredPlugins,
+  getRestoreCompletionText,
+} from '../restoreResult';
+import { getBackupCompletionText } from '../backupResult';
+import NativeZipArchive from '@modules/native-zip-archive';
 import { ROOT_STORAGE } from '@utils/Storages';
 import { ZipBackupName } from '../types';
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
 import { getString } from '@i18n/translations';
 import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
+import { getSelectedBackupFileSections } from '../fileSections';
+import { resolveBackupOptions, type BackupOptions } from '../options';
 
 export const createBackup = async (
-  { destinationUri }: { destinationUri: string },
+  {
+    destinationUri,
+    options: requestedOptions,
+  }: { destinationUri: string; options?: BackupOptions },
   setMeta?: TaskProgressUpdater,
 ) => {
   try {
+    const options = resolveBackupOptions(requestedOptions);
     setMeta?.(meta => ({
       ...meta,
       isRunning: true,
@@ -20,20 +35,22 @@ export const createBackup = async (
       progressText: getString('backupScreen.preparingData'),
     }));
 
-    await prepareBackupData(CACHE_DIR_PATH);
+    const backupResult = await prepareBackupData(CACHE_DIR_PATH, options);
 
     setMeta?.(meta => ({
       ...meta,
       progress: 1 / 4,
-      progressText: getString('backupScreen.uploadingDownloadedFiles'),
+      progressText: getString('backupScreen.preparingSelectedFiles'),
     }));
 
     await sleep(200);
 
-    await NativeZipArchive.zip(
-      ROOT_STORAGE,
-      CACHE_DIR_PATH + '/' + ZipBackupName.DOWNLOAD,
-    );
+    for (const section of getSelectedBackupFileSections(options)) {
+      await NativeZipArchive.zip(
+        section.storagePath,
+        `${CACHE_DIR_PATH}/${section.archiveName}`,
+      );
+    }
 
     setMeta?.(meta => ({
       ...meta,
@@ -53,19 +70,19 @@ export const createBackup = async (
 
     await NativeFile.copyFile(CACHE_DIR_PATH + '.zip', destinationUri);
 
+    const completionText = getBackupCompletionText(backupResult);
     setMeta?.(meta => ({
       ...meta,
       progress: 4 / 4,
       isRunning: false,
+      progressText: completionText,
+      completionText,
     }));
-
-    showToast(getString('backupScreen.backupCreated'));
   } catch (error: any) {
     setMeta?.(meta => ({
       ...meta,
       isRunning: false,
     }));
-    showToast(error.message);
     throw error;
   }
 };
@@ -82,9 +99,7 @@ export const restoreBackup = async (
       progressText: getString('backupScreen.downloadingData'),
     }));
 
-    if (await NativeFile.exists(CACHE_DIR_PATH)) {
-      await NativeFile.unlink(CACHE_DIR_PATH);
-    }
+    await clearBackupCache();
     const localPath = CACHE_DIR_PATH + '-source.zip';
     await NativeFile.copyFile(sourceUri, localPath);
 
@@ -106,35 +121,51 @@ export const restoreBackup = async (
 
     await sleep(200);
 
-    await restoreData(CACHE_DIR_PATH);
+    const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta);
 
     setMeta?.(meta => ({
       ...meta,
       progress: 3 / 4,
-      progressText: getString('backupScreen.downloadingDownloadedFiles'),
+      progressText: getString('backupScreen.restoringSelectedFiles'),
     }));
 
     await sleep(200);
 
-    // TODO: unlink here too?
-    await NativeZipArchive.unzip(
-      CACHE_DIR_PATH + '/' + ZipBackupName.DOWNLOAD,
-      ROOT_STORAGE,
+    if (restoreResult.manifest.formatVersion === 1) {
+      const legacyArchive = CACHE_DIR_PATH + '/' + ZipBackupName.DOWNLOAD;
+      if (!(await NativeFile.exists(legacyArchive))) {
+        throw new Error(getString('backupScreen.invalidBackupFolder'));
+      }
+      await NativeZipArchive.unzip(legacyArchive, ROOT_STORAGE);
+    } else {
+      for (const section of getSelectedBackupFileSections(
+        restoreResult.manifest.sections,
+      )) {
+        const archivePath = `${CACHE_DIR_PATH}/${section.archiveName}`;
+        if (!(await NativeFile.exists(archivePath))) {
+          throw new Error(getString('backupScreen.invalidBackupFolder'));
+        }
+        await NativeZipArchive.unzip(archivePath, section.storagePath);
+      }
+    }
+    const missingPluginIds = await finalizeRestoredPlugins(restoreResult);
+    const completionText = getRestoreCompletionText(
+      restoreResult,
+      missingPluginIds,
     );
 
     setMeta?.(meta => ({
       ...meta,
       progress: 4 / 4,
       isRunning: false,
+      progressText: completionText,
+      completionText,
     }));
-
-    showToast(getString('backupScreen.backupRestored'));
   } catch (error: any) {
     setMeta?.(meta => ({
       ...meta,
       isRunning: false,
     }));
-    showToast(error.message);
     throw error;
   }
 };

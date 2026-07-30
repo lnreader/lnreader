@@ -22,6 +22,7 @@ type NativeBackgroundTasksModule = {
     title: string,
     description: string,
     allowsDuplicates: boolean,
+    queueName: string,
   ): Promise<string>;
   getTasks(): Promise<NativeBackgroundTaskRecord[]>;
   pause(taskId: string): Promise<void>;
@@ -33,7 +34,7 @@ type NativeBackgroundTasksModule = {
     progressText: string,
   ): Promise<void>;
   updateCheckpoint(taskId: string, checkpoint: string): Promise<void>;
-  complete(taskId: string): Promise<void>;
+  complete(taskId: string, completionText: string): Promise<void>;
   fail(taskId: string, error: string, shouldRetry: boolean): Promise<void>;
   scheduleLibraryUpdates(
     intervalHours: number,
@@ -41,6 +42,13 @@ type NativeBackgroundTasksModule = {
     description: string,
   ): Promise<void>;
   cancelLibraryUpdates(): Promise<void>;
+  scheduleAutomaticBackups(
+    intervalHours: number,
+    title: string,
+    description: string,
+    directoryUri: string,
+  ): Promise<void>;
+  cancelAutomaticBackups(): Promise<void>;
 };
 
 export default requireNativeModule<NativeBackgroundTasksModule>(

@@ -13,6 +13,12 @@ import { DriveFile } from '@api/drive/types';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { useAppSettings } from '@hooks/persisted';
 import { formatDate } from '@utils/dateFormat';
+import {
+  DEFAULT_BACKUP_OPTIONS,
+  hasSelectedBackupOption,
+  type BackupOptions,
+} from '@services/backup/options';
+import { BackupOptionsList } from './BackupOptions';
 
 enum BackupModal {
   UNAUTHORIZED,
@@ -98,6 +104,9 @@ function CreateBackup({
 }) {
   const [backupName, setBackupName] = useState('');
   const [fetching, setFetching] = useState(false);
+  const [options, setOptions] = useState<BackupOptions>({
+    ...DEFAULT_BACKUP_OPTIONS,
+  });
 
   const prepare = async () => {
     setFetching(true);
@@ -126,16 +135,28 @@ function CreateBackup({
         placeholderTextColor={theme.onSurfaceDisabled}
         disabled={fetching}
       />
+      <BackupOptionsList
+        onChange={setOptions}
+        options={options}
+        theme={theme}
+      />
       <View style={styles.footerContainer}>
         <Button
-          disabled={backupName.trim().length === 0 || fetching}
+          disabled={
+            backupName.trim().length === 0 ||
+            fetching ||
+            !hasSelectedBackupOption(options)
+          }
           title={getString('common.ok')}
           onPress={() => {
             prepare().then(folder => {
               closeModal();
               backgroundTasks.enqueue({
                 name: 'DRIVE_BACKUP',
-                data: folder,
+                data: {
+                  backupFolder: folder,
+                  options,
+                },
               });
             });
           }}

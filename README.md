@@ -35,8 +35,8 @@
   <a href="https://github.com/lnreader/lnreader/releases/latest">
     <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/lnreader/lnreader?label=Stable&labelColor=0d7377&color=084c4e&style=flat">
   </a>
-  <a href="https://github.com/lnreader/lnreader/releases/latest">
-    <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lnreader/lnreader?include_prereleases&sort=semver&label=Beta&labelColor=3d3d5c&color=2a2a47&style=flat">
+  <a href="https://github.com/lnreader/lnreader/actions/workflows/build.yml">
+    <img alt="Build Preview" src="https://github.com/lnreader/lnreader/actions/workflows/build.yml/badge.svg">
   </a>
 </p>
 

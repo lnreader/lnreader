@@ -17,6 +17,10 @@ export const translateNovelStatus = (status?: NovelStatus | string) => {
       return getString('novelScreen.status.licensed');
     case NovelStatus.PublishingFinished:
       return getString('novelScreen.status.publishingFinished');
+    case NovelStatus.STUB:
+      return getString('novelScreen.status.stub');
+    case NovelStatus.Inactive:
+      return getString('novelScreen.status.inactive');
     default:
       return status ?? '';
   }

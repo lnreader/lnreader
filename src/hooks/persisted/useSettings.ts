@@ -9,7 +9,10 @@ import { useMMKVObject } from 'react-native-mmkv';
 import { useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { DateFormat } from '@utils/dateFormat';
-import type { AutomaticLibraryUpdateInterval } from '@services/backgroundTasks';
+import type {
+  AutomaticBackupInterval,
+  AutomaticLibraryUpdateInterval,
+} from '@services/backgroundTasks';
 
 export const APP_SETTINGS = 'APP_SETTINGS';
 
@@ -71,6 +74,10 @@ export interface AppSettings {
   smartUpdateSkipUnstarted: boolean;
   smartUpdateSkipWithUnread: boolean;
   automaticLibraryUpdateIntervalHours: AutomaticLibraryUpdateInterval;
+  automaticBackupIntervalHours?: AutomaticBackupInterval;
+  automaticBackupDirectoryUri?: string;
+  automaticBackupDirectoryName?: string;
+  lastAutomaticBackupAt?: number;
   updateLibraryOnLaunch: boolean;
   downloadNewChapters: boolean;
   refreshNovelMetadata: boolean;
@@ -253,6 +260,7 @@ const initialAppSettings: AppSettings = {
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
   automaticLibraryUpdateIntervalHours: 0,
+  automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,

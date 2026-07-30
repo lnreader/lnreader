@@ -30,6 +30,23 @@ const INITIAL_MIGRATION_NAME = '20251222152612_past_mandrill';
 const INITIAL_MIGRATION_CREATED_AT = 1766417172000;
 const SCANLATOR_MIGRATION_NAME = '20260612232322_normal_saracen';
 const SCANLATOR_MIGRATION_CREATED_AT = 1781306602000;
+const TIME_SPENT_MIGRATION_NAME = '20260719143427_long_moondragon';
+const TIME_SPENT_MIGRATION_CREATED_AT = 1784471667000;
+
+const CHAPTER_COLUMN_MIGRATIONS = [
+  {
+    columnName: 'scanlator',
+    columnDefinition: 'text',
+    migrationName: SCANLATOR_MIGRATION_NAME,
+    createdAt: SCANLATOR_MIGRATION_CREATED_AT,
+  },
+  {
+    columnName: 'timeSpent',
+    columnDefinition: 'integer DEFAULT 0',
+    migrationName: TIME_SPENT_MIGRATION_NAME,
+    createdAt: TIME_SPENT_MIGRATION_CREATED_AT,
+  },
+] as const;
 
 /**
  * Raw SQLite database instance
@@ -58,6 +75,65 @@ type SqlExecutor = {
 type MigrationExecutor = {
   executeRawSync: (sql: string) => unknown[][];
   executeSync: (sql: string) => unknown;
+};
+
+/**
+ * Recovers the one interruption point where the previous repair migration
+ * could have dropped Novel before renaming its populated replacement.
+ */
+export const repairInterruptedNovelMigration = (
+  executor: MigrationExecutor,
+) => {
+  const tableNames = new Set(
+    executor
+      .executeRawSync("SELECT name FROM sqlite_master WHERE type = 'table';")
+      .map(row => row[0]),
+  );
+  const hasNovel = tableNames.has('Novel');
+  const hasNovelSnapshot = tableNames.has('__migration_Novel');
+  const hasNewNovel = tableNames.has('__new_Novel');
+  const hasMigrationState =
+    hasNovelSnapshot ||
+    hasNewNovel ||
+    tableNames.has('__migration_Chapter') ||
+    tableNames.has('__migration_NovelCategory');
+
+  if (!hasMigrationState || hasNovel || hasNovelSnapshot) {
+    return;
+  }
+  if (!hasNewNovel) {
+    throw new Error(
+      'Cannot recover interrupted Novel migration: no source table remains',
+    );
+  }
+
+  executor.executeSync("ALTER TABLE '__new_Novel' RENAME TO 'Novel';");
+};
+
+/**
+ * Brings a retained Chapter snapshot up to the current schema before an
+ * interrupted migration is retried. Older snapshots can predate columns that
+ * were added to Chapter, so restoring them with the current migration would
+ * otherwise fail with a column-count mismatch.
+ */
+export const repairChapterMigrationSnapshot = (executor: MigrationExecutor) => {
+  const snapshotColumns = executor.executeRawSync(
+    'PRAGMA table_info(__migration_Chapter);',
+  );
+
+  if (snapshotColumns.length === 0) {
+    return;
+  }
+
+  const snapshotColumnNames = new Set(snapshotColumns.map(row => row[1]));
+  for (const migration of CHAPTER_COLUMN_MIGRATIONS) {
+    if (snapshotColumnNames.has(migration.columnName)) {
+      continue;
+    }
+    executor.executeSync(
+      `ALTER TABLE '__migration_Chapter' ADD COLUMN '${migration.columnName}' ${migration.columnDefinition};`,
+    );
+  }
 };
 
 /**
@@ -94,17 +170,20 @@ export const repairMigrationHistory = (executor: MigrationExecutor) => {
   `);
 
   const chapterColumns = executor.executeRawSync('PRAGMA table_info(Chapter);');
-  const hasScanlator = chapterColumns.some(row => row[1] === 'scanlator');
+  const chapterColumnNames = new Set(chapterColumns.map(row => row[1]));
 
-  if (hasScanlator) {
+  for (const migration of CHAPTER_COLUMN_MIGRATIONS) {
+    if (!chapterColumnNames.has(migration.columnName)) {
+      continue;
+    }
     executor.executeSync(`
       INSERT INTO __drizzle_migrations
         (hash, created_at, name, applied_at)
-      SELECT '', ${SCANLATOR_MIGRATION_CREATED_AT},
-        '${SCANLATOR_MIGRATION_NAME}', datetime('now')
+      SELECT '', ${migration.createdAt},
+        '${migration.migrationName}', datetime('now')
       WHERE NOT EXISTS (
         SELECT 1 FROM __drizzle_migrations
-        WHERE name = '${SCANLATOR_MIGRATION_NAME}'
+        WHERE name = '${migration.migrationName}'
       );
     `);
   }
@@ -180,6 +259,8 @@ let initialization: Promise<void> | undefined;
 export const initializeDatabase = () => {
   if (!initialization) {
     setPragmas(_db);
+    repairInterruptedNovelMigration(_db);
+    repairChapterMigrationSnapshot(_db);
     repairMigrationHistory(_db);
     initialization = migrate(drizzleDb, getPendingMigrations(_db)).then(() => {
       runDatabaseBootstrap(_db);

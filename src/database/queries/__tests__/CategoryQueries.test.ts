@@ -212,7 +212,7 @@ describe('CategoryQueries', () => {
   });
 
   describe('updateCategoryOrderInDb', () => {
-    it('should update sort order for multiple categories', async () => {
+    it('should persist categories using one-based display order', async () => {
       const testDb = getTestDb();
       const cat1 = await insertTestCategory(testDb, {
         name: 'Cat 1',
@@ -231,8 +231,8 @@ describe('CategoryQueries', () => {
       const categories = await getCategoriesFromDb();
       const updated1 = categories.find(c => c.id === cat1);
       const updated2 = categories.find(c => c.id === cat2);
-      expect(updated1?.sort).toBe(30);
-      expect(updated2?.sort).toBe(40);
+      expect(updated1?.sort).toBe(1);
+      expect(updated2?.sort).toBe(2);
     });
 
     it('should handle empty array', async () => {

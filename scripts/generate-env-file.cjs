@@ -169,12 +169,14 @@ const releaseDate = args['release-date'] || formatUtcDate(new Date());
 const nodeEnv =
   args['node-env'] ||
   (buildType.toLowerCase().includes('release') ? 'production' : 'development');
+const rozeniteEnabled = nodeEnv !== 'production';
 
 const generatedEnvContent = [
   formatEnvEntry('BUILD_TYPE', buildType),
   formatEnvEntry('GIT_HASH', gitHash),
   formatEnvEntry('RELEASE_DATE', releaseDate),
   formatEnvEntry('NODE_ENV', nodeEnv),
+  formatEnvEntry('WITH_ROZENITE', rozeniteEnabled),
   formatEnvEntry('MYANIMELIST_CLIENT_ID', myanimelistClientId),
   formatEnvEntry('ANILIST_CLIENT_ID', anilistClientId),
   '',
@@ -243,6 +245,7 @@ try {
     GIT_HASH: gitHash,
     RELEASE_DATE: releaseDate,
     NODE_ENV: nodeEnv,
+    WITH_ROZENITE: rozeniteEnabled ? 'enabled' : 'disabled',
     MYANIMELIST_CLIENT_ID: myanimelistClientId
       ? 'configured'
       : 'not configured',

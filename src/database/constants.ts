@@ -28,3 +28,8 @@ export const CHAPTER_FILTER = {
 export type ChapterFilterPositiveKey = keyof typeof CHAPTER_FILTER_POSITIVE;
 export type ChapterFilterKey = keyof typeof CHAPTER_FILTER;
 export type ChapterFilter = (typeof CHAPTER_FILTER)[ChapterFilterKey];
+
+export const BUILT_IN_CATEGORY_IDS = {
+  default: 1,
+  local: 2,
+} as const;

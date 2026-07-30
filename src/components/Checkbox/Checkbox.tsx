@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextStyle,
+  View,
   ViewStyle,
 } from 'react-native';
 import { Checkbox as PaperCheckbox } from 'react-native-paper';
@@ -20,6 +21,8 @@ interface CheckboxProps {
   theme: ThemeColors;
   viewStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
+  description?: string;
+  descriptionStyle?: StyleProp<TextStyle>;
 }
 
 export const Checkbox: React.FC<CheckboxProps> = ({
@@ -30,8 +33,17 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   onPress,
   viewStyle,
   labelStyle,
+  description,
+  descriptionStyle,
 }) => (
   <Pressable
+    accessibilityHint={description}
+    accessibilityLabel={label}
+    accessibilityRole="checkbox"
+    accessibilityState={{
+      checked: status === 'indeterminate' ? 'mixed' : status,
+      disabled,
+    }}
     android_ripple={{ color: theme.rippleColor }}
     style={[styles.pressable, viewStyle]}
     onPress={onPress}
@@ -53,9 +65,28 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       uncheckedColor={theme.onSurfaceVariant}
       disabled={disabled}
     />
-    <Text style={[styles.defaultLabel, { color: theme.onSurface }, labelStyle]}>
-      {label}
-    </Text>
+    <View style={styles.textContainer}>
+      <Text
+        style={[styles.defaultLabel, { color: theme.onSurface }, labelStyle]}
+      >
+        {label}
+      </Text>
+      {description ? (
+        <Text
+          style={[
+            styles.description,
+            {
+              color: disabled
+                ? theme.onSurfaceDisabled
+                : theme.onSurfaceVariant,
+            },
+            descriptionStyle,
+          ]}
+        >
+          {description}
+        </Text>
+      ) : null}
+    </View>
   </Pressable>
 );
 
@@ -85,7 +116,13 @@ export const SortItem = ({ label, status, onPress, theme }: SortItemProps) => (
 
 const styles = StyleSheet.create({
   defaultLabel: {
-    marginStart: 12,
+    flexShrink: 1,
+  },
+  description: {
+    flexShrink: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
   },
   icon: {
     alignSelf: 'center',
@@ -99,4 +136,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   sortItem: { paddingVertical: 16, paddingStart: 64 },
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    marginStart: 12,
+  },
 });

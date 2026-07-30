@@ -9,6 +9,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
+import {
+  DEFAULT_BACKUP_OPTIONS,
+  hasSelectedBackupOption,
+  type BackupOptions,
+} from '@services/backup/options';
+import { BackupOptionsList } from './BackupOptions';
 
 enum BackupModal {
   SET_HOST,
@@ -35,6 +41,9 @@ function CreateBackup({
   closeModal: () => void;
 }) {
   const [backupName, setBackupName] = useState('');
+  const [options, setOptions] = useState<BackupOptions>({
+    ...DEFAULT_BACKUP_OPTIONS,
+  });
 
   return (
     <>
@@ -47,9 +56,16 @@ function CreateBackup({
         theme={{ colors: { ...theme } }}
         placeholderTextColor={theme.onSurfaceDisabled}
       />
+      <BackupOptionsList
+        onChange={setOptions}
+        options={options}
+        theme={theme}
+      />
       <View style={styles.footerContainer}>
         <Button
-          disabled={backupName.trim().length === 0}
+          disabled={
+            backupName.trim().length === 0 || !hasSelectedBackupOption(options)
+          }
           title={getString('common.ok')}
           onPress={() => {
             closeModal();
@@ -58,6 +74,7 @@ function CreateBackup({
               data: {
                 host,
                 backupFolder: backupName + '.backup',
+                options,
               },
             });
           }}

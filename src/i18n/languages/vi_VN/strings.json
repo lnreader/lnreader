@@ -84,30 +84,63 @@
   "backupScreen": {
     "backupName": "Tên sao lưu",
     "backupCreated": "Backup created successfully",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Backup restored successfully",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "Saving Backup",
     "categoriesRestored": "Restored %{count} categories",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
     "categoryFileReadFailed": "Failed to read category file: %{error}",
     "categoryFileWriteFailed": "Failed to write category file: %{error}",
     "createBackup": "Tạo sao lưu",
     "createBackupDesc": "Được dùng để khôi phục thư viện của bạn",
-    "createBackupWarning": "Tạo sao lưu có thể không hoạt đông ở Android 9 hoặc thấp hơn.",
     "downloadingData": "Đang tải xuống dữ liệu",
     "downloadingDownloadedFiles": "Downloading Downloaded Files",
     "failed": "Backup failed",
     "novelsRestored": "Restored %{count} novels",
     "novelsRestoredWithErrors": "Restored %{count} novels (%{failedCount} failed)",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "Failed to backup novel: %{novelName} - %{error}",
     "novelRestoreFailed": "Failed to restore novel: %{novelName} - %{error}",
     "novelDirectoryNotFound": "Novel directory not found in backup",
     "novelDirectoryReadFailed": "Failed to read novel directory: %{error}",
     "restoringCategories": "Restoring Categories",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "Restoring Novels",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Restoring Settings",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "Settings restored",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "Settings file not found in backup",
     "settingsRestoreFailed": "Failed to restore settings: %{error}",
     "settingsFileWriteFailed": "Failed to write settings file: %{error}",
@@ -124,7 +157,21 @@
     "invalidBackupFolder": "Thư mục sao lưu không hợp lệ",
     "localBackup": "Local Backup",
     "noBackupFound": "Không tìm thấy sao lưu",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "Chuẩn bị dữ liệu",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "Sao lưu tự dựng",
       "host": "Máy chủ",
@@ -133,12 +180,13 @@
     "remoteBackup": "Sao lưu từ xa",
     "restoreBackup": "Khôi phục sao lưu",
     "restoreBackupDesc": "Khôi phục thư viện từ tệp sao lưu",
-    "restoreLargeBackupsWarning": "Khôi phục sao lưu lớn có thể đóng băng ứng dụng đến khi hoàn thành",
     "restorinBackup": "Đang khôi phục sao lưu",
     "restoringData": "Đang khôi phục dữ liệu",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Tự dựng",
     "selfHostDesc": "Sao lưu lên máy chủ của bạn",
     "uploadingData": "Đang tải lên dữ liệu",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Uploading Downloaded Files"
   },
   "browse": "Tìm kiếm",
@@ -686,7 +734,10 @@
     "LOCAL_BACKUP": "Local Backup",
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
-    "DOWNLOAD_CHAPTER": "Downloading Chapter"
+    "DOWNLOAD_CHAPTER": "Downloading Chapter",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {

@@ -5,7 +5,7 @@ import {
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { DocumentPickerResult } from 'expo-document-picker';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 
 export default function useImport() {
@@ -17,10 +17,14 @@ export default function useImport() {
     () => queue?.filter(t => t.task.name === 'IMPORT_EPUB') || [],
     [queue],
   );
+  const previousImportCount = useRef(importQueue.length);
 
   useEffect(() => {
-    refetchLibrary();
-  }, [importQueue, refetchLibrary]);
+    if (previousImportCount.current > importQueue.length) {
+      void refetchLibrary();
+    }
+    previousImportCount.current = importQueue.length;
+  }, [importQueue.length, refetchLibrary]);
 
   const importNovel = useCallback((pickedNovel: DocumentPickerResult) => {
     if (pickedNovel.canceled) return;

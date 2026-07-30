@@ -84,30 +84,63 @@
   "backupScreen": {
     "backupName": "Backup name",
     "backupCreated": "Backup created successfully",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Backup restored successfully",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "Saving Backup",
     "categoriesRestored": "Restored %{count} categories",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
     "categoryFileReadFailed": "Failed to read category file: %{error}",
     "categoryFileWriteFailed": "Failed to write category file: %{error}",
     "createBackup": "Create backup",
     "createBackupDesc": "Can be used to restore current library",
-    "createBackupWarning": "Create backup may not work on devices with Android 9 or lower.",
     "downloadingData": "Downloading Data",
     "downloadingDownloadedFiles": "Downloading Downloaded Files",
     "failed": "Backup failed",
     "novelsRestored": "Restored %{count} novels",
     "novelsRestoredWithErrors": "Restored %{count} novels (%{failedCount} failed)",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "Failed to backup novel: %{novelName} - %{error}",
     "novelRestoreFailed": "Failed to restore novel: %{novelName} - %{error}",
     "novelDirectoryNotFound": "Novel directory not found in backup",
     "novelDirectoryReadFailed": "Failed to read novel directory: %{error}",
     "restoringCategories": "Restoring Categories",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "Restoring Novels",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Restoring Settings",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "Settings restored",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "Settings file not found in backup",
     "settingsRestoreFailed": "Failed to restore settings: %{error}",
     "settingsFileWriteFailed": "Failed to write settings file: %{error}",
@@ -124,7 +157,21 @@
     "invalidBackupFolder": "Invalid backup folder",
     "localBackup": "Local Backup",
     "noBackupFound": "No backup found",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "Preparing Data",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "Self Host Backup",
       "host": "Host",
@@ -133,12 +180,13 @@
     "remoteBackup": "Remote Backup",
     "restoreBackup": "Restore backup",
     "restoreBackupDesc": "Restore library from backup file",
-    "restoreLargeBackupsWarning": "Restoring large backups may freeze the app until restoring is finished",
     "restorinBackup": "Restoring backup",
     "restoringData": "Restoring Data",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Self Host",
     "selfHostDesc": "Backup to your server",
     "uploadingData": "Uploading Data",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Uploading Downloaded Files"
   },
   "browse": "閲覧",
@@ -686,7 +734,10 @@
     "LOCAL_BACKUP": "Local Backup",
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
-    "DOWNLOAD_CHAPTER": "Downloading Chapter"
+    "DOWNLOAD_CHAPTER": "Downloading Chapter",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {

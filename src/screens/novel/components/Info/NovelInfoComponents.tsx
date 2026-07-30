@@ -9,6 +9,7 @@ import { isMissingNovelCover } from '../../../../components/NovelCoverImage';
 import { ThemeColors } from '@theme/types';
 import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { parseGenres } from '../../utils/genres';
 
 interface CoverImageProps {
   children: React.ReactNode;
@@ -269,26 +270,29 @@ const TrackerButton = ({
 
 const genreKeyExtractor = (_item: string, index: number) => 'genre' + index;
 
-const NovelGenres = memo(
-  ({ theme, genres }: { theme: ThemeColors; genres: string }) => {
-    const data = useMemo(() => genres.split(/,\s*/), [genres]);
-    const renderGenre = useCallback(
-      ({ item }: { item: string }) => <Chip label={item} theme={theme} />,
-      [theme],
-    );
+interface NovelGenresProps {
+  theme: ThemeColors;
+  genres?: string | null;
+}
 
-    return (
-      <FlatList
-        contentContainerStyle={styles.genreContainer}
-        horizontal
-        data={data}
-        keyExtractor={genreKeyExtractor}
-        renderItem={renderGenre}
-        showsHorizontalScrollIndicator={false}
-      />
-    );
-  },
-);
+const NovelGenres = memo(({ theme, genres }: NovelGenresProps) => {
+  const data = useMemo(() => parseGenres(genres), [genres]);
+  const renderGenre = useCallback(
+    ({ item }: { item: string }) => <Chip label={item} theme={theme} />,
+    [theme],
+  );
+
+  return (
+    <FlatList
+      contentContainerStyle={styles.genreContainer}
+      horizontal
+      data={data}
+      keyExtractor={genreKeyExtractor}
+      renderItem={renderGenre}
+      showsHorizontalScrollIndicator={false}
+    />
+  );
+});
 
 export {
   NovelInfoContainer,

@@ -48,6 +48,7 @@ export default function useDownload() {
       data: {
         novelName: novel.name,
         novelId: novel.id,
+        pluginId: novel.pluginId,
         chapters: [{ chapterId: chapter.id, chapterName: chapter.name }],
       },
     });
@@ -57,6 +58,7 @@ export default function useDownload() {
       data: {
         novelName: novel.name,
         novelId: novel.id,
+        pluginId: novel.pluginId,
         chapters: chapters.map(chapter => ({
           chapterId: chapter.id,
           chapterName: chapter.name,

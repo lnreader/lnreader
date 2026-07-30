@@ -10,6 +10,7 @@ data class BackgroundTaskEntity(
     val payload: String,
     val title: String,
     val description: String,
+    val queueName: String,
     val state: String,
     val progress: Double?,
     val progressText: String?,

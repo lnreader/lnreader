@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, Text, StatusBar } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
-
+import * as Clipboard from 'expo-clipboard';
+import { getString } from '@i18n/translations';
+import { showToast } from '@utils/showToast';
 import { Button, List } from '@components';
 import { useTheme } from '@hooks/persisted';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +19,33 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 }) => {
   const theme = useTheme();
 
+  const fallbackGetString = (
+    key: Parameters<typeof getString>[0],
+    fallback: string,
+    options?: Parameters<typeof getString>[1],
+  ) => {
+    try {
+      return getString(key, options);
+    } catch {
+      return fallback;
+    }
+  };
+
+  const handleCopyStackTrace = async () => {
+    try {
+      await Clipboard.setStringAsync(`${error.message}\n\n${error.stack}`);
+      showToast(
+        fallbackGetString(
+          'common.copiedToClipboard',
+          'Copied to clipboard: Stack trace',
+          { name: 'Stack trace' },
+        ),
+      );
+    } catch {
+      // clipboard failure is non-critical
+    }
+  };
+
   return (
     <SafeAreaView
       style={[styles.mainCtn, { backgroundColor: theme.background }]}
@@ -24,12 +53,16 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       <StatusBar translucent={true} backgroundColor="transparent" />
       <View style={styles.errorInfoCtn}>
         <Text style={[styles.errorTitle, { color: theme.onSurface }]}>
-          An Unexpected Error Ocurred
+          {fallbackGetString(
+            'errorBoundary.title',
+            'An Unexpected Error Occurred',
+          )}
         </Text>
         <Text style={[styles.errorDesc, { color: theme.onSurface }]}>
-          The application ran into an unexpected error. We suggest you
-          screenshot this message and then share it in our support channel on
-          Discord.
+          {fallbackGetString(
+            'errorBoundary.description',
+            'The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.',
+          )}
         </Text>
         <Text
           style={[
@@ -46,8 +79,20 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       </View>
       <List.Divider theme={theme} />
       <Button
+        onPress={handleCopyStackTrace}
+        title={fallbackGetString(
+          'errorBoundary.copyStackTrace',
+          'Copy stack trace',
+        )}
+        style={styles.copyButtonCtn}
+        mode="outlined"
+      />
+      <Button
         onPress={resetError}
-        title={'Restart the application'}
+        title={fallbackGetString(
+          'errorBoundary.restart',
+          'Restart the application',
+        )}
         style={styles.buttonCtn}
         mode="contained"
       />
@@ -71,6 +116,10 @@ const styles = StyleSheet.create({
   buttonCtn: {
     margin: 16,
     marginBottom: 32,
+  },
+  copyButtonCtn: {
+    margin: 16,
+    marginBottom: 8,
   },
   errorCtn: {
     borderRadius: 8,

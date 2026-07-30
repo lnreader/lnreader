@@ -51,13 +51,8 @@ const CategoriesScreen = () => {
       return;
     }
 
-    const updatedOrderCategories = data.map((category, index) => ({
-      ...category,
-      sort: index,
-    }));
-
-    setCategories(updatedOrderCategories);
-    updateCategoryOrderInDb(updatedOrderCategories);
+    setCategories(data);
+    updateCategoryOrderInDb(data);
   };
 
   const renderItem = ({

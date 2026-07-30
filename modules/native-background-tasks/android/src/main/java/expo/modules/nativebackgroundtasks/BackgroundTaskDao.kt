@@ -25,8 +25,28 @@ interface BackgroundTaskDao {
     @Query("UPDATE background_tasks SET state = :state, updatedAt = :updatedAt WHERE id = :id AND state = 'running'")
     suspend fun finishRunning(id: String, state: String, updatedAt: Long)
 
-    @Query("UPDATE background_tasks SET state = :state, attempt = attempt + 1, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun markRunning(id: String, state: String, updatedAt: Long)
+    @Query(
+        """
+        UPDATE background_tasks
+        SET state = :state, attempt = attempt + 1, updatedAt = :updatedAt
+        WHERE id = :id
+          AND state = 'queued'
+          AND (
+            type != 'DOWNLOAD_CHAPTER'
+            OR (
+              SELECT COUNT(*)
+              FROM background_tasks
+              WHERE type = 'DOWNLOAD_CHAPTER' AND state = 'running'
+            ) < :maxConcurrentDownloads
+          )
+        """,
+    )
+    suspend fun tryMarkRunning(
+        id: String,
+        state: String,
+        updatedAt: Long,
+        maxConcurrentDownloads: Int,
+    ): Int
 
     @Query("UPDATE background_tasks SET progress = :progress, progressText = :progressText, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateProgress(id: String, progress: Double?, progressText: String?, updatedAt: Long)

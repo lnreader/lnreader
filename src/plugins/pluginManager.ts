@@ -9,10 +9,10 @@ import { encode, decode } from 'urlencode';
 import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { newer } from '@utils/compareVersion';
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
 import { showToast } from '@utils/showToast';
 import { PLUGIN_STORAGE } from '@utils/Storages';
-import { getMMKVObject } from '@utils/mmkv/mmkv';
+import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 
 import {
   store,
@@ -193,12 +193,38 @@ const initializeInstalledPlugins = async () => {
   await Promise.all(installedPlugins.map(plugin => loadPlugin(plugin.id)));
 };
 
+const reloadInstalledPlugins = async (): Promise<string[]> => {
+  const installedPlugins =
+    getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
+
+  Object.keys(plugins).forEach(pluginId => {
+    plugins[pluginId] = undefined;
+  });
+
+  const results = await Promise.all(
+    installedPlugins.map(async plugin => ({
+      plugin,
+      source: await loadPlugin(plugin.id),
+    })),
+  );
+  const restoredPlugins = results
+    .filter(result => result.source)
+    .map(result => result.plugin);
+
+  setMMKVObject(INSTALLED_PLUGINS_KEY, restoredPlugins);
+
+  return results
+    .filter(result => !result.source)
+    .map(result => result.plugin.id);
+};
+
 const LOCAL_PLUGIN_ID = 'local';
 
 export {
   getPlugin,
   loadPlugin,
   initializeInstalledPlugins,
+  reloadInstalledPlugins,
   installPlugin,
   uninstallPlugin,
   updatePlugin,

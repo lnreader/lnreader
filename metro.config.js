@@ -1,3 +1,6 @@
+const { withRozenite } = require('@rozenite/metro');
+const { withRozeniteExpoAtlasPlugin } = require('@rozenite/expo-atlas-plugin');
+
 const { getDefaultConfig } = require('expo/metro-config');
 const fs = require('fs');
 const path = require('path');
@@ -55,4 +58,7 @@ config.server.enhanceMiddleware = metroMiddleware => {
   };
 };
 
-module.exports = config;
+module.exports = withRozenite(config, {
+  enabled: process.env.WITH_ROZENITE === 'true',
+  enhanceMetroConfig: metroConfig => withRozeniteExpoAtlasPlugin(metroConfig),
+});

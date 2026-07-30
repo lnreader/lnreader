@@ -70,6 +70,8 @@ export enum NovelStatus {
   PublishingFinished = 'Publishing Finished',
   Cancelled = 'Cancelled',
   OnHiatus = 'On Hiatus',
+  STUB = 'STUB',
+  Inactive = 'Inactive',
 }
 
 export interface SourceNovel extends NovelItem {
@@ -107,12 +109,7 @@ export interface PluginItem {
 }
 
 export interface ImageRequestInit {
-  [x: string]:
-    | string
-    | Record<string, string>
-    | Headers
-    | FormData
-    | undefined;
+  [x: string]: string | Record<string, string> | Headers | FormData | undefined;
   method?: string;
   headers: Record<string, string>;
   body?: string;

@@ -2,16 +2,51 @@ import { DriveFile } from '@api/drive/types';
 import { sleep } from '@utils/sleep';
 import { exists } from '@api/drive';
 import { getString } from '@i18n/translations';
-import { CACHE_DIR_PATH, prepareBackupData, restoreData } from '../utils';
+import {
+  CACHE_DIR_PATH,
+  clearBackupCache,
+  prepareBackupData,
+  restoreData,
+} from '../utils';
+import {
+  finalizeRestoredPlugins,
+  getRestoreCompletionText,
+} from '../restoreResult';
+import { getBackupCompletionText } from '../backupResult';
 import { download, updateMetadata, uploadMedia } from '@api/drive/request';
 import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';
-import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
+import type {
+  DriveBackupData,
+  TaskProgressUpdater,
+} from '@services/backgroundTasks/contracts';
+import { getSelectedBackupFileSections } from '../fileSections';
+import { resolveBackupOptions } from '../options';
+
+const uploadBackupSection = async (
+  sourcePath: string,
+  name: ZipBackupName,
+  backupFolder: DriveFile,
+) => {
+  const file = await uploadMedia(sourcePath);
+  await updateMetadata(
+    file.id,
+    {
+      name,
+      mimeType: 'application/zip',
+      parents: [backupFolder.id],
+    },
+    file.parents[0],
+  );
+};
 
 export const createDriveBackup = async (
-  backupFolder: DriveFile,
+  data: DriveBackupData,
   setMeta: TaskProgressUpdater,
 ) => {
+  const backupFolder = 'backupFolder' in data ? data.backupFolder : data;
+  const requestedOptions = 'backupFolder' in data ? data.options : undefined;
+  const options = resolveBackupOptions(requestedOptions);
   setMeta(meta => ({
     ...meta,
     isRunning: true,
@@ -19,7 +54,7 @@ export const createDriveBackup = async (
     progressText: getString('backupScreen.preparingData'),
   }));
 
-  await prepareBackupData(CACHE_DIR_PATH);
+  const backupResult = await prepareBackupData(CACHE_DIR_PATH, options);
 
   setMeta(meta => ({
     ...meta,
@@ -29,39 +64,29 @@ export const createDriveBackup = async (
 
   await sleep(500);
 
-  const file = await uploadMedia(CACHE_DIR_PATH);
-
-  await updateMetadata(
-    file.id,
-    {
-      name: ZipBackupName.DATA,
-      mimeType: 'application/zip',
-      parents: [backupFolder.id],
-    },
-    file.parents[0],
-  );
+  await uploadBackupSection(CACHE_DIR_PATH, ZipBackupName.DATA, backupFolder);
 
   setMeta(meta => ({
     ...meta,
     progress: 2 / 3,
-    progressText: getString('backupScreen.uploadingDownloadedFiles'),
+    progressText: getString('backupScreen.uploadingSelectedFiles'),
   }));
 
-  const file2 = await uploadMedia(ROOT_STORAGE);
-  await updateMetadata(
-    file2.id,
-    {
-      name: ZipBackupName.DOWNLOAD,
-      mimeType: 'application/zip',
-      parents: [backupFolder.id],
-    },
-    file2.parents[0],
-  );
+  for (const section of getSelectedBackupFileSections(options)) {
+    await uploadBackupSection(
+      section.storagePath,
+      section.archiveName,
+      backupFolder,
+    );
+  }
 
+  const completionText = getBackupCompletionText(backupResult);
   setMeta(meta => ({
     ...meta,
     progress: 3 / 3,
     isRunning: false,
+    progressText: completionText,
+    completionText,
   }));
 };
 
@@ -77,15 +102,11 @@ export const driveRestore = async (
   }));
 
   const zipDataFile = await exists(ZipBackupName.DATA, false, backupFolder.id);
-  const zipDownloadFile = await exists(
-    ZipBackupName.DOWNLOAD,
-    false,
-    backupFolder.id,
-  );
-  if (!zipDataFile || !zipDownloadFile) {
+  if (!zipDataFile) {
     throw new Error(getString('backupScreen.invalidBackupFolder'));
   }
 
+  await clearBackupCache();
   await download(zipDataFile, CACHE_DIR_PATH);
   await sleep(500);
 
@@ -95,20 +116,47 @@ export const driveRestore = async (
     progressText: getString('backupScreen.restoringData'),
   }));
 
-  await restoreData(CACHE_DIR_PATH);
+  const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta);
   await sleep(500);
 
   setMeta(meta => ({
     ...meta,
     progress: 2 / 3,
-    progressText: getString('backupScreen.downloadingDownloadedFiles'),
+    progressText: getString('backupScreen.restoringSelectedFiles'),
   }));
 
-  await download(zipDownloadFile, ROOT_STORAGE);
+  if (restoreResult.manifest.formatVersion === 1) {
+    const legacyFile = await exists(
+      ZipBackupName.DOWNLOAD,
+      false,
+      backupFolder.id,
+    );
+    if (!legacyFile) {
+      throw new Error(getString('backupScreen.invalidBackupFolder'));
+    }
+    await download(legacyFile, ROOT_STORAGE);
+  } else {
+    for (const section of getSelectedBackupFileSections(
+      restoreResult.manifest.sections,
+    )) {
+      const file = await exists(section.archiveName, false, backupFolder.id);
+      if (!file) {
+        throw new Error(getString('backupScreen.invalidBackupFolder'));
+      }
+      await download(file, section.storagePath);
+    }
+  }
+  const missingPluginIds = await finalizeRestoredPlugins(restoreResult);
+  const completionText = getRestoreCompletionText(
+    restoreResult,
+    missingPluginIds,
+  );
 
   setMeta(meta => ({
     ...meta,
     progress: 3 / 3,
     isRunning: false,
+    progressText: completionText,
+    completionText,
   }));
 };
