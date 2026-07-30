@@ -82,6 +82,16 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Backup name",
     "backupCreated": "Backup created successfully",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
@@ -362,6 +372,12 @@
     "pluginNotFound": "Plugin not found!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
   },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
+  },
   "generalSettings": "Általános",
   "generalSettingsScreen": {
     "asc": "(Növekvő)",
@@ -582,10 +598,12 @@
     "status": {
       "cancelled": "Cancelled",
       "completed": "Completed",
+      "inactive": "Inactive",
       "licensed": "Licensed",
       "onHiatus": "On Hiatus",
       "ongoing": "Ongoing",
       "publishingFinished": "Publishing Finished",
+      "stub": "STUB",
       "unknown": "Unknown"
     },
     "tracked": "Tracked",
