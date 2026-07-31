@@ -1,6 +1,12 @@
 import 'react-native-url-polyfill/auto';
 import { enableFreeze } from 'react-native-screens';
-import { PropsWithChildren, Suspense, useEffect, useMemo } from 'react';
+import {
+  PropsWithChildren,
+  StrictMode,
+  Suspense,
+  useEffect,
+  useMemo,
+} from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
@@ -90,22 +96,27 @@ const App = () => {
   }
 
   return (
-    <Suspense fallback={null}>
-      <ThemeProvider>
-        <ThemedRootView>
-          <AppErrorBoundary>
-            <SafeAreaProvider>
-              <ThemedPaperProvider>
-                <BottomSheetModalProvider>
-                  <StatusBar translucent={true} backgroundColor="transparent" />
-                  <Main />
-                </BottomSheetModalProvider>
-              </ThemedPaperProvider>
-            </SafeAreaProvider>
-          </AppErrorBoundary>
-        </ThemedRootView>
-      </ThemeProvider>
-    </Suspense>
+    <StrictMode>
+      <Suspense fallback={null}>
+        <ThemeProvider>
+          <ThemedRootView>
+            <AppErrorBoundary>
+              <SafeAreaProvider>
+                <ThemedPaperProvider>
+                  <BottomSheetModalProvider>
+                    <StatusBar
+                      translucent={true}
+                      backgroundColor="transparent"
+                    />
+                    <Main />
+                  </BottomSheetModalProvider>
+                </ThemedPaperProvider>
+              </SafeAreaProvider>
+            </AppErrorBoundary>
+          </ThemedRootView>
+        </ThemeProvider>
+      </Suspense>
+    </StrictMode>
   );
 };
 

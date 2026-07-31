@@ -127,11 +127,13 @@ i18n.defaultLocale = 'en';
 i18n.enableFallback = true;
 
 const getSavedLocale = (): string => {
+  let res;
   try {
-    return MMKVStorage.getString('APP_LOCALE') || '';
+    res = MMKVStorage.getString('APP_LOCALE');
   } catch {
     return '';
   }
+  return res || '';
 };
 
 const getDayjsLocale = (locale: string): string => {

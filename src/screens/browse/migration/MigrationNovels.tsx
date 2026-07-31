@@ -49,11 +49,20 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
 
     filteredInstalledPlugins.map(async item => {
       if (isMounted.current === true) {
-        try {
-          const source = getPlugin(item.id);
-          if (!source) {
-            throw new Error(`Unknown plugin: ${item.id}`);
-          }
+        const source = getPlugin(item.id);
+        if (!source) {
+          setSearchResults(prevState =>
+            prevState.map(pluginItem =>
+              pluginItem.id === item.id
+                ? {
+                    ...pluginItem,
+                    loading: false,
+                    error: `Unknown plugin: ${item.id}`,
+                  }
+                : pluginItem,
+            ),
+          );
+        } else {
           const data = await source.searchNovels(novel.name, 1);
           setSearchResults(prevState =>
             prevState.map(pluginItem =>
@@ -62,20 +71,7 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
                 : { ...pluginItem },
             ),
           );
-        } catch (e: any) {
-          setSearchResults(prevState =>
-            prevState.map(pluginItem =>
-              pluginItem.id === item.id
-                ? {
-                    ...pluginItem,
-                    loading: false,
-                    error: e?.message,
-                  }
-                : pluginItem,
-            ),
-          );
         }
-
         setProgress(before => before + 1 / filteredInstalledPlugins.length);
       }
     });

@@ -4,10 +4,20 @@ import { NovelItem } from '@plugins/types';
 import { getPlugin } from '@plugins/pluginManager';
 import { FilterToValues, Filters } from '@plugins/types/filterTypes';
 
+function getOrThrowPlugin(pluginId: string) {
+  'no use memo';
+  const plugin = getPlugin(pluginId);
+  if (!plugin) {
+    throw new Error(`Unknown plugin: ${pluginId}`);
+  }
+  return plugin;
+}
+
 export const useBrowseSource = (
   pluginId: string,
   showLatestNovels?: boolean,
 ) => {
+  'use no memo';
   const [isLoading, setIsLoading] = useState(true);
   const [novels, setNovels] = useState<NovelItem[]>([]);
   const [error, setError] = useState<string>();
@@ -27,10 +37,7 @@ export const useBrowseSource = (
     async (page: number, filters?: FilterToValues<Filters>) => {
       if (isScreenMounted.current === true) {
         try {
-          const plugin = getPlugin(pluginId);
-          if (!plugin) {
-            throw new Error(`Unknown plugin: ${pluginId}`);
-          }
+          const plugin = getOrThrowPlugin(pluginId);
           await plugin
             .popularNovels(page, {
               showLatestNovels,
@@ -51,9 +58,8 @@ export const useBrowseSource = (
           setFilterValues(plugin.filters);
         } catch (err: unknown) {
           setError(`${err}`);
-        } finally {
-          setIsLoading(false);
         }
+        setIsLoading(false);
       }
     },
     [pluginId, showLatestNovels],
@@ -132,10 +138,7 @@ export const useSearchSource = (pluginId: string) => {
     async (localSearchText: string, page: number) => {
       if (isScreenMounted.current === true) {
         try {
-          const plugin = getPlugin(pluginId);
-          if (!plugin) {
-            throw new Error(`Unknown plugin: ${pluginId}`);
-          }
+          const plugin = getOrThrowPlugin(pluginId);
           const res = await plugin.searchNovels(localSearchText, page);
           setSearchResults(prevState =>
             page === 1 ? res : [...prevState, ...res],
@@ -146,9 +149,8 @@ export const useSearchSource = (pluginId: string) => {
         } catch (err: unknown) {
           setSearchError(`${err}`);
           setHasNextSearchPage(false);
-        } finally {
-          setIsSearching(false);
         }
+        setIsSearching(false);
       }
     },
     [pluginId],

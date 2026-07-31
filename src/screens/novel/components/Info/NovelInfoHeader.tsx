@@ -141,9 +141,10 @@ const NovelInfoHeader = ({
       showNotAvailable();
       return;
     }
+    const inLibrary = novel.inLibrary;
     try {
       await followNovel();
-      if (novel.inLibrary && hasDownloadedChapters) {
+      if (inLibrary && hasDownloadedChapters) {
         deleteDownloadSnackbar?.setTrue();
       } else {
         deleteDownloadSnackbar?.setFalse();

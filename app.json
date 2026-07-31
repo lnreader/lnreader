@@ -1,6 +1,9 @@
 {
   "expo": {
     "version": "2.1.2",
+    "experiments": {
+      "reactCompiler": true
+    },
     "name": "LNReader",
     "slug": "LNReader",
     "scheme": "lnreader",

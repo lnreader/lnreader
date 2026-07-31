@@ -26,27 +26,47 @@ const getReleaseDownloadUrl = async (
   const universalAsset = apkAssets.find(asset =>
     asset.name?.endsWith('-universal.apk'),
   );
-
+  let supportedAbis: string[] = [];
   try {
-    const supportedAbis = await DeviceInfo.supportedAbis();
-
-    for (const abi of supportedAbis) {
-      const matchingAsset = apkAssets.find(asset =>
-        asset.name?.endsWith(`-${abi}.apk`),
-      );
-
-      if (matchingAsset?.browser_download_url) {
-        return matchingAsset.browser_download_url;
-      }
-    }
+    supportedAbis = await DeviceInfo.supportedAbis();
   } catch {
     // Fall back to the universal APK when ABI detection is unavailable.
+    return (
+      universalAsset?.browser_download_url || apkAssets[0]?.browser_download_url
+    );
+  }
+  for (const abi of supportedAbis) {
+    const matchingAsset = apkAssets.find(asset =>
+      asset.name?.endsWith(`-${abi}.apk`),
+    );
+
+    if (matchingAsset && matchingAsset.browser_download_url) {
+      return matchingAsset.browser_download_url;
+    }
+  }
+};
+
+async function fetchRelease(url: string) {
+  'use no memo';
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error();
   }
 
-  return (
-    universalAsset?.browser_download_url || apkAssets[0]?.browser_download_url
-  );
-};
+  const data = await res.json();
+
+  if (!data || !data.tag_name) {
+    throw new Error();
+  }
+
+  const downloadUrl = await getReleaseDownloadUrl(data.assets);
+  return {
+    tag_name: data.tag_name,
+    body: data.body,
+    downloadUrl,
+  };
+}
 
 export const useGithubUpdateChecker = (): GithubUpdate => {
   const latestReleaseUrl =
@@ -74,26 +94,7 @@ export const useGithubUpdateChecker = (): GithubUpdate => {
     }
 
     try {
-      const res = await fetch(latestReleaseUrl);
-
-      if (!res.ok) {
-        setChecking(false);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!data || !data.tag_name) {
-        setChecking(false);
-        return;
-      }
-
-      const downloadUrl = await getReleaseDownloadUrl(data.assets);
-      const release = {
-        tag_name: data.tag_name,
-        body: data.body,
-        downloadUrl,
-      };
+      const release = await fetchRelease(latestReleaseUrl);
 
       MMKVStorage.set(LAST_UPDATE_CHECK_KEY, Date.now());
 

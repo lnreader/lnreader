@@ -1,14 +1,30 @@
-const ReactCompilerConfig = {
-  target: '19',
-};
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 export default function (api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      [
+        'babel-preset-expo',
+        {
+          'react-compiler': {
+            panicThreshold: isDevelopment ? 'critical_errors' : 'none',
+            logger: {
+              logEvent(filename, event) {
+                if (isDevelopment && event.kind === 'CompileError') {
+                  console.error(
+                    `Babel compile error in ${filename}:`,
+                    event.detail.options,
+                  );
+                }
+              },
+            },
+          },
+        },
+      ],
+    ],
     plugins: [
       'module:@babel/plugin-transform-export-namespace-from',
-      ['babel-plugin-react-compiler', ReactCompilerConfig],
       [
         'module-resolver',
         {

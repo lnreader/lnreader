@@ -157,7 +157,8 @@ export class BackgroundTaskQueue {
   }
 
   private async enqueueOne(task: BackgroundTask, showQueuedToast: boolean) {
-    this.notificationPermissionRequest ??= askForPostNotificationsPermission();
+    this.notificationPermissionRequest =
+      this.notificationPermissionRequest ?? askForPostNotificationsPermission();
     await this.notificationPermissionRequest;
 
     const current = this.getSnapshot();

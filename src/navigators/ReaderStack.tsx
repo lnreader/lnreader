@@ -1,5 +1,3 @@
-import { useRef } from 'react';
-
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
@@ -18,13 +16,11 @@ const Stack = createNativeStackNavigator<ReaderStackParamList>();
 
 // @ts-ignore
 const ReaderStack = ({ route }) => {
-  const params = useRef(route?.params);
   const theme = useTheme();
   // The reader has a background of its own, so the screen is given the same one
   // to keep the app background from showing while the chapter is pushed.
   const { theme: readerBackground } = useChapterReaderSettings();
-  // eslint-disable-next-line react-hooks/refs
-  const routeParams = route?.params ?? params.current;
+  const routeParams = route?.params;
 
   return (
     <NovelContextProvider

@@ -81,9 +81,8 @@ const EditInfoModalContent = ({
       }
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error));
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   };
 
   return (

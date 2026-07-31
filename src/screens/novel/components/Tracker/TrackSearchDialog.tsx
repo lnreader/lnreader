@@ -64,10 +64,9 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
           );
           setSearchResults([]);
         }
-      } finally {
-        if (requestId === latestRequestId.current) {
-          setLoading(false);
-        }
+      }
+      if (requestId === latestRequestId.current) {
+        setLoading(false);
       }
     },
     [tracker.auth, tracker.name],

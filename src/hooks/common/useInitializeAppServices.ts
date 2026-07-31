@@ -11,6 +11,7 @@ type AppServicesState = {
 let initializationPromise: Promise<void> | undefined;
 
 const initializeAppServices = (): Promise<void> => {
+  'use no memo';
   if (!initializationPromise) {
     initializationPromise = initializeInstalledPlugins()
       .then(async () => {

@@ -213,6 +213,7 @@ export default function useChapter(
       direction: 'NEXT' | 'PREV',
       excludedScanlators: string[],
     ) => {
+      const queryFn = direction === 'NEXT' ? getNextChapter : getPrevChapter;
       try {
         const count = await getChapterCount(chap.novelId, page);
         if (count === 0) {
@@ -222,8 +223,7 @@ export default function useChapter(
             sourcePage.chapters.map(ch => ({ ...ch, page })),
           );
         }
-        const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
-        return await query(
+        return await queryFn(
           chap.novelId,
           chap.position!,
           chap.page ?? '',

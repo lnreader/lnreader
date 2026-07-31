@@ -17,21 +17,25 @@ export const Banner: React.FC<Props> = ({
   label,
   icon,
   theme,
-  backgroundColor = theme.primary,
-  textColor = theme.onPrimary,
-}) => (
-  <View style={[{ backgroundColor }, styles.container]}>
-    {icon ? (
-      <MaterialCommunityIcons
-        name={icon}
-        color={textColor}
-        size={18}
-        style={styles.icon}
-      />
-    ) : null}
-    <Text style={[{ color: textColor }, styles.bannerText]}>{label}</Text>
-  </View>
-);
+  backgroundColor,
+  textColor,
+}) => {
+  backgroundColor = backgroundColor || theme.primary;
+  textColor = textColor || theme.onPrimary;
+  return (
+    <View style={[{ backgroundColor }, styles.container]}>
+      {icon ? (
+        <MaterialCommunityIcons
+          name={icon}
+          color={textColor}
+          size={18}
+          style={styles.icon}
+        />
+      ) : null}
+      <Text style={[{ color: textColor }, styles.bannerText]}>{label}</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   bannerText: {

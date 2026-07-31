@@ -70,10 +70,9 @@ const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
         loadStatus.current = 'idle';
         showToast(getErrorMessage(error));
       }
-    } finally {
-      if (requestId === latestRequestId.current) {
-        setIsLoading(false);
-      }
+    }
+    if (requestId === latestRequestId.current) {
+      setIsLoading(false);
     }
   }, [overview.novelId, overview.updateDate]);
 

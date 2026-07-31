@@ -41,9 +41,8 @@ const TrackerLoginDialog: React.FC<TrackerLoginDialogProps> = ({
       setPassword('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const handleCancel = () => {

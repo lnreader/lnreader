@@ -116,6 +116,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   onSearchResult,
   searchTextRef,
 }) => {
+  'use no memo';
   const {
     novel,
     chapter,
@@ -133,7 +134,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     () =>
       getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
       initialChapterReaderSettings,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
   );
 
@@ -142,7 +142,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
       initialChapterGeneralSettings,
     // needed to preserve settings during chapter change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
   );
 

@@ -71,6 +71,7 @@ const KitsuLogo = () => (
 );
 
 const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
+  'use no memo';
   const theme = useTheme();
   const { isTrackerAuthenticated, setTracker, removeTracker, getTrackerAuth } =
     useTracker();
@@ -100,8 +101,9 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
       return;
     }
 
+    let auth;
+    let authError: unknown;
     try {
-      let auth;
       if (credentialLoginTracker === 'MangaUpdates') {
         auth = await mangaUpdatesAuth(username, password);
       } else if (credentialLoginTracker === 'Kitsu') {
@@ -114,9 +116,12 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
       hideCredentialLogin();
       showToast(`Successfully logged in to ${credentialLoginTracker}`);
     } catch (error) {
-      if (error instanceof Error) {
-        throw error; /* Let the dialog handle the error display */
-      }
+      authError = error;
+    }
+    if (authError instanceof Error) {
+      throw authError;
+    }
+    if (authError !== undefined) {
       throw new Error(`Failed to authenticate with ${credentialLoginTracker}`);
     }
   };

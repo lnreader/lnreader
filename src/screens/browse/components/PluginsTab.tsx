@@ -181,9 +181,8 @@ export const PluginsTab = memo(
           );
         } catch (error) {
           showToast(error instanceof Error ? error.message : String(error));
-        } finally {
-          updatePendingState(plugin.id, false);
         }
+        updatePendingState(plugin.id, false);
       },
       [installPlugin, updatePendingState],
     );
@@ -196,9 +195,8 @@ export const PluginsTab = memo(
           showToast(getString('browseScreen.updatedTo', { version }));
         } catch (error) {
           showToast(error instanceof Error ? error.message : String(error));
-        } finally {
-          updatePendingState(plugin.id, false);
         }
+        updatePendingState(plugin.id, false);
       },
       [updatePendingState, updatePlugin],
     );
@@ -314,9 +312,8 @@ export const PluginsTab = memo(
         await refreshPlugins();
       } catch (error) {
         showToast(error instanceof Error ? error.message : String(error));
-      } finally {
-        setRefreshing(false);
       }
+      setRefreshing(false);
     }, [refreshPlugins]);
 
     return (

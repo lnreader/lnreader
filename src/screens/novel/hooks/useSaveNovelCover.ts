@@ -27,8 +27,8 @@ export const useSaveNovelCover = (novel: NovelInfo | undefined) =>
 
     const cover = novel.cover;
     let tempCoverUri: string | null = null;
+    const rawExtension = cover.split('.').pop()?.split('?')[0] || 'png';
     try {
-      const rawExtension = cover.split('.').pop()?.split('?')[0] || 'png';
       const extension = ['jpg', 'jpeg', 'png', 'webp'].includes(rawExtension)
         ? rawExtension
         : 'png';
@@ -51,9 +51,8 @@ export const useSaveNovelCover = (novel: NovelInfo | undefined) =>
       showToast(getString('novelScreen.coverSaved'));
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error));
-    } finally {
-      if (tempCoverUri) {
-        await NativeFile.unlink(tempCoverUri).catch(() => undefined);
-      }
+    }
+    if (tempCoverUri) {
+      await NativeFile.unlink(tempCoverUri).catch(() => undefined);
     }
   }, [novel]);

@@ -34,8 +34,9 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
 
   const getNovels = useCallback(
     async (lim?: number) => {
+      lim = lim ? lim : limit;
       try {
-        const data = await scrapeTopNovels(lim ?? limit);
+        const data = await scrapeTopNovels(lim);
         setNovels(before => before.concat(data));
         setLoading(false);
       } catch (err: any) {

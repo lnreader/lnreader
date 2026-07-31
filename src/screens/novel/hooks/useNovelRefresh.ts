@@ -28,28 +28,28 @@ export const useNovelRefresh = ({
     if (!novel || updating) {
       return;
     }
+    const { pluginId, path: novelPath, id, inLibrary, name: novelName } = novel;
 
     setUpdating(true);
     try {
-      await updateNovel(novel.pluginId, novel.path, novel.id, {
+      await updateNovel(pluginId, novelPath, id, {
         downloadNewChapters,
         refreshNovelMetadata,
         enqueue,
       });
       await Promise.all([
         reloadNovel(),
-        novel.inLibrary ? refetchLibrary() : Promise.resolve(),
+        inLibrary ? refetchLibrary() : Promise.resolve(),
       ]);
-      showToast(getString('novelScreen.updatedToast', { name: novel.name }));
+      showToast(getString('novelScreen.updatedToast', { name: novelName }));
     } catch (error) {
       showToast(
         `Failed updating: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
-    } finally {
-      setUpdating(false);
     }
+    setUpdating(false);
   }, [
     downloadNewChapters,
     enqueue,

@@ -48,17 +48,26 @@ function formatTimeSpent(totalMs: number | undefined) {
 
   if (asDays >= 1) {
     return hours > 0
-        ? `${getString('time.days', { count: asDays })} ${getString('time.hours', { count: hours })}`
-        : getString('time.days', { count: asDays });
+      ? `${getString('time.days', { count: asDays })} ${getString(
+          'time.hours',
+          { count: hours },
+        )}`
+      : getString('time.days', { count: asDays });
   }
   if (asHours >= 1) {
-      return minutes > 0
-          ? `${getString('time.hours', { count: asHours })} ${getString('time.minutes', { count: minutes })}`
-          : getString('time.hours', { count: asHours });
+    return minutes > 0
+      ? `${getString('time.hours', { count: asHours })} ${getString(
+          'time.minutes',
+          { count: minutes },
+        )}`
+      : getString('time.hours', { count: asHours });
   }
   if (asMinutes >= 1) {
     return seconds > 0
-      ? `${getString('time.minutes', { count: asMinutes })} ${getString('time.seconds', { count: seconds })}`
+      ? `${getString('time.minutes', { count: asMinutes })} ${getString(
+          'time.seconds',
+          { count: seconds },
+        )}`
       : getString('time.minutes', { count: asMinutes });
   }
   return getString('time.seconds', { count: asSeconds });
@@ -107,10 +116,9 @@ const StatsScreen = () => {
         if (!cancelled) {
           setError(err);
         }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+      }
+      if (!cancelled) {
+        setIsLoading(false);
       }
     };
 
@@ -212,53 +220,71 @@ const StatsScreen = () => {
             />
           ))}
         </Row>
-      <View style={styles.timeSpentHeader}>
-        <Text style={[styles.header, { color: theme.onSurfaceVariant }]}>
-          {showingNovels ? getString('statsScreen.topNovelsByTimeSpent') : getString('statsScreen.topCategoriesByTimeSpent')}
-        </Text>
-        <IconButton
-          icon={showingNovels ? 'label-outline' : 'book'}
-          iconColor={theme.onSurfaceVariant}
-          onPress={() => setShowingNovels(!showingNovels)}
-          accessibilityRole="button"
-          accessibilityLabel={showingNovels ? getString('statsScreen.showCategories') : getString('statsScreen.showNovels')}
+        <View style={styles.timeSpentHeader}>
+          <Text style={[styles.header, { color: theme.onSurfaceVariant }]}>
+            {showingNovels
+              ? getString('statsScreen.topNovelsByTimeSpent')
+              : getString('statsScreen.topCategoriesByTimeSpent')}
+          </Text>
+          <IconButton
+            icon={showingNovels ? 'label-outline' : 'book'}
+            iconColor={theme.onSurfaceVariant}
+            onPress={() => setShowingNovels(!showingNovels)}
+            accessibilityRole="button"
+            accessibilityLabel={
+              showingNovels
+                ? getString('statsScreen.showCategories')
+                : getString('statsScreen.showNovels')
+            }
           />
-      </View>
-        {showingNovels && stats.topNovelsByTimeSpent?.map((novel, _) => {
-          const plugin = getPlugin(novel.pluginId);
-          const headers = plugin?.imageRequestInit?.headers || { 'User-Agent': getUserAgent() };
-          const requestInit = {...plugin?.imageRequestInit, headers };
-          return <View key={novel.id} style={styles.timeSpentRow}>
-            <NovelCoverImage
-              uri={novel.cover}
-              requestInit={requestInit}
-              theme={theme}
-              iconSize={22}
-              style={styles.timeSpentNovelCover}
-              contentFit='cover'
-            />
-            <View>
-              <Text style={[styles.timeSpentLabel, { color: theme.onSurface }]}>
-                {novel.name}
-              </Text>
-              <Text style={{ color: theme.onSurfaceVariant }}>
-                {formatTimeSpent(novel.timeSpent)}
-              </Text>
-            </View>
-          </View>
-        })}
-        {!showingNovels && stats.topCategoriesByTimeSpent?.map((category, _) => {
-          return <View key={category.id} style={styles.timeSpentRow}>
-            <View>
-              <Text style={[styles.timeSpentLabel, { color: theme.onSurface }]}>
-                {category.name}
-              </Text>
-              <Text style={{ color: theme.onSurfaceVariant }}>
-                {formatTimeSpent(category.timeSpent)}
-              </Text>
-            </View>
-          </View>
-        })}
+        </View>
+        {showingNovels &&
+          stats.topNovelsByTimeSpent?.map((novel, _) => {
+            const plugin = getPlugin(novel.pluginId);
+            const headers = plugin?.imageRequestInit?.headers || {
+              'User-Agent': getUserAgent(),
+            };
+            const requestInit = { ...plugin?.imageRequestInit, headers };
+            return (
+              <View key={novel.id} style={styles.timeSpentRow}>
+                <NovelCoverImage
+                  uri={novel.cover}
+                  requestInit={requestInit}
+                  theme={theme}
+                  iconSize={22}
+                  style={styles.timeSpentNovelCover}
+                  contentFit="cover"
+                />
+                <View>
+                  <Text
+                    style={[styles.timeSpentLabel, { color: theme.onSurface }]}
+                  >
+                    {novel.name}
+                  </Text>
+                  <Text style={{ color: theme.onSurfaceVariant }}>
+                    {formatTimeSpent(novel.timeSpent)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        {!showingNovels &&
+          stats.topCategoriesByTimeSpent?.map((category, _) => {
+            return (
+              <View key={category.id} style={styles.timeSpentRow}>
+                <View>
+                  <Text
+                    style={[styles.timeSpentLabel, { color: theme.onSurface }]}
+                  >
+                    {category.name}
+                  </Text>
+                  <Text style={{ color: theme.onSurfaceVariant }}>
+                    {formatTimeSpent(category.timeSpent)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -266,10 +292,10 @@ const StatsScreen = () => {
 
 export default StatsScreen;
 
-export const StatsCard: React.FC<{ label: string; value?: string | number }> = ({
-  label,
-  value = 0,
-}) => {
+export const StatsCard: React.FC<{
+  label: string;
+  value?: string | number;
+}> = ({ label, value = 0 }) => {
   const theme = useTheme();
 
   if (!label) {

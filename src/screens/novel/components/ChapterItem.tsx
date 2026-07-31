@@ -51,7 +51,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     chapter;
   const isGrouped = variant === 'grouped';
 
-  isBookmarked ??= bookmark ?? false;
+  isBookmarked = isBookmarked ?? bookmark ?? false;
 
   const handlePress = useCallback(
     () => onSelectPress(chapter),

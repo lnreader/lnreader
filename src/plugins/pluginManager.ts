@@ -88,6 +88,11 @@ const initPlugin = (pluginId: string, rawCode: string) => {
 const plugins: Record<string, Plugin | undefined> = {};
 export const INSTALLED_PLUGINS_KEY = 'INSTALL_PLUGINS';
 
+const setPlugins = (id: string, plugin: Plugin) => {
+  'use no memo';
+  plugins[plugin.id] = plugin;
+};
+
 const installPlugin = async (
   _plugin: PluginItem,
 ): Promise<Plugin | undefined> => {
@@ -100,7 +105,7 @@ const installPlugin = async (
   }
   let currentPlugin = plugins[plugin.id];
   if (!currentPlugin || newer(plugin.version, currentPlugin.version)) {
-    plugins[plugin.id] = plugin;
+    setPlugins(plugin.id, plugin);
     currentPlugin = plugin;
 
     // save plugin code;

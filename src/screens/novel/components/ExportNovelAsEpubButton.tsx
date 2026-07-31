@@ -94,7 +94,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       let chapterId = document.body.dataset.chapterId;
       let novelId = ${JSON.stringify(novel.id)};
       let html = document.body.innerHTML;
-      
+
       ${readerSettings.customJS}
     `;
   }, [novel, readerSettings]);
@@ -110,10 +110,18 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       showToast(getString('novelScreen.epub.noNovelSelected'));
       return;
     }
+    const {
+      id: novelId,
+      pluginId,
+      name: novelName,
+      cover,
+      summary,
+      author,
+    } = novel;
 
     try {
       const chapters = await getNovelDownloadedChapters(
-        novel.id,
+        novelId,
         startChapter,
         endChapter,
       );
@@ -145,8 +153,8 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
               options.includeChapterNumber && sourceTitle
                 ? `${numberedTitle} — ${sourceTitle}`
                 : sourceTitle || numberedTitle,
-            htmlPath: `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}/index.html`,
-            novelId: novel.id.toString(),
+            htmlPath: `${NOVEL_STORAGE}/${pluginId}/${novelId}/${chapter.id}/index.html`,
+            novelId: novelId.toString(),
             chapterId: chapter.id.toString(),
           };
         },
@@ -155,17 +163,17 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       backgroundTasks.enqueue({
         name: 'EXPORT_EPUB',
         data: {
-          novelName: novel.name,
+          novelName: novelName,
           destinationUri: resolvedDestinationUri,
           fileName,
           chapters: epubChapters,
           metadata: {
-            title: novel.name,
+            title: novelName,
             language: 'en',
-            coverPath: novel.cover || '',
-            description: novel.summary || '',
-            author: novel.author || '',
-            bookId: `urn:lnreader:${novel.pluginId}:${novel.id}`,
+            coverPath: cover || '',
+            description: summary || '',
+            author: author || '',
+            bookId: `urn:lnreader:${pluginId}:${novelId}`,
             stylesheet:
               (options.useAppTheme ? appThemeStylesheet : '') +
               (options.useCustomCSS ? customStylesheet : ''),

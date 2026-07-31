@@ -131,9 +131,8 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
         end,
       );
       hideModal();
-    } finally {
-      setSubmitting(false);
-    }
+    } catch {}
+    setSubmitting(false);
   };
 
   const openFolderPicker = async () => {

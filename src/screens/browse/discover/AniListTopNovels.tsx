@@ -92,6 +92,9 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
 
   const searchAniList = useCallback(
     async (onlyTop: boolean, page = 1) => {
+      const search = onlyTop ? undefined : searchText;
+      let hasSearchNextPage;
+      let results: ALNovel[] = [];
       try {
         if (!tracker) {
           setLoading(false);
@@ -101,13 +104,13 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
         const { data } = await queryAniList(
           anilistSearchQuery,
           {
-            search: onlyTop ? undefined : searchText,
+            search,
             page,
           },
           tracker.auth,
         );
-
-        const results = data.Page.media.map((m: any) => {
+        hasSearchNextPage = data.Page.pageInfo.hasNextPage;
+        results = data.Page.media.map((m: any) => {
           return {
             id: m.id,
             novelName: m.title.userPreferred,
@@ -124,16 +127,15 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
             ],
           };
         });
-
-        setHasNextPage(data.Page.pageInfo.hasNextPage);
-        setNovels(onlyTop ? before => before.concat(results) : results);
-        setLoading(false);
       } catch (err: any) {
         setError(err.message);
         setNovels([]);
         setLoading(false);
         showToast(err.message);
       }
+      setHasNextPage(hasSearchNextPage);
+      setNovels(onlyTop ? before => before.concat(results) : results);
+      setLoading(false);
     },
     [anilistSearchQuery, searchText, tracker],
   );

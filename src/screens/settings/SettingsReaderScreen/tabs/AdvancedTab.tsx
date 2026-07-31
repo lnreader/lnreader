@@ -101,9 +101,9 @@ if (title) {
   };
 
   const handleImport = async () => {
+    const tab = activeCodeTab;
     try {
-      const mimeType =
-        activeCodeTab === 'css' ? 'text/css' : 'application/javascript';
+      const mimeType = tab === 'css' ? 'text/css' : 'application/javascript';
       const file = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: false,
         type: mimeType,
@@ -111,14 +111,12 @@ if (title) {
 
       if (file.assets) {
         const tempPath =
-          NativeFile.ExternalCachesDirectoryPath +
-          '/imported_custom.' +
-          activeCodeTab;
+          NativeFile.ExternalCachesDirectoryPath + '/imported_custom.' + tab;
         await NativeFile.copyFile(file.assets[0].uri, tempPath);
         const content = await NativeFile.readFile(tempPath);
         await NativeFile.unlink(tempPath);
 
-        if (activeCodeTab === 'css') {
+        if (tab === 'css') {
           setCssValue(content.trim());
           setChapterReaderSettings({ customCSS: content.trim() });
         } else {

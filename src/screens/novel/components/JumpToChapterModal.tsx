@@ -34,6 +34,7 @@ const JumpToChapterModal = ({
   novel,
   chapterListRef,
 }: JumpToChapterModalProps) => {
+  'no use memo';
   const minNumber = 1;
 
   const loadedChapters = useNovelValue('chapters');
@@ -157,10 +158,9 @@ const JumpToChapterModal = ({
             : String(actionError),
         );
       }
-    } finally {
-      if (requestId === requestIdRef.current) {
-        setSearching(false);
-      }
+    }
+    if (requestId === requestIdRef.current) {
+      setSearching(false);
     }
   };
 
@@ -199,7 +199,7 @@ const JumpToChapterModal = ({
     setError('');
     setResult([]);
     setSearching(true);
-    try {
+    const performSearch = async () => {
       if (!mode) {
         const num = Number(query);
         if (
@@ -257,6 +257,9 @@ const JumpToChapterModal = ({
       }
 
       setResult(chapters);
+    };
+    try {
+      await performSearch();
     } catch (searchError) {
       if (requestId === requestIdRef.current) {
         setError(
@@ -265,10 +268,9 @@ const JumpToChapterModal = ({
             : String(searchError),
         );
       }
-    } finally {
-      if (requestId === requestIdRef.current) {
-        setSearching(false);
-      }
+    }
+    if (requestId === requestIdRef.current) {
+      setSearching(false);
     }
   };
 

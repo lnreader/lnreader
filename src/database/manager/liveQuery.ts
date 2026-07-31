@@ -14,12 +14,20 @@ export function useLiveQuery<T extends ExecutableSelect>(
   fireOn: FireOn,
   callback?: (data: Awaited<ReturnType<T['all']>>) => void,
 ) {
+  'use no memo';
   type ReturnValue = Awaited<ReturnType<T['all']>>;
 
   const { sql: sqlString, params } = query.toSQL();
   const paramsKey = JSON.stringify(params);
   const fireOnKey = JSON.stringify(fireOn);
   const callbackRef = useRef(callback);
+  const fireOnRef = useRef(fireOn);
+  const paramsRef = useRef(params);
+
+  useEffect(() => {
+    fireOnRef.current = fireOn;
+    paramsRef.current = params;
+  }, [fireOn, params]);
 
   const [data, setData] = useState<ReturnValue>(
     () => db.executeSync(sqlString, params as any[]).rows as ReturnValue,
@@ -36,14 +44,13 @@ export function useLiveQuery<T extends ExecutableSelect>(
   useEffect(() => {
     const unsubscribe = db.reactiveExecute({
       query: sqlString,
-      arguments: params as any[],
-      fireOn,
+      arguments: paramsRef.current as any[],
+      fireOn: fireOnRef.current,
       callback: (result: { rows: ReturnValue }) => {
         setData(result.rows);
       },
     });
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sqlString, paramsKey, fireOnKey]);
 
   return data;

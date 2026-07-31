@@ -17,9 +17,8 @@ const useCategories = () => {
       if (err instanceof Error) {
         setError(err.message);
       }
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
 
   useFocusEffect(

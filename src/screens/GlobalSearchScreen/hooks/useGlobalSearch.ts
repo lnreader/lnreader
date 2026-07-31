@@ -25,6 +25,7 @@ export const useGlobalSearch = ({
   defaultSearchText,
   hasResultsOnly = false,
 }: Props) => {
+  'use no memo';
   const isMounted = useRef(true); //if user closes the search screen, cancel the search
   const isFocused = useRef(true); //if the user opens a sub-screen (e.g. novel screen), pause the search
   const lastSearch = useRef(''); //if the user changes search, cancel running searches
@@ -67,27 +68,9 @@ export const useGlobalSearch = ({
       setSearchResults(defaultResult.sort(novelResultSorter));
       setProgress(0);
 
-      let running = 0;
-
       async function searchInPlugin(_plugin: PluginItem) {
-        try {
-          const plugin = getPlugin(_plugin.id);
-          if (!plugin) {
-            throw new Error(`Unknown plugin: ${_plugin.id}`);
-          }
-          const res = await plugin.searchNovels(searchText, 1);
-
-          setSearchResults(prevState =>
-            prevState
-              .map(prevResult =>
-                prevResult.plugin.id === plugin.id
-                  ? { ...prevResult, novels: res, isLoading: false }
-                  : { ...prevResult },
-              )
-              .sort(novelResultSorter),
-          );
-        } catch (error: any) {
-          const errorMessage = error?.message || String(error);
+        const plugin = getPlugin(_plugin.id);
+        if (!plugin) {
           setSearchResults(prevState =>
             prevState
               .map(prevResult =>
@@ -96,8 +79,20 @@ export const useGlobalSearch = ({
                       ...prevResult,
                       novels: [],
                       isLoading: false,
-                      error: errorMessage,
+                      error: `Unknown plugin: ${_plugin.id}`,
                     }
+                  : { ...prevResult },
+              )
+              .sort(novelResultSorter),
+          );
+        } else {
+          const res = await plugin.searchNovels(searchText, 1);
+
+          setSearchResults(prevState =>
+            prevState
+              .map(prevResult =>
+                prevResult.plugin.id === plugin.id
+                  ? { ...prevResult, novels: res, isLoading: false }
                   : { ...prevResult },
               )
               .sort(novelResultSorter),
@@ -112,6 +107,7 @@ export const useGlobalSearch = ({
 
       (async () => {
         if (globalSearchConcurrency > 1) {
+          let running = 0;
           for (const _plugin of filteredSortedInstalledPlugins) {
             while (running >= globalSearchConcurrency || !isFocused.current) {
               await new Promise(resolve => setTimeout(resolve, 100));
@@ -119,10 +115,10 @@ export const useGlobalSearch = ({
             if (!isMounted.current || lastSearch.current !== searchText) {
               break;
             }
-            running++;
+            running += 1;
             searchInPlugin(_plugin)
               .then(() => {
-                running--;
+                running -= 1;
                 if (lastSearch.current === searchText) {
                   setProgress(
                     prevState =>
@@ -131,7 +127,7 @@ export const useGlobalSearch = ({
                 }
               })
               .catch(() => {
-                running--;
+                running -= 1;
               });
           }
         } else {

@@ -254,9 +254,8 @@ export const runDatabaseBootstrap = (executor: SqlExecutor) => {
   populateDatabase(executor);
 };
 
-let initialization: Promise<void> | undefined;
-
 export const initializeDatabase = () => {
+  let initialization: Promise<void> | undefined;
   if (!initialization) {
     setPragmas(_db);
     repairInterruptedNovelMigration(_db);

@@ -57,25 +57,25 @@ export const useUpdates = () => {
   const [error, setError] = useState('');
 
   const getUpdates = useCallback(async () => {
+    let result: UpdateOverview[] = [];
     try {
-      const result = await getUpdatedOverviewFromDb();
+      result = await getUpdatedOverviewFromDb();
       setUpdatesOverview(result);
       setError('');
-
-      if (result.length) {
-        if (
-          !lastUpdateTime ||
-          dayjs(lastUpdateTime).isBefore(dayjs(result[0].updateDate))
-        ) {
-          setLastUpdateTime(result[0].updateDate);
-        }
-      }
     } catch (updateError) {
       setError(
         updateError instanceof Error
           ? updateError.message
           : String(updateError),
       );
+    }
+    if (result.length) {
+      if (
+        !lastUpdateTime ||
+        dayjs(lastUpdateTime).isBefore(dayjs(result[0].updateDate))
+      ) {
+        setLastUpdateTime(result[0].updateDate);
+      }
     }
   }, [lastUpdateTime, setLastUpdateTime]);
 
