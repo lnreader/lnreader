@@ -312,6 +312,7 @@
     "globally": "全球",
     "install": "安裝",
     "imported": "Imported",
+    "later": "Later",
     "logout": "Logout",
     "name": "名稱",
     "newUpdateAvailable": "有可用更新",
@@ -328,6 +329,7 @@
     "save": "保存",
     "saved": "Saved",
     "search": "搜索",
+    "skipVersion": "Skip version",
     "searchFor": "搜尋",
     "searchResults": "搜尋結果",
     "settings": "设置",
@@ -700,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "已下載章節",
     "genreDistribution": "類型分佈",
+    "novels": "novels",
     "readChapters": "已讀章節",
     "sources": "Sources",
     "statusDistribution": "狀態分布",
@@ -711,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -774,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }
