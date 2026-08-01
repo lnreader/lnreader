@@ -1,0 +1,59 @@
+src/screens/novel/hooks/useDownloadReconciliation.ts
+  s_8ddb6d69629b3a::t_4bae3b5c8d22da 5,9,13-18,20,26,29
+src/screens/more/DownloadsScreen.tsx
+  s_8ddb6d69629b3a::t_49d191912ef9c4 133-146
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/TaskActionReceiver.kt
+  s_8ddb6d69629b3a::t_1e175f29818d6a 36,45
+src/screens/novel/components/__tests__/NovelScreenList.test.tsx
+  s_8ddb6d69629b3a::t_df463230e42bce 9,24,288,354-396
+  s_8ddb6d69629b3a::t_3e8499a7168f1b 397-398
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_8ddb6d69629b3a::t_af14d1d71246c3 512-514,517-519,529-536
+  s_8ddb6d69629b3a::t_78bd567b9eda47 744-755,781-791
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/BackgroundTaskScheduler.kt
+  s_8ddb6d69629b3a::t_1e175f29818d6a 42-43
+  s_8ddb6d69629b3a::t_b3924bc42a3644 12,40-41
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  s_8ddb6d69629b3a::t_2b2b2297d2ea68 159-163
+  s_8ddb6d69629b3a::t_f2c3d9ba3f4211 181-182
+  s_8ddb6d69629b3a::t_b28a1284604407 9,157-158,164-180,183-188
+  s_8ddb6d69629b3a::t_60c888b0faf842 189
+src/services/backgroundTasks/taskDefinitions.ts
+  s_8ddb6d69629b3a::t_4bae3b5c8d22da 28,30-32,34-46
+  s_8ddb6d69629b3a::t_4d6957bea2350d 29,33
+src/screens/more/components/RemoveDownloadsDialog.tsx
+  s_8ddb6d69629b3a::t_f563c25a749767 7
+src/screens/novel/components/NovelScreenList.tsx
+  s_8ddb6d69629b3a::t_4d6957bea2350d 114-115
+  s_8ddb6d69629b3a::t_c3355c7b7b7a56 37
+  s_8ddb6d69629b3a::t_4bae3b5c8d22da 107-112,118-129
+src/hooks/persisted/useDownload.ts
+  s_8ddb6d69629b3a::t_2e16b974857130 23-26
+src/screens/library/hooks/useLibrary.ts
+  s_8ddb6d69629b3a::t_4bae3b5c8d22da 15,124,126-147
+  s_8ddb6d69629b3a::t_4d6957bea2350d 125
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_8ddb6d69629b3a::t_1e175f29818d6a 110
+src/services/backgroundTasks/index.ts
+  s_8ddb6d69629b3a::t_4bae3b5c8d22da 12
+src/database/queries/ChapterQueries.ts
+  s_8ddb6d69629b3a::t_4d6957bea2350d 472,489
+  s_8ddb6d69629b3a::t_49d191912ef9c4 274-278
+  s_8ddb6d69629b3a::t_63a04a1e5b2a68 257-262,264-268,471
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "c3260e8e01e4704b57137d787ffe9cfec7941cbc",
+  "prompts": {},
+  "sessions": {
+    "s_8ddb6d69629b3a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbcff-4d39-7300-b8df-6798b27f72ca",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
