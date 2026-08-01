@@ -1,0 +1,131 @@
+src/screens/settings/SettingsScreen.tsx
+  s_08eb61e16eef60::t_dcd8c960981909 81-82,85
+src/navigators/MoreStack.tsx
+  s_08eb61e16eef60::t_dcd8c960981909 8,41-44
+src/services/backgroundTasks/index.ts
+  s_08eb61e16eef60::t_55c2cadfdf1fe8 26
+src/utils/Storages.ts
+  s_08eb61e16eef60::t_248a3b640bad75 26-30
+  s_08eb61e16eef60::t_7e052353867b15 1-2,6,8-13,15-25
+  s_08eb61e16eef60::t_e8b65eb0b1040a 7,14
+src/services/backgroundTasks/contracts.ts
+  s_08eb61e16eef60::t_55c2cadfdf1fe8 47-51,85
+src/database/queries/NovelQueries.ts
+  s_08eb61e16eef60::t_75f0e03a103179 342,346-347
+src/services/storage/migrateNovelStorage.ts
+  s_08eb61e16eef60::t_7bd67150042bb9 46,49,53-63,106-111,114
+  s_08eb61e16eef60::t_248a3b640bad75 7-11,178,187,192,204
+  s_08eb61e16eef60::t_732c0b87a6f29e 14,31,33-45,47-48,50-52,64-65,71,78,92-94,125-143,155-160
+  s_08eb61e16eef60::t_62d33ef636503c 249,264-267
+  s_08eb61e16eef60::t_9df31db74d0b94 66-70,72-77,79-91
+  s_08eb61e16eef60::t_55c2cadfdf1fe8 15-19,21,217-218,220-248,250-263,268-270,272,276-282
+  s_08eb61e16eef60::t_c22d3450b900be 5
+  s_08eb61e16eef60::t_823b3f80a22acb 12-13,95-102,104-105,112-113,115-124,144-154,161-163,201-202,211
+  s_08eb61e16eef60::t_25908e84b970dc 20,103,273-275
+  s_08eb61e16eef60::t_5ee6f6e6373daf 1-4,6,22-30,32,164-177,179-186,188-191,193-200,203,205-210,212-216,283
+  s_08eb61e16eef60::t_4e35fc013a9d62 219,271
+src/services/download/downloadChapter.ts
+  s_08eb61e16eef60::t_75f0e03a103179 58
+src/services/backgroundTasks/taskDefinitions.ts
+  s_08eb61e16eef60::t_55c2cadfdf1fe8 105-106,132
+  s_08eb61e16eef60::t_62d33ef636503c 133
+src/hooks/common/useInitializeAppServices.ts
+  s_08eb61e16eef60::t_732c0b87a6f29e 5,18
+src/services/backgroundTasks/BackgroundTaskQueue.ts
+  s_08eb61e16eef60::t_df94771fd1ab05 164-173
+modules/native-file/index.ts
+  s_08eb61e16eef60::t_7e052353867b15 1-73,80-120
+  s_08eb61e16eef60::t_75f0e03a103179 74-79
+src/i18n/types/index.ts
+  019fbd20-ea53-7f92-ae8b-ea8f058eee1e 318,389-402,658
+src/screens/more/DownloadsScreen.tsx
+  s_08eb61e16eef60::t_fdf92891cfbc0c 24,95-101
+src/services/backgroundTasks/__tests__/BackgroundTaskQueue.test.ts
+  s_08eb61e16eef60::t_9ea7797f4e06ff 45-46,146-169
+  s_08eb61e16eef60::t_a2312b445fda74 170-171
+src/services/updates/LibraryUpdateQueries.ts
+  s_08eb61e16eef60::t_75f0e03a103179 37
+src/services/storage/directory.ts
+  s_08eb61e16eef60::t_e8b65eb0b1040a 21
+  s_08eb61e16eef60::t_69a9a1e27b47a0 70-88
+  s_08eb61e16eef60::t_248a3b640bad75 1-18,24-69
+  s_08eb61e16eef60::t_9dee3618a2c361 89-94,101-102
+  s_08eb61e16eef60::t_78377db3730d64 95-100
+  s_08eb61e16eef60::t_dda04d8a1299e2 19-20,22-23
+src/services/storage/__tests__/migrateNovelStorage.test.ts
+  s_08eb61e16eef60::t_7baeefc47a9b37 6,19-21,33,54,58-60,67,73,77-80,203-217,219-222
+  s_08eb61e16eef60::t_d0e18f0ab39153 17-18,43-46,55-57,63-66,68-72
+  s_08eb61e16eef60::t_3a2f5c5cd0cfda 47,53,61-62
+  s_08eb61e16eef60::t_44678291e535c6 129-133,152-161
+  s_08eb61e16eef60::t_5ee6f6e6373daf 1,8-16,22-24,40-42,74-76,81-85,87-128,134-148,223-224
+  s_08eb61e16eef60::t_a73e7ea683c92f 86
+  s_08eb61e16eef60::t_b6d5383ccd2d1c 48-52
+  s_08eb61e16eef60::t_da8c2957f8a84c 2-5,7,25-32,34-39,149-151,162-202,218
+src/i18n/languages/en/strings.json
+  s_08eb61e16eef60::t_fdf92891cfbc0c 369
+  s_08eb61e16eef60::t_62d33ef636503c 447-462,777
+src/screens/settings/SettingsBackupScreen/index.tsx
+  s_08eb61e16eef60::t_b143f81c030bb2 4,30
+  s_08eb61e16eef60::t_ceba9b08e034bd 31,33-35,44-52,86-91,97-98,184,191,204-205,209,249-267,315
+  s_08eb61e16eef60::t_1e2ce54071cc68 2
+  s_08eb61e16eef60::t_0a426897dc55c7 8,12
+  s_08eb61e16eef60::t_9ea457bfb3a42d 56-58,99-113,194-201,288-301
+  s_08eb61e16eef60::t_421387b71a7635 235
+  s_08eb61e16eef60::t_d8fd991f2e17c9 92-96,114,302
+src/navigators/types/index.ts
+  s_08eb61e16eef60::t_dcd8c960981909 81,174,176
+  s_08eb61e16eef60::t_e8b65eb0b1040a 99-106,199
+src/services/backup/selfhost/index.ts
+  s_08eb61e16eef60::t_138a737cf0e252 24
+  s_08eb61e16eef60::t_69a9a1e27b47a0 23,25-28,63-66,122,124
+  s_08eb61e16eef60::t_9dee3618a2c361 67-71,126-142
+src/services/backgroundTasks/executeTask.ts
+  s_08eb61e16eef60::t_55c2cadfdf1fe8 8,52-53
+src/services/epub/import.ts
+  s_08eb61e16eef60::t_248a3b640bad75 8,107-109
+  s_08eb61e16eef60::t_ee1d6511a2da45 48,53,55,65
+src/services/backup/drive/index.ts
+  s_08eb61e16eef60::t_25908e84b970dc 87
+  s_08eb61e16eef60::t_69a9a1e27b47a0 25,27-30,82,84,156-159
+  s_08eb61e16eef60::t_9dee3618a2c361 86,88-90,160-171
+  s_08eb61e16eef60::t_138a737cf0e252 26
+src/plugins/__tests__/pluginManager.test.ts
+  s_08eb61e16eef60::t_97894c1ca51f95 38-42
+src/services/epub/export.ts
+  s_08eb61e16eef60::t_f3582d0d03112b 11-15,29-71,80-82,93-96,98-99,162-163
+  s_08eb61e16eef60::t_0c0d87e49c410a 164
+src/services/backup/local/index.ts
+  s_08eb61e16eef60::t_69a9a1e27b47a0 21,23-26,55,57,162-165
+  s_08eb61e16eef60::t_9dee3618a2c361 22,59-66,166-177
+src/services/backgroundTasks/__tests__/taskDefinitions.test.ts
+  s_08eb61e16eef60::t_9ea7797f4e06ff 130-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "7d0d93300e066a9910ff4f0a55e70e0871c7fffc",
+  "prompts": {
+    "08eb61e16eef602f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 1245,
+      "total_deletions": 294,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_08eb61e16eef60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
