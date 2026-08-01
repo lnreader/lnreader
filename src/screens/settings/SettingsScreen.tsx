@@ -78,11 +78,11 @@ const SettingsScreen = ({ navigation }: SettingsScreenProps) => {
           theme={theme}
         />
         <List.Item
-          title={getString('common.backup')}
-          icon="cloud-upload-outline"
+          title={getString('dataStorageScreen.title')}
+          icon="database-cog-outline"
           onPress={() =>
             navigation.navigate('SettingsStack', {
-              screen: 'BackupSettings',
+              screen: 'DataStorageSettings',
             })
           }
           theme={theme}

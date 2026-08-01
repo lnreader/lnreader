@@ -339,11 +339,12 @@ export const pickCustomNovelCover = async (novel: NovelInfo) => {
   const image = await DocumentPicker.getDocumentAsync({ type: 'image/*' });
   if (image.assets && image.assets[0]) {
     const novelDir = NOVEL_STORAGE + '/' + novel.pluginId + '/' + novel.id;
-    let novelCoverUri = 'file://' + novelDir + '/cover.png';
+    const novelCoverPath = novelDir + '/cover.png';
     if (!(await NativeFile.exists(novelDir))) {
       await NativeFile.mkdir(novelDir);
     }
-    await NativeFile.copyFile(image.assets[0].uri, novelCoverUri);
+    await NativeFile.copyFile(image.assets[0].uri, novelCoverPath);
+    let novelCoverUri = await NativeFile.resolveUri(novelCoverPath);
     novelCoverUri += '?' + Date.now();
     await dbManager.write(async tx => {
       await tx

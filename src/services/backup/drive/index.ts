@@ -22,6 +22,12 @@ import type {
 } from '@services/backgroundTasks/contracts';
 import { getSelectedBackupFileSections } from '../fileSections';
 import { resolveBackupOptions } from '../options';
+import {
+  cleanupStagedStorageDirectory,
+  finalizeStorageRestoreDirectory,
+  materializeStorageDirectory,
+  prepareStorageRestoreDirectory,
+} from '@services/storage/directory';
 
 const uploadBackupSection = async (
   sourcePath: string,
@@ -73,11 +79,15 @@ export const createDriveBackup = async (
   }));
 
   for (const section of getSelectedBackupFileSections(options)) {
-    await uploadBackupSection(
+    const sourcePath = await materializeStorageDirectory(
       section.storagePath,
-      section.archiveName,
-      backupFolder,
+      `${CACHE_DIR_PATH}-section-${section.archiveName}`,
     );
+    try {
+      await uploadBackupSection(sourcePath, section.archiveName, backupFolder);
+    } finally {
+      await cleanupStagedStorageDirectory(sourcePath, section.storagePath);
+    }
   }
 
   const completionText = getBackupCompletionText(backupResult);
@@ -143,7 +153,22 @@ export const driveRestore = async (
       if (!file) {
         throw new Error(getString('backupScreen.invalidBackupFolder'));
       }
-      await download(file, section.storagePath);
+      const restoreDirectory = await prepareStorageRestoreDirectory(
+        section.storagePath,
+        `${CACHE_DIR_PATH}-restore-${section.archiveName}`,
+      );
+      try {
+        await download(file, restoreDirectory);
+        await finalizeStorageRestoreDirectory(
+          restoreDirectory,
+          section.storagePath,
+        );
+      } finally {
+        await cleanupStagedStorageDirectory(
+          restoreDirectory,
+          section.storagePath,
+        );
+      }
     }
   }
   const missingPluginIds = await finalizeRestoredPlugins(restoreResult);

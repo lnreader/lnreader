@@ -315,6 +315,7 @@ export interface StringMap {
   'downloadScreen.chapterEmptyOrScrapeError': 'string';
   'downloadScreen.chapterName': 'string';
   'downloadScreen.completed': 'string';
+  'downloadScreen.customStorageInfo': 'string';
   'downloadScreen.storageInfo': 'string';
   'downloadScreen.downloading': 'string';
   'downloadScreen.downloadingNovel': 'string';
@@ -385,6 +386,20 @@ export interface StringMap {
   'generalSettingsScreen.inactivityTimeoutDesc': 'string';
   'globalSearch.allSources': 'string';
   'globalSearch.searchIn': 'string';
+  'dataStorageScreen.title': 'string';
+  'dataStorageScreen.storage': 'string';
+  'dataStorageScreen.storageLocation': 'string';
+  'dataStorageScreen.storageLocationDescription': 'string';
+  'dataStorageScreen.appPrivateStorage': 'string';
+  'dataStorageScreen.backupAndRestore': 'string';
+  'dataStorageScreen.backupSafetyWarning': 'string';
+  'dataStorageScreen.moveDownloadsTitle': 'string';
+  'dataStorageScreen.moveDownloadsDescription': 'string';
+  'dataStorageScreen.moveDownloads': 'string';
+  'dataStorageScreen.storageMigrationPreparing': 'string';
+  'dataStorageScreen.storageMigrationProgress': 'string';
+  'dataStorageScreen.storageMigrationComplete': 'string';
+  'dataStorageScreen.storageMigrationTasksBusy': 'string';
   'history': 'string';
   'historyScreen.chapter': 'string';
   'historyScreen.clearHistorWarning': 'string';
@@ -640,6 +655,7 @@ export interface StringMap {
   'notifications.LOCAL_BACKUP': 'string';
   'notifications.LOCAL_RESTORE': 'string';
   'notifications.MIGRATE_NOVEL': 'string';
+  'notifications.MIGRATE_DOWNLOAD_STORAGE': 'string';
   'notifications.DOWNLOAD_CHAPTER': 'string';
   'notifications.taskQueued': 'string';
   'notifications.taskCompleted': 'string';

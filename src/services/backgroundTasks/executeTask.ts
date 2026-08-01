@@ -5,6 +5,7 @@ import { downloadChapters } from '../download/downloadChapter';
 import { exportEpub } from '../epub/export';
 import { importEpubBatch } from '../epub/import';
 import { migrateNovel } from '../migrate/migrateNovel';
+import { migrateNovelStorageTask } from '../storage/migrateNovelStorage';
 import { updateLibrary } from '../updates';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import type {
@@ -48,6 +49,8 @@ export const executeBackgroundTask = async (
       return;
     case 'LOCAL_RESTORE':
       return restoreBackup(task.data, updateProgress);
+    case 'MIGRATE_DOWNLOAD_STORAGE':
+      return migrateNovelStorageTask(task.data, updateProgress);
     case 'MIGRATE_NOVEL':
       return migrateNovel(task.data, updateProgress, enqueue);
     case 'DOWNLOAD_CHAPTER':

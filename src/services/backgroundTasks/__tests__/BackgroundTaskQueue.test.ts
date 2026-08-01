@@ -42,6 +42,8 @@ jest.mock('@i18n/translations', () => ({
       ? 'Download'
       : key === 'common.preparing'
       ? 'Preparing'
+      : key === 'dataStorageScreen.storageMigrationTasksBusy'
+      ? 'Storage migration busy'
       : 'Completed',
 }));
 
@@ -139,6 +141,32 @@ describe('BackgroundTaskQueue completion notifications', () => {
 
     expect(NativeBackgroundTasks.enqueue).toHaveBeenCalled();
     expect(showToast).not.toHaveBeenCalled();
+  });
+
+  it('does not enqueue file-mutating work during storage migration', async () => {
+    mockStoredTasks = [
+      {
+        id: 'migration',
+        task: {
+          name: 'MIGRATE_DOWNLOAD_STORAGE',
+          data: { directoryName: 'LNReader', directoryUri: 'content://root' },
+        },
+        state: 'running',
+        meta: {
+          name: 'Moving storage',
+          isRunning: true,
+          progress: 0.5,
+          progressText: 'Moving downloads',
+        },
+      },
+    ];
+
+    new BackgroundTaskQueue().enqueue(task);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(NativeBackgroundTasks.enqueue).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledWith('Storage migration busy');
   });
 
   it('keeps progress updates scoped to concurrently running tasks', async () => {
