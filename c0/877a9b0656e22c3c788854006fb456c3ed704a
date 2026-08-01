@@ -1,0 +1,52 @@
+src/components/index.ts
+  s_5dabb38c610ffd::t_35714349d06870 27
+src/components/AppUpdateChecker/AppUpdateDialog.tsx
+  s_5dabb38c610ffd::t_733434bece037c 38
+  s_5dabb38c610ffd::t_d1fc48087449cb 44
+  s_5dabb38c610ffd::t_35714349d06870 4,7-8,10-13,16-20,23-27,30,32,47,51-52,59
+  s_5dabb38c610ffd::t_0e76818e792490 1,21,37,40,46,64
+src/components/AppUpdateChecker/__tests__/useAppUpdateChecker.test.ts
+  s_5dabb38c610ffd::t_fe744bf88ceeaf 1-91
+src/i18n/languages/en/strings.json
+  s_5dabb38c610ffd::t_0e76818e792490 315,332
+src/i18n/types/index.ts
+  s_5dabb38c610ffd::t_58eba107514d68 272,289
+src/navigators/Main.tsx
+  s_5dabb38c610ffd::t_35714349d06870 8,103
+src/components/AppUpdateChecker/index.ts
+  s_5dabb38c610ffd::t_35714349d06870 1
+src/components/AppUpdateChecker/__tests__/AppUpdateChecker.test.tsx
+  s_5dabb38c610ffd::t_b356adf586b6b4 1,51,53,57,59,61,66,68
+  s_5dabb38c610ffd::t_d9c72eea164c85 2-50,52,54-56,58,60,62-65,67,69-72
+src/components/AppUpdateChecker/AppUpdateChecker.tsx
+  s_5dabb38c610ffd::t_35714349d06870 1-6,8-21,28-31,33-39
+  s_5dabb38c610ffd::t_04ebba84d790b4 7
+  h_f56025180c46fa 22-27,32
+src/components/AppUpdateChecker/useAppUpdateChecker.ts
+  s_5dabb38c610ffd::t_35714349d06870 1-3,7-9,11-12,20-37,69-73,75-76,78-81,83-88,90-93,102,104,109,111,119-123,126,133,136-140,143-145
+src/components/AppUpdateChecker/__tests__/AppUpdateDialog.test.tsx
+  s_5dabb38c610ffd::t_d1fc48087449cb 13
+  s_5dabb38c610ffd::t_9de3e92ed2f059 49-50
+  s_5dabb38c610ffd::t_733434bece037c 1-12,14-48,51-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "c0877a9b0656e22c3c788854006fb456c3ed704a",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5dabb38c610ffd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbbe3-e0a1-78e2-9f9d-d423f1056db3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
