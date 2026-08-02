@@ -80,7 +80,6 @@ export const insertNovelAndChapters = async (
       const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
       await NativeFile.mkdir(novelDir);
       const novelCoverPath = novelDir + '/cover.png';
-      const novelCoverUri = 'file://' + novelCoverPath;
 
       try {
         await downloadFile(
@@ -88,6 +87,7 @@ export const insertNovelAndChapters = async (
           novelCoverPath,
           getPlugin(pluginId)?.imageRequestInit,
         );
+        const novelCoverUri = await NativeFile.resolveUri(novelCoverPath);
         await dbManager.write(async tx => {
           tx.update(novelSchema)
             .set({ cover: novelCoverUri })

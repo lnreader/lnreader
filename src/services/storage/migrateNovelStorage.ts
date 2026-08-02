@@ -28,7 +28,7 @@ export type NovelStorageMigrationProgress = {
 type ProgressListener = (progress: NovelStorageMigrationProgress) => void;
 
 let migrationRunning = false;
-const SAF_COVER_URI_REPAIR_KEY = 'SAF_COVER_URI_REPAIR_V1';
+const SAF_COVER_URI_REPAIR_KEY = 'SAF_COVER_URI_REPAIR_V3';
 
 const splitCacheBuster = (uri: string) => {
   const match = uri.match(/(\?\d+)$/);

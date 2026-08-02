@@ -1,10 +1,8 @@
 import { Platform } from 'react-native';
 import SafX from 'react-native-saf-x';
 import NativeFileModule from './src/NativeFileModule';
-import type {
-  DirectorySelection,
-  ReadDirResult,
-} from './src/NativeFileModule';
+import type { DirectorySelection, ReadDirResult } from './src/NativeFileModule';
+import { toSafDocumentUri } from './safUri';
 
 const isSafPath = (path: string) =>
   Platform.OS === 'android' && path.startsWith('content://');
@@ -73,7 +71,7 @@ const NativeFile = {
   },
   resolveUri: async (path: string): Promise<string> => {
     if (isSafPath(path)) {
-      return (await SafX.stat(path)).uri;
+      return toSafDocumentUri((await SafX.stat(path)).uri);
     }
     return path.startsWith('file://') ? path : `file://${path}`;
   },
@@ -95,9 +93,9 @@ const NativeFile = {
       return;
     }
 
-    const temporaryPath = `${NativeFileModule.ExternalCachesDirectoryPath}/saf-download-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}`;
+    const temporaryPath = `${
+      NativeFileModule.ExternalCachesDirectoryPath
+    }/saf-download-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     try {
       await NativeFileModule.downloadFile(
         url,
