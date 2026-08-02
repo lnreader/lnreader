@@ -1,0 +1,33 @@
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_08eb61e16eef60::t_009172b59f67e3 130-140,144-146
+  s_08eb61e16eef60::t_ef266ec0f51b46 18,141-143
+src/services/storage/migrateNovelStorage.ts
+  s_08eb61e16eef60::t_99742324fa846e 31
+src/utils/__tests__/safUri.test.ts
+  s_08eb61e16eef60::t_933a7b96061054 1-30
+src/database/queries/NovelQueries.ts
+  s_08eb61e16eef60::t_009172b59f67e3 90
+modules/native-file/safUri.ts
+  s_08eb61e16eef60::t_933a7b96061054 1-30
+src/database/queries/__tests__/setup.ts
+  s_08eb61e16eef60::t_8077c4defacb62 82-84
+modules/native-file/index.ts
+  s_08eb61e16eef60::t_30a552e12a6c88 4,96-98
+  s_08eb61e16eef60::t_933a7b96061054 5,74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "8bbed3d89026605fef67e36bdeab846d27ef3223",
+  "prompts": {},
+  "sessions": {
+    "s_08eb61e16eef60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
