@@ -1,0 +1,23 @@
+src/database/queries/NovelQueries.ts
+  s_7aa952e7d595d5::t_d149d5440843fd 384-389
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_7aa952e7d595d5::t_d149d5440843fd 15-19,477-500
+src/screens/novel/components/NovelScreenButtonGroup/NovelScreenButtonGroup.tsx
+  s_7aa952e7d595d5::t_d149d5440843fd 15,76,94-98,154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "13885320ae95897cab4de733f381781bbe75bb19",
+  "prompts": {},
+  "sessions": {
+    "s_7aa952e7d595d5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc879-139a-7782-af1e-e7ad7fbd3381",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
