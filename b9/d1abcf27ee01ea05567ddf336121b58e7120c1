@@ -1,0 +1,32 @@
+src/database/queries/LibraryQueries.ts
+  s_46842f385842bf::t_e4fe66b9605420 37,71,74-87
+  s_46842f385842bf::t_58a9d175175312 88
+src/screens/library/hooks/useLibrary.ts
+  s_46842f385842bf::t_79e989a00f0477 53
+  s_46842f385842bf::t_e4fe66b9605420 5-9,51-52,54-55
+  s_46842f385842bf::t_0a0357a7d92aed 56
+  s_46842f385842bf::t_d844a916dadf11 57
+src/screens/library/hooks/__tests__/useLibrary.test.ts
+  s_46842f385842bf::t_8a219a84b3bbc2 46-48
+  s_46842f385842bf::t_61ffa47d9496dd 39-42,66-67
+  s_46842f385842bf::t_f30ff082b06b7c 33-37
+  s_46842f385842bf::t_757346b8cfd3e9 1-32,38,43-45,49-65,68-81
+test/mocks/database.js
+  s_46842f385842bf::t_757346b8cfd3e9 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "b9d1abcf27ee01ea05567ddf336121b58e7120c1",
+  "prompts": {},
+  "sessions": {
+    "s_46842f385842bf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc824-9fd9-7570-a58d-a5d4d76065e2",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
