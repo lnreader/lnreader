@@ -1,9 +1,9 @@
 import { memo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { overlay, TextInput } from 'react-native-paper';
+import { TextInput } from 'react-native-paper';
 
-import { Checkbox, Menu, SwitchItem } from '@components';
+import { Checkbox, SelectField, SwitchItem } from '@components';
 import { PluginSetting } from '@plugins/types';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
@@ -49,56 +49,15 @@ export const PluginSettingField = memo(
     }
 
     if (setting.type === 'Select') {
-      const selectedOption = setting.options.find(
-        option => option.value === value,
-      );
-
       return (
         <View style={styles.setting}>
-          <Menu
-            fullWidth
-            visible={expanded}
-            contentStyle={{ backgroundColor: theme.surfaceVariant }}
-            anchor={
-              <Pressable
-                accessibilityLabel={getString(
-                  'browseScreen.editPluginSetting',
-                  { name: setting.label },
-                )}
-                accessibilityRole="button"
-                onPress={() => setExpanded(true)}
-              >
-                <TextInput
-                  editable={false}
-                  label={setting.label}
-                  mode="outlined"
-                  pointerEvents="none"
-                  textColor={theme.onSurface}
-                  value={selectedOption?.label ?? ''}
-                  theme={{
-                    colors: {
-                      background: overlay(2, theme.surface),
-                      outline: theme.outline,
-                      primary: theme.primary,
-                    },
-                  }}
-                />
-              </Pressable>
-            }
-            onDismiss={() => setExpanded(false)}
-          >
-            {setting.options.map(option => (
-              <Menu.Item
-                key={option.value}
-                title={option.label}
-                titleStyle={{ color: theme.onSurface }}
-                onPress={() => {
-                  onChange(settingKey, option.value);
-                  setExpanded(false);
-                }}
-              />
-            ))}
-          </Menu>
+          <SelectField
+            label={setting.label}
+            value={typeof value === 'string' ? value : ''}
+            options={setting.options}
+            onValueChange={nextValue => onChange(settingKey, nextValue)}
+            theme={theme}
+          />
         </View>
       );
     }

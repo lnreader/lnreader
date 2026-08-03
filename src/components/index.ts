@@ -35,3 +35,5 @@ export { default as TopTabBar } from './TopTabBar/TopTabBar';
 export { default as Menu } from './Menu';
 export { default as Slider } from './Slider/Slider';
 export type { SliderProps, SliderSize } from './Slider/Slider';
+export { SelectField } from './SelectField';
+export type { SelectFieldOption, SelectFieldProps } from './SelectField';

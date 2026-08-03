@@ -1,5 +1,8 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { CircularProgressIndicator } from '@expo/ui/jetpack-compose';
+
+import { ExpoHost } from '@components/ExpoUI';
 import { ThemeColors } from '../../theme/types';
 
 interface Props {
@@ -7,13 +10,17 @@ interface Props {
 }
 
 const LoadingMoreIndicator: React.FC<Props> = ({ theme }) => (
-  <ActivityIndicator color={theme.primary} style={styles.indicator} />
+  <View style={styles.container}>
+    <ExpoHost theme={theme} matchContents>
+      <CircularProgressIndicator color={theme.primary} />
+    </ExpoHost>
+  </View>
 );
 
 export default LoadingMoreIndicator;
 
 const styles = StyleSheet.create({
-  indicator: {
+  container: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',

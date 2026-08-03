@@ -1,7 +1,11 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Chip } from 'react-native-paper';
+import { FilterChip } from '@expo/ui/jetpack-compose';
 
+import {
+  ExpoHost,
+  getFilterChipBorder,
+  getFilterChipColors,
+} from '@components/ExpoUI';
 import { ThemeColors } from '../../theme/types';
 
 interface SelectableChipProps {
@@ -15,36 +19,32 @@ interface SelectableChipProps {
   mode?: 'flat' | 'outlined';
 }
 
+/**
+ * `icon` isn't used anywhere in the app today, and Expo UI's Chip icon slots
+ * require an XML vector-drawable/image source rather than an arbitrary
+ * MaterialCommunityIcons glyph name, so it's accepted but not rendered here.
+ * Material 3's FilterChip already outlines itself when unselected and fills
+ * with a container color when selected, so `mode` no longer needs to switch
+ * between flat/outlined explicitly.
+ */
 const SelectableChip: React.FC<SelectableChipProps> = ({
   label,
   selected,
   theme,
   onPress,
-  icon,
-  showCheckIcon = true,
-  customFontFamily,
-  mode = 'flat',
 }) => {
   return (
-    <Chip
-      selected={selected}
-      onPress={onPress}
-      icon={icon}
-      showSelectedCheck={showCheckIcon}
-      style={styles.chip}
-      textStyle={{ fontFamily: customFontFamily }}
-      theme={{ colors: theme }}
-      mode={selected ? 'flat' : mode}
-    >
-      {label}
-    </Chip>
+    <ExpoHost theme={theme} matchContents>
+      <FilterChip
+        selected={selected}
+        onClick={onPress}
+        colors={getFilterChipColors(theme)}
+        border={getFilterChipBorder(theme)}
+      >
+        <FilterChip.Label>{label}</FilterChip.Label>
+      </FilterChip>
+    </ExpoHost>
   );
 };
 
 export default SelectableChip;
-
-const styles = StyleSheet.create({
-  chip: {
-    marginHorizontal: 6,
-  },
-});

@@ -8,9 +8,10 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Checkbox as PaperCheckbox } from 'react-native-paper';
+import { TriStateCheckbox } from '@expo/ui/jetpack-compose';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
+import { ExpoHost, getCheckboxColors } from '@components/ExpoUI';
 import { ThemeColors } from '../../theme/types';
 
 interface CheckboxProps {
@@ -49,22 +50,16 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     onPress={onPress}
     disabled={disabled}
   >
-    <PaperCheckbox
-      status={
-        status === 'indeterminate'
-          ? 'indeterminate'
-          : status
-          ? 'checked'
-          : 'unchecked'
-      }
-      onPress={onPress}
-      color={theme.primary}
-      theme={{
-        colors: { disabled: theme.onSurfaceVariant },
-      }}
-      uncheckedColor={theme.onSurfaceVariant}
-      disabled={disabled}
-    />
+    <ExpoHost theme={theme} style={styles.checkboxHost} matchContents>
+      <TriStateCheckbox
+        state={
+          status === 'indeterminate' ? 'indeterminate' : status ? 'on' : 'off'
+        }
+        onClick={onPress}
+        enabled={!disabled}
+        colors={getCheckboxColors(theme)}
+      />
+    </ExpoHost>
     <View style={styles.textContainer}>
       <Text
         style={[styles.defaultLabel, { color: theme.onSurface }, labelStyle]}
@@ -115,6 +110,9 @@ export const SortItem = ({ label, status, onPress, theme }: SortItemProps) => (
 );
 
 const styles = StyleSheet.create({
+  checkboxHost: {
+    marginEnd: -8,
+  },
   defaultLabel: {
     flexShrink: 1,
   },

@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import LoadingMoreIndicator from '../LoadingMoreIndicator/LoadingMoreIndicator';
 import { ThemeColors } from '../../theme/types';
 
@@ -47,11 +47,12 @@ describe('LoadingMoreIndicator', () => {
     expect(toJSON()).toBeTruthy();
   });
 
-  it('receives theme prop correctly', () => {
+  it('passes the theme primary color to the Compose progress indicator', () => {
     const customTheme = { ...mockTheme, primary: '#ff0000' };
-    const { toJSON } = render(<LoadingMoreIndicator theme={customTheme} />);
+    render(<LoadingMoreIndicator theme={customTheme} />);
 
-    const json = toJSON();
-    expect(json).toBeTruthy();
+    expect(screen.getByTestId('circular-progress-indicator').props.color).toBe(
+      '#ff0000',
+    );
   });
 });

@@ -68,7 +68,7 @@ module.exports = defineConfig([
         {
           patterns: [
             {
-              group: ['@expo/ui', '@expo/ui/*'],
+              group: ['@expo/ui', '@expo/ui/**'],
               message:
                 'Screens must not import @expo/ui directly. Use an LNReader component wrapper (e.g. src/components/ExpoUI) instead.',
             },

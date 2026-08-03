@@ -61,4 +61,29 @@ describe('Button', () => {
 
     expect(toJSON()).toBeTruthy();
   });
+
+  it('renders the text variant by default', () => {
+    render(<Button title="Click Me" onPress={() => {}} />);
+
+    expect(screen.getByTestId('button-text')).toBeOnTheScreen();
+  });
+
+  it('renders the contained variant for mode="contained"', () => {
+    render(<Button title="Click Me" mode="contained" onPress={() => {}} />);
+
+    expect(screen.getByTestId('button-contained')).toBeOnTheScreen();
+    expect(screen.getByTestId('button-contained').props.colors).toMatchObject({
+      containerColor: mockUseTheme().primary,
+    });
+  });
+
+  it('disables the button and stops onPress from firing', () => {
+    const onPress = jest.fn();
+    render(<Button title="Click Me" onPress={onPress} disabled />);
+
+    const button = screen.getByTestId('button-text');
+    expect(button.props.accessibilityState).toEqual({ disabled: true });
+    fireEvent.press(button);
+    expect(onPress).not.toHaveBeenCalled();
+  });
 });
