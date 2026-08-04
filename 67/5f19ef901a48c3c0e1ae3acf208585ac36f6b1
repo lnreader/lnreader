@@ -1,0 +1,39 @@
+src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx
+  s_c47f312e8402df::t_0c28053a4f846a 131-133
+  s_c47f312e8402df::t_d0bec89515a9b8 9,12,16,48,50,57,66,70-73,78,92,99-101,104-109,120,122-130,134
+  s_34b61a14303e29::t_945fe93954db70 136
+  s_c47f312e8402df::t_7c7e1d802460d1 103,110-119,121,135,137
+  s_c47f312e8402df::t_0d375b7887fdf4 102,139-143
+  s_c47f312e8402df::t_f0e0ead4b94d1a 138
+src/screens/updates/components/UpdateNovelChapterGroup.tsx
+  s_c47f312e8402df::t_d0bec89515a9b8 11,22-30,32-36,45,59,66-67,69-73,90-107
+  s_c47f312e8402df::t_d2fa185576bbc8 31
+src/hooks/persisted/useUpdates.ts
+  s_c47f312e8402df::t_d0bec89515a9b8 3,7,11,16-24,30-38,40,42
+src/database/queries/ChapterQueries.ts
+  s_c47f312e8402df::t_d0bec89515a9b8 802,807-808,831-844
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "675f19ef901a48c3c0e1ae3acf208585ac36f6b1",
+  "prompts": {},
+  "sessions": {
+    "s_34b61a14303e29": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd3d-2db4-7032-b525-35736b7d0dd8",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_c47f312e8402df": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcceb-f116-7330-8e53-2b345f1899a5",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
