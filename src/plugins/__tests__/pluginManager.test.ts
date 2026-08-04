@@ -35,6 +35,11 @@ jest.mock('@hooks/persisted/useUserAgent', () => ({
 jest.mock('@utils/mmkv/mmkv', () => ({
   getMMKVObject: jest.fn(),
   setMMKVObject: jest.fn(),
+  MMKVStorage: {
+    getString: jest.fn(),
+    remove: jest.fn(),
+    set: jest.fn(),
+  },
 }));
 
 const restoredPlugins = [

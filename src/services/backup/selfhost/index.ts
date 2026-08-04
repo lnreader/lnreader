@@ -20,6 +20,12 @@ import type {
 } from '@services/backgroundTasks/contracts';
 import { getSelectedBackupFileSections } from '../fileSections';
 import { resolveBackupOptions } from '../options';
+import {
+  cleanupStagedStorageDirectory,
+  finalizeStorageRestoreDirectory,
+  materializeStorageDirectory,
+  prepareStorageRestoreDirectory,
+} from '@services/storage/directory';
 
 export const createSelfHostBackup = async (
   { host, backupFolder, options: requestedOptions }: SelfHostData,
@@ -54,7 +60,15 @@ export const createSelfHostBackup = async (
   await sleep(200);
 
   for (const section of getSelectedBackupFileSections(options)) {
-    await upload(host, backupFolder, section.archiveName, section.storagePath);
+    const sourcePath = await materializeStorageDirectory(
+      section.storagePath,
+      `${CACHE_DIR_PATH}-section-${section.archiveName}`,
+    );
+    try {
+      await upload(host, backupFolder, section.archiveName, sourcePath);
+    } finally {
+      await cleanupStagedStorageDirectory(sourcePath, section.storagePath);
+    }
   }
 
   const completionText = getBackupCompletionText(backupResult);
@@ -105,12 +119,27 @@ export const selfHostRestore = async (
     for (const section of getSelectedBackupFileSections(
       restoreResult.manifest.sections,
     )) {
-      await download(
-        host,
-        backupFolder,
-        section.archiveName,
+      const restoreDirectory = await prepareStorageRestoreDirectory(
         section.storagePath,
+        `${CACHE_DIR_PATH}-restore-${section.archiveName}`,
       );
+      try {
+        await download(
+          host,
+          backupFolder,
+          section.archiveName,
+          restoreDirectory,
+        );
+        await finalizeStorageRestoreDirectory(
+          restoreDirectory,
+          section.storagePath,
+        );
+      } finally {
+        await cleanupStagedStorageDirectory(
+          restoreDirectory,
+          section.storagePath,
+        );
+      }
     }
   }
   const missingPluginIds = await finalizeRestoredPlugins(restoreResult);

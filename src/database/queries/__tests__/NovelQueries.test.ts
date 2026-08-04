@@ -19,6 +19,7 @@ import {
 } from '@database/schema';
 import { eq } from 'drizzle-orm';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
+import NativeFile from '@modules/native-file';
 
 import {
   getAllNovels,
@@ -128,6 +129,23 @@ describe('NovelQueries', () => {
       expect(novelId).toBeDefined();
       const novel = await getNovelById(novelId!);
       expect(novel?.name).toBe('Test Novel');
+    });
+
+    it('stores the canonical URI after downloading a browse cover', async () => {
+      const novelId = await insertNovelAndChapters('test-plugin', {
+        id: undefined,
+        path: '/test/novel-with-cover',
+        name: 'Novel with cover',
+        cover: 'https://example.com/cover.png',
+        chapters: [],
+      });
+
+      expect(getNovelById(novelId!)?.cover).toBe(
+        'content://provider/document/cover',
+      );
+      expect(NativeFile.resolveUri).toHaveBeenCalledWith(
+        `/mock/novel/storage/test-plugin/${novelId}/cover.png`,
+      );
     });
 
     it('should handle conflict (onConflictDoNothing)', async () => {

@@ -78,7 +78,7 @@ export type SettingsStackParamList = {
   GeneralSettings: undefined;
   ReaderSettings: undefined;
   TrackerSettings: undefined;
-  BackupSettings: undefined;
+  DataStorageSettings: undefined;
   AppearanceSettings: undefined;
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
@@ -96,14 +96,14 @@ export type ChapterScreenProps = StackScreenProps<
 >;
 export type ReaderStackParamList = {
   Novel:
-  | {
-    name: string;
-    path: string;
-    pluginId: string;
-    cover: string | null;
-    isLocal?: boolean | null;
-  }
-  | Omit<NovelInfo, 'id'>;
+    | {
+        name: string;
+        path: string;
+        pluginId: string;
+        cover: string | null;
+        isLocal?: boolean | null;
+      }
+    | Omit<NovelInfo, 'id'>;
   Chapter: {
     novel: NovelInfo;
     chapter: ChapterInfo;
@@ -171,9 +171,9 @@ export type TrackerSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,
   'TrackerSettings'
 >;
-export type BackupSettingsScreenProps = StackScreenProps<
+export type DataStorageSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,
-  'BackupSettings'
+  'DataStorageSettings'
 >;
 export type AdvancedSettingsScreenProps = StackScreenProps<
   SettingsStackParamList,
@@ -196,6 +196,6 @@ export type RespositorySettingsScreenProps = CompositeScreenProps<
 declare global {
   namespace ReactNavigation {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface RootParamList extends RootStackParamList { }
+    interface RootParamList extends RootStackParamList {}
   }
 }

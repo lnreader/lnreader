@@ -21,6 +21,7 @@ import { DownloadsScreenProps } from '@navigators/types';
 import { DownloadedChapter } from '@database/types';
 import { showToast } from '@utils/showToast';
 import { parseChapterNumber } from '@utils/parseChapterNumber';
+import { getNovelStorageDirectoryName } from '@utils/Storages';
 
 type DownloadGroup = Record<number, DownloadedChapter[]>;
 
@@ -91,7 +92,13 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
       </Appbar>
 
       <List.InfoItem
-        title={getString('downloadScreen.storageInfo')}
+        title={
+          getNovelStorageDirectoryName()
+            ? getString('downloadScreen.customStorageInfo', {
+                directory: getNovelStorageDirectoryName(),
+              })
+            : getString('downloadScreen.storageInfo')
+        }
         theme={theme}
       />
       {loading ? (

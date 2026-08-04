@@ -161,6 +161,16 @@ export class BackgroundTaskQueue {
     await this.notificationPermissionRequest;
 
     const current = this.getSnapshot();
+    const storageMigrationActive = current.some(
+      item => item.task.name === 'MIGRATE_DOWNLOAD_STORAGE',
+    );
+    if (
+      (task.name === 'MIGRATE_DOWNLOAD_STORAGE' && current.length > 0) ||
+      (task.name !== 'MIGRATE_DOWNLOAD_STORAGE' && storageMigrationActive)
+    ) {
+      showToast(getString('dataStorageScreen.storageMigrationTasksBusy'));
+      return;
+    }
     if (
       !allowsDuplicateTask(task) &&
       current.some(item => item.task.name === task.name)

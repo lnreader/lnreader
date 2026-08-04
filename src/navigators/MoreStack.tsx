@@ -5,7 +5,7 @@ import About from '../screens/more/About';
 import Settings from '../screens/settings/SettingsScreen';
 import TrackerSettings from '../screens/settings/SettingsTrackerScreen';
 import ReaderSettings from '../screens/settings/SettingsReaderScreen/SettingsReaderScreen';
-import BackupSettings from '../screens/settings/SettingsBackupScreen';
+import DataStorageSettings from '../screens/settings/SettingsBackupScreen';
 import AdvancedSettings from '../screens/settings/SettingsAdvancedScreen';
 import GeneralSettings from '../screens/settings/SettingsGeneralScreen/SettingsGeneralScreen';
 import TaskQueue from '../screens/more/TaskQueueScreen';
@@ -38,7 +38,10 @@ const SettingsStack = () => {
       <Stack.Screen name="GeneralSettings" component={GeneralSettings} />
       <Stack.Screen name="ReaderSettings" component={ReaderSettings} />
       <Stack.Screen name="TrackerSettings" component={TrackerSettings} />
-      <Stack.Screen name="BackupSettings" component={BackupSettings} />
+      <Stack.Screen
+        name="DataStorageSettings"
+        component={DataStorageSettings}
+      />
       <Stack.Screen name="AppearanceSettings" component={AppearanceSettings} />
       <Stack.Screen name="AdvancedSettings" component={AdvancedSettings} />
       <Stack.Screen
