@@ -381,6 +381,12 @@ export const updateNovelCategories = async (
   if (!novelIds.length) return;
 
   await dbManager.write(async tx => {
+    await tx
+      .update(novelSchema)
+      .set({ inLibrary: true })
+      .where(inArray(novelSchema.id, novelIds))
+      .run();
+
     // Delete existing categories (keeping local category if present)
     await tx
       .delete(novelCategorySchema)

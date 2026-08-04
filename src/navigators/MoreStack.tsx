@@ -15,6 +15,7 @@ import CategoriesScreen from '@screens/Categories/CategoriesScreen';
 import RespositorySettings from '@screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen';
 import LibrarySettings from '@screens/settings/SettingsLibraryScreen/SettingsLibraryScreen';
 import StatsScreen from '@screens/StatsScreen/StatsScreen';
+import GenreTaxonomyScreen from '@screens/settings/SettingsTaxonomyScreen/SettingsTaxonomyScreen';
 import { MoreStackParamList, SettingsStackParamList } from './types';
 import { useTheme } from '@hooks/persisted';
 
@@ -45,6 +46,7 @@ const SettingsStack = () => {
         component={RespositorySettings}
       />
       <Stack.Screen name="LibrarySettings" component={LibrarySettings} />
+      <Stack.Screen name="GenreTaxonomy" component={GenreTaxonomyScreen} />
     </Stack.Navigator>
   );
 };

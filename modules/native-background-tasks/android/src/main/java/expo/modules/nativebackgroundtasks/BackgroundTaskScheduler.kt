@@ -9,6 +9,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.await
 import java.util.UUID
 
 object BackgroundTaskScheduler {
@@ -34,6 +35,10 @@ object BackgroundTaskScheduler {
             request,
         )
         return request.id
+    }
+
+    suspend fun cancel(context: Context, taskId: String) {
+        WorkManager.getInstance(context).cancelAllWorkByTag(taskId).await()
     }
 
     suspend fun enqueueLibraryUpdate(

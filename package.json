@@ -90,10 +90,10 @@
     "react-native-pager-view": "^8.0.2",
     "react-native-paper": "^5.15.3",
     "react-native-reanimated": "^4.5.0",
-    "react-native-saf-x": "^2.2.3",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-screens": "^4.25.2",
     "react-native-shimmer-placeholder": "^2.0.9",
+    "react-native-svg": "15.15.4",
     "react-native-tab-view": "^4.3.2",
     "react-native-url-polyfill": "^3.0.0",
     "react-native-webview": "^13.16.1",
@@ -150,7 +150,6 @@
           "nitro-epub",
           "native-background-tasks",
           "@react-native-vector-icons/material-design-icons",
-          "react-native-saf-x",
           "lottie-ios"
         ]
       }

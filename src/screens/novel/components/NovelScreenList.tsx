@@ -34,6 +34,7 @@ import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
+import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -103,14 +104,29 @@ const NovelScreenList = ({
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  const { downloadingChapterIds, downloadingNovelIds, downloadChapter } =
-    useDownload();
+  const {
+    downloadQueue,
+    downloadingChapterIds,
+    downloadingNovelIds,
+    downloadChapter,
+  } = useDownload();
 
-  // Queue removal can mean success, failure, or cancellation. Reconcile once
-  // after this novel's queue settles instead of reloading for every task.
+  // Reconcile as chapters complete and once more when the queue settles so
+  // downloaded state remains accurate after success, failure, or cancellation.
   const isNovelDownloading =
     novel.id !== 'NO_ID' && downloadingNovelIds.has(novel.id);
-  useDownloadReconciliation(isNovelDownloading, getChapters);
+  const novelDownloadProgressKey = useMemo(
+    () =>
+      novel.id === 'NO_ID'
+        ? ''
+        : getDownloadProgressKey(downloadQueue, novel.id),
+    [downloadQueue, novel.id],
+  );
+  useDownloadReconciliation(
+    isNovelDownloading,
+    novelDownloadProgressKey,
+    getChapters,
+  );
 
   const [isFabExtended, setIsFabExtended] = useState(true);
   const [showScrollToTop, setShowScrollToTop] = useState(false);

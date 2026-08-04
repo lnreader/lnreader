@@ -16,6 +16,7 @@ const baseModuleNameMapper = {
   '^@api/(.*)$': '<rootDir>/src/api/$1',
   '^@type/(.*)$': '<rootDir>/src/type/$1',
   '^@specs/(.*)$': '<rootDir>/specs/$1',
+  '^@modules/nitro-epub$': '<rootDir>/modules/nitro-epub/src/index',
   '^@modules/nitro-tts$': '<rootDir>/modules/nitro-tts/src/index',
   '^@modules/(.*)$': '<rootDir>/modules/$1',
   '^@test-utils$': '<rootDir>/test/test-utils',

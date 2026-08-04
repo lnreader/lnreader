@@ -1,6 +1,7 @@
 package expo.modules.nativefile
 
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -33,6 +34,7 @@ import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.UUID
 import java.io.PushbackInputStream
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.coroutineContext
@@ -119,9 +121,10 @@ class NativeFileModule : Module() {
         filepath: String,
         destPath: String,
         onDone: (() -> Unit)? = null,
-    ) {
+    ): Long {
         try {
             val inputStream = getInputStream(filepath)
+            var copiedBytes = 0L
             try {
                 val outputStream = getOutputStream(destPath)
                 try {
@@ -130,7 +133,9 @@ class NativeFileModule : Module() {
                     while (inputStream.read(buffer).also { length = it } > 0) {
                         coroutineContext.ensureActive()
                         outputStream.write(buffer, 0, length)
+                        copiedBytes += length
                     }
+                    outputStream.flush()
                 } finally {
                     outputStream.close()
                 }
@@ -140,8 +145,198 @@ class NativeFileModule : Module() {
             if (onDone != null) {
                 onDone()
             }
+            return copiedBytes
         } catch (e: IOException) {
             throw Exception("Failed to copy file from '$filepath' to '$destPath': ${e.message}")
+        }
+    }
+
+    private fun contentResolver(): ContentResolver =
+        reactContext?.contentResolver
+            ?: throw IOException("React context is unavailable")
+
+    private suspend fun copyToOutputStream(sourcePath: String, outputStream: OutputStream): Long {
+        var copiedBytes = 0L
+        getInputStream(sourcePath).use { inputStream ->
+            outputStream.use { output ->
+                val buffer = ByteArray(BUFFER_SIZE)
+                var length: Int
+                while (inputStream.read(buffer).also { length = it } > 0) {
+                    coroutineContext.ensureActive()
+                    output.write(buffer, 0, length)
+                    copiedBytes += length
+                }
+                output.flush()
+            }
+        }
+        return copiedBytes
+    }
+
+    private fun resolveDirectoryFile(directoryUri: String): File {
+        val uri = Uri.parse(directoryUri)
+        val directory = if (uri.scheme == null) {
+            File(directoryUri)
+        } else if (uri.scheme == ContentResolver.SCHEME_FILE) {
+            File(uri.path ?: throw IOException("Invalid directory URI: '$directoryUri'"))
+        } else {
+            throw IOException("Unsupported filesystem directory URI: '$directoryUri'")
+        }
+        if (!directory.isDirectory) {
+            throw IOException("Destination directory does not exist: '$directoryUri'")
+        }
+        return directory
+    }
+
+    private suspend fun copyFileToFilesystemDirectory(
+        sourcePath: String,
+        directoryUri: String,
+        fileName: String,
+        replace: Boolean,
+    ): Map<String, Any> {
+        val directory = resolveDirectoryFile(directoryUri)
+        val destination = File(directory, fileName)
+        if (destination.exists() && !replace) {
+            throw IOException("File already exists: ${destination.absolutePath}")
+        }
+
+        val staging = File(directory, ".$fileName.${UUID.randomUUID()}.tmp")
+        val backup = File(directory, ".$fileName.${UUID.randomUUID()}.bak")
+        try {
+            val copiedBytes = FileOutputStream(staging).use { output ->
+                copyToOutputStream(sourcePath, output)
+            }
+            if (staging.length() != copiedBytes) {
+                throw IOException("Copied file size does not match the source stream")
+            }
+
+            val hadDestination = destination.exists()
+            if (hadDestination && !destination.renameTo(backup)) {
+                throw IOException("Could not stage the existing destination for replacement")
+            }
+            if (!staging.renameTo(destination)) {
+                if (hadDestination) {
+                    backup.renameTo(destination)
+                }
+                throw IOException("Could not move the completed copy into the destination")
+            }
+            if (backup.exists() && !backup.delete()) {
+                throw IOException("Could not remove the replaced destination backup")
+            }
+            return mapOf("uri" to destination.absolutePath, "size" to copiedBytes)
+        } finally {
+            staging.delete()
+            if (backup.exists() && !destination.exists()) {
+                backup.renameTo(destination)
+            }
+        }
+    }
+
+    private fun resolveTreeDirectoryUri(treeUri: Uri): Uri {
+        if (!DocumentsContract.isTreeUri(treeUri)) {
+            throw IOException("Destination is not a Storage Access Framework directory: '$treeUri'")
+        }
+        val documentId = DocumentsContract.getTreeDocumentId(treeUri)
+        return DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId)
+    }
+
+    private fun findChildDocument(treeUri: Uri, directoryUri: Uri, fileName: String): Uri? {
+        val resolver = contentResolver()
+        val documentId = DocumentsContract.getDocumentId(directoryUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId)
+        val projection = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        )
+        resolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+            while (cursor.moveToNext()) {
+                if (cursor.getString(1) == fileName) {
+                    return DocumentsContract.buildDocumentUriUsingTree(treeUri, cursor.getString(0))
+                }
+            }
+        }
+        return null
+    }
+
+    private fun renameDocument(documentUri: Uri, displayName: String): Uri =
+        DocumentsContract.renameDocument(contentResolver(), documentUri, displayName)
+            ?: throw IOException("Could not rename destination document to '$displayName'")
+
+    private suspend fun copyFileToSafDirectory(
+        sourcePath: String,
+        directoryUriString: String,
+        fileName: String,
+        mimeType: String,
+        replace: Boolean,
+    ): Map<String, Any> {
+        val resolver = contentResolver()
+        val treeUri = Uri.parse(directoryUriString)
+        val directoryUri = resolveTreeDirectoryUri(treeUri)
+        val existing = findChildDocument(treeUri, directoryUri, fileName)
+        if (existing != null && !replace) {
+            throw IOException("File already exists: $fileName")
+        }
+
+        val token = UUID.randomUUID().toString()
+        val stagingName = "$fileName.lnreader-$token.tmp"
+        val backupName = "$fileName.lnreader-$token.bak"
+        var stagingUri = DocumentsContract.createDocument(
+            resolver,
+            directoryUri,
+            mimeType,
+            stagingName,
+        ) ?: throw IOException("Could not create a temporary destination document")
+        var backupUri: Uri? = null
+        var completedUri: Uri? = null
+
+        try {
+            val copiedBytes = copyToOutputStream(
+                sourcePath,
+                resolver.openOutputStream(stagingUri, writeAccessByAPILevel)
+                    ?: throw IOException("Could not open the temporary destination document"),
+            )
+
+            if (existing != null) {
+                backupUri = renameDocument(existing, backupName)
+            }
+            try {
+                completedUri = renameDocument(stagingUri, fileName)
+                stagingUri = completedUri
+            } catch (error: Exception) {
+                backupUri?.let {
+                    try {
+                        renameDocument(it, fileName)
+                        backupUri = null
+                    } catch (_: Exception) {
+                        // Keep the original replacement error.
+                    }
+                }
+                throw error
+            }
+
+            backupUri?.let {
+                try {
+                    DocumentsContract.deleteDocument(resolver, it)
+                } catch (_: Exception) {
+                    // The completed destination is already in place.
+                }
+                backupUri = null
+            }
+            return mapOf("uri" to completedUri.toString(), "size" to copiedBytes)
+        } finally {
+            if (completedUri == null) {
+                try {
+                    DocumentsContract.deleteDocument(resolver, stagingUri)
+                } catch (_: Exception) {
+                    // Preserve the original copy or replacement error.
+                }
+            }
+            if (completedUri == null) backupUri?.let {
+                try {
+                    renameDocument(it, fileName)
+                } catch (_: Exception) {
+                    // Preserve the original copy or replacement error.
+                }
+            }
         }
     }
 
@@ -262,6 +457,25 @@ class NativeFileModule : Module() {
             }
         }
 
+        AsyncFunction("copyFileToDirectory") { sourcePath: String, directoryUri: String, fileName: String, mimeType: String, replace: Boolean, promise: Promise ->
+            coroutineScope.launch {
+                try {
+                    require(fileName.isNotBlank() && fileName != "." && fileName != ".." && !fileName.contains('/') && !fileName.contains('\\')) {
+                        "Invalid destination file name"
+                    }
+                    val uri = Uri.parse(directoryUri)
+                    val result = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+                        copyFileToSafDirectory(sourcePath, directoryUri, fileName, mimeType, replace)
+                    } else {
+                        copyFileToFilesystemDirectory(sourcePath, directoryUri, fileName, replace)
+                    }
+                    promise.resolve(result)
+                } catch (e: Exception) {
+                    rejectFileOperation(promise, "copy into directory", directoryUri, e)
+                }
+            }
+        }
+
         AsyncFunction("moveFile") { filepath: String, destPath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
@@ -292,6 +506,9 @@ class NativeFileModule : Module() {
             coroutineScope.launch {
                 try {
                     val file = File(filepath)
+                    if (file.exists() && !file.isDirectory) {
+                        throw IOException("A file already exists at the directory path")
+                    }
                     if (!file.exists() && !file.mkdirs()) {
                         throw IOException("Directory could not be created")
                     }
@@ -383,14 +600,21 @@ class NativeFileModule : Module() {
             }
         }
 
+        Constant("DocumentDirectoryPath") {
+            val context = reactContext ?: appContext.currentActivity
+            context?.filesDir?.absolutePath.orEmpty()
+        }
+
         Constant("ExternalDirectoryPath") {
-            val externalDirectory = reactContext?.getExternalFilesDir(null)
-            externalDirectory?.absolutePath ?: ""
+            val context = reactContext ?: appContext.currentActivity
+            val directory = context?.getExternalFilesDir(null) ?: context?.filesDir
+            directory?.absolutePath.orEmpty()
         }
 
         Constant("ExternalCachesDirectoryPath") {
-            val externalCachesDirectory = reactContext?.externalCacheDir
-            externalCachesDirectory?.absolutePath ?: ""
+            val context = reactContext ?: appContext.currentActivity
+            val directory = context?.externalCacheDir ?: context?.cacheDir
+            directory?.absolutePath.orEmpty()
         }
     }
 

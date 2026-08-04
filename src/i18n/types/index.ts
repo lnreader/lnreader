@@ -269,6 +269,7 @@ export interface StringMap {
   'common.globally': 'string';
   'common.install': 'string';
   'common.imported': 'string';
+  'common.later': 'string';
   'common.logout': 'string';
   'common.name': 'string';
   'common.newUpdateAvailable': 'string';
@@ -285,6 +286,7 @@ export interface StringMap {
   'common.save': 'string';
   'common.saved': 'string';
   'common.search': 'string';
+  'common.skipVersion': 'string';
   'common.searchFor': 'string';
   'common.searchResults': 'string';
   'common.settings': 'string';
@@ -591,6 +593,7 @@ export interface StringMap {
   'sourceScreen.noResultsFound': 'string';
   'statsScreen.downloadedChapters': 'string';
   'statsScreen.genreDistribution': 'string';
+  'statsScreen.novels': 'string';
   'statsScreen.readChapters': 'string';
   'statsScreen.sources': 'string';
   'statsScreen.statusDistribution': 'string';
@@ -603,6 +606,8 @@ export interface StringMap {
   'statsScreen.totalTimeSpent': 'string';
   'statsScreen.showNovels': 'string';
   'statsScreen.showCategories': 'string';
+  'statsScreen.plugins': 'string';
+  'statsScreen.pluginDistribution': 'string';
   'tracking': 'string';
   'trackingScreen.info': 'string';
   'trackingScreen.logOutMessage': 'string';
@@ -647,4 +652,34 @@ export interface StringMap {
   'time.hours.other': 'string';
   'time.days.one': 'string';
   'time.days.other': 'string';
+  'genreStats.title': 'string';
+  'genreStats.totalNovels.one': 'string';
+  'genreStats.totalNovels.other': 'string';
+  'genreStats.topLevelCategories.one': 'string';
+  'genreStats.topLevelCategories.other': 'string';
+  'genreStats.mostCommon': 'string';
+  'genreStats.empty': 'string';
+  'genreStats.seeAll': 'string';
+  'genreStats.subgenres.one': 'string';
+  'genreStats.subgenres.other': 'string';
+  'genreStats.novelsIn': 'string';
+  'genreStats.noNovels': 'string';
+  'genreStats.seeAllNovels': 'string';
+  'genreStats.editTaxonomy': 'string';
+  'genreStats.taxonomyTitle': 'string';
+  'genreStats.parentCategories': 'string';
+  'genreStats.normalization': 'string';
+  'genreStats.addCategory': 'string';
+  'genreStats.addChild': 'string';
+  'genreStats.addNormalization': 'string';
+  'genreStats.deleteConfirmTitle': 'string';
+  'genreStats.deleteCategoryConfirm': 'string';
+  'genreStats.deleteChildConfirm': 'string';
+  'genreStats.deleteNormalizationConfirm': 'string';
+  'genreStats.parentNamePlaceholder': 'string';
+  'genreStats.childNamePlaceholder': 'string';
+  'genreStats.normalizationKeyPlaceholder': 'string';
+  'genreStats.normalizationValuePlaceholder': 'string';
+  'genreStats.noCategories': 'string';
+  'genreStats.noNormalization': 'string';
 }

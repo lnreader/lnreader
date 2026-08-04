@@ -4,7 +4,7 @@ import { getString } from '@i18n/translations';
 interface RemoveDownloadsDialogProps {
   dialogVisible: boolean;
   hideDialog: () => void;
-  onSubmit: () => void;
+  onSubmit: () => void | Promise<void>;
 }
 
 const RemoveDownloadsDialog = ({

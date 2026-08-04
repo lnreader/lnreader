@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { getString } from '@i18n/translations';
 
@@ -25,20 +25,37 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onDismiss,
   onConfirm,
 }) => {
-  const handleConfirm = () => {
-    void onConfirm();
-    onDismiss();
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsConfirming(true);
+    try {
+      await onConfirm();
+      onDismiss();
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   return (
-    <Dialog.Root visible={visible} onDismiss={onDismiss}>
+    <Dialog.Root
+      visible={visible}
+      onDismiss={isConfirming ? () => {} : onDismiss}
+    >
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
         {message ? <Dialog.Description>{message}</Dialog.Description> : null}
       </Dialog.Header>
       <Dialog.Actions>
-        <Dialog.Action onPress={onDismiss}>{cancelLabel}</Dialog.Action>
-        <Dialog.Action tone={confirmTone} onPress={handleConfirm}>
+        <Dialog.Action disabled={isConfirming} onPress={onDismiss}>
+          {cancelLabel}
+        </Dialog.Action>
+        <Dialog.Action
+          disabled={isConfirming}
+          loading={isConfirming}
+          tone={confirmTone}
+          onPress={handleConfirm}
+        >
           {confirmLabel}
         </Dialog.Action>
       </Dialog.Actions>

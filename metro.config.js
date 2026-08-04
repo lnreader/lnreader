@@ -47,7 +47,7 @@ config.server.enhanceMiddleware = metroMiddleware => {
     response.setHeader(
       'Content-Type',
       readerAssetContentTypes[path.extname(assetPath)] ||
-        'application/octet-stream',
+      'application/octet-stream',
     );
 
     if (request.method === 'HEAD') {

@@ -20,7 +20,10 @@ export default function useDownload() {
   const downloadQueue = useMemo(
     () => queue?.filter(t => t.task?.name === 'DOWNLOAD_CHAPTER') || [],
     [queue],
-  ) as { task: DownloadChapterTask; meta: BackgroundTaskMetadata }[];
+  ) as (QueuedBackgroundTask & {
+    task: DownloadChapterTask;
+    meta: BackgroundTaskMetadata;
+  })[];
 
   const downloadingChapterIds = useMemo(
     () =>

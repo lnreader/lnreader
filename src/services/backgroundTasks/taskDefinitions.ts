@@ -25,6 +25,25 @@ const MAX_CONCURRENT_DOWNLOADS = 3;
 export const allowsDuplicateTask = (task: BackgroundTask) =>
   MULTIPLICABLE_TASKS.includes(task.name);
 
+export const getDownloadProgressKey = (
+  tasks: (QueuedBackgroundTask | BackgroundTask)[] | undefined,
+  novelId?: number,
+) =>
+  (tasks ?? [])
+    .filter((task): task is QueuedBackgroundTask => 'task' in task)
+    .filter(
+      task =>
+        task.task.name === 'DOWNLOAD_CHAPTER' &&
+        (novelId === undefined || task.task.data.novelId === novelId),
+    )
+    .map(
+      task =>
+        `${task.id}:${task.state ?? 'queued'}:${
+          task.meta.progress ?? 'pending'
+        }`,
+    )
+    .join('|');
+
 export const getBackgroundTaskQueueName = (task: BackgroundTask) =>
   task.name === 'DOWNLOAD_CHAPTER'
     ? `${BACKGROUND_TASK_QUEUE_PREFIX}:download:${

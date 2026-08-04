@@ -28,6 +28,7 @@ import NativeFile from '@modules/native-file';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
+import { createNovelTriggerQueryUpdate } from '@database/queryStrings/triggers';
 
 // #region Mutations
 
@@ -245,7 +246,6 @@ export const increaseTimeSpent = async (
   });
 };
 
-// TODO: Remove the need for the chapters array, as it could lead to not deleting the downloaded files but just marking them as not downloaded
 /*
   Deletes all downloaded chapters from the database
 */
@@ -255,19 +255,28 @@ export const deleteDownloads = async (
   if (!chapters?.length) {
     return;
   }
-  chapters.forEach(chapter => {
-    deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id);
-  });
+  await Promise.all(
+    chapters.map(chapter =>
+      deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id),
+    ),
+  );
+  const chapterIds = chapters.map(chapter => chapter.id);
   await dbManager.write(async tx => {
-    await tx.update(chapterSchema).set({ isDownloaded: false }).run();
+    await tx
+      .update(chapterSchema)
+      .set({ isDownloaded: false })
+      .where(inArray(chapterSchema.id, chapterIds))
+      .run();
   });
 };
 
 export const deleteReadChaptersFromDb = async (): Promise<void> => {
   const chapters = await getReadDownloadedChapters();
-  chapters?.forEach(chapter => {
-    deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id);
-  });
+  await Promise.all(
+    chapters.map(chapter =>
+      deleteDownloadedFiles(chapter.pluginId, chapter.novelId, chapter.id),
+    ),
+  );
   const chapterIds = chapters?.map(chapter => chapter.id);
   if (chapterIds?.length) {
     await dbManager.write(async tx => {
@@ -358,7 +367,15 @@ export const markPreviousChaptersUnread = async (
 
 export const clearUpdates = async (): Promise<void> => {
   await dbManager.write(async tx => {
+    // The chapter update trigger recalculates novel aggregates once per row.
+    // Bypass it for this database-wide operation and update the one affected
+    // aggregate in bulk instead.
+    await tx.run(
+      sql.raw('DROP TRIGGER IF EXISTS update_novel_stats_on_update'),
+    );
     await tx.update(chapterSchema).set({ updatedTime: null }).run();
+    await tx.update(novelSchema).set({ lastUpdatedAt: null }).run();
+    await tx.run(sql.raw(createNovelTriggerQueryUpdate));
   });
 };
 
@@ -477,7 +494,8 @@ export const getAllUndownloadedChapters = async (
         eq(chapterSchema.novelId, novelId),
         eq(chapterSchema.isDownloaded, false),
       ),
-    );
+    )
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position));
 /**
  * @deprecated, use getNovelChapters with whereConditions instead
  */
@@ -494,6 +512,7 @@ export const getAllUndownloadedAndUnreadChapters = async (
         eq(chapterSchema.unread, true),
       ),
     )
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
     .all();
 
 export const getChapter = async (chapterId: number) =>
@@ -797,13 +816,13 @@ export const getUpdatedOverviewFromDb = async () =>
     .orderBy(desc(sql`update_date`), novelSchema.id)
     .all();
 
-export const getDetailedUpdatesFromDb = async (
+export const getDetailedUpdatesQuery = (
   novelId: number,
   onlyDownloadableChapters?: boolean,
   updateDate?: string,
   limit?: number,
-): Promise<Update[]> => {
-  return dbManager
+) =>
+  dbManager
     .select({
       ...getColumns(chapterSchema),
       pluginId: novelSchema.pluginId,
@@ -826,9 +845,20 @@ export const getDetailedUpdatesFromDb = async (
       ),
     )
     .orderBy(desc(chapterSchema.updatedTime))
-    .limit(limit ?? -1)
-    .all();
-};
+    .limit(limit ?? -1);
+
+export const getDetailedUpdatesFromDb = (
+  novelId: number,
+  onlyDownloadableChapters?: boolean,
+  updateDate?: string,
+  limit?: number,
+): Promise<Update[]> =>
+  getDetailedUpdatesQuery(
+    novelId,
+    onlyDownloadableChapters,
+    updateDate,
+    limit,
+  ).all();
 
 export const isChapterDownloaded = (chapterId: number): boolean => {
   const result = dbManager.getSync(

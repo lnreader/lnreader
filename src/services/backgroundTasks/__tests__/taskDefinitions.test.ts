@@ -6,6 +6,7 @@ import {
   fromNativeTaskRecord,
   getBackgroundTaskQueueName,
   getBackgroundTaskTitle,
+  getDownloadProgressKey,
   willTaskWaitInQueue,
 } from '../taskDefinitions';
 
@@ -152,5 +153,38 @@ describe('background task definitions', () => {
         progressText: 'Example Novel',
       },
     });
+  });
+
+  it('derives progress keys only for the requested novel downloads', () => {
+    const createDownload = (
+      id: string,
+      novelId: number,
+      progress?: number,
+    ) => ({
+      id,
+      task: {
+        name: 'DOWNLOAD_CHAPTER' as const,
+        data: {
+          novelName: `Novel ${novelId}`,
+          novelId,
+          chapters: [{ chapterId: novelId, chapterName: 'Chapter 1' }],
+        },
+      },
+      state: 'running' as const,
+      meta: {
+        name: `Novel ${novelId}`,
+        isRunning: true,
+        progress,
+        progressText: 'Chapter 1',
+      },
+    });
+    const tasks: (ReturnType<typeof createDownload> | BackgroundTask)[] = [
+      { name: 'UPDATE_LIBRARY' },
+      createDownload('first', 1, 0.5),
+      createDownload('second', 2),
+    ];
+
+    expect(getDownloadProgressKey(tasks, 1)).toBe('first:running:0.5');
+    expect(getDownloadProgressKey(tasks, 2)).toBe('second:running:pending');
   });
 });

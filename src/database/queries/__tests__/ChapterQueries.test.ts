@@ -7,6 +7,8 @@
 import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
 import { insertTestNovel, insertTestChapter, clearAllTables } from './testData';
+import { chapterSchema } from '@database/schema';
+import { eq } from 'drizzle-orm';
 
 import {
   markChapterRead,
@@ -537,9 +539,14 @@ describe('ChapterQueries', () => {
       await insertTestChapter(testDb, novelId, {
         isDownloaded: true,
       });
+      const untouchedChapterId = await insertTestChapter(testDb, novelId, {
+        isDownloaded: true,
+      });
 
       const chapters = await getNovelChapters(novelId);
-      const downloadedChapters = chapters.filter(c => c.isDownloaded);
+      const downloadedChapters = chapters.filter(
+        c => c.isDownloaded && c.id !== untouchedChapterId,
+      );
       await deleteDownloads(
         downloadedChapters.map(c => ({
           id: c.id,
@@ -549,7 +556,14 @@ describe('ChapterQueries', () => {
       );
 
       const updatedChapters = await getNovelChapters(novelId);
-      expect(updatedChapters.every(c => c.isDownloaded === false)).toBe(true);
+      expect(
+        updatedChapters
+          .filter(c => c.id !== untouchedChapterId)
+          .every(c => c.isDownloaded === false),
+      ).toBe(true);
+      expect(
+        updatedChapters.find(c => c.id === untouchedChapterId)?.isDownloaded,
+      ).toBe(true);
     });
   });
 
@@ -677,10 +691,10 @@ describe('ChapterQueries', () => {
   });
 
   describe('clearUpdates', () => {
-    it('should clear all update timestamps', async () => {
+    it('should clear update timestamps and preserve the update trigger', async () => {
       const testDb = getTestDb();
       const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, {
+      const chapterId = await insertTestChapter(testDb, novelId, {
         updatedTime: '2024-01-01',
       });
       await insertTestChapter(testDb, novelId, {
@@ -691,6 +705,25 @@ describe('ChapterQueries', () => {
 
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.updatedTime === null)).toBe(true);
+      expect(
+        testDb.sqlite.executeSync(
+          'SELECT lastUpdatedAt FROM Novel WHERE id = ?',
+          [novelId],
+        ).rows[0]?.lastUpdatedAt,
+      ).toBeNull();
+
+      await testDb.drizzleDb
+        .update(chapterSchema)
+        .set({ updatedTime: '2024-02-01' })
+        .where(eq(chapterSchema.id, chapterId))
+        .run();
+
+      expect(
+        testDb.sqlite.executeSync(
+          'SELECT lastUpdatedAt FROM Novel WHERE id = ?',
+          [novelId],
+        ).rows[0]?.lastUpdatedAt,
+      ).toBe('2024-02-01');
     });
   });
 
@@ -757,6 +790,18 @@ describe('ChapterQueries', () => {
       expect(result).toHaveLength(2);
       expect(result.every(c => c.isDownloaded === false)).toBe(true);
     });
+
+    it('returns chapters in reading order', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { position: 3 });
+      await insertTestChapter(testDb, novelId, { position: 1 });
+      await insertTestChapter(testDb, novelId, { position: 2 });
+
+      const result = await getAllUndownloadedChapters(novelId);
+
+      expect(result.map(chapter => chapter.position)).toEqual([1, 2, 3]);
+    });
   });
 
   describe('getAllUndownloadedAndUnreadChapters', () => {
@@ -781,6 +826,17 @@ describe('ChapterQueries', () => {
       expect(result).toHaveLength(1);
       expect(result[0].isDownloaded).toBe(false);
       expect(result[0].unread).toBe(true);
+    });
+
+    it('returns unread chapters in reading order', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { position: 5, unread: true });
+      await insertTestChapter(testDb, novelId, { position: 2, unread: true });
+
+      const result = await getAllUndownloadedAndUnreadChapters(novelId);
+
+      expect(result.map(chapter => chapter.position)).toEqual([2, 5]);
     });
   });
 

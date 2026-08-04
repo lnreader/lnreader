@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { setStatusBarColor } from '@theme/utils/setBarColor';
 import { useAppSettings, usePluginActions, useTheme } from '@hooks/persisted';
-import { useGithubUpdateChecker } from '@hooks/common/useGithubUpdateChecker';
+import { AppUpdateChecker } from '@components';
 
 /**
  * Navigators
@@ -25,7 +25,6 @@ import MigrateNovel from '../screens/browse/migration/MigrationNovels';
 
 import MalTopNovels from '../screens/browse/discover/MalTopNovels';
 import AniListTopNovels from '../screens/browse/discover/AniListTopNovels';
-import NewUpdateDialog from '../components/NewUpdateDialog';
 import BrowseSettings from '../screens/browse/settings/BrowseSettings';
 import PluginDetailsScreen from '../screens/browse/PluginDetailsScreen';
 import WebviewScreen from '@screens/WebviewScreen/WebviewScreen';
@@ -64,8 +63,6 @@ const MainNavigator = () => {
     }
   }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch]);
 
-  const { isNewVersion, latestRelease } = useGithubUpdateChecker();
-
   if (!isOnboarded) {
     return <OnboardingScreen />;
   }
@@ -103,7 +100,7 @@ const MainNavigator = () => {
     >
       <LibraryContextProvider>
         <UpdateContextProvider>
-          {isNewVersion && <NewUpdateDialog newVersion={latestRelease} />}
+          <AppUpdateChecker />
           <Stack.Navigator
             screenOptions={{
               animation: 'none',

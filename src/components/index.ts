@@ -24,6 +24,7 @@ export type {
 } from './Dialog';
 export { default as ConfirmationDialog } from './ConfirmationDialog/ConfirmationDialog';
 export { default as SafeAreaView } from './SafeAreaView/SafeAreaView';
+export { default as AppUpdateChecker } from './AppUpdateChecker';
 export { SegmentedControl } from './SegmentedControl';
 export type {
   SegmentedControlOption,

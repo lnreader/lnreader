@@ -49,6 +49,7 @@ jest.mock('@database/queries/HistoryQueries', () => ({
 
 jest.mock('@database/queries/LibraryQueries', () => ({
   getLibraryNovelsFromDb: jest.fn(),
+  getLibraryNovelsQuery: jest.fn(),
   getLibraryWithCategory: jest.fn(),
 }));
 

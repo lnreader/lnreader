@@ -130,10 +130,20 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
       <RemoveDownloadsDialog
         dialogVisible={visible}
         hideDialog={hideDialog}
-        onSubmit={() => {
-          deleteDownloads(chapters);
-          setChapters([]);
-          hideDialog();
+        onSubmit={async () => {
+          try {
+            await deleteDownloads(chapters);
+            setChapters([]);
+          } catch (error) {
+            showToast(
+              error instanceof Error
+                ? error.message
+                : getString('novelScreen.deleteChapterError'),
+            );
+            await getChapters();
+          } finally {
+            hideDialog();
+          }
         }}
       />
     </SafeAreaView>

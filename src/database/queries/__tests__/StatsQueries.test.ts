@@ -6,17 +6,16 @@
 
 import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
-import { insertTestNovel, insertTestChapter, clearAllTables, insertTestNovelCategory, insertTestCategory } from './testData';
+import {
+  insertTestNovel,
+  insertTestChapter,
+  clearAllTables,
+  insertTestNovelCategory,
+  insertTestCategory,
+} from './testData';
 
 import {
-  getLibraryStatsFromDb,
-  getChaptersTotalCountFromDb,
-  getChaptersReadCountFromDb,
-  getChaptersUnreadCountFromDb,
-  getChaptersDownloadedCountFromDb,
-  getNovelGenresFromDb,
-  getNovelStatusFromDb,
-  getTotalTimeSpentFromDb,
+  getAggregateStatsFromDb,
   getTopCategoriesByTimeSpentFromDb,
   getTopNovelsByTimeSpentFromDb,
 } from '../StatsQueries';
@@ -31,41 +30,68 @@ describe('StatsQueries', () => {
     teardownTestDatabase();
   });
 
-  describe('getLibraryStatsFromDb', () => {
-    it('should return correct novel and source counts', async () => {
+  describe('getAggregateStatsFromDb', () => {
+    it('should return counts, totals, and chapter stats from Novel pre-computed columns', async () => {
       const testDb = getTestDb();
 
-      // Insert novels from different sources
-      await insertTestNovel(testDb, {
+      const novelId1 = await insertTestNovel(testDb, {
         inLibrary: true,
         pluginId: 'source1',
+        totalChapters: 10,
+        chaptersDownloaded: 3,
+        chaptersUnread: 2,
       });
-      await insertTestNovel(testDb, {
-        inLibrary: true,
-        pluginId: 'source1',
-      });
-      await insertTestNovel(testDb, {
+
+      const novelId2 = await insertTestNovel(testDb, {
         inLibrary: true,
         pluginId: 'source2',
-      });
-      await insertTestNovel(testDb, {
-        inLibrary: false, // Not in library
+        totalChapters: 5,
+        chaptersDownloaded: 1,
+        chaptersUnread: 5,
       });
 
-      const result = await getLibraryStatsFromDb();
+      // Add chapters with timeSpent to test totalTimeSpent
+      await insertTestChapter(testDb, novelId1, { timeSpent: 100 });
+      await insertTestChapter(testDb, novelId1, { timeSpent: 200 });
+      await insertTestChapter(testDb, novelId2, { timeSpent: 300 });
 
-      expect(result.novelsCount).toBe(3);
+      // Novel not in library should be ignored
+      const nonLibNovelId = await insertTestNovel(testDb, {
+        inLibrary: false,
+        pluginId: 'source3',
+        totalChapters: 99,
+        chaptersDownloaded: 99,
+        chaptersUnread: 99,
+      });
+      await insertTestChapter(testDb, nonLibNovelId, { timeSpent: 999 });
+
+      const result = await getAggregateStatsFromDb();
+
+      // Triggers auto-increment totalChapters (1 per chapter insert) and chaptersUnread (1 per unread chapter insert)
+      // novelId1: totalChapters 10 -> 12 (2 chapters inserted), chaptersUnread 2 -> 4
+      // novelId2: totalChapters 5 -> 6 (1 chapter inserted), chaptersUnread 5 -> 6
+      expect(result.novelsCount).toBe(2);
       expect(result.sourcesCount).toBe(2);
+      expect(result.chaptersCount).toBe(18); // (10+2) + (5+1) = 18
+      expect(result.chaptersDownloaded).toBe(4); // 3 + 1, trigger doesn't add (default isDownloaded=false)
+      expect(result.chaptersUnread).toBe(10); // (2+2) + (5+1) = 10
+      expect(result.chaptersRead).toBe(8); // 18 - 10 = 8
+      expect(result.totalTimeSpent).toBe(600); // 100 + 200 + 300
     });
 
-    it('should return zero counts when library is empty', async () => {
-      const result = await getLibraryStatsFromDb();
+    it('should return zeros when library is empty', async () => {
+      const result = await getAggregateStatsFromDb();
 
       expect(result.novelsCount).toBe(0);
       expect(result.sourcesCount).toBe(0);
+      expect(result.chaptersCount).toBe(0);
+      expect(result.chaptersDownloaded).toBe(0);
+      expect(result.chaptersUnread).toBe(0);
+      expect(result.chaptersRead).toBe(0);
+      expect(result.totalTimeSpent).toBe(0);
     });
 
-    it('should only count novels in library', async () => {
+    it('should only count in-library novels', async () => {
       const testDb = getTestDb();
 
       await insertTestNovel(testDb, { inLibrary: true });
@@ -73,257 +99,9 @@ describe('StatsQueries', () => {
       await insertTestNovel(testDb, { inLibrary: false });
       await insertTestNovel(testDb, { inLibrary: false });
 
-      const result = await getLibraryStatsFromDb();
+      const result = await getAggregateStatsFromDb();
 
       expect(result.novelsCount).toBe(2);
-    });
-  });
-
-  describe('getChaptersTotalCountFromDb', () => {
-    it('should return correct total chapter count', async () => {
-      const testDb = getTestDb();
-
-      const novelId1 = await insertTestNovel(testDb, { inLibrary: true });
-      const novelId2 = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestNovel(testDb, { inLibrary: false }); // Not in library
-
-      await insertTestChapter(testDb, novelId1);
-      await insertTestChapter(testDb, novelId1);
-      await insertTestChapter(testDb, novelId2);
-      await insertTestChapter(testDb, novelId2);
-      await insertTestChapter(testDb, novelId2);
-
-      const result = await getChaptersTotalCountFromDb();
-
-      expect(result.chaptersCount).toBe(5);
-    });
-
-    it('should return zero when no chapters in library novels', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, { inLibrary: true });
-
-      const result = await getChaptersTotalCountFromDb();
-
-      expect(result.chaptersCount).toBe(0);
-    });
-
-    it('should only count chapters from library novels', async () => {
-      const testDb = getTestDb();
-
-      const libraryNovelId = await insertTestNovel(testDb, { inLibrary: true });
-      const nonLibraryNovelId = await insertTestNovel(testDb, {
-        inLibrary: false,
-      });
-
-      await insertTestChapter(testDb, libraryNovelId);
-      await insertTestChapter(testDb, libraryNovelId);
-      await insertTestChapter(testDb, nonLibraryNovelId);
-
-      const result = await getChaptersTotalCountFromDb();
-
-      expect(result.chaptersCount).toBe(2);
-    });
-  });
-
-  describe('getChaptersReadCountFromDb', () => {
-    it('should return correct count of read chapters', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-
-      await insertTestChapter(testDb, novelId, { unread: false }); // Read
-      await insertTestChapter(testDb, novelId, { unread: false }); // Read
-      await insertTestChapter(testDb, novelId, { unread: true }); // Unread
-
-      const result = await getChaptersReadCountFromDb();
-
-      expect(result.chaptersRead).toBe(2);
-    });
-
-    it('should return zero when no chapters are read', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, { unread: true });
-
-      const result = await getChaptersReadCountFromDb();
-
-      expect(result.chaptersRead).toBe(0);
-    });
-
-    it('should only count chapters from library novels', async () => {
-      const testDb = getTestDb();
-
-      const libraryNovelId = await insertTestNovel(testDb, { inLibrary: true });
-      const nonLibraryNovelId = await insertTestNovel(testDb, {
-        inLibrary: false,
-      });
-
-      await insertTestChapter(testDb, libraryNovelId, { unread: false });
-      await insertTestChapter(testDb, nonLibraryNovelId, { unread: false });
-
-      const result = await getChaptersReadCountFromDb();
-
-      expect(result.chaptersRead).toBe(1);
-    });
-  });
-
-  describe('getChaptersUnreadCountFromDb', () => {
-    it('should return correct count of unread chapters', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-
-      await insertTestChapter(testDb, novelId, { unread: true }); // Unread
-      await insertTestChapter(testDb, novelId, { unread: true }); // Unread
-      await insertTestChapter(testDb, novelId, { unread: false }); // Read
-
-      const result = await getChaptersUnreadCountFromDb();
-
-      expect(result.chaptersUnread).toBe(2);
-    });
-
-    it('should return zero when all chapters are read', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, { unread: false });
-
-      const result = await getChaptersUnreadCountFromDb();
-
-      expect(result.chaptersUnread).toBe(0);
-    });
-  });
-
-  describe('getChaptersDownloadedCountFromDb', () => {
-    it('should return correct count of downloaded chapters', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-
-      await insertTestChapter(testDb, novelId, { isDownloaded: true });
-      await insertTestChapter(testDb, novelId, { isDownloaded: true });
-      await insertTestChapter(testDb, novelId, { isDownloaded: false });
-
-      const result = await getChaptersDownloadedCountFromDb();
-
-      expect(result.chaptersDownloaded).toBe(2);
-    });
-
-    it('should return zero when no chapters are downloaded', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, { isDownloaded: false });
-
-      const result = await getChaptersDownloadedCountFromDb();
-
-      expect(result.chaptersDownloaded).toBe(0);
-    });
-  });
-
-  describe('getNovelGenresFromDb', () => {
-    it('should return correct genre distribution', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, {
-        inLibrary: true,
-        genres: 'Fantasy, Adventure',
-      });
-      await insertTestNovel(testDb, {
-        inLibrary: true,
-        genres: 'Fantasy, Romance',
-      });
-      await insertTestNovel(testDb, {
-        inLibrary: true,
-        genres: 'Sci-Fi',
-      });
-      await insertTestNovel(testDb, {
-        inLibrary: false,
-        genres: 'Horror', // Not in library
-      });
-
-      const result = await getNovelGenresFromDb();
-
-      expect(result.genres).toEqual({
-        Fantasy: 2,
-        Adventure: 1,
-        Romance: 1,
-        'Sci-Fi': 1,
-      });
-    });
-
-    it('should return empty genres when no novels in library', async () => {
-      const result = await getNovelGenresFromDb();
-
-      expect(result.genres).toEqual({});
-    });
-
-    it('should handle novels with null genres', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, { inLibrary: true, genres: null });
-      await insertTestNovel(testDb, { inLibrary: true, genres: 'Fantasy' });
-
-      const result = await getNovelGenresFromDb();
-
-      expect(result.genres).toEqual({ Fantasy: 1 });
-    });
-
-    it('should handle genres with extra whitespace', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, {
-        inLibrary: true,
-        genres: 'Fantasy,  Adventure,   Action',
-      });
-
-      const result = await getNovelGenresFromDb();
-
-      expect(result.genres).toHaveProperty('Fantasy');
-      expect(result.genres).toHaveProperty('Adventure');
-      expect(result.genres).toHaveProperty('Action');
-    });
-  });
-
-  describe('getNovelStatusFromDb', () => {
-    it('should return correct status distribution', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, { inLibrary: true, status: 'Ongoing' });
-      await insertTestNovel(testDb, { inLibrary: true, status: 'Ongoing' });
-      await insertTestNovel(testDb, { inLibrary: true, status: 'Completed' });
-      await insertTestNovel(testDb, { inLibrary: true, status: 'Hiatus' });
-      await insertTestNovel(testDb, {
-        inLibrary: false,
-        status: 'Dropped', // Not in library
-      });
-
-      const result = await getNovelStatusFromDb();
-
-      expect(result.status).toEqual({
-        Ongoing: 2,
-        Completed: 1,
-        Hiatus: 1,
-      });
-    });
-
-    it('should return empty status when no novels in library', async () => {
-      const result = await getNovelStatusFromDb();
-
-      expect(result.status).toEqual({});
-    });
-
-    it('should handle novels with null status', async () => {
-      const testDb = getTestDb();
-
-      await insertTestNovel(testDb, { inLibrary: true, status: null });
-      await insertTestNovel(testDb, { inLibrary: true, status: 'Ongoing' });
-
-      const result = await getNovelStatusFromDb();
-
-      expect(result.status).toEqual({ Ongoing: 1 });
     });
   });
   describe('getTopNovelsByTimeSpentFromDb', () => {
@@ -362,7 +140,9 @@ describe('StatsQueries', () => {
       const testDb = getTestDb();
 
       const libraryNovelId = await insertTestNovel(testDb, { inLibrary: true });
-      const nonLibraryNovelId = await insertTestNovel(testDb, { inLibrary: false });
+      const nonLibraryNovelId = await insertTestNovel(testDb, {
+        inLibrary: false,
+      });
 
       await insertTestChapter(testDb, libraryNovelId, { timeSpent: 150 });
       await insertTestChapter(testDb, nonLibraryNovelId, { timeSpent: 999 });
@@ -462,28 +242,6 @@ describe('StatsQueries', () => {
       const result = await getTopCategoriesByTimeSpentFromDb();
 
       expect(result.topCategoriesByTimeSpent).toEqual([]);
-    });
-  });
-
-  describe('getTotalTimeSpentFromDb', () => {
-    it('should sum timeSpent across all chapters', async () => {
-      const testDb = getTestDb();
-
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
-
-      await insertTestChapter(testDb, novelId, { timeSpent: 120 });
-      await insertTestChapter(testDb, novelId, { timeSpent: 180 });
-      await insertTestChapter(testDb, novelId, { timeSpent: 50 });
-
-      const result = await getTotalTimeSpentFromDb();
-
-      expect(result.totalTimeSpent).toBe(350);
-    });
-
-    it('should return 0 when there are no chapters or total is null/zero', async () => {
-      const result = await getTotalTimeSpentFromDb();
-
-      expect(result.totalTimeSpent).toBe(0);
     });
   });
 });

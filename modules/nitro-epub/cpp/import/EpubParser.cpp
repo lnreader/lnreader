@@ -2,6 +2,7 @@
 #include "../pugixml.hpp"
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "EpubParser.hpp"
 #include <sstream>
@@ -60,6 +61,78 @@ std::string getParentPath(const std::string &path)
     }
 
     return path.substr(0, pos);
+}
+
+std::string getLocalName(const std::string &qualified_name)
+{
+    size_t separator = qualified_name.find(':');
+    return separator == std::string::npos
+        ? qualified_name
+        : qualified_name.substr(separator + 1);
+}
+
+std::string findImageReference(const pugi::xml_node &node)
+{
+    std::string node_name = getLocalName(node.name());
+    if (node_name == "img" || node_name == "image")
+    {
+        for (const char *attribute_name : {"src", "href", "xlink:href"})
+        {
+            std::string reference = node.attribute(attribute_name).as_string();
+            if (!reference.empty())
+            {
+                size_t fragment = reference.find('#');
+                return fragment == std::string::npos
+                    ? reference
+                    : reference.substr(0, fragment);
+            }
+        }
+    }
+
+    for (pugi::xml_node child : node.children())
+    {
+        std::string reference = findImageReference(child);
+        if (!reference.empty())
+        {
+            return reference;
+        }
+    }
+
+    return "";
+}
+
+std::string findCoverImagePath(
+    const std::string &cover_document_path,
+    const std::unordered_set<std::string> &image_paths)
+{
+    pugi::xml_document cover_document;
+    if (!cover_document.load_file(cover_document_path.c_str()))
+    {
+        return "";
+    }
+
+    std::string image_reference = findImageReference(cover_document);
+    if (image_reference.empty())
+    {
+        return "";
+    }
+
+    std::string image_path = join(getParentPath(cover_document_path), image_reference);
+    return image_paths.count(image_path) ? image_path : "";
+}
+
+bool hasProperty(const std::string &properties, const std::string &property)
+{
+    std::stringstream property_stream(properties);
+    std::string value;
+    while (property_stream >> value)
+    {
+        if (value == property)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::string find_toc_href(const pugi::xml_document &opf_doc)
@@ -200,6 +273,9 @@ void parse_opf_from_folder(const std::string &base_dir,
     meta_out.summary = metadata.child("dc:description").text().as_string();
 
     std::unordered_map<std::string, std::string> id_to_href;
+    std::unordered_map<std::string, std::string> id_to_media_type;
+    std::unordered_set<std::string> image_paths;
+    std::string property_cover_id;
 
     std::string cover_id;
     for (pugi::xml_node meta : metadata.children("meta"))
@@ -217,21 +293,44 @@ void parse_opf_from_folder(const std::string &base_dir,
         std::string id = item.attribute("id").value();
         std::string href = item.attribute("href").value();
         std::string media_type = item.attribute("media-type").value();
+        std::string properties = item.attribute("properties").value();
 
         id_to_href[id] = href;
+        id_to_media_type[id] = media_type;
         if (media_type == "text/css")
         {
             meta_out.cssPaths.push_back(join(opf_dir, href));
         }
-        else if (media_type == "image/jpeg" || media_type == "image/png" || media_type == "image/jpg")
+        else if (media_type.rfind("image/", 0) == 0)
         {
-            meta_out.imagePaths.push_back(join(opf_dir, href));
+            std::string image_path = join(opf_dir, href);
+            meta_out.imagePaths.push_back(image_path);
+            image_paths.insert(image_path);
+            if (property_cover_id.empty() && hasProperty(properties, "cover-image"))
+            {
+                property_cover_id = id;
+            }
         }
     }
 
-    if (!cover_id.empty() && id_to_href.count(cover_id))
+    if (!cover_id.empty() && id_to_href.count(cover_id) &&
+        id_to_media_type[cover_id].rfind("image/", 0) == 0)
     {
         meta_out.cover = join(opf_dir, id_to_href[cover_id]);
+    }
+    else if (!property_cover_id.empty())
+    {
+        meta_out.cover = join(opf_dir, id_to_href[property_cover_id]);
+    }
+    else if (id_to_href.count("cover-image") &&
+             id_to_media_type["cover-image"].rfind("image/", 0) == 0)
+    {
+        meta_out.cover = join(opf_dir, id_to_href["cover-image"]);
+    }
+    else if (!cover_id.empty() && id_to_href.count(cover_id))
+    {
+        std::string cover_document_path = join(opf_dir, id_to_href[cover_id]);
+        meta_out.cover = findCoverImagePath(cover_document_path, image_paths);
     }
 
     auto spine = opf_doc.child("package").child("spine");

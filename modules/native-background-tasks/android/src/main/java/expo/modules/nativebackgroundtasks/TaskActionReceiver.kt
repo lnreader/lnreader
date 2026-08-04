@@ -33,6 +33,7 @@ class TaskActionReceiver : BroadcastReceiver() {
                         if (TaskExecutionRegistry.isActive(taskId)) {
                             NativeBackgroundTasksModule.emitInterruption(taskId, "cancel")
                         }
+                        BackgroundTaskScheduler.cancel(context, taskId)
                         TaskNotificationFactory.dismiss(context, taskId)
                     }
                 }

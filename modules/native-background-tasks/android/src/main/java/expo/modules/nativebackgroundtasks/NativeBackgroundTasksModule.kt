@@ -107,6 +107,7 @@ class NativeBackgroundTasksModule : Module() {
                 if (TaskExecutionRegistry.isActive(taskId)) {
                     emitInterruption(taskId, "cancel")
                 }
+                BackgroundTaskScheduler.cancel(appContext.reactContext!!, taskId)
                 dao.updateCheckpoint(taskId, null, System.currentTimeMillis())
                 TaskNotificationFactory.dismiss(appContext.reactContext!!, taskId)
             }

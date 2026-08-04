@@ -6,15 +6,14 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 
-import { UpdateOverview } from '@database/types';
+import { Update, UpdateOverview } from '@database/types';
 import UpdateNovelChapterGroup from '../UpdateNovelChapterGroup';
 
-const mockFetchDetailedUpdates = jest.fn();
+const mockUseDetailedUpdates = jest.fn();
 const mockNovelChapterGroup = jest.fn();
 
 jest.mock('@hooks/persisted/useUpdates', () => ({
-  fetchDetailedUpdates: (...args: unknown[]) =>
-    mockFetchDetailedUpdates(...args),
+  useDetailedUpdates: (...args: unknown[]) => mockUseDetailedUpdates(...args),
 }));
 
 jest.mock('@screens/novel/components/NovelChapterGroup', () => {
@@ -34,10 +33,6 @@ jest.mock('@screens/novel/components/NovelChapterGroup', () => {
   };
 });
 
-jest.mock('@utils/showToast', () => ({
-  showToast: jest.fn(),
-}));
-
 const overview: UpdateOverview = {
   novelId: 42,
   pluginId: 'source-id',
@@ -50,16 +45,16 @@ const overview: UpdateOverview = {
 
 describe('UpdateNovelChapterGroup', () => {
   beforeEach(() => {
-    mockFetchDetailedUpdates.mockReset();
+    mockUseDetailedUpdates.mockReset();
     mockNovelChapterGroup.mockReset();
-    mockFetchDetailedUpdates.mockResolvedValue([]);
+    mockUseDetailedUpdates.mockReturnValue([]);
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('loads a collapsed group only on its first expansion', async () => {
+  it('subscribes a collapsed group only on its first expansion', () => {
     render(
       <UpdateNovelChapterGroup
         chapterCountLabel="updates"
@@ -68,22 +63,19 @@ describe('UpdateNovelChapterGroup', () => {
       />,
     );
 
-    expect(mockFetchDetailedUpdates).not.toHaveBeenCalled();
+    expect(mockUseDetailedUpdates).not.toHaveBeenCalled();
 
     fireEvent.press(screen.getByTestId('novel-chapter-group'));
 
-    await waitFor(() =>
-      expect(mockFetchDetailedUpdates).toHaveBeenCalledWith(
-        overview.novelId,
-        false,
-        overview.updateDate,
-        5,
-      ),
+    expect(mockUseDetailedUpdates).toHaveBeenCalledWith(
+      overview.novelId,
+      false,
+      overview.updateDate,
     );
 
     fireEvent.press(screen.getByTestId('novel-chapter-group'));
 
-    expect(mockFetchDetailedUpdates).toHaveBeenCalledTimes(1);
+    expect(mockUseDetailedUpdates).toHaveBeenCalledTimes(1);
   });
 
   it('loads a single-chapter group immediately because it has no accordion', async () => {
@@ -97,13 +89,57 @@ describe('UpdateNovelChapterGroup', () => {
       />,
     );
 
-    expect(mockFetchDetailedUpdates).not.toHaveBeenCalled();
+    expect(mockUseDetailedUpdates).not.toHaveBeenCalled();
 
     await act(async () => {
       jest.runOnlyPendingTimers();
       await Promise.resolve();
     });
 
-    expect(mockFetchDetailedUpdates).toHaveBeenCalledTimes(1);
+    expect(mockUseDetailedUpdates).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates a loaded chapter when its reactive query changes', async () => {
+    const initialChapters = [
+      {
+        id: 1,
+        isDownloaded: false,
+        name: 'Chapter 1',
+      } as Update,
+    ];
+    let setReactiveChapters:
+      | React.Dispatch<React.SetStateAction<Update[]>>
+      | undefined;
+    mockUseDetailedUpdates.mockImplementation(() => {
+      const ReactModule = jest.requireActual<typeof import('react')>('react');
+      const [reactiveChapters, setChapters] =
+        ReactModule.useState(initialChapters);
+      setReactiveChapters = setChapters;
+      return reactiveChapters;
+    });
+
+    render(
+      <UpdateNovelChapterGroup
+        chapterCountLabel="updates"
+        onDeleteChapter={jest.fn()}
+        overview={overview}
+      />,
+    );
+
+    fireEvent.press(screen.getByTestId('novel-chapter-group'));
+
+    expect(
+      mockNovelChapterGroup.mock.calls.at(-1)?.[0].chapters[0],
+    ).toMatchObject({ id: 1, isDownloaded: false });
+
+    act(() => {
+      setReactiveChapters?.([{ ...initialChapters[0], isDownloaded: true }]);
+    });
+
+    await waitFor(() =>
+      expect(
+        mockNovelChapterGroup.mock.calls.at(-1)?.[0].chapters[0],
+      ).toMatchObject({ id: 1, isDownloaded: true }),
+    );
   });
 });

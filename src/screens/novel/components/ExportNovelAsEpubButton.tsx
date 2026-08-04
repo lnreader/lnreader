@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { Portal } from 'react-native-paper';
 import { StatusBar } from 'react-native';
-import { openDocumentTree } from 'react-native-saf-x';
 
 import { type EpubExportChapter } from '@modules/nitro-epub';
+import NativeFile from '@modules/native-file';
 
 import { NovelInfo } from '@database/types';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
@@ -125,10 +125,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
 
       let resolvedDestinationUri = destinationUri;
       if (!resolvedDestinationUri) {
-        const selectedFolder = await openDocumentTree(true);
-        if (!selectedFolder) {
-          return;
-        }
+        const selectedFolder = await NativeFile.pickDirectory();
         resolvedDestinationUri = selectedFolder.uri;
       }
 

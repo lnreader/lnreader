@@ -9,6 +9,7 @@ export {
   configureAutomaticBackups,
 } from './automaticBackupSchedule';
 export { runHeadlessBackgroundTask } from './headlessTask';
+export { getDownloadProgressKey } from './taskDefinitions';
 export type {
   BackgroundTask,
   BackgroundTaskEnqueuer,

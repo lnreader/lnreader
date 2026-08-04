@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { RefreshControl, SectionList, StyleSheet, Text } from 'react-native';
 
@@ -21,6 +21,7 @@ import { UpdateScreenProps } from '@navigators/types';
 import { UpdateOverview } from '@database/types';
 import { useUpdateContext } from '@components/Context/UpdateContext';
 import { formatDate } from '@utils/dateFormat';
+import { useFocusEffect } from '@react-navigation/native';
 
 const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
   const theme = useTheme();
@@ -37,6 +38,13 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
   const onChangeText = (text: string) => {
     setSearchText(text);
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      void getUpdates();
+    }, [getUpdates]),
+  );
+
   const sections = useMemo(
     () =>
       updatesOverview

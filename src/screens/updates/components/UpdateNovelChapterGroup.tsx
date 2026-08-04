@@ -8,12 +8,10 @@ import React, {
 } from 'react';
 
 import { Update, UpdateOverview } from '@database/types';
-import { fetchDetailedUpdates } from '@hooks/persisted/useUpdates';
+import { useDetailedUpdates } from '@hooks/persisted/useUpdates';
 import NovelChapterGroup, {
   GroupedNovelChapter,
 } from '@screens/novel/components/NovelChapterGroup';
-import { getErrorMessage } from '@utils/error';
-import { showToast } from '@utils/showToast';
 
 interface UpdateNovelChapterGroupProps {
   chapterCountLabel: string;
@@ -21,7 +19,21 @@ interface UpdateNovelChapterGroupProps {
   overview: UpdateOverview;
 }
 
-const MAX_VISIBLE_CHAPTERS = 5;
+const ReactiveUpdateChapters = ({
+  novelId,
+  onChange,
+  updateDate,
+}: {
+  novelId: number;
+  onChange: (chapters: Update[]) => void;
+  updateDate: string;
+}) => {
+  const chapters = useDetailedUpdates(novelId, false, updateDate);
+
+  useEffect(() => onChange(chapters), [chapters, onChange]);
+
+  return null;
+};
 
 const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
   chapterCountLabel,
@@ -30,8 +42,8 @@ const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
 }) => {
   const [chapters, setChapters] = useState<Update[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const loadStatus = useRef<'idle' | 'loading' | 'loaded'>('idle');
-  const latestRequestId = useRef(0);
 
   const novel = useMemo(
     () => ({
@@ -44,38 +56,21 @@ const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
     [overview],
   );
 
-  const loadChapters = useCallback(async () => {
+  const loadChapters = useCallback(() => {
     if (loadStatus.current !== 'idle') {
       return;
     }
 
     loadStatus.current = 'loading';
     setIsLoading(true);
-    const requestId = ++latestRequestId.current;
+    setIsSubscribed(true);
+  }, []);
 
-    try {
-      const result = await fetchDetailedUpdates(
-        overview.novelId,
-        false,
-        overview.updateDate,
-        MAX_VISIBLE_CHAPTERS,
-      );
-
-      if (requestId === latestRequestId.current) {
-        setChapters(result);
-        loadStatus.current = 'loaded';
-      }
-    } catch (error) {
-      if (requestId === latestRequestId.current) {
-        loadStatus.current = 'idle';
-        showToast(getErrorMessage(error));
-      }
-    } finally {
-      if (requestId === latestRequestId.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [overview.novelId, overview.updateDate]);
+  const updateChapters = useCallback((nextChapters: Update[]) => {
+    setChapters(nextChapters);
+    setIsLoading(false);
+    loadStatus.current = 'loaded';
+  }, []);
 
   useEffect(() => {
     let loadTimer: ReturnType<typeof setTimeout> | undefined;
@@ -88,20 +83,28 @@ const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
       if (loadTimer) {
         clearTimeout(loadTimer);
       }
-      latestRequestId.current += 1;
     };
   }, [loadChapters, overview.updatesPerDay]);
 
   return (
-    <NovelChapterGroup
-      chapterCount={overview.updatesPerDay}
-      chapterCountLabel={chapterCountLabel}
-      chapters={chapters}
-      isLoading={isLoading}
-      novel={novel}
-      onDeleteChapter={onDeleteChapter}
-      onExpand={loadChapters}
-    />
+    <>
+      <NovelChapterGroup
+        chapterCount={overview.updatesPerDay}
+        chapterCountLabel={chapterCountLabel}
+        chapters={chapters}
+        isLoading={isLoading}
+        novel={novel}
+        onDeleteChapter={onDeleteChapter}
+        onExpand={loadChapters}
+      />
+      {isSubscribed ? (
+        <ReactiveUpdateChapters
+          novelId={overview.novelId}
+          onChange={updateChapters}
+          updateDate={overview.updateDate}
+        />
+      ) : null}
+    </>
   );
 };
 

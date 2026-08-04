@@ -33,7 +33,6 @@ const SelectableChip: React.FC<SelectableChipProps> = ({
       showSelectedCheck={showCheckIcon}
       style={styles.chip}
       textStyle={{ fontFamily: customFontFamily }}
-      selectedColor={theme.primary}
       theme={{ colors: theme }}
       mode={selected ? 'flat' : mode}
     >
