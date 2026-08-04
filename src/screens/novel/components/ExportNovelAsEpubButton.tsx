@@ -13,6 +13,10 @@ import { NOVEL_STORAGE } from '@utils/Storages';
 import { getString } from '@i18n/translations';
 import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 import { backgroundTasks } from '@services/backgroundTasks';
+import {
+  buildEpubLNReaderApiScript,
+  wrapCustomizationScript,
+} from '@screens/reader/utils/readerCustomization';
 
 import ExportEpubModal, { EpubExportOptions } from './ExportEpubModal';
 
@@ -87,16 +91,17 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       return '';
     }
 
-    return `
-      let novelName = ${JSON.stringify(novel.name)};
-      let chapterName = document.title;
-      let sourceId = ${JSON.stringify(novel.pluginId)};
-      let chapterId = document.body.dataset.chapterId;
-      let novelId = ${JSON.stringify(novel.id)};
-      let html = document.body.innerHTML;
-      
-      ${readerSettings.customJS}
-    `;
+    const bootstrap = buildEpubLNReaderApiScript({
+      sourceId: novel.pluginId,
+      novelId: novel.id,
+      novelName: novel.name,
+    });
+    const userScript = wrapCustomizationScript(
+      readerSettings.customJS,
+      'user-js',
+    );
+
+    return `${bootstrap}\n${userScript}`;
   }, [novel, readerSettings]);
 
   const exportNovelAsEpub = async (

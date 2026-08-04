@@ -11,6 +11,7 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import * as Clipboard from 'expo-clipboard';
 import NativeFile from '@modules/native-file';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -18,10 +19,37 @@ import { ThemeColors } from '@theme/types';
 import { Button, ConfirmationDialog } from '@components/index';
 import { showToast } from '@utils/showToast';
 import { useBoolean } from '@hooks';
+import type { ReaderCustomizationContext } from '@screens/reader/utils/readerCustomization';
 
 type CodeTab = 'css' | 'js';
 
-const AdvancedTab: React.FC = () => {
+interface AdvancedTabProps {
+  /** Context of the chapter currently shown in the settings preview, if any. */
+  previewContext?: ReaderCustomizationContext;
+  /** Human-readable name of the source identified by previewContext.sourceId. */
+  sourceName?: string;
+}
+
+const buildSourceTemplate = (
+  tab: CodeTab,
+  sourceId: string,
+  sourceName?: string,
+): string =>
+  tab === 'css'
+    ? `body[data-source-id='${sourceId}'] {
+  /* Your customization for ${sourceName ?? sourceId} */
+}`
+    : `// Current source:
+const { sourceId } = LNReader.context;
+
+if (sourceId === '${sourceId}') {
+  // Your customization for ${sourceName ?? sourceId}
+}`;
+
+const AdvancedTab: React.FC<AdvancedTabProps> = ({
+  previewContext,
+  sourceName,
+}) => {
   const theme = useTheme();
   const styles = createStyles(theme);
   const { customCSS, customJS, setChapterReaderSettings } =
@@ -52,24 +80,57 @@ p {
   margin-bottom: 1em;
 }
 
-/* Target specific sources */
-#sourceId-example {
+/* Target a specific source (recommended) */
+body[data-source-id='example-source'] {
   font-family: serif;
 }`;
 
-  const customJSPlaceholder = `// Custom JavaScript for your reader
-// Available variables:
-// - html, novelName, chapterName
-// - sourceId, chapterId, novelId
+  const customJSPlaceholder = `// Current source:
+const { sourceId } = LNReader.context;
 
-// Example: Remove elements
-document.querySelectorAll('.ads').forEach(el => el.remove());
+if (sourceId === 'example-source') {
+  // Your customization
+}
 
-// Example: Modify content
-const title = document.querySelector('h1');
-if (title) {
-  title.style.color = '#FF6B6B';
-}`;
+// LNReader.context is the recommended API: sourceId, novelId, novelName,
+// chapterId, chapterName. The standalone variables (sourceId, novelId,
+// novelName, chapterId, chapterName, html) remain available for
+// compatibility with older scripts.
+//
+// html is a one-time snapshot — changing it does not change the rendered
+// chapter. To modify the chapter, use LNReader.chapter.root, e.g:
+// LNReader.chapter.root.querySelectorAll('.ads').forEach(el => el.remove());`;
+
+  const handleCopySourceId = () => {
+    if (!previewContext?.sourceId) {
+      return;
+    }
+    Clipboard.setStringAsync(previewContext.sourceId).then(() =>
+      showToast(
+        getString('common.copiedToClipboard', {
+          name: previewContext.sourceId,
+        }),
+      ),
+    );
+  };
+
+  const handleInsertTemplate = () => {
+    if (!previewContext?.sourceId) {
+      return;
+    }
+    const template = buildSourceTemplate(
+      activeCodeTab,
+      previewContext.sourceId,
+      sourceName,
+    );
+    if (activeCodeTab === 'css') {
+      setCssValue(current =>
+        current ? `${current}\n\n${template}` : template,
+      );
+    } else {
+      setJsValue(current => (current ? `${current}\n\n${template}` : template));
+    }
+  };
 
   const handleSave = () => {
     if (activeCodeTab === 'css') {
@@ -226,6 +287,49 @@ if (title) {
           </Pressable>
         </View>
 
+        {/* Current context */}
+        {previewContext ? (
+          <View
+            style={[
+              styles.contextPanel,
+              { backgroundColor: theme.surfaceContainerLow ?? theme.surface },
+            ]}
+          >
+            <Text
+              style={[styles.contextTitle, { color: theme.onSurfaceVariant }]}
+            >
+              {getString('readerSettings.currentSource')}
+            </Text>
+            <Text style={[styles.contextLine, { color: theme.onSurface }]}>
+              {(sourceName ?? previewContext.sourceId) +
+                (previewContext.sourceId
+                  ? ` (${previewContext.sourceId})`
+                  : '')}
+            </Text>
+            <Text
+              style={[styles.contextLine, { color: theme.onSurfaceVariant }]}
+            >
+              {previewContext.novelName} — {previewContext.chapterName}
+            </Text>
+            <View style={styles.contextActions}>
+              <Button
+                title={getString('readerSettings.copySourceId')}
+                onPress={handleCopySourceId}
+                mode="outlined"
+                style={styles.contextButton}
+                disabled={!previewContext.sourceId}
+              />
+              <Button
+                title={getString('readerSettings.insertSourceTemplate')}
+                onPress={handleInsertTemplate}
+                mode="outlined"
+                style={styles.contextButton}
+                disabled={!previewContext.sourceId}
+              />
+            </View>
+          </View>
+        ) : null}
+
         {/* Code Editor */}
         <View style={styles.editorContainer}>
           <TextInput
@@ -344,6 +448,30 @@ const createStyles = (theme: ThemeColors) =>
       justifyContent: 'center',
       paddingVertical: 12,
       minHeight: 48,
+    },
+    contextPanel: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      padding: 12,
+      borderRadius: 8,
+      gap: 4,
+    },
+    contextTitle: {
+      fontSize: 11,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 2,
+    },
+    contextLine: {
+      fontSize: 13,
+    },
+    contextActions: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 8,
+    },
+    contextButton: {
+      flex: 1,
     },
     tabIndicator: {
       position: 'absolute',

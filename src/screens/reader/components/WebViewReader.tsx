@@ -25,6 +25,12 @@ import { useTtsSession } from '../hooks/useTtsSession';
 import type { TtsSettings } from '@modules/nitro-tts';
 import { ChapterInfo } from '@database/types';
 import { isPluginIssueReportUrl } from '../utils/sanitizeChapterText';
+import {
+  buildLNReaderApiScript,
+  wrapCustomizationScript,
+  type ReaderCustomizationContext,
+} from '../utils/readerCustomization';
+import { showToast } from '@utils/showToast';
 
 type WebViewPostEvent = {
   type: string;
@@ -285,6 +291,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const source = useMemo(() => {
     // eslint-disable-next-line react-hooks/refs
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
+    const customizationContext: ReaderCustomizationContext = {
+      sourceId: novel?.pluginId,
+      novelId: novel?.id,
+      novelName: novel?.name,
+      chapterId: chapter.id,
+      chapterName: chapter.name,
+    };
     return {
       baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
       headers: plugin?.imageRequestInit?.headers,
@@ -388,9 +401,16 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/search.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
+              <script id="ln-reader-api">${buildLNReaderApiScript(
+                customizationContext,
+                { pluginScriptUrl: pluginCustomJS },
+              )}</script>
               <script src="${pluginCustomJS}"></script>
               <script id="ln-custom-js">
-                ${initialReaderSettings.customJS}
+                ${wrapCustomizationScript(
+                  initialReaderSettings.customJS,
+                  'user-js',
+                )}
               </script>
           </html>
           `,
@@ -560,6 +580,27 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           case 'interaction':
             onUserInteraction();
             break;
+          case 'customization-error': {
+            const data = event.data as
+              | { kind?: unknown; message?: unknown; stack?: unknown }
+              | undefined;
+            const message =
+              typeof data?.message === 'string'
+                ? data.message
+                : 'Unknown error';
+            if (__DEV__) {
+              console.error(
+                `[LNReader] ${
+                  typeof data?.kind === 'string' ? data.kind : 'customization'
+                } error: ${message}`,
+                typeof data?.stack === 'string' ? data.stack : '',
+              );
+            }
+            showToast(
+              getString('readerScreen.customizationJsFailed', { message }),
+            );
+            break;
+          }
         }
       }}
       source={source}

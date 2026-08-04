@@ -33,6 +33,13 @@ import AccessibilityTab from './tabs/AccessibilityTab';
 import AdvancedTab from './tabs/AdvancedTab';
 import { useTtsSession } from '@screens/reader/hooks/useTtsSession';
 import type { TtsSettings } from '@modules/nitro-tts';
+import {
+  buildLNReaderApiScript,
+  wrapCustomizationScript,
+  type ReaderCustomizationContext,
+} from '@screens/reader/utils/readerCustomization';
+import { showToast } from '@utils/showToast';
+import { getPlugin } from '@plugins/pluginManager';
 
 type ReaderSettingsRoute = {
   key: 'display' | 'theme' | 'navigation' | 'accessibility' | 'advanced';
@@ -126,6 +133,13 @@ const SettingsReaderScreen = () => {
     'releaseTime': 'January 1, 2100',
     'unread': 1,
     'updatedTime': null,
+  };
+  const customizationContext: ReaderCustomizationContext = {
+    sourceId: novel.pluginId,
+    novelId: novel.id,
+    novelName: novel.name,
+    chapterId: chapter.id,
+    chapterName: chapter.name,
   };
   const [hidden, setHidden] = useState(true);
   const batteryLevel = useBatteryLevel();
@@ -224,12 +238,18 @@ const SettingsReaderScreen = () => {
         case 'accessibility':
           return <AccessibilityTab />;
         case 'advanced':
-          return <AdvancedTab />;
+          return (
+            <AdvancedTab
+              previewContext={customizationContext}
+              sourceName={getPlugin(novel.pluginId)?.name}
+            />
+          );
         default:
           return <DisplayTab />;
       }
     },
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customizationContext],
   );
 
   const renderTabBar = useCallback(
@@ -348,6 +368,32 @@ const SettingsReaderScreen = () => {
                 }
                 break;
               }
+              case 'customization-error': {
+                const data = event.data as
+                  | { kind?: unknown; message?: unknown; stack?: unknown }
+                  | undefined;
+                const message =
+                  typeof data?.message === 'string'
+                    ? data.message
+                    : 'Unknown error';
+                if (__DEV__) {
+                  // eslint-disable-next-line no-console
+                  console.error(
+                    `[LNReader] ${
+                      typeof data?.kind === 'string'
+                        ? data.kind
+                        : 'customization'
+                    } error: ${message}`,
+                    typeof data?.stack === 'string' ? data.stack : '',
+                  );
+                }
+                showToast(
+                  getString('readerScreen.customizationJsFailed', {
+                    message,
+                  }),
+                );
+                break;
+              }
             }
           }}
           source={{
@@ -391,8 +437,11 @@ const SettingsReaderScreen = () => {
               <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
-              <script>
-                ${readerSettings.customJS}
+              <script id="ln-reader-api">${buildLNReaderApiScript(
+                customizationContext,
+              )}</script>
+              <script id="ln-custom-js">
+                ${wrapCustomizationScript(readerSettings.customJS, 'user-js')}
               </script>
             </html>
             `,

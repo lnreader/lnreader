@@ -559,6 +559,7 @@ export interface StringMap {
   'readerScreen.drawer.scrollToBottom': 'string';
   'readerScreen.drawer.scrollToCurrentChapter': 'string';
   'readerScreen.drawer.scrollToTop': 'string';
+  'readerScreen.customizationJsFailed': 'string';
   'readerScreen.emptyChapterMessage': 'string';
   'readerScreen.finished': 'string';
   'readerScreen.nextChapter': 'string';
@@ -572,10 +573,13 @@ export interface StringMap {
   'readerSettings.backgroundColorModal': 'string';
   'readerSettings.clearCustomCSS': 'string';
   'readerSettings.clearCustomJS': 'string';
+  'readerSettings.copySourceId': 'string';
   'readerSettings.cssHint': 'string';
+  'readerSettings.currentSource': 'string';
   'readerSettings.customCSS': 'string';
   'readerSettings.customJS': 'string';
   'readerSettings.deleteCustomTheme': 'string';
+  'readerSettings.insertSourceTemplate': 'string';
   'readerSettings.jsHint': 'string';
   'readerSettings.navigationControls': 'string';
   'readerSettings.notSaved': 'string';
