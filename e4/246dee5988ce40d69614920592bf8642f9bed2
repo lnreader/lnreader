@@ -1,0 +1,56 @@
+modules/native-file/ios/NativeFileModule.swift
+  s_ad395433d44dab::t_1e9dc405f0516d 20,22-68
+  s_ad395433d44dab::t_3be4362d9e3197 21
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_ad395433d44dab::t_75134f5a3b0478 6,128
+src/screens/updates/__tests__/UpdatesScreen.test.tsx
+  s_c47f312e8402df::t_1de7393e4720a5 1,89
+  s_c47f312e8402df::t_b2813d1b7c816d 82-84
+  s_c47f312e8402df::t_9cfc17be0643e1 2-81,85-88,90-93
+modules/native-file/src/NativeFileModule.ts
+  s_ad395433d44dab::t_1e9dc405f0516d 14-18,29-35
+test/mocks/nativeModules.js
+  s_ad395433d44dab::t_75134f5a3b0478 13-18
+src/screens/novel/components/__tests__/NovelScreenList.test.tsx
+  s_ad395433d44dab::t_75134f5a3b0478 170-177
+src/services/epub/__tests__/export.test.ts
+  s_ad395433d44dab::t_4181db7cd28583 1-123
+src/screens/novel/components/ExportEpubModal.tsx
+  s_ad395433d44dab::t_75134f5a3b0478 6,141-142
+src/services/epub/export.ts
+  s_ad395433d44dab::t_75134f5a3b0478 78-83,85-87
+modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
+  s_ad395433d44dab::t_75134f5a3b0478 199,276,280-281,305-307,309-312
+  s_ad395433d44dab::t_3be4362d9e3197 308,317-321,333
+  s_ad395433d44dab::t_1e9dc405f0516d 4,37,124,127,136,138,148,154-198,200-275,277-279,282-304,313-316,322-332,334-342,460-477
+  s_ad395433d44dab::t_57681f9b256868 478
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "e4246dee5988ce40d69614920592bf8642f9bed2",
+  "prompts": {
+    "ad395433d44dabf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcce5-acd0-7643-9dfa-b0384391345b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 439,
+      "total_deletions": 34,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_c47f312e8402df": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcceb-f116-7330-8e53-2b345f1899a5",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
