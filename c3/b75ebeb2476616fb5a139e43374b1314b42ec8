@@ -1,0 +1,35 @@
+src/plugins/__tests__/pluginManager.test.ts
+  s_213ce9dc3818a4::t_98d6a3a59fdca3 90-94
+  s_213ce9dc3818a4::t_f0bd009299295a 5-6,47-53,81-89,95-160
+modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 295-297,389-393,395-397,401-403
+test/mocks/nativeModules.js
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 7-9
+src/plugins/pluginManager.ts
+  s_213ce9dc3818a4::t_f0bd009299295a 90
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 14,91,96-122,153-154,225-238
+  s_213ce9dc3818a4::t_66b24f8a6d97e6 92-95
+modules/native-file/ios/NativeFileModule.swift
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 55-59
+modules/native-file/src/NativeFileModule.ts
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 15
+src/utils/Storages.ts
+  s_213ce9dc3818a4::t_b4ad1e0e1861db 1,3-5,7-8
+  s_213ce9dc3818a4::t_98d6a3a59fdca3 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c3b75ebeb2476616fb5a139e43374b1314b42ec8",
+  "prompts": {},
+  "sessions": {
+    "s_213ce9dc3818a4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcc61-e34d-70b2-b478-6ae6415f05d3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
