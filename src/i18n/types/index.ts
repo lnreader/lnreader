@@ -20,9 +20,11 @@ export interface StringMap {
   'advancedSettingsScreen.clearUpdatesTab': 'string';
   'advancedSettingsScreen.clearUpdatesWarning': 'string';
   'advancedSettingsScreen.clearupdatesTabDesc': 'string';
+  'advancedSettingsScreen.crashLogsFailed': 'string';
   'advancedSettingsScreen.dataManagement': 'string';
   'advancedSettingsScreen.deleteReadChapters': 'string';
   'advancedSettingsScreen.deleteReadChaptersDialogTitle': 'string';
+  'advancedSettingsScreen.diagnostics': 'string';
   'advancedSettingsScreen.disabled': 'string';
   'advancedSettingsScreen.dnsOverHttps': 'string';
   'advancedSettingsScreen.dnsOverHttpsDescription': 'string';
@@ -32,6 +34,8 @@ export interface StringMap {
   'advancedSettingsScreen.importStaticFiles': 'string';
   'advancedSettingsScreen.novelInsertFailed': 'string';
   'advancedSettingsScreen.networking': 'string';
+  'advancedSettingsScreen.shareCrashLogs': 'string';
+  'advancedSettingsScreen.shareCrashLogsDesc': 'string';
   'advancedSettingsScreen.useFAB': 'string';
   'advancedSettingsScreen.userAgent': 'string';
   'advancedSettingsScreen.recreateDBIndexes': 'string';
@@ -325,6 +329,7 @@ export interface StringMap {
   'errorBoundary.title': 'string';
   'errorBoundary.description': 'string';
   'errorBoundary.copyStackTrace': 'string';
+  'errorBoundary.shareCrashLogs': 'string';
   'errorBoundary.restart': 'string';
   'generalSettings': 'string';
   'generalSettingsScreen.asc': 'string';

@@ -7,6 +7,7 @@ import { showToast } from '@utils/showToast';
 import { Button, List } from '@components';
 import { useTheme } from '@hooks/persisted';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { logger, persistCrash, dumpLogs } from '@utils/logger';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -44,6 +45,10 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     } catch {
       // clipboard failure is non-critical
     }
+  };
+
+  const handleShareCrashLogs = () => {
+    dumpLogs(error);
   };
 
   return (
@@ -88,6 +93,15 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         mode="outlined"
       />
       <Button
+        onPress={handleShareCrashLogs}
+        title={fallbackGetString(
+          'errorBoundary.shareCrashLogs',
+          'Share crash logs',
+        )}
+        style={styles.copyButtonCtn}
+        mode="outlined"
+      />
+      <Button
         onPress={resetError}
         title={fallbackGetString(
           'errorBoundary.restart',
@@ -104,9 +118,19 @@ interface AppErrorBoundaryProps {
   children: React.ReactElement;
 }
 
+const handleBoundaryError = (error: Error) => {
+  logger.error('ErrorBoundary', error.message, error);
+  persistCrash(error, true);
+};
+
 const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({ children }) => {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>{children}</ErrorBoundary>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={handleBoundaryError}
+    >
+      {children}
+    </ErrorBoundary>
   );
 };
 

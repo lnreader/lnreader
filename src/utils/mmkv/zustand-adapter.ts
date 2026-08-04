@@ -1,4 +1,5 @@
 import { MMKVStorage } from './mmkv';
+import { logger } from '@utils/logger/logger';
 
 /**
  * Zustand persist storage adapter for MMKV.
@@ -17,9 +18,9 @@ export const mmkvZustandAdapter = {
       const value = MMKVStorage.getString(key);
       return value ?? null;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[mmkvZustandAdapter] Error getting item for key "${key}":`,
+      logger.error(
+        'mmkvZustandAdapter',
+        `Error getting item for key "${key}"`,
         error,
       );
       return null;
@@ -34,9 +35,9 @@ export const mmkvZustandAdapter = {
     try {
       MMKVStorage.set(key, value);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[mmkvZustandAdapter] Error setting item for key "${key}":`,
+      logger.error(
+        'mmkvZustandAdapter',
+        `Error setting item for key "${key}"`,
         error,
       );
     }
@@ -49,9 +50,9 @@ export const mmkvZustandAdapter = {
     try {
       MMKVStorage.remove(key);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[mmkvZustandAdapter] Error removing item for key "${key}":`,
+      logger.error(
+        'mmkvZustandAdapter',
+        `Error removing item for key "${key}"`,
         error,
       );
     }

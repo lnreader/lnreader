@@ -5,6 +5,7 @@ import { getString } from '@i18n/translations';
 import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import { showToast } from '@utils/showToast';
+import { logger } from '@utils/logger/logger';
 import type {
   BackgroundTask,
   BackgroundTaskMetadata,
@@ -141,6 +142,7 @@ export class BackgroundTaskQueue {
           getString('notifications.taskCompleted'),
       );
     } catch (error) {
+      logger.error('BackgroundTaskQueue', `Task "${task.name}" failed`, error);
       await NativeBackgroundTasks.fail(
         taskId,
         getString('notifications.taskFailed', {
@@ -198,6 +200,11 @@ export class BackgroundTaskQueue {
         );
       }
     } catch (error) {
+      logger.error(
+        'BackgroundTaskQueue',
+        `Failed to enqueue task "${task.name}"`,
+        error,
+      );
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));
       showToast(
         `${pending.meta.name}: ${

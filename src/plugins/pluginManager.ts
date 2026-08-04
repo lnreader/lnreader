@@ -13,6 +13,7 @@ import NativeFile from '@modules/native-file';
 import { showToast } from '@utils/showToast';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
+import { logger } from '@utils/logger/logger';
 
 import {
   store,
@@ -80,7 +81,8 @@ const initPlugin = (pluginId: string, rawCode: string) => {
     }
 
     return plugin;
-  } catch {
+  } catch (error) {
+    logger.error('PluginManager', `Failed to init plugin "${pluginId}"`, error);
     return undefined;
   }
 };
@@ -153,6 +155,11 @@ const fetchPlugins = async (): Promise<PluginItem[]> => {
     if (repoPlugins.status === 'fulfilled') {
       allPlugins.push(...repoPlugins.value);
     } else {
+      logger.error(
+        'PluginManager',
+        'Failed to fetch repository plugin list',
+        repoPlugins.reason,
+      );
       showToast(repoPlugins.reason.toString());
     }
   });
@@ -182,7 +189,8 @@ const loadPlugin = async (pluginId: string) => {
     const plugin = initPlugin(pluginId, code);
     plugins[pluginId] = plugin;
     return plugin;
-  } catch {
+  } catch (error) {
+    logger.error('PluginManager', `Failed to load plugin "${pluginId}"`, error);
     return undefined;
   }
 };

@@ -70,6 +70,7 @@
     "expo-linking": "~57.0.3",
     "expo-localization": "~57.0.1",
     "expo-navigation-bar": "~57.0.2",
+    "expo-sharing": "~57.0.8",
     "expo-speech": "~57.0.1",
     "expo-splash-screen": "^57.0.4",
     "expo-web-browser": "~57.0.1",

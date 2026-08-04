@@ -3,6 +3,9 @@ import { registerRootComponent } from 'expo';
 import { AppRegistry, I18nManager } from 'react-native';
 import { i18n } from './src/i18n/translations';
 import { runHeadlessBackgroundTask } from './src/services/backgroundTasks';
+import { installGlobalErrorHandler } from './src/utils/logger/globalHandler';
+
+installGlobalErrorHandler();
 
 AppRegistry.registerHeadlessTask(
   'LNReaderBackgroundTask',

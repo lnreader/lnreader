@@ -21,6 +21,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { store } from '@plugins/helpers/storage';
 import NativeDoh, { DohProviderId } from '@modules/native-doh';
 import DohProviderDialog, { DOH_PROVIDERS } from './DohProviderDialog';
+import { dumpLogs } from '@utils/logger';
 
 const AdvancedSettings = ({ navigation }: AdvancedSettingsScreenProps) => {
   const theme = useTheme();
@@ -123,6 +124,17 @@ const AdvancedSettings = ({ navigation }: AdvancedSettingsScreenProps) => {
             title={getString('advancedSettingsScreen.userAgent')}
             description={userAgent}
             onPress={showUserAgentModal}
+            theme={theme}
+          />
+        </List.Section>
+        <List.Section>
+          <List.SubHeader theme={theme}>
+            {getString('advancedSettingsScreen.diagnostics')}
+          </List.SubHeader>
+          <List.Item
+            title={getString('advancedSettingsScreen.shareCrashLogs')}
+            description={getString('advancedSettingsScreen.shareCrashLogsDesc')}
+            onPress={() => dumpLogs()}
             theme={theme}
           />
         </List.Section>

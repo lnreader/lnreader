@@ -4,6 +4,13 @@
 jest.mock('@modules/native-file', () => ({
   __esModule: true,
   default: {
+    ExternalDirectoryPath: '/mock/external',
+    ExternalCachesDirectoryPath: '/mock/caches',
+    createDocument: jest.fn().mockResolvedValue('content://mock/document'),
+    pickDocument: jest.fn().mockResolvedValue('content://mock/picked'),
+    pickDirectory: jest
+      .fn()
+      .mockResolvedValue({ uri: 'content://mock/dir', name: 'mock' }),
     writeFile: jest.fn(),
     readFile: jest.fn(() => ''),
     copyFile: jest.fn(),
@@ -18,6 +25,11 @@ jest.mock('@modules/native-file', () => ({
       ExternalCachesDirectoryPath: '/mock/caches',
     })),
   },
+}));
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
+  shareAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 const mockEpubNovel = {
