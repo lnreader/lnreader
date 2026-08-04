@@ -1,0 +1,32 @@
+src/screens/library/LibraryScreen.tsx
+  s_87eb1eb6484c3c::t_21c3fd1c79e79c 26-27,91,264,495-508,521-532
+src/screens/library/hooks/useLibrary.ts
+  s_87eb1eb6484c3c::t_21c3fd1c79e79c 30,50,52-54,87-88,91-118,154-158,217
+src/screens/library/hooks/__tests__/useLibrary.test.ts
+  s_87eb1eb6484c3c::t_b0b010344277f4 1-2,4-8,57,59-64,67-71,99-118,120
+  s_ad395433d44dab::t_ddab6d620f0b05 58,119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "1eb8c587c785bb3f2cfd2f3f8743441dd889f26e",
+  "prompts": {},
+  "sessions": {
+    "s_87eb1eb6484c3c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcce4-cbfb-7f43-be71-58079596bb04",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_ad395433d44dab": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcce5-acd0-7643-9dfa-b0384391345b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
