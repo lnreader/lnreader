@@ -1,0 +1,50 @@
+src/database/types/index.ts
+  s_ff128d4fa68408::t_048f0d8c4420de 54,71
+src/database/queries/ChapterQueries.ts
+  s_ff128d4fa68408::t_048f0d8c4420de 785
+src/screens/novel/components/NovelChapterGroup.tsx
+  s_ff128d4fa68408::t_048f0d8c4420de 96
+src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx
+  s_ff128d4fa68408::t_048f0d8c4420de 37,68-70
+src/screens/updates/components/UpdateNovelChapterGroup.tsx
+  s_ff128d4fa68408::t_048f0d8c4420de 55
+src/screens/history/components/HistoryCard/HistoryCard.tsx
+  s_ff128d4fa68408::t_048f0d8c4420de 38,55
+src/screens/history/HistoryScreen.tsx
+  s_ff128d4fa68408::t_048f0d8c4420de 112
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_ff128d4fa68408::t_048f0d8c4420de 1294
+src/database/queries/HistoryQueries.ts
+  s_ff128d4fa68408::t_048f0d8c4420de 15
+src/database/queries/__tests__/HistoryQueries.test.ts
+  s_ff128d4fa68408::t_048f0d8c4420de 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "57eca11a9ed7c8001e98c34e3e43b92b44e8c60d",
+  "prompts": {
+    "7b55a5e9fba96d17": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd9c-aa47-7443-afa8-2799fe8bf299",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 5,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_ff128d4fa68408": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd98-a0ee-76c1-a118-83e758020e3a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
