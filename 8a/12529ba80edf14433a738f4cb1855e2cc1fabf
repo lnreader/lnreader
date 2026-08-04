@@ -1,0 +1,28 @@
+src/database/queries/ChapterQueries.ts
+  s_6692ecbe8fdea0::t_41ed8ee059ba63 31,370-372,377-378
+  s_6692ecbe8fdea0::t_35189cda6ee78e 373-375
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  s_6692ecbe8fdea0::t_41ed8ee059ba63 1,28-37,41-44,50-58
+src/screens/settings/SettingsAdvancedScreen.tsx
+  s_6692ecbe8fdea0::t_41ed8ee059ba63 48-55,161
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_6692ecbe8fdea0::t_41ed8ee059ba63 10-11,666,669,680-698
+src/components/__tests__/Dialog.test.tsx
+  s_6692ecbe8fdea0::t_41ed8ee059ba63 2-7,112,129-158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "8a12529ba80edf14433a738f4cb1855e2cc1fabf",
+  "prompts": {},
+  "sessions": {
+    "s_6692ecbe8fdea0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd15-743d-7042-bb63-b1204d66c939",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
