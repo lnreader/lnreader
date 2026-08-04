@@ -1,0 +1,41 @@
+test/test-utils.tsx
+  s_5a9b686cc208e7::t_c7d5fe40d07213 40
+modules/nitro-epub/cpp/tests/EpubParserTest.cpp
+  s_52cca5f219b3f6::t_4008bf9d7a9811 79
+  s_52cca5f219b3f6::t_05b5acbe878e8a 46,50,59,77-78,94-97
+src/navigators/ReaderStack.tsx
+  s_5a9b686cc208e7::t_4b59a9b3312e5e 1,4,13,17-26,31,34
+  s_5a9b686cc208e7::t_c7d5fe40d07213 10
+modules/nitro-epub/cpp/import/EpubParser.cpp
+  s_52cca5f219b3f6::t_05b5acbe878e8a 66-137,276-278,296,299,306-312,316-317,321-334
+  s_52cca5f219b3f6::t_4008bf9d7a9811 5
+src/screens/novel/NovelContext.tsx
+  s_5a9b686cc208e7::t_4b59a9b3312e5e 18,29-30,32-34,41-44,46,52-53
+  s_5a9b686cc208e7::t_03f545f965297d 36-40,45
+  s_5a9b686cc208e7::t_c7d5fe40d07213 14,48-51
+  s_5a9b686cc208e7::t_7c1295680456fc 35,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "4f074689348fd0cd8e4272ba85cc5a7ac918ff19",
+  "prompts": {},
+  "sessions": {
+    "s_52cca5f219b3f6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd46-2bbc-7273-b8b4-33a0c42e5b46",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_5a9b686cc208e7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fcd45-13f4-7c90-ae45-19347c6b3928",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
