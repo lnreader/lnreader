@@ -94,8 +94,8 @@ export const insertNovelAndChapters = async (
             .where(eq(novelSchema.id, novelId))
             .run();
         });
-      } catch {
-        // Silently fail cover download
+      } catch (error) {
+        console.warn('Failed to download cover:', sourceNovel.cover, error);
       }
     }
     await insertChapters(novelId, sourceNovel.chapters);
