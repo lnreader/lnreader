@@ -77,7 +77,10 @@ export const insertNovelAndChapters = async (
 
   if (novelId) {
     if (sourceNovel.cover) {
-      const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
+      if (sourceNovel.cover.startsWith('http://')) {
+        console.warn('Skipping insecure HTTP cover download:', sourceNovel.cover);
+      } else {
+        const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
       await NativeFile.mkdir(novelDir);
       const novelCoverPath = novelDir + '/cover.png';
       const novelCoverUri = 'file://' + novelCoverPath;
@@ -96,6 +99,7 @@ export const insertNovelAndChapters = async (
         });
       } catch {
         // Silently fail cover download
+      }
       }
     }
     await insertChapters(novelId, sourceNovel.chapters);
