@@ -874,7 +874,9 @@ export const getNovelScanlators = async (
       ),
     )
     .all();
-  return result.map(r => r.scanlator).filter(Boolean) as string[];
+  const rawList = result.map(r => r.scanlator).filter(Boolean) as string[];
+  const individual = rawList.flatMap(s => s.split(',').map(item => item.trim())).filter(Boolean);
+  return Array.from(new Set(individual));
 };
 
 export const getNovelScanlatorsSync = (novelId: number): string[] => {
@@ -890,5 +892,7 @@ export const getNovelScanlatorsSync = (novelId: number): string[] => {
         ),
       ),
   );
-  return result.map(r => r.scanlator).filter(Boolean) as string[];
+  const rawList = result.map(r => r.scanlator).filter(Boolean) as string[];
+  const individual = rawList.flatMap(s => s.split(',').map(item => item.trim())).filter(Boolean);
+  return Array.from(new Set(individual));
 };
