@@ -36,14 +36,12 @@
     "nix:emulator": "nix develop .#emulator --extra-experimental-features nix-command --extra-experimental-features flakes"
   },
   "dependencies": {
-    "@expo/dom-webview": "^57.0.1",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@legendapp/list": "^3.3.3",
     "@noble/ciphers": "^2.2.0",
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",
     "@preeternal/react-native-cookie-manager": "^6.3.3",
-    "@react-native-documents/picker": "^12.0.1",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-native-vector-icons/common": "^13.0.1",
     "@react-native-vector-icons/material-design-icons": "^13.1.2",
@@ -76,7 +74,6 @@
     "htmlparser2": "^12.0.0",
     "i18n-js": "^4.5.3",
     "lodash-es": "^4.18.1",
-    "lottie-react-native": "^7.3.8",
     "protobufjs": "^8.7.1",
     "react": "19.2.3",
     "react-native": "0.86.0",
@@ -140,6 +137,9 @@
     "typescript": "~6.0.3"
   },
   "expo": {
+    "autolinking": {
+      "exclude": ["@expo/dom-webview"]
+    },
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [

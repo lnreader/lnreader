@@ -8,6 +8,13 @@ react {
 }
 
 android {
+    defaultConfig {
+        // Library resources (Material Components, RN, play-services) only for
+        // languages the app itself ships (src/i18n/languages/*); other locales
+        // fall back to English, matching the app's own JS fallback.
+        resConfigs "af", "ar", "as", "ca", "cs", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "hu", "id", "it", "ja", "ko", "nl", "no", "or", "pl", "pt", "ro", "ru", "sq", "sr", "sv", "tr", "uk", "vi", "zh"
+    }
+
     splits {
         abi {
             enable releaseAbiSplitsEnabled
