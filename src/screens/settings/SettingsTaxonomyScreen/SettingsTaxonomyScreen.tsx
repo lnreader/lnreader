@@ -6,6 +6,7 @@ import { Appbar, Dialog, List, SafeAreaView } from '@components';
 import ConfirmationDialog from '@components/ConfirmationDialog/ConfirmationDialog';
 import { useTheme } from '@hooks/persisted';
 import { useGenreTaxonomy } from '@hooks/persisted/useGenreTaxonomy';
+import { normalizeGenre } from '@screens/GenreStatsScreen/utils';
 import { getString } from '@i18n/translations';
 import type { GenreTaxonomyScreenProps } from '@navigators/types';
 
@@ -47,6 +48,11 @@ const SettingsTaxonomyScreen = ({ navigation }: GenreTaxonomyScreenProps) => {
   const handleAddParent = () => {
     const name = parentName.trim();
     if (!name) return;
+    if (
+      taxonomy.some(
+        t => normalizeGenre(t.parent) === normalizeGenre(name),
+      )
+    ) return;
     setTaxonomy([...taxonomy, { parent: name, children: [] }]);
     setDialog({ type: 'none' });
   };
@@ -55,6 +61,13 @@ const SettingsTaxonomyScreen = ({ navigation }: GenreTaxonomyScreenProps) => {
     const name = parentName.trim();
     if (!name || dialog.type !== 'editParent') return;
     const oldName = dialog.parentName;
+    if (
+      taxonomy.some(
+        t =>
+          t.parent !== oldName &&
+          normalizeGenre(t.parent) === normalizeGenre(name),
+      )
+    ) return;
     const updated = taxonomy.map(t =>
       t.parent === oldName ? { ...t, parent: name } : t,
     );
@@ -65,6 +78,11 @@ const SettingsTaxonomyScreen = ({ navigation }: GenreTaxonomyScreenProps) => {
   const handleAddChild = () => {
     const name = childName.trim();
     if (!name || dialog.type !== 'editParent') return;
+    const node = taxonomy.find(t => t.parent === dialog.parentName);
+    if (
+      !node ||
+      node.children.some(c => normalizeGenre(c) === normalizeGenre(name))
+    ) return;
     const updated = taxonomy.map(t =>
       t.parent === dialog.parentName
         ? { ...t, children: [...t.children, name] }
