@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { Share } from 'react-native';
-import { isNumber } from 'lodash-es';
+import isNumber from 'lodash-es/isNumber';
 
 import {
   getAllUndownloadedAndUnreadChapters,
