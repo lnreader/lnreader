@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { TextInput, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list/react-native';
 
 import { Dialog, NovelCoverImage } from '@components';
 import { getTracker, useTheme } from '@hooks/persisted';
@@ -233,7 +233,7 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
         />
       </Dialog.Content>
       <Dialog.ScrollArea>
-        <FlashList
+        <LegendList
           data={loading ? [] : searchResults}
           keyExtractor={item => item.id.toString()}
           ListEmptyComponent={

@@ -64,13 +64,13 @@ jest.mock('react-native-paper', () => {
   };
 });
 
-jest.mock('@shopify/flash-list', () => {
+jest.mock('@legendapp/list/react-native', () => {
   const ReactModule = jest.requireActual<typeof import('react')>('react');
   const { View } =
     jest.requireActual<typeof import('react-native')>('react-native');
 
   return {
-    FlashList: ({
+    LegendList: ({
       data,
       ListEmptyComponent,
       renderItem,

@@ -8,7 +8,7 @@
     "dev:ios": "npx expo run:ios",
     "dev:start": "npx expo start",
     "dev:clean-start": "npx expo start --clear",
-    "build:release:android": "pnpm run generate:env:release && pnpm exec expo prebuild --platform android --clean --no-install && mkdir -p android/app/build/intermediates/sourcemaps/react/release && cd android && NODE_ENV=production ./gradlew :app:assembleRelease --build-cache --parallel",
+    "build:release:android": "pnpm run generate:env:release && pnpm exec expo prebuild --platform android --clean --no-install && mkdir -p android/app/build/intermediates/sourcemaps/react/release && cd android && NODE_ENV=production ./gradlew :app:assembleRelease --build-cache --parallel -PreleaseAbiSplits=true",
     "build:open-apk": "open ./android/app/build/outputs/apk/release/",
     "generate:env:debug": "node scripts/generate-env-file.cjs --build-type Debug",
     "generate:env:release": "node scripts/generate-env-file.cjs --build-type Release",
@@ -48,8 +48,6 @@
     "@react-navigation/bottom-tabs": "^7.18.11",
     "@react-navigation/native": "^7.3.11",
     "@react-navigation/native-stack": "^7.18.3",
-    "@shopify/flash-list": "^2.0.2",
-    "babel-plugin-inline-import": "^3.0.0",
     "cheerio": "1.0.0-rc.12",
     "color": "^5.0.3",
     "dayjs": "^1.11.21",
@@ -116,6 +114,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
+    "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-sqlite3": "^12.11.1",
@@ -137,7 +136,9 @@
   },
   "expo": {
     "autolinking": {
-      "exclude": ["@expo/dom-webview"]
+      "exclude": [
+        "@expo/dom-webview"
+      ]
     },
     "doctor": {
       "reactNativeDirectoryCheck": {
@@ -166,5 +167,5 @@
   "engines": {
     "node": ">=22.11.0"
   },
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.20.0"
 }
