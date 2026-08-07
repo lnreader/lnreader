@@ -54,7 +54,9 @@ const SettingsTaxonomyScreen = ({ navigation }: GenreTaxonomyScreenProps) => {
       )
     ) return;
     setTaxonomy([...taxonomy, { parent: name, children: [] }]);
-    setDialog({ type: 'none' });
+    // Stay in the same dialog, now in edit mode, so subgenres can be added
+    // directly without reopening.
+    setDialog({ type: 'editParent', parentName: name });
   };
 
   const handleEditParent = () => {

@@ -3,7 +3,11 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import SettingsTaxonomyScreen from '../SettingsTaxonomyScreen';
 
 let mockTaxonomy: { parent: string; children: string[] }[] = [];
-const mockSetTaxonomy = jest.fn();
+const mockSetTaxonomy = jest.fn(
+  (next: { parent: string; children: string[] }[]) => {
+    mockTaxonomy = next;
+  },
+);
 
 jest.mock('@hooks/persisted', () => ({
   useTheme: () => ({
@@ -119,6 +123,26 @@ describe('SettingsTaxonomyScreen', () => {
     expect(mockSetTaxonomy).toHaveBeenCalledWith([
       { parent: 'Fantasy', children: ['Sci-Fi'] },
       { parent: 'Comedy', children: [] },
+    ]);
+  });
+
+  it('stays in the dialog to add subgenres right after adding a parent', () => {
+    renderScreen();
+    fireEvent.press(screen.getByText('genreStats.addCategory'));
+    fireEvent.changeText(
+      screen.getByTestId('genreStats.parentNamePlaceholder'),
+      'Comedy',
+    );
+    fireEvent.press(screen.getByText('common.ok'));
+    // Dialog switched to edit mode for the new parent: child input is live
+    fireEvent.changeText(
+      screen.getByTestId('genreStats.childNamePlaceholder'),
+      'Slice of Life',
+    );
+    fireEvent.press(screen.getByTestId('icon-plus'));
+    expect(mockSetTaxonomy).toHaveBeenLastCalledWith([
+      { parent: 'Fantasy', children: ['Sci-Fi'] },
+      { parent: 'Comedy', children: ['Slice of Life'] },
     ]);
   });
 
