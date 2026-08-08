@@ -6,7 +6,7 @@ import {
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import { useMMKVObject } from 'react-native-mmkv';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { DateFormat } from '@utils/dateFormat';
 import type {
@@ -223,7 +223,21 @@ export interface ChapterReaderSettings {
   epubUseCustomCSS: boolean;
   epubUseCustomJS: boolean;
   epubIncludeChapterNumber: boolean;
+  /**
+   * Custom code
+   */
+  replaceText: Record<string, string>;
+  removeText: string[];
+  codeSnippetsCSS: CodeSnippet[];
+  codeSnippetsJS: CodeSnippet[];
 }
+
+type CodeSnippet = {
+  name: string;
+  code: string;
+  lang: 'js' | 'css';
+  active: boolean;
+};
 
 const initialAppSettings: AppSettings = {
   /**
@@ -326,6 +340,13 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   epubUseCustomCSS: false,
   epubUseCustomJS: false,
   epubIncludeChapterNumber: false,
+  /**
+   * Custom code
+   */
+  replaceText: {},
+  removeText: [],
+  codeSnippetsCSS: [],
+  codeSnippetsJS: [],
 };
 
 export const useAppSettings = () => {
@@ -400,6 +421,7 @@ export const useChapterReaderSettings = () => {
   // object on every render invalidates everything derived from them.
   const chapterReaderSettings = useMemo(
     () => ({
+      ...initialChapterReaderSettings,
       ...storedSettings,
       tts: {
         ...initialChapterReaderSettings.tts,
@@ -435,6 +457,46 @@ export const useChapterReaderSettings = () => {
       ),
     });
 
+  // Migrate old customCSS/customJS to new CodeSnippet arrays
+  useEffect(() => {
+    const css = storedSettings.customCSS?.trim();
+    const js = storedSettings.customJS?.trim();
+    if (css || js) {
+      const migratedCSS: CodeSnippet[] = css
+        ? [
+            {
+              name: 'Legacy CSS',
+              code: css,
+              lang: 'css' as const,
+              active: storedSettings.epubUseCustomCSS,
+            },
+          ]
+        : [];
+      const migratedJS: CodeSnippet[] = js
+        ? [
+            {
+              name: 'Legacy JS',
+              code: js,
+              lang: 'js' as const,
+              active: storedSettings.epubUseCustomJS,
+            },
+          ]
+        : [];
+      setChapterReaderSettings({
+        customCSS: '',
+        customJS: '',
+        codeSnippetsCSS: [
+          ...migratedCSS,
+          ...(storedSettings.codeSnippetsCSS ?? []),
+        ],
+        codeSnippetsJS: [
+          ...migratedJS,
+          ...(storedSettings.codeSnippetsJS ?? []),
+        ],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return {
     ...chapterReaderSettings,
     setChapterReaderSettings,

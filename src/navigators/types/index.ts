@@ -83,6 +83,8 @@ export type SettingsStackParamList = {
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
   RespositorySettings: { url?: string } | undefined;
+CustomCode: undefined;
+  CodeSnippets: { snippetIndex: number; isJS: boolean } | undefined;
   GenreTaxonomy: undefined;
 };
 
@@ -191,6 +193,15 @@ export type GenreTaxonomyScreenProps = CompositeScreenProps<
 export type RespositorySettingsScreenProps = CompositeScreenProps<
   StackScreenProps<SettingsStackParamList, 'RespositorySettings'>,
   StackScreenProps<RootStackParamList, 'BottomNavigator'>
+>;
+
+export type CustomCodeSettingsScreenProps = StackScreenProps<
+  SettingsStackParamList,
+  'CustomCode'
+>;
+export type CodeSnippetsScreenProps = StackScreenProps<
+  SettingsStackParamList,
+  'CodeSnippets'
 >;
 
 declare global {

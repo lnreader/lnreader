@@ -22,6 +22,7 @@ import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices
 import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
 import { useRozeniteSqlitePlugin } from '@rozenite/sqlite-plugin';
 import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 enableFreeze(true);
 const sqliteAdapters = __DEV__ && opSqliteAdapter ? [opSqliteAdapter] : [];
@@ -91,18 +92,23 @@ const App = () => {
 
   return (
     <Suspense fallback={null}>
-      <ThemeProvider>
+<ThemeProvider>
         <ThemedRootView>
-          <AppErrorBoundary>
-            <SafeAreaProvider>
-              <ThemedPaperProvider>
-                <BottomSheetModalProvider>
-                  <StatusBar translucent={true} backgroundColor="transparent" />
-                  <Main />
-                </BottomSheetModalProvider>
-              </ThemedPaperProvider>
-            </SafeAreaProvider>
-          </AppErrorBoundary>
+          <KeyboardProvider>
+            <AppErrorBoundary>
+              <SafeAreaProvider>
+                <ThemedPaperProvider>
+                  <BottomSheetModalProvider>
+                    <StatusBar
+                      translucent={true}
+                      backgroundColor="transparent"
+                    />
+                    <Main />
+                  </BottomSheetModalProvider>
+                </ThemedPaperProvider>
+              </SafeAreaProvider>
+            </AppErrorBoundary>
+          </KeyboardProvider>
         </ThemedRootView>
       </ThemeProvider>
     </Suspense>
