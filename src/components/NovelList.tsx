@@ -54,14 +54,6 @@ export const extendNovelList = (
     }
   }
 
-  extension.push({
-    id: undefined,
-    cover: '',
-    name: '',
-    path: '__loading-row',
-    completeRow: 2,
-  });
-
   return [...data, ...extension];
 };
 

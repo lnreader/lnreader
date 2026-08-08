@@ -77,7 +77,11 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
     return renderLoadingNovel(completeRow);
   }
 
-  if (displayMode === DisplayModes.List) {
+  // completeRow === 2: a single full-width trailing row (rendered as the
+  // list footer), not a screen-filling grid.
+  if (completeRow === 2) {
+    items = [1];
+  } else if (displayMode === DisplayModes.List) {
     items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   } else {
     for (let i = 1; i * pictureHeight < window.height - 100; i++) {

@@ -1,5 +1,6 @@
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { ChapterInfo } from '@database/types';
+import { runWhenIdle } from '@utils/runWhenIdle';
 import { createBootstrapService } from '../store-helper/bootstrapService';
 import {
   bookmarkChaptersAction,
@@ -154,6 +155,11 @@ export const createNovelStoreChapterActions = ({
           continue;
         }
 
+        // Same deferral as getNextChapterBatch: the batched reads are
+        // synchronous 1000-row materialisations that must not run mid-scroll.
+        await new Promise<void>(resolve => {
+          runWhenIdle(() => resolve(), 1000);
+        });
         await bootstrapService.loadUpToBatch({
           targetBatch: nextTarget,
           novel: state.novel,
@@ -192,6 +198,13 @@ export const createNovelStoreChapterActions = ({
         promise: Promise.resolve(),
       };
       request.promise = (async () => {
+        // The batched read materialises up to 1000 chapter rows on the JS
+        // thread synchronously; running it inside the scroll callback stalls
+        // the list at every batch boundary on novels with >1000 chapters
+        // (measured frame drops). Defer it until the thread is idle.
+        await new Promise<void>(resolve => {
+          runWhenIdle(() => resolve(), 1000);
+        });
         const result = await bootstrapService.getNextChapterBatch({
           novel: state.novel,
           pages: state.pages,

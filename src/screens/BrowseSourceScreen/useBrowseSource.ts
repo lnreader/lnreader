@@ -23,44 +23,84 @@ export const useBrowseSource = (
 
   const isScreenMounted = useRef(true);
 
+  // Serialize page fetches: onEndReached bursts (threshold 1.5 with a short
+  // list) can bump currentPage several times before the first request settles.
+  // Without a queue, that spawns concurrent out-of-order page fetches — each
+  // append re-renders the whole grid and remounts the "loading more" shimmer
+  // cells, which reads as stutter while scrolling the source list.
+  const fetchQueueRef = useRef<Promise<void>>(Promise.resolve());
+  // Bumped whenever the list is reset to page 1 (refetch, filters); queued
+  // fetches from an older generation are discarded so they cannot append
+  // stale pages onto a fresh list.
+  const generationRef = useRef(0);
+  // Highest page whose items are in the list, and highest page requested.
+  // `fetchNextPage` always asks for `lastLoaded + 1`, so a failed/empty
+  // fetch is retried on the next approach instead of being skipped past.
+  const lastLoadedPageRef = useRef(0);
+  const requestedPageRef = useRef(1);
+
   const fetchNovels = useCallback(
-    async (page: number, filters?: FilterToValues<Filters>) => {
-      if (isScreenMounted.current === true) {
+    (page: number, filters?: FilterToValues<Filters>) => {
+      const run = async () => {
+        if (!isScreenMounted.current) {
+          return;
+        }
+        const generation = generationRef.current;
         try {
           const plugin = getPlugin(pluginId);
           if (!plugin) {
             throw new Error(`Unknown plugin: ${pluginId}`);
           }
-          await plugin
-            .popularNovels(page, {
-              showLatestNovels,
-              filters,
-            })
-            .then(res => {
-              setNovels(prevState =>
-                page === 1 ? res : [...prevState, ...res],
-              );
-              if (!res.length) {
-                setHasNextPage(false);
-              }
-            })
-            .catch(e => {
-              setError(e.message);
-              setHasNextPage(false);
-            });
+          const res = await plugin.popularNovels(page, {
+            showLatestNovels,
+            filters,
+          });
+          if (generation !== generationRef.current) {
+            return;
+          }
+          setNovels(prevState => (page === 1 ? res : [...prevState, ...res]));
+          lastLoadedPageRef.current = Math.max(lastLoadedPageRef.current, page);
+          if (!res.length) {
+            setHasNextPage(false);
+          }
           setFilterValues(plugin.filters);
         } catch (err: unknown) {
-          setError(`${err}`);
+          if (generation !== generationRef.current) {
+            return;
+          }
+          setError(err instanceof Error ? err.message : `${err}`);
+          // A failed page fetch must not permanently end the list: sources
+          // rate-limit and transient network errors are common, and once
+          // `hasNextPage` flips false nothing ever retries (the screen stays
+          // mounted behind the reader, so the dead state persists even after
+          // navigating away and back). Un-request the failed page so the next
+          // approach retries it; only a successful empty response marks the end.
+          requestedPageRef.current = Math.min(
+            requestedPageRef.current,
+            page - 1,
+          );
         } finally {
-          setIsLoading(false);
+          if (generation === generationRef.current) {
+            setIsLoading(false);
+          }
         }
-      }
+      };
+      fetchQueueRef.current = fetchQueueRef.current.then(run, run);
+      return fetchQueueRef.current;
     },
     [pluginId, showLatestNovels],
   );
 
   const fetchNextPage = () => {
-    if (hasNextPage) setCurrentPage(prevState => prevState + 1);
+    if (!hasNextPage) {
+      return;
+    }
+    const next = lastLoadedPageRef.current + 1;
+    if (next <= requestedPageRef.current) {
+      return;
+    }
+    requestedPageRef.current = next;
+    void fetchNovels(next, selectedFilters);
   };
 
   /**
@@ -73,15 +113,17 @@ export const useBrowseSource = (
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNovels(currentPage, selectedFilters);
   }, [fetchNovels, currentPage, selectedFilters]);
 
   const refetchNovels = () => {
+    generationRef.current += 1;
     setError('');
     setIsLoading(true);
     setNovels([]);
     setCurrentPage(1);
+    lastLoadedPageRef.current = 0;
+    requestedPageRef.current = 1;
     fetchNovels(1, selectedFilters);
   };
 
@@ -91,8 +133,11 @@ export const useBrowseSource = (
   );
 
   const setFilters = (filters?: FilterToValues<Filters>) => {
+    generationRef.current += 1;
     setIsLoading(true);
     setCurrentPage(1);
+    lastLoadedPageRef.current = 0;
+    requestedPageRef.current = 1;
     fetchNovels(1, filters);
     setSelectedFilters(filters);
   };
@@ -119,48 +164,89 @@ export const useSearchSource = (pluginId: string) => {
   const [searchText, setSearchText] = useState('');
 
   const searchSource = (searchTerm: string) => {
+    searchGenerationRef.current += 1;
     setSearchResults([]);
     setHasNextSearchPage(true);
     setCurrentPage(1);
+    lastLoadedPageRef.current = 0;
+    requestedPageRef.current = 1;
     setSearchText(searchTerm);
     setIsSearching(true);
   };
 
   const isScreenMounted = useRef(true);
 
+  // Serialize page fetches — see useBrowseSource.fetchNovels for why.
+  const fetchQueueRef = useRef<Promise<void>>(Promise.resolve());
+  // Bumped whenever a new search starts; queued fetches from a previous
+  // search are discarded so they cannot append stale results onto a new one.
+  const searchGenerationRef = useRef(0);
+  // Same last-loaded/requested page tracking as useBrowseSource so failed
+  // pages are retried instead of skipped.
+  const lastLoadedPageRef = useRef(0);
+  const requestedPageRef = useRef(1);
+
   const fetchNovels = useCallback(
-    async (localSearchText: string, page: number) => {
-      if (isScreenMounted.current === true) {
+    (localSearchText: string, page: number) => {
+      const run = async () => {
+        if (!isScreenMounted.current) {
+          return;
+        }
+        const generation = searchGenerationRef.current;
         try {
           const plugin = getPlugin(pluginId);
           if (!plugin) {
             throw new Error(`Unknown plugin: ${pluginId}`);
           }
           const res = await plugin.searchNovels(localSearchText, page);
+          if (generation !== searchGenerationRef.current) {
+            return;
+          }
           setSearchResults(prevState =>
             page === 1 ? res : [...prevState, ...res],
           );
+          lastLoadedPageRef.current = Math.max(lastLoadedPageRef.current, page);
           if (!res.length) {
             setHasNextSearchPage(false);
           }
         } catch (err: unknown) {
+          if (generation !== searchGenerationRef.current) {
+            return;
+          }
           setSearchError(`${err}`);
-          setHasNextSearchPage(false);
+          // See fetchNovels: a transient failure must not permanently end
+          // pagination; un-request the failed page so the next approach
+          // retries it.
+          requestedPageRef.current = Math.min(
+            requestedPageRef.current,
+            page - 1,
+          );
         } finally {
-          setIsSearching(false);
+          if (generation === searchGenerationRef.current) {
+            setIsSearching(false);
+          }
         }
-      }
+      };
+      fetchQueueRef.current = fetchQueueRef.current.then(run, run);
+      return fetchQueueRef.current;
     },
     [pluginId],
   );
 
   const searchNextPage = () => {
-    if (hasNextSearchPage) setCurrentPage(prevState => prevState + 1);
+    if (!hasNextSearchPage) {
+      return;
+    }
+    const next = lastLoadedPageRef.current + 1;
+    if (next <= requestedPageRef.current) {
+      return;
+    }
+    requestedPageRef.current = next;
+    void fetchNovels(searchText, next);
   };
 
   useEffect(() => {
     if (searchText) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchNovels(searchText, currentPage);
     }
   }, [currentPage, fetchNovels, searchText]);
@@ -170,6 +256,8 @@ export const useSearchSource = (pluginId: string) => {
     setSearchResults([]);
     setCurrentPage(1);
     setHasNextSearchPage(true);
+    lastLoadedPageRef.current = 0;
+    requestedPageRef.current = 1;
   }, []);
 
   return {

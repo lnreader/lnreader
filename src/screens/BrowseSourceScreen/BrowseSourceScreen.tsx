@@ -85,6 +85,50 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
 
   const { bottom, right } = useSafeAreaInsets();
   const filterSheetRef = useRef<BottomSheetModalMethods | null>(null);
+  const lastFetchDistanceRef = useRef(Infinity);
+  const lastContentHeightRef = useRef(0);
+  const lastOffsetYRef = useRef(-1);
+  const handleScroll = (event: {
+    nativeEvent: {
+      contentOffset: { y: number };
+      contentSize: { height: number };
+      layoutMeasurement: { height: number };
+    };
+  }) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromEnd =
+      contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    const offsetMoved = contentOffset.y !== lastOffsetYRef.current;
+    lastOffsetYRef.current = contentOffset.y;
+
+    // A page appended (the end moved away). Re-arm the gate so the next user
+    // scroll toward the end fetches again. Content-size-only events (offset
+    // unchanged) never fetch on their own — that is what turned the old
+    // onEndReached flow into a loop on sources that never return an empty
+    // page (measured: htmlparser2 hot on every frame).
+    if (contentSize.height !== lastContentHeightRef.current) {
+      lastContentHeightRef.current = contentSize.height;
+      if (offsetMoved) {
+        lastFetchDistanceRef.current = Infinity;
+      }
+    }
+    if (!offsetMoved) {
+      return;
+    }
+    if (
+      distanceFromEnd < layoutMeasurement.height * 1.5 &&
+      distanceFromEnd < lastFetchDistanceRef.current
+    ) {
+      lastFetchDistanceRef.current = distanceFromEnd;
+      if (searchText) {
+        if (hasNextSearchPage) {
+          searchNextPage();
+        }
+      } else if (hasNextPage) {
+        fetchNextPage();
+      }
+    }
+  };
   return (
     <SafeAreaView>
       <SearchbarV2
@@ -121,6 +165,12 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
         <NovelList
           data={novelList}
           inSource
+          ListFooterComponent={
+            (hasNextPage && !searchText) ||
+            (hasNextSearchPage && Boolean(searchText)) ? (
+              <SourceScreenSkeletonLoading theme={theme} completeRow={2} />
+            ) : null
+          }
           renderItem={({ item }) => {
             const inLibrary = novelInLibrary(pluginId, item.path);
 
@@ -148,16 +198,8 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
               />
             );
           }}
-          onEndReached={() => {
-            if (searchText) {
-              if (hasNextSearchPage) {
-                searchNextPage();
-              }
-            } else if (hasNextPage) {
-              fetchNextPage();
-            }
-          }}
-          onEndReachedThreshold={1.5}
+          onScroll={handleScroll}
+          scrollEventThrottle={32}
         />
       )}
       {!showLatestNovels && filterValues && !searchText ? (

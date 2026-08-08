@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -38,6 +38,7 @@ import { backgroundTasks } from '@services/backgroundTasks';
 import ReaderStack from './ReaderStack';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
+import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const MainNavigator = () => {
@@ -67,12 +68,17 @@ const MainNavigator = () => {
     }
   }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch]);
 
+  const navigationRef = useRef(null);
+
+  // Enable React Navigation DevTools in development
+  useReactNavigationDevTools({ ref: navigationRef });
+
   if (!isOnboarded) {
     return <OnboardingScreen />;
   }
-
   return (
     <NavigationContainer<RootStackParamList>
+      ref={navigationRef}
       theme={{
         colors: {
           ...DefaultTheme.colors,

@@ -326,6 +326,10 @@ describe('novelStore.chapterActions', () => {
     );
 
     const request = harness.actions.loadUpToBatch(1);
+    // The store action defers the batched read to the idle callback (a
+    // macrotask in the test environment); let that tick run so the mocked
+    // load starts before the generation is invalidated.
+    await new Promise(resolve => setTimeout(resolve, 0));
     harness.chapterRequestCoordinator.invalidate();
     resolveLoad();
     await request;

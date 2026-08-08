@@ -59,7 +59,6 @@ describe('NovelList helpers', () => {
       '/two',
       '__loading-filler-0',
       '__loading-filler-1',
-      '__loading-row',
     ]);
   });
 });
