@@ -109,6 +109,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
               path: lastNovel.novelPath,
               cover: lastNovel.novelCover,
               pluginId: lastNovel.pluginId,
+              inLibrary: lastNovel.inLibrary,
             },
           });
         }

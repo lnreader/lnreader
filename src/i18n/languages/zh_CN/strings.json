@@ -82,6 +82,16 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "备份名称",
     "backupCreated": "成功创建备份",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
@@ -302,6 +312,7 @@
     "globally": "全局",
     "install": "安装",
     "imported": "Imported",
+    "later": "Later",
     "logout": "登出",
     "name": "名称",
     "newUpdateAvailable": "新版本可用",
@@ -318,6 +329,7 @@
     "save": "保存",
     "saved": "Saved",
     "search": "搜索",
+    "skipVersion": "Skip version",
     "searchFor": "搜索",
     "searchResults": "搜索结果",
     "settings": "设置",
@@ -361,6 +373,12 @@
     "noDownloads": "无下载",
     "pluginNotFound": "找不到插件！",
     "removeDownloadsWarning": "您确定吗？所有已下载章节都将被删除。"
+  },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
   },
   "generalSettings": "常规",
   "generalSettingsScreen": {
@@ -582,10 +600,12 @@
     "status": {
       "cancelled": "取消",
       "completed": "完结",
+      "inactive": "Inactive",
       "licensed": "已授权",
       "onHiatus": "停更",
       "ongoing": "连载",
       "publishingFinished": "出版完成",
+      "stub": "STUB",
       "unknown": "未知"
     },
     "tracked": "进度记录中",
@@ -682,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "已下载章节",
     "genreDistribution": "流派分布",
+    "novels": "novels",
     "readChapters": "已读章节",
     "sources": "源",
     "statusDistribution": "状态分布",
@@ -693,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "进度记录",
   "trackingScreen": {
@@ -756,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }

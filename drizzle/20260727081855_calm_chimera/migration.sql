@@ -60,34 +60,24 @@ SELECT
 	`__migration_Novel`.`inLibrary`,
 	`__migration_Novel`.`isLocal`,
 	`__migration_Novel`.`totalPages`,
-	(
-		SELECT COUNT(*)
-		FROM `__migration_Chapter`
-		WHERE `__migration_Chapter`.`novelId` = `__migration_Novel`.`id`
-			AND `__migration_Chapter`.`isDownloaded` = 1
-	),
-	(
-		SELECT COUNT(*)
-		FROM `__migration_Chapter`
-		WHERE `__migration_Chapter`.`novelId` = `__migration_Novel`.`id`
-			AND `__migration_Chapter`.`unread` = 1
-	),
-	(
-		SELECT COUNT(*)
-		FROM `__migration_Chapter`
-		WHERE `__migration_Chapter`.`novelId` = `__migration_Novel`.`id`
-	),
-	(
-		SELECT MAX(`__migration_Chapter`.`readTime`)
-		FROM `__migration_Chapter`
-		WHERE `__migration_Chapter`.`novelId` = `__migration_Novel`.`id`
-	),
-	(
-		SELECT MAX(`__migration_Chapter`.`updatedTime`)
-		FROM `__migration_Chapter`
-		WHERE `__migration_Chapter`.`novelId` = `__migration_Novel`.`id`
-	)
-FROM `__migration_Novel`;--> statement-breakpoint
+	COALESCE(`chapter_stats`.`chaptersDownloaded`, 0),
+	COALESCE(`chapter_stats`.`chaptersUnread`, 0),
+	COALESCE(`chapter_stats`.`totalChapters`, 0),
+	`chapter_stats`.`lastReadAt`,
+	`chapter_stats`.`lastUpdatedAt`
+FROM `__migration_Novel`
+LEFT JOIN (
+	SELECT
+		`novelId`,
+		SUM(CASE WHEN `isDownloaded` = 1 THEN 1 ELSE 0 END) AS `chaptersDownloaded`,
+		SUM(CASE WHEN `unread` = 1 THEN 1 ELSE 0 END) AS `chaptersUnread`,
+		COUNT(*) AS `totalChapters`,
+		MAX(`readTime`) AS `lastReadAt`,
+		MAX(`updatedTime`) AS `lastUpdatedAt`
+	FROM `__migration_Chapter`
+	GROUP BY `novelId`
+) AS `chapter_stats`
+	ON `chapter_stats`.`novelId` = `__migration_Novel`.`id`;--> statement-breakpoint
 DELETE FROM `NovelCategory`;--> statement-breakpoint
 DELETE FROM `Chapter`;--> statement-breakpoint
 DROP TABLE IF EXISTS `Novel`;--> statement-breakpoint

@@ -3,7 +3,8 @@ import { utf8ToBytes, bytesToUtf8 } from '@noble/ciphers/utils.js';
 import dayjs from 'dayjs';
 import { load } from 'cheerio';
 import { Parser } from 'htmlparser2';
-import { reverse, uniqBy } from 'lodash-es';
+import reverse from 'lodash-es/reverse';
+import uniqBy from 'lodash-es/uniqBy';
 import { encode, decode } from 'urlencode';
 
 import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';

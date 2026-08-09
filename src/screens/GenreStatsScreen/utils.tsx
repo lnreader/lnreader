@@ -27,6 +27,23 @@ export function buildGenreTree(
   // Step 1: For each novel, split genres by comma, normalize, collect into Map<genreName, Set<novelId>>
   const genreMap = new Map<string, Set<number>>();
 
+  // normalized name -> original spelling -> occurrence count
+  const genreNameVariants = new Map<string, Map<string, number>>();
+
+  // Pick the most common original spelling; ties keep the first-encountered
+  // (Map preserves insertion order, so this is deterministic).
+  function getDisplayName(variants: Map<string, number>): string {
+    let best = '';
+    let bestCount = -1;
+    for (const [name, count] of variants) {
+      if (count > bestCount) {
+        best = name;
+        bestCount = count;
+      }
+    }
+    return best;
+  }
+
   for (const novel of novels) {
     if (!novel.genres || novel.genres.trim().length === 0) {
       const unknown = 'Unknown';
@@ -40,6 +57,16 @@ export function buildGenreTree(
       const normalized = normalizeGenre(part);
       if (!genreMap.has(normalized)) genreMap.set(normalized, new Set());
       genreMap.get(normalized)!.add(novel.id);
+
+      const original = part.trim();
+      if (original.length > 0) {
+        const variants = genreNameVariants.get(normalized);
+        if (variants) {
+          variants.set(original, (variants.get(original) ?? 0) + 1);
+        } else {
+          genreNameVariants.set(normalized, new Map([[original, 1]]));
+        }
+      }
     }
   }
 
@@ -51,10 +78,9 @@ export function buildGenreTree(
   for (const taxNode of activeTaxonomy) {
     const normalizedParent = normalizeGenre(taxNode.parent);
     const parentEntry = genreMap.get(normalizedParent);
-    if (!parentEntry) continue;
 
     // Collect novelIds: union of parent + all children that exist in genreMap
-    const categoryNovelIds = new Set(parentEntry);
+    const categoryNovelIds = new Set(parentEntry ?? []);
 
     const children: GenreTreeNode[] = [];
     for (const childName of taxNode.children) {
@@ -77,6 +103,10 @@ export function buildGenreTree(
       });
     }
 
+    // Skip categories with no matching novels at all — neither the parent
+    // genre nor any of its children appear in the library.
+    if (categoryNovelIds.size === 0) continue;
+
     processed.add(normalizedParent);
 
     // Sort children by count descending
@@ -84,7 +114,7 @@ export function buildGenreTree(
 
     result.push({
       name: taxNode.parent,
-      count: parentEntry.size,
+      count: parentEntry?.size ?? 0,
       categoryTotal: categoryNovelIds.size,
       novelIds: Array.from(categoryNovelIds),
       children: children.length > 0 ? children : undefined,
@@ -95,8 +125,9 @@ export function buildGenreTree(
   // Step 3: Remaining unprocessed genres → standalone
   for (const [genreName, novelIds] of genreMap) {
     if (processed.has(genreName)) continue;
+    const variants = genreNameVariants.get(genreName);
     result.push({
-      name: genreName,
+      name: variants ? getDisplayName(variants) : genreName,
       count: novelIds.size,
       categoryTotal: novelIds.size,
       novelIds: Array.from(novelIds),

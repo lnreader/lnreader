@@ -14,7 +14,7 @@ import {
   LegendListRef,
   ViewToken,
 } from '@legendapp/list/react-native';
-import { noop } from 'lodash-es';
+import noop from 'lodash-es/noop';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 import { ChapterInfo } from '@database/types';
 

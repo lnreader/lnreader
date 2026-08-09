@@ -12,6 +12,7 @@ export const getHistoryFromDb = async () => {
   return dbManager
     .select({
       ...getColumns(chapterSchema),
+      inLibrary: novelSchema.inLibrary,
       pluginId: novelSchema.pluginId,
       novelName: novelSchema.name,
       novelPath: novelSchema.path,

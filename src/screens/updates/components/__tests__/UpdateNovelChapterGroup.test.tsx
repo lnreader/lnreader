@@ -34,6 +34,7 @@ jest.mock('@screens/novel/components/NovelChapterGroup', () => {
 });
 
 const overview: UpdateOverview = {
+  inLibrary: true,
   novelId: 42,
   pluginId: 'source-id',
   novelName: 'Example Novel',
@@ -64,6 +65,9 @@ describe('UpdateNovelChapterGroup', () => {
     );
 
     expect(mockUseDetailedUpdates).not.toHaveBeenCalled();
+    expect(mockNovelChapterGroup.mock.calls.at(-1)?.[0].novel).toMatchObject({
+      inLibrary: true,
+    });
 
     fireEvent.press(screen.getByTestId('novel-chapter-group'));
 

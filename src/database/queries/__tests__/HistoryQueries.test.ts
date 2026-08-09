@@ -45,6 +45,7 @@ describe('HistoryQueries', () => {
       const novelIds = result.map(h => h.novelId);
       expect(novelIds).toContain(novelId1);
       expect(novelIds).toContain(novelId2);
+      expect(result.every(item => item.inLibrary)).toBe(true);
     });
 
     it('should return empty array when no history exists', async () => {

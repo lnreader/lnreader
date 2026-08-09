@@ -799,6 +799,7 @@ export const getNovelDownloadedChapters = async (
 export const getUpdatedOverviewFromDb = async () =>
   dbManager
     .select({
+      inLibrary: novelSchema.inLibrary,
       novelId: novelSchema.id,
       pluginId: novelSchema.pluginId,
       novelName: novelSchema.name,

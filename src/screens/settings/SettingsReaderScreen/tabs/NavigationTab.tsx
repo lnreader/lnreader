@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { defaultTo } from 'lodash-es';
+import defaultTo from 'lodash-es/defaultTo';
 import { useTheme, useChapterGeneralSettings } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { List, Button } from '@components/index';

@@ -52,6 +52,7 @@ const UpdateNovelChapterGroup: React.FC<UpdateNovelChapterGroupProps> = ({
       name: overview.novelName,
       path: overview.novelPath,
       cover: overview.novelCover,
+      inLibrary: overview.inLibrary,
     }),
     [overview],
   );

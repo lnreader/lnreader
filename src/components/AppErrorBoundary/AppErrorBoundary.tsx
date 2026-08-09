@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, StatusBar } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import * as Clipboard from 'expo-clipboard';
 import { getString } from '@i18n/translations';
+import { getErrorChainMessages } from '@utils/error';
 import { showToast } from '@utils/showToast';
 import { Button, List } from '@components';
 import { useTheme } from '@hooks/persisted';
@@ -31,9 +32,12 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     }
   };
 
+  const chainMessages = useMemo(() => getErrorChainMessages(error), [error]);
+
   const handleCopyStackTrace = async () => {
     try {
-      await Clipboard.setStringAsync(`${error.message}\n\n${error.stack}`);
+      const message = chainMessages.join('\n\nCaused by: ');
+      await Clipboard.setStringAsync(`${message}\n\n${error.stack}`);
       showToast(
         fallbackGetString(
           'common.copiedToClipboard',
@@ -74,7 +78,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           ]}
           numberOfLines={20}
         >
-          {`${error.message}\n\n${error.stack}`}
+          {`${chainMessages.join('\n\nCaused by: ')}\n\n${error.stack}`}
         </Text>
       </View>
       <List.Divider theme={theme} />
