@@ -439,12 +439,12 @@ export function MemoizedHighlightedCode({
   const [window, setWindow] = useState<{ start: number; end: number }>(() =>
     scrollSink
       ? {
-        start: 0,
-        end: Math.min(
-          resolvedLines.length,
-          Math.ceil(viewportHeight / LINE_HEIGHT) + BOTTOM_OVERS,
-        ),
-      }
+          start: 0,
+          end: Math.min(
+            resolvedLines.length,
+            Math.ceil(viewportHeight / LINE_HEIGHT) + BOTTOM_OVERS,
+          ),
+        }
       : { start: 0, end: 0 },
   );
   const [corr, setCorr] = useState(0);
@@ -468,7 +468,11 @@ export function MemoizedHighlightedCode({
     (count: number): number => {
       const rows = linesRef.current;
       let sum = 0;
-      for (let i = 0; i < count; i += 1) {
+      // The window is updated by scroll events, so after a large edit that
+      // shrinks the content it can point past the end of the current rows
+      // until the next scroll/layout pass. Never read past the array.
+      const limit = Math.min(count, rows.length);
+      for (let i = 0; i < limit; i += 1) {
         sum += heightsRef.current.get(rows[i].id) ?? estimateHeight(rows[i]);
       }
       return sum;
@@ -589,11 +593,11 @@ export function MemoizedHighlightedCode({
             onLayout={
               scrollSink
                 ? e => {
-                  const h = e.nativeEvent.layout.height;
-                  if (heightsRef.current.get(line.id) !== h) {
-                    heightsRef.current.set(line.id, h);
+                    const h = e.nativeEvent.layout.height;
+                    if (heightsRef.current.get(line.id) !== h) {
+                      heightsRef.current.set(line.id, h);
+                    }
                   }
-                }
                 : undefined
             }
           >
@@ -683,8 +687,8 @@ export function SimpleCodeEditor({
     highlightMode === 'off'
       ? textStyle.color
       : highlightMode === 'combined'
-        ? Color(textStyle.color).alpha(0.4).string()
-        : 'rgba(0, 0, 0, 0.1)';
+      ? Color(textStyle.color).alpha(0.4).string()
+      : 'rgba(0, 0, 0, 0.1)';
 
   return (
     <View style={[styles.container, containerStyle]}>
