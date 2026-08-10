@@ -1,7 +1,6 @@
 import { AnimatedIconButton, Dialog, List } from '@components';
 import { getString } from '@i18n/translations';
 import { useBoolean } from '@hooks/index';
-import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
@@ -23,6 +22,7 @@ import {
   ReplaceItem,
 } from '../Components/ListItems';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
+import { LegendList } from '@legendapp/list/react-native';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const LIST_CLOSED_HEIGHT = LIST_ITEM_HEIGHT * 3;
@@ -206,7 +206,8 @@ const ReplaceItemModal = ({
           />
         )}
         {showReplace ? (
-          <FlashList
+          <LegendList
+            recycleItems
             data={replaceArray}
             renderItem={({ item }) => (
               <ReplaceItem
@@ -217,7 +218,8 @@ const ReplaceItemModal = ({
             )}
           />
         ) : (
-          <FlashList
+          <LegendList
+            recycleItems
             data={removeText}
             renderItem={({ item, index }) => (
               <RemoveItem

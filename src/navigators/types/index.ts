@@ -83,7 +83,7 @@ export type SettingsStackParamList = {
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
   RespositorySettings: { url?: string } | undefined;
-CustomCode: undefined;
+  CustomCode: undefined;
   CodeSnippets: { snippetIndex: number; isJS: boolean } | undefined;
   GenreTaxonomy: undefined;
 };
@@ -198,11 +198,11 @@ export type RespositorySettingsScreenProps = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList, 'BottomNavigator'>
 >;
 
-export type CustomCodeSettingsScreenProps = StackScreenProps<
+export type CustomCodeSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'CustomCode'
 >;
-export type CodeSnippetsScreenProps = StackScreenProps<
+export type CodeSnippetsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'CodeSnippets'
 >;
