@@ -1,0 +1,21 @@
+src/screens/reader/components/ChapterDrawer/RenderListChapter.tsx
+  s_353f6b635559f0::t_12880efb4824b3 60
+src/screens/reader/components/ChapterDrawer/__tests__/RenderListChapter.test.tsx
+  s_353f6b635559f0::t_53132e2e0e9d15 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "084dcccabc5b8d8823bd3b950c513a4ee55f2eba",
+  "prompts": {},
+  "sessions": {
+    "s_353f6b635559f0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe988-aefc-79f0-b8b7-5ba939bf50bb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
