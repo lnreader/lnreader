@@ -1,0 +1,21 @@
+.github/ISSUE_TEMPLATE/request_feature.yml
+  s_c1a8e20d2ba821::t_6f0efbd4f83e69 5
+.github/ISSUE_TEMPLATE/report_issue.yml
+  s_c1a8e20d2ba821::t_0a19e3cc208aa3 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ee7dcd6fa09a7e4a75ed7db86dccc1a8889befa5",
+  "prompts": {},
+  "sessions": {
+    "s_c1a8e20d2ba821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fea1f-7b7a-7ef3-ae4b-722c20f4cb35",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
