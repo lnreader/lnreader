@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Вебсайт",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Долучитися до перекладу",
     "plugins": "Plugins",
     "version": "Версія",
@@ -238,7 +238,7 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugins": "Pinned",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
@@ -662,7 +662,7 @@
       "scrollToCurrentChapter": "Прокрутити до поточного розділу",
       "scrollToTop": "Прокрутити догори"
     },
-    "emptyChapterMessage": "<p>Розділ порожній.</p><p>Повідомте про це на <a href='%{reportUrl}'>GitHub</a>, якщо він доступний у WebView.</p><p>Плагін: %{pluginId}</p><p>Новела: %{novelName}</p><p>Розділ: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Не вдалося завантажити розділ</h2><p>Читабельний вміст не знайдено. Перевірте розділ у WebView; якщо він там завантажується, <a href='%{reportUrl}'>повідомте про проблему з плагіном</a>.</p><p>Плагін: %{pluginId}<br>Новела: %{novelName}<br>Розділ: %{chapterName}</p>",
     "finished": "Завершено",
     "nextChapter": "Наступний: %{name}",
     "noNextChapter": "Наступний розділ не знайдено",

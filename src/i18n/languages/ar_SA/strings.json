@@ -555,7 +555,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -563,8 +563,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapter",
-      "next5": "Next 5 chapter",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Unread"
     },
     "edit": {
@@ -662,7 +662,7 @@
       "scrollToCurrentChapter": "التمرير إلى الفصل الحالي",
       "scrollToTop": "التمرير إلى الأعلى"
     },
-    "emptyChapterMessage": "<p>الفصل فارغ.</p><p>بلغ عنه على <a href='%{reportUrl}'>GitHub</a> إذا كان متاحاً في WebView.</p><p>الإضافة: %{pluginId}</p><p>الرواية: %{novelName}</p><p>الفصل: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>تعذر تحميل الفصل</h2><p>لم يتم العثور على محتوى قابل للقراءة. تحقق من الفصل في WebView؛ إذا تم تحميله هناك، <a href='%{reportUrl}'>فأبلغ عن مشكلة الإضافة</a>.</p><p>الإضافة: %{pluginId}<br>الرواية: %{novelName}<br>الفصل: %{chapterName}</p>",
     "finished": "انتهى",
     "nextChapter": "التالي: %{name}",
     "noNextChapter": "لا يوجد فصل تالي",

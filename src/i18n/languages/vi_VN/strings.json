@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Trang web",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Giúp chúng tôi dịch ứng dụng",
     "plugins": "Plugins",
     "version": "Phiên bản",
@@ -238,7 +238,7 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugins": "Pinned",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
@@ -662,7 +662,7 @@
       "scrollToCurrentChapter": "Chương hiện tại",
       "scrollToTop": "Lên đầu"
     },
-    "emptyChapterMessage": "<p>Chương không có nội dung.</p><p>Hãy báo cáo trên <a href='%{reportUrl}'>Github</a> nếu bạn vẫn có thể xem được bằng WebView.</p><p>Nguồn: %{pluginId}</p><p>Truyện: %{novelName}</p><p>Chương: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Không thể tải chương</h2><p>Không tìm thấy nội dung có thể đọc. Hãy kiểm tra chương trong WebView; nếu chương tải được ở đó, <a href='%{reportUrl}'>hãy báo cáo sự cố của plugin</a>.</p><p>Plugin: %{pluginId}<br>Truyện: %{novelName}<br>Chương: %{chapterName}</p>",
     "finished": "Đã xong",
     "nextChapter": "Tiếp: %{name}",
     "noNextChapter": "Không có chương kế tiếp",

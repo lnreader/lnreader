@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "网站",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "协助翻译",
     "plugins": "插件",
     "version": "版本",
@@ -662,7 +662,7 @@
       "scrollToCurrentChapter": "滚动到当前章节",
       "scrollToTop": "滚动到顶部"
     },
-    "emptyChapterMessage": "<p>章节为空。</p><p>如果在Webview中不可访问请在 <a href='%{reportUrl}'>GitHub</a> 上报告。</p><p>插件名: %{pluginId}</p><p>小说名: %{novelName}</p><p>章节编号: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>无法加载章节</h2><p>未找到可读取的内容。请在 WebView 中检查该章节；如果在那里可以加载，请<a href='%{reportUrl}'>报告插件问题</a>。</p><p>插件：%{pluginId}<br>小说：%{novelName}<br>章节：%{chapterName}</p>",
     "finished": "已完成",
     "nextChapter": "下一章: %{name}",
     "noNextChapter": "没有下一章节",

@@ -238,7 +238,7 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugins": "Pinned",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
@@ -429,7 +429,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
     "updateLibrary": "Actualizar biblioteca al iniciar",
-    "updateLibraryDesc": "Not recommended for low devices",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Mostrar la última actualización",
     "useFAB": "Usar FAB en la biblioteca",
     "timeTracking": "Time Tracking",
@@ -555,7 +555,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -563,8 +563,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapter",
-      "next5": "Next 5 chapter",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Unread"
     },
     "edit": {
@@ -662,7 +662,7 @@
       "scrollToCurrentChapter": "Desplazar al capítulo actual",
       "scrollToTop": "Desplazar a arriba"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Finalizado",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "No hay próximo capítulo",

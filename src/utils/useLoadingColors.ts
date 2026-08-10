@@ -3,9 +3,9 @@ import color from 'color';
 import { useAppSettings } from '@hooks/persisted';
 import { useMemo } from 'react';
 
-const BASE_STRENGTH = 0.08;
-const STATIC_BASE_STRENGTH = 0.12;
-const HIGHLIGHT_STRENGTH = 0.14;
+const BASE_STRENGTH = 0.03;
+const STATIC_BASE_STRENGTH = 0.05;
+const HIGHLIGHT_STRENGTH = 0.06;
 
 export const getLoadingColors = (
   theme: ThemeColors,

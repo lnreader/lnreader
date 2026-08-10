@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Website",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Help translate",
     "plugins": "Plugins",
     "version": "Version",
@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Cached novels deleted",
     "chapterInsertFailed": "chapter insert failed",
     "clearCachedNovels": "Clear cached novels",
-    "clearCachedNovelsDesc": "Delete cached novels which not in your library",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Read and Downloaded chapters and progress of non-library novels will be lost.",
     "clearUpdatesMessage": "Updates cleared.",
     "clearUpdatesTab": "Clear updates tab",
@@ -162,7 +162,7 @@
       "restore": "Drive Restore",
       "restoreInterruped": "Drive Restore Interrupted"
     },
-    "googeDrive": "Googe Drive",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "Backup to your Google Drive",
     "invalidBackupFolder": "Invalid backup folder",
     "localBackup": "Local Backup",
@@ -243,7 +243,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removed from Library",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Search sources and plugins",
     "searchResults": "Search results",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Add category",
-    "cantDeleteDefault": "You cant delete default category",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Default category",
     "deleteModal": {
@@ -434,7 +434,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
     "updateLibrary": "Update library on launch",
-    "updateLibraryDesc": "Not recommended for low devices",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Show last update time",
     "useFAB": "Use FAB in Library",
     "timeTracking": "Time Tracking",
@@ -560,7 +560,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -568,8 +568,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapter",
-      "next5": "Next 5 chapter",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Unread"
     },
     "edit": {

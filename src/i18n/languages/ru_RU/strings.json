@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Веб-сайт",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Помощь в переводе",
     "plugins": "Плагины",
     "version": "Версия",
@@ -662,9 +662,9 @@
       "scrollToCurrentChapter": "Прокрутка к текущей главе",
       "scrollToTop": "Прокрутить вверх"
     },
-    "emptyChapterMessage": "<p>Глава пуста.</p><p> Сообщите на GitHub, <a href='%{reportUrl}'>GitHub</a> если он доступен в WebView.</p><p>Плагин: %{pluginId}</p><p>Новелла: %{novelName}</p><p>Глава: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Не удалось загрузить главу</h2><p>Читаемый контент не найден. Проверьте главу в WebView; если она там загружается, <a href='%{reportUrl}'>сообщите о проблеме плагина</a>.</p><p>Плагин: %{pluginId}<br>Новелла: %{novelName}<br>Глава: %{chapterName}</p>",
     "finished": "Завершено",
-    "nextChapter": "%{name}Следующий: %{name}",
+    "nextChapter": "Следующая глава: %{name}",
     "noNextChapter": "Следующей главы нет",
     "noPreviousChapter": "Предыдущей главы нет",
     "searchMinLength": "Enter at least %{count} characters to search",

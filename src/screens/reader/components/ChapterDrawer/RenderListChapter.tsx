@@ -57,7 +57,7 @@ const RenderListChapter = ({
                 ? theme.onSecondaryContainer
                 : item.unread
                 ? theme.onSurface
-                : theme.onSurfaceVariant,
+                : theme.outline,
             },
           ]}
         >
