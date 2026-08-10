@@ -1,0 +1,291 @@
+src/i18n/languages/fr_FR/strings.json
+  s_0590ff5c8b83eb::t_f75a04028a1940 14,163,193
+  s_0590ff5c8b83eb::t_0bdc59cf4a53a0 16,274
+  s_0590ff5c8b83eb::t_3fd262a10df98a 432,558,665
+src/i18n/languages/de_DE/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+src/i18n/languages/hu_HU/strings.json
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+src/i18n/languages/sr_SP/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+src/i18n/languages/no_NO/strings.json
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+src/i18n/languages/vi_VN/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_e7ef05f98a5cf6 665
+src/i18n/languages/ar_SA/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_e7ef05f98a5cf6 665
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/pt_BR/strings.json
+  s_0590ff5c8b83eb::t_f75a04028a1940 34,37-38,192,307,558,566-567
+  s_0590ff5c8b83eb::t_3fd262a10df98a 40,184,195,199,248,432,665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+src/i18n/languages/or_IN/strings.json
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+src/i18n/languages/as_IN/strings.json
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_59577904751af5 566
+src/i18n/languages/it_IT/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_f75a04028a1940 311
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 274,558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/es_ES/strings.json
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_37f3e47f07d858 558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/zh_TW/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+src/i18n/languages/pt_PT/strings.json
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+src/i18n/languages/en/strings.json
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_f75a04028a1940 5,16,246,274,432,558,566-567
+src/i18n/languages/hi_IN/strings.json
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+src/i18n/languages/ru_RU/strings.json
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_e7ef05f98a5cf6 665
+  s_0590ff5c8b83eb::t_f6e279957338e9 667
+src/i18n/languages/tr_TR/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_f6e279957338e9 283
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+src/i18n/languages/da_DK/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_ff78d8e8932633 5
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/af_ZA/strings.json
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_3e1bd502faea4b 5
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+src/i18n/languages/ca_ES/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_ff78d8e8932633 5
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+src/i18n/languages/el_GR/strings.json
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+src/i18n/languages/ro_RO/strings.json
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+src/i18n/languages/uk_UA/strings.json
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_e7ef05f98a5cf6 665
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+src/i18n/languages/sv_SE/strings.json
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/nl_NL/strings.json
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+src/i18n/languages/cs_CZ/strings.json
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+src/i18n/languages/pl_PL/strings.json
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+src/i18n/languages/fi_FI/strings.json
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+src/i18n/languages/zh_CN/strings.json
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_e7ef05f98a5cf6 665
+src/i18n/languages/ko_KR/strings.json
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+src/i18n/languages/he_IL/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 274,558
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/ja_JP/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+src/i18n/languages/sq_AL/strings.json
+  s_0590ff5c8b83eb::t_81a341be2e1599 241
+  s_0590ff5c8b83eb::t_9c0004fc4e233f 165
+  s_0590ff5c8b83eb::t_dc91eb28fadd97 665
+  s_0590ff5c8b83eb::t_47c20af74745e7 248
+  s_0590ff5c8b83eb::t_19ab8555239971 5
+  s_0590ff5c8b83eb::t_5e68987ca20518 567
+  s_0590ff5c8b83eb::t_4ee20b3068153f 432
+  s_0590ff5c8b83eb::t_37f3e47f07d858 16,274,558
+  s_0590ff5c8b83eb::t_59577904751af5 566
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "3ad6e372fdb73b40022ab73ff83985395a686126",
+  "prompts": {},
+  "sessions": {
+    "s_0590ff5c8b83eb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd013-2e37-7700-b9f7-8270c32800cf",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
