@@ -1,0 +1,14 @@
+AGENTS.md
+  h_f56025180c46fa 1-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d7310942c8d84e860ba8e76d3c5e2e0f70edf130",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
