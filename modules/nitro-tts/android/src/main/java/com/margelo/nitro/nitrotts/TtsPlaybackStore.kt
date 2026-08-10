@@ -3,6 +3,10 @@ package com.margelo.nitro.nitrotts
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,9 +33,18 @@ internal object TtsPlaybackStore {
     private var state = TtsPlaybackState.IDLE
     private var generation = 0L
 
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var hasAudioFocus = false
+    private var resumeOnFocusGain = false
+
     fun prepare(context: Context, completion: (Result<Unit>) -> Unit) {
         runOnOwner {
             applicationContext = context.applicationContext
+            if (audioManager == null) {
+                audioManager =
+                    applicationContext?.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            }
             if (isReady && boundEngineName == settings.engineName) {
                 completion(Result.success(Unit))
                 return@runOnOwner
@@ -163,14 +176,16 @@ internal object TtsPlaybackStore {
         speakCurrent()
     }
 
+    /**
+     * Manual pause (from the user, media notification, or MediaSession controls).
+     * Always wins over a later focus regain — even if we're currently paused because of a
+     * transient focus loss (e.g. a call), calling this makes sure TTS stays paused once the
+     * call ends instead of auto-resuming.
+     */
     fun pause() {
-        if (state != TtsPlaybackState.PLAYING) {
-            return
-        }
-        generation += 1
-        engine?.stop()
-        state = TtsPlaybackState.PAUSED
-        emitState()
+        resumeOnFocusGain = false
+        abandonAudioFocus()
+        pauseEngine()
     }
 
     fun stop() {
@@ -180,8 +195,95 @@ internal object TtsPlaybackStore {
         currentIndex = 0
         metadata = null
         state = TtsPlaybackState.IDLE
+        resumeOnFocusGain = false
+        abandonAudioFocus()
         emitState()
         applicationContext?.let { TtsPlaybackService.stop(it) }
+    }
+
+    /** Stops the engine and marks playback paused, without touching audio focus. */
+    private fun pauseEngine() {
+        if (state != TtsPlaybackState.PLAYING) {
+            return
+        }
+        generation += 1
+        engine?.stop()
+        state = TtsPlaybackState.PAUSED
+        emitState()
+    }
+
+    /**
+     * Requests playback focus so the system can tell us to pause for a call or other audio
+     * that genuinely needs exclusive use of the speaker. Duck-only interruptions (notification
+     * sounds, alerts) are left alone - see [handleAudioFocusChange].
+     */
+    private fun requestAudioFocus(): Boolean {
+        if (hasAudioFocus) return true
+        val manager = audioManager ?: return false
+
+        val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val attributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(attributes)
+                .setOnAudioFocusChangeListener(audioFocusChangeListener, ownerHandler)
+                .build()
+            audioFocusRequest = request
+            manager.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        } else {
+            @Suppress("DEPRECATION")
+            manager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN,
+            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+        hasAudioFocus = granted
+        return granted
+    }
+
+    private fun abandonAudioFocus() {
+        if (!hasAudioFocus) return
+        val manager = audioManager
+        if (manager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioFocusRequest?.let { manager.abandonAudioFocusRequest(it) }
+            } else {
+                @Suppress("DEPRECATION")
+                manager.abandonAudioFocus(audioFocusChangeListener)
+            }
+        }
+        hasAudioFocus = false
+    }
+
+    private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        runOnOwner { handleAudioFocusChange(focusChange) }
+    }
+
+    private fun handleAudioFocusChange(focusChange: Int) {
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                // Another app now owns audio focus outright (e.g. a call was answered).
+                hasAudioFocus = false
+                resumeOnFocusGain = false
+                pauseEngine()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                // Something needs exclusive use of the speaker for a short while
+                // Pause and remember to resume once it's done.
+                resumeOnFocusGain = state == TtsPlaybackState.PLAYING
+                pauseEngine()
+            }
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                hasAudioFocus = true
+                if (resumeOnFocusGain) {
+                    resumeOnFocusGain = false
+                    play()
+                }
+            }
+        }
     }
 
     fun skipPrevious() {
@@ -255,6 +357,11 @@ internal object TtsPlaybackStore {
             return
         }
 
+        if (!requestAudioFocus()) {
+            fail("Couldn't get audio focus - another app or call may be using audio.")
+            return
+        }
+
         val activeEngine = checkNotNull(engine)
         val paragraph = paragraphs[currentIndex]
         generation += 1
@@ -276,6 +383,7 @@ internal object TtsPlaybackStore {
         }
 
         state = TtsPlaybackState.PLAYING
+        resumeOnFocusGain = false
         emitProgress()
         emitState()
     }
