@@ -1,0 +1,23 @@
+src/utils/useLoadingColors.ts
+  s_5fd38a7291eea8::t_d00ca5f57a6d1b 6-8
+src/utils/__tests__/useLoadingColors.test.ts
+  s_5fd38a7291eea8::t_3e851d27dbdf0a 4-7
+  s_5fd38a7291eea8::t_d00ca5f57a6d1b 1-3,8,10-23,30-46
+  s_5fd38a7291eea8::t_c40fabfaa1699e 9,24-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "51560195bac5f4c91542b8a45239a1eed3eb8f3a",
+  "prompts": {},
+  "sessions": {
+    "s_5fd38a7291eea8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe98b-f82e-7e23-9d90-c60938bdd85b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
