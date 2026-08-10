@@ -53,7 +53,7 @@ import { backgroundTasks } from '@services/backgroundTasks';
 import useImport from '@hooks/persisted/useImport';
 import { ThemeColors } from '@theme/types';
 import { useLibraryContext } from '@components/Context/LibraryContext';
-import { xor } from 'lodash-es';
+import xor from 'lodash-es/xor';
 import { SelectionContext } from './SelectionContext';
 import { getLibraryCategoryIndex } from './constants/constants';
 

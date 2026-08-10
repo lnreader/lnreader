@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import {
-  FlashList,
-  type FlashListProps,
-  type ListRenderItem,
-} from '@shopify/flash-list';
+  LegendList,
+  type LegendListProps,
+  type LegendListRenderItemProps,
+} from '@legendapp/list/react-native';
 import { NovelItem } from '@plugins/types';
 import { NovelInfo } from '../database/types';
 import { DisplayModes } from '@screens/library/constants/constants';
@@ -13,14 +13,16 @@ import {
   useNovelCoverLayoutValue,
 } from './NovelCoverLayoutContext';
 
-export type NovelListRenderItem = ListRenderItem<NovelInfo | NovelItem>;
+export type NovelListRenderItem = (
+  info: LegendListRenderItemProps<NovelInfo | NovelItem>,
+) => React.ReactNode;
 
 export type NovelListDataItem = (NovelInfo | NovelItem) & {
   completeRow?: number;
 };
 
 interface NovelListProps
-  extends Omit<FlashListProps<NovelInfo | NovelItem>, 'data'> {
+  extends Omit<LegendListProps<NovelInfo | NovelItem>, 'data'> {
   inSource?: boolean;
   data: NovelListDataItem[];
 }
@@ -76,7 +78,7 @@ const NovelList: React.FC<NovelListProps> = props => {
 
   return (
     <NovelCoverLayoutProvider value={layout}>
-      <FlashList
+      <LegendList
         contentContainerStyle={[
           !isListView && styles.listView,
           styles.flatListCont,
@@ -84,6 +86,7 @@ const NovelList: React.FC<NovelListProps> = props => {
         numColumns={numColumns}
         key={numColumns}
         keyExtractor={novelListKeyExtractor}
+        estimatedItemSize={layout.coverHeight}
         {...listProps}
         data={extendedNovelList}
       />

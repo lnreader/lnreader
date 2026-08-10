@@ -11,7 +11,7 @@ import { getCategoriesWithCount } from '@database/queries/CategoryQueries';
 import { updateNovelCategories } from '@database/queries/NovelQueries';
 import { CCategory, Category } from '@database/types';
 import { Checkbox } from '@components/Checkbox/Checkbox';
-import { xor } from 'lodash-es';
+import xor from 'lodash-es/xor';
 import { RootStackParamList } from '@navigators/types';
 
 interface SetCategoryModalProps {

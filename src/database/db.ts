@@ -16,6 +16,7 @@ import {
   createNovelTriggerQueryUpdate,
 } from './queryStrings/triggers';
 import { useEffect, useReducer } from 'react';
+import { getErrorChainMessages } from '@utils/error';
 
 class MyLogger implements Logger {
   logQuery(_query: string, _params: unknown[]): void {
@@ -132,6 +133,102 @@ export const repairChapterMigrationSnapshot = (executor: MigrationExecutor) => {
     }
     executor.executeSync(
       `ALTER TABLE '__migration_Chapter' ADD COLUMN '${migration.columnName}' ${migration.columnDefinition};`,
+    );
+  }
+};
+
+/**
+ * Backfills novels into a stale `__migration_Novel` snapshot so an interrupted
+ * migration can be retried without losing novels written while it was down.
+ *
+ * The migration snapshots are created with `IF NOT EXISTS`. A build that ran
+ * the migration outside a transaction and died part-way leaves a stale
+ * `__migration_Novel` on disk while `Novel`/`Chapter`/`NovelCategory` keep
+ * accepting writes; later launches re-run the migration, rebuild `Novel` from
+ * that stale snapshot, and the Chapter/NovelCategory copy-back then violates
+ * the `FOREIGN KEY (novelId)` that pre-drizzle databases still carry on both
+ * tables — failing on every launch. Novels written after the snapshot went
+ * stale are backfilled from the live tables (or, when a crashed attempt
+ * already destroyed them, their references are pruned) so the migration
+ * completes and the surviving data is preserved.
+ */
+export const repairInterruptedNovelSnapshot = (executor: MigrationExecutor) => {
+  const tableNames = new Set(
+    executor
+      .executeRawSync("SELECT name FROM sqlite_master WHERE type = 'table';")
+      .map(row => row[0]),
+  );
+
+  if (!tableNames.has('Novel') || !tableNames.has('__migration_Novel')) {
+    return;
+  }
+
+  // What the copy-back will restore: the live tables when a failed attempt was
+  // rolled back, the retained snapshots when a partial attempt was persisted.
+  const referencedNovelIds = new Set(
+    [
+      'Chapter',
+      'NovelCategory',
+      '__migration_Chapter',
+      '__migration_NovelCategory',
+    ]
+      .filter(tableName => tableNames.has(tableName))
+      .flatMap(tableName =>
+        executor
+          .executeRawSync(`SELECT DISTINCT novelId FROM \`${tableName}\`;`)
+          .map(row => row[0]),
+      ),
+  );
+  if (referencedNovelIds.size === 0) {
+    return;
+  }
+
+  const snapshotNovelIds = new Set(
+    executor
+      .executeRawSync('SELECT id FROM __migration_Novel;')
+      .map(row => row[0]),
+  );
+
+  const missingNovelIds = [...referencedNovelIds].filter(
+    novelId => novelId !== null && !snapshotNovelIds.has(novelId),
+  );
+  if (missingNovelIds.length > 0) {
+    // The stale snapshot can predate the migration's Novel rename, so its
+    // columns may differ from the live table (e.g. pre-drizzle 13 vs 18).
+    // Insert through the intersection of both column sets.
+    const snapshotColumns = executor
+      .executeRawSync('PRAGMA table_info(__migration_Novel);')
+      .map(row => row[1]);
+    const novelColumns = new Set(
+      executor.executeRawSync('PRAGMA table_info(Novel);').map(row => row[1]),
+    );
+    const sharedColumns = snapshotColumns.filter(column =>
+      novelColumns.has(column),
+    );
+    if (sharedColumns.length > 0) {
+      const columnList = sharedColumns
+        .map(column => `\`${column}\``)
+        .join(', ');
+      executor.executeSync(
+        `INSERT INTO __migration_Novel (${columnList}) SELECT ${columnList} FROM Novel WHERE id IN (${missingNovelIds.join(
+          ', ',
+        )});`,
+      );
+    }
+  }
+
+  // Novels referenced only by the retained snapshots are unrecoverable (a
+  // crashed attempt already dropped the live table). Prune their rows so the
+  // copy-back cannot fail the foreign key on every launch.
+  for (const tableName of [
+    '__migration_Chapter',
+    '__migration_NovelCategory',
+  ]) {
+    if (!tableNames.has(tableName)) {
+      continue;
+    }
+    executor.executeSync(
+      `DELETE FROM \`${tableName}\` WHERE novelId NOT IN (SELECT id FROM __migration_Novel);`,
     );
   }
 };
@@ -260,11 +357,24 @@ export const initializeDatabase = () => {
   if (!initialization) {
     setPragmas(_db);
     repairInterruptedNovelMigration(_db);
+    repairInterruptedNovelSnapshot(_db);
     repairChapterMigrationSnapshot(_db);
     repairMigrationHistory(_db);
-    initialization = migrate(drizzleDb, getPendingMigrations(_db)).then(() => {
-      runDatabaseBootstrap(_db);
-    });
+    initialization = migrate(drizzleDb, getPendingMigrations(_db))
+      .then(() => {
+        runDatabaseBootstrap(_db);
+      })
+      .catch((error: Error) => {
+        // DrizzleQueryError keeps the native SQLite message (e.g. "FOREIGN KEY
+        // constraint failed") on `cause`; without it the reported trace ends at
+        // "params:" and the real reason is unrecoverable.
+        console.error(
+          'Database initialization failed:',
+          getErrorChainMessages(error).join(' Caused by: '),
+          error.stack,
+        );
+        throw error;
+      });
   }
   return initialization;
 };

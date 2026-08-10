@@ -3,7 +3,7 @@ import {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialBottomTabScreenProps } from 'react-native-paper';
 
 export type RootStackParamList = {
@@ -42,27 +42,27 @@ export type BottomNavigatorParamList = {
 
 export type LibraryScreenProps = CompositeScreenProps<
   MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Library'>,
-  StackScreenProps<RootStackParamList>
+  NativeStackScreenProps<RootStackParamList>
 >;
 
 export type HistoryScreenProps = CompositeScreenProps<
   MaterialBottomTabScreenProps<BottomNavigatorParamList, 'History'>,
-  StackScreenProps<RootStackParamList>
+  NativeStackScreenProps<RootStackParamList>
 >;
 
 export type UpdateScreenProps = CompositeScreenProps<
   MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Updates'>,
-  StackScreenProps<RootStackParamList>
+  NativeStackScreenProps<RootStackParamList>
 >;
 
 export type BrowseScreenProps = CompositeScreenProps<
   MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Browse'>,
-  StackScreenProps<RootStackParamList>
+  NativeStackScreenProps<RootStackParamList>
 >;
 
 export type MoreStackScreenProps = CompositeScreenProps<
   MaterialBottomTabScreenProps<BottomNavigatorParamList, 'More'>,
-  StackScreenProps<RootStackParamList, 'MoreStack'>
+  NativeStackScreenProps<RootStackParamList, 'MoreStack'>
 >;
 export type MoreStackParamList = {
   SettingsStack: NavigatorScreenParams<SettingsStackParamList>;
@@ -88,111 +88,114 @@ CustomCode: undefined;
   GenreTaxonomy: undefined;
 };
 
-export type NovelScreenProps = StackScreenProps<
+export type NovelScreenProps = NativeStackScreenProps<
   ReaderStackParamList & RootStackParamList,
   'Novel'
 >;
-export type ChapterScreenProps = StackScreenProps<
+export type ChapterScreenProps = NativeStackScreenProps<
   ReaderStackParamList & RootStackParamList,
   'Chapter'
 >;
 export type ReaderStackParamList = {
   Novel:
-  | {
-    name: string;
-    path: string;
-    pluginId: string;
-    cover: string | null;
-    isLocal?: boolean | null;
-  }
-  | Omit<NovelInfo, 'id'>;
+    | {
+        name: string;
+        path: string;
+        pluginId: string;
+        cover: string | null;
+        isLocal?: boolean | null;
+      }
+    | Omit<NovelInfo, 'id'>;
   Chapter: {
     novel: NovelInfo;
     chapter: ChapterInfo;
   };
 };
 
-export type AboutScreenProps = StackScreenProps<MoreStackParamList, 'About'>;
-export type DownloadsScreenProps = StackScreenProps<
+export type AboutScreenProps = NativeStackScreenProps<
+  MoreStackParamList,
+  'About'
+>;
+export type DownloadsScreenProps = NativeStackScreenProps<
   MoreStackParamList,
   'Downloads'
 >;
-export type TaskQueueScreenProps = StackScreenProps<
+export type TaskQueueScreenProps = NativeStackScreenProps<
   MoreStackParamList,
   'TaskQueue'
 >;
-export type BrowseSourceScreenProps = StackScreenProps<
+export type BrowseSourceScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'SourceScreen'
 >;
-export type BrowseMalScreenProps = StackScreenProps<
+export type BrowseMalScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'BrowseMal'
 >;
-export type BrowseALScreenProps = StackScreenProps<
+export type BrowseALScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'BrowseAL'
 >;
-export type BrowseSettingsScreenProp = StackScreenProps<
+export type BrowseSettingsScreenProp = NativeStackScreenProps<
   RootStackParamList,
   'BrowseSettings'
 >;
-export type PluginDetailsScreenProps = StackScreenProps<
+export type PluginDetailsScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'PluginDetails'
 >;
-export type GlobalSearchScreenProps = StackScreenProps<
+export type GlobalSearchScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'GlobalSearchScreen'
 >;
-export type MigrationScreenProps = StackScreenProps<
+export type MigrationScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'Migration'
 >;
-export type MigrateNovelScreenProps = StackScreenProps<
+export type MigrateNovelScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'MigrateNovel'
 >;
-export type SourceNovelsScreenProps = StackScreenProps<
+export type SourceNovelsScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'SourceNovels'
 >;
-export type WebviewScreenProps = StackScreenProps<
+export type WebviewScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'WebviewScreen'
 >;
 export type SettingsScreenProps = CompositeScreenProps<
-  StackScreenProps<SettingsStackParamList, 'Settings'>,
-  StackScreenProps<MoreStackParamList, 'SettingsStack'>
+  NativeStackScreenProps<SettingsStackParamList, 'Settings'>,
+  NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
 >;
-export type AppearanceSettingsScreenProps = StackScreenProps<
+export type AppearanceSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'AppearanceSettings'
 >;
-export type TrackerSettingsScreenProps = StackScreenProps<
+export type TrackerSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'TrackerSettings'
 >;
-export type BackupSettingsScreenProps = StackScreenProps<
+export type BackupSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'BackupSettings'
 >;
-export type AdvancedSettingsScreenProps = StackScreenProps<
+export type AdvancedSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'AdvancedSettings'
 >;
 export type LibrarySettingsScreenProps = CompositeScreenProps<
-  StackScreenProps<SettingsStackParamList, 'LibrarySettings'>,
-  StackScreenProps<MoreStackParamList, 'SettingsStack'>
+  NativeStackScreenProps<SettingsStackParamList, 'LibrarySettings'>,
+  NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
 >;
 export type GenreTaxonomyScreenProps = CompositeScreenProps<
-  StackScreenProps<SettingsStackParamList, 'GenreTaxonomy'>,
-  StackScreenProps<MoreStackParamList, 'SettingsStack'>
+  NativeStackScreenProps<SettingsStackParamList, 'GenreTaxonomy'>,
+  NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
 >;
 
 export type RespositorySettingsScreenProps = CompositeScreenProps<
-  StackScreenProps<SettingsStackParamList, 'RespositorySettings'>,
-  StackScreenProps<RootStackParamList, 'BottomNavigator'>
+  NativeStackScreenProps<SettingsStackParamList, 'RespositorySettings'>,
+  NativeStackScreenProps<RootStackParamList, 'BottomNavigator'>
 >;
 
 export type CustomCodeSettingsScreenProps = StackScreenProps<
@@ -207,6 +210,6 @@ export type CodeSnippetsScreenProps = StackScreenProps<
 declare global {
   namespace ReactNavigation {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface RootParamList extends RootStackParamList { }
+    interface RootParamList extends RootStackParamList {}
   }
 }

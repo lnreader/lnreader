@@ -14,7 +14,7 @@ import {
   TopTabBar,
 } from '@components';
 
-import { countBy } from 'lodash-es';
+import countBy from 'lodash-es/countBy';
 import { LibraryStats } from '@database/types';
 import {
   getAggregateStatsFromDb,

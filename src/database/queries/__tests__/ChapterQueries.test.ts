@@ -18,6 +18,7 @@ import {
   markAllChaptersRead,
   markAllChaptersUnread,
   getNovelChapters,
+  getAllNovelChaptersForBackup,
   getUnreadNovelChapters,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
@@ -125,6 +126,33 @@ describe('ChapterQueries', () => {
       expect(result).toHaveLength(2);
       expect(result.map(c => c.name)).toContain('Chapter 1');
       expect(result.map(c => c.name)).toContain('Chapter 2');
+    });
+  });
+
+  describe('getAllNovelChaptersForBackup', () => {
+    it('returns chapters beyond the 1000-row UI query limit', async () => {
+      const testDb = getTestDb();
+      // No Novel row is needed for this selector test. Keeping the id orphaned
+      // also avoids running aggregate-stat triggers 1001 times during setup.
+      const novelId = 123456;
+
+      const values = Array.from(
+        { length: 1001 },
+        (_, position) =>
+          `(${novelId}, '/chapter/${position + 1}', ` +
+          `'Chapter ${position + 1}', ${position + 1}, '1', ${position})`,
+      ).join(',');
+      testDb.sqlite.executeSync(
+        `INSERT INTO Chapter
+          (novelId, path, name, chapterNumber, page, position)
+         VALUES ${values}`,
+      );
+
+      expect(await getNovelChapters(novelId)).toHaveLength(1000);
+
+      const backupChapters = await getAllNovelChaptersForBackup(novelId);
+      expect(backupChapters).toHaveLength(1001);
+      expect(backupChapters.at(-1)?.name).toBe('Chapter 1001');
     });
   });
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { debounce } from 'lodash-es';
+import debounce from 'lodash-es/debounce';
 
 import { NovelItem, PluginItem } from '@plugins/types';
 import { getPlugin } from '@plugins/pluginManager';
