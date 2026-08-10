@@ -32,6 +32,7 @@ import { NovelStatus, PluginItem } from '@plugins/types';
 import { translateNovelStatus } from '@utils/translateEnum';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import { AVAILABLE_PLUGINS } from '@hooks/persisted/usePlugins';
+import { getPlugin } from '@plugins/pluginManager';
 
 import {
   NovelMetaSkeleton,
@@ -112,10 +113,13 @@ const NovelInfoHeader = ({
     [novel.pluginId],
   );
 
-  const coverSource = useMemo(
-    () => ({ uri: novel.cover ?? undefined }),
-    [novel.cover],
-  );
+  const coverSource = useMemo(() => {
+    const imageRequestInit = getPlugin(novel.pluginId)?.imageRequestInit;
+    return {
+      uri: novel.cover ?? undefined,
+      headers: imageRequestInit?.headers,
+    };
+  }, [novel.pluginId, novel.cover]);
 
   const novelStatus = useMemo(
     () => (novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined),
