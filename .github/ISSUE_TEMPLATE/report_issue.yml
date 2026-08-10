@@ -2,7 +2,7 @@
 
 name: Issue report
 description: Report an issue in LNReader
-labels: [Bug]
+labels: [bug]
 body:
   - type: textarea
     id: reproduce-steps
