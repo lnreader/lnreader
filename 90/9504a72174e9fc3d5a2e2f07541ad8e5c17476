@@ -1,0 +1,442 @@
+drizzle/20260811071655_parched_human_torch/snapshot.json
+  s_cd8f63d1d98dae::t_0add6f850ef80f 1-654
+drizzle/20260811071655_parched_human_torch/migration.sql
+  s_cd8f63d1d98dae::t_0add6f850ef80f 1
+src/screens/settings/SettingsRepositoryScreen/components/__tests__/RepositoryCard.test.tsx
+  s_cd8f63d1d98dae::t_a4026d66c2eb9b 3-7,87-88,90-97,100-158,161,163-194
+  s_cd8f63d1d98dae::t_4e23671a17eb55 1,84
+  s_cd8f63d1d98dae::t_b537dc11de0697 61-64
+  s_cd8f63d1d98dae::t_430ec5f024e820 33-48
+  s_cd8f63d1d98dae::t_1c31fee2892441 65-67,70-71,74-76,80-82
+  s_cd8f63d1d98dae::t_657c90d52a28e4 68-69,72-73,77-79
+  s_cd8f63d1d98dae::t_ffcac11874e6e8 89,98-99
+  s_cd8f63d1d98dae::t_2f0b95d7faf792 8-32
+  s_cd8f63d1d98dae::t_45bc42928eee24 83,85-86
+  s_cd8f63d1d98dae::t_8173b0fc814a46 49-60
+  s_cd8f63d1d98dae::t_ed692b0ca1b487 2,159-160,162
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  human 2,10,68-93,103,115-116
+src/i18n/types/index.ts
+  human 249-251,253,664
+src/database/queries/__tests__/RepositoryQueries.test.ts
+  human 13,17,62-85,124,202-216
+src/plugins/__tests__/pluginManager.test.ts
+  human 2,5,15,56-77,126
+src/hooks/persisted/pluginSelectors.ts
+  human 2,44-73
+src/components/Switch/Switch.tsx
+  human 28-29,37-38,117-124
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  human 14,26,42-58,69-71
+src/plugins/pluginManager.ts
+  human 10,179
+src/i18n/languages/en/strings.json
+  human 290-294
+drizzle/migrations.js
+  human 7,15
+src/hooks/persisted/usePlugins.ts
+  human 20,42-45,120-122,124-135,138-140,142,144-147
+src/database/__tests__/db.test.ts
+  human 373-376,415-423,790
+src/database/queries/__tests__/testDb.ts
+  human 81-82
+src/database/schema/repository.ts
+  human 13
+src/database/queries/__tests__/testData.ts
+  human 94,140
+src/database/queries/RepositoryQueries.ts
+  human 9-19,62-74
+src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx
+  human 2-3,7-8,22,29,33-35,49-62,72-77,80-101,108,119,126,143-153,168,176-179,182,185,191-197
+src/database/types/index.ts
+  human 131
+src/hooks/persisted/__tests__/usePlugins.test.ts
+  human 7,61-97
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 654,
+          "added_lines": 654,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_0add6f850ef80f",
+          "lines": "1-654",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260811071655_parched_human_torch/snapshot.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_0add6f850ef80f",
+          "lines": "1",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/20260811071655_parched_human_torch/migration.sql"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 107,
+          "added_lines": 107,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_a4026d66c2eb9b",
+          "lines": "3-7,87-88,90-97,100-158,161,163-194",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_4e23671a17eb55",
+          "lines": "1,84",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_b537dc11de0697",
+          "lines": "61-64",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_430ec5f024e820",
+          "lines": "33-48",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_1c31fee2892441",
+          "lines": "65-67,70-71,74-76,80-82",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_657c90d52a28e4",
+          "lines": "68-69,72-73,77-79",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_ffcac11874e6e8",
+          "lines": "89,98-99",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 25,
+          "added_lines": 25,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_2f0b95d7faf792",
+          "lines": "8-32",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_45bc42928eee24",
+          "lines": "83,85-86",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_8173b0fc814a46",
+          "lines": "49-60",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_ed692b0ca1b487",
+          "lines": "2,159-160,162",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/components/__tests__/RepositoryCard.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 31,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "2,10,68-93,103,115-116",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "249-251,253,664",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 42,
+          "added_lines": 42,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "13,17,62-85,124,202-216",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/RepositoryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 26,
+          "added_lines": 26,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "2,5,15,56-77,126",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/__tests__/pluginManager.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 31,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "2,44-73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/pluginSelectors.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 12,
+          "added_lines": 12,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "28-29,37-38,117-124",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Switch/Switch.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "14,26,42-58,69-71",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/ConfirmationDialog/ConfirmationDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "10,179",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/pluginManager.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "290-294",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "7,15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/migrations.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 37,
+          "hash": "human",
+          "lines": "20,42-45,120-122,124-135,138-140,142,144-147",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/usePlugins.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "373-376,415-423,790",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "81-82",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/testDb.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "13",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/schema/repository.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "94,140",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/testData.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 24,
+          "added_lines": 24,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "9-19,62-74",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/RepositoryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 79,
+          "added_lines": 79,
+          "deleted_lines": 23,
+          "hash": "human",
+          "lines": "2-3,7-8,22,29,33-35,49-62,72-77,80-101,108,119,126,143-153,168,176-179,182,185,191-197",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "131",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 38,
+          "added_lines": 38,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "7,61-97",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__tests__/usePlugins.test.ts"
+    }
+  ],
+  "base_commit_sha": "63349de1bb4ae630c6b4758a43777831445d53b2",
+  "branch": "master",
+  "commit_sha": "909504a72174e9fc3d5a2e2f07541ad8e5c17476",
+  "commit_type": "commit_amend",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 367,
+      "agent_id": null,
+      "human_author": null,
+      "overriden_lines": 0,
+      "total_additions": 367,
+      "total_deletions": 88
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
