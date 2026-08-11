@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "缓存的小说已删除",
     "chapterInsertFailed": "章节插入失败",
     "clearCachedNovels": "清除缓存的小说",
-    "clearCachedNovelsDesc": "删除不在您的书库中的缓存小说",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "不在书库中的阅读进度和下载章节将会丢失。",
     "clearUpdatesMessage": "更新页面已清除。",
     "clearUpdatesTab": "清除更新页面",
@@ -162,7 +162,7 @@
       "restore": "云端硬盘恢复",
       "restoreInterruped": "云端硬盘恢复中断"
     },
-    "googeDrive": "Google 云端硬盘",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "备份到您的 Google 云端硬盘",
     "invalidBackupFolder": "备份文件夹有误",
     "localBackup": "本地备份",
@@ -243,7 +243,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "已从书库中删除",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "搜索资源",
     "searchResults": "搜索结果",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "添加分类",
-    "cantDeleteDefault": "您不能删除默认分类",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "默认",
     "defaultCategory": "默认分类",
     "deleteModal": {
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "您目前还没有分类。点击编辑按钮来创建一个分类以组织您的书库"
   },
   "repositories": {
-    "emptyMsg": "你还没有插件仓库，添加一个以开始使用。"
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "你还没有插件仓库，添加一个以开始使用。",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "关于",
@@ -340,7 +344,12 @@
     "submit": "确定",
     "loading": "正在加载...",
     "moreOptions": "More options",
-    "warning": "警告"
+    "warning": "警告",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "刷新",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "排序",
     "updateLibrary": "打开应用时更新书库",
-    "updateLibraryDesc": "不推荐在低端设备上启用",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "显示上次更新时间",
     "useFAB": "在书库中使用浮动操作按钮",
     "timeTracking": "Time Tracking",
@@ -555,7 +564,7 @@
     },
     "coverSaved": "封面已保存",
     "coverNotSaved": "封面未保存",
-    "deleteChapterError": "无法删除章节文件夹",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "删除下载的章节？",
     "deletedAllDownloads": "所有下载已删除",
     "download": {
@@ -563,8 +572,8 @@
       "customAmount": "下载自定义数量",
       "delete": "删除下载",
       "next": "后续 1 章",
-      "next10": "后续 10 章",
-      "next5": "后续 5 章",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "未读"
     },
     "edit": {
@@ -662,7 +671,7 @@
       "scrollToCurrentChapter": "滚动到当前章节",
       "scrollToTop": "滚动到顶部"
     },
-    "emptyChapterMessage": "<h2>无法加载章节</h2><p>未找到可读取的内容。请在 WebView 中检查该章节；如果在那里可以加载，请<a href='%{reportUrl}'>报告插件问题</a>。</p><p>插件：%{pluginId}<br>小说：%{novelName}<br>章节：%{chapterName}</p>",
+    "emptyChapterMessage": "<p>章节为空。</p><p>如果在Webview中不可访问请在 <a href='%{reportUrl}'>GitHub</a> 上报告。</p><p>插件名: %{pluginId}</p><p>小说名: %{novelName}</p><p>章节编号: %{chapterName}</p>",
     "finished": "已完成",
     "nextChapter": "下一章: %{name}",
     "noNextChapter": "没有下一章节",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
