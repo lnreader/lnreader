@@ -11,9 +11,9 @@
   "advancedSettings": "Avancé",
   "advancedSettingsScreen": {
     "cachedNovelsDeletedToast": "Romans en cache supprimés",
-    "chapterInsertFailed": "Échec de l'insertion du chapitre",
+    "chapterInsertFailed": "Insertion de chapitre échoué",
     "clearCachedNovels": "Vider les romans en cache",
-    "clearCachedNovelsDesc": "Supprimer les romans en cache qui ne sont pas dans votre bibliothèque",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Les progrès et les chapitres lus et téléchargés hors de la bibliothèque, seront perdus.",
     "clearUpdatesMessage": "Mises à jour effacées.",
     "clearUpdatesTab": "Effacer l'onglet Mises à jour",
@@ -160,7 +160,7 @@
       "backupInterruped": "Sauvegarde interrompue",
       "googleDriveBackup": "Sauvegarde sur Google Drive",
       "restore": "Drive Restore",
-      "restoreInterruped": "Restauration depuis Drive interrompue"
+      "restoreInterruped": "Drive Restore Interrupted"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Sauvegarde sur votre Google Drive",
@@ -190,7 +190,7 @@
     "remoteBackup": "Remote Backup",
     "restoreBackup": "Restaurer la sauvegarde",
     "restoreBackupDesc": "Restore library from backup file",
-    "restorinBackup": "Restauration de la sauvegarde",
+    "restorinBackup": "Restoring backup",
     "restoringData": "Restoring Data",
     "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Self Host",
@@ -243,7 +243,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Supprimé de la bibliothèque",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Rechercher des sources",
     "searchResults": "Résultats de la recherche",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Ajouter une catégorie",
-    "cantDeleteDefault": "Vous ne pouvez pas supprimer la catégorie par défaut",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Défaut",
     "defaultCategory": "Catégorie par défaut",
     "deleteModal": {
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "Vous n'avez pas de catégories. Appuyez sur le bouton Modifier pour en créer une pour organiser votre bibliothèque"
   },
   "repositories": {
-    "emptyMsg": "You have no repositories. Add your first plugin repository to get started."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "You have no repositories. Add your first plugin repository to get started.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "À propos",
@@ -340,7 +344,12 @@
     "submit": "Soumettre",
     "loading": "Chargement ...",
     "moreOptions": "More options",
-    "warning": "Warning"
+    "warning": "Warning",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "Actualiser",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordre de tri",
     "updateLibrary": "Mettre à jour la bibliothèque au lancement",
-    "updateLibraryDesc": "Non recommandé pour les appareils bas de gamme",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Afficher la date de dernière mise à jour",
     "useFAB": "Utiliser FAB dans la bibliothèque",
     "timeTracking": "Time Tracking",
@@ -555,7 +564,7 @@
     },
     "coverSaved": "Couverture sauvegardée",
     "coverNotSaved": "Couverture non sauvegardée",
-    "deleteChapterError": "Impossible de supprimer le dossier du chapitre",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Supprimer les chapitres téléchargés?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -563,8 +572,8 @@
       "customAmount": "Télécharger un nombre personnalisé",
       "delete": "Supprimer les téléchargements",
       "next": "Chapitre suivant",
-      "next10": "10 chapitres suivants",
-      "next5": "5 chapitres suivants",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Non lu"
     },
     "edit": {
@@ -662,7 +671,7 @@
       "scrollToCurrentChapter": "Défiler vers le chapitre actuel",
       "scrollToTop": "Défiler jusqu'en haut"
     },
-    "emptyChapterMessage": "<h2>Impossible de charger le chapitre</h2><p>Aucun contenu lisible n'a été trouvé. Vérifiez le chapitre dans la WebView ; s'il s'y charge, <a href='%{reportUrl}'>signalez le problème du plugin</a>.</p><p>Plugin : %{pluginId}<br>Roman : %{novelName}<br>Chapitre : %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Terminé",
     "nextChapter": "Suivant: %{name}",
     "noNextChapter": "Il n'y a pas de prochain chapitre",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
