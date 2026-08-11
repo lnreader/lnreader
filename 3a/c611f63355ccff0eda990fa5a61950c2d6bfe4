@@ -1,0 +1,121 @@
+modules/nitro-epub/cpp/import/EpubChapterNormalizer.hpp
+  s_6fe77e79273ff1::t_37da4c38cf7f66 1-5
+modules/nitro-epub/cpp/import/EpubChapterNormalizer.cpp
+  s_6fe77e79273ff1::t_37da4c38cf7f66 1-87,89-135
+  s_6fe77e79273ff1::t_928eef0ce7d1ec 88
+modules/nitro-epub/android/CMakeLists.txt
+  human 11
+modules/nitro-epub/cpp/import/EpubParser.cpp
+  human 7,348
+modules/nitro-epub/README.md
+  human 9
+modules/nitro-epub/cpp/tests/EpubParserTest.cpp
+  human 18-23,81-86,109-126
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_37da4c38cf7f66",
+          "lines": "1-5",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/import/EpubChapterNormalizer.hpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 134,
+          "added_lines": 134,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_37da4c38cf7f66",
+          "lines": "1-87,89-135",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_928eef0ce7d1ec",
+          "lines": "88",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/import/EpubChapterNormalizer.cpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "11",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/android/CMakeLists.txt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "7,348",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/import/EpubParser.cpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "9",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/README.md"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 30,
+          "added_lines": 30,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "18-23,81-86,109-126",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/tests/EpubParserTest.cpp"
+    }
+  ],
+  "base_commit_sha": "909504a72174e9fc3d5a2e2f07541ad8e5c17476",
+  "branch": "master",
+  "commit_sha": "3ac611f63355ccff0eda990fa5a61950c2d6bfe4",
+  "commit_type": "commit_amend",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 34,
+      "agent_id": null,
+      "human_author": null,
+      "overriden_lines": 0,
+      "total_additions": 34,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
