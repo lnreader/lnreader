@@ -1,0 +1,338 @@
+src/screens/novel/__tests__/NovelScreen.test.tsx
+  019fea30-345f-7ec2-999a-437874e7db35 6,65-66,245-251,306,324-345
+  human 346-347
+src/hooks/persisted/useNovel/store/chapterActions.ts
+  019fea30-345f-7ec2-999a-437874e7db35 3,25,50,64,98,102-103,107,161,198,219,312,318,321,324,330
+  human 3,25,50,64,98,102-106,110,164,168,202,206,224,228,318,324,327,330,336
+src/hooks/persisted/useNovel/store/novelStore.types.ts
+  019fea30-345f-7ec2-999a-437874e7db35 45,48,50,52,56
+  human 45,48,50,52,56
+src/hooks/persisted/useDownload.ts
+  019fea30-345f-7ec2-999a-437874e7db35 58-61
+  human 58
+src/database/queries/__tests__/ChapterQueries.test.ts
+  019fea30-345f-7ec2-999a-437874e7db35 28,40,118-136,174-175,177-183,543
+  human 176
+src/screens/novel/hooks/useChapterSelection.ts
+  019fea30-345f-7ec2-999a-437874e7db35 1-7,11-13,15-23,29-31,33-39
+  human 8,14
+src/database/queries/ChapterQueries.ts
+  019fea30-345f-7ec2-999a-437874e7db35 33-43,137-143,164-170,226,228,232-236,239-245,330-336,350-361,593-634
+  human 362-364,635-636
+src/hooks/persisted/useNovel/__tests__/novelStore.chapterActions.test.ts
+  019fea30-345f-7ec2-999a-437874e7db35 89,374,377,417,419,422,431,442,459
+  human 89,374,377,417,419,422,431,442,459
+src/hooks/persisted/useNovel/__tests__/chapterActions.test.ts
+  019fea30-345f-7ec2-999a-437874e7db35 46,88,90,148,161,183,242,248
+  human 46,88,90,148,161,183,242-247,253
+src/screens/novel/hooks/useNovelScreenActions.ts
+  019fea30-345f-7ec2-999a-437874e7db35 8,26,34,72-76,94-95,98-99,105-112,120-121,125-134,140,143-146,149,153-156,160,190
+  human 69,89,95-98,106,110-114,120,123,126,130,134
+src/screens/novel/NovelScreen.tsx
+  019fea30-345f-7ec2-999a-437874e7db35 31,36-38,44-56,63,94,125-127
+  human 46,107
+src/screens/novel/hooks/__tests__/useChapterSelection.test.ts
+  019fea30-345f-7ec2-999a-437874e7db35 1-48
+src/hooks/persisted/useNovel/useChapterOperations.ts
+  019fea30-345f-7ec2-999a-437874e7db35 74-75,102-103,116-117,130-131
+  human 74-75,102-103,116-117,130-131
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 33,
+          "added_lines": 35,
+          "deleted_lines": 11,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "6,65-66,245-251,306,324-345",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "346-347",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/__tests__/NovelScreen.test.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 16,
+          "added_lines": 16,
+          "deleted_lines": 5,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "3,25,50,64,98,102-103,107,161,198,219,312,318,321,324,330",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 22,
+          "hash": "human",
+          "lines": "3,25,50,64,98,102-106,110,164,168,202,206,224,228,318,324,327,330,336",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/store/chapterActions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 1,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "45,48,50,52,56",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 5,
+          "hash": "human",
+          "lines": "45,48,50,52,56",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/store/novelStore.types.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 1,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "58-61",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "58",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useDownload.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 31,
+          "added_lines": 32,
+          "deleted_lines": 10,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "28,40,118-136,174-175,177-183,543",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 4,
+          "hash": "human",
+          "lines": "176",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/ChapterQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 29,
+          "added_lines": 29,
+          "deleted_lines": 9,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "1-7,11-13,15-23,29-31,33-39",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 7,
+          "hash": "human",
+          "lines": "8,14",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/hooks/useChapterSelection.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 100,
+          "added_lines": 105,
+          "deleted_lines": 33,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "33-43,137-143,164-170,226,228,232-236,239-245,330-336,350-361,593-634",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 28,
+          "hash": "human",
+          "lines": "362-364,635-636",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/ChapterQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 2,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "89,374,377,417,419,422,431,442,459",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "89,374,377,417,419,422,431,442,459",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/__tests__/novelStore.chapterActions.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 2,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "46,88,90,148,161,183,242,248",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 13,
+          "hash": "human",
+          "lines": "46,88,90,148,161,183,242-247,253",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/__tests__/chapterActions.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 44,
+          "added_lines": 44,
+          "deleted_lines": 13,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "8,26,34,72-76,94-95,98-99,105-112,120-121,125-134,140,143-146,149,153-156,160,190",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 17,
+          "hash": "human",
+          "lines": "69,89,95-98,106,110-114,120,123,126,130,134",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/hooks/useNovelScreenActions.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 22,
+          "added_lines": 22,
+          "deleted_lines": 6,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "31,36-38,44-56,63,94,125-127",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "46,107",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/NovelScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 48,
+          "added_lines": 48,
+          "deleted_lines": 15,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "1-48",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/hooks/__tests__/useChapterSelection.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 8,
+          "hash": "019fea30-345f-7ec2-999a-437874e7db35",
+          "lines": "74-75,102-103,116-117,130-131",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 8,
+          "hash": "human",
+          "lines": "74-75,102-103,116-117,130-131",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/useNovel/useChapterOperations.ts"
+    }
+  ],
+  "base_commit_sha": "c6679b7f41e846c379e082a065b1ce81829cb1ba",
+  "branch": "master",
+  "commit_sha": "63349de1bb4ae630c6b4758a43777831445d53b2",
+  "commit_time": "2026-08-11T11:58:18+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "019fea30-345f-7ec2-999a-437874e7db35": {
+      "accepted_lines": 357,
+      "agent_id": {
+        "id": "019fea30-345f-7ec2-999a-437874e7db35",
+        "model": "gpt-5.6-sol",
+        "tool": "codex"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 365,
+      "total_deletions": 116
+    },
+    "human": {
+      "accepted_lines": 10,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 10,
+      "total_deletions": 116
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
