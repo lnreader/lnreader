@@ -1,0 +1,560 @@
+drizzle/migrations.js
+  s_cd8f63d1d98dae::t_d79d16d42cf4d9 7,15
+src/i18n/languages/en/strings.json
+  s_cd8f63d1d98dae::t_942be616b09b30 290-294
+  human 290
+src/database/queries/RepositoryQueries.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 9-15,17-19,62-70
+  s_cd8f63d1d98dae::t_8494b54d20fe6d 16
+  human 71-74
+src/i18n/types/index.ts
+  s_cd8f63d1d98dae::t_bddcd34e7bb778 249-251,253,664
+  human 660
+src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx
+  s_cd8f63d1d98dae::t_942be616b09b30 7-8,22,29,33-35,49-62,72,82-83,85-86,89-92,94-97,99-100,143-152,168,176-178
+  s_cd8f63d1d98dae::t_d22783d85d68e4 2-3,73-77,80-81,84,87-88,93,98,108,119,126,179,182,185,191-197
+  human 101,153
+src/database/__tests__/db.test.ts
+  s_cd8f63d1d98dae::t_b53c96943d5abf 373-376,415-423,790
+src/components/Switch/Switch.tsx
+  s_cd8f63d1d98dae::t_942be616b09b30 28,37,117-121,123-124
+  s_cd8f63d1d98dae::t_d22783d85d68e4 29,38,122
+  human 113
+src/database/schema/repository.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 13
+src/database/queries/__tests__/testData.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 140
+  s_cd8f63d1d98dae::t_d97c09bba0ed48 94
+  human 94
+src/plugins/pluginManager.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 10,179
+  human 10,179
+src/database/queries/__tests__/testDb.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 81-82
+  human 81
+src/hooks/persisted/usePlugins.ts
+  s_cd8f63d1d98dae::t_427c9edc13f0a9 42-45,120-122,124-135,138-140,142,144-147
+  s_cd8f63d1d98dae::t_00fc8834892d7e 20
+  human 14,116-117,119-132,135-136,138,140-156
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  s_cd8f63d1d98dae::t_942be616b09b30 2,10,68-71,75-93,103,115-116
+  s_cd8f63d1d98dae::t_427c9edc13f0a9 72-74
+  human 2,76,88-94
+src/hooks/persisted/__tests__/usePlugins.test.ts
+  s_cd8f63d1d98dae::t_427c9edc13f0a9 65-75
+  s_cd8f63d1d98dae::t_00fc8834892d7e 7,61-64,76-96
+  human 97
+src/database/queries/__tests__/RepositoryQueries.test.ts
+  s_cd8f63d1d98dae::t_46c8f6f9e4e0b3 13,17,62-72,76-80,82-85,124,202-214
+  s_cd8f63d1d98dae::t_8494b54d20fe6d 73-75,81
+  human 215-216
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  s_cd8f63d1d98dae::t_942be616b09b30 14,26,42-58
+  s_cd8f63d1d98dae::t_d97c09bba0ed48 69-71
+  human 50-60
+src/database/types/index.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 131
+src/hooks/persisted/pluginSelectors.ts
+  s_cd8f63d1d98dae::t_427c9edc13f0a9 48,61
+  s_cd8f63d1d98dae::t_00fc8834892d7e 2,44-47,49-60,62-72
+  human 73
+src/plugins/__tests__/pluginManager.test.ts
+  s_cd8f63d1d98dae::t_78aa3c297524c9 15
+  s_cd8f63d1d98dae::t_ffcac11874e6e8 74,126
+  s_cd8f63d1d98dae::t_b9be540a72d825 2,5,56-62,66-73,75-76
+  s_cd8f63d1d98dae::t_d97c09bba0ed48 63-65
+  human 77
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d79d16d42cf4d9",
+          "lines": "7,15",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "drizzle/migrations.js"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_942be616b09b30",
+          "lines": "290-294",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "290",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/languages/en/strings.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "9-15,17-19,62-70",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_8494b54d20fe6d",
+          "lines": "16",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "71-74",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/RepositoryQueries.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_bddcd34e7bb778",
+          "lines": "249-251,253,664",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "660",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/i18n/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 50,
+          "added_lines": 50,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_942be616b09b30",
+          "lines": "7-8,22,29,33-35,49-62,72,82-83,85-86,89-92,94-97,99-100,143-152,168,176-178",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d22783d85d68e4",
+          "lines": "2-3,73-77,80-81,84,87-88,93,98,108,119,126,179,182,185,191-197",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 23,
+          "hash": "human",
+          "lines": "101,153",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 14,
+          "added_lines": 14,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_b53c96943d5abf",
+          "lines": "373-376,415-423,790",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/__tests__/db.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 9,
+          "added_lines": 9,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_942be616b09b30",
+          "lines": "28,37,117-121,123-124",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d22783d85d68e4",
+          "lines": "29,38,122",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "113",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/Switch/Switch.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "13",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/schema/repository.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "140",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d97c09bba0ed48",
+          "lines": "94",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "94",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/testData.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "10,179",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "10,179",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/pluginManager.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "81-82",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "81",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/testDb.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 27,
+          "added_lines": 27,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_427c9edc13f0a9",
+          "lines": "42-45,120-122,124-135,138-140,142,144-147",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_00fc8834892d7e",
+          "lines": "20",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 37,
+          "hash": "human",
+          "lines": "14,116-117,119-132,135-136,138,140-156",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/usePlugins.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_942be616b09b30",
+          "lines": "2,10,68-71,75-93,103,115-116",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_427c9edc13f0a9",
+          "lines": "72-74",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 9,
+          "hash": "human",
+          "lines": "2,76,88-94",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 11,
+          "added_lines": 11,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_427c9edc13f0a9",
+          "lines": "65-75",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 26,
+          "added_lines": 26,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_00fc8834892d7e",
+          "lines": "7,61-64,76-96",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "97",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/__tests__/usePlugins.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 36,
+          "added_lines": 36,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_46c8f6f9e4e0b3",
+          "lines": "13,17,62-72,76-80,82-85,124,202-214",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 4,
+          "added_lines": 4,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_8494b54d20fe6d",
+          "lines": "73-75,81",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "215-216",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/queries/__tests__/RepositoryQueries.test.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_942be616b09b30",
+          "lines": "14,26,42-58",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d97c09bba0ed48",
+          "lines": "69-71",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 11,
+          "hash": "human",
+          "lines": "50-60",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/components/ConfirmationDialog/ConfirmationDialog.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "131",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/database/types/index.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_427c9edc13f0a9",
+          "lines": "48,61",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_00fc8834892d7e",
+          "lines": "2,44-47,49-60,62-72",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "73",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/persisted/pluginSelectors.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_78aa3c297524c9",
+          "lines": "15",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_ffcac11874e6e8",
+          "lines": "74,126",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 19,
+          "added_lines": 19,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_b9be540a72d825",
+          "lines": "2,5,56-62,66-73,75-76",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_cd8f63d1d98dae::t_d97c09bba0ed48",
+          "lines": "63-65",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "77",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/plugins/__tests__/pluginManager.test.ts"
+    }
+  ],
+  "base_commit_sha": "63349de1bb4ae630c6b4758a43777831445d53b2",
+  "branch": "master",
+  "commit_sha": "9e3ef9269a06f191d1422be12a12d091643191d6",
+  "commit_time": "2026-08-11T13:45:11+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 11,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 11,
+      "total_deletions": 88
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
