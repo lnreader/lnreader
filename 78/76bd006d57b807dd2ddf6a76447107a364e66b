@@ -1,0 +1,185 @@
+src/theme/utils/setBarColor.ts
+  s_a30b3f5fc966b8::t_fb4108d91d7467 5-6,8
+  s_a30b3f5fc966b8::t_a52954ce8773a4 4,7
+app.json
+  s_a30b3f5fc966b8::t_a52954ce8773a4 33-40
+  human 33
+src/screens/novel/NovelScreen.tsx
+  s_a30b3f5fc966b8::t_e883ccce0f8839 163
+  human 163
+src/navigators/Main.tsx
+  s_a30b3f5fc966b8::t_fb4108d91d7467 6-9,52
+  human 6
+src/hooks/common/useFullscreenMode.ts
+  s_a30b3f5fc966b8::t_a52954ce8773a4 58
+  s_a30b3f5fc966b8::t_fb4108d91d7467 10-13,28,43,60
+  human 10-11,54
+src/screens/novel/components/NovelScreenList.tsx
+  s_a30b3f5fc966b8::t_e883ccce0f8839 407-410,423
+  s_a30b3f5fc966b8::t_5e695255c1e3ad 8
+  human 8-13,424,468-478
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 3,
+          "added_lines": 3,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_fb4108d91d7467",
+          "lines": "5-6,8",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_a52954ce8773a4",
+          "lines": "4,7",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/theme/utils/setBarColor.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_a52954ce8773a4",
+          "lines": "33-40",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "33",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "app.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_e883ccce0f8839",
+          "lines": "163",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "163",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/NovelScreen.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_fb4108d91d7467",
+          "lines": "6-9,52",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "6",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/Main.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_a52954ce8773a4",
+          "lines": "58",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 7,
+          "added_lines": 7,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_fb4108d91d7467",
+          "lines": "10-13,28,43,60",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "10-11,54",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/common/useFullscreenMode.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_e883ccce0f8839",
+          "lines": "407-410,423",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_a30b3f5fc966b8::t_5e695255c1e3ad",
+          "lines": "8",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 18,
+          "hash": "human",
+          "lines": "8-13,424,468-478",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelScreenList.tsx"
+    }
+  ],
+  "base_commit_sha": "ee7dcd6fa09a7e4a75ed7db86dccc1a8889befa5",
+  "branch": "claude/draft-agents-md-wh4v9g",
+  "commit_sha": "7876bd006d57b807dd2ddf6a76447107a364e66b",
+  "commit_time": "2026-08-11T11:51:31+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 24
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
