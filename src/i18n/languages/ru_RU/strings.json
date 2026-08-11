@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Кэшированные новеллы удалены",
     "chapterInsertFailed": "не удалось вставить главу",
     "clearCachedNovels": "Очистить кэш новелл",
-    "clearCachedNovelsDesc": "Удалить кэшированные новеллы, которые не находятся в вашей библиотеке",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Вы уверены? Прочитанные и загруженные главы и прогресс не библиотечных новелл будут потеряны.",
     "clearUpdatesMessage": "Обновления очищены.",
     "clearUpdatesTab": "Очистить вкладку обновления",
@@ -162,7 +162,7 @@
       "restore": "Восстановление диска",
       "restoreInterruped": "Восстановление диска прервано"
     },
-    "googeDrive": "Google Диск",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "Резервное копирование на Google Диск",
     "invalidBackupFolder": "Неверная папка резервной копии",
     "localBackup": "Локальное резервное копирование",
@@ -243,7 +243,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Удалено из библиотеки",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Поиск источника",
     "searchResults": "Результаты поиска",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Добавить категорию",
-    "cantDeleteDefault": "Вы не можете удалить категорию по умолчанию",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "По умолчанию",
     "defaultCategory": "Категория по умолчанию",
     "deleteModal": {
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "У вас нет категорий. Нажмите кнопку Изменить, чтобы создать ее для организации вашей библиотеки"
   },
   "repositories": {
-    "emptyMsg": "У вас нет репозиториев. Добавьте ваш первый репозиторий плагинов, чтобы начать работу."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "У вас нет репозиториев. Добавьте ваш первый репозиторий плагинов, чтобы начать работу.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "О программе",
@@ -340,7 +344,12 @@
     "submit": "Продолжить",
     "loading": "Загрузка...",
     "moreOptions": "More options",
-    "warning": "Внимание"
+    "warning": "Внимание",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "Обновить",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Порядок сортировки",
     "updateLibrary": "Обновлять библиотеку при запуске",
-    "updateLibraryDesc": "Не рекомендуется для слабых устройств",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Показать время последнего обновления",
     "useFAB": "Использовать FAB в библиотеке",
     "timeTracking": "Time Tracking",
@@ -555,7 +564,7 @@
     },
     "coverSaved": "Обложка сохранена",
     "coverNotSaved": "Обложка не сохранена",
-    "deleteChapterError": "Не получается удалить папку с главами",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Удалить загруженные главы?",
     "deletedAllDownloads": "Удалить все загрузки",
     "download": {
@@ -563,8 +572,8 @@
       "customAmount": "Загрузить конкретное количество",
       "delete": "Удалить загруженные",
       "next": "Следующую главу",
-      "next10": "Следующие 10 глав",
-      "next5": "Следующие 5 глав",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Непрочитанные"
     },
     "edit": {
@@ -662,9 +671,9 @@
       "scrollToCurrentChapter": "Прокрутка к текущей главе",
       "scrollToTop": "Прокрутить вверх"
     },
-    "emptyChapterMessage": "<h2>Не удалось загрузить главу</h2><p>Читаемый контент не найден. Проверьте главу в WebView; если она там загружается, <a href='%{reportUrl}'>сообщите о проблеме плагина</a>.</p><p>Плагин: %{pluginId}<br>Новелла: %{novelName}<br>Глава: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Глава пуста.</p><p> Сообщите на GitHub, <a href='%{reportUrl}'>GitHub</a> если он доступен в WebView.</p><p>Плагин: %{pluginId}</p><p>Новелла: %{novelName}</p><p>Глава: %{chapterName}</p>",
     "finished": "Завершено",
-    "nextChapter": "Следующая глава: %{name}",
+    "nextChapter": "%{name}Следующий: %{name}",
     "noNextChapter": "Следующей главы нет",
     "noPreviousChapter": "Предыдущей главы нет",
     "searchMinLength": "Enter at least %{count} characters to search",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
