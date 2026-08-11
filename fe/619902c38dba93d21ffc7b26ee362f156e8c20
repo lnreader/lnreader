@@ -1,0 +1,92 @@
+modules/nitro-epub/cpp/import/EpubParser.cpp
+  s_6fe77e79273ff1::t_37da4c38cf7f66 7,348
+modules/nitro-epub/README.md
+  s_6fe77e79273ff1::t_f0c6e24856d378 9
+modules/nitro-epub/android/CMakeLists.txt
+  s_6fe77e79273ff1::t_37da4c38cf7f66 11
+modules/nitro-epub/cpp/tests/EpubParserTest.cpp
+  s_6fe77e79273ff1::t_37da4c38cf7f66 18-23,82-86,109-125
+  human 81,126
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_37da4c38cf7f66",
+          "lines": "7,348",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/import/EpubParser.cpp"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_f0c6e24856d378",
+          "lines": "9",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/README.md"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_37da4c38cf7f66",
+          "lines": "11",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/android/CMakeLists.txt"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 28,
+          "added_lines": 28,
+          "deleted_lines": 0,
+          "hash": "s_6fe77e79273ff1::t_37da4c38cf7f66",
+          "lines": "18-23,82-86,109-125",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "81,126",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/nitro-epub/cpp/tests/EpubParserTest.cpp"
+    }
+  ],
+  "base_commit_sha": "909504a72174e9fc3d5a2e2f07541ad8e5c17476",
+  "branch": "master",
+  "commit_sha": "fe619902c38dba93d21ffc7b26ee362f156e8c20",
+  "commit_time": "2026-08-11T14:51:38+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 2,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 2,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
