@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Cache de novels deletado",
     "chapterInsertFailed": "falha ao inserir capítulo",
     "clearCachedNovels": "Limpar capitulo em app",
-    "clearCachedNovelsDesc": "Deletar novel que não está em sua biblioteca",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "O progresso de capítulo lido e baixados de novels que não pertencem à biblioteca serão perdidos.",
     "clearUpdatesMessage": "Novos capítulos limpos.",
     "clearUpdatesTab": "Aba de limpeza de novidades",
@@ -31,13 +31,13 @@
     "importStaticFiles": "Importar arquivo estático",
     "novelInsertFailed": "falha ao inserir livro",
     "networking": "Networking",
-    "useFAB": "Utilize FAB em vez do botão",
+    "useFAB": "Utilize FAV invez do botão",
     "userAgent": "Agente usuário",
     "recreateDBIndexes": "Recriar índices do BD",
-    "recreateDBIndexesToast": "Índices do BD foram recriados",
-    "recreateDBIndexesDialogTitle": "Todos os índices do BD serão recriados.\nIsso pode demorar um pouco.",
+    "recreateDBIndexesToast": "Índices do BD foi recriado",
+    "recreateDBIndexesDialogTitle": "Todos os índices do BD vai ser Recriado.\nIsso pode demorar um pouco.",
     "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos.",
-    "restartRequired": "Reinicie o LNReader para aplicar esta alteração."
+    "restartRequired": "Restart LNReader to apply this change."
   },
   "appearance": "Aparência",
   "appearanceScreen": {
@@ -181,7 +181,7 @@
       "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
     },
     "preparingData": "Preparando os dados",
-    "preparingSelectedFiles": "Preparando arquivos selecionados",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "“Backup” do servidor pessoal",
       "host": "Servidor",
@@ -189,14 +189,14 @@
     },
     "remoteBackup": "Backup remoto",
     "restoreBackup": "Restaurar backup",
-    "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup",
+    "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup ",
     "restorinBackup": "Restaurando cópia de segurança",
     "restoringData": "Restaurando dados",
-    "restoringSelectedFiles": "Restaurando arquivos selecionados",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Auto hospedar",
     "selfHostDesc": "Fazer “backup” em seu servidor",
     "uploadingData": "Enviando dados",
-    "uploadingSelectedFiles": "Enviando arquivos selecionados",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Baixando arquivos salvos"
   },
   "browse": "Navegar",
@@ -243,9 +243,9 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removido da biblioteca",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
-    "searchbar": "Pesquisar fontes e plugins",
+    "searchbar": "Pesquisar nas fontes",
     "searchResults": "Resultados da pesquisa",
     "selectNovel": "Selecionar novel",
     "sources": "Sources",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Adicionar categoria",
-    "cantDeleteDefault": "Categoria padrão não pode ser deletada",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Padrão",
     "defaultCategory": "Categoria padrão",
     "deleteModal": {
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "Você não possui categorias. Clique no botão de editar para criar uma para organizar sua biblioteca"
   },
   "repositories": {
-    "emptyMsg": "Você não tem fontes. Adicione sua primeira para iniciar."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "Você não tem fontes. Adicione sua primeira para iniciar.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "Sobre",
@@ -304,7 +308,7 @@
     "deleted": "Deletado %{name}",
     "deprecated": "Depreciado",
     "display": "Exibir",
-    "done": "Concluído",
+    "done": "Depreciado",
     "downloads": "Baixados",
     "edit": "Editar",
     "example": "Exemplo",
@@ -340,7 +344,12 @@
     "submit": "Aplicar",
     "loading": "Carregando...",
     "moreOptions": "More options",
-    "warning": "Aviso"
+    "warning": "Aviso",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "Rever",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordenar",
     "updateLibrary": "Atualizar biblioteca ao iniciar",
-    "updateLibraryDesc": "Não recomendado para dispositivos de baixo desempenho",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Mostrar horário da última atualização",
     "useFAB": "Usar Botões flutuantes na Biblioteca",
     "timeTracking": "Time Tracking",
@@ -555,7 +564,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Não foi possível excluir a pasta do capítulo",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -563,8 +572,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Próximos 10 capítulos",
-      "next5": "Próximos 5 capítulos",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Unread"
     },
     "edit": {
@@ -662,7 +671,7 @@
       "scrollToCurrentChapter": "Rolar para o capítulo atual",
       "scrollToTop": "Rolar para o topo"
     },
-    "emptyChapterMessage": "<h2>Não foi possível carregar o capítulo</h2><p>Nenhum conteúdo legível foi encontrado. Verifique o capítulo no WebView; se ele carregar lá, <a href='%{reportUrl}'>relate o problema do plugin</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Capítulo: %{chapterName}</p>",
+    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
     "finished": "Finalizado",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Não há próximo capítulo",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
