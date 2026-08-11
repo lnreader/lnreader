@@ -1,0 +1,47 @@
+modules/native-background-tasks/android/build.gradle
+  s_234c5a69e04b62::t_276857215f7c8b 25,28
+  human 25,28
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 2,
+          "added_lines": 2,
+          "deleted_lines": 0,
+          "hash": "s_234c5a69e04b62::t_276857215f7c8b",
+          "lines": "25,28",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 0,
+          "added_lines": 0,
+          "deleted_lines": 2,
+          "hash": "human",
+          "lines": "25,28",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "modules/native-background-tasks/android/build.gradle"
+    }
+  ],
+  "base_commit_sha": "3ac611f63355ccff0eda990fa5a61950c2d6bfe4",
+  "branch": "master",
+  "commit_sha": "990cd4f2eb8bd37f99abeda64fc33fe4b3e51ca4",
+  "commit_time": "2026-08-11T15:58:51+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 0,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 0,
+      "total_deletions": 2
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
