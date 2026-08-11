@@ -1,0 +1,113 @@
+src/navigators/Main.tsx
+  human 6-9,52
+app.json
+  human 33-40
+src/hooks/common/useFullscreenMode.ts
+  human 10-13,28,43,58,60
+src/theme/utils/setBarColor.ts
+  human 4-8
+src/screens/novel/components/NovelScreenList.tsx
+  human 8,407-410,423
+src/screens/novel/NovelScreen.tsx
+  human 163
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "6-9,52",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/navigators/Main.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "33-40",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "app.json"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 8,
+          "added_lines": 8,
+          "deleted_lines": 3,
+          "hash": "human",
+          "lines": "10-13,28,43,58,60",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/hooks/common/useFullscreenMode.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 5,
+          "added_lines": 5,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "4-8",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/theme/utils/setBarColor.ts"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 6,
+          "added_lines": 6,
+          "deleted_lines": 18,
+          "hash": "human",
+          "lines": "8,407-410,423",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/components/NovelScreenList.tsx"
+    },
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 1,
+          "hash": "human",
+          "lines": "163",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "src/screens/novel/NovelScreen.tsx"
+    }
+  ],
+  "base_commit_sha": "15560b67b16c7f7961b7d6d3270c348cb8889719",
+  "branch": "master",
+  "commit_sha": "c6679b7f41e846c379e082a065b1ce81829cb1ba",
+  "commit_time": "2026-08-11T11:53:03+05:30",
+  "commit_type": "direct_commit",
+  "harness_aidlc_version": "1.4.32",
+  "prompts": {
+    "human": {
+      "accepted_lines": 33,
+      "agent_id": null,
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "overriden_lines": 0,
+      "total_additions": 33,
+      "total_deletions": 24
+    }
+  },
+  "repo": "https://github.com/LNReader/lnreader",
+  "schema_version": "authorship/3.0.0"
+}
