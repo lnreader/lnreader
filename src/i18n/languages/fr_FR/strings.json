@@ -176,7 +176,7 @@
       "settings": "Paramètres",
       "settingsDescription": "Préférences de l'application, du lecteur et des Màj.",
       "plugins": "Plugins",
-      "pluginsDescription": "Fichiers des plugins de source installés.",
+      "pluginsDescription": "Fichiers des extensions de source installées.",
       "downloadedFiles": "Chapitres et couvertures téléchargés",
       "downloadedFilesDescription": "Contenu des chapitres téléchargés et couvertures de romans enregistrées. Cela peut occuper beaucoup d'espace."
     },
@@ -385,7 +385,7 @@
   },
   "errorBoundary": {
     "title": "Une erreur inattendue s'est produite",
-    "description": "L'application a rencontré une erreur inattendue. Copiez la trace ci-dessous et partagez-la sur notre canal d'assistance Discord.",
+    "description": "L'application a rencontré une erreur inattendue. Copiez la trace ci-dessous et partagez-la dans notre salon de support Discord.",
     "copyStackTrace": "Copier la trace",
     "restart": "Redémarrer l'application"
   },
@@ -409,7 +409,7 @@
     "disableHapticFeedback": "Désactiver le retour haptique",
     "disableHapticFeedbackDescription": "Désactiver les vibrations pour les interactions tactiles.",
     "chapterDownloadCooldown": "Délai entre les téléchargements de chapitres",
-    "chapterDownloadCooldownDesc": "Délai entre deux téléchargements successifs de chapitres (en secondes). Permet d'éviter les limitations des sources lors des téléchargements par lots.",
+    "chapterDownloadCooldownDesc": "Délai entre deux téléchargements successifs de chapitres (en secondes). Permet d'éviter les limitations des sources lors de téléchargements groupés.",
     "chapterDownloadCooldownPlaceholder": "Délai en secondes (par ex. 1,5)",
     "chapterDownloadCooldownWarning": "Un délai très court peut déclencher une limitation ou un blocage temporaire de l'adresse IP par les sources.",
     "displayMode": "Mode d'affichage",
@@ -466,7 +466,7 @@
   "libraryScreen": {
     "bottomSheet": {
       "display": {
-        "badges": "Indicateurs",
+        "badges": "Badges",
         "comfortable": "Grille confortable",
         "compact": "Grille compacte",
         "displayMode": "Mode d'affichage",
@@ -549,8 +549,8 @@
       "includeChapterNumber": "Inclure le numéro du chapitre dans les titres",
       "invalidRange": "Veuillez saisir un numéro de chapitre valide",
       "selectFolder": "Sélectionnez le dossier de destination pour le fichier EPUB",
-      "startChapter": "Chapitre de début",
-      "startGreaterThanEnd": "Le chapitre de début doit précéder ou correspondre au chapitre de fin",
+      "startChapter": "Premier chapitre",
+      "startGreaterThanEnd": "Le premier chapitre doit précéder le dernier ou lui être égal",
       "title": "Exporter le roman au format EPUB"
     },
     "epub": {
@@ -560,7 +560,7 @@
       "noDownloadedChapters": "Aucun chapitre téléchargé. Téléchargez des chapitres avant de lancer l'exportation.",
       "noNovelSelected": "Aucun roman sélectionné pour l'exportation",
       "preparingExport": "Préparation de l'EPUB",
-      "savingExport": "Enregistrement de l'EPUB"
+      "savingExport": "Sauvegarde de l'EPUB"
     },
     "coverSaved": "Couverture sauvegardée",
     "coverNotSaved": "Couverture non sauvegardée",
@@ -596,7 +596,7 @@
       },
       "jumpToChapter": "Aller au chapitre",
       "openChapter": "Ouvrir le chapitre",
-      "openChapterDescription": "Désactivez cette option pour simplement l'afficher dans la liste des chapitres.",
+      "openChapterDescription": "Désactivez cette option pour défiler jusqu'au chapitre.",
       "searchByName": "Rechercher par nom de chapitre",
       "searchByNameDescription": "Désactivez cette option pour rechercher par numéro de chapitre."
     },
@@ -610,7 +610,7 @@
       "cancelled": "Annulé",
       "completed": "Terminé",
       "inactive": "Inactif",
-      "licensed": "Sous licence",
+      "licensed": "Licencié",
       "onHiatus": "En pause",
       "ongoing": "En cours",
       "publishingFinished": "Publication terminée",
