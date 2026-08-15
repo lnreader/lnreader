@@ -47,6 +47,15 @@ jest.mock('@modules/native-volume-button-listener', () => ({
   },
 }));
 
+jest.mock('@modules/native-share-receiver', () => ({
+  __esModule: true,
+  default: {
+    getInitialSharedText: jest.fn(async () => null),
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
+    removeListeners: jest.fn(),
+  },
+}));
+
 jest.mock('@modules/native-zip-archive', () => ({
   __esModule: true,
   default: {

@@ -36,6 +36,7 @@ import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
 import { backgroundTasks } from '@services/backgroundTasks';
 import ReaderStack from './ReaderStack';
+import ShareIntentHandler, { navigationRef } from './ShareIntentHandler';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
@@ -108,6 +109,7 @@ const MainNavigator = () => {
         },
       }}
     >
+      <ShareIntentHandler />
       <LibraryContextProvider>
         <UpdateContextProvider>
           <AppUpdateChecker />

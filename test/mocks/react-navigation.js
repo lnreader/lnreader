@@ -1,5 +1,10 @@
 const mockNavigate = jest.fn();
 const mockSetOptions = jest.fn();
+const mockNavigationRef = {
+  isReady: jest.fn(() => true),
+  navigate: mockNavigate,
+  getCurrentRoute: jest.fn(() => null),
+};
 
 // Patch react-native-worklets mock so reanimated setup doesn't crash.
 // Reanimated v4.5.2 imports createShareable, UIRuntimeId, getUIRuntimeHolder,
@@ -14,7 +19,7 @@ jest.mock('react-native-worklets', () => {
     getUISchedulerHolder: () => ({}),
     createShareable: (_hostRuntimeId, initial) => initial,
     UIRuntimeId: 2,
-    toggleSlowAnimationsOnUIRuntime: (_enabled) => { },
+    toggleSlowAnimationsOnUIRuntime: _enabled => {},
   };
 });
 
@@ -39,7 +44,8 @@ jest.mock('@react-navigation/native', () => {
     useRoute: () => ({
       params: {},
     }),
+    createNavigationContainerRef: () => mockNavigationRef,
   };
 });
 
-module.exports = { mockNavigate, mockSetOptions };
+module.exports = { mockNavigate, mockSetOptions, mockNavigationRef };
