@@ -8,7 +8,7 @@
     "dev:ios": "npx expo run:ios",
     "dev:start": "npx expo start",
     "dev:clean-start": "npx expo start --clear",
-    "build:release:android": "pnpm run generate:env:release && pnpm exec expo prebuild --platform android --clean --no-install && mkdir -p android/app/build/intermediates/sourcemaps/react/release && cd android && NODE_ENV=production ./gradlew :app:assembleRelease --build-cache --parallel",
+    "build:release:android": "pnpm run generate:env:release && pnpm exec expo prebuild --platform android --clean --no-install && mkdir -p android/app/build/intermediates/sourcemaps/react/release && cd android && NODE_ENV=production ./gradlew :app:assembleRelease --build-cache --parallel -PreleaseAbiSplits=true",
     "build:open-apk": "open ./android/app/build/outputs/apk/release/",
     "generate:env:debug": "node scripts/generate-env-file.cjs --build-type Debug",
     "generate:env:release": "node scripts/generate-env-file.cjs --build-type Release",
@@ -36,23 +36,18 @@
     "nix:emulator": "nix develop .#emulator --extra-experimental-features nix-command --extra-experimental-features flakes"
   },
   "dependencies": {
-    "@expo/dom-webview": "^57.0.1",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@legendapp/list": "^3.3.3",
     "@noble/ciphers": "^2.2.0",
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",
     "@preeternal/react-native-cookie-manager": "^6.3.3",
-    "@react-native-documents/picker": "^12.0.1",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-native-vector-icons/common": "^13.0.1",
     "@react-native-vector-icons/material-design-icons": "^13.1.2",
     "@react-navigation/bottom-tabs": "^7.18.11",
     "@react-navigation/native": "^7.3.11",
     "@react-navigation/native-stack": "^7.18.3",
-    "@react-navigation/stack": "^7.10.14",
-    "@shopify/flash-list": "^2.0.2",
-    "babel-plugin-inline-import": "^3.0.0",
     "cheerio": "1.0.0-rc.12",
     "color": "^5.0.3",
     "dayjs": "^1.11.21",
@@ -76,7 +71,6 @@
     "htmlparser2": "^12.0.0",
     "i18n-js": "^4.5.3",
     "lodash-es": "^4.18.1",
-    "lottie-react-native": "^7.3.8",
     "protobufjs": "^8.7.1",
     "react": "19.2.3",
     "react-native": "0.86.0",
@@ -86,6 +80,7 @@
     "react-native-edge-to-edge": "^1.8.1",
     "react-native-error-boundary": "^3.1.0",
     "react-native-gesture-handler": "^2.32.0",
+    "react-native-keyboard-controller": "^1.22.2",
     "react-native-mmkv": "^4.3.2",
     "react-native-pager-view": "^8.0.2",
     "react-native-paper": "^5.15.3",
@@ -99,6 +94,7 @@
     "react-native-url-polyfill": "^3.0.0",
     "react-native-webview": "^13.16.1",
     "react-native-worklets": "^0.10.0",
+    "react-syntax-highlighter": "^16.1.1",
     "sanitize-html": "^2.17.6",
     "urlencode": "^2.0.0",
     "zustand": "^5.0.14"
@@ -118,9 +114,11 @@
     "@types/jest": "^29.5.14",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "~19.2.17",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@types/sanitize-html": "^2.16.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
+    "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-sqlite3": "^12.11.1",
@@ -141,6 +139,11 @@
     "typescript": "~6.0.3"
   },
   "expo": {
+    "autolinking": {
+      "exclude": [
+        "@expo/dom-webview"
+      ]
+    },
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
@@ -169,5 +172,5 @@
   "engines": {
     "node": ">=22.11.0"
   },
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.20.0"
 }

@@ -45,6 +45,14 @@ const AdvancedSettings = ({ navigation }: AdvancedSettingsScreenProps) => {
   const [clearUpdatesDialog, setClearUpdatesDialog] = useState(false);
   const showClearUpdatesDialog = () => setClearUpdatesDialog(true);
   const hideClearUpdatesDialog = () => setClearUpdatesDialog(false);
+  const handleClearUpdates = async () => {
+    try {
+      await clearUpdates();
+      showToast(getString('advancedSettingsScreen.clearUpdatesMessage'));
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   const {
     value: deleteReadChaptersDialog,
@@ -150,11 +158,7 @@ const AdvancedSettings = ({ navigation }: AdvancedSettingsScreenProps) => {
         confirmLabel={getString('common.clear')}
         message={getString('advancedSettingsScreen.clearUpdatesWarning')}
         visible={clearUpdatesDialog}
-        onConfirm={() => {
-          clearUpdates();
-          showToast(getString('advancedSettingsScreen.clearUpdatesMessage'));
-          hideClearUpdatesDialog();
-        }}
+        onConfirm={handleClearUpdates}
         onDismiss={hideClearUpdatesDialog}
       />
 

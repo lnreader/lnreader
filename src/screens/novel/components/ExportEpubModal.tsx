@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { HelperText, TextInput } from 'react-native-paper';
-import { openDocumentTree } from 'react-native-saf-x';
 
 import { Dialog, SwitchItem } from '@components';
+import NativeFile from '@modules/native-file';
 
 import { useBoolean } from '@hooks';
 import { getString } from '@i18n/translations';
@@ -138,10 +138,8 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
 
   const openFolderPicker = async () => {
     try {
-      const resultUri = await openDocumentTree(true);
-      if (resultUri) {
-        setUri(resultUri.uri);
-      }
+      const result = await NativeFile.pickDirectory();
+      setUri(result.uri);
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error));
     }

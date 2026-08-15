@@ -1,8 +1,12 @@
 import NativeFile from '@modules/native-file';
 import { MMKVStorage } from './mmkv/mmkv';
 
-export const ROOT_STORAGE = NativeFile.ExternalDirectoryPath;
-export const PLUGIN_STORAGE = ROOT_STORAGE + '/Plugins';
+const documentStorage =
+  NativeFile.DocumentDirectoryPath || NativeFile.ExternalDirectoryPath;
+
+export const ROOT_STORAGE = NativeFile.ExternalDirectoryPath || documentStorage;
+export const LEGACY_PLUGIN_STORAGE = ROOT_STORAGE + '/Plugins';
+export const PLUGIN_STORAGE = documentStorage + '/Plugins';
 export const NOVEL_STORAGE_DIRECTORY_KEY = 'NOVEL_STORAGE_DIRECTORY';
 export const NOVEL_STORAGE_DIRECTORY_NAME_KEY = 'NOVEL_STORAGE_DIRECTORY_NAME';
 

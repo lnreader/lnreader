@@ -93,6 +93,7 @@ const NovelChapterGroup: React.FC<NovelChapterGroupProps> = ({
         path: novel.path,
         cover: novel.cover,
         name: novel.name,
+        inLibrary: novel.inLibrary,
       },
     });
   }, [navigate, novel]);

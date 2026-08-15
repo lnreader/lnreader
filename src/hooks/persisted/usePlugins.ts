@@ -11,13 +11,13 @@ import {
 } from '@plugins/pluginManager';
 import { PluginItem } from '@plugins/types';
 import { getString } from '@i18n/translations';
-import { newer } from '@utils/compareVersion';
 import { languagesMapping } from '@utils/constants/languages';
 import { MMKVStorage, getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import {
   filterAvailablePlugins,
   filterInstalledPlugins,
   getLastUsedPluginId,
+  reconcileInstalledPluginUpdates,
 } from './pluginSelectors';
 
 export const AVAILABLE_PLUGINS = 'AVAILABLE_PLUGINS';
@@ -38,6 +38,10 @@ const emptyStringList: string[] = [];
 
 const readPluginList = (key: string) =>
   getMMKVObject<PluginItem[]>(key) ?? emptyPluginList;
+
+interface RefreshPluginsOptions {
+  clearUnavailableUpdates?: boolean;
+}
 
 export const useInstalledPlugins = () => {
   const [installedPlugins = emptyPluginList] =
@@ -113,47 +117,34 @@ export const usePluginActions = () => {
     setMMKVObject(LAST_USED_PLUGIN, pluginId);
   }, []);
 
-  const refreshPlugins = useCallback(async () => {
-    legacyFilteredPluginKeys.forEach(key => MMKVStorage.remove(key));
+  const refreshPlugins = useCallback(
+    async ({ clearUnavailableUpdates = false }: RefreshPluginsOptions = {}) => {
+      legacyFilteredPluginKeys.forEach(key => MMKVStorage.remove(key));
 
-    const installedPlugins = readPluginList(INSTALLED_PLUGINS);
-    const storedLastUsedPlugin = getMMKVObject<unknown>(LAST_USED_PLUGIN);
-    const lastUsedPluginId = getLastUsedPluginId(storedLastUsedPlugin);
-    if (lastUsedPluginId && typeof storedLastUsedPlugin !== 'string') {
-      setMMKVObject(LAST_USED_PLUGIN, lastUsedPluginId);
-    }
-    const fetchedPlugins = await fetchPlugins();
-    const fetchedPluginsById = new Map(
-      fetchedPlugins.map(plugin => [plugin.id, plugin]),
-    );
-
-    let installedPluginsChanged = false;
-    const updatedInstalledPlugins = installedPlugins.map(installedPlugin => {
-      const fetchedPlugin = fetchedPluginsById.get(installedPlugin.id);
+      const installedPlugins = readPluginList(INSTALLED_PLUGINS);
+      const storedLastUsedPlugin = getMMKVObject<unknown>(LAST_USED_PLUGIN);
+      const lastUsedPluginId = getLastUsedPluginId(storedLastUsedPlugin);
+      if (lastUsedPluginId && typeof storedLastUsedPlugin !== 'string') {
+        setMMKVObject(LAST_USED_PLUGIN, lastUsedPluginId);
+      }
+      const fetchedPlugins = await fetchPlugins();
+      const updatedInstalledPlugins = reconcileInstalledPluginUpdates(
+        installedPlugins,
+        fetchedPlugins,
+        clearUnavailableUpdates,
+      );
 
       if (
-        !fetchedPlugin ||
-        !newer(fetchedPlugin.version, installedPlugin.version)
+        updatedInstalledPlugins.some(
+          (plugin, index) => plugin !== installedPlugins[index],
+        )
       ) {
-        return installedPlugin;
+        setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
       }
-
-      const updatedPlugin = {
-        ...installedPlugin,
-        hasUpdate: true,
-        iconUrl: fetchedPlugin.iconUrl,
-        url: fetchedPlugin.url,
-      };
-      installedPluginsChanged = true;
-
-      return updatedPlugin;
-    });
-
-    if (installedPluginsChanged) {
-      setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
-    }
-    setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
-  }, []);
+      setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
+    },
+    [],
+  );
 
   const toggleLanguageFilter = useCallback((language: string) => {
     const languagesFilter =

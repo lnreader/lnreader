@@ -167,9 +167,14 @@ jest.mock('@utils/showToast', () => ({
 }));
 
 jest.mock('@modules/native-file', () => ({
-  ExternalCachesDirectoryPath: '/tmp',
-  copyFile: jest.fn(),
-  unlink: jest.fn(),
+  __esModule: true,
+  default: {
+    ExternalCachesDirectoryPath: '/tmp',
+    copyFile: jest.fn(),
+    copyFileToDirectory: jest.fn(),
+    pickDirectory: jest.fn(),
+    unlink: jest.fn(),
+  },
 }));
 
 jest.mock('@plugins/helpers/fetch', () => ({

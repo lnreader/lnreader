@@ -34,7 +34,7 @@ const smartUpdateConditions = ({
 /**
  * Get library novels with optional filtering and sorting using Drizzle ORM
  */
-export const getLibraryNovelsFromDb = (
+export const getLibraryNovelsQuery = (
   sortOrder?: string,
   filter?: string,
   searchText?: string,
@@ -68,8 +68,23 @@ export const getLibraryNovelsFromDb = (
     query.orderBy(sql.raw(dateAwareSortOrder));
   }
 
-  return query.all();
+  return query;
 };
+
+export const getLibraryNovelsFromDb = (
+  sortOrder?: string,
+  filter?: string,
+  searchText?: string,
+  downloadedOnlyMode?: boolean,
+  excludeLocalNovels?: boolean,
+) =>
+  getLibraryNovelsQuery(
+    sortOrder,
+    filter,
+    searchText,
+    downloadedOnlyMode,
+    excludeLocalNovels,
+  ).all();
 
 /**
  * Get the novels eligible for a global update in one query.

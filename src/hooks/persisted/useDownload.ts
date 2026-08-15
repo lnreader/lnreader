@@ -55,7 +55,10 @@ export default function useDownload() {
         chapters: [{ chapterId: chapter.id, chapterName: chapter.name }],
       },
     });
-  const downloadChapters = (novel: NovelInfo, chapters: ChapterInfo[]) =>
+  const downloadChapters = (
+    novel: NovelInfo,
+    chapters: Pick<ChapterInfo, 'id' | 'name'>[],
+  ) =>
     backgroundTasks.enqueue({
       name: 'DOWNLOAD_CHAPTER',
       data: {

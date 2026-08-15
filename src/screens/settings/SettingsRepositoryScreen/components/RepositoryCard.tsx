@@ -1,9 +1,11 @@
 import { FC } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 
-import { IconButtonV2 } from '@components';
+import { ConfirmationDialog, IconButtonV2 } from '@components';
+import Switch from '@components/Switch/Switch';
 
 import { Repository } from '@database/types';
 import { useBoolean } from '@hooks/index';
@@ -17,15 +19,20 @@ import DeleteRepositoryModal from './DeleteRepositoryModal';
 interface RepositoryCardProps {
   repository: Repository;
   refetchRepositories: () => void;
+  toggleRepository: (repository: Repository) => void | Promise<void>;
   upsertRepository: (repositoryUrl: string, repository?: Repository) => void;
 }
 
 const RepositoryCard: FC<RepositoryCardProps> = ({
   repository,
   refetchRepositories,
+  toggleRepository,
   upsertRepository,
 }) => {
   const theme = useTheme();
+  const repositoryName = `${repository.url.split('/')?.[3]}/${
+    repository.url.split('/')?.[4]
+  }`;
 
   const {
     value: repositoryModalVisible,
@@ -39,6 +46,20 @@ const RepositoryCard: FC<RepositoryCardProps> = ({
     setFalse: closeDeleteRepositoryModal,
   } = useBoolean();
 
+  const {
+    value: disableRepositoryModalVisible,
+    setTrue: showDisableRepositoryModal,
+    setFalse: closeDisableRepositoryModal,
+  } = useBoolean();
+
+  const onToggleRepository = () => {
+    if (repository.enabled) {
+      showDisableRepositoryModal();
+    } else {
+      toggleRepository(repository);
+    }
+  };
+
   return (
     <View
       style={[
@@ -48,45 +69,61 @@ const RepositoryCard: FC<RepositoryCardProps> = ({
         },
       ]}
     >
-      <View style={styles.nameCtn}>
-        <IconButtonV2
-          name="label-outline"
-          color={theme.onSurface}
-          padding={0}
-          theme={theme}
-        />
-        <Text
-          style={[styles.name, { color: theme.onSurface }]}
+      <View style={styles.headerCtn}>
+        <Pressable
+          accessibilityLabel={repositoryName}
+          accessibilityRole="button"
+          android_ripple={{ color: theme.rippleColor }}
+          style={styles.nameCtn}
           onPress={showRepositoryModal}
         >
-          {`${repository.url.split('/')?.[3]}/${
-            repository.url.split('/')?.[4]
-          }`}
-        </Text>
+          <MaterialCommunityIcons
+            accessible={false}
+            name="label-outline"
+            color={theme.onSurface}
+            size={24}
+          />
+          <Text
+            ellipsizeMode="middle"
+            numberOfLines={1}
+            style={[styles.name, { color: theme.onSurface }]}
+          >
+            {repositoryName}
+          </Text>
+        </Pressable>
+        <Switch
+          accessibilityLabel={getString('repositories.toggle', {
+            name: repositoryName,
+          })}
+          containerStyle={styles.switchCtn}
+          value={repository.enabled}
+          onValueChange={onToggleRepository}
+        />
       </View>
       <View style={styles.buttonsCtn}>
         <IconButtonV2
           name="open-in-new"
           color={theme.onSurface}
           onPress={() => Linking.openURL(repository.url)}
+          padding={12}
           theme={theme}
         />
         <IconButtonV2
           name="content-copy"
           color={theme.onSurface}
-          style={styles.manageBtn}
           onPress={() =>
             Clipboard.setStringAsync(repository.url).then(() => {
               showToast(getString('common.copiedToClipboard', { name: '' }));
             })
           }
+          padding={12}
           theme={theme}
         />
         <IconButtonV2
           name="delete-outline"
           color={theme.onSurface}
-          style={styles.manageBtn}
           onPress={showDeleteRepositoryModal}
+          padding={12}
           theme={theme}
         />
       </View>
@@ -103,6 +140,17 @@ const RepositoryCard: FC<RepositoryCardProps> = ({
           closeModal={closeDeleteRepositoryModal}
           onSuccess={refetchRepositories}
         />
+        <ConfirmationDialog
+          confirmFirst
+          confirmLabel={getString('repositories.disable')}
+          message={getString('repositories.disableWarning', {
+            name: repositoryName,
+          })}
+          title={getString('repositories.disableTitle')}
+          visible={disableRepositoryModalVisible}
+          onConfirm={() => toggleRepository(repository)}
+          onDismiss={closeDisableRepositoryModal}
+        />
       </Portal>
     </View>
   );
@@ -117,6 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   cardCtn: {
+    borderCurve: 'continuous',
     borderRadius: 12,
     boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
     marginBottom: 8,
@@ -124,20 +173,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 8,
   },
-  manageBtn: {
-    marginLeft: 8,
+  headerCtn: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
   },
   name: {
+    flexShrink: 1,
     fontSize: 16,
     fontWeight: '500',
-    marginHorizontal: 16,
+    lineHeight: 24,
   },
   nameCtn: {
     alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    marginLeft: 8,
-    paddingRight: 16,
-    paddingVertical: 4,
+    gap: 12,
+    minHeight: 48,
+    minWidth: 0,
+  },
+  switchCtn: {
+    justifyContent: 'center',
+    minHeight: 48,
   },
 });

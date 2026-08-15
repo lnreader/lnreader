@@ -10,9 +10,11 @@ import { insertTestRepository, clearAllTables } from './testData';
 
 import {
   getRepositoriesFromDb,
+  getEnabledRepositoriesFromDb,
   isRepoUrlDuplicated,
   createRepository,
   deleteRepositoryById,
+  setRepositoryEnabled,
   updateRepository,
 } from '../RepositoryQueries';
 
@@ -57,6 +59,30 @@ describe('RepositoryQueries', () => {
     });
   });
 
+  describe('getEnabledRepositoriesFromDb', () => {
+    it('should exclude disabled repositories', async () => {
+      const testDb = getTestDb();
+
+      await insertTestRepository(testDb, {
+        url: 'https://enabled.example.com',
+      });
+      await insertTestRepository(testDb, {
+        url: 'https://disabled.example.com',
+        enabled: false,
+      });
+      await insertTestRepository(testDb, {
+        url: 'https://second-enabled.example.com',
+      });
+
+      const result = await getEnabledRepositoriesFromDb();
+
+      expect(result.map(repository => repository.url)).toEqual([
+        'https://enabled.example.com',
+        'https://second-enabled.example.com',
+      ]);
+    });
+  });
+
   describe('isRepoUrlDuplicated', () => {
     it('should return true when URL already exists', async () => {
       const testDb = getTestDb();
@@ -95,6 +121,7 @@ describe('RepositoryQueries', () => {
 
       expect(result).toBeDefined();
       expect(result.url).toBe('https://example.com/repo');
+      expect(result.enabled).toBe(true);
       expect(result.id).toBeGreaterThan(0);
     });
 
@@ -170,6 +197,21 @@ describe('RepositoryQueries', () => {
       await expect(
         updateRepository(999, 'https://example.com'),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe('setRepositoryEnabled', () => {
+    it('should update the enabled state without changing the URL', async () => {
+      const testDb = getTestDb();
+      const url = 'https://example.com/repo';
+      const id = await insertTestRepository(testDb, { url });
+
+      await setRepositoryEnabled(id, false);
+
+      const repositories = await getRepositoriesFromDb();
+      expect(repositories).toEqual([
+        expect.objectContaining({ id, url, enabled: false }),
+      ]);
     });
   });
 });

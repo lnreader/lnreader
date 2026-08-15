@@ -7,8 +7,10 @@ import {
   useTheme,
 } from '../persisted';
 import Color from 'color';
-import * as NavigationBar from 'expo-navigation-bar';
-import { setStatusBarColor } from '@theme/utils/setBarColor';
+import {
+  setNavigationBarTransparent,
+  setStatusBarColor,
+} from '@theme/utils/setBarColor';
 import { SystemBars } from 'react-native-edge-to-edge';
 
 const useFullscreenMode = () => {
@@ -23,6 +25,7 @@ const useFullscreenMode = () => {
       SystemBars.setHidden(true);
     } else {
       setStatusBarColor(Color(backgroundColor));
+      setNavigationBarTransparent(Color(backgroundColor).isDark());
     }
   }, [backgroundColor, fullScreenMode]);
 
@@ -37,6 +40,7 @@ const useFullscreenMode = () => {
        */
 
       setStatusBarColor(theme);
+      setNavigationBarTransparent(theme.isDark);
     }
   }, [fullScreenMode, theme]);
 
@@ -51,8 +55,9 @@ const useFullscreenMode = () => {
   useEffect(() => {
     const unsubscribe = addListener('beforeRemove', () => {
       StatusBar.setHidden(false);
-      NavigationBar.setVisibilityAsync('visible');
+      SystemBars.setHidden(false);
       setStatusBarColor(theme);
+      setNavigationBarTransparent(theme.isDark);
     });
 
     return unsubscribe;

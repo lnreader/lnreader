@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Вебсайт",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Долучитися до перекладу",
     "plugins": "Plugins",
     "version": "Версія",
@@ -82,6 +82,16 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Назва резервної копії",
     "backupCreated": "Backup created successfully",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
@@ -228,7 +238,7 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugins": "Pinned",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
@@ -302,6 +312,7 @@
     "globally": "глобально",
     "install": "Встановити",
     "imported": "Imported",
+    "later": "Later",
     "logout": "Вийти",
     "name": "Назва",
     "newUpdateAvailable": "Доступне нове оновлення",
@@ -318,6 +329,7 @@
     "save": "Зберегти",
     "saved": "Saved",
     "search": "Пошук",
+    "skipVersion": "Skip version",
     "searchFor": "Шукати",
     "searchResults": "Результати пошуку",
     "settings": "Налаштування",
@@ -361,6 +373,12 @@
     "noDownloads": "Немає завантажень",
     "pluginNotFound": "Плагін не знайдено в системі!",
     "removeDownloadsWarning": "Ви впевнені? Всі завантажені розділи будуть видалені."
+  },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
   },
   "generalSettings": "Загальні налаштування",
   "generalSettingsScreen": {
@@ -582,10 +600,12 @@
     "status": {
       "cancelled": "Скасовано",
       "completed": "Завершено",
+      "inactive": "Inactive",
       "licensed": "Ліцензовано",
       "onHiatus": "На паузі",
       "ongoing": "Триває",
       "publishingFinished": "Публікацію завершено",
+      "stub": "STUB",
       "unknown": "Невідомо"
     },
     "tracked": "Відстежується",
@@ -642,7 +662,7 @@
       "scrollToCurrentChapter": "Прокрутити до поточного розділу",
       "scrollToTop": "Прокрутити догори"
     },
-    "emptyChapterMessage": "<p>Розділ порожній.</p><p>Повідомте про це на <a href='%{reportUrl}'>GitHub</a>, якщо він доступний у WebView.</p><p>Плагін: %{pluginId}</p><p>Новела: %{novelName}</p><p>Розділ: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Не вдалося завантажити розділ</h2><p>Читабельний вміст не знайдено. Перевірте розділ у WebView; якщо він там завантажується, <a href='%{reportUrl}'>повідомте про проблему з плагіном</a>.</p><p>Плагін: %{pluginId}<br>Новела: %{novelName}<br>Розділ: %{chapterName}</p>",
     "finished": "Завершено",
     "nextChapter": "Наступний: %{name}",
     "noNextChapter": "Наступний розділ не знайдено",
@@ -682,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "Завантажені розділи",
     "genreDistribution": "Розподіл за жанром",
+    "novels": "novels",
     "readChapters": "Прочитані розділи",
     "sources": "Джерела",
     "statusDistribution": "Розподіл за статусом",
@@ -693,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "Відстеження",
   "trackingScreen": {
@@ -756,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }

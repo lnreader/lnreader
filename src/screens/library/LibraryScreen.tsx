@@ -23,6 +23,8 @@ import {
 import {
   SearchbarV2,
   Button,
+  EmptyView,
+  ErrorScreenV2,
   SafeAreaView,
   TopTabBar,
 } from '@components/index';
@@ -51,7 +53,7 @@ import { backgroundTasks } from '@services/backgroundTasks';
 import useImport from '@hooks/persisted/useImport';
 import { ThemeColors } from '@theme/types';
 import { useLibraryContext } from '@components/Context/LibraryContext';
-import { xor } from 'lodash-es';
+import xor from 'lodash-es/xor';
 import { SelectionContext } from './SelectionContext';
 import { getLibraryCategoryIndex } from './constants/constants';
 
@@ -86,6 +88,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     categories,
     refetchLibrary,
     isLoading,
+    error: libraryError,
     settings: {
       showNumberOfNovels,
       downloadedOnlyMode,
@@ -258,9 +261,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
           )
         : unfilteredNovels;
 
-      return isLoading ? (
-        <SourceScreenSkeletonLoading theme={theme} />
-      ) : (
+      return (
         <>
           {searchText ? (
             <Button
@@ -286,14 +287,12 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       );
     },
     [
-      isLoading,
       library,
       navigation,
       pickAndImport,
       searchText,
       searchLower,
       styles.globalSearchBtn,
-      theme,
     ],
   );
 
@@ -493,7 +492,20 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       ) : null}
 
       <SelectionContext.Provider value={selectionContextValue}>
-        {categories.length ? (
+        {isLoading ? (
+          <SourceScreenSkeletonLoading theme={theme} />
+        ) : libraryError ? (
+          <ErrorScreenV2
+            error={libraryError}
+            actions={[
+              {
+                iconName: 'refresh',
+                title: getString('common.retry'),
+                onPress: refetchLibrary,
+              },
+            ]}
+          />
+        ) : categories.length ? (
           <TabView
             commonOptions={{
               label: renderLabel,
@@ -506,7 +518,18 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
             initialLayout={{ width: layout.width }}
           />
         ) : (
-          <SourceScreenSkeletonLoading theme={theme} />
+          <EmptyView
+            theme={theme}
+            icon="Σ(ಠ_ಠ)"
+            description={getString('libraryScreen.emptyCategory')}
+            actions={[
+              {
+                iconName: 'compass-outline',
+                title: getString('browse'),
+                onPress: () => navigation.navigate('Browse'),
+              },
+            ]}
+          />
         )}
       </SelectionContext.Provider>
 

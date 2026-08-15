@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { setStatusBarColor } from '@theme/utils/setBarColor';
+import {
+  setNavigationBarTransparent,
+  setStatusBarColor,
+} from '@theme/utils/setBarColor';
 import { useAppSettings, usePluginActions, useTheme } from '@hooks/persisted';
 import { AppUpdateChecker } from '@components';
 
@@ -46,6 +49,7 @@ const MainNavigator = () => {
   useEffect(() => {
     const timer = setTimeout(async () => {
       setStatusBarColor(theme);
+      setNavigationBarTransparent(theme.isDark);
     }, 500);
 
     return () => {

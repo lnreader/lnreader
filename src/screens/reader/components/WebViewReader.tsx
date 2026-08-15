@@ -1,5 +1,10 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { NativeEventEmitter, NativeModules, StatusBar } from 'react-native';
+import {
+  NativeEventEmitter,
+  NativeModules,
+  StatusBar,
+  StyleSheet,
+} from 'react-native';
 import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
 import color from 'color';
@@ -24,12 +29,18 @@ import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
 import type { TtsSettings } from '@modules/nitro-tts';
 import { ChapterInfo } from '@database/types';
+import { Dialog } from '@components/Dialog';
+import { TextInput } from 'react-native-paper';
+import useCustomCode from './Hooks/useCustomCode';
+import useTextModifications from './Hooks/useTextModifications';
 import { isPluginIssueReportUrl } from '../utils/sanitizeChapterText';
 
-type WebViewPostEvent = {
+export type WebViewPostEvent = {
   type: string;
   data?: unknown;
   autoStartTTS?: boolean;
+  index?: number;
+  total?: number;
 };
 
 type WebViewReaderProps = {
@@ -130,17 +141,18 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   } = useChapterContext();
   const theme = useTheme();
   const initialReaderSettings = useMemo(
-    () =>
-      getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS) ||
-      initialChapterReaderSettings,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => ({
+      ...initialChapterReaderSettings,
+      ...getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS),
+    }), // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
   );
 
   const chapterGeneralSettings = useMemo(
-    () =>
-      getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
-      initialChapterGeneralSettings,
+    () => ({
+      ...initialChapterGeneralSettings,
+      ...getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS),
+    }),
     // needed to preserve settings during chapter change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
@@ -162,6 +174,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     state: ttsState,
     updateSettings: updateTtsSettings,
   } = useTtsSession();
+
+  const { customJS, customCSS } = useCustomCode(initialReaderSettings);
+
+  const {
+    html: processedHtml,
+    replaceModalVisible,
+    setReplaceModalVisible,
+    selectedTextForReplace,
+    replacementText,
+    setReplacementText,
+    handleReplaceSave,
+    handleReplaceCancel,
+    eventTextAction,
+  } = useTextModifications(html, webViewRef);
 
   const [readerSettings, setReaderSettings] = useState(
     () =>
@@ -339,9 +365,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 }
 				</style>
               <link rel="stylesheet" href="${pluginCustomCSS}">
-              <style id="ln-custom-css">${
-                initialReaderSettings.customCSS
-              }</style>
+              <style id="ln-custom-css">${customCSS}</style>
             </head>
             <body class="${
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
@@ -354,7 +378,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
               ">${chapter.name}</div>
               <div id="LNReader-chapter">
-                ${html}
+                ${processedHtml}
               </div>
               <div id="reader-ui"></div>
               </body>
@@ -388,9 +412,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/core.js"></script>
               <script src="${assetsUriPrefix}/js/search.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
+              <script src="${assetsUriPrefix}/js/textRemover.js"></script>
               <script src="${pluginCustomJS}"></script>
               <script id="ln-custom-js">
-                ${initialReaderSettings.customJS}
+              function fn(){
+                let html = document.querySelector('#LNReader-chapter').innerHTML;
+                ${customJS}
+                document.querySelector('#LNReader-chapter').innerHTML = html;
+              }
+              document.addEventListener('DOMContentLoaded', fn);
               </script>
           </html>
           `,
@@ -399,7 +429,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     batteryLevel,
     chapter,
     chapterGeneralSettings,
-    html,
+    processedHtml,
+      customJS,
+      customCSS,
     initialReaderSettings,
     novel,
     plugin,
@@ -410,6 +442,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   ]);
 
   return (
+      <>
     <WebView
       ref={webViewRef}
       onTouchStart={onTouchStart}
@@ -432,20 +465,24 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           `if (window.reader && window.reader.batteryLevel) {
             window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
           }`,
-        );
-        webViewRef.current?.injectJavaScript(adjacentChapterScriptRef.current);
-
-        const searchText = searchTextRef.current.trim();
-        if (searchText) {
-          webViewRef.current?.injectJavaScript(
-            `window.readerSearch?.search(${JSON.stringify(searchText)}); true;`,
           );
-        }
+          webViewRef.current?.injectJavaScript(
+            adjacentChapterScriptRef.current,
+          );
 
-        if (autoStartTTSRef.current) {
-          autoStartTTSRef.current = false;
-          setTimeout(() => {
-            webViewRef.current?.injectJavaScript(`
+          const searchText = searchTextRef.current.trim();
+          if (searchText) {
+            webViewRef.current?.injectJavaScript(
+              `window.readerSearch?.search(${JSON.stringify(
+                searchText,
+              )}); true;`,
+            );
+          }
+
+          if (autoStartTTSRef.current) {
+            autoStartTTSRef.current = false;
+            setTimeout(() => {
+              webViewRef.current?.injectJavaScript(`
               (function() {
                 if (window.tts && reader.generalSettings.val.TTSEnable) {
                   setTimeout(() => {
@@ -454,117 +491,158 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 }
               })();
             `);
-          }, 300);
-        }
-      }}
-      onMessage={(ev: { nativeEvent: { data: string } }) => {
-        __DEV__ && onLogMessage(ev);
-        const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
-        switch (event.type) {
-          case 'tts-queue': {
-            const payload = event.data as
-              | { queue?: unknown; startIndex?: unknown }
-              | undefined;
-            const queue = Array.isArray(payload?.queue)
-              ? payload?.queue.filter(
-                  (item): item is string =>
-                    typeof item === 'string' && item.trim().length > 0,
-                )
-              : [];
-            const startIndex =
-              typeof payload?.startIndex === 'number' ? payload.startIndex : 0;
-            void loadAndPlay(
-              queue,
-              startIndex,
-              {
-                novelName: novel?.name || 'Unknown',
-                chapterName: chapter.name,
-                coverUri: novel?.cover || undefined,
-              },
-              toNativeTtsSettings(readerSettingsRef.current.tts),
-            );
-            break;
+            }, 300);
           }
-          case 'tts-command': {
-            if (!event.data || typeof event.data !== 'object') {
+        }}
+        onMessage={(ev: { nativeEvent: { data: string } }) => {
+          __DEV__ && onLogMessage(ev);
+          const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
+          switch (event.type) {
+            case 'tts-queue': {
+              const payload = event.data as
+                | { queue?: unknown; startIndex?: unknown }
+                | undefined;
+              const queue = Array.isArray(payload?.queue)
+                ? payload?.queue.filter(
+                    (item): item is string =>
+                      typeof item === 'string' && item.trim().length > 0,
+                  )
+                : [];
+              const startIndex =
+                typeof payload?.startIndex === 'number'
+                  ? payload.startIndex
+                  : 0;
+              void loadAndPlay(
+                queue,
+                startIndex,
+                {
+                  novelName: novel?.name || 'Unknown',
+                  chapterName: chapter.name,
+                  coverUri: novel?.cover || undefined,
+                },
+                toNativeTtsSettings(readerSettingsRef.current.tts),
+              );
               break;
             }
-            const data = event.data as {
-              command?: unknown;
-              index?: unknown;
-            };
-            switch (data.command) {
-              case 'next':
-              case 'pause':
-              case 'play':
-              case 'previous':
-              case 'replay':
-              case 'stop':
-                runTtsCommand(data.command);
-                break;
-              case 'seekTo':
-                if (typeof data.index === 'number') {
-                  seekTts(data.index);
-                }
-                break;
-            }
-            break;
-          }
-          case 'hide':
-            onPress();
-            break;
-          case 'next':
-            nextChapterScreenVisible.current = true;
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
-            navigateChapter('NEXT');
-            break;
-          case 'prev':
-            if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
-            }
-            navigateChapter('PREV');
-            break;
-          case 'save':
-            if (event.data && typeof event.data === 'number') {
-              saveProgress(event.data);
-            }
-            break;
-          case 'search-result':
-            if (event.data && typeof event.data === 'object') {
-              const data = event.data as {
-                query?: unknown;
-                current?: unknown;
-                total?: unknown;
-                renderedTotal?: unknown;
-                isTruncated?: unknown;
-              };
-              const query = typeof data.query === 'string' ? data.query : '';
-              if (query !== searchTextRef.current.trim()) {
+            case 'tts-command': {
+              if (!event.data || typeof event.data !== 'object') {
                 break;
               }
-              const total = typeof data.total === 'number' ? data.total : 0;
-              onSearchResult({
-                query,
-                current: typeof data.current === 'number' ? data.current : 0,
-                total,
-                renderedTotal:
-                  typeof data.renderedTotal === 'number'
-                    ? data.renderedTotal
-                    : total,
-                isTruncated: data.isTruncated === true,
-              });
+              const data = event.data as {
+                command?: unknown;
+                index?: unknown;
+              };
+              switch (data.command) {
+                case 'next':
+                case 'pause':
+                case 'play':
+                case 'previous':
+                case 'replay':
+                case 'stop':
+                  runTtsCommand(data.command);
+                  break;
+                case 'seekTo':
+                  if (typeof data.index === 'number') {
+                    seekTts(data.index);
+                  }
+                  break;
+              }
+              break;
             }
-            break;
-          case 'interaction':
-            onUserInteraction();
-            break;
-        }
-      }}
-      source={source}
-    />
+            case 'hide':
+              onPress();
+              break;
+            case 'next':
+              nextChapterScreenVisible.current = true;
+              if (event.autoStartTTS) {
+                autoStartTTSRef.current = true;
+              }
+              navigateChapter('NEXT');
+              break;
+            case 'prev':
+              if (event.autoStartTTS) {
+                autoStartTTSRef.current = true;
+              }
+              navigateChapter('PREV');
+              break;
+            case 'save':
+              if (event.data && typeof event.data === 'number') {
+                saveProgress(event.data);
+              }
+              break;
+            case 'text-action':
+              eventTextAction(event);
+              break;
+            case 'search-result':
+              if (event.data && typeof event.data === 'object') {
+                const data = event.data as {
+                  query?: unknown;
+                  current?: unknown;
+                  total?: unknown;
+                  renderedTotal?: unknown;
+                  isTruncated?: unknown;
+                };
+                const query = typeof data.query === 'string' ? data.query : '';
+                if (query !== searchTextRef.current.trim()) {
+                  break;
+                }
+                const total = typeof data.total === 'number' ? data.total : 0;
+                onSearchResult({
+                  query,
+                  current: typeof data.current === 'number' ? data.current : 0,
+                  total,
+                  renderedTotal:
+                    typeof data.renderedTotal === 'number'
+                      ? data.renderedTotal
+                      : total,
+                  isTruncated: data.isTruncated === true,
+                });
+              }
+              break;
+            case 'interaction':
+              onUserInteraction();
+              break;
+          }
+        }}
+        source={source}
+      />
+      <Dialog.Root
+        visible={replaceModalVisible}
+        onDismiss={() => setReplaceModalVisible(false)}
+      >
+        <Dialog.Header>
+          <Dialog.Title>Replace Text</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Content>
+          <TextInput
+            label="Text to replace"
+            value={selectedTextForReplace}
+            editable={false}
+            mode="outlined"
+            style={styles.textInput}
+            theme={{ colors: { background: theme.surface } }}
+          />
+          <TextInput
+            label="Replace with"
+            value={replacementText}
+            onChangeText={setReplacementText}
+            autoCorrect={false}
+            mode="outlined"
+            style={styles.textInput}
+            theme={{ colors: { background: theme.surface } }}
+          />
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Dialog.Action onPress={handleReplaceCancel}>Cancel</Dialog.Action>
+          <Dialog.Action onPress={handleReplaceSave}>Save</Dialog.Action>
+        </Dialog.Actions>
+      </Dialog.Root>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  textInput: { marginBottom: 16 },
+});
 
 export default memo(WebViewReader);

@@ -3,6 +3,7 @@ import NovelScreen from '../NovelScreen';
 
 const mockDownloadChapters = jest.fn();
 const mockUpdateChapterProgressByIds = jest.fn();
+const mockGetPageChapterIds = jest.fn();
 const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
 
@@ -61,6 +62,8 @@ jest.mock('@i18n/translations', () => ({
 jest.mock('@database/queries/ChapterQueries', () => ({
   getAllUndownloadedAndUnreadChapters: jest.fn().mockResolvedValue([]),
   getAllUndownloadedChapters: jest.fn().mockResolvedValue([]),
+  getChaptersByIds: jest.fn().mockResolvedValue([]),
+  getPageChapterIds: (...args: unknown[]) => mockGetPageChapterIds(...args),
   updateChapterProgressByIds: (...args: unknown[]) =>
     mockUpdateChapterProgressByIds(...args),
 }));
@@ -239,6 +242,13 @@ const createStore = (overrides: Record<string, unknown> = {}) => {
       },
     ],
     fetching: false,
+    novelSettings: {
+      filter: [],
+      excludedScanlators: [],
+      sort: 'positionAsc',
+    },
+    pageIndex: 0,
+    pages: ['1'],
     batchInformation: { batch: 0, total: 0, totalChapters: 0 },
     getNextChapterBatch: jest.fn(),
     loadUpToBatch: jest.fn(),
@@ -293,6 +303,7 @@ const navigation = {
 describe('NovelScreen (task 12 context boundary cutover)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetPageChapterIds.mockResolvedValue([]);
   });
 
   it('uses novelStore action selectors for selected unread workflow', () => {
@@ -308,6 +319,30 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     fireEvent.press(screen.getByTestId('action-check'));
 
     expect(store.state.markChaptersRead).toHaveBeenCalledTimes(1);
+  });
+
+  it('selects chapter ids beyond the loaded chapter batch', async () => {
+    const store = createStore();
+    wireStoreSelectors(store);
+    mockGetPageChapterIds.mockResolvedValue(
+      Array.from({ length: 1001 }, (_, index) => index + 1),
+    );
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    fireEvent.press(screen.getByTestId('select-unread'));
+    fireEvent.press(screen.getByTestId('appbar-action-select-all'));
+
+    expect(await screen.findByText('1001')).toBeOnTheScreen();
+    expect(mockGetPageChapterIds).toHaveBeenCalledWith(7, [], '1', []);
+
+    fireEvent.press(screen.getByTestId('action-check'));
+    expect(store.state.markChaptersRead).toHaveBeenCalledWith(
+      Array.from({ length: 1001 }, (_, index) => index + 1),
+    );
   });
 
   it('uses the atomic unread and progress-reset workflow', () => {

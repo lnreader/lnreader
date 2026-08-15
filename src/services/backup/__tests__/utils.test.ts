@@ -2,7 +2,7 @@ import {
   _restoreNovelAndChapters,
   getAllNovels,
 } from '@database/queries/NovelQueries';
-import { getNovelChapters } from '@database/queries/ChapterQueries';
+import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
 import {
   _restoreCategory,
   getAllNovelCategories,
@@ -19,7 +19,7 @@ jest.mock('@database/queries/NovelQueries', () => ({
 }));
 
 jest.mock('@database/queries/ChapterQueries', () => ({
-  getNovelChapters: jest.fn(),
+  getAllNovelChaptersForBackup: jest.fn(),
 }));
 
 jest.mock('@database/queries/CategoryQueries', () => ({
@@ -74,7 +74,7 @@ describe('selective backup data', () => {
     jest.mocked(NativeFile.mkdir).mockResolvedValue(undefined);
     jest.mocked(NativeFile.writeFile).mockResolvedValue(undefined);
     jest.mocked(getAllNovels).mockResolvedValue([]);
-    jest.mocked(getNovelChapters).mockResolvedValue([]);
+    jest.mocked(getAllNovelChaptersForBackup).mockResolvedValue([]);
     jest.mocked(getCategoriesFromDb).mockResolvedValue([]);
     jest.mocked(getAllNovelCategories).mockResolvedValue([]);
   });
@@ -139,7 +139,7 @@ describe('selective backup data', () => {
         cover: 'file:///storage/Novels/source/1/cover.png',
       },
     ]);
-    jest.mocked(getNovelChapters).mockResolvedValueOnce([
+    jest.mocked(getAllNovelChaptersForBackup).mockResolvedValueOnce([
       {
         id: 10,
         novelId: 1,
@@ -147,7 +147,7 @@ describe('selective backup data', () => {
         name: 'Chapter 1',
         isDownloaded: true,
       },
-    ] as Awaited<ReturnType<typeof getNovelChapters>>);
+    ] as Awaited<ReturnType<typeof getAllNovelChaptersForBackup>>);
 
     await prepareBackupData('/cache', {
       library: true,

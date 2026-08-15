@@ -35,6 +35,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ history, onRemove }) => {
                 name: history.novelName,
                 pluginId: history.pluginId,
                 cover: history.novelCover,
+                inLibrary: history.inLibrary,
               },
               chapter: history,
             },
@@ -51,6 +52,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ history, onRemove }) => {
                 path: history.novelPath,
                 cover: history.novelCover,
                 pluginId: history.pluginId,
+                inLibrary: history.inLibrary,
               },
             });
           }}

@@ -12,6 +12,8 @@ import TaskQueue from '../screens/more/TaskQueueScreen';
 import Downloads from '../screens/more/DownloadsScreen';
 import AppearanceSettings from '../screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen';
 import CategoriesScreen from '@screens/Categories/CategoriesScreen';
+import SettingsCustomCode from '@screens/settings/SettingsCustomCodeScreen';
+import CodeSnippetsScreen from '@screens/settings/SettingsCustomCodeScreen/CodeSnippetsScreen';
 import RespositorySettings from '@screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen';
 import LibrarySettings from '@screens/settings/SettingsLibraryScreen/SettingsLibraryScreen';
 import StatsScreen from '@screens/StatsScreen/StatsScreen';
@@ -49,6 +51,8 @@ const SettingsStack = () => {
         component={RespositorySettings}
       />
       <Stack.Screen name="LibrarySettings" component={LibrarySettings} />
+      <Stack.Screen name="CustomCode" component={SettingsCustomCode} />
+      <Stack.Screen name="CodeSnippets" component={CodeSnippetsScreen} />
       <Stack.Screen name="GenreTaxonomy" component={GenreTaxonomyScreen} />
     </Stack.Navigator>
   );

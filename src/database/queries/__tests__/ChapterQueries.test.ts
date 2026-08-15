@@ -7,6 +7,8 @@
 import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
 import { insertTestNovel, insertTestChapter, clearAllTables } from './testData';
+import { chapterSchema } from '@database/schema';
+import { eq } from 'drizzle-orm';
 
 import {
   markChapterRead,
@@ -16,12 +18,14 @@ import {
   markAllChaptersRead,
   markAllChaptersUnread,
   getNovelChapters,
+  getAllNovelChaptersForBackup,
   getUnreadNovelChapters,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
   getChapter,
   getCustomPages,
   getPageChapters,
+  getPageChapterIds,
   getChapterCount,
   getChapterCountSync,
   getPageChaptersBatched,
@@ -33,6 +37,7 @@ import {
   getDetailedUpdatesFromDb,
   isChapterDownloaded,
   bookmarkChapter,
+  bookmarkChapters,
   insertChapters,
   deleteChapter,
   deleteChapters,
@@ -110,6 +115,25 @@ describe('ChapterQueries', () => {
     });
   });
 
+  describe('bookmarkChapters', () => {
+    it('should toggle multiple chapters by id', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId, {
+        bookmark: false,
+      });
+      const chapterId2 = await insertTestChapter(testDb, novelId, {
+        bookmark: true,
+      });
+
+      await bookmarkChapters([chapterId1, chapterId2]);
+
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.find(c => c.id === chapterId1)?.bookmark).toBe(true);
+      expect(chapters.find(c => c.id === chapterId2)?.bookmark).toBe(false);
+    });
+  });
+
   describe('getNovelChapters', () => {
     it('should return all chapters for a novel', async () => {
       const testDb = getTestDb();
@@ -123,6 +147,43 @@ describe('ChapterQueries', () => {
       expect(result).toHaveLength(2);
       expect(result.map(c => c.name)).toContain('Chapter 1');
       expect(result.map(c => c.name)).toContain('Chapter 2');
+    });
+  });
+
+  describe('getAllNovelChaptersForBackup', () => {
+    it('returns chapters beyond the 1000-row UI query limit', async () => {
+      const testDb = getTestDb();
+      // No Novel row is needed for this selector test. Keeping the id orphaned
+      // also avoids running aggregate-stat triggers 1001 times during setup.
+      const novelId = 123456;
+
+      const values = Array.from(
+        { length: 1001 },
+        (_, position) =>
+          `(${novelId}, '/chapter/${position + 1}', ` +
+          `'Chapter ${position + 1}', ${position + 1}, '1', ${position})`,
+      ).join(',');
+      testDb.sqlite.executeSync(
+        `INSERT INTO Chapter
+          (novelId, path, name, chapterNumber, page, position)
+         VALUES ${values}`,
+      );
+
+      expect(await getNovelChapters(novelId)).toHaveLength(1000);
+
+      const chapterIds = await getPageChapterIds(novelId, [], '1');
+      expect(chapterIds).toHaveLength(1001);
+
+      await markChaptersRead(chapterIds);
+      expect(
+        (await getPageChapters(novelId, undefined, [], '1')).every(
+          chapter => !chapter.unread,
+        ),
+      ).toBe(true);
+
+      const backupChapters = await getAllNovelChaptersForBackup(novelId);
+      expect(backupChapters).toHaveLength(1001);
+      expect(backupChapters.at(-1)?.name).toBe('Chapter 1001');
     });
   });
 
@@ -479,10 +540,7 @@ describe('ChapterQueries', () => {
       const chapter2b = chapters.find(c => c.id === chapterId2);
       expect(chapter1b?.isDownloaded).toBe(true);
       expect(chapter2b?.isDownloaded).toBe(true);
-      await deleteChapters('test-plugin', novelId, [
-        { id: chapterId1 } as any,
-        { id: chapterId2 } as any,
-      ]);
+      await deleteChapters('test-plugin', novelId, [chapterId1, chapterId2]);
 
       const updatedChapters = await getNovelChapters(novelId);
       const chapter1a = updatedChapters.find(c => c.id === chapterId1);
@@ -661,10 +719,10 @@ describe('ChapterQueries', () => {
   });
 
   describe('clearUpdates', () => {
-    it('should clear all update timestamps', async () => {
+    it('should clear update timestamps and preserve the update trigger', async () => {
       const testDb = getTestDb();
       const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, {
+      const chapterId = await insertTestChapter(testDb, novelId, {
         updatedTime: '2024-01-01',
       });
       await insertTestChapter(testDb, novelId, {
@@ -675,6 +733,25 @@ describe('ChapterQueries', () => {
 
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.updatedTime === null)).toBe(true);
+      expect(
+        testDb.sqlite.executeSync(
+          'SELECT lastUpdatedAt FROM Novel WHERE id = ?',
+          [novelId],
+        ).rows[0]?.lastUpdatedAt,
+      ).toBeNull();
+
+      await testDb.drizzleDb
+        .update(chapterSchema)
+        .set({ updatedTime: '2024-02-01' })
+        .where(eq(chapterSchema.id, chapterId))
+        .run();
+
+      expect(
+        testDb.sqlite.executeSync(
+          'SELECT lastUpdatedAt FROM Novel WHERE id = ?',
+          [novelId],
+        ).rows[0]?.lastUpdatedAt,
+      ).toBe('2024-02-01');
     });
   });
 
@@ -1270,6 +1347,7 @@ describe('ChapterQueries', () => {
       const result = await getUpdatedOverviewFromDb();
 
       expect(result.length).toBeGreaterThanOrEqual(1);
+      expect(result[0]?.inLibrary).toBe(true);
     });
   });
 

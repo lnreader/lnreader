@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { Share } from 'react-native';
-import { isNumber } from 'lodash-es';
+import isNumber from 'lodash-es/isNumber';
 
 import {
   getAllUndownloadedAndUnreadChapters,
   getAllUndownloadedChapters,
+  getChaptersByIds,
 } from '@database/queries/ChapterQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useDownload } from '@hooks/persisted';
@@ -22,6 +23,7 @@ interface UseNovelScreenActionsOptions {
   chapters: ChapterInfo[];
   clearSelection: () => void;
   novel?: NovelInfo;
+  selectedIds: number[];
   selectedChapters: ChapterInfo[];
 }
 
@@ -29,6 +31,7 @@ export const useNovelScreenActions = ({
   chapters,
   clearSelection,
   novel,
+  selectedIds,
   selectedChapters,
 }: UseNovelScreenActionsOptions) => {
   const {
@@ -66,7 +69,11 @@ export const useNovelScreenActions = ({
   );
 
   const deleteDownloadedChapters = useCallback(() => {
-    deleteChapters(chapters.filter(chapter => chapter.isDownloaded));
+    deleteChapters(
+      chapters
+        .filter(chapter => chapter.isDownloaded)
+        .map(chapter => chapter.id),
+    );
   }, [chapters, deleteChapters]);
 
   const shareNovel = useCallback(() => {
@@ -84,18 +91,25 @@ export const useNovelScreenActions = ({
       clearSelection();
     };
 
+    const hasUnloadedSelection = selectedIds.length > selectedChapters.length;
+
     if (
       !novel?.isLocal &&
-      selectedChapters.some(chapter => !chapter.isDownloaded)
+      (hasUnloadedSelection ||
+        selectedChapters.some(chapter => !chapter.isDownloaded))
     ) {
       actions.push({
         icon: 'download-outline',
         onPress: finish(() => {
           if (novel) {
-            downloadChapters(
-              novel,
-              selectedChapters.filter(chapter => !chapter.isDownloaded),
-            );
+            void getChaptersByIds(selectedIds).then(chaptersToDownload => {
+              const availableChapters = chaptersToDownload.filter(
+                chapter => !chapter.isDownloaded,
+              );
+              if (availableChapters.length > 0) {
+                downloadChapters(novel, availableChapters);
+              }
+            });
           }
         }),
       });
@@ -103,35 +117,47 @@ export const useNovelScreenActions = ({
 
     if (
       !novel?.isLocal &&
-      selectedChapters.some(chapter => chapter.isDownloaded)
+      (hasUnloadedSelection ||
+        selectedChapters.some(chapter => chapter.isDownloaded))
     ) {
       actions.push({
         icon: 'trash-can-outline',
-        onPress: finish(() =>
-          deleteChapters(
-            selectedChapters.filter(chapter => chapter.isDownloaded),
-          ),
-        ),
+        onPress: finish(() => {
+          void getChaptersByIds(selectedIds).then(selectedChapterRows => {
+            const downloadedChapterIds = selectedChapterRows
+              .filter(chapter => chapter.isDownloaded)
+              .map(chapter => chapter.id);
+            if (downloadedChapterIds.length > 0) {
+              deleteChapters(downloadedChapterIds);
+            }
+          });
+        }),
       });
     }
 
     actions.push({
       icon: 'bookmark-outline',
-      onPress: finish(() => bookmarkChapters(selectedChapters)),
+      onPress: finish(() => bookmarkChapters(selectedIds)),
     });
 
-    if (selectedChapters.some(chapter => chapter.unread)) {
+    if (
+      hasUnloadedSelection ||
+      selectedChapters.some(chapter => chapter.unread)
+    ) {
       actions.push({
         icon: 'check',
-        onPress: finish(() => markChaptersRead(selectedChapters)),
+        onPress: finish(() => markChaptersRead(selectedIds)),
       });
     }
 
-    if (selectedChapters.some(chapter => !chapter.unread)) {
+    if (
+      hasUnloadedSelection ||
+      selectedChapters.some(chapter => !chapter.unread)
+    ) {
       actions.push({
         icon: 'check-outline',
         onPress: finish(() => {
-          void markChaptersUnreadAndResetProgress(selectedChapters);
+          void markChaptersUnreadAndResetProgress(selectedIds);
         }),
       });
     }
@@ -161,6 +187,7 @@ export const useNovelScreenActions = ({
     markPreviousChaptersUnread,
     markPreviouschaptersRead,
     novel,
+    selectedIds,
     selectedChapters,
   ]);
 

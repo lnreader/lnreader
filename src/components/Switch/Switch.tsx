@@ -25,6 +25,8 @@ const THUMB_OFFSET_ON =
 
 interface SwitchProps {
   accessible?: boolean;
+  accessibilityLabel?: string;
+  containerStyle?: StyleProp<ViewStyle>;
   value: boolean;
   onValueChange?: () => void;
   style?: StyleProp<ViewStyle>;
@@ -32,6 +34,8 @@ interface SwitchProps {
 
 const Switch = ({
   accessible = true,
+  accessibilityLabel,
+  containerStyle,
   value,
   onValueChange,
   style,
@@ -110,7 +114,14 @@ const Switch = ({
   }));
 
   return (
-    <Pressable accessible={accessible} onPress={onValueChange}>
+    <Pressable
+      accessible={accessible}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessible ? 'switch' : undefined}
+      accessibilityState={accessible ? { checked: value } : undefined}
+      style={containerStyle}
+      onPress={onValueChange}
+    >
       <Animated.View
         style={[styles.track, style, trackColorStyle, trackBorderStyle]}
       >

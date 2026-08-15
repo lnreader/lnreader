@@ -28,14 +28,31 @@ import { useNovelScreenActions } from './hooks/useNovelScreenActions';
 import { useNovelRefresh } from './hooks/useNovelRefresh';
 import SetCategoryModal from './components/SetCategoriesModal';
 import { backgroundTasks } from '@services/backgroundTasks';
+import { getPageChapterIds } from '@database/queries/ChapterQueries';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
   const chapters = useNovelValue('chapters');
+  const novelSettings = useNovelValue('novelSettings');
+  const pageIndex = useNovelValue('pageIndex');
+  const pages = useNovelValue('pages');
   const { setNovel, deleteChapters, refreshNovel } = useNovelActions();
 
   const theme = useTheme();
   const { downloadNewChapters, refreshNovelMetadata } = useAppSettings();
+
+  const getAllChapterIds = useCallback(() => {
+    if (!novel) {
+      return Promise.resolve([]);
+    }
+
+    return getPageChapterIds(
+      novel.id,
+      novelSettings.filter,
+      pages[pageIndex],
+      novelSettings.excludedScanlators,
+    );
+  }, [novel, novelSettings, pageIndex, pages]);
 
   const {
     selectedIds: selected,
@@ -43,7 +60,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     setSelectedIds: setSelected,
     clearSelection,
     selectAll,
-  } = useChapterSelection(chapters);
+  } = useChapterSelection(chapters, getAllChapterIds);
   const [editInfoModal, showEditInfoModal] = useState(false);
 
   const chapterListRef = useRef<LegendListRef | null>(null);
@@ -74,6 +91,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     chapters,
     clearSelection,
     novel,
+    selectedIds: selected,
     selectedChapters,
   });
 
@@ -104,7 +122,9 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     () => ({
       label: getString('common.delete'),
       onPress: () => {
-        deleteChapters(chapters.filter(c => c.isDownloaded));
+        deleteChapters(
+          chapters.filter(c => c.isDownloaded).map(chapter => chapter.id),
+        );
       },
     }),
     [chapters, deleteChapters],
@@ -160,7 +180,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
             </Animated.View>
           )}
         </Portal>
-        <SafeAreaView excludeTop>
+        <SafeAreaView excludeTop excludeBottom>
           <Suspense fallback={<NovelScreenLoading theme={theme} />}>
             <NovelScreenList
               headerOpacity={headerOpacity}

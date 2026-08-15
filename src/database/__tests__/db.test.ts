@@ -3,11 +3,18 @@ import { drizzle } from 'drizzle-orm/op-sqlite';
 import { migrate } from 'drizzle-orm/op-sqlite/migrator';
 import migrations from '../../../drizzle/migrations';
 import { schema } from '@database/schema';
+import {
+  createCategoryTriggerQuery,
+  createNovelTriggerQueryDelete,
+  createNovelTriggerQueryInsert,
+  createNovelTriggerQueryUpdate,
+} from '@database/queryStrings/triggers';
 
 import {
   getPendingMigrations,
   repairChapterMigrationSnapshot,
   repairInterruptedNovelMigration,
+  repairInterruptedNovelSnapshot,
   repairMigrationHistory,
   runDatabaseBootstrap,
 } from '@database/db';
@@ -89,12 +96,102 @@ const LEGACY_NOVEL_TABLE_STATEMENT = `CREATE TABLE IF NOT EXISTS Novel (
 	totalPages integer DEFAULT 0
 )`;
 
+// Pre-drizzle Chapter kept by `past_mandrill` via `IF NOT EXISTS`: it carries
+// the FOREIGN KEY that makes the interrupted-migration copy-back fail.
+const LEGACY_CHAPTER_TABLE_STATEMENT = `CREATE TABLE IF NOT EXISTS Chapter (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	novelId INTEGER NOT NULL,
+	path TEXT NOT NULL,
+	name TEXT NOT NULL,
+	releaseTime TEXT,
+	bookmark INTEGER DEFAULT 0,
+	unread INTEGER DEFAULT 1,
+	readTime TEXT,
+	isDownloaded INTEGER DEFAULT 0,
+	updatedTime TEXT,
+	chapterNumber REAL NULL,
+	page TEXT DEFAULT "1",
+	position INTEGER DEFAULT 0,
+	progress INTEGER,
+	UNIQUE(path, novelId),
+	FOREIGN KEY (novelId) REFERENCES Novel(id) ON DELETE CASCADE
+)`;
+
+const LEGACY_NOVEL_CATEGORY_TABLE_STATEMENT = `CREATE TABLE IF NOT EXISTS NovelCategory (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	novelId INTEGER NOT NULL,
+	categoryId INTEGER NOT NULL,
+	UNIQUE(novelId, categoryId),
+	FOREIGN KEY (novelId) REFERENCES Novel(id) ON DELETE CASCADE,
+	FOREIGN KEY (categoryId) REFERENCES Category(id) ON DELETE CASCADE
+)`;
+
 const createSchema = (sqlite: DB, legacyNovel = false) => {
   for (const statement of MIGRATION_STATEMENTS) {
     sqlite.executeSync(
       legacyNovel && statement.startsWith('CREATE TABLE IF NOT EXISTS Novel (')
         ? LEGACY_NOVEL_TABLE_STATEMENT
         : statement.trim(),
+    );
+  }
+};
+
+const createLegacySchema = (sqlite: DB) => {
+  sqlite.executeSync(`CREATE TABLE IF NOT EXISTS Category (
+	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name text NOT NULL,
+	sort integer
+)`);
+  sqlite.executeSync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS category_name_unique ON Category (name)',
+  );
+  sqlite.executeSync(
+    'CREATE INDEX IF NOT EXISTS category_sort_idx ON Category (sort)',
+  );
+  sqlite.executeSync(LEGACY_NOVEL_TABLE_STATEMENT);
+  sqlite.executeSync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS novel_path_plugin_unique ON Novel (path, pluginId)',
+  );
+  sqlite.executeSync(LEGACY_CHAPTER_TABLE_STATEMENT);
+  sqlite.executeSync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS chapter_novel_path_unique ON Chapter (novelId, path)',
+  );
+  sqlite.executeSync(
+    'CREATE INDEX IF NOT EXISTS chapterNovelIdIndex ON Chapter (novelId, position, page, id)',
+  );
+  sqlite.executeSync(LEGACY_NOVEL_CATEGORY_TABLE_STATEMENT);
+  sqlite.executeSync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS novel_category_unique ON NovelCategory (novelId, categoryId)',
+  );
+  sqlite.executeSync(`CREATE TABLE IF NOT EXISTS Repository (
+	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	url text NOT NULL
+)`);
+  sqlite.executeSync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS repository_url_unique ON Repository (url)',
+  );
+};
+
+const recordAppliedMigrations = (sqlite: DB) => {
+  sqlite.executeSync(`
+    CREATE TABLE __drizzle_migrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      hash text NOT NULL,
+      created_at numeric,
+      name text,
+      applied_at text
+    )
+  `);
+  const applied = [
+    ['', 1766417172000, '20251222152612_past_mandrill'],
+    ['', 1781306602000, '20260612232322_normal_saracen'],
+    ['', 1784471667000, '20260719143427_long_moondragon'],
+  ] as const;
+  for (const [hash, createdAt, name] of applied) {
+    sqlite.executeSync(
+      `INSERT INTO __drizzle_migrations (hash, created_at, name, applied_at)
+       VALUES (?, ?, ?, datetime('now'))`,
+      [hash, createdAt, name],
     );
   }
 };
@@ -195,6 +292,43 @@ describe('runDatabaseBootstrap', () => {
 });
 
 describe('production migrations', () => {
+  it('rebuilds novel counters with one scan of the Chapter snapshot', () => {
+    const sqlite = open({ name: ':memory:' });
+    try {
+      createSchema(sqlite);
+
+      const statements = migrations.migrations['20260727081855_calm_chimera']
+        .split('--> statement-breakpoint')
+        .map((statement: string) => statement.trim())
+        .filter(Boolean);
+      const counterStatementIndex = statements.findIndex((statement: string) =>
+        statement.startsWith('INSERT INTO `__new_Novel`'),
+      );
+
+      expect(counterStatementIndex).toBeGreaterThan(0);
+      for (const statement of statements.slice(0, counterStatementIndex)) {
+        sqlite.executeSync(statement);
+      }
+
+      const queryPlan = sqlite
+        .executeRawSync(
+          `EXPLAIN QUERY PLAN ${statements[counterStatementIndex]}`,
+        )
+        .map(row => String(row[3]));
+
+      expect(
+        queryPlan.filter(detail => detail.includes('SCAN __migration_Chapter')),
+      ).toHaveLength(1);
+      expect(queryPlan).not.toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('CORRELATED SCALAR SUBQUERY'),
+        ]),
+      );
+    } finally {
+      sqlite.close();
+    }
+  });
+
   it('can run after test schema exists', async () => {
     const sqlite = open({ name: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
@@ -236,6 +370,10 @@ describe('production migrations', () => {
         INSERT INTO NovelCategory (id, novelId, categoryId)
         VALUES (1, 1, 1)
       `);
+      sqlite.executeSync(`
+        INSERT INTO Repository (id, url)
+        VALUES (1, 'https://example.com/plugins.min.json')
+      `);
 
       const drizzleDb = drizzle(sqlite, { schema });
       await migrate(drizzleDb, getPendingMigrations(sqlite));
@@ -274,6 +412,15 @@ describe('production migrations', () => {
         sqlite.executeSync('SELECT id, novelId, categoryId FROM NovelCategory')
           .rows,
       ).toEqual([{ id: 1, novelId: 1, categoryId: 1 }]);
+      expect(
+        sqlite.executeSync('SELECT id, url, enabled FROM Repository').rows,
+      ).toEqual([
+        {
+          id: 1,
+          url: 'https://example.com/plugins.min.json',
+          enabled: 1,
+        },
+      ]);
     } finally {
       sqlite.close();
     }
@@ -640,7 +787,404 @@ describe('production migrations', () => {
         '20260612232322_normal_saracen',
         '20260719143427_long_moondragon',
         '20260727081855_calm_chimera',
+        '20260811071655_parched_human_torch',
       ]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  const calmChimeraStatements = () =>
+    migrations.migrations['20260727081855_calm_chimera']
+      .split('--> statement-breakpoint')
+      .map((statement: string) => statement.trim())
+      .filter(Boolean);
+
+  // Statements 0-3 drop triggers and snapshot Novel. An app killed after them
+  // (before the Chapter snapshot statement) leaves `__migration_Novel` on disk
+  // while `Novel` and `Chapter` stay live and keep accepting writes.
+  const crashAfterNovelSnapshot = (sqlite: DB) => {
+    for (const statement of calmChimeraStatements().slice(0, 4)) {
+      sqlite.executeSync(statement);
+    }
+  };
+
+  const runRecovery = async (sqlite: DB) => {
+    repairInterruptedNovelMigration(sqlite);
+    repairChapterMigrationSnapshot(sqlite);
+    repairMigrationHistory(sqlite);
+    repairInterruptedNovelSnapshot(sqlite);
+    const drizzleDb = drizzle(sqlite, { schema });
+    await migrate(drizzleDb, getPendingMigrations(sqlite));
+  };
+
+  it('recovers when novels were added while the migration was interrupted', async () => {
+    const sqlite = open({ name: ':memory:' });
+    sqlite.executeSync('PRAGMA foreign_keys = ON');
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createLegacySchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      for (const novelId of [1, 2]) {
+        sqlite.executeSync(
+          `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+           VALUES (${novelId}, '/novel-${novelId}', 'plugin-${novelId}', 'Novel ${novelId}', 1)`,
+        );
+        sqlite.executeSync(
+          `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded, readTime, updatedTime)
+           VALUES (${
+             (novelId - 1) * 3 + 1
+           }, ${novelId}, '/novel-${novelId}/chapter-1', 'Chapter 1', 1, 1, '2026-07-26T10:00:00.000Z', '2026-07-26T11:00:00.000Z')`,
+        );
+      }
+      sqlite.executeSync(
+        `INSERT INTO Category (id, name, sort) VALUES (1, 'Default', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (1, 1, 1)`,
+      );
+      recordAppliedMigrations(sqlite);
+
+      crashAfterNovelSnapshot(sqlite);
+
+      // The app kept running between attempts: a novel and its chapter are
+      // added to the live tables after the Novel snapshot went stale.
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+         VALUES (3, '/novel-3', 'plugin-3', 'Novel 3', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded, readTime, updatedTime)
+         VALUES (7, 3, '/novel-3/chapter-1', 'Chapter 3.1', 1, 0, '2026-07-27T10:00:00.000Z', '2026-07-27T11:00:00.000Z')`,
+      );
+
+      // Legacy Chapter still enforces `FOREIGN KEY (novelId) REFERENCES Novel`,
+      // so the copy-back fails unless the Novel snapshot is backfilled first.
+      await runRecovery(sqlite);
+
+      expect(
+        sqlite.executeSync('SELECT id, name FROM Novel ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, name: 'Novel 1' },
+        { id: 2, name: 'Novel 2' },
+        { id: 3, name: 'Novel 3' },
+      ]);
+      expect(
+        sqlite.executeSync('SELECT id, novelId, name FROM Chapter ORDER BY id')
+          .rows,
+      ).toEqual([
+        { id: 1, novelId: 1, name: 'Chapter 1' },
+        { id: 4, novelId: 2, name: 'Chapter 1' },
+        { id: 7, novelId: 3, name: 'Chapter 3.1' },
+      ]);
+      expect(sqlite.executeRawSync('PRAGMA foreign_key_check;')).toEqual([]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('preserves novels added while the migration was interrupted (no legacy FK)', async () => {
+    const sqlite = open({ name: ':memory:' });
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createSchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      for (const novelId of [1, 2]) {
+        sqlite.executeSync(
+          `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+           VALUES (${novelId}, '/novel-${novelId}', 'plugin-${novelId}', 'Novel ${novelId}', 1)`,
+        );
+        sqlite.executeSync(
+          `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded)
+           VALUES (${
+             (novelId - 1) * 3 + 1
+           }, ${novelId}, '/novel-${novelId}/chapter-1', 'Chapter 1', 1, 1)`,
+        );
+      }
+      recordAppliedMigrations(sqlite);
+
+      crashAfterNovelSnapshot(sqlite);
+
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+         VALUES (3, '/novel-3', 'plugin-3', 'Novel 3', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded)
+         VALUES (7, 3, '/novel-3/chapter-1', 'Chapter 3.1', 1, 0)`,
+      );
+
+      await runRecovery(sqlite);
+
+      expect(
+        sqlite.executeSync('SELECT id, name FROM Novel ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, name: 'Novel 1' },
+        { id: 2, name: 'Novel 2' },
+        { id: 3, name: 'Novel 3' },
+      ]);
+      expect(
+        sqlite.executeSync('SELECT id, novelId FROM Chapter ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, novelId: 1 },
+        { id: 4, novelId: 2 },
+        { id: 7, novelId: 3 },
+      ]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('recovers when NovelCategory rows were added while the migration was interrupted', async () => {
+    const sqlite = open({ name: ':memory:' });
+    sqlite.executeSync('PRAGMA foreign_keys = ON');
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createLegacySchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      for (const novelId of [1, 2]) {
+        sqlite.executeSync(
+          `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+           VALUES (${novelId}, '/novel-${novelId}', 'plugin-${novelId}', 'Novel ${novelId}', 1)`,
+        );
+      }
+      sqlite.executeSync(
+        `INSERT INTO Category (id, name, sort) VALUES (1, 'Default', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (1, 1, 1)`,
+      );
+      recordAppliedMigrations(sqlite);
+
+      crashAfterNovelSnapshot(sqlite);
+
+      // Only the NovelCategory table gains a row for the new novel; the
+      // Chapter snapshot stays consistent, so the Chapter copy-back succeeds
+      // and the NovelCategory copy-back is the one that would violate the FK.
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+         VALUES (3, '/novel-3', 'plugin-3', 'Novel 3', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (2, 3, 1)`,
+      );
+
+      await runRecovery(sqlite);
+
+      expect(
+        sqlite.executeSync('SELECT id, name FROM Novel ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, name: 'Novel 1' },
+        { id: 2, name: 'Novel 2' },
+        { id: 3, name: 'Novel 3' },
+      ]);
+      expect(
+        sqlite.executeSync(
+          'SELECT novelId, categoryId FROM NovelCategory ORDER BY id',
+        ).rows,
+      ).toEqual([
+        { novelId: 1, categoryId: 1 },
+        { novelId: 3, categoryId: 1 },
+      ]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('unsticks a device whose previous attempt already crashed the migration', async () => {
+    const sqlite = open({ name: ':memory:' });
+    sqlite.executeSync('PRAGMA foreign_keys = ON');
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createLegacySchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      for (const novelId of [1, 2]) {
+        sqlite.executeSync(
+          `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+           VALUES (${novelId}, '/novel-${novelId}', 'plugin-${novelId}', 'Novel ${novelId}', 1)`,
+        );
+        sqlite.executeSync(
+          `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded, readTime, updatedTime)
+           VALUES (${
+             (novelId - 1) * 3 + 1
+           }, ${novelId}, '/novel-${novelId}/chapter-1', 'Chapter 1', 1, 1, '2026-07-26T10:00:00.000Z', '2026-07-26T11:00:00.000Z')`,
+        );
+      }
+      sqlite.executeSync(
+        `INSERT INTO Category (id, name, sort) VALUES (1, 'Default', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (1, 1, 1)`,
+      );
+      recordAppliedMigrations(sqlite);
+
+      crashAfterNovelSnapshot(sqlite);
+
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+         VALUES (3, '/novel-3', 'plugin-3', 'Novel 3', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded)
+         VALUES (7, 3, '/novel-3/chapter-1', 'Chapter 3.1', 1, 0)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (2, 3, 1)`,
+      );
+
+      // A build without transactional migration runs the statements directly
+      // and crashes at the Chapter copy-back, persisting the partial state.
+      const statements = calmChimeraStatements();
+      let crashError: unknown;
+      let crashStatement: string | undefined;
+      for (let index = 0; index < 14; index += 1) {
+        try {
+          sqlite.executeSync(statements[index]);
+        } catch (error) {
+          crashError = error;
+          crashStatement = statements[index];
+          break;
+        }
+      }
+      expect(String(crashError)).toMatch(/FOREIGN KEY/i);
+      expect(crashStatement).toContain('INSERT OR REPLACE INTO `Chapter`');
+      expect(
+        sqlite.executeSync('SELECT COUNT(*) AS count FROM Chapter').rows,
+      ).toEqual([{ count: 0 }]);
+      expect(
+        sqlite.executeSync('SELECT id FROM Novel ORDER BY id').rows,
+      ).toEqual([{ id: 1 }, { id: 2 }]);
+      expect(
+        sqlite.executeSync('SELECT COUNT(*) AS count FROM __migration_Chapter')
+          .rows,
+      ).toEqual([{ count: 3 }]);
+
+      // Every later launch re-runs the migration and re-crashes: the app is
+      // locked out until the repairs below unstick it.
+      const lockedDrizzleDb = drizzle(sqlite, { schema });
+      await expect(
+        migrate(lockedDrizzleDb, getPendingMigrations(sqlite)),
+      ).rejects.toThrow();
+
+      await runRecovery(sqlite);
+
+      expect(
+        sqlite.executeSync('SELECT id, name FROM Novel ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, name: 'Novel 1' },
+        { id: 2, name: 'Novel 2' },
+      ]);
+      expect(
+        sqlite.executeSync('SELECT id, novelId, name FROM Chapter ORDER BY id')
+          .rows,
+      ).toEqual([
+        { id: 1, novelId: 1, name: 'Chapter 1' },
+        { id: 4, novelId: 2, name: 'Chapter 1' },
+      ]);
+      expect(
+        sqlite.executeSync(
+          'SELECT novelId, categoryId FROM NovelCategory ORDER BY id',
+        ).rows,
+      ).toEqual([{ novelId: 1, categoryId: 1 }]);
+      // The exact precondition of the production crash: no restored row may
+      // reference a novel that the rebuilt `Novel` does not contain.
+      expect(sqlite.executeRawSync('PRAGMA foreign_key_check;')).toEqual([]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('runs the full production initialization on a legacy database', async () => {
+    const sqlite = open({ name: ':memory:' });
+    sqlite.executeSync('PRAGMA foreign_keys = ON');
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createLegacySchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      for (const novelId of [1, 2]) {
+        sqlite.executeSync(
+          `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+           VALUES (${novelId}, '/novel-${novelId}', 'plugin-${novelId}', 'Novel ${novelId}', 1)`,
+        );
+        sqlite.executeSync(
+          `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded, readTime, updatedTime)
+           VALUES (${
+             (novelId - 1) * 3 + 1
+           }, ${novelId}, '/novel-${novelId}/chapter-1', 'Chapter 1', 1, 1, '2026-07-26T10:00:00.000Z', '2026-07-26T11:00:00.000Z')`,
+        );
+      }
+      sqlite.executeSync(
+        `INSERT INTO Category (id, name, sort) VALUES (1, 'Default', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (1, 1, 1)`,
+      );
+      recordAppliedMigrations(sqlite);
+      // A previous release's successful bootstrap left triggers behind.
+      sqlite.executeSync(createNovelTriggerQueryInsert);
+      sqlite.executeSync(createNovelTriggerQueryUpdate);
+      sqlite.executeSync(createNovelTriggerQueryDelete);
+      sqlite.executeSync(createCategoryTriggerQuery);
+
+      crashAfterNovelSnapshot(sqlite);
+
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name, inLibrary)
+         VALUES (3, '/novel-3', 'plugin-3', 'Novel 3', 1)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO Chapter (id, novelId, path, name, unread, isDownloaded)
+         VALUES (7, 3, '/novel-3/chapter-1', 'Chapter 3.1', 1, 0)`,
+      );
+      sqlite.executeSync(
+        `INSERT INTO NovelCategory (id, novelId, categoryId) VALUES (2, 3, 1)`,
+      );
+
+      // The exact production sequence: repairs, then migrate, then bootstrap.
+      await runRecovery(sqlite);
+      runDatabaseBootstrap(createExecutor(sqlite));
+
+      expect(
+        sqlite.executeSync('SELECT id, name FROM Novel ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, name: 'Novel 1' },
+        { id: 2, name: 'Novel 2' },
+        { id: 3, name: 'Novel 3' },
+      ]);
+      expect(
+        sqlite.executeSync('SELECT id, novelId FROM Chapter ORDER BY id').rows,
+      ).toEqual([
+        { id: 1, novelId: 1 },
+        { id: 4, novelId: 2 },
+        { id: 7, novelId: 3 },
+      ]);
+      expect(sqlite.executeRawSync('PRAGMA foreign_key_check;')).toEqual([]);
+      const triggerNames = (
+        sqlite.executeSync(
+          "SELECT name FROM sqlite_master WHERE type = 'trigger'",
+        ).rows as { name: string }[]
+      ).map(row => row.name);
+      expect(triggerNames).toEqual(
+        expect.arrayContaining([
+          'update_novel_stats',
+          'update_novel_stats_on_update',
+          'update_novel_stats_on_delete',
+          'add_category',
+        ]),
+      );
+      expect(
+        sqlite.executeSync('SELECT id FROM Category ORDER BY id').rows,
+      ).toEqual([{ id: 1 }, { id: 2 }]);
     } finally {
       sqlite.close();
     }

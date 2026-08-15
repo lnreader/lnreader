@@ -86,7 +86,7 @@ const mockNovel: NovelInfo = {
 };
 
 const createDeps = (): jest.Mocked<ChapterActionsDependencies> => ({
-  bookmarkChapter: jest.fn().mockResolvedValue(undefined),
+  bookmarkChapters: jest.fn().mockResolvedValue(undefined),
   markChapterRead: jest.fn().mockResolvedValue(undefined),
   markChaptersRead: jest.fn().mockResolvedValue(undefined),
   markPreviuschaptersRead: jest.fn().mockResolvedValue(undefined),
@@ -371,10 +371,10 @@ describe('novelStore.chapterActions', () => {
       mutate(chs => chs.map(ch => ({ ...ch, bookmark: true })));
     });
 
-    harness.actions.bookmarkChapters([makeChapter(1)]);
+    harness.actions.bookmarkChapters([1]);
 
     expect(bookmarkChaptersAction).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: 1 })],
+      [1],
       expect.any(Function),
       harness.chapterDeps,
     );
@@ -414,12 +414,12 @@ describe('novelStore.chapterActions', () => {
     const harness = createHarness();
 
     harness.actions.markPreviouschaptersRead(3);
-    harness.actions.markChaptersRead([makeChapter(1)]);
+    harness.actions.markChaptersRead([1]);
     harness.actions.markPreviousChaptersUnread(3);
-    harness.actions.markChaptersUnread([makeChapter(1)]);
+    harness.actions.markChaptersUnread([1]);
     harness.actions.updateChapterProgress(1, 50);
     harness.actions.deleteChapter(makeChapter(1));
-    harness.actions.deleteChapters([makeChapter(1)]);
+    harness.actions.deleteChapters([1]);
 
     expect(markPreviouschaptersReadAction).toHaveBeenCalledWith(
       3,
@@ -428,7 +428,7 @@ describe('novelStore.chapterActions', () => {
       harness.chapterDeps,
     );
     expect(markChaptersReadAction).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: 1 })],
+      [1],
       expect.any(Function),
       harness.chapterDeps,
     );
@@ -439,7 +439,7 @@ describe('novelStore.chapterActions', () => {
       harness.chapterDeps,
     );
     expect(markChaptersUnreadAction).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: 1 })],
+      [1],
       expect.any(Function),
       harness.chapterDeps,
     );
@@ -456,7 +456,7 @@ describe('novelStore.chapterActions', () => {
       harness.chapterDeps,
     );
     expect(deleteChaptersAction).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: 1 })],
+      [1],
       mockNovel,
       expect.any(Function),
       harness.chapterDeps,

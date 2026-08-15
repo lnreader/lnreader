@@ -78,7 +78,8 @@ const MIGRATION_STATEMENTS = [
   `CREATE UNIQUE INDEX IF NOT EXISTS novel_category_unique ON NovelCategory (novelId, categoryId)`,
   `CREATE TABLE IF NOT EXISTS Repository (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	url text NOT NULL
+	url text NOT NULL,
+	enabled integer DEFAULT true NOT NULL
 )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS repository_url_unique ON Repository (url)`,
 ];

@@ -1,5 +1,3 @@
-import { copyFile } from 'react-native-saf-x';
-
 import NativeFile from '@modules/native-file';
 import { epub } from '@modules/nitro-epub';
 
@@ -132,11 +130,16 @@ export const exportEpub = async (
     }));
 
     const epubFileName = `${sanitizeEpubFileName(fileName)}.epub`;
-    await copyFile(
-      `file://${result.outputPath}`,
-      `${destinationUri}/${epubFileName}`,
-      { replaceIfDestinationExists: true },
+    const copyResult = await NativeFile.copyFileToDirectory(
+      result.outputPath,
+      destinationUri,
+      epubFileName,
+      'application/epub+zip',
+      true,
     );
+    if (copyResult.size <= 0) {
+      throw new Error('Exported EPUB is empty');
+    }
 
     const completionText = getString('novelScreen.epub.exportSuccess', {
       chapters: result.chapterCount.toString(),

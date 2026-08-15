@@ -33,5 +33,7 @@ export type {
 export { default as BottomTabBar } from './BottomTabBar';
 export { default as TopTabBar } from './TopTabBar/TopTabBar';
 export { default as Menu } from './Menu';
+export { default as AnimatedIconButton } from './IconButtonV2/AnimatedIconButton';
+export { default as TextInput } from './TextInput';
 export { default as Slider } from './Slider/Slider';
 export type { SliderProps, SliderSize } from './Slider/Slider';

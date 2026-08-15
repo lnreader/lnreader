@@ -30,7 +30,7 @@ import WebView from 'react-native-webview';
 import { useFullscreenMode } from '@hooks';
 import { Dimensions } from 'react-native';
 import { runWhenIdle } from '@utils/runWhenIdle';
-import { defaultTo } from 'lodash-es';
+import defaultTo from 'lodash-es/defaultTo';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
 import NativeVolumeButtonListener from '@modules/native-volume-button-listener';

@@ -4,10 +4,27 @@ import { View, StyleSheet } from 'react-native';
 const Row = ({
   children,
   style = {},
+  horizontalSpacing,
+  verticalSpacing,
 }: {
   children?: React.ReactNode;
   style?: any;
-}) => <View style={[styles.row, style]}>{children}</View>;
+  horizontalSpacing?: number | `${number}%`;
+  verticalSpacing?: number | `${number}%`;
+}) => (
+  <View
+    style={[
+      styles.row,
+      style,
+      {
+        paddingHorizontal: horizontalSpacing,
+        paddingVertical: verticalSpacing,
+      },
+    ]}
+  >
+    {children}
+  </View>
+);
 
 export { Row };
 

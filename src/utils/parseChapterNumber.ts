@@ -1,4 +1,4 @@
-import { isNil } from 'lodash-es';
+import isNil from 'lodash-es/isNil';
 
 export const parseChapterNumber = (
   novelName: string,

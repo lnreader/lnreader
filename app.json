@@ -30,7 +30,14 @@
         }
       ],
       "expo-localization",
-      "react-native-edge-to-edge",
+      [
+        "react-native-edge-to-edge",
+        {
+          "android": {
+            "enforceNavigationBarContrast": false
+          }
+        }
+      ],
       "expo-web-browser",
       "./plugins/withReaderAssets",
       [
@@ -41,7 +48,9 @@
             "manifestApplicationAttributes": {
               "android:largeHeap": "true",
               "android:allowBackup": "true"
-            }
+            },
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
           }
         }
       ]

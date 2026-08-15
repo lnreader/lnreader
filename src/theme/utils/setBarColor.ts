@@ -1,6 +1,11 @@
 import { StatusBar } from 'react-native';
 import { ThemeColors } from '@theme/types';
 import Color, { ColorInstance } from 'color';
+import { SystemBars } from 'react-native-edge-to-edge';
+
+export const setNavigationBarTransparent = (isDark: boolean) => {
+  SystemBars.setStyle({ navigationBar: isDark ? 'light' : 'dark' });
+};
 
 export const setStatusBarColor = (color: ThemeColors | ColorInstance) => {
   if (color instanceof Color) {

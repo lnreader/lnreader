@@ -1,5 +1,4 @@
-/** Explicit parent → children relationships. A genre listed as a parent MUST also be listed
- *  in knownRoots so it is recognized as a top-level category. */
+/** Explicit parent → children relationships. Parents and children are matched against novel genres case-/format-insensitively via normalizeGenre in utils.tsx. */
 export interface TaxonomyNode {
  parent: string;
  children: string[];

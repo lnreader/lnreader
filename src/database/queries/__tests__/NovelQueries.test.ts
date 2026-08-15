@@ -12,7 +12,11 @@ import {
   insertTestCategory,
   clearAllTables,
 } from './testData';
-import { categorySchema, novelCategorySchema } from '@database/schema';
+import {
+  categorySchema,
+  novelCategorySchema,
+  novelSchema,
+} from '@database/schema';
 import { eq } from 'drizzle-orm';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
 import NativeFile from '@modules/native-file';
@@ -488,6 +492,30 @@ describe('NovelQueries', () => {
   });
 
   describe('updateNovelCategories', () => {
+    it('should add a novel to the library with only the selected categories', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: false });
+      const categoryId = await insertTestCategory(testDb, {
+        name: 'Selected Category',
+      });
+
+      await updateNovelCategories([novelId], [categoryId]);
+
+      const novel = await testDb.drizzleDb
+        .select()
+        .from(novelSchema)
+        .where(eq(novelSchema.id, novelId))
+        .get();
+      const associations = await testDb.drizzleDb
+        .select()
+        .from(novelCategorySchema)
+        .where(eq(novelCategorySchema.novelId, novelId))
+        .all();
+
+      expect(Boolean(novel?.inLibrary)).toBe(true);
+      expect(associations.map(item => item.categoryId)).toEqual([categoryId]);
+    });
+
     it('should update categories for multiple novels', async () => {
       const testDb = getTestDb();
       const novelId1 = await insertTestNovel(testDb, { inLibrary: true });

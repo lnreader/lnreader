@@ -4,19 +4,24 @@
 jest.mock('@modules/native-file', () => ({
   __esModule: true,
   default: {
+    DocumentDirectoryPath: '/mock/documents',
+    ExternalDirectoryPath: '/mock/external',
+    ExternalCachesDirectoryPath: '/mock/caches',
     writeFile: jest.fn(),
     readFile: jest.fn(() => ''),
     copyFile: jest.fn(),
+    copyFileToDirectory: jest.fn(() =>
+      Promise.resolve({ uri: '/mock/export.epub', size: 1 }),
+    ),
+    pickDirectory: jest.fn(() =>
+      Promise.resolve({ uri: '/mock/export', name: 'export' }),
+    ),
     moveFile: jest.fn(),
     exists: jest.fn(() => true),
     mkdir: jest.fn(),
     unlink: jest.fn(),
     readDir: jest.fn(() => []),
     downloadFile: jest.fn().mockResolvedValue(),
-    getConstants: jest.fn(() => ({
-      ExternalDirectoryPath: '/mock/external',
-      ExternalCachesDirectoryPath: '/mock/caches',
-    })),
   },
 }));
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
 import { FAB, Portal } from 'react-native-paper';
 
 import { Appbar, EmptyView, SafeAreaView } from '@components';
@@ -7,6 +7,7 @@ import { Appbar, EmptyView, SafeAreaView } from '@components';
 import {
   createRepository,
   isRepoUrlDuplicated,
+  setRepositoryEnabled,
   updateRepository,
 } from '@database/queries/RepositoryQueries';
 import { Repository } from '@database/types';
@@ -64,6 +65,32 @@ const SettingsBrowseScreen = ({
     [refreshPlugins],
   );
 
+  const toggleRepository = useCallback(
+    async (repository: Repository) => {
+      try {
+        await setRepositoryEnabled(repository.id, !repository.enabled);
+        await refreshPlugins({
+          clearUnavailableUpdates: repository.enabled,
+        });
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : String(error));
+      }
+    },
+    [refreshPlugins],
+  );
+
+  const renderRepository = useCallback(
+    ({ item }: ListRenderItemInfo<Repository>) => (
+      <RepositoryCard
+        repository={item}
+        refetchRepositories={refreshPlugins}
+        toggleRepository={toggleRepository}
+        upsertRepository={upsertRepository}
+      />
+    ),
+    [refreshPlugins, toggleRepository, upsertRepository],
+  );
+
   useEffect(() => {
     if (params?.url) {
       upsertRepository(params.url);
@@ -73,7 +100,7 @@ const SettingsBrowseScreen = ({
   return (
     <SafeAreaView excludeTop>
       <Appbar
-        title={'Repositories'}
+        title={getString('browseScreen.repositories')}
         handleGoBack={() => {
           if (navigation.canGoBack()) {
             navigation.goBack();
@@ -85,13 +112,8 @@ const SettingsBrowseScreen = ({
       <FlatList
         data={repositories}
         contentContainerStyle={styles.contentCtn}
-        renderItem={({ item }) => (
-          <RepositoryCard
-            repository={item}
-            refetchRepositories={() => {}}
-            upsertRepository={upsertRepository}
-          />
-        )}
+        keyExtractor={repository => repository.id.toString()}
+        renderItem={renderRepository}
         ListEmptyComponent={
           <EmptyView
             icon="Σ(ಠ_ಠ)"

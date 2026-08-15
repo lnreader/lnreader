@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Website",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Help translate",
     "plugins": "Plugins",
     "version": "Version",
@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Cached novels deleted",
     "chapterInsertFailed": "chapter insert failed",
     "clearCachedNovels": "Clear cached novels",
-    "clearCachedNovelsDesc": "Delete cached novels which not in your library",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Read and Downloaded chapters and progress of non-library novels will be lost.",
     "clearUpdatesMessage": "Updates cleared.",
     "clearUpdatesTab": "Clear updates tab",
@@ -82,12 +82,36 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Backup name",
     "backupCreated": "Backup created successfully",
+    "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Backup restored successfully",
+    "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
+    "backupRestoredSummary": {
+      "one": "Restored %{count} novel",
+      "other": "Restored %{count} novels"
+    },
+    "backupRestoredWithWarnings": {
+      "one": "Restored %{count} novel with warnings: %{warnings}",
+      "other": "Restored %{count} novels with warnings: %{warnings}"
+    },
     "savingBackup": "Saving Backup",
     "categoriesRestored": "Restored %{count} categories",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
+    "categoriesRestoreFailedSummary": {
+      "one": "%{count} category failed",
+      "other": "%{count} categories failed"
+    },
     "categoryRestoreFailed": "Failed to restore category: %{categoryName} - %{error}",
     "categoryFileNotFound": "Category file not found in backup",
     "categoryFileReadFailed": "Failed to read category file: %{error}",
@@ -99,14 +123,34 @@
     "failed": "Backup failed",
     "novelsRestored": "Restored %{count} novels",
     "novelsRestoredWithErrors": "Restored %{count} novels (%{failedCount} failed)",
+    "novelsBackupFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
+    "novelsRestoreFailedSummary": {
+      "one": "%{count} novel failed",
+      "other": "%{count} novels failed"
+    },
     "novelBackupFailed": "Failed to backup novel: %{novelName} - %{error}",
     "novelRestoreFailed": "Failed to restore novel: %{novelName} - %{error}",
     "novelDirectoryNotFound": "Novel directory not found in backup",
     "novelDirectoryReadFailed": "Failed to read novel directory: %{error}",
     "restoringCategories": "Restoring Categories",
+    "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
     "restoringNovels": "Restoring Novels",
+    "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Restoring Settings",
+    "missingPluginsAfterRestore": "Missing plugins: %{plugins}",
+    "sectionsRestoreFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
+    "sectionsBackupFailedSummary": {
+      "one": "%{count} backup section failed",
+      "other": "%{count} backup sections failed"
+    },
     "settingsRestored": "Settings restored",
+    "settingsRestoreFailedSummary": "settings failed",
     "settingsFileNotFound": "Settings file not found in backup",
     "settingsRestoreFailed": "Failed to restore settings: %{error}",
     "settingsFileWriteFailed": "Failed to write settings file: %{error}",
@@ -118,12 +162,26 @@
       "restore": "Drive Restore",
       "restoreInterruped": "Drive Restore Interrupted"
     },
-    "googeDrive": "Googe Drive",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "Backup to your Google Drive",
     "invalidBackupFolder": "Invalid backup folder",
     "localBackup": "Local Backup",
     "noBackupFound": "No backup found",
+    "options": {
+      "title": "Backup contents",
+      "description": "Choose what to include in this backup.",
+      "selectAll": "Select all",
+      "library": "Library data",
+      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "settings": "Settings",
+      "settingsDescription": "App, reader, and update preferences.",
+      "plugins": "Plugins",
+      "pluginsDescription": "Installed source plugin files.",
+      "downloadedFiles": "Downloaded chapters and covers",
+      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+    },
     "preparingData": "Preparing Data",
+    "preparingSelectedFiles": "Preparing selected files",
     "remote": {
       "backup": "Self Host Backup",
       "host": "Host",
@@ -134,9 +192,11 @@
     "restoreBackupDesc": "Restore library from backup file",
     "restorinBackup": "Restoring backup",
     "restoringData": "Restoring Data",
+    "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Self Host",
     "selfHostDesc": "Backup to your server",
     "uploadingData": "Uploading Data",
+    "uploadingSelectedFiles": "Uploading selected files",
     "uploadingDownloadedFiles": "Uploading Downloaded Files"
   },
   "browse": "Browse",
@@ -178,14 +238,14 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned plugins",
+    "pinnedPlugins": "Pinned",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
     "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
-    "searchbar": "Search sources",
+    "searchbar": "Search sources and plugins",
     "searchResults": "Search results",
     "selectNovel": "Select Novel",
     "sources": "Sources",
@@ -211,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Add category",
-    "cantDeleteDefault": "You cant delete default category",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Default category",
     "deleteModal": {
@@ -252,6 +312,7 @@
     "globally": "globally",
     "install": "Install",
     "imported": "Imported",
+    "later": "Later",
     "logout": "Logout",
     "name": "Name",
     "newUpdateAvailable": "New update available",
@@ -268,6 +329,7 @@
     "save": "Save",
     "saved": "Saved",
     "search": "Search",
+    "skipVersion": "Skip version",
     "searchFor": "Search for",
     "searchResults": "Search results",
     "settings": "Settings",
@@ -311,6 +373,12 @@
     "noDownloads": "No downloads",
     "pluginNotFound": "Plugin not found!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
+  },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
   },
   "generalSettings": "General",
   "generalSettingsScreen": {
@@ -361,7 +429,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
     "updateLibrary": "Update library on launch",
-    "updateLibraryDesc": "Not recommended for low devices",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Show last update time",
     "useFAB": "Use FAB in Library",
     "timeTracking": "Time Tracking",
@@ -487,7 +555,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -495,8 +563,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapter",
-      "next5": "Next 5 chapter",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Unread"
     },
     "edit": {
@@ -532,10 +600,12 @@
     "status": {
       "cancelled": "Cancelled",
       "completed": "Completed",
+      "inactive": "Inactive",
       "licensed": "Licensed",
       "onHiatus": "On Hiatus",
       "ongoing": "Ongoing",
       "publishingFinished": "Publishing Finished",
+      "stub": "STUB",
       "unknown": "Unknown"
     },
     "tracked": "Tracked",
@@ -592,7 +662,7 @@
       "scrollToCurrentChapter": "Scroll to current chapter",
       "scrollToTop": "Scroll to top"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Finished",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "There's no next chapter",
@@ -632,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "Downloaded chapters",
     "genreDistribution": "Genre distribution",
+    "novels": "novels",
     "readChapters": "Read chapters",
     "sources": "Sources",
     "statusDistribution": "Status distribution",
@@ -643,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -684,7 +757,10 @@
     "LOCAL_BACKUP": "Local Backup",
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
-    "DOWNLOAD_CHAPTER": "Downloading Chapter"
+    "DOWNLOAD_CHAPTER": "Downloading Chapter",
+    "taskQueued": "%{task} queued",
+    "taskCompleted": "Completed",
+    "taskFailed": "Failed: %{error}"
   },
   "time": {
     "seconds": {
@@ -703,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }

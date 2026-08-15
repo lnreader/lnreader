@@ -11,7 +11,13 @@ export type DirectorySelection = {
   name: string;
 };
 
+export type FileCopyResult = {
+  uri: string;
+  size: number;
+};
+
 type NativeFileModule = {
+  DocumentDirectoryPath: string;
   ExternalDirectoryPath: string;
   ExternalCachesDirectoryPath: string;
   createDocument(filename: string, mimeType: string): Promise<string>;
@@ -20,6 +26,13 @@ type NativeFileModule = {
   writeFile(path: string, content: string): Promise<void>;
   readFile(path: string): Promise<string>;
   copyFile(filepath: string, destPath: string): Promise<void>;
+  copyFileToDirectory(
+    sourcePath: string,
+    directoryUri: string,
+    fileName: string,
+    mimeType: string,
+    replace: boolean,
+  ): Promise<FileCopyResult>;
   moveFile(filepath: string, destPath: string): Promise<void>;
   exists(filepath: string): Promise<boolean>;
   mkdir(filepath: string): Promise<void>;

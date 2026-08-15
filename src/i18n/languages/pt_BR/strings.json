@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "Site",
     "discord": "Discord",
-    "github": "Github",
+    "github": "GitHub",
     "helpTranslate": "Ajude a traduzir",
     "plugins": "Plugins",
     "version": "Versão",
@@ -31,13 +31,13 @@
     "importStaticFiles": "Importar arquivo estático",
     "novelInsertFailed": "falha ao inserir livro",
     "networking": "Networking",
-    "useFAB": "Utilize FAV invez do botão",
+    "useFAB": "Utilize FAB em vez do botão",
     "userAgent": "Agente usuário",
     "recreateDBIndexes": "Recriar índices do BD",
-    "recreateDBIndexesToast": "Índices do BD foi recriado",
-    "recreateDBIndexesDialogTitle": "Todos os índices do BD vai ser Recriado.\nIsso pode demorar um pouco.",
+    "recreateDBIndexesToast": "Índices do BD foram recriados",
+    "recreateDBIndexesDialogTitle": "Todos os índices do BD serão recriados.\nIsso pode demorar um pouco.",
     "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos.",
-    "restartRequired": "Restart LNReader to apply this change."
+    "restartRequired": "Reinicie o LNReader para aplicar esta alteração."
   },
   "appearance": "Aparência",
   "appearanceScreen": {
@@ -82,6 +82,16 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Salvar nome",
     "backupCreated": "Backup criado com sucesso",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
@@ -152,7 +162,7 @@
       "restore": "Drive Restore",
       "restoreInterruped": "Restauração do Drive interrompida"
     },
-    "googeDrive": "Googe Drive",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "Fazer backup no Google Drive",
     "invalidBackupFolder": "Pasta de backup inválida",
     "localBackup": "Backup local",
@@ -171,7 +181,7 @@
       "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
     },
     "preparingData": "Preparando os dados",
-    "preparingSelectedFiles": "Preparing selected files",
+    "preparingSelectedFiles": "Preparando arquivos selecionados",
     "remote": {
       "backup": "“Backup” do servidor pessoal",
       "host": "Servidor",
@@ -179,14 +189,14 @@
     },
     "remoteBackup": "Backup remoto",
     "restoreBackup": "Restaurar backup",
-    "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup ",
+    "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup",
     "restorinBackup": "Restaurando cópia de segurança",
     "restoringData": "Restaurando dados",
-    "restoringSelectedFiles": "Restoring selected files",
+    "restoringSelectedFiles": "Restaurando arquivos selecionados",
     "selfHost": "Auto hospedar",
     "selfHostDesc": "Fazer “backup” em seu servidor",
     "uploadingData": "Enviando dados",
-    "uploadingSelectedFiles": "Uploading selected files",
+    "uploadingSelectedFiles": "Enviando arquivos selecionados",
     "uploadingDownloadedFiles": "Baixando arquivos salvos"
   },
   "browse": "Navegar",
@@ -235,7 +245,7 @@
     "plugins": "Plugins",
     "removeFromLibrary": "Removido da biblioteca",
     "repositories": "Repositories",
-    "searchbar": "Pesquisar nas fontes",
+    "searchbar": "Pesquisar fontes e plugins",
     "searchResults": "Resultados da pesquisa",
     "selectNovel": "Selecionar novel",
     "sources": "Sources",
@@ -294,7 +304,7 @@
     "deleted": "Deletado %{name}",
     "deprecated": "Depreciado",
     "display": "Exibir",
-    "done": "Depreciado",
+    "done": "Concluído",
     "downloads": "Baixados",
     "edit": "Editar",
     "example": "Exemplo",
@@ -302,6 +312,7 @@
     "globally": "globalmente",
     "install": "Instalar",
     "imported": "Imported",
+    "later": "Later",
     "logout": "Desconectar",
     "name": "Nome",
     "newUpdateAvailable": "Nova atualização disponível",
@@ -318,6 +329,7 @@
     "save": "Salvar",
     "saved": "Saved",
     "search": "Pesquisar",
+    "skipVersion": "Skip version",
     "searchFor": "Pesquisar por",
     "searchResults": "Resultados da busca",
     "settings": "Configurações",
@@ -361,6 +373,12 @@
     "noDownloads": "Sem transferências",
     "pluginNotFound": "Extensão não encontrada!",
     "removeDownloadsWarning": "Tem certeza? Todos os capítulos transferidos serão deletados"
+  },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
   },
   "generalSettings": "Geral",
   "generalSettingsScreen": {
@@ -411,7 +429,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordenar",
     "updateLibrary": "Atualizar biblioteca ao iniciar",
-    "updateLibraryDesc": "Not recommended for low devices",
+    "updateLibraryDesc": "Não recomendado para dispositivos de baixo desempenho",
     "updateTime": "Mostrar horário da última atualização",
     "useFAB": "Usar Botões flutuantes na Biblioteca",
     "timeTracking": "Time Tracking",
@@ -537,7 +555,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Não foi possível excluir a pasta do capítulo",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -545,8 +563,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapter",
-      "next5": "Next 5 chapter",
+      "next10": "Próximos 10 capítulos",
+      "next5": "Próximos 5 capítulos",
       "unread": "Unread"
     },
     "edit": {
@@ -582,10 +600,12 @@
     "status": {
       "cancelled": "Cancelled",
       "completed": "Completed",
+      "inactive": "Inactive",
       "licensed": "Licensed",
       "onHiatus": "On Hiatus",
       "ongoing": "Ongoing",
       "publishingFinished": "Publishing Finished",
+      "stub": "STUB",
       "unknown": "Unknown"
     },
     "tracked": "Tracked",
@@ -642,7 +662,7 @@
       "scrollToCurrentChapter": "Rolar para o capítulo atual",
       "scrollToTop": "Rolar para o topo"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Não foi possível carregar o capítulo</h2><p>Nenhum conteúdo legível foi encontrado. Verifique o capítulo no WebView; se ele carregar lá, <a href='%{reportUrl}'>relate o problema do plugin</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Capítulo: %{chapterName}</p>",
     "finished": "Finalizado",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "Não há próximo capítulo",
@@ -682,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "Capítulos baixados",
     "genreDistribution": "Categoria de gêneros",
+    "novels": "novels",
     "readChapters": "Capítulos lidos",
     "sources": "Sources",
     "statusDistribution": "Distribuição de status",
@@ -693,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "Tracking",
   "trackingScreen": {
@@ -756,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }

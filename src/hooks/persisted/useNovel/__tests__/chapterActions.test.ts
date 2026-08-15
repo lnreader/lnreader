@@ -43,7 +43,7 @@ const mockNovel: NovelInfo = {
 };
 
 const createDeps = (): jest.Mocked<ChapterActionsDependencies> => ({
-  bookmarkChapter: jest.fn().mockResolvedValue(undefined),
+  bookmarkChapters: jest.fn().mockResolvedValue(undefined),
   markChapterRead: jest.fn().mockResolvedValue(undefined),
   markChaptersRead: jest.fn().mockResolvedValue(undefined),
   markPreviuschaptersRead: jest.fn().mockResolvedValue(undefined),
@@ -85,9 +85,9 @@ describe('chapterActions', () => {
     const deps = createDeps();
     const state = createStateMutator([makeChapter(1), makeChapter(2)]);
 
-    bookmarkChaptersAction([makeChapter(2)], state.mutate, deps);
+    bookmarkChaptersAction([2], state.mutate, deps);
 
-    expect(deps.bookmarkChapter).toHaveBeenCalledWith(2);
+    expect(deps.bookmarkChapters).toHaveBeenCalledWith([2]);
     expect(state.getState().map(ch => ch.bookmark)).toEqual([false, true]);
   });
 
@@ -145,7 +145,7 @@ describe('chapterActions', () => {
       makeChapter(2, { unread: false }),
     ]);
 
-    markChaptersUnreadAction([makeChapter(2)], state.mutate, deps);
+    markChaptersUnreadAction([2], state.mutate, deps);
 
     expect(deps.markChaptersUnread).toHaveBeenCalledWith([2]);
     expect(state.getState().map(ch => ch.unread)).toEqual([false, true]);
@@ -158,7 +158,7 @@ describe('chapterActions', () => {
     ]);
 
     const success = await markChaptersUnreadAndResetProgressAction(
-      [makeChapter(1)],
+      [1],
       state.mutate,
       deps,
     );
@@ -180,7 +180,7 @@ describe('chapterActions', () => {
     const state = createStateMutator([original]);
 
     const success = await markChaptersUnreadAndResetProgressAction(
-      [makeChapter(1)],
+      [1],
       state.mutate,
       deps,
     );
@@ -239,18 +239,13 @@ describe('chapterActions', () => {
       makeChapter(3),
     ]);
 
-    deleteChaptersAction(
-      [makeChapter(1), makeChapter(3)],
-      mockNovel,
-      state.mutate,
-      deps,
-    );
+    deleteChaptersAction([1, 3], mockNovel, state.mutate, deps);
     await Promise.resolve();
 
     expect(deps.deleteChapters).toHaveBeenCalledWith(
       mockNovel.pluginId,
       mockNovel.id,
-      [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 3 })],
+      [1, 3],
     );
     expect(deps.getString).toHaveBeenCalledWith(
       'updatesScreen.deletedChapters',

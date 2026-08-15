@@ -6,6 +6,17 @@ export const getRepositoriesFromDb = async (): Promise<RepositoryRow[]> => {
   return dbManager.select().from(repositorySchema).all();
 };
 
+export const getEnabledRepositoriesFromDb = async (): Promise<
+  RepositoryRow[]
+> => {
+  return dbManager
+    .select()
+    .from(repositorySchema)
+    .where(eq(repositorySchema.enabled, true))
+    .orderBy(repositorySchema.id)
+    .all();
+};
+
 export const isRepoUrlDuplicated = async (repoUrl: string) => {
   const result = await dbManager
     .select({ count: repositorySchema.id })
@@ -44,6 +55,19 @@ export const updateRepository = async (
     await tx
       .update(repositorySchema)
       .set({ url })
+      .where(eq(repositorySchema.id, id))
+      .run();
+  });
+};
+
+export const setRepositoryEnabled = async (
+  id: number,
+  enabled: boolean,
+): Promise<void> => {
+  await dbManager.write(async tx => {
+    await tx
+      .update(repositorySchema)
+      .set({ enabled })
       .where(eq(repositorySchema.id, id))
       .run();
   });

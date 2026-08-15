@@ -11,9 +11,9 @@
   "advancedSettings": "Avancé",
   "advancedSettingsScreen": {
     "cachedNovelsDeletedToast": "Romans en cache supprimés",
-    "chapterInsertFailed": "Insertion de chapitre échoué",
+    "chapterInsertFailed": "Échec de l'insertion du chapitre",
     "clearCachedNovels": "Vider les romans en cache",
-    "clearCachedNovelsDesc": "Delete cached novels which not in your library",
+    "clearCachedNovelsDesc": "Supprimer les romans en cache qui ne sont pas dans votre bibliothèque",
     "clearDatabaseWarning": "Les progrès et les chapitres lus et téléchargés hors de la bibliothèque, seront perdus.",
     "clearUpdatesMessage": "Mises à jour effacées.",
     "clearUpdatesTab": "Effacer l'onglet Mises à jour",
@@ -82,6 +82,16 @@
     }
   },
   "backupScreen": {
+    "automaticBackupFrequency": "Automatic backup frequency",
+    "automaticBackupDescription": "Backups run in the background and are stored locally. Android may delay background work to save battery.",
+    "automaticBackupOff": "Off",
+    "automaticBackupEvery6Hours": "Every 6 hours",
+    "automaticBackupEvery12Hours": "Every 12 hours",
+    "automaticBackupDaily": "Daily",
+    "automaticBackupEvery2Days": "Every 2 days",
+    "automaticBackupWeekly": "Weekly",
+    "automaticBackupLocation": "Automatic backup location",
+    "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Nom de la sauvegarde",
     "backupCreated": "Sauvegarde créée avec succès",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
@@ -150,7 +160,7 @@
       "backupInterruped": "Sauvegarde interrompue",
       "googleDriveBackup": "Sauvegarde sur Google Drive",
       "restore": "Drive Restore",
-      "restoreInterruped": "Drive Restore Interrupted"
+      "restoreInterruped": "Restauration depuis Drive interrompue"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Sauvegarde sur votre Google Drive",
@@ -180,7 +190,7 @@
     "remoteBackup": "Remote Backup",
     "restoreBackup": "Restaurer la sauvegarde",
     "restoreBackupDesc": "Restore library from backup file",
-    "restorinBackup": "Restoring backup",
+    "restorinBackup": "Restauration de la sauvegarde",
     "restoringData": "Restoring Data",
     "restoringSelectedFiles": "Restoring selected files",
     "selfHost": "Self Host",
@@ -261,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Ajouter une catégorie",
-    "cantDeleteDefault": "You cant delete default category",
+    "cantDeleteDefault": "Vous ne pouvez pas supprimer la catégorie par défaut",
     "default": "Défaut",
     "defaultCategory": "Catégorie par défaut",
     "deleteModal": {
@@ -302,6 +312,7 @@
     "globally": "globalement",
     "install": "Installer",
     "imported": "Imported",
+    "later": "Later",
     "logout": "Se déconnecter",
     "name": "Nom",
     "newUpdateAvailable": "Nouvelle mise à jour disponible",
@@ -318,6 +329,7 @@
     "save": "Sauvegarder",
     "saved": "Saved",
     "search": "Recherchez",
+    "skipVersion": "Skip version",
     "searchFor": "Rechercher",
     "searchResults": "Résultats de la recherche",
     "settings": "Paramètres",
@@ -361,6 +373,12 @@
     "noDownloads": "Aucun téléchargement",
     "pluginNotFound": "Plugin introuvable!",
     "removeDownloadsWarning": "Are you sure? All downloaded chapters will be deleted."
+  },
+  "errorBoundary": {
+    "title": "An Unexpected Error Occurred",
+    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "copyStackTrace": "Copy stack trace",
+    "restart": "Restart the application"
   },
   "generalSettings": "Général",
   "generalSettingsScreen": {
@@ -411,7 +429,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordre de tri",
     "updateLibrary": "Mettre à jour la bibliothèque au lancement",
-    "updateLibraryDesc": "Non recommandé pour les appareils ????",
+    "updateLibraryDesc": "Non recommandé pour les appareils bas de gamme",
     "updateTime": "Afficher la date de dernière mise à jour",
     "useFAB": "Utiliser FAB dans la bibliothèque",
     "timeTracking": "Time Tracking",
@@ -537,7 +555,7 @@
     },
     "coverSaved": "Couverture sauvegardée",
     "coverNotSaved": "Couverture non sauvegardée",
-    "deleteChapterError": "Cant delete chapter chapter folder",
+    "deleteChapterError": "Impossible de supprimer le dossier du chapitre",
     "deleteMessage": "Supprimer les chapitres téléchargés?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -582,10 +600,12 @@
     "status": {
       "cancelled": "Annulé",
       "completed": "Complet",
+      "inactive": "Inactive",
       "licensed": "Licensed",
       "onHiatus": "En pause",
       "ongoing": "En cours",
       "publishingFinished": "Publishing Finished",
+      "stub": "STUB",
       "unknown": "Inconnu"
     },
     "tracked": "Suivi",
@@ -642,7 +662,7 @@
       "scrollToCurrentChapter": "Défiler vers le chapitre actuel",
       "scrollToTop": "Défiler jusqu'en haut"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Impossible de charger le chapitre</h2><p>Aucun contenu lisible n'a été trouvé. Vérifiez le chapitre dans la WebView ; s'il s'y charge, <a href='%{reportUrl}'>signalez le problème du plugin</a>.</p><p>Plugin : %{pluginId}<br>Roman : %{novelName}<br>Chapitre : %{chapterName}</p>",
     "finished": "Terminé",
     "nextChapter": "Suivant: %{name}",
     "noNextChapter": "Il n'y a pas de prochain chapitre",
@@ -682,6 +702,7 @@
   "statsScreen": {
     "downloadedChapters": "Chapitres téléchargés",
     "genreDistribution": "Répartition par genres",
+    "novels": "novels",
     "readChapters": "Chapitres Lu",
     "sources": "Sources",
     "statusDistribution": "Répartition de l'état",
@@ -693,7 +714,9 @@
     "topCategoriesByTimeSpent": "Top categories by time spent",
     "totalTimeSpent": "Total time spent",
     "showNovels": "Group by novel",
-    "showCategories": "Group by category"
+    "showCategories": "Group by category",
+    "plugins": "Plugins",
+    "pluginDistribution": "Plugin distribution"
   },
   "tracking": "Suivi",
   "trackingScreen": {
@@ -756,5 +779,43 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "genreStats": {
+    "title": "Genre statistics",
+    "totalNovels": {
+      "one": "%{count} novel",
+      "other": "%{count} novels"
+    },
+    "topLevelCategories": {
+      "one": "%{count} category",
+      "other": "%{count} categories"
+    },
+    "mostCommon": "Most common",
+    "empty": "No genres found",
+    "seeAll": "View all genres",
+    "subgenres": {
+      "one": "%{count} subgenre",
+      "other": "%{count} subgenres"
+    },
+    "novelsIn": "Novels in %{genre}",
+    "noNovels": "No novels found for this category",
+    "seeAllNovels": "See all",
+    "editTaxonomy": "Edit genre taxonomy",
+    "taxonomyTitle": "Genre taxonomy",
+    "parentCategories": "Parent categories",
+    "normalization": "Normalization rules",
+    "addCategory": "Add category",
+    "addChild": "Add subgenre",
+    "addNormalization": "Add rule",
+    "deleteConfirmTitle": "Delete entry",
+    "deleteCategoryConfirm": "Delete this category and its subgenres?",
+    "deleteChildConfirm": "Delete this subgenre?",
+    "deleteNormalizationConfirm": "Delete this normalization rule?",
+    "parentNamePlaceholder": "Category name",
+    "childNamePlaceholder": "Add Subgenre",
+    "normalizationKeyPlaceholder": "e.g. sci-fi",
+    "normalizationValuePlaceholder": "e.g. Sci-Fi",
+    "noCategories": "No parent categories configured",
+    "noNormalization": "No normalization rules configured"
   }
 }

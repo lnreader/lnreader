@@ -5,12 +5,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import {
-  RefreshControl,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { RefreshControl, useWindowDimensions, View } from 'react-native';
 import {
   runOnJS,
   SharedValue,
@@ -409,6 +404,10 @@ const NovelScreenList = ({
     () => ({ downloadingChapterIds, selectedIds }),
     [downloadingChapterIds, selectedIds],
   );
+  const contentContainerStyle = useMemo(
+    () => ({ paddingBottom: 100 + bottomInset }),
+    [bottomInset],
+  );
 
   return (
     <>
@@ -421,7 +420,7 @@ const NovelScreenList = ({
         renderItem={renderChapter}
         keyExtractor={chapterKeyExtractor}
         extraData={listExtraData}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={contentContainerStyle}
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}
         onEndReachedThreshold={6}
@@ -464,16 +463,5 @@ const NovelScreenList = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  contentContainer: { paddingBottom: 100 },
-  rowBack: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-});
 
 export default React.memo(NovelScreenList);

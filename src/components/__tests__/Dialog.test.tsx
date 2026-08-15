@@ -1,5 +1,10 @@
 import './mocks';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 
 import { Dialog } from '../Dialog';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
@@ -104,7 +109,7 @@ describe('Dialog', () => {
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
-  it('runs and dismisses a confirmation action', () => {
+  it('runs and dismisses a confirmation action', async () => {
     const onConfirm = jest.fn();
     const onDismiss = jest.fn();
 
@@ -121,6 +126,35 @@ describe('Dialog', () => {
     fireEvent.press(screen.getByText('Delete'));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onDismiss).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onDismiss).toHaveBeenCalledTimes(1));
+  });
+
+  it('waits for an async confirmation action before dismissing', async () => {
+    let resolveConfirmation: () => void = () => {};
+    const onConfirm = jest.fn(
+      () =>
+        new Promise<void>(resolve => {
+          resolveConfirmation = resolve;
+        }),
+    );
+    const onDismiss = jest.fn();
+
+    render(
+      <ConfirmationDialog
+        title="Delete item?"
+        confirmLabel="Delete"
+        visible
+        onConfirm={onConfirm}
+        onDismiss={onDismiss}
+      />,
+    );
+
+    fireEvent.press(screen.getByText('Delete'));
+
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onDismiss).not.toHaveBeenCalled();
+
+    resolveConfirmation();
+    await waitFor(() => expect(onDismiss).toHaveBeenCalledTimes(1));
   });
 });

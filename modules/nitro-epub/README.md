@@ -6,6 +6,7 @@ Modules.
 ## Capabilities
 
 - Parse an extracted EPUB into novel metadata and chapter paths.
+- Normalize raster-only SVG image wrappers into HTML images during import.
 - Export downloaded chapter files as an EPUB 3 archive.
 - Copy local chapter images into the archive and remove missing images.
 - Generate EPUB navigation, NCX compatibility navigation, metadata, CSS, and

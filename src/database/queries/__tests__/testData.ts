@@ -91,7 +91,7 @@ export async function insertTestChapter(
     position: 0,
     progress: null,
     scanlator: null,
-	timeSpent: 0,
+    timeSpent: 0,
     ...data,
     novelId,
   };
@@ -137,6 +137,7 @@ export async function insertTestRepository(
   const { drizzleDb } = testDb;
   const repoData: RepositoryInsert = {
     url: data.url ?? `https://test-repo-${Date.now()}.example.com`,
+    enabled: data.enabled ?? true,
   };
 
   const result = await drizzleDb

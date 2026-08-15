@@ -4,6 +4,7 @@ import {
   filterAvailablePlugins,
   filterInstalledPlugins,
   getLastUsedPluginId,
+  reconcileInstalledPluginUpdates,
 } from '../pluginSelectors';
 
 const createPlugin = (id: string, name: string, lang: string): PluginItem => ({
@@ -56,5 +57,42 @@ describe('plugin selectors', () => {
     expect(getLastUsedPluginId(englishPlugin.id)).toBe(englishPlugin.id);
     expect(getLastUsedPluginId(englishPlugin)).toBe(englishPlugin.id);
     expect(getLastUsedPluginId(undefined)).toBeUndefined();
+  });
+
+  it('clears stale update flags when an installed plugin is no longer available', () => {
+    const installedPlugin = { ...englishPlugin, hasUpdate: true };
+
+    expect(
+      reconcileInstalledPluginUpdates([installedPlugin], [], true),
+    ).toEqual([{ ...installedPlugin, hasUpdate: false }]);
+  });
+
+  it('preserves update flags after an ordinary repository fetch failure', () => {
+    const installedPlugin = { ...englishPlugin, hasUpdate: true };
+
+    expect(reconcileInstalledPluginUpdates([installedPlugin], [])[0]).toBe(
+      installedPlugin,
+    );
+  });
+
+  it('uses metadata from the selected repository when an update is available', () => {
+    const installedPlugin = { ...englishPlugin, version: '1.0.0' };
+    const availablePlugin = {
+      ...englishPlugin,
+      version: '2.0.0',
+      iconUrl: 'https://enabled.example.com/icon.png',
+      url: 'https://enabled.example.com/plugin.js',
+    };
+
+    expect(
+      reconcileInstalledPluginUpdates([installedPlugin], [availablePlugin]),
+    ).toEqual([
+      {
+        ...installedPlugin,
+        hasUpdate: true,
+        iconUrl: availablePlugin.iconUrl,
+        url: availablePlugin.url,
+      },
+    ]);
   });
 });

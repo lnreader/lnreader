@@ -10,6 +10,7 @@ export const repository = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     url: text('url').notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
   },
   table => [uniqueIndex('repository_url_unique').on(table.url)],
 );

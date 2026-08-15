@@ -1,37 +1,30 @@
 import { ThemeColors } from '@theme/types';
 import color from 'color';
 import { useAppSettings } from '@hooks/persisted';
-import { interpolateColor } from 'react-native-reanimated';
 import { useMemo } from 'react';
+
+const BASE_STRENGTH = 0.03;
+const STATIC_BASE_STRENGTH = 0.05;
+const HIGHLIGHT_STRENGTH = 0.06;
 
 export const getLoadingColors = (
   theme: ThemeColors,
   disableLoadingAnimations = false,
 ) => {
-  const highlightColor = color(theme.primary).alpha(0.08).string();
-  const backgroundColor = color(theme.surface);
+  const surfaceColor = color(theme.surface);
+  const foregroundColor = color(theme.onSurface);
+  const backgroundStrength = disableLoadingAnimations
+    ? STATIC_BASE_STRENGTH
+    : BASE_STRENGTH;
 
-  let adjustedBackgroundColor;
+  const backgroundColor = surfaceColor
+    .mix(foregroundColor, backgroundStrength)
+    .hex();
+  const highlightColor = surfaceColor
+    .mix(foregroundColor, HIGHLIGHT_STRENGTH)
+    .hex();
 
-  if (backgroundColor.isDark()) {
-    adjustedBackgroundColor =
-      backgroundColor.luminosity() !== 0
-        ? backgroundColor.lighten(0.1).toString()
-        : backgroundColor.negate().darken(0.98).toString();
-  } else {
-    adjustedBackgroundColor = backgroundColor.darken(0.04).toString();
-  }
-
-  if (disableLoadingAnimations) {
-    // The highlight is hidden, so increase the static placeholder contrast.
-    adjustedBackgroundColor = interpolateColor(
-      0.01,
-      [0, 1],
-      [adjustedBackgroundColor, highlightColor],
-    );
-  }
-
-  return [highlightColor, adjustedBackgroundColor] as const;
+  return [highlightColor, backgroundColor] as const;
 };
 
 const useLoadingColors = (theme: ThemeColors) => {

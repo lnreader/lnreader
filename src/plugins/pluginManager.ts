@@ -3,15 +3,16 @@ import { utf8ToBytes, bytesToUtf8 } from '@noble/ciphers/utils.js';
 import dayjs from 'dayjs';
 import { load } from 'cheerio';
 import { Parser } from 'htmlparser2';
-import { reverse, uniqBy } from 'lodash-es';
+import reverse from 'lodash-es/reverse';
+import uniqBy from 'lodash-es/uniqBy';
 import { encode, decode } from 'urlencode';
 
-import { getRepositoriesFromDb } from '@database/queries/RepositoryQueries';
+import { getEnabledRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { newer } from '@utils/compareVersion';
 import NativeFile from '@modules/native-file';
 import { showToast } from '@utils/showToast';
-import { PLUGIN_STORAGE } from '@utils/Storages';
+import { LEGACY_PLUGIN_STORAGE, PLUGIN_STORAGE } from '@utils/Storages';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 
 import {
@@ -87,6 +88,39 @@ const initPlugin = (pluginId: string, rawCode: string) => {
 
 const plugins: Record<string, Plugin | undefined> = {};
 export const INSTALLED_PLUGINS_KEY = 'INSTALL_PLUGINS';
+const PLUGIN_FILES = ['custom.js', 'custom.css', 'index.js'] as const;
+
+// v2.1.0 stored plugin bundles in getExternalFilesDir(), which can be unavailable
+// on some Android devices and leave installed plugin metadata without its bundle.
+// Copy legacy bundles into reliable internal storage, retaining the originals so
+// an interrupted migration can be retried safely on the next launch.
+const migrateLegacyPluginFiles = async (pluginId: string) => {
+  if (LEGACY_PLUGIN_STORAGE === PLUGIN_STORAGE) {
+    return;
+  }
+
+  const legacyIndexPath = `${LEGACY_PLUGIN_STORAGE}/${pluginId}/index.js`;
+  const pluginIndexPath = `${PLUGIN_STORAGE}/${pluginId}/index.js`;
+  if (
+    (await NativeFile.exists(pluginIndexPath)) ||
+    !(await NativeFile.exists(legacyIndexPath))
+  ) {
+    return;
+  }
+
+  const pluginDir = `${PLUGIN_STORAGE}/${pluginId}`;
+  await NativeFile.mkdir(pluginDir);
+  for (const filename of PLUGIN_FILES) {
+    const legacyPath = `${LEGACY_PLUGIN_STORAGE}/${pluginId}/${filename}`;
+    if (await NativeFile.exists(legacyPath)) {
+      const destinationPath = `${pluginDir}/${filename}`;
+      await NativeFile.writeFile(
+        destinationPath,
+        await NativeFile.readFile(legacyPath),
+      );
+    }
+  }
+};
 
 const installPlugin = async (
   _plugin: PluginItem,
@@ -100,9 +134,6 @@ const installPlugin = async (
   }
   let currentPlugin = plugins[plugin.id];
   if (!currentPlugin || newer(plugin.version, currentPlugin.version)) {
-    plugins[plugin.id] = plugin;
-    currentPlugin = plugin;
-
     // save plugin code;
     const pluginDir = `${PLUGIN_STORAGE}/${plugin.id}`;
     await NativeFile.mkdir(pluginDir);
@@ -120,6 +151,8 @@ const installPlugin = async (
       await NativeFile.unlink(customCSSPath);
     }
     await NativeFile.writeFile(pluginPath, rawCode);
+    plugins[plugin.id] = plugin;
+    currentPlugin = plugin;
   }
   return currentPlugin;
 };
@@ -143,7 +176,7 @@ const updatePlugin = async (plugin: PluginItem) => {
 
 const fetchPlugins = async (): Promise<PluginItem[]> => {
   const allPlugins: PluginItem[] = [];
-  const allRepositories = await getRepositoriesFromDb();
+  const allRepositories = await getEnabledRepositoriesFromDb();
 
   const repoPluginsRes = await Promise.allSettled(
     allRepositories.map(({ url }) => fetch(url).then(res => res.json())),
@@ -190,7 +223,20 @@ const loadPlugin = async (pluginId: string) => {
 const initializeInstalledPlugins = async () => {
   const installedPlugins =
     getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
-  await Promise.all(installedPlugins.map(plugin => loadPlugin(plugin.id)));
+  await Promise.allSettled(
+    installedPlugins.map(async plugin => {
+      try {
+        await migrateLegacyPluginFiles(plugin.id);
+      } catch {
+        // A failed migration can still be recovered from the repository below.
+      }
+
+      const installedPlugin = await loadPlugin(plugin.id);
+      if (!installedPlugin) {
+        await installPlugin(plugin);
+      }
+    }),
+  );
 };
 
 const reloadInstalledPlugins = async (): Promise<string[]> => {

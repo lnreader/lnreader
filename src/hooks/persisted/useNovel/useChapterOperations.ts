@@ -71,8 +71,8 @@ export const useChapterOperations = ({
   );
 
   const bookmarkChapters = useCallback(
-    (_chapters: ChapterInfo[]) => {
-      bookmarkChaptersAction(_chapters, mutateChapters);
+    (chapterIds: number[]) => {
+      bookmarkChaptersAction(chapterIds, mutateChapters);
     },
     [mutateChapters],
   );
@@ -99,8 +99,8 @@ export const useChapterOperations = ({
   );
 
   const markChaptersRead = useCallback(
-    (_chapters: ChapterInfo[]) => {
-      markChaptersReadAction(_chapters, mutateChapters);
+    (chapterIds: number[]) => {
+      markChaptersReadAction(chapterIds, mutateChapters);
     },
     [mutateChapters],
   );
@@ -113,8 +113,8 @@ export const useChapterOperations = ({
   );
 
   const markChaptersUnread = useCallback(
-    (_chapters: ChapterInfo[]) => {
-      markChaptersUnreadAction(_chapters, mutateChapters);
+    (chapterIds: number[]) => {
+      markChaptersUnreadAction(chapterIds, mutateChapters);
     },
     [mutateChapters],
   );
@@ -127,8 +127,8 @@ export const useChapterOperations = ({
   );
 
   const deleteChapters = useCallback(
-    (_chapters: ChapterInfo[]) => {
-      deleteChaptersAction(_chapters, novel, mutateChapters);
+    (chapterIds: number[]) => {
+      deleteChaptersAction(chapterIds, novel, mutateChapters);
     },
     [novel, mutateChapters],
   );

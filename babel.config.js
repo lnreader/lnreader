@@ -28,6 +28,7 @@ export default function (api) {
             '@specs': './specs',
             '@test-utils': './test/test-utils',
             '@env': './src/generated/build-info',
+            '@modules/nitro-epub': './modules/nitro-epub/src/index',
             '@modules/nitro-tts': './modules/nitro-tts/src/index',
             '@modules': './modules',
             'react-native-vector-icons/MaterialCommunityIcons':

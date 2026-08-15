@@ -1,7 +1,11 @@
 import { Platform } from 'react-native';
 import SafX from 'react-native-saf-x';
 import NativeFileModule from './src/NativeFileModule';
-import type { DirectorySelection, ReadDirResult } from './src/NativeFileModule';
+import type {
+  DirectorySelection,
+  FileCopyResult,
+  ReadDirResult,
+} from './src/NativeFileModule';
 import { toSafDocumentUri } from './safUri';
 
 const isSafPath = (path: string) =>
@@ -13,6 +17,7 @@ const toSafPath = (path: string) =>
     : `file://${path}`;
 
 const NativeFile = {
+  DocumentDirectoryPath: NativeFileModule.DocumentDirectoryPath,
   ExternalDirectoryPath: NativeFileModule.ExternalDirectoryPath,
   ExternalCachesDirectoryPath: NativeFileModule.ExternalCachesDirectoryPath,
   createDocument: NativeFileModule.createDocument.bind(NativeFileModule),
@@ -35,6 +40,8 @@ const NativeFile = {
     }
     await NativeFileModule.copyFile(source, destination);
   },
+  copyFileToDirectory:
+    NativeFileModule.copyFileToDirectory.bind(NativeFileModule),
   moveFile: async (source: string, destination: string): Promise<void> => {
     if (isSafPath(source) || isSafPath(destination)) {
       await SafX.moveFile(toSafPath(source), toSafPath(destination), {
@@ -115,5 +122,5 @@ const NativeFile = {
   },
 };
 
-export type { DirectorySelection, ReadDirResult };
+export type { DirectorySelection, FileCopyResult, ReadDirResult };
 export default NativeFile;

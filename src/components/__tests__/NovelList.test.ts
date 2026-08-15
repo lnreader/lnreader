@@ -6,8 +6,8 @@ import {
   type NovelListDataItem,
 } from '../NovelList';
 
-jest.mock('@shopify/flash-list', () => ({
-  FlashList: () => null,
+jest.mock('@legendapp/list/react-native', () => ({
+  LegendList: () => null,
 }));
 
 jest.mock('@hooks', () => ({
