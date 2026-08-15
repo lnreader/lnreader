@@ -1,0 +1,445 @@
+src/i18n/languages/ca_ES/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/el_GR/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/components/Common/__tests__/ToggleButton.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-96
+src/screens/novel/__tests__/NovelScreen.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6,65-66,245-251,306,324-345
+  s_08eb61e16eef60::t_f99c10486798eb 346-347
+modules/native-background-tasks/android/build.gradle
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 25,28
+src/screens/library/LibraryScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 26-27,56,91,264,495-508,521-532
+src/screens/settings/SettingsCustomCodeScreen/CodeSnippetsScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1,3-12,14-19,21-37,39-70,74-105,110,120,125-126,134-139,141-166,168,172-186
+src/utils/error.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-31
+src/i18n/languages/pl_PL/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/novel/components/ExportEpubModal.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6,141-142
+src/i18n/languages/or_IN/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+app.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 33-40,51-53
+src/i18n/languages/fr_FR/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 14,16,85-94,163,193,274,315,332,377-382,432,558,603,608,665,705,717-719,782-819
+src/database/queries/NovelQueries.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 385-390
+src/hooks/persisted/useNovel/store/chapterActions.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 3,25,50,64,98,102-103,107,161,198,219,312,318,321,324,330
+src/i18n/languages/sv_SE/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/tr_TR/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,85-94,241,283,315,332,377-382,603,608,665,705,717-719,782-819
+src/screens/novel/hooks/useChapterSelection.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-8,11-23,29-31,33-39
+src/screens/settings/SettingsReaderScreen/components/SettingsReaderWebView.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-291
+src/components/NovelList.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 4-7,16-18,25,81,89
+src/i18n/languages/ja_JP/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+assets/reader/js/textRemover.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-262
+src/screens/GenreStatsScreen/utils.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 30-46,60-69,83,106-109,117,128,130
+src/i18n/languages/en/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,165,246,274,290-294,347-352,442,584,592-593,810-830
+  s_08eb61e16eef60::t_a8a761cc6d6c55 831
+src/screens/updates/components/__tests__/UpdateNovelChapterGroup.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9,12,16,37,49,51,58,67-70,74-77,82,96,103-147
+src/components/Common/ToggleButton.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2,7,14,16,30,39,46,49
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 15-19,495-518
+src/screens/settings/SettingsRepositoryScreen/components/__tests__/RepositoryCard.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-194
+modules/nitro-epub/cpp/tests/EpubParserTest.cpp
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-128
+src/components/__tests__/Dialog.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2-7,112,129-158
+src/database/queries/__tests__/testDb.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 81-82
+src/i18n/languages/no_NO/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/uk_UA/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,85-94,241,315,332,377-382,603,608,665,705,717-719,782-819
+src/screens/settings/SettingsCustomCodeScreen/Routes/CodeRoute.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-215
+src/screens/settings/SettingsCustomCodeScreen/Components/__tests__/SimpleCodeEditor.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-100
+src/utils/__tests__/useLoadingColors.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-46
+test/mocks/nativeModules.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 7-9,13-18
+src/screens/reader/components/ChapterDrawer/index.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 17
+src/screens/GenreStatsScreen/__tests__/utils.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-90
+modules/nitro-epub/android/CMakeLists.txt
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 11
+src/screens/novel/components/SetCategoriesModal.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 14
+src/hooks/persisted/usePlugins.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 20,42-45,120-122,124-135,138-140,142,144-147
+src/screens/novel/components/Tracker/__tests__/TrackSearchDialog.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 67,73
+src/screens/novel/hooks/useNovelScreenActions.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 3,8,26,34,72-76,94-95,98-99,105-112,120-121,125-134,140,143-146,149,153-156,160,190
+drizzle/20260811071655_parched_human_torch/snapshot.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-654
+src/plugins/__tests__/pluginManager.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2,5,7-8,15,54-82,110-190
+src/components/Switch/SwitchItem.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 17,19,27,29,41,46
+src/screens/reader/components/Hooks/useTextModifications.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-113
+src/screens/GlobalSearchScreen/hooks/useGlobalSearch.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2
+src/screens/settings/SettingsTaxonomyScreen/SettingsTaxonomyScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9,51-55,57-59,66-72,83-87
+src/database/queries/LibraryQueries.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 37,71,74-87
+  s_08eb61e16eef60::t_4004d6ef166cac 88
+src/screens/settings/SettingsReaderScreen/tabs/NavigationTab.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5
+src/screens/settings/SettingsScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 71-75
+  s_08eb61e16eef60::t_496ec2f4feafb2 70
+modules/nitro-epub/cpp/import/EpubParser.cpp
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,7,67-138,277-279,297,300,305,307-313,317-318,322-335,348
+plugins/android/android-build-types.gradle
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 11-17
+src/i18n/languages/es_ES/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 85-94,241,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/nl_NL/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/library/hooks/__tests__/useLibrary.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-121
+src/screens/settings/SettingsRepositoryScreen/components/RepositoryCard.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2-3,7-8,22,29,33-35,49-62,72-77,80-101,108,119,126,143-153,168,176-179,182,185,191-197
+src/i18n/languages/hi_IN/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/utils/useLoadingColors.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6-9,14-27
+src/i18n/languages/pt_PT/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/hooks/persisted/useNovel/useChapterOperations.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 74-75,102-103,116-117,130-131
+App.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 25,95,97-111
+src/screens/novel/components/Info/NovelInfoHeader.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 35,116-122
+src/screens/novel/hooks/__tests__/useChapterSelection.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-48
+src/utils/__tests__/customCode.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-152
+jest.config.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 19
+src/components/Switch/__tests__/SwitchItem.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-122
+modules/nitro-tts/android/src/main/java/com/margelo/nitro/nitrotts/TtsPlaybackStore.kt
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6-9,36-40,44-47,179-184,186-188,198-199,204-288,360-364,386,503
+src/hooks/common/__tests__/useKeyboardHeight.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-72
+src/hooks/persisted/__tests__/usePlugins.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 7,61-97
+src/hooks/persisted/pluginSelectors.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2,44-72
+  s_08eb61e16eef60::t_248abac20b1477 73
+src/navigators/Main.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6-9,52
+src/i18n/languages/it_IT/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 85-94,165,241,274,311,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/novel/components/Tracker/TrackSearchDialog.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 10,236
+src/screens/reader/hooks/useChapter.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 33
+src/screens/settings/SettingsTaxonomyScreen/__tests__/SettingsTaxonomyScreen.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-187
+src/database/queries/__tests__/index.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 84
+src/hooks/common/useKeyboardHeight.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-31
+src/screens/settings/SettingsCustomCodeScreen/Modals/ReplaceItemModal.tsx
+  s_badcbad30332bf::t_338727fbf8f609 2,6-7,10-11,21,36,40,75,84,119,130,220,233,243,245-246,251,281,284,292
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1,3-5,8-9,12-20,22-35,37-39,41-74,76-83,85-118,120-129,131-219,221-232,234-242,244,247-250,252-259,261-280,282-283,285-291,293-308,310-314,316-325
+  s_badcbad30332bf::t_c26b1f8e7c0667 315
+  s_30d677ff874774::t_5d176f605de4f2 260
+  h_f56025180c46fa 309
+src/screens/settings/SettingsCustomCodeScreen/Routes/SettingsRoute.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-191
+src/services/backup/__tests__/utils.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,22,77,142,150
+test/mocks/database.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 52
+src/components/TextInput/index.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-71
+src/i18n/types/index.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 249-251,253,305-309,680-699
+src/components/Switch/Switch.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 28-29,37-38,117-124
+src/i18n/languages/ro_RO/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,97,99-107,111-114,126-133,139,141,143-151,153,165,170-182,184,195,199,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,760-763,782-819
+src/screens/settings/SettingsCustomCodeScreen/Components/ListItems.tsx
+  s_badcbad30332bf::t_a48c29a8cb8711 29,32-33,39,42-43,53,55,95
+  s_badcbad30332bf::t_0e69d049a32f39 45
+  s_badcbad30332bf::t_9a4ba7bd873c74 13-15,20-21,25,54,57-59,61-69,92-93,101
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-12,16-19,22-24,26-28,30-31,34-38,40-41,44,46-52,56,60,70-91,94,96-100,102-123
+src/components/TextInput/__tests__/mocks.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-30
+modules/nitro-epub/cpp/import/EpubChapterNormalizer.cpp
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-135
+src/database/queries/__tests__/ChapterQueries.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 10-11,21,28,40,118-136,153-189,543,722,725,736-754,1350
+src/i18n/languages/af_ZA/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/history/components/HistoryCard/HistoryCard.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 38,55
+src/screens/novel/components/NovelScreenButtonGroup/NovelScreenButtonGroup.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 15,76,94-98,154
+src/screens/reader/components/ChapterDrawer/RenderListChapter.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 60
+src/services/epub/export.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 133-138,140-142
+src/hooks/persisted/useNovel/store/novelStore.types.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 45,48,50,52,56
+src/components/ConfirmationDialog/ConfirmationDialog.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1,14,26,30-39,42-58,60-63,69-71
+src/database/schema/repository.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 13
+src/i18n/languages/ar_SA/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 85-94,315,332,377-382,558,566-567,603,608,665,705,717-719,782-819
+src/navigators/MoreStack.tsx
+  s_08eb61e16eef60::t_d48e6778f9b40b 54
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 15-16,55
+src/services/backup/utils.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 10,107
+src/components/__tests__/NovelList.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9-10
+src/components/TextInput/__tests__/TextInput.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-132
+src/hooks/persisted/useUpdates.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 3,7,11,16-24,30-38,40,42
+src/screens/novel/components/ExportNovelAsEpubButton.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6,128
+src/utils/parseChapterNumber.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1
+modules/nitro-epub/cpp/import/EpubChapterNormalizer.hpp
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-5
+package.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 11,83,97,117,121,142-146,175
+src/components/Common.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 7-8,12-27
+src/screens/updates/__tests__/UpdatesScreen.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-93
+src/database/queries/__tests__/RepositoryQueries.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 13,17,62-85,124,202-216
+src/screens/settings/SettingsCustomCodeScreen/Components/CodeInput.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-220
+babel.config.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 31
+src/i18n/languages/sq_AL/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/navigators/types/index.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6,45,50,55,60,65,86-87,91,95,115-119,123,127,131,135,139,143,147,151,155,159,163,168-169,171,175,183,188-189,192-193,197-207
+  s_08eb61e16eef60::t_68d4bf172722e9 179
+src/i18n/languages/pt_BR/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,34,37-38,40,85-94,165,184,192,195,199,248,307,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/novel/NovelScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 31,36-38,44-56,63,94,125-127,183
+src/i18n/languages/ru_RU/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,85-94,315,332,377-382,603,608,665,667,705,717-719,782-819
+src/screens/StatsScreen/StatsScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 17
+modules/nitro-epub/README.md
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9
+src/screens/settings/SettingsCustomCodeScreen/Components/Snippet.tsx
+  s_badcbad30332bf::t_54fa9d67bb8a64 4-5,43,47-48
+  s_badcbad30332bf::t_be03e960ad4f6e 33,35,50
+  s_30d677ff874774::t_552bab783f6fd9 57
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-3,6-9,11-14,16,18-32,34,36-42,44-46,49,51-56,58-70
+  s_30d677ff874774::t_43d8d1e7803fbc 10,15,17
+src/screens/history/HistoryScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 112
+test/mocks/react-navigation.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 4-19,25-30
+src/i18n/languages/id_ID/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 3-9,11,13-40,42,44-46,48-49,51-69,71,85-99,101-102,105-106,108-110,112-113,115-125,127-128,131-132,134-143,145-146,149-150,152-157,159-163,165-169,171-181,183-184,186,188,190-200,204-206,208-218,220-231,233-260,262-263,266,268,270,273-276,278-279,281-287,290,293-297,301-308,310,312-316,318-324,326-327,330-333,336-343,346-353,357-360,364-381,383,385-421,424-440,443-444,446,448-454,456,460-471,474,476,480-481,483-486,489-490,492-495,497,499,501-505,508,511-512,515-518,521-522,525-527,529-545,548,550-554,556-560,562-568,571-574,576-577,579,581-583,585-586,588-592,594-599,601-609,611-614,618-658,661,663,665,670-671,674-697,700,703-719,721,723-726,728,730-739,742-747,750-763,767-768,771-772,775-776,779-780,782-819
+src/screens/settings/SettingsAdvancedScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 48-55,161
+modules/native-file/index.ts
+  s_08eb61e16eef60::t_e222703477868e 4-8,20,43-44,125
+src/i18n/languages/da_DK/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/settings/SettingsCustomCodeScreen/Components/dummies.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2-23,25-30,32-36,42-46,48-83,86-88
+src/hooks/persisted/useDownload.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 58-61
+src/screens/settings/SettingsReaderScreen/SettingsReaderScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-2,15,19,26,34-35,128
+src/i18n/languages/hu_HU/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/database/types/index.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 54,71,131
+src/screens/novel/components/NovelScreenList.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 8,407-410,423
+AGENTS.md
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-132
+modules/native-file/ios/NativeFileModule.swift
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 20-68,104-107
+  s_08eb61e16eef60::t_aacc5b45e5dd63 108
+src/hooks/common/useFullscreenMode.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 10-13,28,43,58,60
+src/i18n/languages/as_IN/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/de_DE/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/zh_CN/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,85-94,315,332,377-382,603,608,665,705,717-719,782-819
+src/i18n/languages/ko_KR/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/i18n/languages/sr_SP/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/novel/components/__tests__/NovelScreenList.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 170-177
+src/i18n/languages/he_IL/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/reader/components/Hooks/useCustomCode.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-25
+src/screens/reader/components/WebViewReader.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2-7,32-35,38,42-43,144-147,152-155,178-191,368,381,415,418-423,432-434,445,468,470,473-485,494,496-524,527-528,530,532-533,535-548,550,552-640,644-646
+  s_08eb61e16eef60::t_3e27c20a2cbf46 647
+src/screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 2,10,68-93,103,115-116
+src/i18n/languages/fi_FI/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,248,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/updates/UpdatesScreen.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1,24,41-47
+src/utils/Storages.ts
+  s_08eb61e16eef60::t_68d4bf172722e9 4-9
+src/i18n/languages/zh_TW/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+src/screens/novel/components/NovelChapterGroup.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 96
+src/database/queries/ChapterQueries.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 31-42,137-143,164-170,226,228,232-236,239-245,330-336,350-364,403-408,410-411,463-479,593-636,879,897,902-903,926-939
+drizzle/20260727081855_calm_chimera/migration.sql
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 63-80
+src/i18n/languages/vi_VN/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,85-94,241,315,332,377-382,603,608,665,705,717-719,782-819
+src/hooks/persisted/useNovel/__tests__/novelStore.chapterActions.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 89,374,377,417,419,422,431,442,459
+src/screens/reader/components/ChapterDrawer/__tests__/RenderListChapter.test.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-69
+src/hooks/persisted/useSettings.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9,226-232,235-241,343-349,424,460-499
+src/screens/settings/SettingsCustomCodeScreen/SnippetEditor.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-208
+src/components/index.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 36-37
+src/utils/__tests__/error.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-73
+src/components/AppErrorBoundary/AppErrorBoundary.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1,6,35-36,39-40,81
+drizzle/20260811071655_parched_human_torch/migration.sql
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1
+src/screens/updates/components/UpdateNovelChapterGroup.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 11,22-36,45,55,60,67-68,70-74,91-108
+src/database/db.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 19,140-235,360,363-377
+src/components/IconButtonV2/AnimatedIconButton.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-90
+src/components/Switch/__tests__/mocks.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-30
+src/screens/GenreStatsScreen/taxonomy.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1
+src/database/queries/__tests__/testData.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 94,140
+src/database/queries/HistoryQueries.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 15
+src/i18n/languages/cs_CZ/strings.json
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5,16,85-94,165,241,274,315,332,377-382,432,558,566-567,603,608,665,705,717-719,782-819
+drizzle/migrations.js
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 7,15
+src/screens/settings/SettingsCustomCodeScreen/index.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-4,7-9,11-17,19-31,34-44,46-48,51-52,56-58,62,64,66-71,73,79-99,101-102,104-123,125-142,145-150,152-184,197-201,205,210,212-216,220-232,234,236-244,246-248
+  s_badcbad30332bf::t_8f079e8f014be3 5-6,10,32-33,50,54-55,59-61,65,100,103,143-144,151,211,217,235
+  s_30d677ff874774::t_79b816a19b0073 18,45,49,53,63,72,74-78,124,185-196,202-204,206-209,218-219
+  s_30d677ff874774::t_72d2cbb98e6557 233
+  s_badcbad30332bf::t_c26b1f8e7c0667 245
+src/components/Common/__tests__/mocks.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-30
+src/database/__tests__/db.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6-11,17,99-128,139-198,295-331,373-376,415-423,790-993,999-1191
+src/database/queries/__tests__/HistoryQueries.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 48
+src/plugins/pluginManager.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 6-7,10,15,91-123,154-155,179,226-239
+src/screens/library/hooks/useLibrary.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 5-9,30,50,52-61,87-88,91-118,154-158,217
+modules/native-file/src/NativeFileModule.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 14-18,20,29-35
+src/database/queries/RepositoryQueries.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 9-19,62-70,74
+  s_08eb61e16eef60::t_db8b742ff79d74 71-73
+src/screens/settings/SettingsCustomCodeScreen/Components/SettingsWebView.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-363
+src/screens/settings/SettingsCustomCodeScreen/Components/SimpleCodeEditor.tsx
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-787
+src/services/epub/__tests__/export.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-123
+src/theme/utils/setBarColor.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 4-8
+src/hooks/persisted/useNovel/__tests__/chapterActions.test.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 46,88,90,148,161,183,242,248
+src/utils/customCode.ts
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 1-111
+modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
+  s_08eb61e16eef60::t_7e3ae1c3d9d96b 4,37,124,127,136,138,148,154-342,460-478,509-511,603-607,609-611,615-617
+pnpm-lock.yaml
+  s_08eb61e16eef60::t_3778ab5f288c7c 146-148,188-190,243-245,255-257,1865-1867,1898-1903,1919-1924,2548-2556,2677-2679,2823-2825,3573-3575,3663-3666,3817-3822,3864-3869,3988-3993,4035-4037,4075-4077,4580-4581,4971-4973,5101-5104,5123-5125,5240-5246,5360-5365,5387-5389,5660-5662,8299-8302,8338-8343,8360-8363,9073-9078,9215-9216,9366-9369,10244-10247,10353-10354,10493-10504,10544-10547,10680-10686,10735-10736,10767-10768,11494,11496-11497,11980-11989,12108-12109,12129-12130,12260-12266,12424-12433,12464-12470,12798-12799
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5f07b4f8cb898de0b67e056d5cb4d7b738f3cadb",
+  "prompts": {
+    "04c0acf5cdac6ee2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a003e3-d01e-78e2-8214-89e61dfad644",
+        "model": "unknown"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 0,
+      "total_deletions": 461,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "08eb61e16eef602f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 12357,
+      "total_deletions": 2056,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_08eb61e16eef60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
