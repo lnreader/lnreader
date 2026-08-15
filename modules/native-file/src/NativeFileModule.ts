@@ -38,6 +38,7 @@ type NativeFileModule = {
   mkdir(filepath: string): Promise<void>;
   unlink(filepath: string): Promise<void>;
   readDir(directory: string): Promise<ReadDirResult[]>;
+  resolveUri(path: string): Promise<string>;
   downloadFile(
     url: string,
     destPath: string,
