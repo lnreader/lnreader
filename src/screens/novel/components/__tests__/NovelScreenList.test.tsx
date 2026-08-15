@@ -45,12 +45,12 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0 }),
 }));
 
-jest.mock('@legendapp/list/reanimated', () => {
+jest.mock('@legendapp/list/react-native', () => {
   const React = require('react');
   const { View } = require('react-native');
 
   return {
-    AnimatedLegendList: ({ data, renderItem, ListHeaderComponent }: any) =>
+    LegendList: ({ data, renderItem, ListHeaderComponent }: any) =>
       React.createElement(
         View,
         null,
@@ -63,6 +63,7 @@ jest.mock('@legendapp/list/reanimated', () => {
           ),
         ),
       ),
+    LegendListRef: {},
   };
 });
 
