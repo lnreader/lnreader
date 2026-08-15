@@ -1,0 +1,29 @@
+modules/native-file/android/src/main/java/expo/modules/nativefile/SafDocumentStore.kt
+  s_08eb61e16eef60::t_d63572a182e95c 1-6,8-33,36-57,63-124,130-146,152-161,163-171,173-174,177-286
+  s_08eb61e16eef60::t_0598f62b6539c3 7,34-35,58-62,125-129,147-151,162,172,175-176
+modules/native-file/index.ts
+  s_08eb61e16eef60::t_23840e994159ed 1-4
+  s_08eb61e16eef60::t_739ce32fb88474 14-16,19-25
+modules/native-file/android/src/main/java/expo/modules/nativefile/NativeFileModule.kt
+  s_08eb61e16eef60::t_211e10a5cdbfa2 51-55,112-114,124-126,131-144,451-455,466-469,516,528-533,543-547,565-569,584-587,607-623,652-653
+modules/native-file/src/NativeFileModule.ts
+  s_08eb61e16eef60::t_739ce32fb88474 41
+test/mocks/nativeModules.js
+  s_08eb61e16eef60::t_42d6ae220aa90c 24-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b37dac05112b90bc1037bf11d94a91386ef74750",
+  "prompts": {},
+  "sessions": {
+    "s_08eb61e16eef60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fbd20-ea53-7f92-ae8b-ea8f058eee1e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
