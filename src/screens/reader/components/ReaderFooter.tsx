@@ -66,8 +66,7 @@ const ChapterFooter = ({
   scrollToStart,
   openDrawer,
 }: ChapterFooterProps) => {
-  const { nextChapter, prevChapter, navigateChapter, refetch } =
-    useChapterContext();
+  const { nextChapter, prevChapter, navigateChapter } = useChapterContext();
   const theme = useTheme();
   const rippleConfig = {
     color: theme.rippleColor,
@@ -124,13 +123,6 @@ const ChapterFooter = ({
             size={26}
             iconColor={theme.onSurface}
           />
-        </Pressable>
-        <Pressable
-          android_ripple={rippleConfig}
-          style={styles.buttonStyles}
-          onPress={() => refetch()}
-        >
-          <IconButton icon="refresh" size={26} iconColor={theme.onSurface} />
         </Pressable>
         <Pressable
           android_ripple={rippleConfig}

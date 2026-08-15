@@ -52,7 +52,7 @@ const ReaderAppbar = ({
   openInBrowser,
   shareChapter,
 }: ReaderAppbarProps) => {
-  const { chapter, novel } = useChapterContext();
+  const { chapter, novel, refetch } = useChapterContext();
   const { statusBarHeight } = useNovelLayout();
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -168,6 +168,10 @@ const ReaderAppbar = ({
               />
             }
           >
+            <Menu.Item
+              title={getString('webview.refresh')}
+              onPress={() => runMenuAction(refetch)}
+            />
             <Menu.Item
               title={getString('webview.openInWebView')}
               onPress={() => runMenuAction(openInWebView)}

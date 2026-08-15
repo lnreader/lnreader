@@ -506,10 +506,11 @@ export default function useChapter(
   }, [getChapter]);
 
   const refetch = useCallback(() => {
+    chapterTextCache.remove(chapterRef.current.id);
     setLoading(true);
     setError('');
     getChapter();
-  }, [getChapter]);
+  }, [chapterTextCache, getChapter]);
 
   /**
    * Everything except `hidden`, which toggles on every tap on the page. Keeping
