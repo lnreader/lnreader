@@ -102,7 +102,7 @@ describe('novelStore.bootstrap', () => {
     expect(harness.getState().loading).toBe(false);
   });
 
-  it('maps a bootstrap error to the custom not-found message, never the raw error', async () => {
+  it('maps a bootstrap error to the load-failed message, never the raw error', async () => {
     const harness = createHarness();
     harness.bootstrapService.bootstrapNovelAsync.mockResolvedValue({
       ok: false,
@@ -113,8 +113,24 @@ describe('novelStore.bootstrap', () => {
     const ok = await harness.actions.bootstrapNovel();
 
     expect(ok).toBe(false);
-    expect(harness.getState().error).toBe(getString('novelScreen.notFound'));
+    expect(harness.getState().error).toBe(getString('novelScreen.loadFailed'));
     expect(harness.getState().error).not.toBe('boom');
+  });
+
+  it('maps a missing-chapters failure to the unable-to-get-novel message', async () => {
+    const harness = createHarness();
+    harness.bootstrapService.bootstrapNovelAsync.mockResolvedValue({
+      ok: false,
+      reason: 'missing-chapters',
+    });
+
+    const ok = await harness.actions.bootstrapNovel();
+
+    expect(ok).toBe(false);
+    expect(harness.getState().error).toBe(
+      getString('updatesScreen.unableToGetNovel'),
+    );
+    expect(harness.getState().loading).toBe(false);
   });
 
   it('clears the error on a successful bootstrap', async () => {

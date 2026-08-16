@@ -21,28 +21,28 @@ const createPlugin = (id: string, site: string, name = id): PluginItem => ({
   iconUrl: `https://example.com/${id}.png`,
 });
 
-const royalroad = createPlugin(
-  'royalroad',
-  'https://www.royalroad.com/',
-  'Royal Road',
+const testSource = createPlugin(
+  'test-source',
+  'https://testsource.example.com/',
+  'Test Source',
 );
 const plain = createPlugin('plain', 'https://example.com');
 
 const mockGetMMKVObject = getMMKVObject as jest.Mock;
 
 beforeEach(() => {
-  mockGetMMKVObject.mockReturnValue([royalroad]);
+  mockGetMMKVObject.mockReturnValue([testSource]);
 });
 
 describe('resolveSharedUrl', () => {
   it('opens the novel when one installed plugin site prefixes the URL', () => {
     expect(
       resolveSharedUrl(
-        'https://www.royalroad.com/fiction/21220/mother-of-learning',
+        'https://testsource.example.com/fiction/21220/mother-of-learning',
       ),
     ).toEqual({
       kind: 'novel',
-      pluginId: 'royalroad',
+      pluginId: 'test-source',
       path: 'fiction/21220/mother-of-learning',
     });
   });
@@ -60,11 +60,11 @@ describe('resolveSharedUrl', () => {
   it('drops query and hash from the shared URL', () => {
     expect(
       resolveSharedUrl(
-        'https://www.royalroad.com/fiction/21220/title?src=share#ch1',
+        'https://testsource.example.com/fiction/21220/title?src=share#ch1',
       ),
     ).toEqual({
       kind: 'novel',
-      pluginId: 'royalroad',
+      pluginId: 'test-source',
       path: 'fiction/21220/title',
     });
   });
@@ -123,10 +123,10 @@ describe('resolveSharedUrl', () => {
     mockGetMMKVObject.mockReturnValue([]);
 
     expect(
-      resolveSharedUrl('https://www.royalroad.com/fiction/21220/x'),
+      resolveSharedUrl('https://testsource.example.com/fiction/21220/x'),
     ).toEqual({
       kind: 'search',
-      searchText: 'https://www.royalroad.com/fiction/21220/x',
+      searchText: 'https://testsource.example.com/fiction/21220/x',
     });
   });
 });

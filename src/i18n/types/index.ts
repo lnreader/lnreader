@@ -508,6 +508,7 @@ export interface StringMap {
   'novelScreen.jumpToChapterModal.openChapterDescription': 'string';
   'novelScreen.jumpToChapterModal.searchByName': 'string';
   'novelScreen.jumpToChapterModal.searchByNameDescription': 'string';
+  'novelScreen.loadFailed': 'string';
   'novelScreen.migrate': 'string';
   'novelScreen.noSummary': 'string';
   'novelScreen.noCoverFound': 'string';

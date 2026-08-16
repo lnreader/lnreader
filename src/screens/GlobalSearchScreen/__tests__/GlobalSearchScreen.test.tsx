@@ -179,24 +179,25 @@ jest.mock('@utils/mmkv/mmkv', () => ({
   setMMKVObject: jest.fn(),
 }));
 
-const royalroad: PluginItem = {
-  id: 'royalroad',
-  name: 'Royal Road',
-  site: 'https://www.royalroad.com/',
+const testSource: PluginItem = {
+  id: 'test-source',
+  name: 'Test Source',
+  site: 'https://testsource.example.com/',
   lang: 'English',
   version: '1.0.0',
-  url: 'https://example.com/royalroad.js',
-  iconUrl: 'https://example.com/royalroad.png',
+  url: 'https://example.com/test-source.js',
+  iconUrl: 'https://example.com/test-source.png',
 };
 
-const NOVEL_URL = 'https://www.royalroad.com/fiction/21220/mother-of-learning';
+const NOVEL_URL =
+  'https://testsource.example.com/fiction/21220/mother-of-learning';
 
 const mockGetMMKVObject = getMMKVObject as jest.Mock;
 const mockShowToast = showToast as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockGetMMKVObject.mockReturnValue([royalroad]);
+  mockGetMMKVObject.mockReturnValue([testSource]);
   (getStringAsync as jest.Mock).mockResolvedValue('');
   (useFocusEffect as jest.Mock).mockReset();
 });
@@ -215,7 +216,7 @@ describe('GlobalSearchScreen', () => {
       params: {
         name: '',
         path: 'fiction/21220/mother-of-learning',
-        pluginId: 'royalroad',
+        pluginId: 'test-source',
         cover: null,
       },
     });
@@ -232,13 +233,13 @@ describe('GlobalSearchScreen', () => {
       params: {
         name: '',
         path: 'fiction/21220/mother-of-learning',
-        pluginId: 'royalroad',
+        pluginId: 'test-source',
         cover: null,
       },
     });
   });
 
-  it('toasts when the URL matches no installed source', () => {
+  it('offers no open-novel button and toasts when the URL matches no installed source', () => {
     mockGetMMKVObject.mockReturnValue([]);
     render(<GlobalSearchScreen />);
 
@@ -247,7 +248,10 @@ describe('GlobalSearchScreen', () => {
       'https://www.someothersite.com/novel/1',
     );
 
-    fireEvent.press(screen.getByText('globalSearch.openNovel'));
+    // An unmatched URL must not be advertised as an openable novel.
+    expect(screen.queryByTestId('open-novel-button')).toBeNull();
+
+    fireEvent(screen.getByTestId('search-input'), 'submitEditing');
 
     expect(mockShowToast).toHaveBeenCalledWith('globalSearch.noSourceForUrl');
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -269,7 +273,7 @@ describe('GlobalSearchScreen', () => {
       params: {
         name: '',
         path: 'fiction/21220/mother-of-learning',
-        pluginId: 'royalroad',
+        pluginId: 'test-source',
         cover: null,
       },
     });

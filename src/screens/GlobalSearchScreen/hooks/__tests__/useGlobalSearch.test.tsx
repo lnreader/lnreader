@@ -3,7 +3,6 @@ import { act, renderHook } from '@test-utils';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { PluginItem } from '@plugins/types';
 import { getPlugin } from '@plugins/pluginManager';
-import { navigationRef } from '@navigators/ShareIntentHandler';
 import { useGlobalSearch } from '../useGlobalSearch';
 
 jest.mock('@hooks/persisted/useTheme', () => ({
@@ -53,27 +52,26 @@ jest.mock('@utils/mmkv/mmkv', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
-  useFilteredInstalledPlugins: () => [royalroad],
+  useFilteredInstalledPlugins: () => [testSource],
   useBrowseSettings: () => ({ globalSearchConcurrency: 1 }),
 }));
 
-const royalroad: PluginItem = {
-  id: 'royalroad',
-  name: 'Royal Road',
-  site: 'https://www.royalroad.com/',
+const testSource: PluginItem = {
+  id: 'test-source',
+  name: 'Test Source',
+  site: 'https://testsource.example.com/',
   lang: 'English',
   version: '1.0.0',
-  url: 'https://example.com/royalroad.js',
-  iconUrl: 'https://example.com/royalroad.png',
+  url: 'https://example.com/test-source.js',
+  iconUrl: 'https://example.com/test-source.png',
 };
 
 const mockGetMMKVObject = getMMKVObject as jest.Mock;
 const mockGetPlugin = getPlugin as jest.Mock;
-const mockNavigate = navigationRef.navigate as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockGetMMKVObject.mockReturnValue([royalroad]);
+  mockGetMMKVObject.mockReturnValue([testSource]);
   jest.useFakeTimers();
 });
 
@@ -82,11 +80,11 @@ afterEach(() => {
 });
 
 describe('useGlobalSearch', () => {
-  it('does not search or navigate for a URL matching an installed plugin', () => {
+  it('does not search for a URL matching an installed plugin', () => {
     renderHook(() =>
       useGlobalSearch({
         defaultSearchText:
-          'https://www.royalroad.com/fiction/21220/mother-of-learning',
+          'https://testsource.example.com/fiction/21220/mother-of-learning',
       }),
     );
 
@@ -94,11 +92,10 @@ describe('useGlobalSearch', () => {
       jest.advanceTimersByTime(400);
     });
 
-    expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockGetPlugin).not.toHaveBeenCalled();
   });
 
-  it('does not search or navigate for a URL matching no plugin', () => {
+  it('does not search for a URL matching no plugin', () => {
     mockGetMMKVObject.mockReturnValue([]);
 
     renderHook(() =>
@@ -111,7 +108,6 @@ describe('useGlobalSearch', () => {
       jest.advanceTimersByTime(400);
     });
 
-    expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockGetPlugin).not.toHaveBeenCalled();
   });
 

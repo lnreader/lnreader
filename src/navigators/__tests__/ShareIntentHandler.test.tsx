@@ -3,7 +3,10 @@ import { act, render, waitFor } from '@test-utils';
 import NativeShareReceiver from '@modules/native-share-receiver';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { PluginItem } from '@plugins/types';
-import ShareIntentHandler, { navigationRef } from '../ShareIntentHandler';
+import ShareIntentHandler, {
+  flushPendingShare,
+  navigationRef,
+} from '../ShareIntentHandler';
 
 jest.mock('@hooks/persisted/useTheme', () => ({
   ThemeProvider: ({ children }: { children: ReactNode }) => children,
@@ -54,27 +57,29 @@ jest.mock('@utils/mmkv/mmkv', () => ({
   setMMKVObject: jest.fn(),
 }));
 
-const royalroad: PluginItem = {
-  id: 'royalroad',
-  name: 'Royal Road',
-  site: 'https://www.royalroad.com/',
+const testSource: PluginItem = {
+  id: 'test-source',
+  name: 'Test Source',
+  site: 'https://testsource.example.com/',
   lang: 'English',
   version: '1.0.0',
-  url: 'https://example.com/royalroad.js',
-  iconUrl: 'https://example.com/royalroad.png',
+  url: 'https://example.com/test-source.js',
+  iconUrl: 'https://example.com/test-source.png',
 };
 
 const mockGetMMKVObject = getMMKVObject as jest.Mock;
 const mockNavigate = navigationRef.navigate as jest.Mock;
 
-const NOVEL_URL = 'https://www.royalroad.com/fiction/21220/mother-of-learning';
+const NOVEL_URL =
+  'https://testsource.example.com/fiction/21220/mother-of-learning';
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockGetMMKVObject.mockReturnValue([royalroad]);
+  mockGetMMKVObject.mockReturnValue([testSource]);
   (NativeShareReceiver.getInitialSharedText as jest.Mock).mockResolvedValue(
     null,
   );
+  (navigationRef.isReady as jest.Mock).mockReturnValue(true);
 });
 
 describe('ShareIntentHandler', () => {
@@ -91,7 +96,7 @@ describe('ShareIntentHandler', () => {
         params: {
           name: '',
           path: 'fiction/21220/mother-of-learning',
-          pluginId: 'royalroad',
+          pluginId: 'test-source',
           cover: null,
         },
       }),
@@ -142,9 +147,78 @@ describe('ShareIntentHandler', () => {
       params: {
         name: '',
         path: 'fiction/21220/mother-of-learning',
-        pluginId: 'royalroad',
+        pluginId: 'test-source',
         cover: null,
       },
     });
+  });
+
+  it('queues the initial share until the container is ready', async () => {
+    (NativeShareReceiver.getInitialSharedText as jest.Mock).mockResolvedValue(
+      NOVEL_URL,
+    );
+    (navigationRef.isReady as jest.Mock).mockReturnValue(false);
+
+    render(<ShareIntentHandler />);
+    // Let the initial-share promise settle while the container is not ready.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    (navigationRef.isReady as jest.Mock).mockReturnValue(true);
+    act(() => flushPendingShare());
+
+    expect(mockNavigate).toHaveBeenCalledWith('ReaderStack', {
+      screen: 'Novel',
+      params: {
+        name: '',
+        path: 'fiction/21220/mother-of-learning',
+        pluginId: 'test-source',
+        cover: null,
+      },
+    });
+  });
+
+  it('queues a warm share delivered before the container is ready', () => {
+    (navigationRef.isReady as jest.Mock).mockReturnValue(false);
+
+    render(<ShareIntentHandler />);
+
+    const [eventName, listener] = (NativeShareReceiver.addListener as jest.Mock)
+      .mock.calls[0];
+
+    expect(eventName).toBe('SharedText');
+
+    act(() => listener({ text: NOVEL_URL }));
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    (navigationRef.isReady as jest.Mock).mockReturnValue(true);
+    act(() => flushPendingShare());
+
+    expect(mockNavigate).toHaveBeenCalledWith('ReaderStack', {
+      screen: 'Novel',
+      params: {
+        name: '',
+        path: 'fiction/21220/mother-of-learning',
+        pluginId: 'test-source',
+        cover: null,
+      },
+    });
+  });
+
+  it('removes the SharedText listener on unmount', () => {
+    const { unmount } = render(<ShareIntentHandler />);
+
+    const subscription = (NativeShareReceiver.addListener as jest.Mock).mock
+      .results[0].value;
+    expect(subscription.remove).toBeDefined();
+
+    unmount();
+
+    expect(subscription.remove).toHaveBeenCalled();
   });
 });

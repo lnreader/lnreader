@@ -20,6 +20,10 @@ const resolveBootstrapError = (result: BootstrapFailureResult): string => {
   if (result.reason === 'missing-chapters') {
     return getString('updatesScreen.unableToGetNovel');
   }
+  if (result.reason === 'error') {
+    // A real fetch/parse failure — don't claim the novel is missing.
+    return getString('novelScreen.loadFailed');
+  }
   return getString('novelScreen.notFound');
 };
 

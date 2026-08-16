@@ -53,8 +53,8 @@ export const resolveSharedUrl = (text: string): SharedUrlResult | undefined => {
   if (!plugin) {
     return { kind: 'search', searchText };
   }
-  // parseNovel takes a path relative to the plugin site (e.g. royalroad
-  // does fetchApi(this.site + novelPath)); strip site prefix + slashes.
+  // parseNovel takes a path relative to the plugin site (plugins do
+  // fetchApi(this.site + novelPath)); strip site prefix + slashes.
   const path = url
     .slice(normalizeTrailingSlash(plugin.site).length)
     .replace(/^\/+|\/+$/g, '');

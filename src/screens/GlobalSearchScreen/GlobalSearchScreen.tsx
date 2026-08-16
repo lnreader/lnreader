@@ -115,19 +115,20 @@ const GlobalSearchScreen = (props: Props) => {
     // Non-URL text: the debounced search is already running; enter does nothing extra.
   }, [openNovel, searchUrlResult]);
 
-  const openNovelOffer = searchUrlResult
-    ? {
-        icon: 'book-open-page-variant',
-        label: getString('globalSearch.openNovel'),
-        onPress: handleSubmit,
-      }
-    : searchText === '' && clipboardNovel
-    ? {
-        icon: 'content-paste',
-        label: getString('globalSearch.openCopiedNovel'),
-        onPress: () => openNovel(clipboardNovel),
-      }
-    : null;
+  const openNovelOffer =
+    searchUrlResult?.kind === 'novel'
+      ? {
+          icon: 'book-open-page-variant',
+          label: getString('globalSearch.openNovel'),
+          onPress: handleSubmit,
+        }
+      : searchText === '' && clipboardNovel
+      ? {
+          icon: 'content-paste',
+          label: getString('globalSearch.openCopiedNovel'),
+          onPress: () => openNovel(clipboardNovel),
+        }
+      : null;
 
   return (
     <SafeAreaView>

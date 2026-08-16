@@ -12,7 +12,13 @@ class NativeShareReceiverModule : Module() {
 
     Function("getInitialSharedText") {
       val intent = appContext.currentActivity?.intent
-      extractSharedText(intent)
+      val text = extractSharedText(intent)
+      if (text != null) {
+        // Consume the share so JS reloads (Fast Refresh, OTA) that re-read
+        // the activity intent don't re-deliver the same text.
+        intent?.removeExtra(Intent.EXTRA_TEXT)
+      }
+      text
     }
 
     OnNewIntent { intent ->

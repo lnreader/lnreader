@@ -416,6 +416,23 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     expect(navigation.goBack).toHaveBeenCalled();
   });
 
+  it('keeps the error view hidden while the novel is still loading', () => {
+    const store = createStore({
+      novel: undefined,
+      loading: true,
+      error: 'Novel not found on the source',
+    });
+    wireStoreSelectors(store);
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    expect(screen.queryByText('Novel not found on the source')).toBeNull();
+    expect(screen.getByTestId('novel-appbar')).toHaveTextContent('appbar');
+  });
+
   it('keeps undefined-novel safety path for download action and guarded modals', () => {
     const store = createStore({ novel: undefined });
     wireStoreSelectors(store);
