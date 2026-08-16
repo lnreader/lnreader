@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "Gulir ke bab saat ini",
       "scrollToTop": "Gulung ke atas\n"
     },
-    "emptyChapterMessage": "<p>Bab kosong.</p><p>Laporkan di <a href='%{reportUrl}'>GitHub</a> jika tersedia di WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Bab: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Selesai",
     "nextChapter": "Berikutnya: %{name}",
     "noNextChapter": "Tidak ada bab berikutnya",
