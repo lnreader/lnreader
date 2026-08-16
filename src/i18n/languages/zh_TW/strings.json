@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "捲動到當前章節",
       "scrollToTop": "捲動至頂"
     },
-    "emptyChapterMessage": "<p>Chapter is empty.</p><p>Report on <a href='%{reportUrl}'>GitHub</a> if it's available in WebView.</p><p>Plugin: %{pluginId}</p><p>Novel: %{novelName}</p><p>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "已完成",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "没有下一章节",
