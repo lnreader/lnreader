@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "all sources",
-    "searchIn": "Search a novel in"
+    "searchIn": "Search a novel in",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "History",
   "historyScreen": {
@@ -603,6 +606,7 @@
     "migrate": "Migrate",
     "noSummary": "No summary",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Progress %{progress} %",
     "readChaptersDeleted": "Read chapters deleted",
     "startReadingChapters": "Start reading %{name}",
