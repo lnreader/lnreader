@@ -1,0 +1,52 @@
+src/i18n/languages/en/strings.json
+  s_a1898ad6e00380::t_c2254aa3b9c56e 175,180-181
+src/services/backup/__tests__/utils.test.ts
+  s_a1898ad6e00380::t_a48414528bba13 210-218
+  s_a1898ad6e00380::t_c2254aa3b9c56e 76,133,140,164,167-209,219-248
+src/services/backup/utils.ts
+  s_a1898ad6e00380::t_43475ffc5e5c4d 130-132
+  s_a1898ad6e00380::t_c2254aa3b9c56e 38-42,89,110,121-129,133-134,140,248,284-291
+src/services/backup/types.ts
+  s_a1898ad6e00380::t_c2254aa3b9c56e 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "523aa90c190e6f5932888c993d21c0d5033d23ce",
+  "prompts": {
+    "3bd736270ea20a65": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a00522-8b90-7f30-a124-146fb9419ac0",
+        "model": "unknown"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 117,
+      "total_deletions": 12,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "a1898ad6e0038058": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a003ec-f83e-70f0-b3fa-92dd56f17ab9",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 121,
+      "total_deletions": 12,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_a1898ad6e00380": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a003ec-f83e-70f0-b3fa-92dd56f17ab9",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
