@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "Chương hiện tại",
       "scrollToTop": "Lên đầu"
     },
-    "emptyChapterMessage": "<p>Chương không có nội dung.</p><p>Hãy báo cáo trên <a href='%{reportUrl}'>Github</a> nếu bạn vẫn có thể xem được bằng WebView.</p><p>Nguồn: %{pluginId}</p><p>Truyện: %{novelName}</p><p>Chương: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Đã xong",
     "nextChapter": "Tiếp: %{name}",
     "noNextChapter": "Không có chương kế tiếp",
