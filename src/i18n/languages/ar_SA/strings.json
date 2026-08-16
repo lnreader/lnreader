@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "التمرير إلى الفصل الحالي",
       "scrollToTop": "التمرير إلى الأعلى"
     },
-    "emptyChapterMessage": "<p>الفصل فارغ.</p><p>بلغ عنه على <a href='%{reportUrl}'>GitHub</a> إذا كان متاحاً في WebView.</p><p>الإضافة: %{pluginId}</p><p>الرواية: %{novelName}</p><p>الفصل: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "انتهى",
     "nextChapter": "التالي: %{name}",
     "noNextChapter": "لا يوجد فصل تالي",
