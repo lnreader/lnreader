@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "Прокрутити до поточного розділу",
       "scrollToTop": "Прокрутити догори"
     },
-    "emptyChapterMessage": "<p>Розділ порожній.</p><p>Повідомте про це на <a href='%{reportUrl}'>GitHub</a>, якщо він доступний у WebView.</p><p>Плагін: %{pluginId}</p><p>Новела: %{novelName}</p><p>Розділ: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Завершено",
     "nextChapter": "Наступний: %{name}",
     "noNextChapter": "Наступний розділ не знайдено",
