@@ -8,6 +8,7 @@ import {
   useFilteredInstalledPlugins,
 } from '@hooks/persisted';
 import { useFocusEffect } from '@react-navigation/native';
+import { resolveSharedUrl } from '@services/share/resolveSharedUrl';
 
 interface Props {
   defaultSearchText?: string;
@@ -162,7 +163,12 @@ export const useGlobalSearch = ({
 
   useEffect(() => {
     if (defaultSearchText) {
-      debouncedGlobalSearch(defaultSearchText);
+      // URL text is handled by the screen's explicit submit flow
+      // (button / keyboard submit); never search or navigate for it.
+      const sharedUrlResult = resolveSharedUrl(defaultSearchText);
+      if (!sharedUrlResult) {
+        debouncedGlobalSearch(defaultSearchText);
+      }
     }
 
     return () => {
