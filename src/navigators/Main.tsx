@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -71,8 +71,6 @@ const MainNavigator = () => {
       refreshPlugins();
     }
   }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch]);
-
-  const navigationRef = useRef(null);
 
   // Enable React Navigation DevTools in development
   useReactNavigationDevTools({ ref: navigationRef });
