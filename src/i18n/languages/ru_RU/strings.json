@@ -671,7 +671,7 @@
       "scrollToCurrentChapter": "Прокрутка к текущей главе",
       "scrollToTop": "Прокрутить вверх"
     },
-    "emptyChapterMessage": "<p>Глава пуста.</p><p> Сообщите на GitHub, <a href='%{reportUrl}'>GitHub</a> если он доступен в WebView.</p><p>Плагин: %{pluginId}</p><p>Новелла: %{novelName}</p><p>Глава: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Завершено",
     "nextChapter": "%{name}Следующий: %{name}",
     "noNextChapter": "Следующей главы нет",
