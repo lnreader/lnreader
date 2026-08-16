@@ -23,6 +23,7 @@ export const createNovelSlice = ({
   return {
     loading: false,
     fetching: false,
+    error: undefined,
     pluginId,
     novelPath,
     novel,
