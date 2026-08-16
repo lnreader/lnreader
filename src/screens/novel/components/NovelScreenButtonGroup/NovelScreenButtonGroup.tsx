@@ -13,6 +13,7 @@ import { useTrackedNovel, useTracker } from '@hooks/persisted';
 import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { MaterialDesignIconName } from '@type/icon';
 import { useNovelAction } from '@screens/novel/NovelContext';
+import { useLibraryContext } from '@components/Context/LibraryContext';
 
 const NButton = ({
   onPress,
@@ -74,6 +75,7 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
   const { tracker } = useTracker();
   const { trackedNovel } = useTrackedNovel(novel.id);
   const setNovel = useNovelAction('setNovel');
+  const { refetchLibrary } = useLibraryContext();
 
   const followButtonColor = inLibrary ? theme.primary : theme.outline;
   const trackerButtonColor = trackedNovel ? theme.primary : theme.outline;
@@ -91,10 +93,11 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
     navigate('MigrateNovel', {
       novel: novel,
     });
-  const handleCategoriesUpdated = () => {
+  const handleCategoriesUpdated = async () => {
     if (!novel.inLibrary && novel.id !== 'NO_ID') {
       setNovel({ ...novel, inLibrary: true });
     }
+    await refetchLibrary();
   };
 
   const {
