@@ -19,7 +19,7 @@ import { getString } from '@i18n/translations';
 import NovelAppbar from './components/NovelAppbar';
 import NovelScreenList from './components/NovelScreenList';
 import { ThemeColors } from '@theme/types';
-import { SafeAreaView } from '@components';
+import { EmptyView, SafeAreaView } from '@components';
 import { useNovelActions, useNovelValue } from './NovelContext';
 import { LegendListRef } from '@legendapp/list/react-native';
 import { useCustomNovelCover } from './hooks/useCustomNovelCover';
@@ -32,6 +32,8 @@ import { getPageChapterIds } from '@database/queries/ChapterQueries';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
+  const loading = useNovelValue('loading');
+  const error = useNovelValue('error');
   const chapters = useNovelValue('chapters');
   const novelSettings = useNovelValue('novelSettings');
   const pageIndex = useNovelValue('pageIndex');
@@ -40,6 +42,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
 
   const theme = useTheme();
   const { downloadNewChapters, refreshNovelMetadata } = useAppSettings();
+
+  const showNovelError = !novel && !loading && error;
 
   const getAllChapterIds = useCallback(() => {
     if (!novel) {
@@ -156,6 +160,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
               goBack={navigation.goBack}
               headerOpacity={headerOpacity}
+              hideActions={!!showNovelError}
             />
           ) : (
             <Animated.View
@@ -181,19 +186,34 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
           )}
         </Portal>
         <SafeAreaView excludeTop excludeBottom>
-          <Suspense fallback={<NovelScreenLoading theme={theme} />}>
-            <NovelScreenList
-              headerOpacity={headerOpacity}
-              listRef={chapterListRef}
-              navigation={navigation}
-              routeBaseNovel={route.params}
-              selected={selected}
-              setSelected={setSelected}
-              deleteDownloadSnackbar={deleteDownloadsSnackbar}
-              onRefresh={onRefresh}
-              updating={updating}
+          {showNovelError ? (
+            <EmptyView
+              icon="Σ(ಠ_ಠ)"
+              description={error}
+              theme={theme}
+              actions={[
+                {
+                  iconName: 'arrow-left',
+                  title: getString('common.back'),
+                  onPress: navigation.goBack,
+                },
+              ]}
             />
-          </Suspense>
+          ) : (
+            <Suspense fallback={<NovelScreenLoading theme={theme} />}>
+              <NovelScreenList
+                headerOpacity={headerOpacity}
+                listRef={chapterListRef}
+                navigation={navigation}
+                routeBaseNovel={route.params}
+                selected={selected}
+                setSelected={setSelected}
+                deleteDownloadSnackbar={deleteDownloadsSnackbar}
+                onRefresh={onRefresh}
+                updating={updating}
+              />
+            </Suspense>
+          )}
         </SafeAreaView>
 
         {novel && setCategoriesModalVisible ? (
