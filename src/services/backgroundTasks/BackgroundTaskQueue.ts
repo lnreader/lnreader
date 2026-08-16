@@ -27,6 +27,7 @@ const makeTemporaryId = () =>
 export class BackgroundTaskQueue {
   private interruptedTasks = new Map<string, 'pause' | 'cancel'>();
   private notificationPermissionRequest?: Promise<boolean>;
+  private pendingRefresh?: Promise<unknown>;
 
   constructor() {
     DeviceEventEmitter.addListener(
@@ -50,12 +51,21 @@ export class BackgroundTaskQueue {
   }
 
   async refresh() {
-    const records = await NativeBackgroundTasks.getTasks();
-    const queue = records
-      .filter(record => ACTIVE_BACKGROUND_TASK_STATES.has(record.state))
-      .map(fromNativeTaskRecord);
-    this.store(queue);
-    return queue;
+    const refresh = NativeBackgroundTasks.getTasks();
+    this.pendingRefresh = refresh;
+
+    try {
+      const records = await refresh;
+      const queue = records
+        .filter(record => ACTIVE_BACKGROUND_TASK_STATES.has(record.state))
+        .map(fromNativeTaskRecord);
+      this.store(queue);
+      return queue;
+    } finally {
+      if (this.pendingRefresh === refresh) {
+        this.pendingRefresh = undefined;
+      }
+    }
   }
 
   enqueue = (tasks: BackgroundTask | BackgroundTask[]) => {
@@ -159,6 +169,14 @@ export class BackgroundTaskQueue {
   private async enqueueOne(task: BackgroundTask, showQueuedToast: boolean) {
     this.notificationPermissionRequest ??= askForPostNotificationsPermission();
     await this.notificationPermissionRequest;
+
+    // The startup refresh is no longer awaited before the app can run, and it
+    // replaces the whole stored queue with what the native side knew when it
+    // was dispatched. Letting it land first keeps it from overwriting the task
+    // being added here.
+    if (this.pendingRefresh) {
+      await this.pendingRefresh.catch(() => undefined);
+    }
 
     const current = this.getSnapshot();
     if (

@@ -67,8 +67,10 @@ const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
 const App = () => {
   useRozeniteSqlitePlugin({ adapters: sqliteAdapters });
   const { success: databaseReady, error: databaseError } = useInitDatabase();
+  // Runs alongside the database rather than behind it — neither waits on the
+  // other, so a launch costs the slower of the two instead of their sum.
   const { ready: servicesReady, error: servicesError } =
-    useInitializeAppServices(Boolean(databaseReady));
+    useInitializeAppServices();
 
   useEffect(() => {
     if ((databaseReady && servicesReady) || databaseError || servicesError) {
@@ -92,7 +94,7 @@ const App = () => {
 
   return (
     <Suspense fallback={null}>
-<ThemeProvider>
+      <ThemeProvider>
         <ThemedRootView>
           <KeyboardProvider>
             <AppErrorBoundary>

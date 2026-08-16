@@ -2,10 +2,6 @@ import { useCallback, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Library from '../screens/library/LibraryScreen';
-import Updates from '../screens/updates/UpdatesScreen';
-import History from '../screens/history/HistoryScreen';
-import Browse from '../screens/browse/BrowseScreen';
-import More from '../screens/more/MoreScreen';
 
 import { getString } from '@i18n/translations';
 import {
@@ -95,10 +91,18 @@ const BottomNavigator = () => {
           title: getString('library'),
         }}
       />
+      {/*
+       * The tabs already mount lazily, but importing their screens here still
+       * evaluated all of them during startup. `getComponent` ties the module
+       * to the tab actually being opened; Library stays eager because it is
+       * the tab the app opens on.
+       */}
       {showUpdatesTab ? (
         <Tab.Screen
           name="Updates"
-          component={Updates}
+          getComponent={() =>
+            require('../screens/updates/UpdatesScreen').default
+          }
           options={{
             title: getString('updates'),
           }}
@@ -107,7 +111,9 @@ const BottomNavigator = () => {
       {showHistoryTab ? (
         <Tab.Screen
           name="History"
-          component={History}
+          getComponent={() =>
+            require('../screens/history/HistoryScreen').default
+          }
           options={{
             title: getString('history'),
           }}
@@ -115,7 +121,7 @@ const BottomNavigator = () => {
       ) : null}
       <Tab.Screen
         name="Browse"
-        component={Browse}
+        getComponent={() => require('../screens/browse/BrowseScreen').default}
         options={{
           title: getString('browse'),
           freezeOnBlur: false,
@@ -126,7 +132,7 @@ const BottomNavigator = () => {
       />
       <Tab.Screen
         name="More"
-        component={More}
+        getComponent={() => require('../screens/more/MoreScreen').default}
         options={{
           title: getString('more'),
         }}

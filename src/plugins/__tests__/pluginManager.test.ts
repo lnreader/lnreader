@@ -153,7 +153,10 @@ describe('initializeInstalledPlugins', () => {
       text: async () => pluginCode('missing'),
     } as Response);
 
-    await initializeInstalledPlugins();
+    // The download is deliberately not awaited by startup, so the caller gets
+    // a handle to it instead.
+    const { repaired } = await initializeInstalledPlugins();
+    await repaired;
 
     expect(NativeFile.writeFile).toHaveBeenCalledWith(
       '/mock/documents/Plugins/missing/index.js',

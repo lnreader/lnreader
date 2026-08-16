@@ -10,29 +10,35 @@ type AppServicesState = {
 
 let initializationPromise: Promise<void> | undefined;
 
+/**
+ * Everything the first frame genuinely depends on, and nothing else.
+ *
+ * Plugin bundles are read from disk and from MMKV, so they do not need the
+ * database and are loaded alongside it rather than after it. The background
+ * task queue only mirrors the native records into MMKV, which every consumer
+ * observes reactively, so it catches up on its own once it lands — awaiting it
+ * here put a native WorkManager round trip (and the Room database it creates on
+ * first launch) in front of the first frame for no benefit.
+ */
 const initializeAppServices = (): Promise<void> => {
   if (!initializationPromise) {
     initializationPromise = initializeInstalledPlugins()
-      .then(async () => {
-        await backgroundTasks.refresh();
-      })
+      .then(() => undefined)
       .catch(error => {
         initializationPromise = undefined;
         throw error;
       });
+
+    backgroundTasks.refresh().catch(() => undefined);
   }
 
   return initializationPromise;
 };
 
-export const useInitializeAppServices = (
-  databaseReady: boolean,
-): AppServicesState => {
+export const useInitializeAppServices = (): AppServicesState => {
   const [state, setState] = useState<AppServicesState>({ ready: false });
 
   useEffect(() => {
-    if (!databaseReady) return;
-
     let isActive = true;
 
     initializeAppServices()
@@ -51,7 +57,7 @@ export const useInitializeAppServices = (
     return () => {
       isActive = false;
     };
-  }, [databaseReady]);
+  }, []);
 
   return state;
 };

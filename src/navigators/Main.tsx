@@ -14,28 +14,11 @@ import { AppUpdateChecker } from '@components';
  * Navigators
  */
 import BottomNavigator from './BottomNavigator';
-import MoreStack from './MoreStack';
 
-/**
- * Screens
- */
-
-import BrowseSourceScreen from '../screens/BrowseSourceScreen/BrowseSourceScreen';
-import GlobalSearchScreen from '../screens/GlobalSearchScreen/GlobalSearchScreen';
-import Migration from '../screens/browse/migration/Migration';
-import SourceNovels from '../screens/browse/SourceNovels';
-import MigrateNovel from '../screens/browse/migration/MigrationNovels';
-
-import MalTopNovels from '../screens/browse/discover/MalTopNovels';
-import AniListTopNovels from '../screens/browse/discover/AniListTopNovels';
-import BrowseSettings from '../screens/browse/settings/BrowseSettings';
-import PluginDetailsScreen from '../screens/browse/PluginDetailsScreen';
-import WebviewScreen from '@screens/WebviewScreen/WebviewScreen';
 import { RootStackParamList } from './types';
 import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
 import { backgroundTasks } from '@services/backgroundTasks';
-import ReaderStack from './ReaderStack';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
@@ -119,24 +102,84 @@ const MainNavigator = () => {
             }}
           >
             <Stack.Screen name="BottomNavigator" component={BottomNavigator} />
-            <Stack.Screen name="ReaderStack" component={ReaderStack} />
-            <Stack.Screen name="MoreStack" component={MoreStack} />
-            <Stack.Screen name="SourceScreen" component={BrowseSourceScreen} />
-            <Stack.Screen name="BrowseMal" component={MalTopNovels} />
-            <Stack.Screen name="BrowseAL" component={AniListTopNovels} />
-            <Stack.Screen name="BrowseSettings" component={BrowseSettings} />
+            {/*
+             * Every screen below is reachable only by navigating to it, but
+             * importing them here made the engine evaluate the reader, the
+             * settings tree and their dependencies before the first frame
+             * could be drawn. `getComponent` is called when the screen is
+             * first rendered, so each one is now paid for on the navigation
+             * that needs it.
+             */}
+            <Stack.Screen
+              name="ReaderStack"
+              getComponent={() => require('./ReaderStack').default}
+            />
+            <Stack.Screen
+              name="MoreStack"
+              getComponent={() => require('./MoreStack').default}
+            />
+            <Stack.Screen
+              name="SourceScreen"
+              getComponent={() =>
+                require('../screens/BrowseSourceScreen/BrowseSourceScreen')
+                  .default
+              }
+            />
+            <Stack.Screen
+              name="BrowseMal"
+              getComponent={() =>
+                require('../screens/browse/discover/MalTopNovels').default
+              }
+            />
+            <Stack.Screen
+              name="BrowseAL"
+              getComponent={() =>
+                require('../screens/browse/discover/AniListTopNovels').default
+              }
+            />
+            <Stack.Screen
+              name="BrowseSettings"
+              getComponent={() =>
+                require('../screens/browse/settings/BrowseSettings').default
+              }
+            />
             <Stack.Screen
               name="PluginDetails"
-              component={PluginDetailsScreen}
+              getComponent={() =>
+                require('../screens/browse/PluginDetailsScreen').default
+              }
             />
             <Stack.Screen
               name="GlobalSearchScreen"
-              component={GlobalSearchScreen}
+              getComponent={() =>
+                require('../screens/GlobalSearchScreen/GlobalSearchScreen')
+                  .default
+              }
             />
-            <Stack.Screen name="Migration" component={Migration} />
-            <Stack.Screen name="SourceNovels" component={SourceNovels} />
-            <Stack.Screen name="MigrateNovel" component={MigrateNovel} />
-            <Stack.Screen name="WebviewScreen" component={WebviewScreen} />
+            <Stack.Screen
+              name="Migration"
+              getComponent={() =>
+                require('../screens/browse/migration/Migration').default
+              }
+            />
+            <Stack.Screen
+              name="SourceNovels"
+              getComponent={() =>
+                require('../screens/browse/SourceNovels').default
+              }
+            />
+            <Stack.Screen
+              name="MigrateNovel"
+              getComponent={() =>
+                require('../screens/browse/migration/MigrationNovels').default
+              }
+            />
+            <Stack.Screen
+              name="WebviewScreen"
+              getComponent={() =>
+                require('@screens/WebviewScreen/WebviewScreen').default
+              }
+            />
           </Stack.Navigator>
         </UpdateContextProvider>
       </LibraryContextProvider>

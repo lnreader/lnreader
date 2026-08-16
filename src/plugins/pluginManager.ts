@@ -1,11 +1,5 @@
-import { gcm } from '@noble/ciphers/aes.js';
-import { utf8ToBytes, bytesToUtf8 } from '@noble/ciphers/utils.js';
-import dayjs from 'dayjs';
-import { load } from 'cheerio';
-import { Parser } from 'htmlparser2';
 import reverse from 'lodash-es/reverse';
 import uniqBy from 'lodash-es/uniqBy';
-import { encode, decode } from 'urlencode';
 
 import { getEnabledRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
@@ -27,18 +21,46 @@ import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
 import { FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
 
-const packages: Record<string, any> = {
-  'htmlparser2': { Parser },
-  'cheerio': { load },
-  'dayjs': dayjs,
-  'urlencode': { encode, decode },
-  '@libs/novelStatus': { NovelStatus },
-  '@libs/fetch': { fetchApi, fetchText, fetchProto },
-  '@libs/isAbsoluteUrl': { isUrlAbsolute },
-  '@libs/filterInputs': { FilterTypes },
-  '@libs/defaultCover': { defaultCover },
-  '@libs/aes': { gcm },
-  '@libs/utils': { utf8ToBytes, bytesToUtf8 },
+/**
+ * The parsing and crypto libraries handed to plugins are some of the heaviest
+ * modules in the bundle (cheerio alone pulls in parse5, css-select, domhandler
+ * and domutils). This module is loaded during app initialisation, so importing
+ * them statically evaluated all of them before the first frame even for users
+ * with no plugins installed. Each entry is built on first use instead and
+ * memoised, so a launch only pays for what the installed plugins ask for.
+ */
+const packageFactories: Record<string, () => any> = {
+  'htmlparser2': () => ({ Parser: require('htmlparser2').Parser }),
+  'cheerio': () => ({ load: require('cheerio').load }),
+  'dayjs': () => require('dayjs').default ?? require('dayjs'),
+  'urlencode': () => {
+    const { encode, decode } = require('urlencode');
+    return { encode, decode };
+  },
+  '@libs/novelStatus': () => ({ NovelStatus }),
+  '@libs/fetch': () => ({ fetchApi, fetchText, fetchProto }),
+  '@libs/isAbsoluteUrl': () => ({ isUrlAbsolute }),
+  '@libs/filterInputs': () => ({ FilterTypes }),
+  '@libs/defaultCover': () => ({ defaultCover }),
+  '@libs/aes': () => ({ gcm: require('@noble/ciphers/aes.js').gcm }),
+  '@libs/utils': () => {
+    const { utf8ToBytes, bytesToUtf8 } = require('@noble/ciphers/utils.js');
+    return { utf8ToBytes, bytesToUtf8 };
+  },
+};
+
+const resolvedPackages: Record<string, any> = {};
+
+const resolvePackage = (packageName: string) => {
+  if (!(packageName in resolvedPackages)) {
+    const factory = packageFactories[packageName];
+    if (!factory) {
+      return undefined;
+    }
+    resolvedPackages[packageName] = factory();
+  }
+
+  return resolvedPackages[packageName];
 };
 
 const initPlugin = (pluginId: string, rawCode: string) => {
@@ -51,7 +73,7 @@ const initPlugin = (pluginId: string, rawCode: string) => {
           sessionStorage: new SessionStorage(pluginId),
         };
       }
-      return packages[packageName];
+      return resolvePackage(packageName);
     };
     /* eslint no-new-func: "off", curly: "error" */
     const plugin: Plugin = Function(
@@ -220,24 +242,45 @@ const loadPlugin = async (pluginId: string) => {
   }
 };
 
-const initializeInstalledPlugins = async () => {
-  const installedPlugins =
-    getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
-  await Promise.allSettled(
-    installedPlugins.map(async plugin => {
-      try {
-        await migrateLegacyPluginFiles(plugin.id);
-      } catch {
-        // A failed migration can still be recovered from the repository below.
-      }
-
-      const installedPlugin = await loadPlugin(plugin.id);
-      if (!installedPlugin) {
-        await installPlugin(plugin);
-      }
-    }),
-  );
+type InstalledPluginsInitialization = {
+  /**
+   * Resolves once the bundles that were missing from disk have been
+   * re-downloaded. Startup does not have to wait for it.
+   */
+  repaired: Promise<void>;
 };
+
+const initializeInstalledPlugins =
+  async (): Promise<InstalledPluginsInitialization> => {
+    const installedPlugins =
+      getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
+
+    const results = await Promise.allSettled(
+      installedPlugins.map(async plugin => {
+        try {
+          await migrateLegacyPluginFiles(plugin.id);
+        } catch {
+          // A failed migration can still be recovered by re-downloading below.
+        }
+
+        return (await loadPlugin(plugin.id)) ? undefined : plugin;
+      }),
+    );
+
+    const missingPlugins = results.flatMap(result =>
+      result.status === 'fulfilled' && result.value ? [result.value] : [],
+    );
+
+    // Re-downloading a bundle needs the repository, and awaiting it here kept
+    // the splash screen up for as long as the request took — until it timed
+    // out when the device was offline. The plugin stays unusable until the
+    // download lands either way, so the app is allowed to start meanwhile.
+    const repaired = Promise.allSettled(
+      missingPlugins.map(plugin => installPlugin(plugin)),
+    ).then(() => undefined);
+
+    return { repaired };
+  };
 
 const reloadInstalledPlugins = async (): Promise<string[]> => {
   const installedPlugins =
