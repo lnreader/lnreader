@@ -1,0 +1,23 @@
+modules/nitro-epub/cpp/import/EpubParser.cpp
+  s_017df4c0a92185::t_4614762c9e44a1 417
+  s_017df4c0a92185::t_a179b61b17e985 4,12-13,78-108,175-177,179-181,195,197-200,214,229-231,233,244,246-248,250-251,256,279-280,295-299,303,308,314-318,326,328-330,338-342,344-346,390-393,396,398-400,443-445,448-449,458-463
+modules/nitro-epub/cpp/tests/EpubParserTest.cpp
+  s_017df4c0a92185::t_f38bdd68a9e868 110
+  s_017df4c0a92185::t_7819cfcf1e1c12 40-44,49-51,53-69,74-81,95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "eef58f212f22b15e7871c1954467544181571016",
+  "prompts": {},
+  "sessions": {
+    "s_017df4c0a92185": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a00fea-d286-7071-946c-dc1452737cb5",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
