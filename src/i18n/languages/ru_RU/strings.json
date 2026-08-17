@@ -172,13 +172,13 @@
       "description": "Choose what to include in this backup.",
       "selectAll": "Select all",
       "library": "Library data",
-      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "libraryDescription": "Novels, covers, chapter lists, reading progress, bookmarks, and categories.",
       "settings": "Settings",
       "settingsDescription": "App, reader, and update preferences.",
       "plugins": "Plugins",
       "pluginsDescription": "Installed source plugin files.",
-      "downloadedFiles": "Downloaded chapters and covers",
-      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+      "downloadedFiles": "Downloaded chapters",
+      "downloadedFilesDescription": "Downloaded chapter content for offline reading. This may be large."
     },
     "preparingData": "Подготовка данных",
     "preparingSelectedFiles": "Preparing selected files",
