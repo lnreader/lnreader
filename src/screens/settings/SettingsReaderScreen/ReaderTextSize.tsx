@@ -26,7 +26,7 @@ const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
       <Slider
         value={textSize}
         min={12}
-        max={20}
+        max={50}
         step={1}
         showStops
         showValueIndicator

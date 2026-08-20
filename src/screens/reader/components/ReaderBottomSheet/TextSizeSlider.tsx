@@ -9,7 +9,7 @@ const TextSizeSlider: React.FC = () => (
     valueKey="textSize"
     valueChange={1}
     min={12}
-    max={20}
+    max={50}
     decimals={0}
     unit="px"
   />
