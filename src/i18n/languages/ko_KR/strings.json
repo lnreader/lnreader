@@ -1,14 +1,14 @@
 {
   "aboutScreen": {
-    "website": "Website",
-    "discord": "Discord",
-    "github": "GitHub",
-    "helpTranslate": "Help translate",
-    "plugins": "Plugins",
-    "version": "Version",
-    "whatsNew": "What's new"
+    "website": "웹사이트",
+    "discord": "디스코드",
+    "github": "깃허브",
+    "helpTranslate": "번역에 도움을 주세요.",
+    "plugins": "플러그인",
+    "version": "버전 정보",
+    "whatsNew": "새로운 소식"
   },
-  "advancedSettings": "Advanced",
+  "advancedSettings": "고급 설정",
   "advancedSettingsScreen": {
     "cachedNovelsDeletedToast": "Cached novels deleted",
     "chapterInsertFailed": "chapter insert failed",
@@ -19,10 +19,10 @@
     "clearUpdatesTab": "Clear updates tab",
     "clearUpdatesWarning": "Updates tab will be cleared.",
     "clearupdatesTabDesc": "Clears chapter entries in updates tab",
-    "dataManagement": "Data Management",
+    "dataManagement": "데이터 관리",
     "deleteReadChapters": "Delete read chapters",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
-    "disabled": "Disabled",
+    "disabled": "비활성화",
     "dnsOverHttps": "DNS over HTTPS (DoH)",
     "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
     "importEpub": "Import EPUB",
