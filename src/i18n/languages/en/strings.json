@@ -458,6 +458,11 @@
     "clearHistorWarning": "Are you sure? All history will be lost.",
     "deleted": "History deleted.",
     "nothingReadRecently": "Nothing read recently",
+    "purgeWarning_one": "{{count}} novel will be purged: downloaded chapters deleted, history cleared{{removedFromLibrary}}.",
+    "purgeWarning_other": "{{count}} novels will be purged: downloaded chapters deleted, history cleared{{removedFromLibrary}}.",
+    "removedFromLibrarySuffix": ", {{count}} removed from Library",
+    "removedFromLibrarySuffix_zero": "",
+    "unattributableDownloads": "{{count}} download(s) queued by an older app version are still running — they were left alone.",
     "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
     "resetAllChapters": "Reset all chapters for this entry",
     "searchbar": "Search history"
@@ -789,7 +794,7 @@
       "other": "%{count} days"
     }
   },
-"customCodeSettings": {
+  "customCodeSettings": {
     "textManipulation": "Text Manipulation",
     "codeSnippets": "Code Snippets",
     "cssSnippets": "CSS Snippets",

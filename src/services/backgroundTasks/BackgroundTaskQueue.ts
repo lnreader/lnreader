@@ -8,6 +8,7 @@ import { showToast } from '@utils/showToast';
 import type {
   BackgroundTask,
   BackgroundTaskMetadata,
+  DownloadChapterTask,
   QueuedBackgroundTask,
 } from './contracts';
 import { executeBackgroundTask } from './executeTask';
@@ -97,6 +98,35 @@ export class BackgroundTaskQueue {
     tasks.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
     await Promise.all(tasks.map(task => NativeBackgroundTasks.cancel(task.id)));
     await this.refresh();
+  }
+
+  /**
+   * Cancel queued DOWNLOAD_CHAPTER tasks belonging to the given novels only.
+   *
+   * Tasks persisted before the per-novel queue identity carry no `novelId`
+   * and are deliberately left running — silently killing unattributable
+   * work would be worse than letting it finish (#1874 review round 1).
+   * Returns the novel ids that still have unattributable queued tasks so
+   * the caller can surface them (toast) instead of leaving them invisible.
+   */
+  async cancelForNovels(novelIds: number[]): Promise<number[]> {
+    const ids = new Set(novelIds);
+    const tasks = this.getSnapshot().filter(
+      task =>
+        task.task.name === 'DOWNLOAD_CHAPTER' &&
+        ids.has((task.task as DownloadChapterTask).data.novelId ?? NaN),
+    );
+    const cancelledNovelIds = new Set(
+      tasks.flatMap(task => {
+        const novelId = (task.task as DownloadChapterTask).data.novelId;
+        return novelId === undefined ? [] : [novelId];
+      }),
+    );
+    tasks.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
+    await Promise.all(tasks.map(task => NativeBackgroundTasks.cancel(task.id)));
+    await this.refresh();
+
+    return [...ids].filter(id => !cancelledNovelIds.has(id));
   }
 
   async cancelAll() {

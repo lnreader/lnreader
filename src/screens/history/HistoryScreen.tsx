@@ -10,10 +10,11 @@ import {
 import HistoryCard from './components/HistoryCard/HistoryCard';
 import PurgeHistoryDialog from './components/PurgeHistoryDialog';
 
-import { useBackHandler, useSearch, useBoolean } from '@hooks';
+import { useSearch, useBackHandler, useBoolean } from '@hooks';
 import { useAppSettings, useTheme, useHistory } from '@hooks/persisted';
 
 import { convertDateToISOString } from '@database/utils/convertDateToISOString';
+import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
 
 import { History } from '@database/types';
 import { getString } from '@i18n/translations';
@@ -86,23 +87,47 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   const { purgeNovels } = useHistoryPurge();
 
+  // Live downloaded-chapter count for the confirm dialog (review R3):
+  // fetched from the DB when the dialog opens, not from stale row data.
+  const [purgeChapterCount, setPurgeChapterCount] = useState(0);
+
+  const openPurgeDialogWithCounts = useCallback(async () => {
+    let total = 0;
+    for (const entry of selectedEntries) {
+      try {
+        const downloaded = await getNovelDownloadedChapters(entry.novelId);
+        total += downloaded.length;
+      } catch {
+        // Counting is best-effort; the purge itself re-resolves and
+        // isolates per-novel errors.
+      }
+    }
+    setPurgeChapterCount(total);
+    openPurgeDialog();
+  }, [selectedEntries, openPurgeDialog]);
+
   const handlePurge = useCallback(async () => {
     await purgeNovels(selectedEntries);
     setSelectedNovelIds([]);
+    setPurgeChapterCount(0);
   }, [purgeNovels, selectedEntries]);
 
   const actionbarActions = useMemo(
     () => [
       {
         icon: 'delete-outline' as const,
-        onPress: openPurgeDialog,
+        onPress: () => {
+          void openPurgeDialogWithCounts();
+        },
       },
       {
         icon: 'close' as const,
-        onPress: () => setSelectedNovelIds([]),
+        onPress: () => {
+          setSelectedNovelIds([]);
+        },
       },
     ],
-    [openPurgeDialog],
+    [openPurgeDialogWithCounts],
   );
 
   const onChangeText = (text: string) => {
@@ -243,6 +268,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
               libraryNovelCount={
                 selectedEntries.filter(entry => entry.inLibrary).length
               }
+              chapterCount={purgeChapterCount}
               onSubmit={handlePurge}
               onDismiss={closePurgeDialog}
             />

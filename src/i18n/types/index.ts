@@ -399,6 +399,11 @@ export interface StringMap {
   'historyScreen.clearHistorWarning': 'string';
   'historyScreen.deleted': 'string';
   'historyScreen.nothingReadRecently': 'string';
+  'historyScreen.purgeWarning_one': 'string';
+  'historyScreen.purgeWarning_other': 'string';
+  'historyScreen.removedFromLibrarySuffix': 'string';
+  'historyScreen.removedFromLibrarySuffix_zero': 'string';
+  'historyScreen.unattributableDownloads': 'string';
   'historyScreen.removeHistoryWarning': 'string';
   'historyScreen.resetAllChapters': 'string';
   'historyScreen.searchbar': 'string';
