@@ -107,6 +107,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   }, [selectedEntries, openPurgeDialog]);
 
   const handlePurge = useCallback(async () => {
+    // Outcome surfacing (round-2 review blocker 1) lives INSIDE the hook —
+    // it toasts the success count plus one line per failure. The screen
+    // only resets selection state (double-toast bug fixed).
     await purgeNovels(selectedEntries);
     setSelectedNovelIds([]);
     setPurgeChapterCount(0);

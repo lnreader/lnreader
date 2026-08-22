@@ -101,32 +101,38 @@ export class BackgroundTaskQueue {
   }
 
   /**
-   * Cancel queued DOWNLOAD_CHAPTER tasks belonging to the given novels only.
-   *
-   * Tasks persisted before the per-novel queue identity carry no `novelId`
-   * and are deliberately left running — silently killing unattributable
-   * work would be worse than letting it finish (#1874 review round 1).
-   * Returns the novel ids that still have unattributable queued tasks so
-   * the caller can surface them (toast) instead of leaving them invisible.
+   * Cancel queued DOWNLOAD_CHAPTER tasks belonging to the given novels only
+   * (#1874 rulings round 1): scoping by task name alone would over-cancel
+   * the whole queue. Tasks persisted before per-novel queue identity carry
+   * no novelId and are deliberately left running — silently killing
+   * unattributable work would be worse than letting it finish. Returns the
+   * NUMBER of such legacy tasks encountered while cancelling (round-2
+   * review fix: selected-novels-without-tasks are NOT unattributable —
+   * they simply have nothing queued), so the caller can surface a toast
+   * only when legacy tasks actually exist.
    */
-  async cancelForNovels(novelIds: number[]): Promise<number[]> {
-    const ids = new Set(novelIds);
-    const tasks = this.getSnapshot().filter(
+  async cancelForNovels(novelIds: number[]): Promise<number> {
+    const wanted = new Set(novelIds);
+    const snapshot = this.getSnapshot();
+    const matched = snapshot.filter(
       task =>
         task.task.name === 'DOWNLOAD_CHAPTER' &&
-        ids.has((task.task as DownloadChapterTask).data.novelId ?? NaN),
+        (task.task as DownloadChapterTask).data.novelId !== undefined &&
+        wanted.has((task.task as DownloadChapterTask).data.novelId as number),
     );
-    const cancelledNovelIds = new Set(
-      tasks.flatMap(task => {
-        const novelId = (task.task as DownloadChapterTask).data.novelId;
-        return novelId === undefined ? [] : [novelId];
-      }),
+    const legacyTaskCount = snapshot.filter(
+      task =>
+        task.task.name === 'DOWNLOAD_CHAPTER' &&
+        (task.task as DownloadChapterTask).data.novelId === undefined,
+    ).length;
+
+    matched.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
+    await Promise.all(
+      matched.map(task => NativeBackgroundTasks.cancel(task.id)),
     );
-    tasks.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
-    await Promise.all(tasks.map(task => NativeBackgroundTasks.cancel(task.id)));
     await this.refresh();
 
-    return [...ids].filter(id => !cancelledNovelIds.has(id));
+    return legacyTaskCount;
   }
 
   async cancelAll() {

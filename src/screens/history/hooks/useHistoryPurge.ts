@@ -19,10 +19,17 @@ export interface PurgeFailure {
 }
 
 export interface PurgeResult {
+  /** Novels whose purge completed through every stage, history included. */
   purgedNovels: number;
   failures: PurgeFailure[];
-  /** Novels whose queued downloads could not be attributed (legacy tasks). */
-  unmatchedQueuedNovelIds: number[];
+  /**
+   * Count of legacy (novelId-less) queued download tasks encountered while
+   * cancelling: left running by design, surfaced via toast instead. A count
+   * cannot be attributed to specific novels, so no synthetic ids are
+   * fabricated here — unlike library-stage failures, which ARE attributable
+   * and land in `failures` per novel.
+   */
+  legacyTaskCount: number;
 }
 
 export interface OrchestrationEntry {
@@ -37,15 +44,20 @@ export interface OrchestrationEntry {
  * order of operations is unit-testable without React (review round 1:
  * the purge's correctness IS its order of operations).
  *
- * Contract (spec-1874 rulings round 1, c8a1b11):
+ * Contract (round-2 AMENDED ruling — grillmaster, delivered by SRAL):
  *   1. cancel queued downloads per-novel BEFORE any deletion
+ *      (io.cancelForNovels returns the count of unattributable legacy
+ *      tasks it deliberately left running)
  *   2. per-novel error isolation — one failure never aborts the rest
- *   3. history clear always runs; library removal only when inLibrary
+ *   3. batched library removal AFTER the loop, BEFORE any history clear
+ *   4. history clear LAST — the irreversible step runs only for novels
+ *      whose purge reached this stage successfully; a library-stage
+ *      failure leaves those histories intact (the atomicity property)
  */
 export const runPurgeOrchestration = async (
   entries: OrchestrationEntry[],
   io: {
-    cancelForNovels: (novelIds: number[]) => Promise<number[]>;
+    cancelForNovels: (novelIds: number[]) => Promise<number>;
     getDownloadedChapters: (novelId: number) => Promise<{ id: number }[]>;
     deleteChaptersFiles: (
       pluginId: string,
@@ -65,8 +77,12 @@ export const runPurgeOrchestration = async (
 
   const failures: PurgeFailure[] = [];
 
-  const unattributable = await io.cancelForNovels([...uniqueEntries.keys()]);
+  // Stage 1: scoped cancel BEFORE any deletion; the returned number counts
+  // legacy tasks (no novelId) that were deliberately left running.
+  const legacyTaskCount = await io.cancelForNovels([...uniqueEntries.keys()]);
 
+  // Stage 2: per-novel probe + file wipe, errors isolated per novel.
+  const filesCleared: OrchestrationEntry[] = [];
   for (const entry of uniqueEntries.values()) {
     try {
       const downloaded = await io.getDownloadedChapters(entry.novelId);
@@ -77,6 +93,49 @@ export const runPurgeOrchestration = async (
           downloaded.map(chapter => chapter.id),
         );
       }
+      filesCleared.push(entry);
+    } catch (error) {
+      failures.push({
+        novelId: entry.novelId,
+        novelName: entry.novelName,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  // Stage 3: ONE batched library write, only for novels still alive.
+  const libraryIds = filesCleared
+    .filter(entry => entry.inLibrary)
+    .map(entry => entry.novelId);
+
+  let libraryStageSucceeded = true;
+  if (libraryIds.length) {
+    try {
+      await io.removeFromLibrary(libraryIds);
+    } catch (error) {
+      libraryStageSucceeded = false;
+      // Per-novel attribution (round-2): every novel blocked by this
+      // stage is named individually — no '(library removal)' sentinel —
+      // so the caller's toast can say exactly which novels are untouched.
+      const message = error instanceof Error ? error.message : String(error);
+      for (const novelId of libraryIds) {
+        failures.push({
+          novelId,
+          novelName:
+            uniqueEntries.get(novelId)?.novelName ?? `Novel ${novelId}`,
+          error: message,
+        });
+      }
+    }
+  }
+
+  // Stage 4 (LAST): history clear only for novels whose purge made it here.
+  // When the library stage failed, its novels keep their history.
+  const historyTargets = libraryStageSucceeded
+    ? filesCleared
+    : filesCleared.filter(entry => !entry.inLibrary);
+  for (const entry of historyTargets) {
+    try {
       await io.deleteHistory(entry.novelId);
     } catch (error) {
       failures.push({
@@ -87,40 +146,17 @@ export const runPurgeOrchestration = async (
     }
   }
 
-  const libraryIds = [...uniqueEntries.values()]
-    .filter(
-      entry =>
-        entry.inLibrary && !failures.some(f => f.novelId === entry.novelId),
-    )
-    .map(entry => entry.novelId);
-
-  if (libraryIds.length) {
-    try {
-      await io.removeFromLibrary(libraryIds);
-    } catch (error) {
-      failures.push({
-        novelId: -1,
-        novelName: '(library removal)',
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
   return {
     purgedNovels: uniqueEntries.size - failures.length,
     failures,
-    unmatchedQueuedNovelIds: unattributable.filter(
-      id => !failures.some(failure => failure.novelId === id),
-    ),
+    legacyTaskCount,
   };
 };
 
 /**
- * Bulk-purge helper for the History screen (#1874): for every selected
- * history entry, cancel that novel's queued chapter downloads, wipe
- * downloaded files, clear its read history, and remove it from Library when
- * it belongs there. Non-library entries are handled gracefully (history +
- * files only). Per-novel errors are isolated and surfaced to the caller.
+ * Bulk-purge helper for the History screen (#1874). DELEGATES to the pure
+ * runPurgeOrchestration — this hook only wires real implementations into
+ * the injected io and surfaces toasts. No duplicated logic (review r2b).
  */
 export const useHistoryPurge = () => {
   const { downloadQueue } = useDownload();
@@ -137,76 +173,51 @@ export const useHistoryPurge = () => {
 
   const purgeNovels = useCallback(
     async (entries: History[]): Promise<PurgeResult> => {
-      const uniqueEntries = new Map<number, History>();
-      for (const entry of entries) {
-        if (!uniqueEntries.has(entry.novelId)) {
-          uniqueEntries.set(entry.novelId, entry);
-        }
-      }
-
-      // Cancel only the selected novels' queued downloads before deleting.
-      const touchesSelection = [...uniqueEntries.values()].some(entry =>
+      // Pre-flight decision: only consult/cancel the background queue when
+      // a selected novel actually has something queued (round-2 review fix:
+      // selected-novels-without-tasks are NOT unattributable).
+      const touchesSelection = entries.some(entry =>
         downloadingNovelIds.has(entry.novelId),
       );
-      let unmatchedQueuedNovelIds: number[] = [];
-      if (touchesSelection) {
-        unmatchedQueuedNovelIds = await backgroundTasks.cancelForNovels([
-          ...uniqueEntries.keys(),
-        ]);
-        if (unmatchedQueuedNovelIds.length) {
-          showToast(
-            getString('historyScreen.unattributableDownloads', {
-              count: unmatchedQueuedNovelIds.length,
-            }),
-          );
-        }
-      }
 
-      const libraryNovelIds: number[] = [];
-      const failures: PurgeFailure[] = [];
-
-      for (const entry of uniqueEntries.values()) {
-        try {
-          const downloaded = await getNovelDownloadedChapters(entry.novelId);
-          if (downloaded.length) {
-            await deleteChapters(
-              entry.pluginId,
-              entry.novelId,
-              downloaded.map(chapter => chapter.id),
+      const result = await runPurgeOrchestration(entries, {
+        cancelForNovels: async novelIds => {
+          if (!touchesSelection && novelIds.length > 0) {
+            return 0;
+          }
+          const legacyCount = await backgroundTasks.cancelForNovels(novelIds);
+          if (legacyCount > 0) {
+            showToast(
+              getString('historyScreen.unattributableDownloads', {
+                count: legacyCount,
+              }),
             );
           }
-          await deleteNovelHistory(entry.novelId);
-          if (entry.inLibrary) {
-            libraryNovelIds.push(entry.novelId);
-          }
-        } catch (error) {
-          // Per-novel error isolation (#1874 review R4): one broken entry
-          // must not abort the purge of the rest.
-          failures.push({
-            novelId: entry.novelId,
-            novelName: entry.novelName,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+          return legacyCount;
+        },
+        getDownloadedChapters: getNovelDownloadedChapters,
+        deleteChaptersFiles: deleteChapters,
+        deleteHistory: deleteNovelHistory,
+        removeFromLibrary: removeNovelsFromLibrary,
+      });
 
-      if (libraryNovelIds.length) {
-        try {
-          await removeNovelsFromLibrary(libraryNovelIds);
-        } catch (error) {
-          failures.push({
-            novelId: -1,
-            novelName: '(library removal)',
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      // R4 post-confirm outcome toast (round-2 review blocker 1): success
+      // count, plus one line per failure when anything failed. Surfaced
+      // HERE ONLY — the screen consumes the returned result without
+      // re-toasting (double-toast bug fixed).
+      showToast(
+        getString('historyScreen.purgeSuccess', {
+          count: result.purgedNovels,
+        }),
+        ...result.failures.map(failure =>
+          getString('historyScreen.purgeFailurePrefix', {
+            novelName: failure.novelName,
+            error: failure.error,
+          }),
+        ),
+      );
 
-      return {
-        purgedNovels: uniqueEntries.size - failures.length,
-        failures,
-        unmatchedQueuedNovelIds,
-      };
+      return result;
     },
     [downloadingNovelIds],
   );

@@ -20,24 +20,22 @@ const PurgeHistoryDialog: React.FC<PurgeHistoryDialogProps> = ({
   onSubmit,
   onDismiss,
 }) => {
-  const removedFromLibrary =
-    libraryNovelCount > 0
-      ? getString('historyScreen.removedFromLibrarySuffix', {
-          count: libraryNovelCount,
-        })
-      : getString('historyScreen.removedFromLibrarySuffix_zero');
+  const removedFromLibrary = getString(
+    'historyScreen.removedFromLibrarySuffix',
+    {
+      count: libraryNovelCount,
+    },
+  );
 
-  const message = getString('historyScreen.purgeWarning_other', {
+  const message = getString('historyScreen.purgeWarning', {
     count: novelCount,
     removedFromLibrary,
   });
 
   const chapterLine =
     chapterCount > 0
-      ? `${chapterCount} downloaded ${
-          chapterCount === 1 ? 'chapter' : 'chapters'
-        } will be deleted.`
-      : 'No downloaded chapters for this selection.';
+      ? getString('historyScreen.chapterLinePresent', { count: chapterCount })
+      : getString('historyScreen.chapterLineAbsent');
 
   return (
     <ConfirmationDialog
