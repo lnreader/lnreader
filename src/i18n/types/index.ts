@@ -315,6 +315,7 @@ export interface StringMap {
   'webview.cookiesCleared': 'string';
   'webview.clearData': 'string';
   'webview.dataDeleted': 'string';
+  'webview.enterUrl': 'string';
   'date.calendar.lastDay': 'string';
   'date.calendar.lastWeek': 'string';
   'date.calendar.nextDay': 'string';

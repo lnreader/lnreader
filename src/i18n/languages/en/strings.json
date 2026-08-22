@@ -359,7 +359,8 @@
     "clearCookies": "Clear cookies",
     "cookiesCleared": "Cookies cleared",
     "clearData": "Clear WebView data",
-    "dataDeleted": "WebView data cleared"
+    "dataDeleted": "WebView data cleared",
+    "enterUrl": "Enter address"
   },
   "date": {
     "calendar": {
