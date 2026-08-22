@@ -210,7 +210,7 @@ export const useHistoryPurge = () => {
           count: result.purgedNovels,
         }),
         ...result.failures.map(failure =>
-          getString('historyScreen.purgeFailurePrefix', {
+          getString('historyScreen.purgeFailureLine', {
             novelName: failure.novelName,
             error: failure.error,
           }),

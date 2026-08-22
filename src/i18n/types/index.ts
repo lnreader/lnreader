@@ -412,7 +412,6 @@ export interface StringMap {
   'historyScreen.unattributableDownloads.other': 'string';
   'historyScreen.purgeSuccess.one': 'string';
   'historyScreen.purgeSuccess.other': 'string';
-  'historyScreen.purgeFailurePrefix': 'string';
   'historyScreen.purgeFailureLine': 'string';
   'historyScreen.removeHistoryWarning': 'string';
   'historyScreen.resetAllChapters': 'string';

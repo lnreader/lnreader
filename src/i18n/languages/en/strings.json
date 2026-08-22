@@ -481,7 +481,6 @@
       "one": "%{count} novel removed from history.",
       "other": "%{count} novels removed from history."
     },
-    "purgeFailurePrefix": "Purge failed for",
     "purgeFailureLine": "%{novelName}: %{error}",
     "removeHistoryWarning": "This will remove the read date of this chapter. Are you sure?",
     "resetAllChapters": "Reset all chapters for this entry",
