@@ -6,6 +6,11 @@ import type {
   EpubExportData,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
+import {
+  isSafDirectory,
+  materializeStorageDirectory,
+} from '@services/storage/directory';
+import { toStorageFileUri } from '@utils/Storages';
 
 const sanitizeEpubFileName = (fileName: string) => {
   const withoutExtension = fileName.trim().replace(/\.epub$/i, '');
@@ -19,6 +24,49 @@ const sanitizeEpubFileName = (fileName: string) => {
 
 const PROGRESS_UPDATE_INTERVAL_MS = 250;
 
+const parentDirectory = (path: string) =>
+  path.slice(0, Math.max(0, path.lastIndexOf('/')));
+
+const materializeEpubSources = async (
+  data: EpubExportData,
+  cacheDirectory: string,
+): Promise<EpubExportData> => {
+  const firstChapter = data.chapters[0];
+  if (!firstChapter || !isSafDirectory(firstChapter.htmlPath)) return data;
+
+  const novelDirectory = parentDirectory(
+    parentDirectory(firstChapter.htmlPath),
+  );
+  await materializeStorageDirectory(novelDirectory, cacheDirectory);
+  const localDirectoryUri = toStorageFileUri(cacheDirectory);
+  const chapters = data.chapters.map(chapter => ({
+    ...chapter,
+    htmlPath: chapter.htmlPath.replace(novelDirectory, cacheDirectory),
+  }));
+
+  for (const chapter of chapters) {
+    const html = await NativeFile.readFile(chapter.htmlPath);
+    await NativeFile.writeFile(
+      chapter.htmlPath,
+      html
+        .replaceAll(`file://${novelDirectory}`, localDirectoryUri)
+        .replaceAll(novelDirectory, localDirectoryUri),
+    );
+  }
+
+  return {
+    ...data,
+    chapters,
+    metadata: {
+      ...data.metadata,
+      coverPath: data.metadata.coverPath.replace(
+        novelDirectory,
+        localDirectoryUri,
+      ),
+    },
+  };
+};
+
 export const exportEpub = async (
   data: EpubExportData,
   updateProgress: TaskProgressUpdater,
@@ -27,6 +75,9 @@ export const exportEpub = async (
   const tempEpubPath = `${
     NativeFile.ExternalCachesDirectoryPath
   }/epub-export-${Date.now()}.epub`;
+  const sourceCacheDirectory = `${
+    NativeFile.ExternalCachesDirectoryPath
+  }/epub-export-source-${Date.now()}`;
   let lastProgressUpdateAt = 0;
 
   try {
@@ -37,9 +88,13 @@ export const exportEpub = async (
       progressText: getString('novelScreen.epub.preparingExport'),
     }));
 
+    const preparedData = await materializeEpubSources(
+      { ...data, chapters, metadata },
+      sourceCacheDirectory,
+    );
     const result = await epub.exportEpub(
-      metadata,
-      chapters,
+      preparedData.metadata,
+      preparedData.chapters,
       tempEpubPath,
       async (completedChapters, totalChapters, chapterTitle) => {
         const total = Math.max(1, Math.round(totalChapters));
@@ -106,6 +161,9 @@ export const exportEpub = async (
     try {
       if (await NativeFile.exists(tempEpubPath)) {
         await NativeFile.unlink(tempEpubPath);
+      }
+      if (await NativeFile.exists(sourceCacheDirectory)) {
+        await NativeFile.unlink(sourceCacheDirectory);
       }
     } catch {
       // Export cleanup must not replace the original result or error.

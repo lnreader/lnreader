@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { initializeInstalledPlugins } from '@plugins/pluginManager';
 import { backgroundTasks } from '@services/backgroundTasks';
+import { repairStoredNovelCoverUris } from '@services/storage/migrateNovelStorage';
 
 type AppServicesState = {
   ready: boolean;
@@ -14,6 +15,7 @@ const initializeAppServices = (): Promise<void> => {
   if (!initializationPromise) {
     initializationPromise = initializeInstalledPlugins()
       .then(async () => {
+        await repairStoredNovelCoverUris();
         await backgroundTasks.refresh();
       })
       .catch(error => {

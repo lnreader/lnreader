@@ -79,6 +79,9 @@ jest.mock('@modules/native-file', () => ({
     mkdir: jest.fn(),
     unlink: jest.fn(),
     copyFile: jest.fn(),
+    resolveUri: jest
+      .fn()
+      .mockResolvedValue('content://provider/document/cover'),
     readFile: jest.fn().mockReturnValue(''),
     writeFile: jest.fn(),
   },

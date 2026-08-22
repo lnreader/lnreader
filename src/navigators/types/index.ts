@@ -78,7 +78,7 @@ export type SettingsStackParamList = {
   GeneralSettings: undefined;
   ReaderSettings: undefined;
   TrackerSettings: undefined;
-  BackupSettings: undefined;
+  DataStorageSettings: undefined;
   AppearanceSettings: undefined;
   AdvancedSettings: undefined;
   LibrarySettings: undefined;
@@ -176,9 +176,9 @@ export type TrackerSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'TrackerSettings'
 >;
-export type BackupSettingsScreenProps = NativeStackScreenProps<
+export type DataStorageSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
-  'BackupSettings'
+  'DataStorageSettings'
 >;
 export type AdvancedSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,

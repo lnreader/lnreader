@@ -18,6 +18,12 @@ import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
 import { getSelectedBackupFileSections } from '../fileSections';
 import { resolveBackupOptions, type BackupOptions } from '../options';
+import {
+  cleanupStagedStorageDirectory,
+  finalizeStorageRestoreDirectory,
+  materializeStorageDirectory,
+  prepareStorageRestoreDirectory,
+} from '@services/storage/directory';
 
 export const createBackup = async (
   {
@@ -46,10 +52,18 @@ export const createBackup = async (
     await sleep(200);
 
     for (const section of getSelectedBackupFileSections(options)) {
-      await NativeZipArchive.zip(
+      const sourcePath = await materializeStorageDirectory(
         section.storagePath,
-        `${CACHE_DIR_PATH}/${section.archiveName}`,
+        `${CACHE_DIR_PATH}-section-${section.archiveName}`,
       );
+      try {
+        await NativeZipArchive.zip(
+          sourcePath,
+          `${CACHE_DIR_PATH}/${section.archiveName}`,
+        );
+      } finally {
+        await cleanupStagedStorageDirectory(sourcePath, section.storagePath);
+      }
     }
 
     setMeta?.(meta => ({
@@ -145,7 +159,22 @@ export const restoreBackup = async (
         if (!(await NativeFile.exists(archivePath))) {
           throw new Error(getString('backupScreen.invalidBackupFolder'));
         }
-        await NativeZipArchive.unzip(archivePath, section.storagePath);
+        const restoreDirectory = await prepareStorageRestoreDirectory(
+          section.storagePath,
+          `${CACHE_DIR_PATH}-restore-${section.archiveName}`,
+        );
+        try {
+          await NativeZipArchive.unzip(archivePath, restoreDirectory);
+          await finalizeStorageRestoreDirectory(
+            restoreDirectory,
+            section.storagePath,
+          );
+        } finally {
+          await cleanupStagedStorageDirectory(
+            restoreDirectory,
+            section.storagePath,
+          );
+        }
       }
     }
     const missingPluginIds = await finalizeRestoredPlugins(restoreResult);
