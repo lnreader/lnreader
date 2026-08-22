@@ -45,11 +45,14 @@ const loadTtsTraversal = (chapterElement: TestElement): TtsTraversal => {
     join(process.cwd(), 'assets/reader/js/core.js'),
     'utf8',
   );
+  // The shared collector (#1576) lives above the tts object; include it in
+  // the evaluated slice so the delegation resolves.
+  const sharedStart = core.indexOf('function normalizeSharedText(');
   const start = core.indexOf('window.tts = new (function () {');
   const closing = '\n})();';
   const end = core.indexOf(closing, start);
 
-  if (start < 0 || end < 0) {
+  if (sharedStart < 0 || start < 0 || end < 0) {
     throw new Error('Could not locate the reader TTS implementation');
   }
 
@@ -61,7 +64,7 @@ const loadTtsTraversal = (chapterElement: TestElement): TtsTraversal => {
     window: {},
   };
 
-  runInNewContext(core.slice(start, end + closing.length), context);
+  runInNewContext(core.slice(sharedStart, end + closing.length), context);
 
   if (!context.window.tts) {
     throw new Error('Reader TTS implementation did not initialize');
