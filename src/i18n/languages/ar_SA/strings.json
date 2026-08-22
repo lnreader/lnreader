@@ -2,7 +2,7 @@
   "aboutScreen": {
     "website": "الموقع",
     "discord": "ديس كورد",
-    "github": "كيت هاب",
+    "github": "Arabic",
     "helpTranslate": "المساعدة في الترجَمة",
     "plugins": "Plugins",
     "version": "آلإصدار",
@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "تم حذف الروايات المخزنة مؤقتًا",
     "chapterInsertFailed": "فشل إدراج الفصل",
     "clearCachedNovels": "مسح الروايات المخزنة مؤقتا",
-    "clearCachedNovelsDesc": "احذف الروايات المخزنة مؤقتًا و التي ليست موجودة في مكتبتك",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "هل أنت متيقِّن؟ سيتم فقدان الفصول المقروءة والمُنزّلة، بالإضافة إلى تقدم الروايات غير المُدرجة في المكتبة.",
     "clearUpdatesMessage": "تمت إزالة التحديثات.",
     "clearUpdatesTab": "مسح علامة تبويب التحديثات",
@@ -162,7 +162,7 @@
       "restore": "استعادة من الدرايف",
       "restoreInterruped": "انقطعت الاستعادة من الدرايف"
     },
-    "googeDrive": "جوجل درايف",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "نسخ احتياطي إلى جوجل درايف الخاص بك",
     "invalidBackupFolder": "مجلد نسخة احتياطية غير صالح",
     "localBackup": "نسخ احتياطي محلي",
@@ -172,13 +172,13 @@
       "description": "Choose what to include in this backup.",
       "selectAll": "Select all",
       "library": "Library data",
-      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "libraryDescription": "Novels, covers, chapter lists, reading progress, bookmarks, and categories.",
       "settings": "Settings",
       "settingsDescription": "App, reader, and update preferences.",
       "plugins": "Plugins",
       "pluginsDescription": "Installed source plugin files.",
-      "downloadedFiles": "Downloaded chapters and covers",
-      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+      "downloadedFiles": "Downloaded chapters",
+      "downloadedFilesDescription": "Downloaded chapter content for offline reading. This may be large."
     },
     "preparingData": "تحضير البيانات",
     "preparingSelectedFiles": "Preparing selected files",
@@ -243,7 +243,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "تمت إزالته من المكتبة",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "البحث في المصادر",
     "searchResults": "نتائج البحث",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "إضافة تصنيف",
-    "cantDeleteDefault": "لا يمكنك حذف التصنيف الافتراضي",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "افتراضي",
     "defaultCategory": "التصنيف الافتراضي",
     "deleteModal": {
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "ليس لديك تصنيفات. اضغط على زر تعديل لإنشاء واحد لتنظيم مكتبتك"
   },
   "repositories": {
-    "emptyMsg": "ليس لديك مستودعات. أضف مستودع الإضافات الأول لتبدأ."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "ليس لديك مستودعات. أضف مستودع الإضافات الأول لتبدأ.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "حول",
@@ -340,7 +344,12 @@
     "submit": "إرسال",
     "loading": "جارٍ التحميل...",
     "moreOptions": "More options",
-    "warning": "تحذير"
+    "warning": "تحذير",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "تحديث",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "ترتيب الفرز",
     "updateLibrary": "تحديث المكتبة عند التشغيل",
-    "updateLibraryDesc": "لا ينصح به للأجهزة الضعيفة",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "إظهار وقت آخر تحديث",
     "useFAB": "استخدام الزر العائم (FAB) في المكتبة",
     "timeTracking": "Time Tracking",
@@ -662,7 +671,7 @@
       "scrollToCurrentChapter": "التمرير إلى الفصل الحالي",
       "scrollToTop": "التمرير إلى الأعلى"
     },
-    "emptyChapterMessage": "<h2>تعذر تحميل الفصل</h2><p>لم يتم العثور على محتوى قابل للقراءة. تحقق من الفصل في WebView؛ إذا تم تحميله هناك، <a href='%{reportUrl}'>فأبلغ عن مشكلة الإضافة</a>.</p><p>الإضافة: %{pluginId}<br>الرواية: %{novelName}<br>الفصل: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "انتهى",
     "nextChapter": "التالي: %{name}",
     "noNextChapter": "لا يوجد فصل تالي",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",

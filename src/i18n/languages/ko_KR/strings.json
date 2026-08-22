@@ -1,14 +1,14 @@
 {
   "aboutScreen": {
-    "website": "Website",
-    "discord": "Discord",
-    "github": "GitHub",
-    "helpTranslate": "Help translate",
-    "plugins": "Plugins",
-    "version": "Version",
-    "whatsNew": "What's new"
+    "website": "웹사이트",
+    "discord": "디스코드",
+    "github": "깃허브",
+    "helpTranslate": "번역에 도움을 주세요.",
+    "plugins": "플러그인",
+    "version": "버전 정보",
+    "whatsNew": "새로운 소식"
   },
-  "advancedSettings": "Advanced",
+  "advancedSettings": "고급 설정",
   "advancedSettingsScreen": {
     "cachedNovelsDeletedToast": "Cached novels deleted",
     "chapterInsertFailed": "chapter insert failed",
@@ -19,10 +19,10 @@
     "clearUpdatesTab": "Clear updates tab",
     "clearUpdatesWarning": "Updates tab will be cleared.",
     "clearupdatesTabDesc": "Clears chapter entries in updates tab",
-    "dataManagement": "Data Management",
+    "dataManagement": "데이터 관리",
     "deleteReadChapters": "Delete read chapters",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
-    "disabled": "Disabled",
+    "disabled": "비활성화",
     "dnsOverHttps": "DNS over HTTPS (DoH)",
     "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
     "importEpub": "Import EPUB",
@@ -172,13 +172,13 @@
       "description": "Choose what to include in this backup.",
       "selectAll": "Select all",
       "library": "Library data",
-      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "libraryDescription": "Novels, covers, chapter lists, reading progress, bookmarks, and categories.",
       "settings": "Settings",
       "settingsDescription": "App, reader, and update preferences.",
       "plugins": "Plugins",
       "pluginsDescription": "Installed source plugin files.",
-      "downloadedFiles": "Downloaded chapters and covers",
-      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+      "downloadedFiles": "Downloaded chapters",
+      "downloadedFilesDescription": "Downloaded chapter content for offline reading. This may be large."
     },
     "preparingData": "Preparing Data",
     "preparingSelectedFiles": "Preparing selected files",
@@ -238,14 +238,14 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned",
+    "pinnedPlugins": "Pinned plugins",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
     "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
-    "searchbar": "Search sources and plugins",
+    "searchbar": "Search sources",
     "searchResults": "Search results",
     "selectNovel": "Select Novel",
     "sources": "Sources",
@@ -287,7 +287,11 @@
     "setModalEmptyMsg": "You have no categories. Tap the Edit button to create one for organizing your library"
   },
   "repositories": {
-    "emptyMsg": "You have no repositories. Add your first plugin repository to get started."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "You have no repositories. Add your first plugin repository to get started.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "About",
@@ -340,7 +344,12 @@
     "submit": "Submit",
     "loading": "Loading ...",
     "moreOptions": "More options",
-    "warning": "Warning"
+    "warning": "Warning",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "Refresh",
@@ -662,7 +671,7 @@
       "scrollToCurrentChapter": "Scroll to current chapter",
       "scrollToTop": "Scroll to top"
     },
-    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Finished",
     "nextChapter": "Next: %{name}",
     "noNextChapter": "There's no next chapter",
@@ -779,6 +788,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
