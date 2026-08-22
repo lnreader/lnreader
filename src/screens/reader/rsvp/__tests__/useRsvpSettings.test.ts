@@ -99,4 +99,23 @@ describe('useRsvpSettings — writes', () => {
       chunkSize: 3,
     });
   });
+
+  it('REGRESSION WITNESS: three back-to-back patches all retain their fields', async () => {
+    // Permanent witness for the stale-closure bug caught during the first
+    // GREEN loop (grillmaster promotion, 2026-08-23): sequential patches
+    // {wpm}, {chunkSize} then a wpm re-adjustment must compose — no field
+    // may revert to defaults because an earlier patch was forgotten.
+    const { result, rerender } = renderHook(() => useRsvpSettings());
+
+    act(() => result.current.setRsvp({ wpm: 400 }));
+    rerender({});
+    act(() => result.current.setRsvp({ chunkSize: 3 }));
+    rerender({});
+    act(() => result.current.setRsvp({ wpm: 550 }));
+
+    expect(mockSetStored).toHaveBeenLastCalledWith({
+      wpm: 550,
+      chunkSize: 3,
+    });
+  });
 });

@@ -169,6 +169,71 @@ window.reader = new (function () {
   // end reader
 })();
 
+/**
+ * Shared readable-content collector (#1576): the ONE DOM walk for both
+ * TTS and RSVP. Returns [{element, text}] in document order, where text
+ * is the normalized innerText of each readable element.
+ */
+function normalizeSharedText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([.,!?;:])\s*/g, '$1 ')
+    .trim();
+}
+
+function collectReadableEntries(chapterElement) {
+  const readableNodeNames = [
+    '#text',
+    'B',
+    'I',
+    'SPAN',
+    'EM',
+    'BR',
+    'STRONG',
+    'A',
+    'MARK',
+  ];
+
+  const readable = element => {
+    const ele = element;
+    if (ele.nodeName !== 'SPAN' && readableNodeNames.includes(ele.nodeName)) {
+      return false;
+    }
+    if (!ele.hasChildNodes()) {
+      return false;
+    }
+    for (let i = 0; i < ele.childNodes.length; i++) {
+      if (!readableNodeNames.includes(ele.childNodes.item(i).nodeName)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const elements = [];
+  const traverse = el => {
+    if (!el) return;
+    if (readable(el)) {
+      elements.push(el);
+      // innerText already includes readable descendants, so descending any
+      // further would add overlapping text to the speech queue.
+      return;
+    }
+    for (let i = 0; i < el.children.length; i++) {
+      traverse(el.children[i]);
+    }
+  };
+  traverse(chapterElement);
+
+  return elements
+    .map(element => ({
+      element,
+      text: normalizeSharedText(element.innerText),
+    }))
+    .filter(entry => !!entry.text);
+}
+
 window.tts = new (function () {
   this.readableNodeNames = [
     '#text',
@@ -209,13 +274,7 @@ window.tts = new (function () {
     return true;
   };
 
-  this.normalizeText = text => {
-    if (!text) return '';
-    return text
-      .replace(/\s+/g, ' ')
-      .replace(/\s*([.,!?;:])\s*/g, '$1 ')
-      .trim();
-  };
+  this.normalizeText = normalizeSharedText;
 
   // if can find a readable node, else stop tts
   // FIXED: Added proper boundary checks to prevent stack overflow
@@ -297,12 +356,8 @@ window.tts = new (function () {
   this.start = element => {
     const startElement = element ?? reader.chapterElement;
 
-    const readableEntries = this.getAllReadableElements(reader.chapterElement)
-      .map(readableElement => ({
-        element: readableElement,
-        text: this.normalizeText(readableElement.innerText),
-      }))
-      .filter(entry => !!entry.text);
+    // Shared collector (#1576): ONE DOM walk feeding both TTS and RSVP.
+    const readableEntries = collectReadableEntries(reader.chapterElement);
     this.allReadableElements = readableEntries.map(entry => entry.element);
     this.totalElements = this.allReadableElements.length;
     this.textQueue = readableEntries.map(entry => entry.text);
@@ -326,23 +381,8 @@ window.tts = new (function () {
   };
 
   // Get all readable elements in order
-  this.getAllReadableElements = element => {
-    const elements = [];
-    const traverse = el => {
-      if (!el) return;
-      if (this.readable(el)) {
-        elements.push(el);
-        // innerText already includes readable descendants, so descending any
-        // further would add overlapping text to the speech queue.
-        return;
-      }
-      for (let i = 0; i < el.children.length; i++) {
-        traverse(el.children[i]);
-      }
-    };
-    traverse(element);
-    return elements;
-  };
+  this.getAllReadableElements = element =>
+    collectReadableEntries(element).map(entry => entry.element);
 
   this.resume = () => {
     if (!this.started) return;
