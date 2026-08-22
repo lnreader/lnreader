@@ -1,0 +1,68 @@
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderTaskWorker.kt
+  s_5ff84a11fc4ebb::t_5e52e4ef014a29 42-43,45-47,88-99
+  s_5ff84a11fc4ebb::t_996ac1ffba56f7 44
+modules/native-background-tasks/src/NativeBackgroundTasksModule.ts
+  s_5ff84a11fc4ebb::t_5e52e4ef014a29 28
+src/screens/reader/utils/__tests__/ttsTraversal.test.ts
+  s_a3db622534d961::t_58ac84680f9eef 104-116
+  s_a3db622534d961::t_83592796143588 12,26
+  s_a3db622534d961::t_25d67c9cffa3a2 1-11,13-25,27-103,117-132
+src/services/epub/__tests__/importProgress.test.ts
+  s_5ff84a11fc4ebb::t_ea6d3d6c98d5b8 1-13,21-60
+  s_5ff84a11fc4ebb::t_ce1f4d3755c987 14-20
+src/services/epub/import.ts
+  s_5ff84a11fc4ebb::t_ea6d3d6c98d5b8 20,154,162
+modules/native-zip-archive/android/src/main/java/expo/modules/nativeziparchive/NativeZipArchiveModule.kt
+  s_5ff84a11fc4ebb::t_697a15e120704b 24,40,78,118-119
+  s_5ff84a11fc4ebb::t_247c961da5eaf6 120-121
+src/services/backgroundTasks/headlessTask.ts
+  s_5ff84a11fc4ebb::t_5e52e4ef014a29 1,10-29
+src/services/epub/importProgress.ts
+  s_5ff84a11fc4ebb::t_ea6d3d6c98d5b8 1-31
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/LNReaderHeadlessTaskService.kt
+  s_5ff84a11fc4ebb::t_996ac1ffba56f7 11
+  s_5ff84a11fc4ebb::t_5e52e4ef014a29 19
+src/services/backgroundTasks/__tests__/headlessTask.test.ts
+  s_5ff84a11fc4ebb::t_996ac1ffba56f7 1-94,96-112
+  s_5ff84a11fc4ebb::t_a6b29fa10858ec 95
+modules/native-background-tasks/android/src/main/java/expo/modules/nativebackgroundtasks/NativeBackgroundTasksModule.kt
+  s_5ff84a11fc4ebb::t_5e52e4ef014a29 60-66,180-193
+  s_5ff84a11fc4ebb::t_9d5ea91e51c4c6 194
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "0fab0143b15da8e713579b964efc6d4108cc1467",
+  "prompts": {
+    "dafe01af47e06b0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a02728-2c27-70e3-9f21-07feaecb3386",
+        "model": "unknown"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_5ff84a11fc4ebb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0272b-7f84-7f30-8f9a-c0c8c11bb0f3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    },
+    "s_a3db622534d961": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01366-ebe1-7861-b2af-4f17e592887b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
