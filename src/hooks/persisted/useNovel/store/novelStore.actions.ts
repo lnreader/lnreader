@@ -1,5 +1,7 @@
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
+import { getString } from '@i18n/translations';
 import { NovelSettings } from '../types';
+import { BootstrapFailureResult } from '../store-helper/bootstrapService';
 import {
   GetState,
   NovelStoreDependencies,
@@ -13,6 +15,17 @@ interface CreateNovelStoreActionsParams {
   deps: NovelStoreDependencies;
   defaultChapterSort: ChapterOrderKey;
 }
+
+const resolveBootstrapError = (result: BootstrapFailureResult): string => {
+  if (result.reason === 'missing-chapters') {
+    return getString('updatesScreen.unableToGetNovel');
+  }
+  if (result.reason === 'error') {
+    // A real fetch/parse failure — don't claim the novel is missing.
+    return getString('novelScreen.loadFailed');
+  }
+  return getString('novelScreen.notFound');
+};
 
 export const createNovelStoreActions = ({
   set,
@@ -42,7 +55,7 @@ export const createNovelStoreActions = ({
 
       const requestId = deps.chapterRequestCoordinator.invalidate();
       inflightBootstrap = (async () => {
-        set({ loading: true, fetching: true });
+        set({ loading: true, fetching: true, error: undefined });
 
         const state = get();
         const result = await deps.bootstrapService.bootstrapNovelAsync({
@@ -63,6 +76,7 @@ export const createNovelStoreActions = ({
           set({
             loading: false,
             fetching: false,
+            error: resolveBootstrapError(result),
           });
           return false;
         }

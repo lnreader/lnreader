@@ -107,6 +107,7 @@ const NovelAppbar = ({
   editCategories,
   showJumpToChapterModal,
   headerOpacity,
+  hideActions = false,
 }: {
   novel: NovelInfo | undefined;
   theme: ThemeColors;
@@ -122,6 +123,7 @@ const NovelAppbar = ({
   editCategories: () => void;
   showJumpToChapterModal: (arg: boolean) => void;
   headerOpacity: SharedValue<number>;
+  hideActions?: boolean;
 }) => {
   const headerOpacityStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -249,47 +251,49 @@ const NovelAppbar = ({
       <Appbar.Header theme={headerTheme}>
         <Appbar.BackAction onPress={goBack} />
 
-        <View style={styles.row}>
-          <ExportNovelAsEpubButton
-            novel={novel}
-            renderIcon={renderExportIcon}
-          />
-          <NovelAppbarAction
-            theme={theme}
-            icon="book-search-outline"
-            onPress={openJumpToChapter}
-          />
-          {!isLocal ? (
-            <Menu
+        {hideActions ? null : (
+          <View style={styles.row}>
+            <ExportNovelAsEpubButton
+              novel={novel}
+              renderIcon={renderExportIcon}
+            />
+            <NovelAppbarAction
               theme={theme}
-              visible={downloadMenu}
-              onDismiss={closeDlMenu}
+              icon="book-search-outline"
+              onPress={openJumpToChapter}
+            />
+            {!isLocal ? (
+              <Menu
+                theme={theme}
+                visible={downloadMenu}
+                onDismiss={closeDlMenu}
+                anchor={
+                  <Appbar.Action
+                    theme={appbarTheme}
+                    icon="download-outline"
+                    onPress={openDlMenu}
+                    size={26}
+                  />
+                }
+                items={downloadMenuItems}
+              />
+            ) : null}
+            <Menu
+              visible={extraMenu}
+              onDismiss={closeExtraMenu}
               anchor={
                 <Appbar.Action
                   theme={appbarTheme}
-                  icon="download-outline"
-                  onPress={openDlMenu}
-                  size={26}
+                  icon="dots-vertical"
+                  onPress={openExtraMenu}
+                  size={24}
                 />
               }
-              items={downloadMenuItems}
+              theme={theme}
+              items={extraMenuItems}
             />
-          ) : null}
-          <Menu
-            visible={extraMenu}
-            onDismiss={closeExtraMenu}
-            anchor={
-              <Appbar.Action
-                theme={appbarTheme}
-                icon="dots-vertical"
-                onPress={openExtraMenu}
-                size={24}
-              />
-            }
-            theme={theme}
-            items={extraMenuItems}
-          />
-        </View>
+          </View>
+        )}
       </Appbar.Header>
     </Animated.View>
   );

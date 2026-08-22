@@ -70,6 +70,13 @@
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.POST_NOTIFICATIONS"
+      ],
+      "intentFilters": [
+        {
+          "action": "SEND",
+          "category": ["DEFAULT"],
+          "data": [{ "mimeType": "text/plain" }]
+        }
       ]
     },
     "extra": {

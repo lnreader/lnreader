@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -36,6 +36,10 @@ import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
 import { backgroundTasks } from '@services/backgroundTasks';
 import ReaderStack from './ReaderStack';
+import ShareIntentHandler, {
+  flushPendingShare,
+  navigationRef,
+} from './ShareIntentHandler';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
@@ -68,8 +72,6 @@ const MainNavigator = () => {
     }
   }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch]);
 
-  const navigationRef = useRef(null);
-
   // Enable React Navigation DevTools in development
   useReactNavigationDevTools({ ref: navigationRef });
 
@@ -79,6 +81,7 @@ const MainNavigator = () => {
   return (
     <NavigationContainer<RootStackParamList>
       ref={navigationRef}
+      onReady={flushPendingShare}
       theme={{
         colors: {
           ...DefaultTheme.colors,
@@ -108,6 +111,7 @@ const MainNavigator = () => {
         },
       }}
     >
+      <ShareIntentHandler />
       <LibraryContextProvider>
         <UpdateContextProvider>
           <AppUpdateChecker />

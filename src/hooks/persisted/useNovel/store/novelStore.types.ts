@@ -23,6 +23,7 @@ export interface ChapterSliceState {
 export interface NovelStoreData extends ChapterSliceState {
   loading: boolean;
   fetching: boolean;
+  error: string | undefined;
 
   pluginId: string;
   novelPath: string;

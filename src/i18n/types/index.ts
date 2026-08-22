@@ -394,6 +394,9 @@ export interface StringMap {
   'generalSettingsScreen.inactivityTimeoutDesc': 'string';
   'globalSearch.allSources': 'string';
   'globalSearch.searchIn': 'string';
+  'globalSearch.openNovel': 'string';
+  'globalSearch.openCopiedNovel': 'string';
+  'globalSearch.noSourceForUrl': 'string';
   'history': 'string';
   'historyScreen.chapter': 'string';
   'historyScreen.clearHistorWarning': 'string';
@@ -505,9 +508,11 @@ export interface StringMap {
   'novelScreen.jumpToChapterModal.openChapterDescription': 'string';
   'novelScreen.jumpToChapterModal.searchByName': 'string';
   'novelScreen.jumpToChapterModal.searchByNameDescription': 'string';
+  'novelScreen.loadFailed': 'string';
   'novelScreen.migrate': 'string';
   'novelScreen.noSummary': 'string';
   'novelScreen.noCoverFound': 'string';
+  'novelScreen.notFound': 'string';
   'novelScreen.progress': 'string';
   'novelScreen.readChaptersDeleted': 'string';
   'novelScreen.startReadingChapters': 'string';

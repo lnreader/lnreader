@@ -75,7 +75,12 @@ jest.mock('../../../database/queries/NovelQueries', () => ({
 jest.mock('../components/NovelAppbar', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () => React.createElement(Text, { testID: 'novel-appbar' }, 'appbar');
+  return ({ hideActions }: { hideActions?: boolean }) =>
+    React.createElement(
+      Text,
+      { testID: 'novel-appbar' },
+      hideActions ? 'appbar-actions-hidden' : 'appbar',
+    );
 });
 
 jest.mock('../components/NovelScreenList', () => {
@@ -146,9 +151,33 @@ jest.mock('../../../components/Actionbar/Actionbar', () => {
 
 jest.mock('@components', () => {
   const React = require('react');
+  const { Pressable, Text, View } = require('react-native');
   return {
     SafeAreaView: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    EmptyView: ({
+      description,
+      actions,
+    }: {
+      description: string;
+      actions?: { iconName: string; title: string; onPress: () => void }[];
+    }) =>
+      React.createElement(
+        View,
+        null,
+        React.createElement(Text, null, description),
+        ...(actions || []).map(action =>
+          React.createElement(
+            Pressable,
+            {
+              key: action.title,
+              testID: `emptyview-action-${action.iconName}`,
+              onPress: action.onPress,
+            },
+            React.createElement(Text, null, action.title),
+          ),
+        ),
+      ),
   };
 });
 
@@ -242,6 +271,8 @@ const createStore = (overrides: Record<string, unknown> = {}) => {
       },
     ],
     fetching: false,
+    loading: false,
+    error: undefined,
     novelSettings: {
       filter: [],
       excludedScanlators: [],
@@ -361,6 +392,45 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
       store.state.markChaptersUnreadAndResetProgress,
     ).toHaveBeenCalledTimes(1);
     expect(mockUpdateChapterProgressByIds).not.toHaveBeenCalled();
+  });
+
+  it('shows the not-found error view with back action and hidden appbar actions', () => {
+    const store = createStore({
+      novel: undefined,
+      loading: false,
+      error: 'Novel not found on the source',
+    });
+    wireStoreSelectors(store);
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    expect(screen.getByText('Novel not found on the source')).toBeTruthy();
+    expect(screen.getByTestId('novel-appbar')).toHaveTextContent(
+      'appbar-actions-hidden',
+    );
+
+    fireEvent.press(screen.getByTestId('emptyview-action-arrow-left'));
+    expect(navigation.goBack).toHaveBeenCalled();
+  });
+
+  it('keeps the error view hidden while the novel is still loading', () => {
+    const store = createStore({
+      novel: undefined,
+      loading: true,
+      error: 'Novel not found on the source',
+    });
+    wireStoreSelectors(store);
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    expect(screen.queryByText('Novel not found on the source')).toBeNull();
+    expect(screen.getByTestId('novel-appbar')).toHaveTextContent('appbar');
   });
 
   it('keeps undefined-novel safety path for download action and guarded modals', () => {
