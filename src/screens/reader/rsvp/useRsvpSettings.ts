@@ -9,7 +9,7 @@
 
 import { useMMKVObject } from 'react-native-mmkv';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { RSVP_SETTINGS } from './constants';
 
@@ -44,14 +44,18 @@ export const useRsvpSettings = (): {
   const [stored, setStored] =
     useMMKVObject<Partial<RsvpSettings>>(RSVP_SETTINGS);
 
+  // Merge reads the LATEST stored value via a ref so back-to-back patches
+  // compose even when the MMKV subscription has not re-rendered yet
+  // (stale-closure guard). The ref write lives in an effect, not render,
+  // per react-hooks/exhaustive-deps + refs-during-render lint rules.
   const storedRef = useRef(stored);
-  storedRef.current = stored;
+  useEffect(() => {
+    storedRef.current = stored;
+  }, [stored]);
 
   // Local state mirrors the normalized object so reads never see partials.
   const rsvpSettings = normalize(stored);
 
-  // Merge reads through a ref so back-to-back patches compose even when
-  // the MMKV subscription has not re-rendered yet (stale-closure guard).
   const setRsvp = useCallback(
     (patch: Partial<RsvpSettings>) => {
       setStored(normalize({ ...normalize(storedRef.current), ...patch }));
