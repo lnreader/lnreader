@@ -5,7 +5,7 @@ import {
   getNovelDownloadedChapters,
 } from '@database/queries/ChapterQueries';
 import { deleteNovelHistory } from '@database/queries/HistoryQueries';
-import { removeNovelsFromLibrary } from '@database/queries/NovelQueries';
+import { removeNovelsFromLibrarySilent } from '@database/queries/NovelQueries';
 import { useDownload } from '@hooks/persisted';
 import { History } from '@database/types';
 import { backgroundTasks } from '@services/backgroundTasks';
@@ -198,7 +198,7 @@ export const useHistoryPurge = () => {
         getDownloadedChapters: getNovelDownloadedChapters,
         deleteChaptersFiles: deleteChapters,
         deleteHistory: deleteNovelHistory,
-        removeFromLibrary: removeNovelsFromLibrary,
+        removeFromLibrary: removeNovelsFromLibrarySilent,
       });
 
       // R4 post-confirm outcome toast (round-2 review blocker 1): success

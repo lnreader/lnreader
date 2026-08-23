@@ -74,10 +74,18 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     return false;
   });
 
-  const selectedEntries = useMemo(
-    () => history.filter(item => selectedIdsSet.has(item.novelId)),
-    [history, selectedIdsSet],
-  );
+  // History rows are per-chapter: one selected novel spans several rows.
+  // Everything downstream (dialog counts, purge input) works per NOVEL,
+  // so dedupe by novelId here — first row wins, rows only carry display data.
+  const selectedNovels = useMemo(() => {
+    const byId = new Map<number, History>();
+    for (const item of history) {
+      if (selectedIdsSet.has(item.novelId) && !byId.has(item.novelId)) {
+        byId.set(item.novelId, item);
+      }
+    }
+    return [...byId.values()];
+  }, [history, selectedIdsSet]);
 
   const {
     value: purgeDialogVisible,
@@ -93,7 +101,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   const openPurgeDialogWithCounts = useCallback(async () => {
     let total = 0;
-    for (const entry of selectedEntries) {
+    for (const entry of selectedNovels) {
       try {
         const downloaded = await getNovelDownloadedChapters(entry.novelId);
         total += downloaded.length;
@@ -104,16 +112,16 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     }
     setPurgeChapterCount(total);
     openPurgeDialog();
-  }, [selectedEntries, openPurgeDialog]);
+  }, [selectedNovels, openPurgeDialog]);
 
   const handlePurge = useCallback(async () => {
     // Outcome surfacing (round-2 review blocker 1) lives INSIDE the hook —
     // it toasts the success count plus one line per failure. The screen
     // only resets selection state (double-toast bug fixed).
-    await purgeNovels(selectedEntries);
+    await purgeNovels(selectedNovels);
     setSelectedNovelIds([]);
     setPurgeChapterCount(0);
-  }, [purgeNovels, selectedEntries]);
+  }, [purgeNovels, selectedNovels]);
 
   const actionbarActions = useMemo(
     () => [
@@ -267,9 +275,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
             />
             <PurgeHistoryDialog
               visible={purgeDialogVisible}
-              novelCount={selectedEntries.length}
+              novelCount={selectedNovels.length}
               libraryNovelCount={
-                selectedEntries.filter(entry => entry.inLibrary).length
+                selectedNovels.filter(entry => entry.inLibrary).length
               }
               chapterCount={purgeChapterCount}
               onSubmit={handlePurge}
