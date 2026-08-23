@@ -524,6 +524,8 @@ export interface StringMap {
   'novelScreen.tracking': 'string';
   'novelScreen.unknownStatus': 'string';
   'novelScreen.updatedToast': 'string';
+  'readerScreen.rsvpEmpty': 'string';
+  'readerScreen.rsvpFinished': 'string';
   'readerScreen.bottomSheet.alignCenter': 'string';
   'readerScreen.bottomSheet.alignJustify': 'string';
   'readerScreen.bottomSheet.alignLeft': 'string';

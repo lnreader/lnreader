@@ -623,6 +623,8 @@
     "updatedToast": "Updated %{name}"
   },
   "readerScreen": {
+    "rsvpEmpty": "Nothing to speed-read in this chapter.",
+    "rsvpFinished": "Speed-read finished.",
     "bottomSheet": {
       "alignCenter": "Center",
       "alignJustify": "Justify",
@@ -789,7 +791,7 @@
       "other": "%{count} days"
     }
   },
-"customCodeSettings": {
+  "customCodeSettings": {
     "textManipulation": "Text Manipulation",
     "codeSnippets": "Code Snippets",
     "cssSnippets": "CSS Snippets",

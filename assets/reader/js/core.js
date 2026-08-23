@@ -166,6 +166,25 @@ window.reader = new (function () {
     console.warn = console.log;
     console.error = console.log;
   }
+  /**
+   * #1576 AC5: translate an RSVP element index into the chapter-progress
+   * percentage the existing autoSave path understands, and scroll the
+   * real DOM to that element so exit lands on the exact last-read spot.
+   */
+  this.saveRsvpPosition = elementIndex => {
+    const elements = collectReadableEntries(this.chapterElement);
+    const clamped = Math.max(0, Math.min(elementIndex, elements.length - 1));
+    const target = elements[clamped];
+    if (target) this.scrollToElement(target.element);
+    if (elements.length > 0) {
+      const pct = Math.round(((clamped + 1) / elements.length) * 100);
+      if (pct > (this.chapter.progress || 0)) {
+        this.chapter.progress = pct;
+        this.post({ type: 'save', data: pct });
+      }
+    }
+  };
+
   // end reader
 })();
 
