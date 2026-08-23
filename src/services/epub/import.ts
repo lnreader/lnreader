@@ -45,6 +45,8 @@ const insertLocalNovel = async (
       const decodedPath = decodePath(cover);
       if (await NativeFile.exists(decodedPath)) {
         await NativeFile.moveFile(decodedPath, newCoverPath);
+      } else {
+        throw new Error(`missing declared asset: ${cover}`);
       }
     }
     await updateNovelInfo({
@@ -170,6 +172,8 @@ export const importEpub = async (
           decodedPath,
           novelDir + '/' + filePath.split(/[/\\]/).pop(),
         );
+      } else {
+        throw new Error(`missing declared asset: ${filePath}`);
       }
     }
 
@@ -180,6 +184,8 @@ export const importEpub = async (
           decodedPath,
           novelDir + '/' + filePath.split(/[/\\]/).pop(),
         );
+      } else {
+        throw new Error(`missing declared asset: ${filePath}`);
       }
     }
   } catch (error) {
@@ -187,6 +193,9 @@ export const importEpub = async (
       getString('advancedSettingsScreen.importFailed'),
       (error as Error).message,
     );
+    // Rethrow so BackgroundTaskQueue.run fails the task instead of the
+    // import silently completing (#1997).
+    throw error;
   }
 
   setMeta(meta => ({

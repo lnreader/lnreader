@@ -11,11 +11,14 @@
  *   category [2], one chapter row per fixture chapter in order.
  * - AC4 anti-duplication budget: moveFile call count === existing source
  *   file count (images + css + cover) — the 50→94 MB bug class pinned.
+ *   Missing declared assets (image/css/cover) REJECT the import (#1997
+ *   symptom: images "simply skipped and not added" — silent skip replaced
+ *   by loud failure).
  * - Name fallbacks: unnamed novel → filename-derived; unnamed chapters →
  *   path-derived.
- * - AC5 silent-catch pin: injected error mid-flow → toast shown, no
- *   throw, progress terminates at 1 / isRunning false. MARKED for the
- *   follow-up PR that flips this to loud failure — do not "fix" here.
+ * - AC5 loud failure: mid-flow error → toast shown AND rejection, so
+ *   BackgroundTaskQueue.run's NativeBackgroundTasks.fail path can fire;
+ *   meta never claims a completed import (progress 1) on failure.
  */
 
 import { importEpub } from '../import';
@@ -217,7 +220,7 @@ describe('moveFile anti-duplication budget (AC4)', () => {
     expect(moveCalls).toBe(4);
   });
 
-  it('skips moveFile for sources that do not exist on disk', async () => {
+  it('rejects the import when a declared image is missing from disk (#1997)', async () => {
     const fixture = buildFixture({
       filename: 'Missing Images.epub',
       novelName: 'Miss',
@@ -233,16 +236,41 @@ describe('moveFile anti-duplication budget (AC4)', () => {
     wireMocks(fixture);
     mockParse.mockResolvedValue(fixture.parsedNovel);
 
-    await runImport(fixture);
+    // Issue #1997 symptom: images "simply skipped and not added" while the
+    // import reported success. Pre-fix this resolved silently; now it must
+    // reject so the task queue fails the import.
+    await expect(runImport(fixture)).rejects.toThrow(
+      'missing declared asset: img/GONE.png',
+    );
 
-    // Only present.png moves (plus no cover): exactly 1.
+    // Assets before the miss still moved — exactly the present one.
     expect(NativeFileMock.moveFile).toHaveBeenCalledTimes(1);
     expect(NativeFileMock.moveFile.mock.calls[0][0]).toContain('present.png');
   });
+
+  it('rejects the import when the declared cover is missing from disk (#1997)', async () => {
+    const fixture = buildFixture({
+      filename: 'No Cover.epub',
+      novelName: 'NC',
+      chapters: [{ path: 'epub/c1.xhtml' }],
+      images: [],
+      css: [],
+      cover: 'img/cover.jpg',
+    });
+    fixture.existingFiles = fixture.existingFiles.filter(
+      f => !f.includes('cover.jpg'),
+    );
+    wireMocks(fixture);
+    mockParse.mockResolvedValue(fixture.parsedNovel);
+
+    await expect(runImport(fixture)).rejects.toThrow(
+      'missing declared asset: img/cover.jpg',
+    );
+  });
 });
 
-describe('silent-catch pin (AC5 — CURRENT behavior, flips in follow-up)', () => {
-  it('toasts and still terminates progress at 1/isRunning:false on mid-flow error — NO throw', async () => {
+describe('loud failure (AC5 — silent-catch flipped, #1997)', () => {
+  it('toasts AND rejects on mid-flow error so the queue can fail the task', async () => {
     const fixture = buildFixture({
       filename: 'Broken.epub',
       novelName: 'Broke',
@@ -253,8 +281,9 @@ describe('silent-catch pin (AC5 — CURRENT behavior, flips in follow-up)', () =
     wireMocks(fixture);
     mockParse.mockRejectedValue(new Error('native parse exploded'));
 
-    // MUST NOT reject — that is the behavior being pinned.
-    await expect(runImport(fixture)).resolves.toBeDefined();
+    // MUST reject: BackgroundTaskQueue.run marks the task failed
+    // (NativeBackgroundTasks.fail) only when the executor throws.
+    await expect(runImport(fixture)).rejects.toThrow('native parse exploded');
 
     expect(showToast).toHaveBeenCalledWith(
       'advancedSettingsScreen.importFailed',
@@ -262,7 +291,7 @@ describe('silent-catch pin (AC5 — CURRENT behavior, flips in follow-up)', () =
     );
   });
 
-  it('progress terminal state: last meta update sets progress 1, isRunning false', async () => {
+  it('never claims a completed import on failure: terminal meta has no progress 1', async () => {
     const fixture = buildFixture({
       filename: 'Terminal.epub',
       novelName: 'Term',
@@ -273,9 +302,20 @@ describe('silent-catch pin (AC5 — CURRENT behavior, flips in follow-up)', () =
     wireMocks(fixture);
     mockParse.mockRejectedValue(new Error('boom'));
 
-    const { metas } = await runImport(fixture);
-    const terminal = metas[metas.length - 1];
-    expect(terminal.progress).toBe(1);
-    expect(terminal.isRunning).toBe(false);
+    // runImport awaits importEpub, so its { metas } result is unreachable
+    // on rejection — drive setMeta directly to inspect the terminal meta.
+    const captured: Record<string, unknown>[] = [];
+    const run = importEpub({ uri: '/s/b.epub', filename: fixture.filename }, ((
+      transform: (m: Record<string, unknown>) => Record<string, unknown>,
+    ) => {
+      captured.push(transform(captured[captured.length - 1] ?? {}));
+    }) as never);
+
+    await expect(run).rejects.toThrow('boom');
+
+    // The unconditional "progress 1 / isRunning false" terminal update was
+    // the silent-completion half of the bug — it must not run on failure.
+    const terminal = captured[captured.length - 1];
+    expect(terminal.progress).not.toBe(1);
   });
 });
