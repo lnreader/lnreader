@@ -72,16 +72,27 @@ describe('AC2 — absolute asset URIs independent of baseUrl (#1999)', () => {
   );
 
   it.each([
-    ['online + site', { isDownloaded: false, pluginSite: SITE }],
-    ['downloaded', { isDownloaded: true, pluginSite: undefined }],
-    ['online site-less', { isDownloaded: false, pluginSite: undefined }],
-  ])('%s: asset URIs stay absolute file:///android_asset', (_label, cohort) => {
-    // Whatever origin this cohort gets, the template must keep absolute
-    // asset URIs — assert the resolver result AND the template contract.
-    const baseUrl = resolveBaseUrl(cohort);
-    expect(typeof baseUrl === 'string' || baseUrl === undefined).toBe(true);
+    ['online + site', { isDownloaded: false, pluginSite: SITE }, SITE] as const,
+    [
+      'downloaded',
+      { isDownloaded: true, pluginSite: undefined },
+      FALLBACK_BASE_URL,
+    ] as const,
+    [
+      'online site-less',
+      { isDownloaded: false, pluginSite: undefined },
+      FALLBACK_BASE_URL,
+    ] as const,
+  ])(
+    '%s: asset URIs stay absolute file:///android_asset',
+    (_label, cohort, expectedBaseUrl) => {
+      // Pin the exact expected origin for this cohort — a real assertion that
+      // fails if resolveBaseUrl drifts — then assert the template contract:
+      // the asset references must never depend on baseUrl.
+      expect(resolveBaseUrl(cohort)).toBe(expectedBaseUrl);
 
-    expect(readerSource).toContain("'file:///android_asset'");
-    expect(readerSource).toMatch(/file:\/\/\/android_asset\/fonts\/\$\{/);
-  });
+      expect(readerSource).toContain("'file:///android_asset'");
+      expect(readerSource).toMatch(/file:\/\/\/android_asset\/fonts\/\$\{/);
+    },
+  );
 });

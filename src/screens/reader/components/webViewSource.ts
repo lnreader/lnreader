@@ -20,12 +20,13 @@ export const resolveBaseUrl = ({
 }): string | undefined => {
   // A null/unset flag behaves like "not downloaded" for origin purposes:
   // only a positively-downloaded chapter with no site falls back, and an
-  // online chapter needs a positively-present site to keep it.
+  // online chapter needs a positively-present site to keep it. Every other
+  // path lands on the fallback — the origin is never left opaque.
   if (!isDownloaded && pluginSite) {
     return pluginSite;
   }
   if (isDownloaded) {
     return FALLBACK_BASE_URL;
   }
-  return pluginSite ? undefined : FALLBACK_BASE_URL;
+  return FALLBACK_BASE_URL;
 };
