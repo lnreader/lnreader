@@ -41,10 +41,9 @@ const RsvpTab: React.FC = () => {
       </View>
       <View style={{ marginTop: 16 }}>
         <Button
-          title={getString('readerScreen.rsvpChunkSize').replace(
-            '%{size}',
-            String(rsvpSettings.chunkSize),
-          )}
+          title={getString('readerScreen.rsvpChunkSize', {
+            size: rsvpSettings.chunkSize,
+          })}
           onPress={cycleChunk}
         />
       </View>
