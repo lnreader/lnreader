@@ -18,14 +18,7 @@ import NativeZipArchive from '@modules/native-zip-archive';
 import { epub } from '@modules/nitro-epub';
 import { showToast } from '@utils/showToast';
 import { createImportProgressReporter } from './importProgress';
-
-const decodePath = (path: string) => {
-  try {
-    return decodeURI(path);
-  } catch {
-    return path;
-  }
-};
+import { chapterNameFallback, decodePath } from './helpers';
 
 const insertLocalNovel = async (
   name: string,
@@ -155,7 +148,7 @@ export const importEpub = async (
       for (let i = 0; i < novel.chapters?.length; i++) {
         const chapter = novel.chapters[i];
         if (!chapter.name) {
-          chapter.name = chapter.path.split(/[/\\]/).pop() || 'unknown';
+          chapter.name = chapterNameFallback(chapter.path);
         }
 
         await insertLocalChapter(novelId, i, chapter.name, chapter.path, now);
