@@ -15,7 +15,7 @@ const RsvpTab: React.FC = () => {
 
   const send = (command: string, arg?: number) => {
     webViewRef.current?.injectJavaScript(
-      `window.rsvp?.${command}?.${arg !== undefined ? arg : ''}); true;`,
+      `window.rsvp?.${command}?.(${arg !== undefined ? arg : ''}); true;`,
     );
   };
 
