@@ -147,11 +147,12 @@ describe('reader TTS traversal', () => {
     expect(normalizeText('He said “run!”’')).toBe('He said “run!');
     // Interior quotes are untouched.
     expect(normalizeText('The "best" part')).toBe('The "best" part');
-    // Whitespace handling matches upstream PR #1869's ordering: the quote
-    // strip runs before whitespace collapse, so only quotes adjacent to the
-    // string edges are removed. Real chapter innerText rarely has padding,
-    // so we pin the faithful adjacency behavior rather than inventing
-    // stricter semantics.
-    expect(normalizeText('"Padded quote."')).toBe('Padded quote.');
+    // Edge whitespace can shield quotes from the first strip: a <br> at a
+    // paragraph edge makes innerText start or end with a newline, and
+    // source padding survives until trim. normalizeText therefore strips
+    // again after trimming.
+    expect(normalizeText('\n“Padded quote.”')).toBe('Padded quote.');
+    expect(normalizeText('“Padded quote.”\n')).toBe('Padded quote.');
+    expect(normalizeText(' "Padded quote." ')).toBe('Padded quote.');
   });
 });
