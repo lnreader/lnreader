@@ -50,6 +50,19 @@ describe('resolveBaseUrl — fallback-only matrix (#1999)', () => {
       FALLBACK_BASE_URL,
     );
   });
+
+  it('null isDownloaded + site keeps the origin (null behaves as not-downloaded)', () => {
+    expect(resolveBaseUrl({ isDownloaded: null, pluginSite: SITE })).toBe(SITE);
+  });
+
+  it('null isDownloaded + no site falls back (never leaves the origin opaque)', () => {
+    expect(resolveBaseUrl({ isDownloaded: null, pluginSite: undefined })).toBe(
+      FALLBACK_BASE_URL,
+    );
+    expect(resolveBaseUrl({ isDownloaded: null, pluginSite: '' })).toBe(
+      FALLBACK_BASE_URL,
+    );
+  });
 });
 
 describe('AC2 — absolute asset URIs independent of baseUrl (#1999)', () => {
