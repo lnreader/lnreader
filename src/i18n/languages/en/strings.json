@@ -623,6 +623,9 @@
     "updatedToast": "Updated %{name}"
   },
   "readerScreen": {
+    "rsvpStart": "Start speed-reading",
+    "rsvpExit": "Exit",
+    "rsvpChunkSize": "Chunk size: %{size}",
     "rsvpEmpty": "Nothing to speed-read in this chapter.",
     "rsvpFinished": "Speed-read finished.",
     "bottomSheet": {
