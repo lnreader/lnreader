@@ -212,8 +212,13 @@ window.tts = new (function () {
   this.normalizeText = text => {
     if (!text) return '';
     return text
+      .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
       .replace(/\s+/g, ' ')
       .replace(/\s*([.,!?;:])\s*/g, '$1 ')
+      .trim()
+      // edge whitespace (e.g. a <br> newline in innerText) can shield quotes
+      // from the first strip, so strip again once the edges are clean
+      .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
       .trim();
   };
 

@@ -30,6 +30,7 @@ class TestElement {
 
 type TtsTraversal = {
   getAllReadableElements(element: TestElement): TestElement[];
+  normalizeText: (text: string) => string;
 };
 
 const text = (value: string): TestNode => ({
@@ -61,6 +62,9 @@ const loadTtsTraversal = (chapterElement: TestElement): TtsTraversal => {
     window: {},
   };
 
+  // normalizeSharedText doesn't exist on this base — the tts object defines
+  // this.normalizeText inline (line ~212), which IS the shared normalizer
+  // post-#1576 refactor. The tts slice already contains it.
   runInNewContext(core.slice(start, end + closing.length), context);
 
   if (!context.window.tts) {
@@ -128,5 +132,27 @@ describe('reader TTS traversal', () => {
       'First paragraph',
       'Second paragraph',
     ]);
+  });
+
+  it('strips leading and trailing quotes from normalized text (#2008)', () => {
+    const { normalizeText } = loadTtsTraversal(
+      element('div', element('p', element('span', text('placeholder')))),
+    );
+
+    // Straight, curly, and mixed quote pairs — including a lone trailing
+    // quote from an unclosed quotation spanning paragraphs.
+    expect(normalizeText('"Hello there."')).toBe('Hello there.');
+    expect(normalizeText('“Hello there.”')).toBe('Hello there.');
+    expect(normalizeText("'tis the season'")).toBe('tis the season');
+    expect(normalizeText('He said “run!”’')).toBe('He said “run!');
+    // Interior quotes are untouched.
+    expect(normalizeText('The "best" part')).toBe('The "best" part');
+    // Edge whitespace can shield quotes from the first strip: a <br> at a
+    // paragraph edge makes innerText start or end with a newline, and
+    // source padding survives until trim. normalizeText therefore strips
+    // again after trimming.
+    expect(normalizeText('\n“Padded quote.”')).toBe('Padded quote.');
+    expect(normalizeText('“Padded quote.”\n')).toBe('Padded quote.');
+    expect(normalizeText(' "Padded quote." ')).toBe('Padded quote.');
   });
 });
