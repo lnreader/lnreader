@@ -11,6 +11,7 @@ import color from 'color';
 
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
+import { showToast } from '@utils/showToast';
 
 import { getPlugin } from '@plugins/pluginManager';
 import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';
@@ -434,8 +435,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     chapter,
     chapterGeneralSettings,
     processedHtml,
-      customJS,
-      customCSS,
+    customJS,
+    customCSS,
     initialReaderSettings,
     novel,
     plugin,
@@ -446,31 +447,31 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   ]);
 
   return (
-      <>
-    <WebView
-      ref={webViewRef}
-      onTouchStart={onTouchStart}
-      style={{ backgroundColor: readerSettings.theme }}
-      allowFileAccess={true}
-      originWhitelist={['*']}
-      scalesPageToFit={true}
-      showsVerticalScrollIndicator={false}
-      javaScriptEnabled={true}
-      webviewDebuggingEnabled={__DEV__}
-      onShouldStartLoadWithRequest={({ url }) => {
-        if (isPluginIssueReportUrl(url)) {
-          void Linking.openURL(url);
-          return false;
-        }
-        if (isChapterRefreshUrl(url)) {
-          refetch();
-          return false;
-        }
-        return true;
-      }}
-      onLoadEnd={() => {
-        webViewRef.current?.injectJavaScript(
-          `if (window.reader && window.reader.batteryLevel) {
+    <>
+      <WebView
+        ref={webViewRef}
+        onTouchStart={onTouchStart}
+        style={{ backgroundColor: readerSettings.theme }}
+        allowFileAccess={true}
+        originWhitelist={['*']}
+        scalesPageToFit={true}
+        showsVerticalScrollIndicator={false}
+        javaScriptEnabled={true}
+        webviewDebuggingEnabled={__DEV__}
+        onShouldStartLoadWithRequest={({ url }) => {
+          if (isPluginIssueReportUrl(url)) {
+            void Linking.openURL(url);
+            return false;
+          }
+          if (isChapterRefreshUrl(url)) {
+            refetch();
+            return false;
+          }
+          return true;
+        }}
+        onLoadEnd={() => {
+          webViewRef.current?.injectJavaScript(
+            `if (window.reader && window.reader.batteryLevel) {
             window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
           }`,
           );
@@ -576,6 +577,27 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               }
               navigateChapter('PREV');
               break;
+            case 'rsvp-position': {
+              // R5: map the RSVP chunk position onto chapter progress at
+              // element granularity — same units TTS queues use.
+              const data = event.data as
+                | { elementIndex?: unknown; totalChunks?: unknown }
+                | undefined;
+              const elementIndex =
+                typeof data?.elementIndex === 'number' ? data.elementIndex : 0;
+              webViewRef.current?.injectJavaScript(
+                `window.reader?.saveRsvpPosition?.(${elementIndex}); true;`,
+              );
+              break;
+            }
+            case 'rsvp-empty': {
+              showToast(getString('readerScreen.rsvpEmpty'));
+              break;
+            }
+            case 'rsvp-finished': {
+              showToast(getString('readerScreen.rsvpFinished'));
+              break;
+            }
             case 'save':
               if (event.data && typeof event.data === 'number') {
                 saveProgress(event.data);

@@ -166,8 +166,92 @@ window.reader = new (function () {
     console.warn = console.log;
     console.error = console.log;
   }
+  /**
+   * #1576 AC5: translate an RSVP element index into the chapter-progress
+   * percentage the existing autoSave path understands, and scroll the
+   * real DOM to that element so exit lands on the exact last-read spot.
+   */
+  this.saveRsvpPosition = elementIndex => {
+    const elements = collectReadableEntries(this.chapterElement);
+    const clamped = Math.max(0, Math.min(elementIndex, elements.length - 1));
+    const target = elements[clamped];
+    if (target) this.scrollToElement(target.element);
+    if (elements.length > 0) {
+      const pct = Math.round(((clamped + 1) / elements.length) * 100);
+      if (pct > (this.chapter.progress || 0)) {
+        this.chapter.progress = pct;
+        this.post({ type: 'save', data: pct });
+      }
+    }
+  };
+
   // end reader
 })();
+
+/**
+ * Shared readable-content collector (#1576): the ONE DOM walk for both
+ * TTS and RSVP. Returns [{element, text}] in document order, where text
+ * is the normalized innerText of each readable element.
+ */
+function normalizeSharedText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([.,!?;:])\s*/g, '$1 ')
+    .trim();
+}
+
+function collectReadableEntries(chapterElement) {
+  const readableNodeNames = [
+    '#text',
+    'B',
+    'I',
+    'SPAN',
+    'EM',
+    'BR',
+    'STRONG',
+    'A',
+    'MARK',
+  ];
+
+  const readable = element => {
+    const ele = element;
+    if (ele.nodeName !== 'SPAN' && readableNodeNames.includes(ele.nodeName)) {
+      return false;
+    }
+    if (!ele.hasChildNodes()) {
+      return false;
+    }
+    for (let i = 0; i < ele.childNodes.length; i++) {
+      if (!readableNodeNames.includes(ele.childNodes.item(i).nodeName)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const elements = [];
+  const traverse = el => {
+    if (!el) return;
+    if (readable(el)) {
+      elements.push(el);
+      // innerText already includes readable descendants, so descending any
+      // further would add overlapping text to the speech queue.
+      return;
+    }
+    for (let i = 0; i < el.children.length; i++) {
+      traverse(el.children[i]);
+    }
+  };
+  traverse(chapterElement);
+
+  return elements
+    .map(element => ({
+      element,
+      text: normalizeSharedText(element.innerText),
+    }))
+    .filter(entry => !!entry.text);
+}
 
 window.tts = new (function () {
   this.readableNodeNames = [
@@ -209,13 +293,7 @@ window.tts = new (function () {
     return true;
   };
 
-  this.normalizeText = text => {
-    if (!text) return '';
-    return text
-      .replace(/\s+/g, ' ')
-      .replace(/\s*([.,!?;:])\s*/g, '$1 ')
-      .trim();
-  };
+  this.normalizeText = normalizeSharedText;
 
   // if can find a readable node, else stop tts
   // FIXED: Added proper boundary checks to prevent stack overflow
@@ -297,12 +375,8 @@ window.tts = new (function () {
   this.start = element => {
     const startElement = element ?? reader.chapterElement;
 
-    const readableEntries = this.getAllReadableElements(reader.chapterElement)
-      .map(readableElement => ({
-        element: readableElement,
-        text: this.normalizeText(readableElement.innerText),
-      }))
-      .filter(entry => !!entry.text);
+    // Shared collector (#1576): ONE DOM walk feeding both TTS and RSVP.
+    const readableEntries = collectReadableEntries(reader.chapterElement);
     this.allReadableElements = readableEntries.map(entry => entry.element);
     this.totalElements = this.allReadableElements.length;
     this.textQueue = readableEntries.map(entry => entry.text);
@@ -326,23 +400,8 @@ window.tts = new (function () {
   };
 
   // Get all readable elements in order
-  this.getAllReadableElements = element => {
-    const elements = [];
-    const traverse = el => {
-      if (!el) return;
-      if (this.readable(el)) {
-        elements.push(el);
-        // innerText already includes readable descendants, so descending any
-        // further would add overlapping text to the speech queue.
-        return;
-      }
-      for (let i = 0; i < el.children.length; i++) {
-        traverse(el.children[i]);
-      }
-    };
-    traverse(element);
-    return elements;
-  };
+  this.getAllReadableElements = element =>
+    collectReadableEntries(element).map(entry => entry.element);
 
   this.resume = () => {
     if (!this.started) return;
@@ -986,4 +1045,210 @@ window.addEventListener('load', () => {
       window.readerSearch.search(searchQuery, searchIndex);
     }
   });
+})();
+
+// --- RSVP bridge (#1576) -------------------------------------------------
+// window.rsvp: speed-reader mode reusing the SAME collectReadableEntries
+// output as TTS (no second DOM walk). The cadence timer lives here in the
+// WebView; the native side only hears 'rsvp-position' on pause/exit/save —
+// never per-flash. Chunking math mirrors the pure functions tested natively
+// (chunkSplitter.ts / pauseCalculator.ts): chunks of 1–3 words, >12-char
+// tokens split at 12 chars with continuation flags, punctuation pauses.
+window.rsvp = new (function () {
+  this.active = false;
+  this.paused = false;
+  this.entries = []; // [{ element, text }] from the shared collector
+  this.chunks = []; // [{ text, elementIndex, continuesNext, continuationOfPrev }]
+  this.chunkIndex = 0;
+  this.wpm = 250;
+  this.chunkSize = 1;
+  this.timerId = null;
+
+  const FLASH_OVERLAY_ID = 'RSVP-Overlay';
+
+  const buildChunks = () => {
+    const chunks = [];
+    for (let e = 0; e < this.entries.length; e++) {
+      const words = this.entries[e].text.split(/\s+/).filter(Boolean);
+      if (!words.length) {
+        // Non-text node: flash an honest placeholder so progress advances.
+        chunks.push({
+          text: '[image]',
+          elementIndex: e,
+          continuesNext: false,
+          continuationOfPrev: false,
+        });
+        continue;
+      }
+      let group = [];
+      for (let w = 0; w < words.length; w++) {
+        const word = words[w];
+        if (word.length > 12) {
+          if (group.length) {
+            chunks.push({
+              text: group.join(' '),
+              elementIndex: e,
+              continuesNext: false,
+              continuationOfPrev: false,
+            });
+            group = [];
+          }
+          for (let s = 0; s < word.length; s += 12) {
+            const piece = word.slice(s, s + 12);
+            chunks.push({
+              text: s === 0 ? piece : '…' + piece,
+              elementIndex: e,
+              continuesNext: s + 12 < word.length,
+              continuationOfPrev: s > 0,
+            });
+          }
+          continue;
+        }
+        group.push(word);
+        if (group.length === this.chunkSize || w === words.length - 1) {
+          chunks.push({
+            text: group.join(' '),
+            elementIndex: e,
+            continuesNext: false,
+            continuationOfPrev: false,
+          });
+          group = [];
+        }
+      }
+    }
+    return chunks;
+  };
+
+  const pauseFor = chunk => {
+    const base = 60000 / Math.max(1, this.wpm);
+    const last = chunk.text.charAt(chunk.text.length - 1);
+    let multiplier = 1;
+    if (last === '\n') multiplier = 3;
+    else if ('.!?'.includes(last)) multiplier = 2.5;
+    else if (',;:'.includes(last)) multiplier = 1.5;
+    return Math.round(base * multiplier);
+  };
+
+  const renderFlash = () => {
+    const chunk = this.chunks[this.chunkIndex];
+    if (!chunk) return;
+    let overlay = document.getElementById(FLASH_OVERLAY_ID);
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = FLASH_OVERLAY_ID;
+      overlay.style.cssText =
+        'position:fixed;top:33%;left:0;right:0;display:flex;' +
+        'flex-direction:column;align-items:center;z-index:9999;' +
+        'font-size:1.6em;';
+      document.body.appendChild(overlay);
+    }
+    const orp = Math.max(0, Math.floor((chunk.text.length - 1) / 2));
+    overlay.innerHTML =
+      '<span>' +
+      chunk.text.slice(0, orp) +
+      '</span><span style="color:#d32f2f">' +
+      chunk.text.charAt(orp) +
+      '</span><span>' +
+      chunk.text.slice(orp + 1) +
+      '</span>';
+  };
+
+  const step = () => {
+    if (!this.active || this.paused) return;
+    const chunk = this.chunks[this.chunkIndex];
+    if (!chunk) {
+      this.exit();
+      reader.post({ type: 'rsvp-finished' });
+      return;
+    }
+    renderFlash();
+    this.chunkIndex += 1;
+    this.timerId = setTimeout(step, pauseFor(chunk));
+  };
+
+  const clearTimer = () => {
+    if (this.timerId !== null) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
+  };
+
+  const removeOverlay = () => {
+    const overlay = document.getElementById(FLASH_OVERLAY_ID);
+    if (overlay) overlay.remove();
+  };
+
+  this.start = () => {
+    if (this.active) return;
+    // Shared collector (#1576): same walk TTS uses — no duplicate traversal.
+    this.entries = collectReadableEntries(reader.chapterElement);
+    this.chunks = buildChunks.call(this);
+    this.chunkIndex = 0;
+    if (!this.chunks.length) {
+      reader.post({ type: 'rsvp-empty' });
+      return;
+    }
+    this.active = true;
+    this.paused = false;
+    step();
+  };
+
+  this.pause = () => {
+    if (!this.active || this.paused) return;
+    this.paused = true;
+    clearTimer();
+    // Position update to native ONLY on pause/exit/save ticks (R2).
+    const chunk = this.chunks[Math.max(0, this.chunkIndex - 1)];
+    reader.post({
+      type: 'rsvp-position',
+      data: {
+        elementIndex: chunk ? chunk.elementIndex : 0,
+        chunkIndex: Math.max(0, this.chunkIndex - 1),
+        totalChunks: this.chunks.length,
+      },
+    });
+  };
+
+  this.resume = () => {
+    if (!this.active || !this.paused) return;
+    this.paused = false;
+    step();
+  };
+
+  this.setWpm = wpm => {
+    const parsed = Number(wpm);
+    if (Number.isFinite(parsed)) {
+      this.wpm = Math.min(800, Math.max(150, Math.round(parsed)));
+    }
+  };
+
+  this.setChunkSize = size => {
+    const parsed = Number(size);
+    if (Number.isFinite(parsed) && [1, 2, 3].includes(Math.round(parsed))) {
+      this.chunkSize = Math.round(parsed);
+    }
+  };
+
+  this.exit = () => {
+    const wasActive = this.active;
+    const chunk = this.chunks[Math.max(0, this.chunkIndex - 1)];
+    clearTimer();
+    removeOverlay();
+    this.active = false;
+    this.paused = false;
+    this.entries = [];
+    this.chunks = [];
+    this.chunkIndex = 0;
+    if (wasActive) {
+      // Final position so normal reading can scroll to the exact element.
+      reader.post({
+        type: 'rsvp-position',
+        data: {
+          elementIndex: chunk ? chunk.elementIndex : 0,
+          chunkIndex: Math.max(0, this.chunkIndex - 1),
+          totalChunks: 0,
+        },
+      });
+    }
+  };
 })();
