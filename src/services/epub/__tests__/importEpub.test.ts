@@ -273,14 +273,8 @@ describe('silent-catch pin (AC5 — CURRENT behavior, flips in follow-up)', () =
     wireMocks(fixture);
     mockParse.mockRejectedValue(new Error('boom'));
 
-    const captured: Record<string, unknown>[] = [];
-    await importEpub({ uri: '/s/b.epub', filename: fixture.filename }, ((
-      transform: (m: Record<string, unknown>) => Record<string, unknown>,
-    ) => {
-      captured.push(transform(captured[captured.length - 1] ?? {}));
-    }) as never);
-
-    const terminal = captured[captured.length - 1];
+    const { metas } = await runImport(fixture);
+    const terminal = metas[metas.length - 1];
     expect(terminal.progress).toBe(1);
     expect(terminal.isRunning).toBe(false);
   });

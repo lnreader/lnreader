@@ -1,10 +1,10 @@
 /**
- * RED 1b — chapter name-fallback unit tests (spec-1997 AC1, R1).
+ * Chapter name-fallback unit tests (spec-1997 AC1, R1).
  *
- * Contract (extracted from import.ts's inline fallback):
- *   path.split(/[/\\]/).pop() || 'unknown'
- * - Takes the last path segment across both separator styles.
- * - Returns 'unknown' when the segment is empty (trailing separator).
+ * Contract: the fallback must survive any path shape a chapter file can
+ * arrive in — both separator styles — and still yield a speakable/usable
+ * name when the segment is empty (trailing separator), rather than an
+ * empty string.
  */
 
 import { chapterNameFallback } from '../helpers';

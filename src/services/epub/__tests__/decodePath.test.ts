@@ -5,9 +5,6 @@
  * - URI-encoded input decodes (decodeURI semantics).
  * - Malformed % sequences pass through unchanged (no throw).
  * - Plain paths pass through untouched.
- *
- * These tests import from '../helpers', which does not exist yet —
- * documented red.
  */
 
 import { decodePath } from '../helpers';
