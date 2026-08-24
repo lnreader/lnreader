@@ -10,18 +10,18 @@ typed progress phases. Errors are data; nothing in this module toasts.
 
 ## Pinned cases (covered by port.test.ts)
 
-| Symptom                                                            | Fixture / test                                                                  |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| Novel imported but not in library / missing local flags            | AC3 happy path — "returns ok with novelId/name/chapterCount"                    |
-| Category not auto-assigned on local import                         | AC3 happy path — same test, category asserted via NovelQueries mock             |
-| Unnamed novel imported under a garbage internal name               | Name-fallback contract (helpers) + happy-path name assertion                    |
-| 50 MB EPUB balloons to ~94 MB after import                         | AC4 moveFile budget — operation counts pinned per cohort in port tests          |
-| Missing image aborts the whole import                              | image-move-partial test — failed moves collected, not fatal                     |
-| Import failure invisible: toast fires, progress completes silently | Silent-catch is GONE at this layer: every failure returns `{ok: false, errors}` |
-| Corrupt archive crashes the app                                    | zip-corrupt test — rejection maps to `{kind: 'zip-corrupt'}`                    |
-| Source file missing mid-flow                                       | file-not-found test — maps to data, no throw                                    |
-| Parse explodes on malformed structure                              | parse-failure test — error message carried as data                              |
-| Database insert fails at novel or chapter stage                    | db-write-failure tests — stage attributed                                       |
+| Symptom                                                                     | Fixture / test                                                                                                                                    |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Novel imported but not in library / missing local flags                     | AC3 happy path — "returns ok with novelId/name/chapterCount"                                                                                      |
+| Category not auto-assigned on local import                                  | AC3 happy path — same test, category asserted via NovelQueries mock                                                                               |
+| Unnamed novel imported under a garbage internal name                        | Name-fallback contract (helpers) + happy-path name assertion                                                                                      |
+| 50 MB EPUB balloons to ~94 MB after import                                  | AC4 moveFile budget — operation counts pinned per cohort in port tests                                                                            |
+| Missing image aborts the whole import (regression, master skipped silently) | moveFile budget test — missing sources skipped WITH a warnings entry (`image-move-skipped`), existing sources moved exactly once, import succeeds |
+| Import failure invisible: toast fires, progress completes silently          | Silent-catch is GONE at this layer: every failure returns `{ok: false, errors}`                                                                   |
+| Corrupt archive crashes the app                                             | zip-corrupt test — rejection maps to `{kind: 'zip-corrupt'}`                                                                                      |
+| Source file missing mid-flow                                                | file-not-found test — maps to data, no throw                                                                                                      |
+| Parse explodes on malformed structure                                       | parse-failure test — error message carried as data                                                                                                |
+| Database insert fails at novel or chapter stage                             | db-write-failure tests — stage attributed                                                                                                         |
 
 ## Known gaps (deliberately deferred — do NOT assume covered)
 

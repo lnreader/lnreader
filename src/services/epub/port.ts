@@ -43,8 +43,11 @@ export type EpubError =
   | { kind: 'image-move-partial'; moved: string[]; failed: string[] }
   | { kind: 'db-write-failure'; stage: 'novel' | 'chapter' };
 
+/** Non-fatal observations: the operation succeeded, but not perfectly. */
+export type EpubWarning = { kind: 'image-move-skipped'; paths: string[] };
+
 export type Result<T> =
-  | { ok: true; value: T }
+  | { ok: true; value: T; warnings?: EpubWarning[] }
   | { ok: false; errors: EpubError[] };
 
 export type ProgressPhase = 'copy' | 'extract' | 'parse' | 'db' | 'images';
@@ -188,6 +191,7 @@ export const importNovel = async (
     report('images', 0, novel.imagePaths.length + novel.cssPaths.length);
     const moved: string[] = [];
     const failedMoves: string[] = [];
+    const skippedSources: string[] = [];
 
     for (const filePath of [...novel.imagePaths, ...novel.cssPaths]) {
       const decodedPath = decodePath(filePath);
@@ -202,7 +206,9 @@ export const importNovel = async (
           failedMoves.push(filePath);
         }
       } else {
-        failedMoves.push(filePath);
+        // Missing source: master parity on outcomes (skip), but the skip
+        // is visible as data per ruling 83857ea.
+        skippedSources.push(filePath);
       }
     }
 
@@ -224,6 +230,11 @@ export const importNovel = async (
         name: novel.name,
         chapterCount: totalChapters,
       },
+      ...(skippedSources.length > 0
+        ? {
+            warnings: [{ kind: 'image-move-skipped', paths: skippedSources }],
+          }
+        : {}),
     };
   } catch (error) {
     // Anything unclassified still surfaces as data, never swallowed.
@@ -392,7 +403,10 @@ export const exportNovel = async (
     const novel = getNovelById(novelId);
     const pluginId = novel?.pluginId ?? 'local';
     const epubChapters: EpubExportChapter[] = chapters.map(chapter => ({
-      title: chapter.name ?? '',
+      title:
+        chapter.chapterNumber != null
+          ? `${chapter.chapterNumber} — ${chapter.name ?? ''}`
+          : chapter.name ?? '',
       htmlPath: `${NOVEL_STORAGE}/${pluginId}/${chapter.novelId}/${chapter.id}/index.html`,
       novelId: String(chapter.novelId),
       chapterId: String(chapter.id),
@@ -404,7 +418,7 @@ export const exportNovel = async (
 
     report('copy', 0, chapters.length);
     const result = await epub.exportEpub(
-      buildExportMetadata(novel, novelId, pluginId),
+      buildExportMetadata(novel, novelId, pluginId, options),
       epubChapters,
       tempEpubPath,
       async (completedChapters: number, totalChapters: number) => {
@@ -468,6 +482,7 @@ const buildExportMetadata = (
     | undefined,
   novelId: number,
   pluginId: string,
+  options: ExportOptions,
 ): EpubExportMetadata => ({
   title: novel?.name ?? `novel-${novelId}`,
   language: 'en',
@@ -475,6 +490,6 @@ const buildExportMetadata = (
   description: novel?.summary ?? '',
   author: novel?.author ?? '',
   bookId: `urn:lnreader:${pluginId}:${novelId}`,
-  stylesheet: '',
-  javascript: '',
+  stylesheet: options.applyReaderTheme ? '[reader-theme]' : '',
+  javascript: options.includeCustomJs ? '[custom-js]' : '',
 });

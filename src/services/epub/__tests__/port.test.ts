@@ -17,6 +17,10 @@ import { importNovel, exportNovel } from '../port';
 import { buildFixture } from '../fixtures/generator';
 import NativeFile from '@modules/native-file';
 import NativeZipArchive from '@modules/native-zip-archive';
+import { updateNovelCategoryById } from '@database/queries/NovelQueries';
+
+// Captured insert values let tests assert library flags on real rows.
+const capturedInsertValues: Record<string, unknown>[] = [];
 
 jest.mock('@modules/native-file', () => ({
   __esModule: true,
@@ -105,9 +109,12 @@ const wireHappyFilesystem = (
     insertId += 1;
     return await tx({
       insert: () => ({
-        values: () => ({
-          run: async () => ({ insertId: currentId }),
-        }),
+        values: (v: Record<string, unknown>) => {
+          capturedInsertValues.push(v);
+          return {
+            run: async () => ({ insertId: currentId }),
+          };
+        },
       }),
     });
   });
@@ -150,6 +157,12 @@ describe('importNovel — interface (AC3 happy + phases)', () => {
     expect(phases).toContain('parse');
     expect(phases).toContain('db');
     expect(phases.indexOf('images')).toBeGreaterThan(phases.indexOf('parse'));
+
+    // CASES.md claims backed by real assertions.
+    expect(updateNovelCategoryById).toHaveBeenCalledWith(100, [2]);
+    const novelInsert = capturedInsertValues.find(v => 'inLibrary' in v);
+    expect(novelInsert?.inLibrary).toBe(true);
+    expect(novelInsert?.isLocal).toBe(true);
   });
 
   it('zip-corrupt: unzip rejection maps to { kind: zip-corrupt }', async () => {
@@ -269,12 +282,17 @@ describe('importNovel — interface (AC3 happy + phases)', () => {
       undefined,
     );
 
-    // The GONE image surfaces as image-move-partial data, but every
-    // existing source still moves exactly once.
-    expect(result.ok).toBe(false);
-    if (result.ok) throw new Error('expected errors');
-    const partial = result.errors.find(e => e.kind === 'image-move-partial');
-    expect(partial).toBeDefined();
+    // Missing sources are a skip per ruling 83857ea: the import succeeds
+    // and the skip is visible as data. The budget below is the actual
+    // regression guard.
+    expect(result.ok).toBe(true);
+    // Ruling 83857ea: the skip is visible as data, not silent.
+    if (!result.ok) throw new Error('expected ok');
+    const skippedWarning = result.warnings?.find(
+      w => w.kind === 'image-move-skipped',
+    );
+    expect(skippedWarning).toBeDefined();
+    expect(skippedWarning?.paths).toEqual(['img/GONE.png']);
     // 2 existing images + 1 existing css = exactly 3 moves. The 50 MB to
     // 94 MB duplication bug class fails loudly if the port ever copies
     // twice or moves missing sources.
