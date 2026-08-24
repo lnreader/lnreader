@@ -90,7 +90,13 @@ const MIGRATION_STATEMENTS = [
  */
 export function createTestDb() {
   // Create in-memory database
-  const sqlite = open({ name: ':memory:' });
+  // op-sqlite's Node adapter (wrapping better-sqlite3) decides the in-memory
+  // sentinel via the `location` option; with no location it does
+  // path.join('./', name), which on Windows yields '.\:memory:' (illegal
+  // filename) => SqliteError "unable to open database file". POSIX normalizes
+  // './:memory:' back to ':memory:', so Linux/macOS CI never sees this. Pass
+  // location ':memory:' to keep the sentinel intact (op-sqlite 5f3a102, #381).
+  const sqlite = open({ name: ':memory:', location: ':memory:' });
   // drizzle-orm/op-sqlite expects executeAsync on the client
   (sqlite as any).executeAsync ??= sqlite.execute;
   (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
