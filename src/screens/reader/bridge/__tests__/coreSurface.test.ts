@@ -3,11 +3,11 @@
  * WebView assets.
  *
  * Paranoia, exactly: the bridge modules emit scripts for window.tts /
- * window.reader / window.readerSearch. If the JS asset renames a method or
- * drops a state slot, those scripts silently no-op on device — the #2009
- * class of failure. These tests load the real assets/reader/js/core.js and
- * assets/reader/js/search.js in a minimal DOM stub (the pattern proven by
- * #1576's rsvpBridge.test.ts) and then:
+ * window.reader / window.readerSearch / window.pageReader. If the JS asset
+ * renames a method or drops a state slot, those scripts silently no-op on
+ * device — the #2009 class of failure. These tests load the real
+ * assets/reader/js/core.js and assets/reader/js/search.js in a minimal DOM
+ * stub (the pattern proven by #1576's rsvpBridge.test.ts) and then:
  *   1. pin the surfaces the TS bridges target (method existence + shapes),
  *   2. run every bridge-emitted script against that real surface and assert
  *      the actual effect a WebView would produce.
@@ -34,6 +34,7 @@ import {
   ttsSetActiveIndexScript,
   ttsSetPlaybackStateScript,
 } from '../tts';
+import { pageReaderMovePageScript } from '../pageReader';
 
 const ASSET_DIR = join(process.cwd(), 'assets', 'reader', 'js');
 
@@ -183,6 +184,14 @@ const loadAssets = (): LoadedAssets => {
     van: vanStub,
     pageReader: undefined,
     ReactNativeWebView: { postMessage: () => undefined },
+    // Browsers resolve bare window properties as globals; core.js internals
+    // (window.pageReader.movePage among them) call onUserInteraction()
+    // without a window prefix. The evaluator's new Function scopes that bare
+    // identifier to this parameter binding, fixed at core.js load time, so
+    // supply a stable no-op: the interaction-grouping side effect
+    // (reader.post) is not part of the parity surface under test, and a
+    // deterministic handler keeps these scripts runnable in the stub.
+    onUserInteraction: () => undefined,
     location: {},
     history: {},
     navigator: {},
@@ -370,5 +379,22 @@ describe('core.js / search.js surface parity', () => {
         typeof (env.windowObj.readerSearch as Record<string, unknown>)[method],
       ).toBe('function');
     }
+  });
+
+  it('window.pageReader exposes the methods the pageReader bridge targets', () => {
+    const pageReader = env.windowObj.pageReader as Record<string, unknown>;
+    expect(pageReader).toBeDefined();
+    expect(typeof pageReader.movePage).toBe('function');
+  });
+
+  it('pageReader movePage emission parses and runs against the real surface', () => {
+    // movePage(0) is the exact emission ReaderScreen.tsx makes when the
+    // pageReader setting is enabled (scroll-to-start). In this stub the
+    // chapter sits at the first page with no adjacent chapter, so the real
+    // surface must no-op — never throw. The method name is a fixed literal,
+    // so the #2009 hazard class cannot appear here.
+    const script = pageReaderMovePageScript(0);
+    expect(() => new Function('window', script)).not.toThrow();
+    expect(() => env.evaluate(script)).not.toThrow();
   });
 });
