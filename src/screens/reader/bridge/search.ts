@@ -2,13 +2,23 @@
  * Search bridge — typed script builders for the reader WebView's
  * window.readerSearch surface.
  *
- * Note: only the search-text emission from WebViewReader (onLoadEnd replay)
- * is routed through this module in this change. The chapter-search
- * navigation emitted from useChapter.ts still uses string-built method
- * interpolation (`window.readerSearch?.${method}(...)` — PR #2009 hazard
- * class) and is tracked as a follow-up.
+ * Every emission names its target method literally: script strings never
+ * carry a computed method name (the PR #2009 hazard class). Used by
+ * WebViewReader (onLoadEnd replay) and useChapter (search-text emission and
+ * NEXT/PREV navigation).
  */
 
 /** Run a search against the page for the given query. */
 export const readerSearchScript = (query: string): string =>
   `window.readerSearch?.search(${JSON.stringify(query)}); true;`;
+
+export type SearchDirection = 'NEXT' | 'PREV';
+
+/** Jump to the next or previous occurrence of the given query. */
+export const readerSearchNavigateScript = (
+  direction: SearchDirection,
+  text: string,
+): string =>
+  direction === 'NEXT'
+    ? `window.readerSearch?.next(${JSON.stringify(text)}); true;`
+    : `window.readerSearch?.previous(${JSON.stringify(text)}); true;`;

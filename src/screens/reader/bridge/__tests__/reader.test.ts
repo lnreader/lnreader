@@ -18,7 +18,7 @@ import {
   readerSetGeneralSettingsScript,
   readerSetSettingsScript,
 } from '../reader';
-import { readerSearchScript } from '../search';
+import { readerSearchNavigateScript, readerSearchScript } from '../search';
 
 /** Records `val` writes with the exact JSON the WebView state would hold. */
 const makeStateSlot = (calls: string[], label: string) => {
@@ -222,6 +222,61 @@ describe('search bridge — WebView injection', () => {
     expect(captured).toEqual(['say "hi" \\ backslash']);
     expect(
       () => new Function('window', readerSearchScript('say "hi" \\ backslash')),
+    ).not.toThrow();
+  });
+
+  it('navigate next emits a script that calls readerSearch.next with the query', () => {
+    const captured: string[] = [];
+    const evaluate = new Function(
+      'window',
+      readerSearchNavigateScript('NEXT', 'The Great'),
+    );
+    evaluate({
+      readerSearch: { next: (query: string) => captured.push(query) },
+    });
+    expect(captured).toEqual(['The Great']);
+  });
+
+  it('navigate previous emits a script that calls readerSearch.previous with the query', () => {
+    const captured: string[] = [];
+    const evaluate = new Function(
+      'window',
+      readerSearchNavigateScript('PREV', 'The Great'),
+    );
+    evaluate({
+      readerSearch: { previous: (query: string) => captured.push(query) },
+    });
+    expect(captured).toEqual(['The Great']);
+  });
+
+  it('navigate scripts spell the method name literally, never by interpolation', () => {
+    // The seam this function closes (PR #2009 hazard class): the injected
+    // script must never carry a computed method name, only the literals
+    // `next` / `previous` resolvable to the real surface.
+    expect(readerSearchNavigateScript('NEXT', 'x')).toBe(
+      'window.readerSearch?.next("x"); true;',
+    );
+    expect(readerSearchNavigateScript('PREV', 'x')).toBe(
+      'window.readerSearch?.previous("x"); true;',
+    );
+  });
+
+  it('navigate JSON-escapes tricky queries', () => {
+    const captured: string[] = [];
+    const evaluate = new Function(
+      'window',
+      readerSearchNavigateScript('NEXT', 'say "hi" again'),
+    );
+    evaluate({
+      readerSearch: { next: (query: string) => captured.push(query) },
+    });
+    expect(captured).toEqual(['say "hi" again']);
+    expect(
+      () =>
+        new Function(
+          'window',
+          readerSearchNavigateScript('NEXT', 'say "hi" again'),
+        ),
     ).not.toThrow();
   });
 });

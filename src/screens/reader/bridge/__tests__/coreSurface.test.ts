@@ -28,7 +28,7 @@ import {
   readerSetGeneralSettingsScript,
   readerSetSettingsScript,
 } from '../reader';
-import { readerSearchScript } from '../search';
+import { readerSearchNavigateScript, readerSearchScript } from '../search';
 import {
   ttsCompleteScript,
   ttsSetActiveIndexScript,
@@ -356,5 +356,19 @@ describe('core.js / search.js surface parity', () => {
     expect(
       typeof (env.windowObj.readerSearch as Record<string, unknown>).search,
     ).toBe('function');
+  });
+
+  it('search navigate emissions parse and target the real next/previous surface', () => {
+    // Mirrors the search-emission contract test: navigate scripts spell the
+    // method literally (the #2009 seam this suite guards against) and the
+    // real surface exposes those exact methods.
+    for (const direction of ['NEXT', 'PREV'] as const) {
+      const script = readerSearchNavigateScript(direction, 'test');
+      expect(() => new Function('window', script)).not.toThrow();
+      const method = direction === 'NEXT' ? 'next' : 'previous';
+      expect(
+        typeof (env.windowObj.readerSearch as Record<string, unknown>)[method],
+      ).toBe('function');
+    }
   });
 });
