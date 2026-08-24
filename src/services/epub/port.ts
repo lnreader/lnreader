@@ -388,7 +388,7 @@ export const exportNovel = async (
 
     report('parse', 0, chapters.length);
     // Assembly ownership moved inside: the port queries the novel row for
-    // pluginId (parity with the old caller-assembled htmlPath layout).
+    // metadata parity with the old caller-assembled export.
     const novel = getNovelById(novelId);
     const pluginId = novel?.pluginId ?? 'local';
     const epubChapters: EpubExportChapter[] = chapters.map(chapter => ({
@@ -404,7 +404,7 @@ export const exportNovel = async (
 
     report('copy', 0, chapters.length);
     const result = await epub.exportEpub(
-      buildExportMetadata(novelId, options.filenameOverride, epubChapters),
+      buildExportMetadata(novel, novelId, pluginId),
       epubChapters,
       tempEpubPath,
       async (completedChapters: number, totalChapters: number) => {
@@ -458,16 +458,23 @@ export const exportNovel = async (
 };
 
 const buildExportMetadata = (
-  _novelId: number,
-  _filenameOverride: string | undefined,
-  chapters: EpubExportChapter[],
+  novel:
+    | {
+        name?: string | null;
+        cover?: string | null;
+        author?: string | null;
+        summary?: string | null;
+      }
+    | undefined,
+  novelId: number,
+  pluginId: string,
 ): EpubExportMetadata => ({
-  title: 'novel',
+  title: novel?.name ?? `novel-${novelId}`,
   language: 'en',
-  coverPath: '',
-  description: '',
-  author: '',
-  bookId: `urn:lnreader:local:${chapters.length}`,
+  coverPath: novel?.cover ?? '',
+  description: novel?.summary ?? '',
+  author: novel?.author ?? '',
+  bookId: `urn:lnreader:${pluginId}:${novelId}`,
   stylesheet: '',
   javascript: '',
 });

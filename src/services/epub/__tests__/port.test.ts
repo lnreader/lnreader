@@ -49,16 +49,14 @@ jest.mock('@modules/nitro-epub', () => ({
 }));
 
 const mockWrite = jest.fn();
+const mockGetSync = jest.fn();
 jest.mock('@database/db', () => ({
   __esModule: true,
-  dbManager: { write: (fn: unknown) => mockWrite(fn) },
-}));
-
-jest.mock('@database/queries/NovelQueries', () => ({
-  __esModule: true,
-  updateNovelCategoryById: jest.fn(),
-  updateNovelInfo: jest.fn(),
-  getNovelById: jest.fn().mockResolvedValue({ pluginId: 'local' }),
+  dbManager: {
+    write: (fn: unknown) => mockWrite(fn),
+    getSync: (...args: unknown[]) => mockGetSync(...args),
+    select: () => ({ from: () => ({ where: () => undefined }) }),
+  },
 }));
 
 jest.mock('@plugins/pluginManager', () => ({
@@ -67,10 +65,17 @@ jest.mock('@plugins/pluginManager', () => ({
 }));
 
 const mockGetDownloaded = jest.fn();
+const mockGetNovelById = jest.fn();
 jest.mock('@database/queries/ChapterQueries', () => ({
   __esModule: true,
   getNovelDownloadedChapters: (...args: unknown[]) =>
     mockGetDownloaded(...args),
+}));
+jest.mock('@database/queries/NovelQueries', () => ({
+  __esModule: true,
+  updateNovelCategoryById: jest.fn(),
+  updateNovelInfo: jest.fn(),
+  getNovelById: (...args: unknown[]) => mockGetNovelById(...args),
 }));
 
 const NativeFileMock = NativeFile as jest.Mocked<typeof NativeFile>;
@@ -243,6 +248,46 @@ describe('importNovel — interface (AC3 happy + phases)', () => {
     expect(partial.failed).toEqual(['img/fails.png']);
   });
 
+  it('moveFile budget: exactly one call per existing source, zero for missing (#1997 parity)', async () => {
+    const fixture = buildFixture({
+      filename: 'Budget.epub',
+      novelName: 'B',
+      chapters: [{ path: 'epub/c1.xhtml' }],
+      images: ['img/a.png', 'img/b.jpg', 'img/GONE.png'],
+      css: ['style/main.css'],
+    });
+    // GONE does not exist on disk; a.png/b.jpg/css do.
+    fixture.existingFiles = fixture.existingFiles.filter(
+      f => !f.includes('GONE'),
+    );
+    wireHappyFilesystem(fixture, { sourceUri: '/s/b.epub' });
+    unzipMock.mockResolvedValue(undefined);
+    mockParse.mockResolvedValue(fixture.parsedNovel);
+
+    const result = await importNovel(
+      { uri: '/s/b.epub', filename: fixture.filename },
+      undefined,
+    );
+
+    // The GONE image surfaces as image-move-partial data, but every
+    // existing source still moves exactly once.
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error('expected errors');
+    const partial = result.errors.find(e => e.kind === 'image-move-partial');
+    expect(partial).toBeDefined();
+    // 2 existing images + 1 existing css = exactly 3 moves. The 50 MB to
+    // 94 MB duplication bug class fails loudly if the port ever copies
+    // twice or moves missing sources.
+    expect(NativeFileMock.moveFile.mock.calls.length).toBe(3);
+    const movedPaths = NativeFileMock.moveFile.mock.calls.map(
+      (call: unknown[]) => String(call[0]),
+    );
+    expect(movedPaths.filter(p => p.includes('a.png')).length).toBe(1);
+    expect(movedPaths.filter(p => p.includes('b.jpg')).length).toBe(1);
+    expect(movedPaths.some(p => p.includes('main.css'))).toBe(true);
+    expect(movedPaths.some(p => p.includes('GONE'))).toBe(false);
+  });
+
   it('db-write-failure: novel-stage insert error maps to stage novel', async () => {
     const fixture = buildFixture({
       filename: 'DbFail.epub',
@@ -352,5 +397,78 @@ describe('exportNovel — interface (AC3 happy + phases)', () => {
     expect((result.errors[0] as { message?: string }).message).toBe(
       'chapter html vanished',
     );
+  });
+
+  it('builds export metadata from the novel row (no hardcoded fallback)', async () => {
+    // getNovelById resolves synchronously from the DB layer.
+    mockGetNovelById.mockReturnValue({
+      id: 42,
+      name: 'Real Novel Title',
+      cover: '/covers/42.jpg',
+      author: 'Real Author',
+      summary: 'A real summary',
+      pluginId: 'someplugin',
+    });
+    mockGetDownloaded.mockResolvedValue([
+      {
+        id: 7,
+        novelId: 42,
+        name: 'Chapter One',
+        pluginId: 'someplugin',
+        isDownloaded: true,
+      },
+    ]);
+    mockExport.mockResolvedValue({
+      outputPath: '/caches/out.epub',
+      chapterCount: 1,
+    });
+
+    await exportNovel(
+      42,
+      {
+        destinationUri: '/dest/',
+        applyReaderTheme: false,
+        includeCustomJs: false,
+      },
+      undefined,
+    );
+
+    const metadata = mockExport.mock.calls[0][0];
+    expect(metadata.title).toBe('Real Novel Title');
+    expect(metadata.coverPath).toBe('/covers/42.jpg');
+    expect(metadata.author).toBe('Real Author');
+    expect(metadata.description).toBe('A real summary');
+    expect(metadata.bookId).toBe('urn:lnreader:someplugin:42');
+  });
+
+  it('falls back to derived metadata when the novel row is missing', async () => {
+    mockGetNovelById.mockReturnValue(undefined);
+    mockGetDownloaded.mockResolvedValue([
+      {
+        id: 7,
+        novelId: 42,
+        name: 'Chapter One',
+        pluginId: 'local',
+        isDownloaded: true,
+      },
+    ]);
+    mockExport.mockResolvedValue({
+      outputPath: '/caches/out.epub',
+      chapterCount: 1,
+    });
+
+    await exportNovel(
+      42,
+      {
+        destinationUri: '/dest/',
+        applyReaderTheme: false,
+        includeCustomJs: false,
+      },
+      undefined,
+    );
+
+    const metadata = mockExport.mock.calls[0][0];
+    expect(metadata.title).toBe('novel-42');
+    expect(metadata.bookId).toBe('urn:lnreader:local:42');
   });
 });
