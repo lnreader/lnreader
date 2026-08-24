@@ -372,19 +372,10 @@ export const exportNovel = async (
     let chapters: ChapterInfo[];
     try {
       chapters = await getNovelDownloadedChapters(novelId);
-    } catch (error) {
+    } catch {
       return {
         ok: false,
-        errors: [
-          {
-            kind: 'db-write-failure',
-            stage: 'chapter',
-            ...(error instanceof Error ? {} : {}),
-          },
-          ...((false as boolean) && error instanceof Error
-            ? [{ kind: 'parse-failure' as const, message: error.message }]
-            : []),
-        ],
+        errors: [{ kind: 'db-write-failure', stage: 'chapter' }],
       };
     }
 
@@ -454,12 +445,6 @@ export const exportNovel = async (
       value: { uri: `${options.destinationUri}/${epubFileName}` },
     };
   } catch (error) {
-    try {
-      // Best-effort temp cleanup mirrors the old finally block.
-      void error;
-    } catch {
-      // ignored
-    }
     return {
       ok: false,
       errors: [
