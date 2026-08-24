@@ -314,6 +314,8 @@ const TTSController = () => {
   const collapsed = van.state(true);
   let collapseButtonElement = null;
   let lastBubbleTouchEnd = 0;
+  const savedTtsControllerPosition =
+    initialReaderConfig?.ttsControllerPosition ?? null;
 
   const stopEvent = e => {
     e.preventDefault();
@@ -353,6 +355,44 @@ const TTSController = () => {
     )}px`;
     controllerElement.style.right = 'auto';
     controllerElement.style.bottom = 'auto';
+  };
+
+  /**
+   * One post per drag gesture, on release. Reads the inline px left/top and
+   * skips the post when they are absent (a tap that never moved is guarded by
+   * the NaN check: parseFloat('') is NaN, so the default CSS position is
+   * never persisted over a real saved one).
+   */
+  const postTtsControllerPosition = () => {
+    const left = parseFloat(controllerElement?.style?.left);
+    const top = parseFloat(controllerElement?.style?.top);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      reader.post({ type: 'tts-controller-position', data: { left, top } });
+    }
+  };
+
+  /**
+   * Apply the position saved by a previous chapter (MMKV key
+   * TTS_CONTROLLER_POSITION, bridged through initialReaderConfig). Single rAF:
+   * apply + clamp land together before the first paint, so there is no flash
+   * of the CSS default position.
+   */
+  const applySavedTtsControllerPosition = () => {
+    controllerElement ??= document.getElementById('TTS-Controller');
+    if (!controllerElement || !savedTtsControllerPosition) {
+      return;
+    }
+    controllerElement.style.left = `${savedTtsControllerPosition.left}px`;
+    controllerElement.style.top = `${savedTtsControllerPosition.top}px`;
+    // Clamp only when the controller is VISIBLE (TTS enabled). A hidden
+    // (display:none) element has 0 size and clamp would math to 8,8 and
+    // destroy the saved position.
+    if (
+      controllerElement.offsetWidth !== 0 &&
+      controllerElement.offsetHeight !== 0
+    ) {
+      clampControllerToViewport();
+    }
   };
 
   const setCollapsed = value => {
@@ -416,6 +456,7 @@ const TTSController = () => {
     hoverElement?.classList.remove('highlight');
     hoverElement = null;
     moved = false;
+    postTtsControllerPosition();
   };
 
   const startBubbleDrag = e => {
@@ -465,6 +506,7 @@ const TTSController = () => {
     const shouldExpand = !moved;
     lastBubbleTouchEnd = Date.now();
     finishBubbleDrag();
+    postTtsControllerPosition();
     if (shouldExpand) {
       setCollapsed(false);
     }
@@ -504,6 +546,18 @@ const TTSController = () => {
     ontouchend: endBubbleDrag,
     ontouchcancel: cancelBubbleDrag,
     onclick: toggleCollapsed,
+  });
+
+  // Apply the saved position before the first paint, and re-clamp on
+  // orientation changes (the WebView re-lays out without reloading, so
+  // window resize is the signal; 'active' is present during a drag, so the
+  // user's in-progress drag is never disturbed).
+  requestAnimationFrame(applySavedTtsControllerPosition);
+  window.addEventListener('resize', () => {
+    controllerElement ??= document.getElementById('TTS-Controller');
+    if (controllerElement && !controllerElement.classList.contains('active')) {
+      clampControllerToViewport();
+    }
   });
 
   return div(

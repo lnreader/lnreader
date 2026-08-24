@@ -22,6 +22,11 @@ import {
   initialChapterGeneralSettings,
   initialChapterReaderSettings,
 } from '@hooks/persisted/useSettings';
+import {
+  getSavedTtsControllerPosition,
+  parseTtsControllerPosition,
+  saveTtsControllerPosition,
+} from './ttsControllerPosition';
 import { getBatteryLevel } from 'react-native-device-info';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
@@ -397,6 +402,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   chapterGeneralSettings,
                   novel,
                   chapter,
+                  ttsControllerPosition: getSavedTtsControllerPosition(),
                   batteryLevel,
                   autoSaveInterval: 2222,
                   DEBUG: __DEV__,
@@ -554,6 +560,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                     seekTts(data.index);
                   }
                   break;
+              }
+              break;
+            }
+            case 'tts-controller-position': {
+              const pos = parseTtsControllerPosition(event.data);
+              if (pos) {
+                saveTtsControllerPosition(pos);
               }
               break;
             }
