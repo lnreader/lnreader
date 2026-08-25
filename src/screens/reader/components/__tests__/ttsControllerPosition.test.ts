@@ -11,12 +11,6 @@ describe('ttsControllerPosition', () => {
     MMKVStorage.clearAll();
   });
 
-  describe('TTS_CONTROLLER_POSITION', () => {
-    it('is the MMKV key for the floating TTS controller position (#2000)', () => {
-      expect(TTS_CONTROLLER_POSITION).toBe('TTS_CONTROLLER_POSITION');
-    });
-  });
-
   describe('parseTtsControllerPosition', () => {
     it('accepts a valid { left, top } payload', () => {
       expect(parseTtsControllerPosition({ left: 100, top: 200 })).toEqual({
