@@ -65,7 +65,7 @@ std::string extractBody(std::string html) {
   html = std::regex_replace(
       html, std::regex(R"(<!doctype[^>]*>)", std::regex::icase), "");
   const std::regex bodyPattern(
-      R"(<body\b[^>]*>([\s\S]*?)</body\s*>)",
+      R"(<body\b[^>]*>([^]*?)</body\s*>)",
       std::regex::icase);
   std::smatch match;
   if (std::regex_search(html, match, bodyPattern)) {
