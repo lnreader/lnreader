@@ -32,7 +32,7 @@ jest.mock('@i18n/translations', () => ({
 jest.mock('sanitize-html', () => {
   const sanitize = Object.assign(
     jest.fn((html: string) =>
-      html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ''),
+      html.replace(/<script\b[^>]*>[^]*?<\/script>/gi, ''),
     ),
     { defaults: { allowedTags: ['p'] } },
   );
