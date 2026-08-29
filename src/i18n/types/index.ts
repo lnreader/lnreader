@@ -558,6 +558,8 @@ export interface StringMap {
   'readerScreen.bottomSheet.textSize': 'string';
   'readerScreen.bottomSheet.ttsAutoPageAdvanceDescription': 'string';
   'readerScreen.bottomSheet.ttsEngineDescription': 'string';
+  'readerScreen.bottomSheet.ttsHighlightColorDefault': 'string';
+  'readerScreen.bottomSheet.ttsHighlightDescription': 'string';
   'readerScreen.bottomSheet.ttsScrollToTopDescription': 'string';
   'readerScreen.bottomSheet.useChapterDrawerSwipeNavigation': 'string';
   'readerScreen.bottomSheet.verticalSeekbar': 'string';

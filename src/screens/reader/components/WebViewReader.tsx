@@ -177,6 +177,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     seekTo: seekTts,
     state: ttsState,
     updateSettings: updateTtsSettings,
+    wordRange,
   } = useTtsSession();
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
@@ -225,6 +226,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     }
   }, [ttsProgress, webViewRef]);
 
+  const highlightSettings = (ttsS: ChapterReaderSettings['tts']) => ({
+    enabled: ttsS?.highlight !== false,
+    color: ttsS?.highlightColor || '',
+  });
+
+  useEffect(() => {
+    if (!wordRange) return;
+    if (wordRange.paragraphId !== String(ttsProgress.index)) return;
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setWordRange?.(${JSON.stringify(wordRange.paragraphId)}, ${
+      wordRange.start
+    }, ${wordRange.end});
+      true;
+    `);
+  }, [ttsProgress.index, webViewRef, wordRange]);
+
   useEffect(() => {
     if (activeChapterIdRef.current !== chapter.id) {
       activeChapterIdRef.current = chapter.id;
@@ -263,6 +280,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             reader.readerSettings.val = ${JSON.stringify(newReaderSettings)}
             `,
           );
+          webViewRef.current?.injectJavaScript(`
+            window.tts?.setHighlightSettings?.(${JSON.stringify(
+              highlightSettings(newReaderSettings.tts),
+            )});
+            true;
+          `);
           break;
         }
         case CHAPTER_GENERAL_SETTINGS: {
@@ -434,8 +457,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     chapter,
     chapterGeneralSettings,
     processedHtml,
-      customJS,
-      customCSS,
+    customJS,
+    customCSS,
     initialReaderSettings,
     novel,
     plugin,
@@ -446,37 +469,43 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   ]);
 
   return (
-      <>
-    <WebView
-      ref={webViewRef}
-      onTouchStart={onTouchStart}
-      style={{ backgroundColor: readerSettings.theme }}
-      allowFileAccess={true}
-      originWhitelist={['*']}
-      scalesPageToFit={true}
-      showsVerticalScrollIndicator={false}
-      javaScriptEnabled={true}
-      webviewDebuggingEnabled={__DEV__}
-      onShouldStartLoadWithRequest={({ url }) => {
-        if (isPluginIssueReportUrl(url)) {
-          void Linking.openURL(url);
-          return false;
-        }
-        if (isChapterRefreshUrl(url)) {
-          refetch();
-          return false;
-        }
-        return true;
-      }}
-      onLoadEnd={() => {
-        webViewRef.current?.injectJavaScript(
-          `if (window.reader && window.reader.batteryLevel) {
+    <>
+      <WebView
+        ref={webViewRef}
+        onTouchStart={onTouchStart}
+        style={{ backgroundColor: readerSettings.theme }}
+        allowFileAccess={true}
+        originWhitelist={['*']}
+        scalesPageToFit={true}
+        showsVerticalScrollIndicator={false}
+        javaScriptEnabled={true}
+        webviewDebuggingEnabled={__DEV__}
+        onShouldStartLoadWithRequest={({ url }) => {
+          if (isPluginIssueReportUrl(url)) {
+            void Linking.openURL(url);
+            return false;
+          }
+          if (isChapterRefreshUrl(url)) {
+            refetch();
+            return false;
+          }
+          return true;
+        }}
+        onLoadEnd={() => {
+          webViewRef.current?.injectJavaScript(
+            `if (window.reader && window.reader.batteryLevel) {
             window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
           }`,
           );
           webViewRef.current?.injectJavaScript(
             adjacentChapterScriptRef.current,
           );
+          webViewRef.current?.injectJavaScript(`
+            window.tts?.setHighlightSettings?.(${JSON.stringify(
+              highlightSettings(readerSettingsRef.current.tts),
+            )});
+            true;
+          `);
 
           const searchText = searchTextRef.current.trim();
           if (searchText) {

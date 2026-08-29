@@ -189,6 +189,27 @@ window.tts = new (function () {
   this.totalElements = 0;
   this.allReadableElements = []; // Store all readable elements at start
   this.textQueue = []; // Flat list of normalized text for native fallback
+  this.wordMap = null; // Normalized text + DOM offsets for the active paragraph
+  this.highlightEnabled = true;
+  this.highlightColor = '';
+  this.userScrolling = false; // set while the user drags the page
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (this.started) this.userScrolling = true;
+      },
+      true,
+    );
+    document.addEventListener(
+      'scrollend',
+      () => {
+        this.userScrolling = false;
+      },
+      true,
+    );
+  }
 
   this.readable = element => {
     const ele = element ?? this.currentElement;
@@ -375,6 +396,8 @@ window.tts = new (function () {
 
   this.reset = () => {
     this.currentElement?.classList?.remove('highlight');
+    this.clearWordHighlight();
+    this.wordMap = null;
     this.prevElement = null;
     this.currentElement = reader.chapterElement;
     this.started = false;
@@ -393,9 +416,15 @@ window.tts = new (function () {
     if (!this.allReadableElements.length) return;
     const targetIndex = Math.max(0, Math.min(index, this.totalElements - 1));
     this.currentElement?.classList?.remove('highlight');
+    this.clearWordHighlight();
     this.currentElement = this.allReadableElements[targetIndex];
     this.elementsRead = targetIndex + 1;
     this.started = true;
+    const mapped = this.mapFromElement(this.currentElement);
+    if (mapped) {
+      mapped.paragraphId = String(targetIndex);
+      this.wordMap = mapped;
+    }
     this.scrollToElement(this.currentElement);
     this.currentElement.classList.add('highlight');
     const progress = document.getElementById('TTS-Progress');
@@ -444,7 +473,9 @@ window.tts = new (function () {
     );
   };
 
-  // UPDATED: Scroll to top or center based on settings with padding for notch/camera
+  // Scrolls the active paragraph to a ~20% anchor line (like NoveLA's TTS
+  // follow), re-anchoring smoothly within a viewport and jumping otherwise.
+  // Only kick in once the user's own scroll has settled.
   this.scrollToElement = element => {
     if (!element) return;
     // Check if element is partially visible (at least some part is in viewport)
@@ -464,37 +495,248 @@ window.tts = new (function () {
       );
       return;
     }
+    if (this.userScrolling) return;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const isPartiallyVisible =
-      rect.top < windowHeight &&
-      rect.bottom > 0 &&
-      rect.left < window.innerWidth &&
-      rect.right > 0;
 
-    // Only scroll if element is not visible or barely visible
-    if (!isPartiallyVisible || rect.top < 0 || rect.bottom > windowHeight) {
-      // Check scrollToTop setting (default to true for better reading experience)
-      const scrollToTop = reader.readerSettings.val.tts?.scrollToTop !== false;
+    const scrollToTop = reader.readerSettings.val.tts?.scrollToTop !== false;
 
-      if (scrollToTop) {
-        // Scroll to top with padding for notch/camera (80px from top)
-        const elementTop =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementTop - 80; // 80px padding for notch/camera
+    if (!scrollToTop) {
+      // Center scroll (toggle disabled)
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+      return;
+    }
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
-      } else {
-        // Center scroll (original behavior)
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest',
-        });
+    // Anchors the paragraph top at ~20% of the viewport height, clamped to a
+    // sane band so short windows still leave breathing room above the text.
+    const anchor = Math.min(Math.max(Math.round(windowHeight * 0.2), 130), 350);
+    const elementTop = rect.top + window.pageYOffset;
+    const targetScroll = elementTop - anchor;
+    const delta = targetScroll - window.pageYOffset;
+
+    // Already positioned around the anchor line, or still safely in view
+    // without a tighter anchor above it.
+    if (Math.abs(delta) <= 16) return;
+    if (rect.top >= 0 && rect.bottom <= windowHeight) return;
+
+    const smooth = Math.abs(delta) <= windowHeight;
+    window.scrollTo({
+      top: Math.max(targetScroll, 0),
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+  };
+
+  // Flattens an element's text into `normalizeText`-equivalent output while
+  // recording, for every output character, the raw code-unit offset it came
+  // from. Native engines report spoken ranges relative to the very string they
+  // were handed (`normalizeText(el.innerText)`), so this map lets those ranges
+  // be translated back onto the DOM nodes that render that text.
+  this.mapFromElement = element => {
+    if (!element || typeof element.childNodes === 'undefined') return null;
+    const segments = [];
+    let raw = '';
+    const isRendered = el => {
+      try {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      } catch (error) {
+        return true;
       }
+    };
+    const walk = el => {
+      for (let i = 0; i < el.childNodes.length; i++) {
+        const child = el.childNodes[i];
+        if (child.nodeType === Node.TEXT_NODE) {
+          segments.push({
+            node: child,
+            start: raw.length,
+            end: raw.length + child.data.length,
+          });
+          raw += child.data;
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          if (child.nodeName === 'BR') {
+            raw += '\n';
+          } else if (isRendered(child)) {
+            walk(child);
+          }
+        }
+      }
+    };
+    walk(element);
+    if (!raw) return null;
+    const { text, offsets } = this.normalizeWithOffsets(raw);
+    if (!text) return null;
+    return { element, text, offsets, segments };
+  };
+
+  // Mirrors normalizeText character by character so each output char keeps the
+  // raw offset it was derived from. A collapsed space after punctuation maps to
+  // the punctuation itself when no real space follows (the spacing `$1 '`
+  // inserts is synthetic).
+  this.normalizeWithOffsets = raw => {
+    if (!raw) return { text: '', offsets: [] };
+    const chars = [];
+    const src = [];
+    for (let i = 0; i < raw.length; i++) {
+      const c = raw[i];
+      if (/\s/.test(c)) {
+        if (chars.length > 0 && chars[chars.length - 1] !== ' ') {
+          chars.push(' ');
+          src.push(i);
+        }
+      } else {
+        chars.push(c);
+        src.push(i);
+      }
+    }
+    const out = [];
+    const outSrc = [];
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (/[.,!?;:]/.test(c)) {
+        // The punctuation rule strips only a real preceding space (not the
+        // synthetic one a previous punctuation emitted), mirroring the regex
+        // which never re-scans its own replacements.
+        if (i > 0 && chars[i - 1] === ' ' && out[out.length - 1] === ' ') {
+          out.pop();
+          outSrc.pop();
+        }
+        out.push(c);
+        outSrc.push(src[i]);
+        if (i + 1 < chars.length && chars[i + 1] === ' ') {
+          out.push(' ');
+          outSrc.push(src[i + 1]);
+          i++;
+        } else {
+          out.push(' ');
+          outSrc.push(src[i]);
+        }
+      } else {
+        out.push(c);
+        outSrc.push(src[i]);
+      }
+    }
+    let start = 0;
+    let end = out.length;
+    while (start < end && out[start] === ' ') start++;
+    while (end > start && out[end - 1] === ' ') end--;
+    return {
+      text: out.slice(start, end).join(''),
+      offsets: outSrc.slice(start, end),
+    };
+  };
+
+  // Turns a normalized [start,end) span into one DOM Range per text-node run.
+  this.rangesFor = (map, start, end) => {
+    if (!map || !map.text) return [];
+    const lo = Math.max(0, Math.floor(start));
+    const hi = Math.min(map.text.length, Math.ceil(end));
+    if (hi <= lo || !map.offsets || !map.segments) return [];
+    const seen = new Set();
+    const positions = [];
+    for (let i = lo; i < hi; i++) {
+      const offset = map.offsets[i];
+      if (!seen.has(offset)) {
+        seen.add(offset);
+        positions.push(offset);
+      }
+    }
+    positions.sort((a, b) => a - b);
+    const ranges = [];
+    let runStart = -1;
+    let runEnd = -1;
+    positions.forEach(pos => {
+      if (runStart === -1) {
+        runStart = pos;
+        runEnd = pos;
+      } else if (pos === runEnd + 1) {
+        runEnd = pos;
+      } else {
+        map.segments.forEach(segment => {
+          if (runEnd < segment.start || runStart >= segment.end) return;
+          const localStart = Math.max(runStart, segment.start) - segment.start;
+          const localEnd = Math.min(runEnd + 1, segment.end) - segment.start;
+          if (localEnd > localStart) {
+            const range = document.createRange();
+            range.setStart(segment.node, localStart);
+            range.setEnd(segment.node, localEnd);
+            ranges.push(range);
+          }
+        });
+        runStart = pos;
+        runEnd = pos;
+      }
+    });
+    if (runStart !== -1) {
+      map.segments.forEach(segment => {
+        if (runEnd < segment.start || runStart >= segment.end) return;
+        const localStart = Math.max(runStart, segment.start) - segment.start;
+        const localEnd = Math.min(runEnd + 1, segment.end) - segment.start;
+        if (localEnd > localStart) {
+          const range = document.createRange();
+          range.setStart(segment.node, localStart);
+          range.setEnd(segment.node, localEnd);
+          ranges.push(range);
+        }
+      });
+    }
+    return ranges;
+  };
+
+  this.clearWordHighlight = () => {
+    if (typeof CSS === 'undefined' || !CSS.highlights) return;
+    try {
+      CSS.highlights.delete('tts-word');
+    } catch (error) {
+      // Custom Highlight API unsupported – degrade gracefully.
+    }
+  };
+
+  // Applies the spoken-word highlight rendered only via the Custom Highlight
+  // API, so no DOM mutations are ever performed while narrating.
+  this.setWordRange = (paragraphId, start, end) => {
+    if (!this.highlightEnabled) {
+      this.clearWordHighlight();
+      return;
+    }
+    if (
+      typeof CSS === 'undefined' ||
+      !CSS.highlights ||
+      typeof Highlight === 'undefined'
+    ) {
+      return;
+    }
+    if (!this.wordMap || this.wordMap.paragraphId !== paragraphId) return;
+    const ranges = this.rangesFor(this.wordMap, start, end);
+    try {
+      if (ranges.length === 0) {
+        this.clearWordHighlight();
+        return;
+      }
+      const highlight = CSS.highlights.get('tts-word') || new Highlight();
+      highlight.clear();
+      ranges.forEach(range => highlight.add(range));
+      CSS.highlights.set('tts-word', highlight);
+    } catch (error) {
+      // Custom Highlight API unsupported – degrade gracefully.
+    }
+  };
+
+  this.setHighlightSettings = settings => {
+    this.highlightEnabled = settings.enabled !== false;
+    this.highlightColor = settings.color || '';
+    const fallback =
+      'color-mix(in srgb, var(--readerSettings-textColor) 20%, var(--readerSettings-theme))';
+    document.documentElement.style.setProperty(
+      '--tts-highlight-color',
+      this.highlightColor || fallback,
+    );
+    if (!this.highlightEnabled) {
+      this.clearWordHighlight();
     }
   };
 

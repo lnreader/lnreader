@@ -658,6 +658,8 @@
       "textSize": "Text size",
       "ttsAutoPageAdvanceDescription": "Move to the next chapter automatically when narration ends",
       "ttsEngineDescription": "Text-to-speech engine used to generate audio",
+      "ttsHighlightColorDefault": "Theme default",
+      "ttsHighlightDescription": "Highlight the word currently being spoken",
       "ttsScrollToTopDescription": "Jump back to the top of the chapter when narration starts",
       "useChapterDrawerSwipeNavigation": "Swipe to open drawer",
       "verticalSeekbar": "Vertical seekbar",

@@ -85,6 +85,7 @@ describe('useTtsSession', () => {
     const subscriptions = [
       session.addOnStateChangedListener.mock.results[0].value,
       session.addOnProgressChangedListener.mock.results[0].value,
+      session.addOnWordRangeChangedListener.mock.results[0].value,
       session.addOnErrorListener.mock.results[0].value,
     ];
     unmount();
@@ -92,6 +93,31 @@ describe('useTtsSession', () => {
     await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
     subscriptions.forEach(item => {
       expect(item.remove).toHaveBeenCalled();
+    });
+  });
+
+  it('surfaces the word range of the paragraph currently being spoken', async () => {
+    const { result } = renderHook(useTtsSession);
+    const session = await getNativeSession();
+    await waitFor(() =>
+      expect(session.addOnWordRangeChangedListener).toHaveBeenCalledTimes(1),
+    );
+
+    const wordRangeListener = session.addOnWordRangeChangedListener.mock
+      .calls[0][0] as (range: {
+      paragraphId: string;
+      start: number;
+      end: number;
+    }) => void;
+
+    act(() => {
+      wordRangeListener({ paragraphId: '2', start: 5, end: 9 });
+    });
+
+    expect(result.current.wordRange).toEqual({
+      paragraphId: '2',
+      start: 5,
+      end: 9,
     });
   });
 });

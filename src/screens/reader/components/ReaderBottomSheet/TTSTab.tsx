@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Pressable, View, StyleSheet, Text, ScrollView } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { Dialog, List, Slider } from '@components';
+import { Dialog, List, Slider, ColorPreferenceItem } from '@components';
 import { getLocales } from 'expo-localization';
 import { Tts, TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import {
@@ -10,7 +10,9 @@ import {
   useChapterReaderSettings,
 } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { Chip } from 'react-native-paper';
+import { Chip, Portal } from 'react-native-paper';
+import { useBoolean } from '@hooks';
+import ColorPickerModal from '@components/ColorPickerModal/ColorPickerModal';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
 
 interface VoicePickerModalProps {
@@ -299,6 +301,7 @@ const TTSTab: React.FC = () => {
   const [voices, setVoices] = useState<TtsVoice[]>([]);
   const [engineModalVisible, setEngineModalVisible] = useState(false);
   const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+  const highlightColorModal = useBoolean();
 
   // Android only; resolves empty on iOS, which hides the Engine row below.
   useEffect(() => {
@@ -436,12 +439,55 @@ const TTSTab: React.FC = () => {
                 }
                 theme={theme}
               />
+
+              <ReaderSheetPreferenceItem
+                description={getString(
+                  'readerScreen.bottomSheet.ttsHighlightDescription',
+                )}
+                label="Highlight"
+                value={tts?.highlight !== false}
+                onPress={() =>
+                  setChapterReaderSettings({
+                    tts: { ...tts, highlight: !(tts?.highlight !== false) },
+                  })
+                }
+                theme={theme}
+              />
+
+              {tts?.highlight !== false ? (
+                <ColorPreferenceItem
+                  label="Highlight Color"
+                  description={
+                    tts?.highlightColor ||
+                    getString(
+                      'readerScreen.bottomSheet.ttsHighlightColorDefault',
+                    )
+                  }
+                  onPress={highlightColorModal.setTrue}
+                  theme={theme}
+                />
+              ) : null}
             </>
           ) : null}
         </View>
 
         <View style={styles.bottomSpacing} />
       </BottomSheetScrollView>
+
+      <Portal>
+        <ColorPickerModal
+          visible={highlightColorModal.value}
+          title="Highlight Color"
+          color={tts?.highlightColor || ''}
+          closeModal={highlightColorModal.setFalse}
+          theme={theme}
+          onSubmit={color =>
+            setChapterReaderSettings({
+              tts: { ...tts, highlightColor: color },
+            })
+          }
+        />
+      </Portal>
 
       <EnginePickerModal
         visible={engineModalVisible}
