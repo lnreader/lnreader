@@ -24,9 +24,9 @@ import {
   type TranslationProvider,
 } from '@api/translation/types';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
-import { useChapterContext } from '../../ChapterContext';
 
 interface TranslationTabProps {
+  novelId: number;
   onRedoTranslation: () => void;
 }
 
@@ -51,14 +51,14 @@ const promptName = (
 };
 
 const TranslationTab: React.FC<TranslationTabProps> = ({
+  novelId,
   onRedoTranslation,
 }) => {
   const theme = useTheme();
-  const { novel } = useChapterContext();
   const settings = useTranslationSettings();
   const effective = useMemo(
-    () => computeEffectiveTranslationSettings(settings, novel.id),
-    [novel.id, settings],
+    () => computeEffectiveTranslationSettings(settings, novelId),
+    [novelId, settings],
   );
 
   const [providerModal, setProviderModal] = React.useState(false);
@@ -117,7 +117,7 @@ const TranslationTab: React.FC<TranslationTabProps> = ({
 
   const setPerNovel = (
     values: Parameters<typeof settings.setPerNovelTranslationSettings>[1],
-  ) => settings.setPerNovelTranslationSettings(novel.id, values);
+  ) => settings.setPerNovelTranslationSettings(novelId, values);
 
   return (
     <>

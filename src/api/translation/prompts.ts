@@ -17,11 +17,6 @@ export type BuiltInPromptId =
 
 export const DEFAULT_PROMPT_ID: BuiltInPromptId = 'balanced';
 
-export const PROMPT_PLACEHOLDERS = [
-  '{source_language}',
-  '{target_language}',
-] as const;
-
 const PROMPT_FALLBACK_SOURCE = 'Auto-detect';
 
 export const BUILT_IN_PROMPTS: Record<

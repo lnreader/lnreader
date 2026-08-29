@@ -306,6 +306,7 @@ export const ChapterContent = ({
       {readerSheetMounted ? (
         <ReaderBottomSheetV2
           bottomSheetRef={readerSheetRef}
+          novelId={novel.id}
           onRedoTranslation={() =>
             webViewRef.current?.injectJavaScript(
               'window.reader?.requestTranslation?.(true); true;',

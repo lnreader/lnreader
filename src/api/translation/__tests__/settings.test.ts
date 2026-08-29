@@ -3,11 +3,7 @@ import {
   initialTranslationSettings,
   mergeTranslationSettings,
 } from '@api/translation/settings';
-import {
-  isTranslationPrimary,
-  selectTtsText,
-  type RegexCleanupRule,
-} from '@api/translation/types';
+import { type RegexCleanupRule } from '@api/translation/types';
 
 const baseSettings = () => ({
   ...initialTranslationSettings,
@@ -99,40 +95,5 @@ describe('translation settings resolution', () => {
     expect(computeEffectiveTranslationSettings(settings, 3).regexRules).toEqual(
       [globalRule, perRule],
     );
-  });
-});
-
-describe('TTS text selection for parallel modes', () => {
-  const original = '原文';
-  const translated = 'translated';
-
-  it('speaks the original for original-side modes', () => {
-    expect(selectTtsText(original, translated, 'ORIGINAL_ONLY')).toBe(original);
-    expect(selectTtsText(original, translated, 'PARALLEL_ORIGINAL_FIRST')).toBe(
-      original,
-    );
-  });
-
-  it('speaks the translated text with an original fallback otherwise', () => {
-    expect(
-      selectTtsText(original, translated, 'PARALLEL_TRANSLATION_FIRST'),
-    ).toBe(translated);
-    expect(selectTtsText(original, translated, 'TRANSLATED_ONLY')).toBe(
-      translated,
-    );
-  });
-
-  it('falls back to the original when no translation exists', () => {
-    expect(
-      selectTtsText(original, undefined, 'PARALLEL_TRANSLATION_FIRST'),
-    ).toBe(original);
-    expect(selectTtsText(original, '', 'TRANSLATED_ONLY')).toBe(original);
-  });
-
-  it('flags which side is primary on screen', () => {
-    expect(isTranslationPrimary('TRANSLATED_ONLY')).toBe(true);
-    expect(isTranslationPrimary('PARALLEL_TRANSLATION_FIRST')).toBe(true);
-    expect(isTranslationPrimary('ORIGINAL_ONLY')).toBe(false);
-    expect(isTranslationPrimary('PARALLEL_ORIGINAL_FIRST')).toBe(false);
   });
 });

@@ -30,10 +30,6 @@ const mockSetTranslationSettings = jest.fn((values: Partial<any>) => {
 });
 const mockSetPerNovel = jest.fn();
 
-jest.mock('../../../ChapterContext', () => ({
-  useChapterContext: () => ({ novel: { id: 42 } }),
-}));
-
 jest.mock('@hooks/persisted', () => ({
   useTheme: () => ({
     background: '#111',
@@ -149,7 +145,7 @@ jest.mock('react-native-paper', () => {
 });
 
 const renderTab = () =>
-  render(<TranslationTab onRedoTranslation={onRedoTranslation} />);
+  render(<TranslationTab novelId={42} onRedoTranslation={onRedoTranslation} />);
 const onRedoTranslation = jest.fn();
 
 describe('TranslationTab', () => {

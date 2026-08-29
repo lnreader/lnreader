@@ -10,10 +10,10 @@
 import { fetchTimeout } from '@utils/fetch/fetch';
 import { TranslationError } from './types';
 
-export const DEFAULT_GOOGLE_PA_COMMUNITY_KEY =
+const DEFAULT_GOOGLE_PA_COMMUNITY_KEY =
   'AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520';
 
-export const GOOGLE_PA_ENDPOINT =
+const GOOGLE_PA_ENDPOINT =
   'https://translation.googleapis.com/language/translate/v2';
 
 const TIMEOUT_MS = 60000;

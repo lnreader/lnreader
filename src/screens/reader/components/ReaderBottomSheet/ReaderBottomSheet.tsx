@@ -190,6 +190,7 @@ const GeneralTab: React.FC = React.memo(() => {
 
 interface ReaderBottomSheetV2Props {
   bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  novelId: number;
   onRedoTranslation: () => void;
 }
 
@@ -197,13 +198,17 @@ const routes = [
   { key: 'readerTab', title: getString('readerSettings.title') },
   { key: 'generalTab', title: getString('generalSettings') },
   { key: 'ttsTab', title: 'TTS' },
-  { key: 'translationTab', title: 'Translate' },
+  {
+    key: 'translationTab',
+    title: getString('readerScreen.bottomSheet.translation'),
+  },
 ];
 
 const renderLazyPlaceholder = () => <View style={styles.flex} />;
 
 const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   bottomSheetRef,
+  novelId,
   onRedoTranslation,
 }) => {
   const theme = useTheme();
@@ -218,10 +223,13 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
         generalTab: GeneralTab,
         ttsTab: TTSTab,
         translationTab: () => (
-          <TranslationTab onRedoTranslation={onRedoTranslation} />
+          <TranslationTab
+            novelId={novelId}
+            onRedoTranslation={onRedoTranslation}
+          />
         ),
       }),
-    [onRedoTranslation],
+    [novelId, onRedoTranslation],
   );
 
   const [index, setIndex] = useState(0);

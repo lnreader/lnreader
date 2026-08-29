@@ -33,28 +33,6 @@ export const TRANSLATION_PARALLEL_MODES: readonly TranslationParallelMode[] = [
   'PARALLEL_TRANSLATION_FIRST',
 ] as const;
 
-/** Whether the translated side is the primary (visible/spoken) text. */
-export const isTranslationPrimary = (mode: TranslationParallelMode): boolean =>
-  mode === 'TRANSLATED_ONLY' || mode === 'PARALLEL_TRANSLATION_FIRST';
-
-/** The text TTS should speak for a paragraph under a given parallel mode. */
-export const selectTtsText = (
-  original: string,
-  translated: string | undefined,
-  mode: TranslationParallelMode,
-): string => {
-  const fallback = (candidate: string | undefined) =>
-    candidate && candidate.length > 0 ? candidate : original;
-  switch (mode) {
-    case 'ORIGINAL_ONLY':
-    case 'PARALLEL_ORIGINAL_FIRST':
-      return original;
-    case 'TRANSLATED_ONLY':
-    case 'PARALLEL_TRANSLATION_FIRST':
-      return fallback(translated);
-  }
-};
-
 /** One user-defined regex cleanup rule (global or per-novel). */
 export interface RegexCleanupRule {
   /** Literal text or a `/pattern/flags` regex string. */
