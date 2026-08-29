@@ -59,6 +59,91 @@ window.reader = new (function () {
   this.autoSaveInterval = autoSaveInterval;
   this.rawHTML = this.chapterElement.innerHTML;
 
+  // ------------------------------------------------------------------
+  // Translation (NoveLA-style). The app resolves settings and translates
+  // paragraph texts; this page renders the two sides and re-maps TTS so it
+  // speaks whichever side is the primary for the active parallel mode.
+  // ------------------------------------------------------------------
+  this.translation = {
+    config: {
+      enabled: false,
+      parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+    },
+    /** paragraph element -> { orig, transl, primary, originalMarkup } */
+    entries: new Map(),
+  };
+
+  const translationStyleId = 'lnr-translation-style';
+  const ensureTranslationStyles = () => {
+    if (document.getElementById(translationStyleId)) return;
+    const style = document.createElement('style');
+    style.id = translationStyleId;
+    style.textContent = [
+      '.lnr-parallel{display:flex;flex-direction:column;}',
+      '[data-translation-mode="ORIGINAL_ONLY"] .lnr-transl{display:none;}',
+      '[data-translation-mode="TRANSLATED_ONLY"] .lnr-orig{display:none;}',
+      '[data-translation-mode="PARALLEL_ORIGINAL_FIRST"] .lnr-orig{order:1;}',
+      '[data-translation-mode="PARALLEL_ORIGINAL_FIRST"] .lnr-transl{order:2;}',
+      '[data-translation-mode="PARALLEL_TRANSLATION_FIRST"] .lnr-orig{order:2;}',
+      '[data-translation-mode="PARALLEL_TRANSLATION_FIRST"] .lnr-transl{order:1;}',
+    ].join('');
+    document.head.appendChild(style);
+  };
+
+  /**
+   * Push the active config into the page. Used on load and for cheap updates
+   * (parallel mode, enable/disable) that don't require re-translation.
+   */
+  this.applyTranslationConfig = config => {
+    const next = {
+      enabled: false,
+      parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+      ...(config ?? {}),
+    };
+    this.translation.config = next;
+    if (!next.enabled) {
+      window.tts?.clearTranslation?.();
+      return;
+    }
+    ensureTranslationStyles();
+    document.documentElement.setAttribute(
+      'data-translation-mode',
+      next.parallelMode,
+    );
+    window.tts?.applyTranslationMode?.(next.parallelMode);
+  };
+
+  /** Ask the app for fresh translations of the current paragraph texts. */
+  this.requestTranslation = () => {
+    if (!this.translation.config.enabled) return;
+    const paragraphs = window.tts?.collectParagraphTexts?.() ?? [];
+    this.post({ type: 'translation-request', data: { paragraphs } });
+  };
+
+  /** Render finished translations into the chapter and re-map TTS. */
+  this.applyTranslation = payload => {
+    const { config, paragraphs = [], translations = [] } = payload ?? {};
+    if (config) {
+      this.translation.config = {
+        enabled: false,
+        parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+        ...config,
+      };
+    }
+    const { enabled, parallelMode } = this.translation.config;
+    if (!enabled) {
+      window.tts?.clearTranslation?.();
+      return;
+    }
+    ensureTranslationStyles();
+    document.documentElement.setAttribute(
+      'data-translation-mode',
+      parallelMode,
+    );
+    window.tts?.setTranslatedParagraphs?.(paragraphs, translations, parallelMode);
+    this.refresh();
+  };
+
   //layout props
   this.paddingTop = parseInt(
     getComputedStyle(document.querySelector('body')).getPropertyValue(
@@ -359,6 +444,137 @@ window.tts = new (function () {
     return this.normalizeTokens(text).chars.join('');
   };
 
+  // ------------------------------------------------------------------
+  // Translation support. Each paragraph element gains an entry holding the
+  // cleaned original, the translation, the original markup and the two rendered
+  // spans; paragraphRoot resolves the node TTS should speak for the active
+  // parallel mode so the queue text and the highlight map always describe the
+  // same (primary) content.
+  // ------------------------------------------------------------------
+  this.collectReadableElements = () =>
+    this.getAllReadableElements(reader.chapterElement);
+
+  this.paragraphOriginalText = element => {
+    const entry = reader.translation?.entries?.get(element);
+    if (entry && entry.orig !== undefined) return entry.orig;
+    return this.normalizeText(element.innerText);
+  };
+
+  this.paragraphRoot = element => {
+    if (!reader.translation) return element;
+    const entry = reader.translation.entries.get(element);
+    return entry?.primary ?? element;
+  };
+
+  this.collectParagraphTexts = () =>
+    this.collectReadableElements()
+      .filter(element => !!this.paragraphOriginalText(element))
+      .map(element => this.paragraphOriginalText(element));
+
+  this.primaryForMode = (entry, parallelMode) => {
+    if (
+      parallelMode === 'ORIGINAL_ONLY' ||
+      parallelMode === 'PARALLEL_ORIGINAL_FIRST'
+    ) {
+      return entry.origSpan;
+    }
+    return entry.translSpan ?? entry.origSpan;
+  };
+
+  this.paragraphIndexOf = element => {
+    const elements = this.collectReadableElements();
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i] === element) return i;
+      if (
+        typeof elements[i].contains === 'function' &&
+        elements[i].contains(element)
+      ) {
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  this.applyTranslationMode = parallelMode => {
+    if (!reader.translation) return;
+    reader.translation.config = {
+      ...reader.translation.config,
+      parallelMode,
+    };
+    reader.translation.entries.forEach(entry => {
+      entry.primary = this.primaryForMode(entry, parallelMode);
+    });
+    this.rebuildQueue();
+  };
+
+  this.rebuildQueue = () => {
+    if (!this.started) return;
+    const translated = (reader.translation?.entries?.size ?? 0) > 0;
+    const index = this.paragraphIndexOf(this.currentElement);
+    if (!translated && index === this.allReadableElements.indexOf(this.currentElement)) {
+      return;
+    }
+    const anchor =
+      index >= 0 ? this.collectReadableElements()[index] : this.currentElement;
+    this.start(anchor);
+    if (index >= 0) this.setActiveIndex(index);
+  };
+
+  this.clearTranslation = () => {
+    if (!reader.translation) return;
+    const started = this.started;
+    const index = started ? this.paragraphIndexOf(this.currentElement) : -1;
+    reader.translation.entries.forEach((entry, element) => {
+      element.classList.remove('lnr-parallel');
+      if (entry.originalMarkup !== undefined) {
+        element.innerHTML = entry.originalMarkup;
+      }
+    });
+    reader.translation.entries = new Map();
+    document.documentElement?.removeAttribute?.('data-translation-mode');
+    if (index >= 0) this.start(this.collectReadableElements()[index]);
+    else if (started) this.start(reader.chapterElement);
+  };
+
+  this.setTranslatedParagraphs = (paragraphs, translations, parallelMode) => {
+    if (!reader.translation) return;
+    const requested = this.collectReadableElements().filter(element =>
+      !!this.paragraphOriginalText(element),
+    );
+    const next = new Map();
+    requested.forEach((element, index) => {
+      const previous = reader.translation.entries.get(element);
+      next.set(element, {
+        orig:
+          paragraphs?.[index] ?? this.paragraphOriginalText(element),
+        transl: translations?.[index] ?? '',
+        originalMarkup: previous?.originalMarkup ?? element.innerHTML,
+        origSpan: null,
+        translSpan: null,
+        primary: null,
+      });
+    });
+    next.forEach((entry, element) => {
+      element.classList.add('lnr-parallel');
+      element.innerHTML = '';
+      const origSpan = document.createElement('span');
+      origSpan.className = 'lnr-orig';
+      origSpan.innerHTML = entry.originalMarkup;
+      element.appendChild(origSpan);
+      entry.origSpan = origSpan;
+      const translation = (entry.transl ?? '').trim();
+      if (translation) {
+        const translSpan = document.createElement('span');
+        translSpan.className = 'lnr-transl';
+        translSpan.textContent = entry.transl;
+        element.appendChild(translSpan);
+        entry.translSpan = translSpan;
+      }
+    });
+    reader.translation.entries = next;
+    this.applyTranslationMode(parallelMode);
+  };
+
   // if can find a readable node, else stop tts
   // FIXED: Added proper boundary checks to prevent stack overflow
   this.findNextTextNode = (depth = 0) => {
@@ -439,11 +655,14 @@ window.tts = new (function () {
   this.start = element => {
     const startElement = element ?? reader.chapterElement;
 
-    const readableEntries = this.getAllReadableElements(reader.chapterElement)
-      .map(readableElement => ({
-        element: readableElement,
-        text: this.normalizeText(readableElement.innerText),
-      }))
+    const readableEntries = this.collectReadableElements()
+      .map(readableElement => {
+        const root = this.paragraphRoot(readableElement);
+        return {
+          element: root,
+          text: this.normalizeText(root.innerText),
+        };
+      })
       .filter(entry => !!entry.text);
     this.allReadableElements = readableEntries.map(entry => entry.element);
     this.totalElements = this.allReadableElements.length;

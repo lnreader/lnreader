@@ -577,6 +577,8 @@ export interface StringMap {
   'readerScreen.noPreviousChapter': 'string';
   'readerScreen.searchMinLength': 'string';
   'readerScreen.searchPlaceholder': 'string';
+  'readerScreen.translationError': 'string';
+  'readerScreen.untranslated': 'string';
   'readerSettings.autoScrollInterval': 'string';
   'readerSettings.autoScrollOffset': 'string';
   'readerSettings.backgroundColor': 'string';

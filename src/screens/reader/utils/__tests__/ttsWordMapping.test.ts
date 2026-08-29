@@ -29,6 +29,12 @@ class TestElement {
     return this.childNodes.length > 0;
   }
 
+  get children(): TestElement[] {
+    return this.childNodes.filter(
+      (node): node is TestElement => node instanceof TestElement,
+    );
+  }
+
   get innerText(): string {
     return this.childNodes
       .map(node => (node instanceof TestElement ? node.innerText : node.data))
@@ -37,6 +43,19 @@ class TestElement {
 }
 
 type CapturedRange = { node: TestTextNode; start: number; end: number };
+
+type TranslationEntry = {
+  orig?: string;
+  transl?: string;
+  primary?: TestElement;
+  origSpan?: TestElement;
+  translSpan?: TestElement;
+};
+
+type TranslationHarness = {
+  config?: { enabled: boolean; parallelMode: string };
+  entries?: Map<TestElement, TranslationEntry>;
+};
 
 type TtsMapping = {
   mapFromElement(element: TestElement): {
@@ -55,6 +74,13 @@ type TtsMapping = {
   ): CapturedRange[];
   setWordRange(paragraphId: string, start: number, end: number): void;
   setHighlightSettings(settings: { enabled?: boolean; color?: string }): void;
+  collectParagraphTexts(): string[];
+  paragraphOriginalText(element: TestElement): string;
+  paragraphRoot(element: TestElement): TestElement;
+  primaryForMode(
+    entry: TranslationEntry,
+    parallelMode: string,
+  ): TestElement | null;
 };
 
 const text = (value: string) => new TestTextNode(value);
@@ -69,6 +95,7 @@ type TtsMappingWithWordMap = TtsMapping & { wordMap: TtsWordMap };
 const loadTtsMapping = (
   chapterElement: TestElement,
   captured: CapturedRange[],
+  translation?: TranslationHarness,
 ): TtsMapping => {
   const core = readFileSync(
     join(process.cwd(), 'assets/reader/js/core.js'),
@@ -85,7 +112,10 @@ const loadTtsMapping = (
   const highlights = new Map<string, { clear(): void; add(): void }>();
 
   type TtsContext = {
-    reader: { chapterElement: TestElement };
+    reader: {
+      chapterElement: TestElement;
+      translation?: TranslationHarness;
+    };
     window: {
       getComputedStyle(el: TestElement): {
         display: string;
@@ -110,7 +140,7 @@ const loadTtsMapping = (
   };
 
   const context: TtsContext = {
-    reader: { chapterElement },
+    reader: { chapterElement, ...(translation ? { translation } : {}) },
     window: {
       getComputedStyle: () => ({ display: 'block', visibility: 'visible' }),
     },
@@ -406,5 +436,140 @@ describe('reader TTS speaks like NoveLA', () => {
         expect(offset).toBeLessThanOrEqual(raw.length);
       });
     }
+  });
+});
+
+describe('reader TTS translation engine', () => {
+  it('collectParagraphTexts lists cleaned originals in DOM order, skipping decorator-only paragraphs', () => {
+    const chapter = element(
+      'div',
+      element('p', text('Hello '), element('strong', text('world'))),
+      element('p', text('----------')),
+      element('p', text('"Second."')),
+    );
+    const tts = loadTtsMapping(chapter, []);
+    expect(tts.collectParagraphTexts()).toEqual(['Hello world', 'Second.']);
+  });
+
+  it('keeps the cleaned original stable through a translation via the stored entry', () => {
+    const original = element('p', text('Original text'));
+    const chapter = element('div', original);
+    const tts = loadTtsMapping(chapter, [], {
+      config: { enabled: true, parallelMode: 'PARALLEL_TRANSLATION_FIRST' },
+      entries: new Map([
+        [
+          original,
+          { orig: 'Original text', transl: 'Bản gốc', primary: original },
+        ],
+      ]),
+    });
+    expect(tts.paragraphOriginalText(original)).toBe('Original text');
+    expect(tts.collectParagraphTexts()).toEqual(['Original text']);
+    expect(tts.paragraphOriginalText(element('p', text('Unseen')))).toBe(
+      'Unseen',
+    );
+  });
+
+  it('paragraphRoot resolves the node TTS must speak for the active mode', () => {
+    const orig = element('span', text('Original'));
+    const translated = element('span', text('Bản gốc'));
+    const paragraph = element('p', orig, translated);
+    const tts = loadTtsMapping(element('div', paragraph), [], {
+      config: { enabled: true, parallelMode: 'PARALLEL_TRANSLATION_FIRST' },
+      entries: new Map([
+        [
+          paragraph,
+          {
+            orig: 'Original',
+            transl: 'Bản gốc',
+            primary: translated,
+            origSpan: orig,
+            translSpan: translated,
+          },
+        ],
+      ]),
+    });
+    expect(tts.paragraphRoot(paragraph)).toBe(translated);
+    const untranslated = element('p', text('Untranslated'));
+    expect(tts.paragraphRoot(untranslated)).toBe(untranslated);
+  });
+
+  it('primaryForMode picks the spoken side, falling back to the original for empty translations', () => {
+    const orig = element('span', text('Original'));
+    const translated = element('span', text('Bản gốc'));
+    const tts = loadTtsMapping(element('div'), []);
+    expect(
+      tts.primaryForMode(
+        { origSpan: orig, translSpan: translated },
+        'ORIGINAL_ONLY',
+      ),
+    ).toBe(orig);
+    expect(
+      tts.primaryForMode(
+        { origSpan: orig, translSpan: translated },
+        'PARALLEL_ORIGINAL_FIRST',
+      ),
+    ).toBe(orig);
+    expect(
+      tts.primaryForMode(
+        { origSpan: orig, translSpan: translated },
+        'PARALLEL_TRANSLATION_FIRST',
+      ),
+    ).toBe(translated);
+    expect(
+      tts.primaryForMode(
+        { origSpan: orig, translSpan: translated },
+        'TRANSLATED_ONLY',
+      ),
+    ).toBe(translated);
+    expect(
+      tts.primaryForMode(
+        { origSpan: orig, translSpan: undefined },
+        'TRANSLATED_ONLY',
+      ),
+    ).toBe(orig);
+  });
+
+  it('keeps the spoken text in parity with the primary side highlight map', () => {
+    const orig = element(
+      'span',
+      text('Hello '),
+      element('strong', text('world')),
+    );
+    const translated = element('span', text('Xin chào thế giới'));
+    const paragraph = element('p', orig, translated);
+    const chapter = element('div', paragraph);
+    const captured: CapturedRange[] = [];
+    const tts = loadTtsMapping(chapter, captured, {
+      config: { enabled: true, parallelMode: 'TRANSLATED_ONLY' },
+      entries: new Map([
+        [
+          paragraph,
+          {
+            orig: 'Hello world',
+            transl: 'Xin chào thế giới',
+            primary: translated,
+            origSpan: orig,
+            translSpan: translated,
+          },
+        ],
+      ]),
+    });
+
+    const root = tts.paragraphRoot(paragraph);
+    expect(root).toBe(translated);
+    const map = tts.mapFromElement(root);
+    expect(map).not.toBeNull();
+    expect(map!.text).toBe(tts.normalizeText(translated.innerText));
+    expect(map!.text).toBe('Xin chào thế giới');
+
+    const start = map!.text.indexOf('chào');
+    const end = start + 'chào'.length;
+    const ranges = tts.rangesFor(map, start, end);
+    const highlighted = ranges
+      .map(range => range.node.data.slice(range.start, range.end))
+      .join('');
+    expect(highlighted).toBe('chào');
+    expect(captured.length).toBeGreaterThan(0);
   });
 });

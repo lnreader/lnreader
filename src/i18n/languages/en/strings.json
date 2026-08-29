@@ -679,7 +679,9 @@
     "noNextChapter": "There's no next chapter",
     "noPreviousChapter": "There's no previous chapter",
     "searchMinLength": "Enter at least %{count} characters to search",
-    "searchPlaceholder": "Search chapter"
+    "searchPlaceholder": "Search chapter",
+    "translationError": "Translation failed. Check your network and provider settings.",
+    "untranslated": "No translation available"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",

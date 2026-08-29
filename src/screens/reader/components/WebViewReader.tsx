@@ -27,6 +27,7 @@ import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
+import { useChapterTranslation } from '../hooks/useChapterTranslation';
 import type { TtsSettings } from '@modules/nitro-tts';
 import { ChapterInfo } from '@database/types';
 import { Dialog } from '@components/Dialog';
@@ -179,6 +180,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     updateSettings: updateTtsSettings,
     wordRange,
   } = useTtsSession();
+
+  const {
+    translationEnabled,
+    parallelMode,
+    requestTranslation,
+    pushConfig,
+    onTranslationRequest,
+  } = useChapterTranslation(webViewRef, activeChapterIdRef);
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
 
@@ -530,6 +539,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             `);
             }, 300);
           }
+
+          if (translationEnabled) {
+            pushConfig({ enabled: true, parallelMode });
+            requestTranslation();
+          }
         }}
         onMessage={(ev: { nativeEvent: { data: string } }) => {
           __DEV__ && onLogMessage(ev);
@@ -584,6 +598,18 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   }
                   break;
               }
+              break;
+            }
+            case 'translation-request': {
+              const payload = event.data as
+                | { paragraphs?: unknown }
+                | undefined;
+              const paragraphs = Array.isArray(payload?.paragraphs)
+                ? payload.paragraphs.filter(
+                    (item): item is string => typeof item === 'string',
+                  )
+                : [];
+              onTranslationRequest(paragraphs);
               break;
             }
             case 'hide':
