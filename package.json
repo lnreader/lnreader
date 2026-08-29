@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev:android:release": "pnpm run generate:env:release && npx expo run:android --variant release",
-    "dev:android": "pnpm run generate:env:debug && npx expo run:android --app-id com.rajarsheechatterjee.LNReader.debug",
+    "dev:android": "pnpm run generate:env:debug && npx expo run:android --app-id com.vaizer0.LNReader.debug",
     "dev:ios": "npx expo run:ios",
     "dev:start": "npx expo start",
     "dev:clean-start": "npx expo start --clear",
