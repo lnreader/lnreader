@@ -110,5 +110,13 @@ namespace margelo::nitro::nitrotts::bridge::swift {
       swiftClosure.call(message);
     };
   }
+  
+  // pragma MARK: std::function<void(const TtsWordRange& /* range */)>
+  Func_void_TtsWordRange create_Func_void_TtsWordRange(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroTts::Func_void_TtsWordRange::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const TtsWordRange& range) mutable -> void {
+      swiftClosure.call(range);
+    };
+  }
 
 } // namespace margelo::nitro::nitrotts::bridge::swift

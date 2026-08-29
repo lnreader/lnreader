@@ -19,6 +19,8 @@ namespace margelo::nitro::nitrotts { struct TtsSettings; }
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsWordRange` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsWordRange; }
 
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
@@ -44,6 +46,9 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include "JFunc_void_TtsProgress.hpp"
 #include "JTtsProgress.hpp"
 #include "JFunc_void_std__string.hpp"
+#include "TtsWordRange.hpp"
+#include "JFunc_void_TtsWordRange.hpp"
+#include "JTtsWordRange.hpp"
 
 namespace margelo::nitro::nitrotts {
 
@@ -235,6 +240,11 @@ namespace margelo::nitro::nitrotts {
   ListenerSubscription JHybridTtsSessionSpec::addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_std__string::javaobject> /* listener */)>("addOnErrorListener_cxx");
     auto __result = method(_javaPart, JFunc_void_std__string_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridTtsSessionSpec::addOnWordRangeChangedListener(const std::function<void(const TtsWordRange& /* range */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_TtsWordRange::javaobject> /* listener */)>("addOnWordRangeChangedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_TtsWordRange_cxx::fromCpp(listener));
     return __result->toCpp();
   }
 

@@ -66,6 +66,7 @@ namespace margelo::nitro::nitrotts {
     ListenerSubscription addOnStateChangedListener(const std::function<void(TtsPlaybackState /* state */)>& listener) override;
     ListenerSubscription addOnProgressChangedListener(const std::function<void(const TtsProgress& /* progress */)>& listener) override;
     ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) override;
+    ListenerSubscription addOnWordRangeChangedListener(const std::function<void(const TtsWordRange& /* range */)>& listener) override;
 
   private:
     jni::global_ref<JHybridTtsSessionSpec::JavaPart> _javaPart;

@@ -91,6 +91,15 @@ abstract class HybridTtsSessionSpec: HybridObject() {
     val __result = addOnErrorListener(listener)
     return __result
   }
+  
+  abstract fun addOnWordRangeChangedListener(listener: (range: TtsWordRange) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnWordRangeChangedListener_cxx(listener: Func_void_TtsWordRange): ListenerSubscription {
+    val __result = addOnWordRangeChangedListener(listener)
+    return __result
+  }
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

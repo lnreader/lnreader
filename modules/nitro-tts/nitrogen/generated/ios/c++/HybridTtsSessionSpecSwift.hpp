@@ -24,6 +24,8 @@ namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsWordRange` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsWordRange; }
 
 #include <NitroModules/Promise.hpp>
 #include "TtsParagraph.hpp"
@@ -36,6 +38,7 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include <functional>
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
+#include "TtsWordRange.hpp"
 
 #include "NitroTts-Swift-Cxx-Umbrella.hpp"
 
@@ -177,6 +180,14 @@ namespace margelo::nitro::nitrotts {
     }
     inline ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) override {
       auto __result = _swiftPart.addOnErrorListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnWordRangeChangedListener(const std::function<void(const TtsWordRange& /* range */)>& listener) override {
+      auto __result = _swiftPart.addOnWordRangeChangedListener(listener);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

@@ -25,6 +25,7 @@ public protocol HybridTtsSessionSpec_protocol: HybridObject {
   func addOnStateChangedListener(listener: @escaping (_ state: TtsPlaybackState) -> Void) throws -> ListenerSubscription
   func addOnProgressChangedListener(listener: @escaping (_ progress: TtsProgress) -> Void) throws -> ListenerSubscription
   func addOnErrorListener(listener: @escaping (_ message: String) -> Void) throws -> ListenerSubscription
+  func addOnWordRangeChangedListener(listener: @escaping (_ range: TtsWordRange) -> Void) throws -> ListenerSubscription
 }
 
 public extension HybridTtsSessionSpec_protocol {

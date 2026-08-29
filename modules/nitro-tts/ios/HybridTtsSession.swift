@@ -72,4 +72,10 @@ final class HybridTtsSession: HybridTtsSessionSpec {
   ) throws -> ListenerSubscription {
     return ListenerSubscription(remove: coordinator.addErrorListener(listener))
   }
+
+  func addOnWordRangeChangedListener(
+    listener: @escaping (TtsWordRange) -> Void
+  ) throws -> ListenerSubscription {
+    return ListenerSubscription(remove: coordinator.addWordRangeListener(listener))
+  }
 }
