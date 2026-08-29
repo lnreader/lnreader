@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import { useChapterGeneralSettings, useTheme, useTranslationSettings } from '@hooks/persisted';
 
 import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
@@ -100,6 +100,8 @@ export const ChapterContent = ({
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
+  const { enabled: translationEnabled, setTranslationSettings } =
+    useTranslationSettings();
   const [bookmarked, setBookmarked] = useState<boolean>(
     chapter.bookmark ?? false,
   );
@@ -238,6 +240,25 @@ export const ChapterContent = ({
     void Share.share({ message: chapterUrl });
   }, [chapterUrl]);
 
+  const toggleTranslation = useCallback(() => {
+    const next = !translationEnabled;
+    setTranslationSettings({ enabled: next });
+    if (next) {
+      webViewRef.current?.injectJavaScript(`
+        (()=>{
+          const cfg = window.reader?.translation?.config ?? {};
+          window.reader?.applyTranslation?.({ config: { ...cfg, enabled: true } });
+          window.reader?.requestTranslation?.();
+        })();
+        true;
+      `);
+    } else {
+      webViewRef.current?.injectJavaScript(
+        '(window.reader?.clearTranslation?.(), true);',
+      );
+    }
+  }, [setTranslationSettings, translationEnabled, webViewRef]);
+
   if (error) {
     return (
       <ErrorScreenV2
@@ -302,6 +323,8 @@ export const ChapterContent = ({
             openInWebView={openChapterInWebView}
             openInBrowser={openChapterInBrowser}
             shareChapter={shareChapter}
+            translationEnabled={translationEnabled}
+            onToggleTranslation={toggleTranslation}
           />
           {!searchVisible ? (
             <ReaderFooter

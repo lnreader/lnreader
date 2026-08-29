@@ -32,6 +32,8 @@ interface ReaderAppbarProps {
   openInWebView: () => void;
   openInBrowser: () => void;
   shareChapter: () => void;
+  translationEnabled: boolean;
+  onToggleTranslation: () => void;
 }
 
 const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
@@ -51,6 +53,8 @@ const ReaderAppbar = ({
   openInWebView,
   openInBrowser,
   shareChapter,
+  translationEnabled,
+  onToggleTranslation,
 }: ReaderAppbarProps) => {
   const { chapter, novel, refetch } = useChapterContext();
   const { statusBarHeight } = useNovelLayout();
@@ -140,6 +144,15 @@ const ReaderAppbar = ({
           padding={12}
           onPress={() => setSearchVisible(current => !current)}
           color={searchVisible ? theme.primary : theme.onSurface}
+          theme={theme}
+        />
+        <IconButtonV2
+          accessibilityLabel={getString('readerScreen.bottomSheet.translation')}
+          name="translate"
+          size={24}
+          padding={12}
+          onPress={onToggleTranslation}
+          color={translationEnabled ? theme.primary : theme.onSurface}
           theme={theme}
         />
         <IconButtonV2
