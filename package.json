@@ -1,6 +1,6 @@
 {
   "name": "lnreader",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "scripts": {
     "dev:android:release": "pnpm run generate:env:release && npx expo run:android --variant release",

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "version": "2.1.3",
+    "version": "2.1.4",
     "name": "LNReader",
     "slug": "LNReader",
     "scheme": "lnreader",
@@ -56,7 +56,7 @@
       ]
     ],
     "android": {
-      "versionCode": 4196355,
+      "versionCode": 4196356,
       "package": "com.vaizer0.LNReader",
       "adaptiveIcon": {
         "foregroundImage": "./assets/native/ic_launcher_foreground.png",
