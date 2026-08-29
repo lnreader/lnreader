@@ -164,18 +164,5 @@ jobs:
             release-artifacts/* \
             --target "$GITHUB_SHA" \
             --title "LNReader Nightly (master @ ${{ env.NIGHTLY_VERSION }})" \
-            --notes "$(cat <<'EOF'
-Nightly build from the latest master.
-
-Includes all APK variants:
-- **arm64-v8a** (64-bit)
-- **armeabi-v7a** (32-bit)
-- **x86** (32-bit emulators)
-- **x86_64** (64-bit emulators)
-- **universal** (all devices)
-
-This is a rolling pre-release: it is replaced by the next `master` nightly.
-Install over an existing LNReader install; the version code always increases.
-EOF
-            )" \
+            --notes "Nightly build from the latest master. Includes all APK variants: arm64-v8a (64-bit), armeabi-v7a (32-bit), x86 (32-bit emulators), x86_64 (64-bit emulators) and universal (all devices). This is a rolling pre-release replaced by the next master nightly; the version code always increases so it installs over an existing LNReader build." \
             --prerelease
