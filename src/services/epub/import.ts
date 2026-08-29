@@ -5,7 +5,7 @@ import {
 } from '@database/queries/NovelQueries';
 import { LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
 import { getString } from '@i18n/translations';
-import { NOVEL_STORAGE } from '@utils/Storages';
+import { NOVEL_STORAGE, toStorageFileUri } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import type {
@@ -46,12 +46,14 @@ const insertLocalNovel = async (
     await updateNovelCategoryById(insertId, [2]);
     const novelDir = NOVEL_STORAGE + '/local/' + insertId;
     await NativeFile.mkdir(novelDir);
-    const newCoverPath = `file://${novelDir}/${cover?.split(/[/\\]/).pop()}`;
+    let newCoverUri: string | undefined;
 
     if (cover) {
       const decodedPath = decodePath(cover);
       if (await NativeFile.exists(decodedPath)) {
+        const newCoverPath = `${novelDir}/${cover.split(/[/\\]/).pop()}`;
         await NativeFile.moveFile(decodedPath, newCoverPath);
+        newCoverUri = await NativeFile.resolveUri(newCoverPath);
       }
     }
     await updateNovelInfo({
@@ -61,7 +63,7 @@ const insertLocalNovel = async (
       artist: artist,
       summary: summary,
       path: NOVEL_STORAGE + '/local/' + insertId,
-      cover: newCoverPath,
+      cover: newCoverUri,
       name: name,
       inLibrary: true,
       isLocal: true,
@@ -103,7 +105,9 @@ const insertLocalChapter = async (
     chapterText = chapterText.replace(
       /[=](?<= href=| src=)(["'])([^]*?)\1/g,
       (_, __, $2: string) => {
-        return `="file://${novelDir}/${$2.split(/[/\\]/).pop()}"`;
+        return `="${toStorageFileUri(
+          `${novelDir}/${$2.split(/[/\\]/).pop()}`,
+        )}"`;
       },
     );
     await NativeFile.mkdir(novelDir + '/' + insertId);

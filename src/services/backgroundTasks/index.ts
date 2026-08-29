@@ -23,6 +23,7 @@ export type {
   MigrateNovelData,
   MigrationNovelOptions,
   MigrationNovelPreference,
+  MigrateDownloadStorageData,
   QueuedBackgroundTask,
   SelfHostData,
   TaskProgressUpdater,

@@ -375,6 +375,7 @@
     "chapterEmptyOrScrapeError": "Either chapter is empty or the app couldn't scrape it",
     "chapterName": "Chapter: %{name}",
     "completed": "Download completed",
+    "customStorageInfo": "Downloaded chapters are stored in %{directory}.",
     "storageInfo": "Downloaded chapters are stored in the app's private storage on this device.",
     "downloading": "Downloading",
     "downloadingNovel": "Downloading: %{name}",
@@ -451,6 +452,22 @@
   "globalSearch": {
     "allSources": "all sources",
     "searchIn": "Search a novel in"
+  },
+  "dataStorageScreen": {
+    "title": "Data & storage",
+    "storage": "Storage",
+    "storageLocation": "Storage location",
+    "storageLocationDescription": "Used for automatic backups, chapter downloads, and local novels.",
+    "appPrivateStorage": "App-private storage",
+    "backupAndRestore": "Backup and restore",
+    "backupSafetyWarning": "Keep copies of important backups somewhere else too. Backups on this device do not protect against device loss or storage failure.",
+    "moveDownloadsTitle": "Move existing downloads?",
+    "moveDownloadsDescription": "LNReader will copy existing downloads to %{directory}, use it for automatic backups, and keep the old files as a safety copy.",
+    "moveDownloads": "Move data",
+    "storageMigrationPreparing": "Preparing storage migration",
+    "storageMigrationProgress": "Moving downloads: %{copied}/%{total}",
+    "storageMigrationComplete": "Storage moved successfully.",
+    "storageMigrationTasksBusy": "Pause or finish background tasks before moving storage."
   },
   "history": "History",
   "historyScreen": {
@@ -766,6 +783,7 @@
     "LOCAL_BACKUP": "Local Backup",
     "LOCAL_RESTORE": "Local Restore",
     "MIGRATE_NOVEL": "Migrating Novel",
+    "MIGRATE_DOWNLOAD_STORAGE": "Moving LNReader storage",
     "DOWNLOAD_CHAPTER": "Downloading Chapter",
     "taskQueued": "%{task} queued",
     "taskCompleted": "Completed",

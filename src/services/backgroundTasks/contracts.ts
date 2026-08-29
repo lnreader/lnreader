@@ -44,6 +44,11 @@ export type EpubImportFile = {
   uri: string;
 };
 
+export type MigrateDownloadStorageData = {
+  directoryName: string;
+  directoryUri: string;
+};
+
 export type EpubExportData = {
   novelName: string;
   metadata: EpubExportMetadata;
@@ -77,6 +82,7 @@ export type BackgroundTask =
       };
     }
   | { name: 'LOCAL_RESTORE'; data: { sourceUri: string } }
+  | { name: 'MIGRATE_DOWNLOAD_STORAGE'; data: MigrateDownloadStorageData }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
   | DownloadChapterTask;
 

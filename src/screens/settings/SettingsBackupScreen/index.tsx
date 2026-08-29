@@ -1,13 +1,15 @@
 import { useAppSettings, useTheme } from '@hooks/persisted';
-import { Appbar, List, SafeAreaView } from '@components';
+import { Appbar, ConfirmationDialog, List, SafeAreaView } from '@components';
 import { useBoolean } from '@hooks';
-import { BackupSettingsScreenProps } from '@navigators/types';
+import { DataStorageSettingsScreenProps } from '@navigators/types';
 import GoogleDriveModal from './Components/GoogleDriveModal';
 import SelfHostModal from './Components/SelfHostModal';
 import {
+  BACKGROUND_TASKS_STORE_KEY,
   backgroundTasks,
   configureAutomaticBackups,
   type AutomaticBackupInterval,
+  type QueuedBackgroundTask as BackgroundTaskRecord,
 } from '@services/backgroundTasks';
 import { ScrollView } from 'react-native-gesture-handler';
 import { getString } from '@i18n/translations';
@@ -25,8 +27,12 @@ import AutomaticBackupDialog, {
   AUTOMATIC_BACKUP_LABELS,
 } from './Components/AutomaticBackupDialog';
 import { showToast } from '@utils/showToast';
+import { NOVEL_STORAGE_DIRECTORY_NAME_KEY } from '@utils/Storages';
+import { useMMKVObject, useMMKVString } from 'react-native-mmkv';
 
-const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
+const DataStorageSettings = ({
+  navigation,
+}: DataStorageSettingsScreenProps) => {
   const theme = useTheme();
   const {
     automaticBackupIntervalHours = 0,
@@ -35,9 +41,21 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
     lastAutomaticBackupAt,
     setAppSettings,
   } = useAppSettings();
+  const [storageDirectoryName] = useMMKVString(
+    NOVEL_STORAGE_DIRECTORY_NAME_KEY,
+  );
+  const [taskQueue] = useMMKVObject<BackgroundTaskRecord[]>(
+    BACKGROUND_TASKS_STORE_KEY,
+  );
+  const storageMigration = taskQueue?.find(
+    task => task.task.name === 'MIGRATE_DOWNLOAD_STORAGE',
+  );
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
     ...DEFAULT_BACKUP_OPTIONS,
   });
+  const [pendingStorageDirectory, setPendingStorageDirectory] = useState<
+    Awaited<ReturnType<typeof NativeFile.pickDirectory>> | undefined
+  >();
   const {
     value: backupOptionsVisible,
     setFalse: closeBackupOptions,
@@ -65,12 +83,40 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
     }
   };
 
+  const selectStorageDirectory = async () => {
+    if (storageMigration) return;
+    if (backgroundTasks.isRunning) {
+      showToast(getString('dataStorageScreen.storageMigrationTasksBusy'));
+      return;
+    }
+
+    let directory: Awaited<ReturnType<typeof NativeFile.pickDirectory>>;
+    try {
+      directory = await NativeFile.pickDirectory();
+    } catch {
+      return;
+    }
+
+    setPendingStorageDirectory(directory);
+  };
+
+  const moveDownloads = () => {
+    if (!pendingStorageDirectory) return;
+
+    backgroundTasks.enqueue({
+      name: 'MIGRATE_DOWNLOAD_STORAGE',
+      data: {
+        directoryName: pendingStorageDirectory.name,
+        directoryUri: pendingStorageDirectory.uri,
+      },
+    });
+  };
+
   const selectAutomaticBackupDirectory = async () => {
     let directory: Awaited<ReturnType<typeof NativeFile.pickDirectory>>;
     try {
       directory = await NativeFile.pickDirectory();
     } catch {
-      // Closing Android's directory picker intentionally keeps the old location.
       return;
     }
 
@@ -135,30 +181,32 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
-        title={getString('common.backup')}
+        title={getString('dataStorageScreen.title')}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
       />
       <ScrollView style={styles.paddingBottom}>
         <List.Section>
           <List.SubHeader theme={theme}>
-            {getString('backupScreen.remoteBackup')}
+            {getString('dataStorageScreen.storage')}
           </List.SubHeader>
           <List.Item
-            title={getString('backupScreen.selfHost')}
-            description={getString('backupScreen.selfHostDesc')}
+            title={getString('dataStorageScreen.storageLocation')}
+            description={
+              storageMigration?.meta.progressText ??
+              storageDirectoryName ??
+              getString('dataStorageScreen.appPrivateStorage')
+            }
+            onPress={selectStorageDirectory}
+            disabled={Boolean(storageMigration)}
             theme={theme}
-            onPress={openSelfHostModal}
           />
-
-          <List.Item
-            title={getString('backupScreen.googeDrive')}
-            description={getString('backupScreen.googeDriveDesc')}
+          <List.InfoItem
+            title={getString('dataStorageScreen.storageLocationDescription')}
             theme={theme}
-            onPress={openGoogleDriveModal}
           />
           <List.SubHeader theme={theme}>
-            {getString('backupScreen.localBackup')}
+            {getString('dataStorageScreen.backupAndRestore')}
           </List.SubHeader>
           <List.Item
             title={getString('backupScreen.createBackup')}
@@ -184,6 +232,7 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
             title={getString('backupScreen.automaticBackupLocation')}
             description={
               automaticBackupDirectoryName ??
+              storageDirectoryName ??
               `${NativeFile.ExternalDirectoryPath}/Backups`
             }
             onPress={selectAutomaticBackupDirectory}
@@ -197,6 +246,25 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
               theme={theme}
             />
           ) : null}
+          <List.InfoItem
+            title={getString('dataStorageScreen.backupSafetyWarning')}
+            theme={theme}
+          />
+          <List.SubHeader theme={theme}>
+            {getString('backupScreen.remoteBackup')}
+          </List.SubHeader>
+          <List.Item
+            title={getString('backupScreen.selfHost')}
+            description={getString('backupScreen.selfHostDesc')}
+            theme={theme}
+            onPress={openSelfHostModal}
+          />
+          <List.Item
+            title={getString('backupScreen.googeDrive')}
+            description={getString('backupScreen.googeDriveDesc')}
+            theme={theme}
+            onPress={openGoogleDriveModal}
+          />
         </List.Section>
       </ScrollView>
       <GoogleDriveModal
@@ -217,6 +285,21 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
         theme={theme}
         visible={backupOptionsVisible}
       />
+      <ConfirmationDialog
+        title={getString('dataStorageScreen.moveDownloadsTitle')}
+        message={
+          pendingStorageDirectory
+            ? getString('dataStorageScreen.moveDownloadsDescription', {
+                directory: pendingStorageDirectory.name,
+              })
+            : undefined
+        }
+        confirmLabel={getString('dataStorageScreen.moveDownloads')}
+        confirmTone="primary"
+        visible={Boolean(pendingStorageDirectory)}
+        onConfirm={moveDownloads}
+        onDismiss={() => setPendingStorageDirectory(undefined)}
+      />
       <Portal>
         <AutomaticBackupDialog
           intervalHours={automaticBackupIntervalHours}
@@ -229,7 +312,7 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   );
 };
 
-export default BackupSettings;
+export default DataStorageSettings;
 
 const styles = StyleSheet.create({
   paddingBottom: { paddingBottom: 40 },

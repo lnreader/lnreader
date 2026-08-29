@@ -127,6 +127,20 @@ describe('background task definitions', () => {
     );
   });
 
+  it('derives notification metadata for storage migration', () => {
+    const task: BackgroundTask = {
+      name: 'MIGRATE_DOWNLOAD_STORAGE',
+      data: { directoryName: 'LNReader', directoryUri: 'content://root' },
+    };
+
+    expect(getBackgroundTaskTitle(task)).toBe(
+      'notifications.MIGRATE_DOWNLOAD_STORAGE',
+    );
+    expect(createBackgroundTaskMetadata(task, false).progressText).toBe(
+      'dataStorageScreen.storageMigrationPreparing',
+    );
+  });
+
   it('maps a native record into the reactive queue projection', () => {
     const task: BackgroundTask = { name: 'UPDATE_LIBRARY' };
     const record: NativeBackgroundTaskRecord = {

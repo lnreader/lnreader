@@ -28,14 +28,13 @@ const updateNovelMetadata = async (
 
   if (cover) {
     const novelCoverPath = `${novelDir}/cover.png`;
-    const novelCoverUri = `file://${novelCoverPath}`;
     try {
       await downloadFile(
         cover,
         novelCoverPath,
         getPlugin(pluginId)?.imageRequestInit,
       );
-      cover = `${novelCoverUri}?${Date.now()}`;
+      cover = `${await NativeFile.resolveUri(novelCoverPath)}?${Date.now()}`;
     } catch {
       // If download fails, we fallback to what was there or null
       cover = undefined;

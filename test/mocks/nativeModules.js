@@ -21,6 +21,9 @@ jest.mock('@modules/native-file', () => ({
     mkdir: jest.fn(),
     unlink: jest.fn(),
     readDir: jest.fn(() => []),
+    resolveUri: jest.fn(path =>
+      Promise.resolve(path.startsWith('content://') ? path : `file://${path}`),
+    ),
     downloadFile: jest.fn().mockResolvedValue(),
   },
 }));

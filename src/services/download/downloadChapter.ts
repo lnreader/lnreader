@@ -52,10 +52,10 @@ const downloadFiles = async (
     const url = elem.attr('src');
     if (url) {
       const fileurl = `${folder}/${i}.b64.png`;
-      elem.attr('src', 'file://' + fileurl);
       try {
         const absoluteURL = new URL(url, plugin.site).href;
         await downloadFile(absoluteURL, fileurl, plugin.imageRequestInit);
+        elem.attr('src', await NativeFile.resolveUri(fileurl));
       } catch (e) {
         elem.attr('alt', String(e));
       }

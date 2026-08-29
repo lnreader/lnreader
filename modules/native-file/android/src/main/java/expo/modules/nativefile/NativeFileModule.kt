@@ -48,6 +48,11 @@ class NativeFileModule : Module() {
     private val reactContext: ReactApplicationContext?
         get() = appContext.reactContext as? ReactApplicationContext
 
+    private val safDocumentStore: SafDocumentStore
+        get() = SafDocumentStore(
+            reactContext ?: throw IOException("React context is unavailable"),
+        )
+
     private val activityEventListener = object : BaseActivityEventListener() {
         override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
             if (
@@ -104,6 +109,9 @@ class NativeFileModule : Module() {
 
     private fun getInputStream(filepath: String): InputStream {
         val uri = getFileUri(filepath)
+        if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            return safDocumentStore.openInputStream(filepath)
+        }
         return reactContext?.contentResolver?.openInputStream(uri)
             ?: throw Exception("ENOENT: could not open an input stream for '$filepath'")
     }
@@ -113,8 +121,25 @@ class NativeFileModule : Module() {
 
     private fun getOutputStream(filepath: String): OutputStream {
         val uri = getFileUri(filepath)
+        if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            return safDocumentStore.openOutputStream(filepath)
+        }
         return reactContext?.contentResolver?.openOutputStream(uri, writeAccessByAPILevel)
             ?: throw Exception("ENOENT: could not open an output stream for '$filepath'")
+    }
+
+    private fun isSafPath(path: String): Boolean =
+        Uri.parse(path).scheme == ContentResolver.SCHEME_CONTENT
+
+    private fun deletePath(path: String) {
+        if (isSafPath(path)) {
+            safDocumentStore.unlink(path)
+            return
+        }
+        val file = File(Uri.parse(path).path ?: path)
+        if (!file.delete()) {
+            throw IOException("Failed to delete source file '$path'")
+        }
     }
 
     private suspend fun copyFileContent(
@@ -423,7 +448,11 @@ class NativeFileModule : Module() {
         AsyncFunction("writeFile") { path: String, content: String, promise: Promise ->
             coroutineScope.launch {
                 try {
-                    FileWriter(path).use { it.write(content) }
+                    if (isSafPath(path)) {
+                        safDocumentStore.writeText(path, content)
+                    } else {
+                        FileWriter(path).use { it.write(content) }
+                    }
                     promise.resolve(null)
                 } catch (e: Exception) {
                     rejectFileOperation(promise, "write", path, e)
@@ -434,6 +463,10 @@ class NativeFileModule : Module() {
         AsyncFunction("readFile") { path: String, promise: Promise ->
             coroutineScope.launch {
                 try {
+                    if (isSafPath(path)) {
+                        promise.resolve(safDocumentStore.readText(path))
+                        return@launch
+                    }
                     val file = File(path)
                     if (!file.exists()) {
                         promise.reject("ENOENT", "File not found: '$path'", null)
@@ -479,11 +512,8 @@ class NativeFileModule : Module() {
         AsyncFunction("moveFile") { filepath: String, destPath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
-                    val inFile = File(filepath)
                     copyFileContent(filepath, destPath) {
-                        if (!inFile.delete()) {
-                            throw IOException("Failed to delete source file '$filepath'")
-                        }
+                        deletePath(filepath)
                     }
                     promise.resolve(null)
                 } catch (e: Exception) {
@@ -495,7 +525,12 @@ class NativeFileModule : Module() {
         AsyncFunction("exists") { filepath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
-                    promise.resolve(File(filepath).exists())
+                    val exists = if (isSafPath(filepath)) {
+                        safDocumentStore.exists(filepath)
+                    } else {
+                        File(filepath).exists()
+                    }
+                    promise.resolve(exists)
                 } catch (e: Exception) {
                     rejectFileOperation(promise, "inspect", filepath, e)
                 }
@@ -505,6 +540,11 @@ class NativeFileModule : Module() {
         AsyncFunction("mkdir") { filepath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
+                    if (isSafPath(filepath)) {
+                        safDocumentStore.mkdir(filepath)
+                        promise.resolve(null)
+                        return@launch
+                    }
                     val file = File(filepath)
                     if (file.exists() && !file.isDirectory) {
                         throw IOException("A file already exists at the directory path")
@@ -522,6 +562,11 @@ class NativeFileModule : Module() {
         AsyncFunction("unlink") { filepath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
+                    if (isSafPath(filepath)) {
+                        safDocumentStore.unlink(filepath)
+                        promise.resolve(null)
+                        return@launch
+                    }
                     val file = File(filepath)
                     if (file.exists()) {
                         deleteRecursive(file)
@@ -536,6 +581,10 @@ class NativeFileModule : Module() {
         AsyncFunction("readDir") { directory: String, promise: Promise ->
             coroutineScope.launch {
                 try {
+                    if (isSafPath(directory)) {
+                        promise.resolve(safDocumentStore.list(directory))
+                        return@launch
+                    }
                     val file = File(directory)
                     if (!file.exists()) {
                         promise.reject("ENOENT", "Folder does not exist: '$directory'", null)
@@ -551,6 +600,23 @@ class NativeFileModule : Module() {
                     promise.resolve(result)
                 } catch (e: Exception) {
                     rejectFileOperation(promise, "list", directory, e)
+                }
+            }
+        }
+
+        AsyncFunction("resolveUri") { path: String, promise: Promise ->
+            coroutineScope.launch {
+                try {
+                    val uri = if (isSafPath(path)) {
+                        safDocumentStore.resolveUri(path)
+                    } else if (path.startsWith("file://")) {
+                        path
+                    } else {
+                        "file://$path"
+                    }
+                    promise.resolve(uri)
+                } catch (e: Exception) {
+                    rejectFileOperation(promise, "resolve", path, e)
                 }
             }
         }
@@ -583,8 +649,8 @@ class NativeFileModule : Module() {
                                     }
                                     try {
                                         decompressStream(it.body!!.byteStream()).use { inputStream ->
-                                            FileOutputStream(destPath).use { fos ->
-                                                inputStream.copyTo(fos, BUFFER_SIZE)
+                                            getOutputStream(destPath).use { outputStream ->
+                                                inputStream.copyTo(outputStream, BUFFER_SIZE)
                                             }
                                         }
                                         promise.resolve(null)

@@ -102,6 +102,8 @@ export const getBackgroundTaskTitle = (task: BackgroundTask) => {
       return `${getString('notifications.MIGRATE_NOVEL')}: ${
         task.data.fromNovel.name
       }`;
+    case 'MIGRATE_DOWNLOAD_STORAGE':
+      return getString('notifications.MIGRATE_DOWNLOAD_STORAGE');
     case 'UPDATE_LIBRARY':
       return task.data?.categoryName
         ? `${getString('notifications.UPDATE_LIBRARY')}: ${
@@ -127,6 +129,8 @@ export const createBackgroundTaskMetadata = (
       ? task.data.files[0]?.filename
       : task.name === 'EXPORT_EPUB'
       ? getString('novelScreen.epub.preparingExport')
+      : task.name === 'MIGRATE_DOWNLOAD_STORAGE'
+      ? getString('dataStorageScreen.storageMigrationPreparing')
       : undefined,
 });
 
