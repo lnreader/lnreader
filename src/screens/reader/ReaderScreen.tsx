@@ -1,5 +1,9 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { useChapterGeneralSettings, useTheme, useTranslationSettings } from '@hooks/persisted';
+import {
+  useChapterGeneralSettings,
+  useTheme,
+  useTranslationSettings,
+} from '@hooks/persisted';
 
 import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
@@ -247,7 +251,10 @@ export const ChapterContent = ({
       webViewRef.current?.injectJavaScript(`
         (()=>{
           const cfg = window.reader?.translation?.config ?? {};
-          window.reader?.applyTranslation?.({ config: { ...cfg, enabled: true } });
+          window.reader?.applyTranslationConfig?.({
+            enabled: true,
+            parallelMode: cfg.parallelMode ?? 'PARALLEL_TRANSLATION_FIRST',
+          });
           window.reader?.requestTranslation?.();
         })();
         true;
