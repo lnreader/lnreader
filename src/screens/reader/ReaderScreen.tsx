@@ -245,26 +245,10 @@ export const ChapterContent = ({
   }, [chapterUrl]);
 
   const toggleTranslation = useCallback(() => {
-    const next = !translationEnabled;
-    setTranslationSettings({ enabled: next });
-    if (next) {
-      webViewRef.current?.injectJavaScript(`
-        (()=>{
-          const cfg = window.reader?.translation?.config ?? {};
-          window.reader?.applyTranslationConfig?.({
-            enabled: true,
-            parallelMode: cfg.parallelMode ?? 'PARALLEL_TRANSLATION_FIRST',
-          });
-          window.reader?.requestTranslation?.();
-        })();
-        true;
-      `);
-    } else {
-      webViewRef.current?.injectJavaScript(
-        '(window.reader?.clearTranslation?.(), true);',
-      );
-    }
-  }, [setTranslationSettings, translationEnabled, webViewRef]);
+    // Single source of truth: the useChapterTranslation effect watches the
+    // persisted settings and pushes config + (re)translation into the page.
+    setTranslationSettings({ enabled: !translationEnabled });
+  }, [setTranslationSettings, translationEnabled]);
 
   if (error) {
     return (
@@ -308,9 +292,17 @@ export const ChapterContent = ({
           bottomSheetRef={readerSheetRef}
           novelId={novel.id}
           onRedoTranslation={() =>
-            webViewRef.current?.injectJavaScript(
-              'window.reader?.requestTranslation?.(true); true;',
-            )
+            webViewRef.current?.injectJavaScript(`
+              (()=>{
+                const cfg = window.reader?.translation?.config ?? {};
+                window.reader?.applyTranslationConfig?.({
+                  enabled: true,
+                  parallelMode: cfg.parallelMode ?? 'PARALLEL_TRANSLATION_FIRST',
+                });
+                window.reader?.requestTranslation?.(true);
+              })();
+              true;
+            `)
           }
         />
       ) : null}

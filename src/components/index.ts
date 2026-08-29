@@ -43,3 +43,6 @@ export {
 } from './Translation/OptionPickerDialog';
 export { default as RegexRulesEditor } from './Translation/RegexRulesEditor';
 export { default as PromptsManager } from './Translation/PromptsManager';
+export { default as LanguagePickerDialog } from './Translation/LanguagePickerDialog';
+export { default as ProviderSettingsPanel } from './Translation/ProviderSettingsPanel';
+export { default as ExpandableSection } from './Translation/ExpandableSection';

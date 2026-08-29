@@ -89,10 +89,15 @@ export const useChapterTranslation = (
     }
 
     if (activeChapterIdRef.current === chapterId) {
-      if (
-        previous.enabled === false ||
+      // The page guards requestTranslation() on config.enabled, so always push
+      // the config first — enabling mid-chapter must reach the page enabled.
+      if (previous.enabled === false) {
+        pushConfig({ enabled: true, parallelMode: effective.parallelMode });
+        requestTranslation();
+      } else if (
         fieldsChanged(
           'provider',
+          'providerFingerprint',
           'sourceLanguage',
           'targetLanguage',
           'promptId',

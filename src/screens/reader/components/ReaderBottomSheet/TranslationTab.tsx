@@ -4,8 +4,10 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Chip } from 'react-native-paper';
 import {
   Button,
+  LanguagePickerDialog,
   List,
   OptionPickerDialog,
+  ProviderSettingsPanel,
   RegexRulesEditor,
   type TranslationOption,
 } from '@components';
@@ -14,26 +16,14 @@ import { getString } from '@i18n/translations';
 import type { StringMap } from '@i18n/types';
 import { computeEffectiveTranslationSettings } from '@api/translation/settings';
 import { BUILT_IN_PROMPTS } from '@api/translation/prompts';
-import {
-  getLanguageName,
-  TRANSLATION_LANGUAGES,
-} from '@api/translation/languages';
-import {
-  TRANSLATION_PARALLEL_MODES,
-  TRANSLATION_PROVIDERS,
-  type TranslationProvider,
-} from '@api/translation/types';
+import { getLanguageName } from '@api/translation/languages';
+import { TRANSLATION_PARALLEL_MODES } from '@api/translation/types';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
 
 interface TranslationTabProps {
   novelId: number;
   onRedoTranslation: () => void;
 }
-
-const providerLabel = (provider: string): string =>
-  getString(
-    `translationSettings.providers.${provider.toLowerCase()}` as keyof StringMap,
-  );
 
 const parallelModeLabel = (mode: string): string =>
   getString(`translationSettings.parallelModes.${mode}` as keyof StringMap);
@@ -61,28 +51,9 @@ const TranslationTab: React.FC<TranslationTabProps> = ({
     [novelId, settings],
   );
 
-  const [providerModal, setProviderModal] = React.useState(false);
   const [sourceModal, setSourceModal] = React.useState(false);
   const [targetModal, setTargetModal] = React.useState(false);
   const [promptModal, setPromptModal] = React.useState(false);
-
-  const providerOptions: TranslationOption[] = useMemo(
-    () =>
-      TRANSLATION_PROVIDERS.map(provider => ({
-        key: provider,
-        label: providerLabel(provider),
-      })),
-    [],
-  );
-
-  const languageOptions: TranslationOption[] = useMemo(
-    () =>
-      TRANSLATION_LANGUAGES.map(language => ({
-        key: language.code,
-        label: language.name,
-      })),
-    [],
-  );
 
   const promptOptions: TranslationOption[] = useMemo(() => {
     const globalName = promptName(
@@ -141,6 +112,33 @@ const TranslationTab: React.FC<TranslationTabProps> = ({
         {effective.enabled ? (
           <>
             <List.SubHeader theme={theme}>
+              {getString('translationSettings.mainProvider')}
+            </List.SubHeader>
+            <ProviderSettingsPanel
+              provider={effective.provider}
+              settings={settings}
+              setTranslationSettings={settings.setTranslationSettings}
+            />
+
+            <List.SubHeader theme={theme}>
+              {getString('translationSettings.language')}
+            </List.SubHeader>
+            <List.Item
+              title={getString('translationSettings.sourceLanguage')}
+              description={getLanguageName(effective.sourceLanguage)}
+              onPress={() => setSourceModal(true)}
+              right="chevron-right"
+              theme={theme}
+            />
+            <List.Item
+              title={getString('translationSettings.targetLanguage')}
+              description={getLanguageName(effective.targetLanguage)}
+              onPress={() => setTargetModal(true)}
+              right="chevron-right"
+              theme={theme}
+            />
+
+            <List.SubHeader theme={theme}>
               {getString('translationSettings.parallelMode')}
             </List.SubHeader>
             <View style={styles.chips}>
@@ -166,31 +164,10 @@ const TranslationTab: React.FC<TranslationTabProps> = ({
             </View>
 
             <List.SubHeader theme={theme}>
-              {getString('readerScreen.bottomSheet.translationSettings')}
+              {getString('translationSettings.prompt')}
             </List.SubHeader>
             <List.Item
-              title={getString('translationSettings.provider')}
-              description={providerLabel(effective.provider)}
-              onPress={() => setProviderModal(true)}
-              right="chevron-right"
-              theme={theme}
-            />
-            <List.Item
-              title={getString('translationSettings.sourceLanguage')}
-              description={getLanguageName(effective.sourceLanguage)}
-              onPress={() => setSourceModal(true)}
-              right="chevron-right"
-              theme={theme}
-            />
-            <List.Item
-              title={getString('translationSettings.targetLanguage')}
-              description={getLanguageName(effective.targetLanguage)}
-              onPress={() => setTargetModal(true)}
-              right="chevron-right"
-              theme={theme}
-            />
-            <List.Item
-              title={getString('translationSettings.prompt')}
+              title={getString('translationSettings.defaultPrompt')}
               description={promptName(
                 effective.promptId,
                 settings.prompts,
@@ -230,31 +207,17 @@ const TranslationTab: React.FC<TranslationTabProps> = ({
         )}
       </BottomSheetScrollView>
 
-      <OptionPickerDialog
-        visible={providerModal}
-        onDismiss={() => setProviderModal(false)}
-        title={getString('translationSettings.provider')}
-        options={providerOptions}
-        current={effective.provider}
-        onSelect={provider =>
-          settings.setTranslationSettings({
-            provider: provider as TranslationProvider,
-          })
-        }
-      />
-      <OptionPickerDialog
+      <LanguagePickerDialog
         visible={sourceModal}
         onDismiss={() => setSourceModal(false)}
         title={getString('translationSettings.sourceLanguage')}
-        options={languageOptions}
         current={effective.sourceLanguage}
         onSelect={sourceLanguage => setPerNovel({ sourceLanguage })}
       />
-      <OptionPickerDialog
+      <LanguagePickerDialog
         visible={targetModal}
         onDismiss={() => setTargetModal(false)}
         title={getString('translationSettings.targetLanguage')}
-        options={languageOptions}
         current={effective.targetLanguage}
         onSelect={targetLanguage => setPerNovel({ targetLanguage })}
       />

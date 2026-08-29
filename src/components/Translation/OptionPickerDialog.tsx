@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { Dialog } from '@components';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -38,30 +38,37 @@ const OptionPickerDialog: React.FC<OptionPickerDialogProps> = ({
         <Dialog.Title>{title}</Dialog.Title>
       </Dialog.Header>
       <Dialog.ScrollArea>
-        {options.map(option => {
-          const active = option.key === current;
-          return (
-            <Pressable
-              key={option.key}
-              style={[
-                styles.option,
-                active && { backgroundColor: theme.secondaryContainer },
-              ]}
-              android_ripple={{ color: theme.rippleColor }}
-              onPress={() => {
-                onSelect(option.key);
-                onDismiss();
-              }}
-            >
-              <Text style={[styles.label, { color: theme.onSurface }]}>
-                {option.label}
-              </Text>
-              {active ? (
-                <Text style={[styles.check, { color: theme.primary }]}>✓</Text>
-              ) : null}
-            </Pressable>
-          );
-        })}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.options}
+        >
+          {options.map(option => {
+            const active = option.key === current;
+            return (
+              <Pressable
+                key={option.key}
+                style={[
+                  styles.option,
+                  active && { backgroundColor: theme.secondaryContainer },
+                ]}
+                android_ripple={{ color: theme.rippleColor }}
+                onPress={() => {
+                  onSelect(option.key);
+                  onDismiss();
+                }}
+              >
+                <Text style={[styles.label, { color: theme.onSurface }]}>
+                  {option.label}
+                </Text>
+                {active ? (
+                  <Text style={[styles.check, { color: theme.primary }]}>
+                    ✓
+                  </Text>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss}>
@@ -75,6 +82,12 @@ const OptionPickerDialog: React.FC<OptionPickerDialogProps> = ({
 export default React.memo(OptionPickerDialog);
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexShrink: 1,
+  },
+  options: {
+    paddingBottom: 4,
+  },
   option: {
     alignItems: 'center',
     borderRadius: 4,

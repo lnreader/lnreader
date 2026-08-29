@@ -762,8 +762,18 @@ export interface StringMap {
   'translationSettings.providers.google_free': 'string';
   'translationSettings.providers.gemini': 'string';
   'translationSettings.providers.openai': 'string';
+  'translationSettings.providerDescriptions.google_pa': 'string';
+  'translationSettings.providerDescriptions.google_free': 'string';
+  'translationSettings.providerDescriptions.gemini': 'string';
+  'translationSettings.providerDescriptions.openai': 'string';
   'translationSettings.parallelModes.ORIGINAL_ONLY': 'string';
   'translationSettings.parallelModes.TRANSLATED_ONLY': 'string';
   'translationSettings.parallelModes.PARALLEL_ORIGINAL_FIRST': 'string';
   'translationSettings.parallelModes.PARALLEL_TRANSLATION_FIRST': 'string';
+  'translationSettings.languageSearchPlaceholder': 'string';
+  'translationSettings.noLanguageMatch': 'string';
+  'translationSettings.translationServices': 'string';
+  'translationSettings.language': 'string';
+  'translationSettings.baseUrlPlaceholder': 'string';
+  'translationSettings.personalApiKey': 'string';
 }

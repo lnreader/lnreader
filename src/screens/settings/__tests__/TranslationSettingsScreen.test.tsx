@@ -131,6 +131,25 @@ jest.mock('@components', () => {
     OptionPickerDialog,
     RegexRulesEditor: () => null,
     PromptsManager: () => null,
+    ProviderSettingsPanel: ({ setTranslationSettings }: any) =>
+      React.createElement(
+        Pressable,
+        {
+          testID: 'provider-panel',
+          onPress: () => setTranslationSettings({ provider: 'GEMINI' }),
+        },
+        React.createElement(Text, null, 'provider-panel'),
+      ),
+    LanguagePickerDialog: ({ title, onSelect }: any) =>
+      React.createElement(
+        View,
+        { testID: `lang-picker-${title}` },
+        React.createElement(
+          Pressable,
+          { onPress: () => onSelect('ja') },
+          React.createElement(Text, null, 'Japanese'),
+        ),
+      ),
   };
 });
 
@@ -168,25 +187,16 @@ describe('TranslationSettingsScreen', () => {
     expect(mockSetTranslationSettings).toHaveBeenCalledWith({ enabled: true });
   });
 
-  it('selects the provider from its dialog', () => {
+  it('selects the provider from its provider panel', () => {
     mockSettings = { ...mockSettings, enabled: true };
     renderScreen();
-    fireEvent.press(
-      screen.getByText(
-        'translationSettings.mainProvider: translationSettings.providers.google_pa',
-      ),
-    );
-    fireEvent.press(
-      within(
-        screen.getByTestId('options-translationSettings.mainProvider'),
-      ).getByText('translationSettings.providers.gemini'),
-    );
+    fireEvent.press(screen.getByTestId('provider-panel'));
     expect(mockSetTranslationSettings).toHaveBeenCalledWith({
       provider: 'GEMINI',
     });
   });
 
-  it('selects a target language from its dialog', () => {
+  it('selects a target language from the language dialog', () => {
     mockSettings = { ...mockSettings, enabled: true };
     renderScreen();
     fireEvent.press(
@@ -194,7 +204,7 @@ describe('TranslationSettingsScreen', () => {
     );
     fireEvent.press(
       within(
-        screen.getByTestId('options-translationSettings.targetLanguage'),
+        screen.getByTestId('lang-picker-translationSettings.targetLanguage'),
       ).getByText('Japanese'),
     );
     expect(mockSetTranslationSettings).toHaveBeenCalledWith({

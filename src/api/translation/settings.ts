@@ -88,6 +88,11 @@ export interface EffectiveTranslationSettings {
    */
   promptId: string | undefined | null;
   regexRules: RegexCleanupRule[];
+  /**
+   * Signature of the credential/model fields for the *active* provider, so a
+   * setting change re-translates (and editing a different provider does not).
+   */
+  providerFingerprint: string;
 }
 
 /**
@@ -109,7 +114,24 @@ export const computeEffectiveTranslationSettings = (
     promptId:
       per && 'promptId' in per ? per.promptId : settings.defaultPromptId,
     regexRules: [...(settings.regexRules ?? []), ...(per?.regexRules ?? [])],
+    providerFingerprint: fingerprint(settings.provider, settings),
   };
+};
+
+const fingerprint = (
+  provider: TranslationProvider,
+  settings: TranslationSettings,
+): string => {
+  switch (provider) {
+    case 'GOOGLE_PA':
+      return `${settings.googlePaApiKey.trim()}|${settings.useCommunityGooglePaKey}`;
+    case 'GEMINI':
+      return `${settings.geminiApiKey.trim()}|${settings.geminiModel.trim()}`;
+    case 'OPENAI':
+      return `${settings.openaiApiKey.trim()}|${settings.openaiEndpoint.trim()}|${settings.openaiModel.trim()}`;
+    default:
+      return '';
+  }
 };
 
 export type { BuiltInPromptId };

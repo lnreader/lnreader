@@ -117,6 +117,17 @@ jest.mock('@components', () => {
     SwitchItem,
     OptionPickerDialog,
     RegexRulesEditor: () => null,
+    ProviderSettingsPanel: () => null,
+    LanguagePickerDialog: ({ title, onSelect, current }: any) =>
+      React.createElement(
+        View,
+        { testID: `languages-${title}` },
+        React.createElement(
+          Pressable,
+          { onPress: () => onSelect(current === 'auto' ? 'ja' : 'en') },
+          React.createElement(Text, null, 'en'),
+        ),
+      ),
   };
 });
 
@@ -205,5 +216,17 @@ describe('TranslationTab', () => {
       screen.getByText('readerScreen.bottomSheet.translationRedo'),
     );
     expect(onRedoTranslation).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets the per-novel source language from the language dialog', () => {
+    renderTab();
+    fireEvent.press(
+      within(
+        screen.getByTestId('languages-translationSettings.sourceLanguage'),
+      ).getByText('en'),
+    );
+    expect(mockSetPerNovel).toHaveBeenCalledWith(42, {
+      sourceLanguage: 'ja',
+    });
   });
 });
