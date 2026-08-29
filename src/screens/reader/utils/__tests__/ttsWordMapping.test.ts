@@ -314,3 +314,97 @@ describe('reader TTS word mapping', () => {
     expect(captured.length).toBeGreaterThan(0);
   });
 });
+
+describe('reader TTS speaks like NoveLA', () => {
+  const normalizeText = (raw: string) => {
+    const tts = loadTtsMapping(element('div'), []);
+    return tts.normalizeText(raw);
+  };
+
+  it('strips surrounding straight quotes so the engine never says "quote"', () => {
+    expect(normalizeText('"He said."')).toBe('He said.');
+    expect(normalizeText('"Alright."')).toBe('Alright.');
+  });
+
+  it('strips leading/trailing curly quotes and pseudo-quotes too', () => {
+    expect(normalizeText('“Hello.”')).toBe('Hello.');
+    expect(normalizeText('‘Hi there.’')).toBe('Hi there.');
+  });
+
+  it('keeps quotes in the middle of the paragraph', () => {
+    expect(normalizeText('He said "hi" again.')).toBe('He said "hi" again.');
+  });
+
+  it('collapses a quote-only paragraph to silence', () => {
+    expect(normalizeText('""')).toBe('');
+    expect(normalizeText('“”')).toBe('');
+  });
+
+  it('strips NoveLA decorative runs and skips decorator-only lines', () => {
+    expect(normalizeText('──────')).toBe('');
+    expect(normalizeText('***********')).toBe('');
+    expect(normalizeText('===== Hello =====')).toBe('Hello');
+    expect(
+      normalizeText(['First line', '─────', 'Second line.'].join('\n')),
+    ).toBe('First line Second line.');
+  });
+
+  it('handles quotes around decorated paragraphs', () => {
+    expect(normalizeText('─────────"Hello."─────────')).toBe('Hello.');
+  });
+
+  it('keeps word mapping aligned with the cleaned spoken text', () => {
+    const captured: CapturedRange[] = [];
+    const tts = loadTtsMapping(element('div'), captured);
+    const paragraph = element(
+      'span',
+      text('─────────'),
+      text('"Hello'),
+      text(' there."'),
+      text('─────────'),
+    );
+
+    const map = tts.mapFromElement(paragraph);
+    expect(map).not.toBeNull();
+    expect(map!.text).toBe('Hello there.');
+    expect(map!.text).toBe(tts.normalizeText(paragraph.innerText));
+
+    const start = map!.text.indexOf('Hello');
+    const end = start + 'Hello'.length;
+    const ranges = tts.rangesFor(map, start, end);
+    const highlighted = ranges
+      .map(range => range.node.data.slice(range.start, range.end))
+      .join('');
+    expect(highlighted).toBe('Hello');
+  });
+
+  it('normalizeWithOffsets stays in exact parity with normalizeText', () => {
+    const tts = loadTtsMapping(element('div'), []);
+    const corpus = [
+      '"He said."',
+      '“Hello.”',
+      'He said "hi" again.',
+      '""',
+      '──────',
+      '===== Hello =====',
+      'First line\n─────\nSecond line.',
+      '─────────"Hello."─────────',
+      'a  b. c!?',
+      '你好世界 こんにちは',
+      '   spaced   out   ',
+      'Sentence one. Sentence two!',
+      '“Quote” and “unfinished',
+      '~~*~~ section break ~~*~~',
+    ];
+    for (const raw of corpus) {
+      const { text: spokenText, offsets } = tts.normalizeWithOffsets(raw);
+      expect(spokenText).toBe(tts.normalizeText(raw));
+      expect(offsets.length).toBe(spokenText.length);
+      offsets.forEach((offset, index) => {
+        expect(Number.isInteger(offset)).toBe(true);
+        expect(offset).toBeGreaterThanOrEqual(0);
+        expect(offset).toBeLessThanOrEqual(raw.length);
+      });
+    }
+  });
+});

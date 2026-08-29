@@ -195,20 +195,43 @@ window.tts = new (function () {
   this.userScrolling = false; // set while the user drags the page
 
   if (typeof document !== 'undefined') {
+    // Tracks user-initiated page drags. The paragraph follow stays paused while
+    // the user is dragging and re-engages shortly after they let go. Android
+    // WebViews don't always fire `scrollend` (taps, older engines), so a
+    // watchdog clears `userScrolling` ~700ms after the last scroll activity
+    // instead of depending on the event alone.
+    const clearScrolling = () => {
+      if (this.scrollWatchdog) {
+        clearTimeout(this.scrollWatchdog);
+        this.scrollWatchdog = null;
+      }
+      this.userScrolling = false;
+    };
+    const armScrollingWatchdog = () => {
+      if (this.scrollWatchdog) clearTimeout(this.scrollWatchdog);
+      this.scrollWatchdog = setTimeout(() => {
+        this.scrollWatchdog = null;
+        this.userScrolling = false;
+      }, 700);
+    };
     document.addEventListener(
       'pointerdown',
       () => {
-        if (this.started) this.userScrolling = true;
+        if (this.started) {
+          this.userScrolling = true;
+          armScrollingWatchdog();
+        }
       },
       true,
     );
     document.addEventListener(
-      'scrollend',
+      'scroll',
       () => {
-        this.userScrolling = false;
+        if (this.userScrolling) armScrollingWatchdog();
       },
       true,
     );
+    document.addEventListener('scrollend', clearScrolling, true);
   }
 
   this.readable = element => {
@@ -230,12 +253,110 @@ window.tts = new (function () {
     return true;
   };
 
+  // Shared token pipeline for normalizeText/normalizeWithOffsets. Every output
+  // char carries the raw code-unit offset it was derived from, so the spoken
+  // text and the highlight ranges stay aligned by construction.
+  const TTS_DECORATIVE = /[\-=*_~+#·•°─-┿]/;
+  const TTS_LEADING_DECORATIVE = /^[\-=*_~+#·•°─-┿]{3,}\s*/;
+  const TTS_TRAILING_DECORATIVE = /\s*[\-=*_~+#·•°─-┿]{3,}$/;
+  const TTS_QUOTE = /["'“”‘’]/;
+
+  this.normalizeTokens = raw => {
+    if (!raw) return { chars: [], src: [] };
+    const chars = [];
+    const src = [];
+    const lines = raw.split(/\r\n|\r|\n/);
+    let base = 0;
+    let prevLineHadContent = false;
+    for (const line of lines) {
+      // NoveLA's cleanTextForTts: strip decorative separator runs bordering
+      // each line (scene-break rules like ----, ***, ────), then trim.
+      let from = 0;
+      let to = line.length;
+      const lead = TTS_LEADING_DECORATIVE.exec(line);
+      if (lead) from = lead[0].length;
+      const trail = TTS_TRAILING_DECORATIVE.exec(line);
+      if (trail) to = trail.index;
+      while (from < to && /\s/.test(line[from])) from++;
+      while (to > from && /\s/.test(line[to - 1])) to--;
+      if (to > from) {
+        // Adjacent text lines collapse into a single space, mapping onto the
+        // separator that used to sit between them.
+        if (prevLineHadContent) {
+          chars.push(' ');
+          src.push(Math.max(base - 1, 0));
+        }
+        for (let i = from; i < to; i++) {
+          chars.push(line[i]);
+          src.push(base + i);
+        }
+        prevLineHadContent = true;
+      }
+      base += line.length + 1;
+    }
+    const collapsed = [];
+    const collapsedSrc = [];
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (/\s/.test(c)) {
+        if (collapsed.length > 0 && collapsed[collapsed.length - 1] !== ' ') {
+          collapsed.push(' ');
+          collapsedSrc.push(src[i]);
+        }
+      } else {
+        collapsed.push(c);
+        collapsedSrc.push(src[i]);
+      }
+    }
+    // Upstream LNReader: trim, then strip surrounding quote runs so the engine
+    // never reads stray " ... " as the word "quote".
+    let start = 0;
+    let end = collapsed.length;
+    while (start < end && collapsed[start] === ' ') start++;
+    while (end > start && collapsed[end - 1] === ' ') end--;
+    while (start < end && TTS_QUOTE.test(collapsed[start])) start++;
+    while (end > start && TTS_QUOTE.test(collapsed[end - 1])) end--;
+    const out = [];
+    const outSrc = [];
+    for (let i = start; i < end; i++) {
+      const c = collapsed[i];
+      if (/[.,!?;:]/.test(c)) {
+        // The punctuation rule strips only a real preceding space (not the
+        // synthetic one a previous punctuation emitted), mirroring the regex
+        // which never re-scans its own replacements.
+        if (
+          i > start &&
+          collapsed[i - 1] === ' ' &&
+          out[out.length - 1] === ' '
+        ) {
+          out.pop();
+          outSrc.pop();
+        }
+        out.push(c);
+        outSrc.push(collapsedSrc[i]);
+        if (i + 1 < end && collapsed[i + 1] === ' ') {
+          out.push(' ');
+          outSrc.push(collapsedSrc[i + 1]);
+          i++;
+        } else {
+          out.push(' ');
+          outSrc.push(collapsedSrc[i]);
+        }
+      } else {
+        out.push(c);
+        outSrc.push(collapsedSrc[i]);
+      }
+    }
+    let from = 0;
+    let to = out.length;
+    while (from < to && out[from] === ' ') from++;
+    while (to > from && out[to - 1] === ' ') to--;
+    return { chars: out.slice(from, to), src: outSrc.slice(from, to) };
+  };
+
   this.normalizeText = text => {
     if (!text) return '';
-    return text
-      .replace(/\s+/g, ' ')
-      .replace(/\s*([.,!?;:])\s*/g, '$1 ')
-      .trim();
+    return this.normalizeTokens(text).chars.join('');
   };
 
   // if can find a readable node, else stop tts
@@ -511,9 +632,9 @@ window.tts = new (function () {
       return;
     }
 
-    // Anchors the paragraph top at ~20% of the viewport height, clamped to a
-    // sane band so short windows still leave breathing room above the text.
-    const anchor = Math.min(Math.max(Math.round(windowHeight * 0.2), 130), 350);
+    // Anchors the paragraph top near the top of the viewport (~8%), clamped to
+    // a sane band so short windows still leave breathing room above the text.
+    const anchor = Math.min(Math.max(Math.round(windowHeight * 0.08), 70), 160);
     const elementTop = rect.top + window.pageYOffset;
     const targetScroll = elementTop - anchor;
     const delta = targetScroll - window.pageYOffset;
@@ -573,61 +694,12 @@ window.tts = new (function () {
     return { element, text, offsets, segments };
   };
 
-  // Mirrors normalizeText character by character so each output char keeps the
-  // raw offset it was derived from. A collapsed space after punctuation maps to
-  // the punctuation itself when no real space follows (the spacing `$1 '`
-  // inserts is synthetic).
+  // Offset-tracked twin of normalizeText: both run the same token pipeline, so
+  // the spoken queue text and the highlight map can never drift apart.
   this.normalizeWithOffsets = raw => {
     if (!raw) return { text: '', offsets: [] };
-    const chars = [];
-    const src = [];
-    for (let i = 0; i < raw.length; i++) {
-      const c = raw[i];
-      if (/\s/.test(c)) {
-        if (chars.length > 0 && chars[chars.length - 1] !== ' ') {
-          chars.push(' ');
-          src.push(i);
-        }
-      } else {
-        chars.push(c);
-        src.push(i);
-      }
-    }
-    const out = [];
-    const outSrc = [];
-    for (let i = 0; i < chars.length; i++) {
-      const c = chars[i];
-      if (/[.,!?;:]/.test(c)) {
-        // The punctuation rule strips only a real preceding space (not the
-        // synthetic one a previous punctuation emitted), mirroring the regex
-        // which never re-scans its own replacements.
-        if (i > 0 && chars[i - 1] === ' ' && out[out.length - 1] === ' ') {
-          out.pop();
-          outSrc.pop();
-        }
-        out.push(c);
-        outSrc.push(src[i]);
-        if (i + 1 < chars.length && chars[i + 1] === ' ') {
-          out.push(' ');
-          outSrc.push(src[i + 1]);
-          i++;
-        } else {
-          out.push(' ');
-          outSrc.push(src[i]);
-        }
-      } else {
-        out.push(c);
-        outSrc.push(src[i]);
-      }
-    }
-    let start = 0;
-    let end = out.length;
-    while (start < end && out[start] === ' ') start++;
-    while (end > start && out[end - 1] === ' ') end--;
-    return {
-      text: out.slice(start, end).join(''),
-      offsets: outSrc.slice(start, end),
-    };
+    const { chars, src } = this.normalizeTokens(raw);
+    return { text: chars.join(''), offsets: src };
   };
 
   // Turns a normalized [start,end) span into one DOM Range per text-node run.
