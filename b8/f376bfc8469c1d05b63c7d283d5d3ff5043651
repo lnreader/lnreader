@@ -1,0 +1,21 @@
+src/screens/reader/utils/__tests__/ttsTraversal.test.ts
+  s_6327306ecdf485::t_61a5d108bcffc8 33,80-102
+assets/reader/js/core.js
+  s_6327306ecdf485::t_61a5d108bcffc8 216-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b8f376bfc8469c1d05b63c7d283d5d3ff5043651",
+  "prompts": {},
+  "sessions": {
+    "s_6327306ecdf485": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04c1c-a555-7de0-83a3-2afe9c7de116",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
