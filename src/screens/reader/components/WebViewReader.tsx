@@ -602,14 +602,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             }
             case 'translation-request': {
               const payload = event.data as
-                | { paragraphs?: unknown }
+                | { paragraphs?: unknown; force?: unknown }
                 | undefined;
               const paragraphs = Array.isArray(payload?.paragraphs)
                 ? payload.paragraphs.filter(
                     (item): item is string => typeof item === 'string',
                   )
                 : [];
-              onTranslationRequest(paragraphs);
+              onTranslationRequest(paragraphs, payload?.force === true);
               break;
             }
             case 'hide':

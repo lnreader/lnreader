@@ -118,7 +118,7 @@ export const useChapterTranslation = (
    * when possible) and pushes the result back into the page.
    */
   const onTranslationRequest = useCallback(
-    (paragraphs: string[]) => {
+    (paragraphs: string[], force = false) => {
       if (!effective.enabled) return;
       const chapterId = chapter.id;
       const cleanOriginals = paragraphs.map(paragraph =>
@@ -149,7 +149,9 @@ export const useChapterTranslation = (
 
       void (async () => {
         try {
-          const cached = await getChapterTranslationFromDb(cacheKey);
+          const cached = force
+            ? null
+            : await getChapterTranslationFromDb(cacheKey);
           if (cached) {
             apply(cached);
             return;

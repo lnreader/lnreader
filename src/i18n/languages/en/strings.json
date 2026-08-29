@@ -666,7 +666,13 @@
       "verticalSeekbarDescription": "Show a slider on the side to jump to any point in the chapter",
       "keepScreenOn": "Keep screen on",
       "volumeButtonsScroll": "Volume button scrolling",
-      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume"
+      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume",
+      "translation": "Translation",
+      "translationEnableDescription": "Show this chapter translated alongside the original",
+      "translationSettings": "Settings",
+      "translationRedo": "Redo translation",
+      "translationRegex": "This novel's regex rules",
+      "translationDisabledNotice": "Enable translation for this app to configure it"
     },
     "drawer": {
       "scrollToBottom": "Scroll to bottom",
@@ -852,5 +858,56 @@
     "normalizationValuePlaceholder": "e.g. Sci-Fi",
     "noCategories": "No parent categories configured",
     "noNormalization": "No normalization rules configured"
+  },
+  "translationSettings": {
+    "title": "Translation",
+    "general": "General",
+    "enable": "Enable",
+    "enableDescription": "Translates web chapters in parallel with the original (experimental)",
+    "parallelMode": "Default parallel mode",
+    "sourceLanguage": "Default source language",
+    "targetLanguage": "Target language",
+    "mainProvider": "Translation provider",
+    "provider": "Provider",
+    "defaultPrompt": "Default prompt",
+    "providerCredentials": "Provider",
+    "useCommunityGooglePaKey": "Use the community Google key",
+    "useCommunityGooglePaKeyDescription": "Fall back to the shared key when no personal key is set",
+    "apiKey": "API key",
+    "apiKeyPlaceholder": "Paste your API key",
+    "noKeySet": "Not set",
+    "geminiModel": "Gemini model",
+    "openaiModel": "OpenAI model",
+    "openaiEndpoint": "OpenAI endpoint",
+    "googleFreeNote": "Google Free (unofficial endpoint) needs no API key and may be rate-limited.",
+    "customPrompts": "Custom prompts",
+    "addPrompt": "Add prompt",
+    "editPrompt": "Edit prompt",
+    "noPrompts": "No custom prompts yet",
+    "promptName": "Name",
+    "promptContent": "Prompt content",
+    "prompt": "Prompt",
+    "promptNone": "No prompt",
+    "promptGlobalDefault": "Global default",
+    "regexRules": "Global regex rules",
+    "addRule": "Add rule",
+    "editRule": "Edit rule",
+    "rulePattern": "Pattern (text or /regex/flags)",
+    "ruleReplacement": "Replacement",
+    "ruleEnabled": "Enabled",
+    "ruleRemoveText": "Removes the matching text",
+    "noRules": "No rules yet. Rules run before translation to strip decoration and headers.",
+    "providers": {
+      "google_pa": "Google Translate (official)",
+      "google_free": "Google Translate (free)",
+      "gemini": "Gemini",
+      "openai": "OpenAI"
+    },
+    "parallelModes": {
+      "ORIGINAL_ONLY": "Original only",
+      "TRANSLATED_ONLY": "Translated only",
+      "PARALLEL_ORIGINAL_FIRST": "Parallel — original first",
+      "PARALLEL_TRANSLATION_FIRST": "Parallel — translation first"
+    }
   }
 }

@@ -114,10 +114,13 @@ window.reader = new (function () {
   };
 
   /** Ask the app for fresh translations of the current paragraph texts. */
-  this.requestTranslation = () => {
+  this.requestTranslation = (force = false) => {
     if (!this.translation.config.enabled) return;
     const paragraphs = window.tts?.collectParagraphTexts?.() ?? [];
-    this.post({ type: 'translation-request', data: { paragraphs } });
+    this.post({
+      type: 'translation-request',
+      data: { paragraphs, force: !!force },
+    });
   };
 
   /** Render finished translations into the chapter and re-map TTS. */
@@ -140,7 +143,11 @@ window.reader = new (function () {
       'data-translation-mode',
       parallelMode,
     );
-    window.tts?.setTranslatedParagraphs?.(paragraphs, translations, parallelMode);
+    window.tts?.setTranslatedParagraphs?.(
+      paragraphs,
+      translations,
+      parallelMode,
+    );
     this.refresh();
   };
 
@@ -511,7 +518,10 @@ window.tts = new (function () {
     if (!this.started) return;
     const translated = (reader.translation?.entries?.size ?? 0) > 0;
     const index = this.paragraphIndexOf(this.currentElement);
-    if (!translated && index === this.allReadableElements.indexOf(this.currentElement)) {
+    if (
+      !translated &&
+      index === this.allReadableElements.indexOf(this.currentElement)
+    ) {
       return;
     }
     const anchor =
@@ -538,15 +548,14 @@ window.tts = new (function () {
 
   this.setTranslatedParagraphs = (paragraphs, translations, parallelMode) => {
     if (!reader.translation) return;
-    const requested = this.collectReadableElements().filter(element =>
-      !!this.paragraphOriginalText(element),
+    const requested = this.collectReadableElements().filter(
+      element => !!this.paragraphOriginalText(element),
     );
     const next = new Map();
     requested.forEach((element, index) => {
       const previous = reader.translation.entries.get(element);
       next.set(element, {
-        orig:
-          paragraphs?.[index] ?? this.paragraphOriginalText(element),
+        orig: paragraphs?.[index] ?? this.paragraphOriginalText(element),
         transl: translations?.[index] ?? '',
         originalMarkup: previous?.originalMarkup ?? element.innerHTML,
         origSpan: null,

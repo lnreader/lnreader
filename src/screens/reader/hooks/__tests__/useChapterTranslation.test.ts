@@ -167,6 +167,20 @@ describe('useChapterTranslation', () => {
     expect(payload?.translations).toEqual(['Bản gốc lưu trữ']);
   });
 
+  it('re-translates past the cache when forced', async () => {
+    mockedGetChapterTranslation.mockResolvedValue(['Cached text']);
+    mockedTranslateParagraphs.mockResolvedValue(['Fresh text']);
+    const { result, injectJavaScript } = setup();
+
+    result.current.onTranslationRequest(['Original text'], true);
+    await waitFor(() => expect(injectJavaScript).toHaveBeenCalled());
+
+    expect(mockedTranslateParagraphs).toHaveBeenCalledTimes(1);
+    expect(mockedUpsertChapterTranslation).toHaveBeenCalled();
+    const payload = payloadOf(injectJavaScript.mock.calls[0][0] as string);
+    expect(payload?.translations).toEqual(['Fresh text']);
+  });
+
   it('surfaces provider failures as a toast', async () => {
     mockedGetChapterTranslation.mockResolvedValue(null);
     mockedTranslateParagraphs.mockRejectedValue(new Error('network'));

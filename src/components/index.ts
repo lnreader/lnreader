@@ -37,3 +37,9 @@ export { default as AnimatedIconButton } from './IconButtonV2/AnimatedIconButton
 export { default as TextInput } from './TextInput';
 export { default as Slider } from './Slider/Slider';
 export type { SliderProps, SliderSize } from './Slider/Slider';
+export {
+  default as OptionPickerDialog,
+  type TranslationOption,
+} from './Translation/OptionPickerDialog';
+export { default as RegexRulesEditor } from './Translation/RegexRulesEditor';
+export { default as PromptsManager } from './Translation/PromptsManager';

@@ -29,6 +29,7 @@ import ReaderTextAlignSelector from './ReaderTextAlignSelector';
 import ReaderValueChange from './ReaderValueChange';
 import ReaderFontPicker from './ReaderFontPicker';
 import TTSTab from './TTSTab';
+import TranslationTab from './TranslationTab';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { StringMap } from '@i18n/types';
 
@@ -189,18 +190,21 @@ const GeneralTab: React.FC = React.memo(() => {
 
 interface ReaderBottomSheetV2Props {
   bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  onRedoTranslation: () => void;
 }
 
 const routes = [
   { key: 'readerTab', title: getString('readerSettings.title') },
   { key: 'generalTab', title: getString('generalSettings') },
   { key: 'ttsTab', title: 'TTS' },
+  { key: 'translationTab', title: 'Translate' },
 ];
 
 const renderLazyPlaceholder = () => <View style={styles.flex} />;
 
 const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   bottomSheetRef,
+  onRedoTranslation,
 }) => {
   const theme = useTheme();
   const layout = useWindowDimensions();
@@ -213,8 +217,11 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
         readerTab: ReaderTab,
         generalTab: GeneralTab,
         ttsTab: TTSTab,
+        translationTab: () => (
+          <TranslationTab onRedoTranslation={onRedoTranslation} />
+        ),
       }),
-    [],
+    [onRedoTranslation],
   );
 
   const [index, setIndex] = useState(0);

@@ -276,7 +276,14 @@ export const ChapterContent = ({
         />
       )}
       {readerSheetMounted ? (
-        <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+        <ReaderBottomSheetV2
+          bottomSheetRef={readerSheetRef}
+          onRedoTranslation={() =>
+            webViewRef.current?.injectJavaScript(
+              'window.reader?.requestTranslation?.(true); true;',
+            )
+          }
+        />
       ) : null}
       {!hidden ? (
         <>

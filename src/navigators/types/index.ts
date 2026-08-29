@@ -86,6 +86,7 @@ export type SettingsStackParamList = {
   CustomCode: undefined;
   CodeSnippets: { snippetIndex: number; isJS: boolean } | undefined;
   GenreTaxonomy: undefined;
+  TranslationSettings: undefined;
 };
 
 export type NovelScreenProps = NativeStackScreenProps<
@@ -190,6 +191,10 @@ export type LibrarySettingsScreenProps = CompositeScreenProps<
 >;
 export type GenreTaxonomyScreenProps = CompositeScreenProps<
   NativeStackScreenProps<SettingsStackParamList, 'GenreTaxonomy'>,
+  NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
+>;
+export type TranslationSettingsScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<SettingsStackParamList, 'TranslationSettings'>,
   NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
 >;
 
