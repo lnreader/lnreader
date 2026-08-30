@@ -22,7 +22,7 @@ Translate the exact chapter you're reading — no copy/paste, no leaving the rea
 
 - **One-tap translation** from the reader's **Aa** toggle or the chapter bottom sheet
 - **4 providers:** Google Gemini (BYO AI-Studio key) · any OpenAI-compatible API (OpenAI, Groq, OpenRouter, DeepSeek, Mistral…) · Google PA · **Google Free** (zero-config, no key)
-- **3 reading modes:** Translated only · Parallel (bilingual) · Original only
+- **4 reading modes:** Original only · Translated only · Parallel (original first) · Parallel (translation first)
 - Editable translation prompt, regex cleanup of footnotes/URLs, source auto-detect + target language, and a model picker that accepts any model name (e.g. `gemini-3.7-flash`)
 - **Offline cache** (SQLite) — translated chapters are stored locally, so revisits never re-translate
 
