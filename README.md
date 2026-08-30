@@ -28,7 +28,7 @@ Translate the exact chapter you're reading — no copy/paste, no leaving the rea
 
 ### 🔊 TTS with spoken-word highlighting
 
-NoveLA-style listening: the text-to-speech engine highlights **each word as it's read aloud**, in sync with playback — configurable highlight color plus speed and pitch sliders.
+NoveLA-style listening: the text-to-speech engine highlights **each word as it's read aloud**, in sync with playback — with a manual hex color picker (e.g. `#FF6B6B` soft red, `#4CAF50` green) or presets, plus speed and pitch sliders.
 
 ### 📸 Screenshots
 
