@@ -67,7 +67,7 @@ LNReader loads sources from **plugin repositories**. Add one in **Settings → R
 | Official LNReader plugins | `https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json` |
 | This fork's plugins (extra sources) | `https://raw.githubusercontent.com/Vaizer0/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json` |
 
-This fork's repository adds the **Truth Novel** source (*Lord of the Truth* — https://truthnovel.top/), kept updated and ideal for reading with in-app translation. Plugin requests live at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins); content providers are not affiliated with this project.
+This fork's repository adds the **Truth Novel** source (*Lord of the Truth* — https://truthnovel.top/), kept updated and ideal for reading with in-app translation. Plugin requests live at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins) (official) and [Vaizer0/lnreader-plugins](https://github.com/Vaizer0/lnreader-plugins) (this fork); content providers are not affiliated with this project.
 
 ## 🤝 Upstream & license
 
