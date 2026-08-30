@@ -60,7 +60,14 @@ Testing builds for all ABIs — `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`, `un
 
 ## 🚀 Plugins
 
-Plugin source requests live at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins).
+LNReader loads sources from **plugin repositories**. Add one in **Settings → Repositories**:
+
+| Repository | Index URL |
+| :--- | :--- |
+| Official LNReader plugins | `https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json` |
+| This fork's plugins (extra sources) | `https://raw.githubusercontent.com/Vaizer0/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json` |
+
+This fork's repository adds the **Truth Novel** source (*Lord of the Truth* — https://truthnovel.top/), kept updated and ideal for reading with in-app translation. Plugin requests live at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins); content providers are not affiliated with this project.
 
 ## 🤝 Upstream & license
 
