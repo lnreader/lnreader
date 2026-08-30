@@ -30,6 +30,7 @@ class TestElement {
 
 type TtsTraversal = {
   getAllReadableElements(element: TestElement): TestElement[];
+  normalizeText(text: string): string;
 };
 
 const text = (value: string): TestNode => ({
@@ -76,6 +77,29 @@ const getQueuedText = (chapter: TestElement): string[] =>
     .map(readableElement => readableElement.innerText);
 
 describe('reader TTS traversal', () => {
+  describe('text normalization', () => {
+    const tts = loadTtsTraversal(element('div'));
+
+    it.each([
+      ['"Hello world."', 'Hello world.'],
+      ["'Hello world.'", 'Hello world.'],
+      ['“Hello world.”', 'Hello world.'],
+      ['‘Hello world.’', 'Hello world.'],
+    ])('removes surrounding quotes from %s', (input, expected) => {
+      expect(tts.normalizeText(input)).toBe(expected);
+    });
+
+    it('removes quotes after trimming surrounding whitespace', () => {
+      expect(tts.normalizeText('  “Hello   world.”\n')).toBe('Hello world.');
+    });
+
+    it('preserves quotes within a paragraph', () => {
+      expect(tts.normalizeText('He said “hello” before leaving.')).toBe(
+        'He said “hello” before leaving.',
+      );
+    });
+  });
+
   it('queues paragraphs wrapped in spans only once', () => {
     const chapter = element(
       'div',
