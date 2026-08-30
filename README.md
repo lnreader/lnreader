@@ -1,73 +1,58 @@
 <p align="center">
-  <a href="https://lnreader.app">
-    <img src="./.github/readme-images/icon_new.png" align="center" width="128" />
-  </a>
+  <img src="./.github/readme-images/07-word-highlight.jpg" align="center" width="128" />
 </p>
 
-<h1 align="center">LNReader</h1>
+<h1 align="center">LNReader — Web Novel & Light Novel Reader with AI Translation (MTL) + TTS Word Highlighting</h1>
 
 <p align="center">
-  LNReader is a free and open source light novel reader for Android, inspired by Tachiyomi.
+  Free, open-source Android reader for <b>light novels, webnovels, web novels, and ranobe</b> from 25+ sources — now with built-in <b>machine translation</b> in the reader and <b>NoveLA-style TTS</b> spoken-word highlighting. Read any novel in your language, or listen hands-free while the words light up.
 </p>
 
 <div align="center">
-  <a href="https://discord.gg/QdcWN4MD63">
-    <img alt="Discord Chat" src="https://img.shields.io/discord/835746409357246465.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=5865F2&color=4752C4&label=discord&style=flat">
-  </a>
-  <a href="https://github.com/lnreader/lnreader/releases">
-    <img alt="GitHub Downloads" src="https://img.shields.io/github/downloads/lnreader/lnreader/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat">
-  </a>
+  <img alt="GitHub release" src="https://img.shields.io/github/v/release/Vaizer0/lnreader?label=latest&style=flat">
+  <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/Vaizer0/lnreader/total?label=downloads&style=flat">
+  <img alt="License" src="https://img.shields.io/github/license/Vaizer0/lnreader?style=flat">
 </div>
 
-<div align="center">
-  <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/lnreader/lnreader/build.yml?labelColor=27303D&style=flat">
-  <a href="https://github.com/lnreader/lnreader/blob/main/LICENSE">
-    <img alt="GitHub" src="https://img.shields.io/github/license/lnreader/lnreader?labelColor=27303D&color=1a73e8&style=flat">
-  </a>
-  <a title="Crowdin" target="_blank" href="https://crowdin.com/project/lnreader">
-    <img src="https://badges.crowdin.net/lnreader/localized.svg">
-  </a>
-</div>
+## ✨ What this fork adds
 
-<h2 align="center">Download</h2>
+### 📖 Translate light novels & webnovels in-app (MTL)
 
-<p align="center">
-  <a href="https://github.com/lnreader/lnreader/releases/latest">
-    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/lnreader/lnreader?label=Stable&labelColor=0d7377&color=084c4e&style=flat">
-  </a>
-  <a href="https://github.com/lnreader/lnreader/actions/workflows/build.yml">
-    <img alt="Build Preview" src="https://github.com/lnreader/lnreader/actions/workflows/build.yml/badge.svg">
-  </a>
-</p>
+Translate the exact chapter you're reading — no copy/paste, no leaving the reader.
 
-<p align="center">
-  Get the app from our <a href="https://github.com/lnreader/lnreader/releases">releases page</a>.
-</p>
+- **One-tap translation** from the reader's **Aa** toggle or the chapter bottom sheet
+- **4 providers:** Google Gemini (BYO AI-Studio key) · any OpenAI-compatible API (OpenAI, Groq, OpenRouter, DeepSeek, Mistral…) · Google PA · **Google Free** (zero-config, no key)
+- **3 reading modes:** Translated only · Parallel (bilingual) · Original only
+- Editable translation prompt, regex cleanup of footnotes/URLs, source auto-detect + target language, and a model picker that accepts any model name (e.g. `gemini-3.7-flash`)
+- **Offline cache** (SQLite) — translated chapters are stored locally, so revisits never re-translate
 
-<p align="center">
-  <em>Android 7.0 or higher.</em>
-</p>
+### 🔊 TTS with spoken-word highlighting
 
-<h2 align="center">Screenshots</h2>
+NoveLA-style listening: the text-to-speech engine highlights **each word as it's read aloud**, in sync with playback — configurable highlight color plus speed and pitch sliders.
 
-<p align="center">
-  <img src="./.github/readme-images/screenshots.png" align="center" />
-</p>
+### 📸 Screenshots
 
-## Plugins
+| Translated | Parallel (bilingual) | Original + TTS highlight |
+| :---: | :---: | :---: |
+| ![Translated](./.github/readme-images/03-translated-english.jpg) | ![Parallel bilingual](./.github/readme-images/02-parallel-bilingual.jpg) | ![TTS word highlight](./.github/readme-images/07-word-highlight.jpg) |
 
-LNReader does not have any affiliation with the content providers available.
+## 📲 Download
 
-Plugin requests should be created at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins).
+Testing builds for all ABIs — `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`, `universal`:
+[**Latest release**](https://github.com/Vaizer0/lnreader/releases/latest)
 
-## Translation
+> Package ID `com.vaizer0.LNReader` — installs **alongside** the official LNReader app without conflict.
 
-Help translate LNReader into your language on [Crowdin](https://crowdin.com/project/lnreader).
+## 📚 Core reader features
 
-## Building & Contributing
+- **25+ plugin sources** for light novels & web novels (content providers are not affiliated with this project)
+- Library with custom categories, **web novel trackers**, background downloads, and offline reading
+- **EPUB reader**, EPUB/JSON export, backups, custom themes, TTS reader, per-page reader customization
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+## 🚀 Plugins
 
-## License
+Plugin source requests live at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins).
 
-[MIT](https://github.com/lnreader/lnreader/blob/main/LICENSE)
+## 🤝 Upstream & license
+
+This repository is a **fork of [lnreader/lnreader](https://github.com/lnreader/lnreader)** extended with in-app AI translation and spoken-word TTS highlighting. Contributing: see [CONTRIBUTING.md](./CONTRIBUTING.md). Code is licensed under [MIT](LICENSE).
