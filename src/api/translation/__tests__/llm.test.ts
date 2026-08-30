@@ -1,5 +1,7 @@
 import {
   buildNumberedPayload,
+  CONTENT_BLOCKED,
+  parseApiKeys,
   parseNumberedTranslations,
   translateChatTexts,
   type ChatModelRequest,
@@ -14,7 +16,7 @@ const mockFetchTimeout = fetchTimeout as jest.MockedFunction<
 >;
 
 const makeRequest = (): ChatModelRequest => ({
-  url: 'https://example.com/chat',
+  buildUrl: () => 'https://example.com/chat',
   buildHeaders: () => ({ Authorization: 'Bearer test' }),
   buildBody: (payload: string) => ({ payload }),
   reply: {
@@ -35,7 +37,18 @@ const echoResponse = (status = 200) => ({
   text: async () => 'echo body',
 });
 
-describe('llm numbered payload', () => {
+describe('llm key lists and numbered payload', () => {
+  it('parses NoveLA key lists (newline, comma, semicolon)', () => {
+    expect(parseApiKeys('aaa\nbbb,ccc;ddd')).toEqual([
+      'aaa',
+      'bbb',
+      'ccc',
+      'ddd',
+    ]);
+    expect(parseApiKeys('  aaa  ,  bbb  ')).toEqual(['aaa', 'bbb']);
+    expect(parseApiKeys('')).toEqual([]);
+  });
+
   it('builds a sequential numbered list', () => {
     expect(buildNumberedPayload(['a', 'b', 'c'])).toBe('1. a\n2. b\n3. c');
   });
@@ -79,29 +92,118 @@ describe('translateChatTexts', () => {
     mockFetchTimeout.mockReset();
   });
 
-  it('rejects when no API key is configured', async () => {
+  it('rejects when no API keys are configured', async () => {
     await expect(
       translateChatTexts(makeRequest(), ['a'], undefined, {
-        apiKey: '',
+        apiKeys: [],
         errorCode: 'GEMINI',
       }),
     ).rejects.toBeInstanceOf(TranslationError);
     expect(mockFetchTimeout).not.toHaveBeenCalled();
   });
 
-  it('splits long chapters into batches of at most 20 items', async () => {
+  it('splits chapters into batches of the configured size (default 60)', async () => {
     mockFetchTimeout.mockResolvedValue(echoResponse() as never);
     const texts = Array.from({ length: 45 }, (_, i) => `t${i}`);
     const results = await translateChatTexts(makeRequest(), texts, undefined, {
-      apiKey: 'key',
+      apiKeys: ['key'],
       errorCode: 'GEMINI',
+    });
+    // 45 ≤ default 60 → a single request.
+    expect(mockFetchTimeout).toHaveBeenCalledTimes(1);
+
+    mockFetchTimeout.mockClear();
+    mockFetchTimeout.mockResolvedValue(echoResponse() as never);
+    await translateChatTexts(makeRequest(), texts, undefined, {
+      apiKeys: ['key'],
+      errorCode: 'GEMINI',
+      batchSize: 20,
     });
     expect(mockFetchTimeout).toHaveBeenCalledTimes(3);
     expect(results).toEqual(texts.map(text => `${text} translated`));
   });
 
-  it('falls back to the original text per batch instead of aborting', async () => {
+  it('rotates to the next key on 429', async () => {
     mockFetchTimeout
+      .mockResolvedValueOnce(echoResponse(429) as never)
+      .mockResolvedValueOnce(echoResponse() as never);
+    const results = await translateChatTexts(makeRequest(), ['a'], undefined, {
+      apiKeys: ['dead', 'live'],
+      errorCode: 'GEMINI',
+    });
+    expect(results).toEqual(['a translated']);
+    expect(mockFetchTimeout).toHaveBeenCalledTimes(2);
+  });
+
+  it('rotates past invalid keys on 401 and 403', async () => {
+    mockFetchTimeout
+      .mockResolvedValueOnce(echoResponse(401) as never)
+      .mockResolvedValueOnce(echoResponse(403) as never)
+      .mockResolvedValueOnce(echoResponse() as never);
+    const results = await translateChatTexts(makeRequest(), ['a'], undefined, {
+      apiKeys: ['bad1', 'bad2', 'good'],
+      errorCode: 'OPENAI',
+    });
+    expect(results).toEqual(['a translated']);
+    expect(mockFetchTimeout).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries 5xx on the same key before giving up', async () => {
+    mockFetchTimeout
+      .mockResolvedValueOnce(echoResponse(503) as never)
+      .mockResolvedValueOnce(echoResponse(503) as never)
+      .mockResolvedValueOnce(echoResponse() as never);
+    const results = await translateChatTexts(makeRequest(), ['a'], undefined, {
+      apiKeys: ['key'],
+      errorCode: 'GEMINI',
+    });
+    expect(results).toEqual(['a translated']);
+    expect(mockFetchTimeout).toHaveBeenCalledTimes(3);
+  });
+
+  it('fails a batch when every key is rate-limited', async () => {
+    mockFetchTimeout.mockResolvedValue(echoResponse(429) as never);
+    await expect(
+      translateChatTexts(makeRequest(), ['a', 'b'], undefined, {
+        apiKeys: ['key'],
+        errorCode: 'GEMINI',
+      }),
+    ).rejects.toThrow(/Rate limit/);
+  });
+
+  it('aborts immediately on a content-filtered reply (NoveLA blocked)', async () => {
+    mockFetchTimeout.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+      text: async () => '',
+    } as never);
+    const blocked = makeRequest();
+    blocked.reply.parseText = () => CONTENT_BLOCKED;
+    await expect(
+      translateChatTexts(blocked, ['a'], undefined, {
+        apiKeys: ['key'],
+        errorCode: 'GEMINI',
+      }),
+    ).rejects.toThrow(/content filter/i);
+    expect(mockFetchTimeout).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to original text per batch instead of aborting', async () => {
+    // Three rejections exhaust the same-key retries so the 20-item batch fails.
+    mockFetchTimeout
+      .mockRejectedValueOnce(
+        new TranslationError(
+          'OPENAI',
+          'Provider returned HTTP 400: bad',
+        ) as never,
+      )
+      .mockRejectedValueOnce(
+        new TranslationError(
+          'OPENAI',
+          'Provider returned HTTP 400: bad',
+        ) as never,
+      )
       .mockRejectedValueOnce(
         new TranslationError(
           'OPENAI',
@@ -111,8 +213,9 @@ describe('translateChatTexts', () => {
       .mockResolvedValue(echoResponse() as never);
     const texts = Array.from({ length: 25 }, (_, i) => `t${i}`);
     const results = await translateChatTexts(makeRequest(), texts, undefined, {
-      apiKey: 'key',
+      apiKeys: ['key'],
       errorCode: 'GEMINI',
+      batchSize: 20,
     });
     expect(results.slice(0, 20)).toEqual(texts.slice(0, 20));
     expect(results.slice(20)).toEqual(
@@ -129,24 +232,9 @@ describe('translateChatTexts', () => {
     );
     await expect(
       translateChatTexts(makeRequest(), ['a', 'b'], undefined, {
-        apiKey: 'key',
+        apiKeys: ['key'],
         errorCode: 'GEMINI',
       }),
     ).rejects.toBeInstanceOf(TranslationError);
-  });
-
-  it('retries rate-limited requests with backoff', async () => {
-    jest.useFakeTimers();
-    mockFetchTimeout
-      .mockResolvedValueOnce(echoResponse(429) as never)
-      .mockResolvedValueOnce(echoResponse() as never);
-    const p = translateChatTexts(makeRequest(), ['a'], undefined, {
-      apiKey: 'key',
-      errorCode: 'GEMINI',
-    });
-    await jest.advanceTimersByTimeAsync(3000);
-    await expect(p).resolves.toEqual(['a translated']);
-    expect(mockFetchTimeout).toHaveBeenCalledTimes(2);
-    jest.useRealTimers();
   });
 });

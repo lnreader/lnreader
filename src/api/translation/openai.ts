@@ -6,6 +6,12 @@
  * is normalised to `{base}/v1/chat/completions`, so values like
  * `https://api.openai.com`, `https://api.openai.com/v1`,
  * `https://openrouter.ai/api` or a local Ollama host all resolve correctly.
+ *
+ * Multiple keys (one per line, or ,/; separated) are rotated round-robin by
+ * the shared driver — on 401 it walks every remaining key before failing, on
+ * 429 it tries the next key. `max_tokens` is only sent when the user set a
+ * cap (0 = let the model decide), and `batchSize` bounds paragraphs per
+ * request so a large prompt never overflows the output token budget.
  */
 
 import { translateChatTexts, type ChatModelRequest } from './llm';
@@ -26,10 +32,9 @@ const buildOpenaiRequest = (
   model: string,
   maxOutputTokens: number,
 ): ChatModelRequest => ({
-  url: normalizeEndpoint(endpoint),
+  buildUrl: () => normalizeEndpoint(endpoint),
   buildHeaders: apiKey => ({
     Authorization: `Bearer ${apiKey}`,
-    'Content-Type': 'application/json',
   }),
   buildBody: (payload, systemPrompt) => ({
     model,
@@ -49,12 +54,15 @@ const buildOpenaiRequest = (
 });
 
 export interface TranslateViaOpenaiOptions {
-  apiKey: string;
+  /** NoveLA-style key list (one per line, or ,/; separated). */
+  apiKeys: string[];
   endpoint?: string;
   model?: string;
   systemPrompt?: string;
   /** 0 (and negative caps) let the model decide; only sent when > 0. */
   maxOutputTokens?: number;
+  /** Max paragraphs per request (NoveLA TRANSLATION_BATCH_SIZE). */
+  batchSize?: number;
   errorCode: 'OPENAI';
 }
 
@@ -70,5 +78,9 @@ export const translateViaOpenai = (
     ),
     texts,
     options.systemPrompt,
-    { apiKey: options.apiKey, errorCode: options.errorCode },
+    {
+      apiKeys: options.apiKeys,
+      errorCode: options.errorCode,
+      batchSize: options.batchSize,
+    },
   );

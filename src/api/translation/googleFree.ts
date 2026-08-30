@@ -29,6 +29,7 @@ const translateChunk = async (
   sourceLanguage: string,
   targetLanguage: string,
 ): Promise<string | undefined> => {
+  let cookieSeeded = false;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const usePost = text.length > POST_THRESHOLD_CHARS;
@@ -59,6 +60,18 @@ const translateChunk = async (
             { headers: { 'User-Agent': 'LNReader/2' } },
             TIMEOUT_MS,
           );
+      if (response.status === 429 && !cookieSeeded) {
+        // NoveLA trick: seed JSESSIONID via translate.google.com so the
+        // public endpoint stops rate-limiting us for a while.
+        cookieSeeded = true;
+        await fetchTimeout(
+          'https://translate.google.com/?hl=en',
+          { headers: { 'User-Agent': 'LNReader/2' } },
+          TIMEOUT_MS,
+        ).catch(() => undefined);
+        attempt = Math.max(attempt - 1, -1);
+        continue;
+      }
       if (!response.ok) {
         if (response.status === 429 || response.status >= 500) {
           if (attempt < MAX_RETRIES) {
@@ -97,7 +110,9 @@ const translateChunk = async (
   return undefined;
 };
 
-const buildChunks = (texts: string[]): { indices: number[]; text: string }[] => {
+const buildChunks = (
+  texts: string[],
+): { indices: number[]; text: string }[] => {
   const chunks: { indices: number[]; text: string }[] = [];
   let currentIndices: number[] = [];
   let currentParts: string[] = [];
@@ -149,7 +164,11 @@ export const translateViaGoogleFree = async (
       .split('\n')
       .map(line => line.trim())
       .filter(Boolean);
-    for (let j = 0; j < Math.min(translatedLines.length, chunk.indices.length); j++) {
+    for (
+      let j = 0;
+      j < Math.min(translatedLines.length, chunk.indices.length);
+      j++
+    ) {
       results[chunk.indices[j]] = translatedLines[j];
     }
   }

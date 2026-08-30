@@ -14,6 +14,7 @@ import { showToast } from '@utils/showToast';
 import { useChapterContext } from '../ChapterContext';
 import {
   getTranslationSettings,
+  setAppTranslationSettings,
   useTranslationSettings,
   type EffectiveTranslationSettings,
 } from '@hooks/persisted/useTranslationSettings';
@@ -180,11 +181,28 @@ export const useChapterTranslation = (
               : undefined,
             googlePaApiKey: current.googlePaApiKey,
             useCommunityGooglePaKey: current.useCommunityGooglePaKey,
+            googlePaApiKeys: current.googlePaApiKeys,
+            googlePaCachedKey: current.googlePaCachedKey,
+            googlePaKeyLastChecked: current.googlePaKeyLastChecked,
+            persistGooglePaKeyCache: (
+              googlePaCachedKey,
+              googlePaKeyLastChecked,
+            ) =>
+              setAppTranslationSettings({
+                googlePaCachedKey,
+                googlePaKeyLastChecked,
+              }),
+            persistGooglePaApiKeys: googlePaApiKeys =>
+              setAppTranslationSettings({
+                googlePaApiKeys: googlePaApiKeys.join('\n'),
+              }),
             geminiApiKey: current.geminiApiKey,
             geminiModel: current.geminiModel,
             openaiApiKey: current.openaiApiKey,
             openaiEndpoint: current.openaiEndpoint,
             openaiModel: current.openaiModel,
+            batchSize: current.batchSize,
+            maxOutputTokens: current.maxOutputTokens,
           });
           if (activeChapterIdRef.current !== chapterId) return;
           void upsertChapterTranslation(cacheKey, translations);

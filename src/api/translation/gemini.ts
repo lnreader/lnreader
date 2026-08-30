@@ -4,12 +4,19 @@
  * instruction and the numbered paragraph batch as the only user message.
  *
  * Matches NoveLA's hardened request shape: BLOCK_NONE safety settings for all
- * categories, plain-text responses, tools disabled, low temperature and the
- * key sent both in the URL and the `X-Goog-API-Key` header. Content-filtered
- * replies parse to `undefined` so the driver falls back to the original text.
+ * categories (including CIVIC_INTEGRITY), plain-text responses, tools
+ * disabled, low temperature, `maxOutputTokens` only sent when set (0 = let the
+ * model decide) and the key passed in the URL and `X-Goog-API-Key` header.
+ * Multiple keys are rotated by the shared driver. Content-filtered replies
+ * abort the batch with a clear error (NoveLA's ContentBlockedException), not a
+ * silent fallback to the original text.
  */
 
-import { translateChatTexts, type ChatModelRequest } from './llm';
+import {
+  CONTENT_BLOCKED,
+  translateChatTexts,
+  type ChatModelRequest,
+} from './llm';
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
@@ -28,14 +35,13 @@ const BLOCKED_FINISH_REASONS = ['SAFETY', 'PROHIBITED_CONTENT'];
 
 const buildGeminiRequest = (
   model: string,
-  apiKey: string,
   maxOutputTokens: number,
 ): ChatModelRequest => ({
-  url: `${GEMINI_ENDPOINT}/${encodeURIComponent(
-    model,
-  )}:generateContent?key=${encodeURIComponent(apiKey)}`,
-  buildHeaders: () => ({
-    'Content-Type': 'application/json',
+  buildUrl: apiKey =>
+    `${GEMINI_ENDPOINT}/${encodeURIComponent(
+      model,
+    )}:generateContent?key=${encodeURIComponent(apiKey)}`,
+  buildHeaders: apiKey => ({
     'X-Goog-API-Key': apiKey,
   }),
   buildBody: (payload, systemPrompt) => ({
@@ -64,14 +70,14 @@ const buildGeminiRequest = (
           content?: { parts?: { text?: string }[] };
         }[];
       };
-      if (response?.promptFeedback?.blockReason) return undefined;
+      if (response?.promptFeedback?.blockReason) return CONTENT_BLOCKED;
       const candidate = response?.candidates?.[0];
       if (!candidate) return undefined;
       if (
         candidate.finishReason &&
         BLOCKED_FINISH_REASONS.includes(candidate.finishReason)
       ) {
-        return undefined;
+        return CONTENT_BLOCKED;
       }
       return (
         candidate.content?.parts
@@ -84,11 +90,14 @@ const buildGeminiRequest = (
 });
 
 export interface TranslateViaGeminiOptions {
-  apiKey: string;
+  /** NoveLA-style key list (one per line, or ,/; separated). */
+  apiKeys: string[];
   model?: string;
   systemPrompt?: string;
   /** 0 (and negative caps) let the model decide; only sent when > 0. */
   maxOutputTokens?: number;
+  /** Max paragraphs per request (NoveLA TRANSLATION_BATCH_SIZE). */
+  batchSize?: number;
   errorCode: 'GEMINI';
 }
 
@@ -99,10 +108,13 @@ export const translateViaGemini = (
   translateChatTexts(
     buildGeminiRequest(
       options.model?.trim() || DEFAULT_GEMINI_MODEL,
-      options.apiKey,
       Math.floor(options.maxOutputTokens ?? 0),
     ),
     texts,
     options.systemPrompt,
-    { apiKey: options.apiKey, errorCode: options.errorCode },
+    {
+      apiKeys: options.apiKeys,
+      errorCode: options.errorCode,
+      batchSize: options.batchSize,
+    },
   );

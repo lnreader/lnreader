@@ -24,6 +24,39 @@ describe('translation settings resolution', () => {
     expect(stored.perNovel).toBe(merged.perNovel);
   });
 
+  it('defaults the NoveLA engine knobs (batch 60, auto tokens, key lists)', () => {
+    const merged = mergeTranslationSettings({});
+    expect(merged.batchSize).toBe(60);
+    expect(merged.maxOutputTokens).toBe(0);
+    expect(merged.googlePaApiKeys).toBe('');
+    expect(merged.googlePaCachedKey).toBe('');
+    expect(merged.googlePaKeyLastChecked).toBe(0);
+  });
+
+  it('fingerprints the knobs that change translation output', () => {
+    const settings = { ...baseSettings(), provider: 'GEMINI' as const };
+    const base = computeEffectiveTranslationSettings(
+      settings,
+      1,
+    ).providerFingerprint;
+    expect(
+      computeEffectiveTranslationSettings({ ...settings, batchSize: 30 }, 1)
+        .providerFingerprint,
+    ).not.toBe(base);
+    expect(
+      computeEffectiveTranslationSettings(
+        { ...settings, maxOutputTokens: 1024 },
+        1,
+      ).providerFingerprint,
+    ).not.toBe(base);
+    expect(
+      computeEffectiveTranslationSettings(
+        { ...settings, geminiApiKey: 'k1\nk2' },
+        1,
+      ).providerFingerprint,
+    ).not.toBe(base);
+  });
+
   it('requires both the global switch and the per-novel switch', () => {
     const settings = { ...baseSettings(), enabled: true };
     expect(computeEffectiveTranslationSettings(settings, 1).enabled).toBe(true);

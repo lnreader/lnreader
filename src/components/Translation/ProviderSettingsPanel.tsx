@@ -45,6 +45,7 @@ interface CredentialFieldProps {
   value: string;
   placeholder?: string;
   autoCapitalize?: 'none' | 'characters' | 'words' | 'sentences';
+  multiline?: boolean;
   onCommit: (value: string) => void;
 }
 
@@ -53,6 +54,7 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
   value,
   placeholder,
   autoCapitalize = 'none',
+  multiline,
   onCommit,
 }) => {
   const theme = useTheme();
@@ -73,8 +75,60 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
         autoCapitalize={autoCapitalize}
         autoCorrect={false}
         returnKeyType="done"
+        multiline={multiline}
+        style={multiline ? styles.multiline : undefined}
       />
     </View>
+  );
+};
+
+interface NumberFieldProps {
+  label: string;
+  value: number;
+  placeholder?: string;
+  onCommit: (value: number) => void;
+}
+
+const NumberField: React.FC<NumberFieldProps> = ({
+  label,
+  value,
+  placeholder,
+  onCommit,
+}) => {
+  const theme = useTheme();
+  const [draft, setDraft] = useState(String(value));
+
+  const commit = () => {
+    const parsed = Number.parseInt(draft.replace(/[^\d]/g, ''), 10);
+    onCommit(Number.isNaN(parsed) ? 0 : parsed);
+  };
+
+  return (
+    <View style={styles.field}>
+      <Text style={[styles.fieldLabel, { color: theme.onSurfaceVariant }]}>
+        {label}
+      </Text>
+      <TextInput
+        key={value}
+        defaultValue={draft}
+        onChangeText={setDraft}
+        onBlur={commit}
+        onSubmitEditing={commit}
+        placeholder={placeholder}
+        keyboardType="numeric"
+        autoCorrect={false}
+        returnKeyType="done"
+      />
+    </View>
+  );
+};
+
+const FieldNote: React.FC<{ text: string }> = ({ text }) => {
+  const theme = useTheme();
+  return (
+    <Text style={[styles.fieldNote, { color: theme.onSurfaceVariant }]}>
+      {text}
+    </Text>
   );
 };
 
@@ -155,18 +209,28 @@ const ProviderPanel: React.FC<ProviderPanelProps> = ({
             })
           }
         />
-        {settings.useCommunityGooglePaKey ? null : (
-          <View style={styles.field}>
-            <CredentialField
-              label={getString('translationSettings.personalApiKey')}
-              value={settings.googlePaApiKey}
-              placeholder={getString('translationSettings.apiKeyPlaceholder')}
-              onCommit={googlePaApiKey =>
-                setTranslationSettings({ googlePaApiKey })
-              }
-            />
-          </View>
-        )}
+        <CredentialField
+          label={getString('translationSettings.googlePaKeyList')}
+          value={settings.googlePaApiKeys}
+          placeholder={getString('translationSettings.apiKeyPlaceholder')}
+          multiline
+          onCommit={googlePaApiKeys =>
+            setTranslationSettings({ googlePaApiKeys })
+          }
+        />
+        <FieldNote
+          text={getString('translationSettings.googlePaKeyListDescription')}
+        />
+        <View style={styles.cacheStatus}>
+          <List.InfoItem
+            title={
+              settings.googlePaCachedKey
+                ? getString('translationSettings.googlePaCachedKeySet')
+                : getString('translationSettings.googlePaCachedKeyNone')
+            }
+            theme={theme}
+          />
+        </View>
       </View>
     );
   }
@@ -178,8 +242,10 @@ const ProviderPanel: React.FC<ProviderPanelProps> = ({
           label={getString('translationSettings.apiKey')}
           value={settings.geminiApiKey}
           placeholder={getString('translationSettings.apiKeyPlaceholder')}
+          multiline
           onCommit={geminiApiKey => setTranslationSettings({ geminiApiKey })}
         />
+        <FieldNote text={getString('translationSettings.multiKeyNote')} />
         <View style={styles.field}>
           <CredentialField
             label={getString('translationSettings.geminiModel')}
@@ -192,6 +258,26 @@ const ProviderPanel: React.FC<ProviderPanelProps> = ({
           preset={settings.geminiModel}
           presets={GEMINI_PRESETS}
           onSelect={geminiModel => setTranslationSettings({ geminiModel })}
+        />
+        <NumberField
+          label={getString('translationSettings.batchSize')}
+          value={settings.batchSize}
+          placeholder="60"
+          onCommit={batchSize => setTranslationSettings({ batchSize })}
+        />
+        <FieldNote
+          text={getString('translationSettings.batchSizeDescription')}
+        />
+        <NumberField
+          label={getString('translationSettings.maxOutputTokens')}
+          value={settings.maxOutputTokens}
+          placeholder="0"
+          onCommit={maxOutputTokens =>
+            setTranslationSettings({ maxOutputTokens })
+          }
+        />
+        <FieldNote
+          text={getString('translationSettings.maxOutputTokensDescription')}
         />
       </View>
     );
@@ -210,9 +296,11 @@ const ProviderPanel: React.FC<ProviderPanelProps> = ({
           label={getString('translationSettings.apiKey')}
           value={settings.openaiApiKey}
           placeholder={getString('translationSettings.apiKeyPlaceholder')}
+          multiline
           onCommit={openaiApiKey => setTranslationSettings({ openaiApiKey })}
         />
       </View>
+      <FieldNote text={getString('translationSettings.multiKeyNote')} />
       <View style={styles.field}>
         <CredentialField
           label={getString('translationSettings.openaiModel')}
@@ -225,6 +313,24 @@ const ProviderPanel: React.FC<ProviderPanelProps> = ({
         preset={settings.openaiModel}
         presets={OPENAI_PRESETS}
         onSelect={openaiModel => setTranslationSettings({ openaiModel })}
+      />
+      <NumberField
+        label={getString('translationSettings.batchSize')}
+        value={settings.batchSize}
+        placeholder="60"
+        onCommit={batchSize => setTranslationSettings({ batchSize })}
+      />
+      <FieldNote text={getString('translationSettings.batchSizeDescription')} />
+      <NumberField
+        label={getString('translationSettings.maxOutputTokens')}
+        value={settings.maxOutputTokens}
+        placeholder="0"
+        onCommit={maxOutputTokens =>
+          setTranslationSettings({ maxOutputTokens })
+        }
+      />
+      <FieldNote
+        text={getString('translationSettings.maxOutputTokensDescription')}
       />
     </View>
   );
@@ -307,6 +413,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     marginBottom: 4,
+  },
+  multiline: {
+    minHeight: 72,
+    textAlignVertical: 'top',
+  },
+  fieldNote: {
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 6,
+  },
+  cacheStatus: {
+    marginTop: 8,
   },
   presets: {
     flexDirection: 'row',

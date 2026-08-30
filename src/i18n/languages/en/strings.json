@@ -897,18 +897,27 @@
     "ruleEnabled": "Enabled",
     "ruleRemoveText": "Removes the matching text",
     "noRules": "No rules yet. Rules run before translation to strip decoration and headers.",
-    "providers": {
-      "google_pa": "Google Translate (official)",
-      "google_free": "Google Translate (free)",
-      "gemini": "Gemini",
-      "openai": "OpenAI"
-    },
-    "providerDescriptions": {
-      "google_pa": "Official Google Cloud endpoint. Works with the community key out of the box.",
-      "google_free": "Unofficial public endpoint. No key required, but it may be rate-limited.",
-      "gemini": "Google's Gemini API. Free tier available — add your own key.",
-      "openai": "OpenAI or any compatible endpoint (OpenRouter, Mistral, DeepSeek, local Ollama)."
-    },
+"providers": {
+  "google_pa": "Google Translate (Enhanced)",
+  "google_free": "Google Translate (Simple)",
+  "gemini": "Google Gemini API",
+  "openai": "OpenAI-compatible API"
+ },
+ "providerDescriptions": {
+  "google_pa": "Google's enhanced endpoint, powered by the same translate-pa API as the WtrLab plugin. Works with the community key out of the box.",
+  "google_free": "Free public Google endpoint. No key required, but it may be rate-limited.",
+  "gemini": "Google's Gemini API. Free tier available — add your key or several, one per line.",
+  "openai": "OpenAI or any compatible endpoint (OpenRouter, Mistral, DeepSeek, local Ollama)."
+ },
+ "batchSize": "Paragraphs per request",
+ "batchSizeDescription": "Max paragraphs sent per API call. Lower it when a large prompt makes the model truncate the chapter (default 60).",
+ "maxOutputTokens": "Max output tokens",
+ "maxOutputTokensDescription": "Cap the reply length. 0 = let the model decide.",
+ "multiKeyNote": "One key per line, or separated by commas/semicolons. Keys rotate automatically when one is rate-limited.",
+ "googlePaKeyList": "Google PA keys",
+ "googlePaKeyListDescription": "One key per line. Leave blank to use the shared community key; new keys are also auto-discovered from WtrLab.",
+ "googlePaCachedKeySet": "A working key is cached (24 h) and active",
+ "googlePaCachedKeyNone": "No cached key yet — it will be resolved on first use",
     "parallelModes": {
       "ORIGINAL_ONLY": "Original only",
       "TRANSLATED_ONLY": "Translated only",

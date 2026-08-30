@@ -36,17 +36,33 @@ export interface TranslationSettings {
   googlePaApiKey: string;
   /** Fall back to the shared community key when no personal key is set. */
   useCommunityGooglePaKey: boolean;
+  /** NoveLA-style Google PA key list (one per line). Falls back to the
+   * legacy `googlePaApiKey` / community key when blank. */
+  googlePaApiKeys: string;
+  /** Last key verified to work (24h cache, mirrors NoveLA). */
+  googlePaCachedKey: string;
+  /** Unix ms timestamp of the last successful key check (0 = none). */
+  googlePaKeyLastChecked: number;
+  /** Gemini/OpenAI API key list; one per line or comma/semicolon separated
+   * (NoveLA-compatible rotation). */
   geminiApiKey: string;
   geminiModel: string;
   openaiApiKey: string;
   openaiEndpoint: string;
   openaiModel: string;
+  /** Max paragraphs per chat-provider request. 0/blank → NoveLA default (60). */
+  batchSize: number;
+  /** Max output tokens for chat providers. 0 = let the model decide. */
+  maxOutputTokens: number;
   /** User-defined prompts (built-ins are referenced by id directly). */
   prompts: TranslationPrompt[];
   regexRules: RegexCleanupRule[];
   /** Keyed by `String(novelId)`. */
   perNovel: Record<string, PerNovelTranslationSettings>;
 }
+
+export const DEFAULT_TRANSLATION_BATCH_SIZE = 60;
+export const DEFAULT_MAX_OUTPUT_TOKENS = 0;
 
 export const initialTranslationSettings: TranslationSettings = {
   enabled: false,
@@ -57,11 +73,16 @@ export const initialTranslationSettings: TranslationSettings = {
   defaultPromptId: DEFAULT_PROMPT_ID,
   googlePaApiKey: '',
   useCommunityGooglePaKey: true,
+  googlePaApiKeys: '',
+  googlePaCachedKey: '',
+  googlePaKeyLastChecked: 0,
   geminiApiKey: '',
   geminiModel: DEFAULT_GEMINI_MODEL,
   openaiApiKey: '',
   openaiEndpoint: DEFAULT_OPENAI_ENDPOINT,
   openaiModel: DEFAULT_OPENAI_MODEL,
+  batchSize: DEFAULT_TRANSLATION_BATCH_SIZE,
+  maxOutputTokens: DEFAULT_MAX_OUTPUT_TOKENS,
   prompts: [],
   regexRules: [],
   perNovel: {},
@@ -124,11 +145,26 @@ const fingerprint = (
 ): string => {
   switch (provider) {
     case 'GOOGLE_PA':
-      return `${settings.googlePaApiKey.trim()}|${settings.useCommunityGooglePaKey}`;
+      return [
+        settings.googlePaApiKeys.trim(),
+        settings.googlePaApiKey.trim(),
+        settings.useCommunityGooglePaKey,
+      ].join('|');
     case 'GEMINI':
-      return `${settings.geminiApiKey.trim()}|${settings.geminiModel.trim()}`;
+      return [
+        settings.geminiApiKey.trim(),
+        settings.geminiModel.trim(),
+        settings.batchSize,
+        settings.maxOutputTokens,
+      ].join('|');
     case 'OPENAI':
-      return `${settings.openaiApiKey.trim()}|${settings.openaiEndpoint.trim()}|${settings.openaiModel.trim()}`;
+      return [
+        settings.openaiApiKey.trim(),
+        settings.openaiEndpoint.trim(),
+        settings.openaiModel.trim(),
+        settings.batchSize,
+        settings.maxOutputTokens,
+      ].join('|');
     default:
       return '';
   }

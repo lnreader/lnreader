@@ -7,6 +7,7 @@
  */
 
 import type { TranslationPrompt } from './types';
+import { getLanguageName } from './languages';
 
 export type BuiltInPromptId =
   | 'minimal'
@@ -50,10 +51,15 @@ export const BUILT_IN_PROMPTS: Record<
   },
 };
 
-const displayLanguage = (code: string): string =>
-  code && code.trim().length > 0 && code.trim().toLowerCase() !== 'auto'
-    ? code.trim()
-    : PROMPT_FALLBACK_SOURCE;
+/**
+ * Full English language name ("Japanese", "Chinese (Simplified)"), matching
+ * NoveLA's prompt placeholder substitution — codes like "ja" would only
+ * confuse the model. Unknown/blank codes fall back to the auto label.
+ */
+const displayLanguage = (code: string): string => {
+  const trimmed = (code ?? '').trim();
+  return trimmed ? getLanguageName(trimmed) : PROMPT_FALLBACK_SOURCE;
+};
 
 /** Fill the `{source_language}` / `{target_language}` placeholders. */
 export const formatPrompt = (

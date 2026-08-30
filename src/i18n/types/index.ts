@@ -766,6 +766,15 @@ export interface StringMap {
   'translationSettings.providerDescriptions.google_free': 'string';
   'translationSettings.providerDescriptions.gemini': 'string';
   'translationSettings.providerDescriptions.openai': 'string';
+  'translationSettings.batchSize': 'string';
+  'translationSettings.batchSizeDescription': 'string';
+  'translationSettings.maxOutputTokens': 'string';
+  'translationSettings.maxOutputTokensDescription': 'string';
+  'translationSettings.multiKeyNote': 'string';
+  'translationSettings.googlePaKeyList': 'string';
+  'translationSettings.googlePaKeyListDescription': 'string';
+  'translationSettings.googlePaCachedKeySet': 'string';
+  'translationSettings.googlePaCachedKeyNone': 'string';
   'translationSettings.parallelModes.ORIGINAL_ONLY': 'string';
   'translationSettings.parallelModes.TRANSLATED_ONLY': 'string';
   'translationSettings.parallelModes.PARALLEL_ORIGINAL_FIRST': 'string';

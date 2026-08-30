@@ -21,13 +21,13 @@ describe('translation prompts', () => {
     }
   });
 
-  it('formats language placeholders into every prompt', () => {
+  it('formats language placeholders into full English names (NoveLA style)', () => {
     for (const prompt of Object.values(BUILT_IN_PROMPTS)) {
       const formatted = formatPrompt(prompt.content, 'ja', 'en');
       expect(formatted).not.toContain('{source_language}');
       expect(formatted).not.toContain('{target_language}');
-      expect(formatted).toContain('ja');
-      expect(formatted).toContain('en');
+      expect(formatted).toContain('Japanese');
+      expect(formatted).toContain('English');
     }
   });
 
