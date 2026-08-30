@@ -26,6 +26,15 @@ Translate the exact chapter you're reading — no copy/paste, no leaving the rea
 - Editable translation prompt, regex cleanup of footnotes/URLs, source auto-detect + target language, and a model picker that accepts any model name (e.g. `gemini-3.7-flash`)
 - **Offline cache** (SQLite) — translated chapters are stored locally, so revisits never re-translate
 
+**Translation backends** — four supported, with automatic retry on rate limits (429/5xx):
+
+| Backend | Cost | API key |
+| :--- | :--- | :--- |
+| Google Translate (official) | Free | Not required |
+| Google Translate (free) | Free | Not required |
+| Google Gemini | Free tier | Required |
+| OpenAI-compatible | Varies | Required |
+
 ### 🔊 TTS with spoken-word highlighting
 
 NoveLA-style listening: the text-to-speech engine highlights **each word as it's read aloud**, in sync with playback — with a manual hex color picker (e.g. `#FF6B6B` soft red, `#4CAF50` green) or presets, plus speed and pitch sliders.
