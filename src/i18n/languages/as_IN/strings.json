@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "সকলো উৎস",
-    "searchIn": "উৎসত উপন্যাস অনুসন্ধান কৰক"
+    "searchIn": "উৎসত উপন্যাস অনুসন্ধান কৰক",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "ইতিহাস",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "স্থানান্তৰিত কৰক",
     "noSummary": "কোনো সংক্ষিপ্তসাৰ নাই",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Progress %{progress} %",
     "readChaptersDeleted": "Read chapters deleted",
     "startReadingChapters": "Start reading %{name}",
