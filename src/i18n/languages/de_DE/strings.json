@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "Alle Quellen",
-    "searchIn": "Suche ein Buch in"
+    "searchIn": "Suche ein Buch in",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Verlauf",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Migrieren",
     "noSummary": "Keine Beschreibung",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Progress %{progress} %",
     "readChaptersDeleted": "Read chapters deleted",
     "startReadingChapters": "Start reading %{name}",
