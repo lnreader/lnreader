@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "tüm kaynaklarda",
-    "searchIn": "Şurada bir novel arayın"
+    "searchIn": "Şurada bir novel arayın",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Geçmiş",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Taşın",
     "noSummary": "Özet bilgisi yok",
     "noCoverFound": "Kapak bulunamadı",
+    "notFound": "Novel not found on the source",
     "progress": "İlerleme %{progress}%",
     "readChaptersDeleted": "Okunmuş bölümler silindi",
     "startReadingChapters": "%{name} okumaya başla",
