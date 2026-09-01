@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "toàn bộ nguồn",
-    "searchIn": "Tìm truyện ở"
+    "searchIn": "Tìm truyện ở",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Lịch sử",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Đồng bộ",
     "noSummary": "Không có tóm tắt",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Tiến trình %{progress} %",
     "readChaptersDeleted": "Đã xoá chương đã đọc",
     "startReadingChapters": "Bắt đầu đọc %{name}",
