@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "все источники",
-    "searchIn": "Поиск новеллы в"
+    "searchIn": "Поиск новеллы в",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "История",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Перенос",
     "noSummary": "Нет сводки",
     "noCoverFound": "Обложка не найдена",
+    "notFound": "Novel not found on the source",
     "progress": "Прогресс %{progress}%",
     "readChaptersDeleted": "Прочитанные главы удалены",
     "startReadingChapters": "Начать %{name}",
