@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "Alla källor",
-    "searchIn": "Sök efter en roman i"
+    "searchIn": "Sök efter en roman i",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Historik",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Sök efter kapitlets namn",
       "searchByNameDescription": "Stäng av för att söka efter kapitlets nummer."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Migrera",
     "noSummary": "Ingen sammanfattning",
     "noCoverFound": "Inget omslag hittades",
+    "notFound": "Novel not found on the source",
     "progress": "Framsteg %{progress}%",
     "readChaptersDeleted": "Läs kapitel borttagna",
     "startReadingChapters": "Börja läsa %{name}",
