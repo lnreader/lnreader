@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "所有源",
-    "searchIn": "搜索小说在"
+    "searchIn": "搜索小说在",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "历史",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "迁移",
     "noSummary": "无简介",
     "noCoverFound": "未发现封面",
+    "notFound": "Novel not found on the source",
     "progress": "进度 %{progress} %",
     "readChaptersDeleted": "阅读章节已删除",
     "startReadingChapters": "开始阅读 %{name}",
