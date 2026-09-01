@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "всі джерела",
-    "searchIn": "Пошук новели в"
+    "searchIn": "Пошук новели в",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Історія",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Перенести",
     "noSummary": "Немає зведених відомостей",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Прогрес %{progress} %",
     "readChaptersDeleted": "Прочитані розділи видалено",
     "startReadingChapters": "Почати читання %{name}",
