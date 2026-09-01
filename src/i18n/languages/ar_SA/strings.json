@@ -450,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "جميع المصادر",
-    "searchIn": "البحث عن رواية في"
+    "searchIn": "البحث عن رواية في",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "السجل",
   "historyScreen": {
@@ -600,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "نقل",
     "noSummary": "لا يوجد ملخص",
     "noCoverFound": "No cover found",
+    "notFound": "Novel not found on the source",
     "progress": "Progress %{progress} %",
     "readChaptersDeleted": "Read chapters deleted",
     "startReadingChapters": "Start reading %{name}",
