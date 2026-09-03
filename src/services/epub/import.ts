@@ -18,14 +18,7 @@ import NativeZipArchive from '@modules/native-zip-archive';
 import { epub } from '@modules/nitro-epub';
 import { showToast } from '@utils/showToast';
 import { createImportProgressReporter } from './importProgress';
-
-const decodePath = (path: string) => {
-  try {
-    return decodeURI(path);
-  } catch {
-    return path;
-  }
-};
+import { chapterNameFallback, decodePath } from './helpers';
 
 const insertLocalNovel = async (
   name: string,
@@ -52,6 +45,8 @@ const insertLocalNovel = async (
       const decodedPath = decodePath(cover);
       if (await NativeFile.exists(decodedPath)) {
         await NativeFile.moveFile(decodedPath, newCoverPath);
+      } else {
+        throw new Error(`missing declared asset: ${cover}`);
       }
     }
     await updateNovelInfo({
@@ -155,7 +150,7 @@ export const importEpub = async (
       for (let i = 0; i < novel.chapters?.length; i++) {
         const chapter = novel.chapters[i];
         if (!chapter.name) {
-          chapter.name = chapter.path.split(/[/\\]/).pop() || 'unknown';
+          chapter.name = chapterNameFallback(chapter.path);
         }
 
         await insertLocalChapter(novelId, i, chapter.name, chapter.path, now);
@@ -177,6 +172,8 @@ export const importEpub = async (
           decodedPath,
           novelDir + '/' + filePath.split(/[/\\]/).pop(),
         );
+      } else {
+        throw new Error(`missing declared asset: ${filePath}`);
       }
     }
 
@@ -187,6 +184,8 @@ export const importEpub = async (
           decodedPath,
           novelDir + '/' + filePath.split(/[/\\]/).pop(),
         );
+      } else {
+        throw new Error(`missing declared asset: ${filePath}`);
       }
     }
   } catch (error) {
@@ -194,6 +193,9 @@ export const importEpub = async (
       getString('advancedSettingsScreen.importFailed'),
       (error as Error).message,
     );
+    // Rethrow so BackgroundTaskQueue.run fails the task instead of the
+    // import silently completing (#1997).
+    throw error;
   }
 
   setMeta(meta => ({
