@@ -241,10 +241,66 @@ describe('selective backup data', () => {
         id: 1,
         cover: 'file:///storage/Novels/source/1/cover.png?123',
       }),
+      expect.objectContaining({
+        mode: 'overwrite',
+        novelIdMap: expect.any(Map),
+      }),
     );
     expect(_restoreNovelAndChapters).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ id: 2, cover: null }),
+      expect.objectContaining({
+        mode: 'overwrite',
+        novelIdMap: expect.any(Map),
+      }),
+    );
+  });
+
+  it('deep-merges JSON settings and replaces backup arrays in merge mode', async () => {
+    const options: BackupOptions = {
+      library: false,
+      settings: true,
+      plugins: false,
+      downloadedFiles: false,
+    };
+    jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+      if (path.endsWith('/Version.json')) {
+        return JSON.stringify({
+          appVersion: '2.1.2',
+          formatVersion: 2,
+          sections: options,
+        });
+      }
+      return JSON.stringify({
+        READER_SETTINGS: JSON.stringify({
+          theme: 'backup',
+          nested: { backupOnly: true },
+          fonts: ['backup-font'],
+        }),
+      });
+    });
+    jest
+      .mocked(NativeFile.exists)
+      .mockImplementation(async path => path.endsWith('/Setting.json'));
+    jest.mocked(MMKVStorage.getString).mockImplementation(key =>
+      key === 'READER_SETTINGS'
+        ? JSON.stringify({
+            theme: 'local',
+            nested: { localOnly: true },
+            fonts: ['local-font'],
+          })
+        : undefined,
+    );
+
+    await restoreData('/cache', undefined, 'merge');
+
+    expect(MMKVStorage.set).toHaveBeenCalledWith(
+      'READER_SETTINGS',
+      JSON.stringify({
+        theme: 'backup',
+        nested: { localOnly: true, backupOnly: true },
+        fonts: ['backup-font'],
+      }),
     );
   });
 

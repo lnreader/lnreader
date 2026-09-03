@@ -16,6 +16,7 @@ import { ZipBackupName } from '../types';
 import { ROOT_STORAGE } from '@utils/Storages';
 import type {
   SelfHostData,
+  SelfHostRestoreData,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import { getSelectedBackupFileSections } from '../fileSections';
@@ -68,7 +69,7 @@ export const createSelfHostBackup = async (
 };
 
 export const selfHostRestore = async (
-  { host, backupFolder }: SelfHostData,
+  { host, backupFolder, mode }: SelfHostRestoreData,
   setMeta: TaskProgressUpdater,
 ) => {
   setMeta(meta => ({
@@ -89,7 +90,7 @@ export const selfHostRestore = async (
 
   await sleep(200);
 
-  const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta);
+  const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta, mode);
 
   setMeta(meta => ({
     ...meta,

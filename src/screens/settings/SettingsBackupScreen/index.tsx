@@ -25,6 +25,7 @@ import AutomaticBackupDialog, {
   AUTOMATIC_BACKUP_LABELS,
 } from './Components/AutomaticBackupDialog';
 import { showToast } from '@utils/showToast';
+import type { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   const theme = useTheme();
@@ -114,12 +115,12 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
     }
   };
 
-  const restoreLocalBackup = async () => {
+  const restoreLocalBackup = async (mode: RestoreMode) => {
     try {
       const sourceUri = await NativeFile.pickDocument('application/zip');
       backgroundTasks.enqueue({
         name: 'LOCAL_RESTORE',
-        data: { sourceUri },
+        data: { sourceUri, mode },
       });
     } catch {
       // Closing Android's document picker intentionally leaves the queue unchanged.
@@ -169,7 +170,17 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
           <List.Item
             title={getString('backupScreen.restoreBackup')}
             description={getString('backupScreen.restoreBackupDesc')}
-            onPress={restoreLocalBackup}
+            onPress={() => restoreLocalBackup('overwrite')}
+            theme={theme}
+          />
+          <List.Item
+            title={getString('backupScreen.restoreBackupMerge')}
+            description={getString('backupScreen.restoreBackupMergeDesc')}
+            onPress={() => restoreLocalBackup('merge')}
+            theme={theme}
+          />
+          <List.InfoItem
+            title={getString('backupScreen.restoreLargeBackupsWarning')}
             theme={theme}
           />
           <List.Item

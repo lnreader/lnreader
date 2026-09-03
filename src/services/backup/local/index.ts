@@ -18,6 +18,7 @@ import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
 import { getSelectedBackupFileSections } from '../fileSections';
 import { resolveBackupOptions, type BackupOptions } from '../options';
+import type { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 export const createBackup = async (
   {
@@ -88,7 +89,7 @@ export const createBackup = async (
 };
 
 export const restoreBackup = async (
-  { sourceUri }: { sourceUri: string },
+  { sourceUri, mode = 'overwrite' }: { sourceUri: string; mode?: RestoreMode },
   setMeta?: TaskProgressUpdater,
 ) => {
   try {
@@ -121,7 +122,7 @@ export const restoreBackup = async (
 
     await sleep(200);
 
-    const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta);
+    const restoreResult = await restoreData(CACHE_DIR_PATH, setMeta, mode);
 
     setMeta?.(meta => ({
       ...meta,

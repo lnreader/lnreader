@@ -6,6 +6,7 @@ import type {
   EpubExportMetadata,
 } from '@modules/nitro-epub';
 import type { BackupOptions } from '@services/backup/options';
+import type { RestoreMode } from '@database/queries/_restoreMergeUtils';
 
 export type SelfHostData = {
   host: string;
@@ -19,6 +20,10 @@ export type DriveBackupData =
       backupFolder: DriveFile;
       options?: BackupOptions;
     };
+
+export type DriveRestoreData = DriveFile & { mode?: RestoreMode };
+
+export type SelfHostRestoreData = SelfHostData & { mode?: RestoreMode };
 
 export type MigrationNovelPreference = 'current' | 'destination';
 
@@ -65,9 +70,9 @@ export type BackgroundTask =
       data?: { categoryId?: number; categoryName?: string };
     }
   | { name: 'DRIVE_BACKUP'; data: DriveBackupData }
-  | { name: 'DRIVE_RESTORE'; data: DriveFile }
+  | { name: 'DRIVE_RESTORE'; data: DriveRestoreData }
   | { name: 'SELF_HOST_BACKUP'; data: SelfHostData }
-  | { name: 'SELF_HOST_RESTORE'; data: SelfHostData }
+  | { name: 'SELF_HOST_RESTORE'; data: SelfHostRestoreData }
   | {
       name: 'LOCAL_BACKUP';
       data: {
@@ -76,7 +81,10 @@ export type BackgroundTask =
         automatic?: boolean;
       };
     }
-  | { name: 'LOCAL_RESTORE'; data: { sourceUri: string } }
+  | {
+      name: 'LOCAL_RESTORE';
+      data: { sourceUri: string; mode?: RestoreMode };
+    }
   | { name: 'MIGRATE_NOVEL'; data: MigrateNovelData }
   | DownloadChapterTask;
 
