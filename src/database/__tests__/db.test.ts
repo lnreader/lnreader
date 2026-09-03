@@ -514,6 +514,108 @@ describe('production migrations', () => {
     }
   });
 
+  it('repairs a user_version=2 database whose counter columns exist but were never populated', async () => {
+    // Second upgrade cohort from #1754: v2.0.0–v2.0.3 installs stamped
+    // user_version = 2 while skipping the counter-column migration, so the
+    // Novel table is current-shaped but chaptersUnread/chaptersDownloaded/
+    // totalChapters sit at their DEFAULT 0 with real Chapter rows present.
+    // calm_chimera must still recompute them from the Chapter snapshot.
+    //
+    // `location: ':memory:'` (not `name`) — the op-sqlite Node runtime only
+    // honors the in-memory special value in the location slot; passing it as
+    // name builds a './:memory:' file path, which is an illegal filename on
+    // Windows and breaks every test that copies the cohort-1 pattern verbatim.
+    const sqlite = open({ name: 'lnreader-test.db', location: ':memory:' });
+    (sqlite as any).executeAsync ??= sqlite.execute;
+    (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createSchema(sqlite);
+      sqlite.executeSync('PRAGMA user_version = 2');
+
+      sqlite.executeSync(`
+        INSERT INTO Category (id, name, sort)
+        VALUES (1, 'Existing category', 1)
+      `);
+      sqlite.executeSync(`
+        INSERT INTO Novel (
+          id,
+          path,
+          pluginId,
+          name,
+          inLibrary,
+          chaptersDownloaded,
+          chaptersUnread,
+          totalChapters
+        )
+        VALUES (1, '/stale-counters', 'stale-plugin', 'Stale novel', 1, 0, 0, 0)
+      `);
+      sqlite.executeSync(`
+        INSERT INTO Chapter (
+          id,
+          novelId,
+          path,
+          name,
+          unread,
+          isDownloaded,
+          readTime,
+          updatedTime
+        )
+        VALUES
+          (
+            1,
+            1,
+            '/stale-counters/chapter-1',
+            'Chapter 1',
+            0,
+            1,
+            '2026-07-25T10:00:00.000Z',
+            '2026-07-25T11:00:00.000Z'
+          ),
+          (
+            2,
+            1,
+            '/stale-counters/chapter-2',
+            'Chapter 2',
+            1,
+            1,
+            NULL,
+            '2026-07-26T11:00:00.000Z'
+          )
+      `);
+      sqlite.executeSync(`
+        INSERT INTO NovelCategory (id, novelId, categoryId)
+        VALUES (1, 1, 1)
+      `);
+
+      const drizzleDb = drizzle(sqlite, { schema });
+      await migrate(drizzleDb, getPendingMigrations(sqlite));
+
+      expect(
+        sqlite.executeSync(
+          `SELECT
+            id,
+            chaptersDownloaded,
+            chaptersUnread,
+            totalChapters,
+            lastReadAt,
+            lastUpdatedAt
+          FROM Novel`,
+        ).rows,
+      ).toEqual([
+        {
+          id: 1,
+          chaptersDownloaded: 2,
+          chaptersUnread: 1,
+          totalChapters: 2,
+          lastReadAt: '2026-07-25T10:00:00.000Z',
+          lastUpdatedAt: '2026-07-26T11:00:00.000Z',
+        },
+      ]);
+    } finally {
+      sqlite.close();
+    }
+  });
+
   it('resumes after Novel was dropped during the previous repair migration', async () => {
     const sqlite = open({ name: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
