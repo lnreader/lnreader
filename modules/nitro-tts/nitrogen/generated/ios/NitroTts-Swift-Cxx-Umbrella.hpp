@@ -28,6 +28,8 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 namespace margelo::nitro::nitrotts { struct TtsSettings; }
 // Forward declaration of `TtsVoice` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsVoice; }
+// Forward declaration of `TtsWordRange` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsWordRange; }
 
 // Include C++ defined types
 #include "HybridTtsFactorySpec.hpp"
@@ -40,6 +42,7 @@ namespace margelo::nitro::nitrotts { struct TtsVoice; }
 #include "TtsProgress.hpp"
 #include "TtsSettings.hpp"
 #include "TtsVoice.hpp"
+#include "TtsWordRange.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>

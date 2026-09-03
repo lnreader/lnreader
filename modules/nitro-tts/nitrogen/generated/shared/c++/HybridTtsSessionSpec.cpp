@@ -26,6 +26,7 @@ namespace margelo::nitro::nitrotts {
       prototype.registerHybridMethod("addOnStateChangedListener", &HybridTtsSessionSpec::addOnStateChangedListener);
       prototype.registerHybridMethod("addOnProgressChangedListener", &HybridTtsSessionSpec::addOnProgressChangedListener);
       prototype.registerHybridMethod("addOnErrorListener", &HybridTtsSessionSpec::addOnErrorListener);
+      prototype.registerHybridMethod("addOnWordRangeChangedListener", &HybridTtsSessionSpec::addOnWordRangeChangedListener);
     });
   }
 

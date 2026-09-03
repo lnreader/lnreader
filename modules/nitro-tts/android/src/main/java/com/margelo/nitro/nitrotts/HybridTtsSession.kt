@@ -64,4 +64,10 @@ final class HybridTtsSession : HybridTtsSessionSpec() {
     ): ListenerSubscription {
         return ListenerSubscription(TtsPlaybackStore.addErrorListener(listener))
     }
+
+    override fun addOnWordRangeChangedListener(
+        listener: (range: TtsWordRange) -> Unit,
+    ): ListenerSubscription {
+        return ListenerSubscription(TtsPlaybackStore.addWordRangeListener(listener))
+    }
 }

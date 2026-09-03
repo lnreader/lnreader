@@ -59,6 +59,98 @@ window.reader = new (function () {
   this.autoSaveInterval = autoSaveInterval;
   this.rawHTML = this.chapterElement.innerHTML;
 
+  // ------------------------------------------------------------------
+  // Translation (NoveLA-style). The app resolves settings and translates
+  // paragraph texts; this page renders the two sides and re-maps TTS so it
+  // speaks whichever side is the primary for the active parallel mode.
+  // ------------------------------------------------------------------
+  this.translation = {
+    config: {
+      enabled: false,
+      parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+    },
+    /** paragraph element -> { orig, transl, primary, originalMarkup } */
+    entries: new Map(),
+  };
+
+  const translationStyleId = 'lnr-translation-style';
+  const ensureTranslationStyles = () => {
+    if (document.getElementById(translationStyleId)) return;
+    const style = document.createElement('style');
+    style.id = translationStyleId;
+    style.textContent = [
+      '.lnr-parallel{display:flex;flex-direction:column;}',
+      '[data-translation-mode="ORIGINAL_ONLY"] .lnr-transl{display:none;}',
+      '[data-translation-mode="TRANSLATED_ONLY"] .lnr-orig{display:none;}',
+      '[data-translation-mode="PARALLEL_ORIGINAL_FIRST"] .lnr-orig{order:1;}',
+      '[data-translation-mode="PARALLEL_ORIGINAL_FIRST"] .lnr-transl{order:2;}',
+      '[data-translation-mode="PARALLEL_TRANSLATION_FIRST"] .lnr-orig{order:2;}',
+      '[data-translation-mode="PARALLEL_TRANSLATION_FIRST"] .lnr-transl{order:1;}',
+    ].join('');
+    document.head.appendChild(style);
+  };
+
+  /**
+   * Push the active config into the page. Used on load and for cheap updates
+   * (parallel mode, enable/disable) that don't require re-translation.
+   */
+  this.applyTranslationConfig = config => {
+    const next = {
+      enabled: false,
+      parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+      ...(config ?? {}),
+    };
+    this.translation.config = next;
+    if (!next.enabled) {
+      window.tts?.clearTranslation?.();
+      return;
+    }
+    ensureTranslationStyles();
+    document.documentElement.setAttribute(
+      'data-translation-mode',
+      next.parallelMode,
+    );
+    window.tts?.applyTranslationMode?.(next.parallelMode);
+  };
+
+  /** Ask the app for fresh translations of the current paragraph texts. */
+  this.requestTranslation = (force = false) => {
+    if (!this.translation.config.enabled) return;
+    const paragraphs = window.tts?.collectParagraphTexts?.() ?? [];
+    this.post({
+      type: 'translation-request',
+      data: { paragraphs, force: !!force },
+    });
+  };
+
+  /** Render finished translations into the chapter and re-map TTS. */
+  this.applyTranslation = payload => {
+    const { config, paragraphs = [], translations = [] } = payload ?? {};
+    if (config) {
+      this.translation.config = {
+        enabled: false,
+        parallelMode: 'PARALLEL_TRANSLATION_FIRST',
+        ...config,
+      };
+    }
+    const { enabled, parallelMode } = this.translation.config;
+    if (!enabled) {
+      window.tts?.clearTranslation?.();
+      return;
+    }
+    ensureTranslationStyles();
+    document.documentElement.setAttribute(
+      'data-translation-mode',
+      parallelMode,
+    );
+    window.tts?.setTranslatedParagraphs?.(
+      paragraphs,
+      translations,
+      parallelMode,
+    );
+    this.refresh();
+  };
+
   //layout props
   this.paddingTop = parseInt(
     getComputedStyle(document.querySelector('body')).getPropertyValue(
@@ -189,6 +281,50 @@ window.tts = new (function () {
   this.totalElements = 0;
   this.allReadableElements = []; // Store all readable elements at start
   this.textQueue = []; // Flat list of normalized text for native fallback
+  this.wordMap = null; // Normalized text + DOM offsets for the active paragraph
+  this.highlightEnabled = true;
+  this.highlightColor = '';
+  this.userScrolling = false; // set while the user drags the page
+
+  if (typeof document !== 'undefined') {
+    // Tracks user-initiated page drags. The paragraph follow stays paused while
+    // the user is dragging and re-engages shortly after they let go. Android
+    // WebViews don't always fire `scrollend` (taps, older engines), so a
+    // watchdog clears `userScrolling` ~700ms after the last scroll activity
+    // instead of depending on the event alone.
+    const clearScrolling = () => {
+      if (this.scrollWatchdog) {
+        clearTimeout(this.scrollWatchdog);
+        this.scrollWatchdog = null;
+      }
+      this.userScrolling = false;
+    };
+    const armScrollingWatchdog = () => {
+      if (this.scrollWatchdog) clearTimeout(this.scrollWatchdog);
+      this.scrollWatchdog = setTimeout(() => {
+        this.scrollWatchdog = null;
+        this.userScrolling = false;
+      }, 700);
+    };
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (this.started) {
+          this.userScrolling = true;
+          armScrollingWatchdog();
+        }
+      },
+      true,
+    );
+    document.addEventListener(
+      'scroll',
+      () => {
+        if (this.userScrolling) armScrollingWatchdog();
+      },
+      true,
+    );
+    document.addEventListener('scrollend', clearScrolling, true);
+  }
 
   this.readable = element => {
     const ele = element ?? this.currentElement;
@@ -209,14 +345,243 @@ window.tts = new (function () {
     return true;
   };
 
+  // Shared token pipeline for normalizeText/normalizeWithOffsets. Every output
+  // char carries the raw code-unit offset it was derived from, so the spoken
+  // text and the highlight ranges stay aligned by construction.
+  const TTS_DECORATIVE = /[\-=*_~+#·•°─-┿]/;
+  const TTS_LEADING_DECORATIVE = /^[\-=*_~+#·•°─-┿]{3,}\s*/;
+  const TTS_TRAILING_DECORATIVE = /\s*[\-=*_~+#·•°─-┿]{3,}$/;
+  const TTS_QUOTE = /["'“”‘’]/;
+
+  this.normalizeTokens = raw => {
+    if (!raw) return { chars: [], src: [] };
+    const chars = [];
+    const src = [];
+    const lines = raw.split(/\r\n|\r|\n/);
+    let base = 0;
+    let prevLineHadContent = false;
+    for (const line of lines) {
+      // NoveLA's cleanTextForTts: strip decorative separator runs bordering
+      // each line (scene-break rules like ----, ***, ────), then trim.
+      let from = 0;
+      let to = line.length;
+      const lead = TTS_LEADING_DECORATIVE.exec(line);
+      if (lead) from = lead[0].length;
+      const trail = TTS_TRAILING_DECORATIVE.exec(line);
+      if (trail) to = trail.index;
+      while (from < to && /\s/.test(line[from])) from++;
+      while (to > from && /\s/.test(line[to - 1])) to--;
+      if (to > from) {
+        // Adjacent text lines collapse into a single space, mapping onto the
+        // separator that used to sit between them.
+        if (prevLineHadContent) {
+          chars.push(' ');
+          src.push(Math.max(base - 1, 0));
+        }
+        for (let i = from; i < to; i++) {
+          chars.push(line[i]);
+          src.push(base + i);
+        }
+        prevLineHadContent = true;
+      }
+      base += line.length + 1;
+    }
+    const collapsed = [];
+    const collapsedSrc = [];
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (/\s/.test(c)) {
+        if (collapsed.length > 0 && collapsed[collapsed.length - 1] !== ' ') {
+          collapsed.push(' ');
+          collapsedSrc.push(src[i]);
+        }
+      } else {
+        collapsed.push(c);
+        collapsedSrc.push(src[i]);
+      }
+    }
+    // Upstream LNReader: trim, then strip surrounding quote runs so the engine
+    // never reads stray " ... " as the word "quote".
+    let start = 0;
+    let end = collapsed.length;
+    while (start < end && collapsed[start] === ' ') start++;
+    while (end > start && collapsed[end - 1] === ' ') end--;
+    while (start < end && TTS_QUOTE.test(collapsed[start])) start++;
+    while (end > start && TTS_QUOTE.test(collapsed[end - 1])) end--;
+    const out = [];
+    const outSrc = [];
+    for (let i = start; i < end; i++) {
+      const c = collapsed[i];
+      if (/[.,!?;:]/.test(c)) {
+        // The punctuation rule strips only a real preceding space (not the
+        // synthetic one a previous punctuation emitted), mirroring the regex
+        // which never re-scans its own replacements.
+        if (
+          i > start &&
+          collapsed[i - 1] === ' ' &&
+          out[out.length - 1] === ' '
+        ) {
+          out.pop();
+          outSrc.pop();
+        }
+        out.push(c);
+        outSrc.push(collapsedSrc[i]);
+        if (i + 1 < end && collapsed[i + 1] === ' ') {
+          out.push(' ');
+          outSrc.push(collapsedSrc[i + 1]);
+          i++;
+        } else {
+          out.push(' ');
+          outSrc.push(collapsedSrc[i]);
+        }
+      } else {
+        out.push(c);
+        outSrc.push(collapsedSrc[i]);
+      }
+    }
+    let from = 0;
+    let to = out.length;
+    while (from < to && out[from] === ' ') from++;
+    while (to > from && out[to - 1] === ' ') to--;
+    return { chars: out.slice(from, to), src: outSrc.slice(from, to) };
+  };
+
   this.normalizeText = text => {
     if (!text) return '';
-    return text
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
-      .replace(/\s*([.,!?;:])\s*/g, '$1 ')
-      .trim();
+    return this.normalizeTokens(text).chars.join('');
+  };
+
+  // ------------------------------------------------------------------
+  // Translation support. Each paragraph element gains an entry holding the
+  // cleaned original, the translation, the original markup and the two rendered
+  // spans; paragraphRoot resolves the node TTS should speak for the active
+  // parallel mode so the queue text and the highlight map always describe the
+  // same (primary) content.
+  // ------------------------------------------------------------------
+  this.collectReadableElements = () =>
+    this.getAllReadableElements(reader.chapterElement);
+
+  this.paragraphOriginalText = element => {
+    const entry = reader.translation?.entries?.get(element);
+    if (entry && entry.orig !== undefined) return entry.orig;
+    return this.normalizeText(element.innerText);
+  };
+
+  this.paragraphRoot = element => {
+    if (!reader.translation) return element;
+    const entry = reader.translation.entries.get(element);
+    return entry?.primary ?? element;
+  };
+
+  this.collectParagraphTexts = () =>
+    this.collectReadableElements()
+      .filter(element => !!this.paragraphOriginalText(element))
+      .map(element => this.paragraphOriginalText(element));
+
+  this.primaryForMode = (entry, parallelMode) => {
+    if (
+      parallelMode === 'ORIGINAL_ONLY' ||
+      parallelMode === 'PARALLEL_ORIGINAL_FIRST'
+    ) {
+      return entry.origSpan;
+    }
+    return entry.translSpan ?? entry.origSpan;
+  };
+
+  this.paragraphIndexOf = element => {
+    const elements = this.collectReadableElements();
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i] === element) return i;
+      if (
+        typeof elements[i].contains === 'function' &&
+        elements[i].contains(element)
+      ) {
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  this.applyTranslationMode = parallelMode => {
+    if (!reader.translation) return;
+    reader.translation.config = {
+      ...reader.translation.config,
+      parallelMode,
+    };
+    reader.translation.entries.forEach(entry => {
+      entry.primary = this.primaryForMode(entry, parallelMode);
+    });
+    this.rebuildQueue();
+  };
+
+  this.rebuildQueue = () => {
+    if (!this.started) return;
+    const translated = (reader.translation?.entries?.size ?? 0) > 0;
+    const index = this.paragraphIndexOf(this.currentElement);
+    if (
+      !translated &&
+      index === this.allReadableElements.indexOf(this.currentElement)
+    ) {
+      return;
+    }
+    const anchor =
+      index >= 0 ? this.collectReadableElements()[index] : this.currentElement;
+    this.start(anchor);
+    if (index >= 0) this.setActiveIndex(index);
+  };
+
+  this.clearTranslation = () => {
+    if (!reader.translation) return;
+    const started = this.started;
+    const index = started ? this.paragraphIndexOf(this.currentElement) : -1;
+    reader.translation.entries.forEach((entry, element) => {
+      element.classList.remove('lnr-parallel');
+      if (entry.originalMarkup !== undefined) {
+        element.innerHTML = entry.originalMarkup;
+      }
+    });
+    reader.translation.entries = new Map();
+    document.documentElement?.removeAttribute?.('data-translation-mode');
+    if (index >= 0) this.start(this.collectReadableElements()[index]);
+    else if (started) this.start(reader.chapterElement);
+  };
+
+  this.setTranslatedParagraphs = (paragraphs, translations, parallelMode) => {
+    if (!reader.translation) return;
+    const requested = this.collectReadableElements().filter(
+      element => !!this.paragraphOriginalText(element),
+    );
+    const next = new Map();
+    requested.forEach((element, index) => {
+      const previous = reader.translation.entries.get(element);
+      next.set(element, {
+        orig: paragraphs?.[index] ?? this.paragraphOriginalText(element),
+        transl: translations?.[index] ?? '',
+        originalMarkup: previous?.originalMarkup ?? element.innerHTML,
+        origSpan: null,
+        translSpan: null,
+        primary: null,
+      });
+    });
+    next.forEach((entry, element) => {
+      element.classList.add('lnr-parallel');
+      element.innerHTML = '';
+      const origSpan = document.createElement('span');
+      origSpan.className = 'lnr-orig';
+      origSpan.innerHTML = entry.originalMarkup;
+      element.appendChild(origSpan);
+      entry.origSpan = origSpan;
+      const translation = (entry.transl ?? '').trim();
+      if (translation) {
+        const translSpan = document.createElement('span');
+        translSpan.className = 'lnr-transl';
+        translSpan.textContent = entry.transl;
+        element.appendChild(translSpan);
+        entry.translSpan = translSpan;
+      }
+    });
+    reader.translation.entries = next;
+    this.applyTranslationMode(parallelMode);
   };
 
   // if can find a readable node, else stop tts
@@ -299,11 +664,14 @@ window.tts = new (function () {
   this.start = element => {
     const startElement = element ?? reader.chapterElement;
 
-    const readableEntries = this.getAllReadableElements(reader.chapterElement)
-      .map(readableElement => ({
-        element: readableElement,
-        text: this.normalizeText(readableElement.innerText),
-      }))
+    const readableEntries = this.collectReadableElements()
+      .map(readableElement => {
+        const root = this.paragraphRoot(readableElement);
+        return {
+          element: root,
+          text: this.normalizeText(root.innerText),
+        };
+      })
       .filter(entry => !!entry.text);
     this.allReadableElements = readableEntries.map(entry => entry.element);
     this.totalElements = this.allReadableElements.length;
@@ -377,6 +745,8 @@ window.tts = new (function () {
 
   this.reset = () => {
     this.currentElement?.classList?.remove('highlight');
+    this.clearWordHighlight();
+    this.wordMap = null;
     this.prevElement = null;
     this.currentElement = reader.chapterElement;
     this.started = false;
@@ -395,9 +765,15 @@ window.tts = new (function () {
     if (!this.allReadableElements.length) return;
     const targetIndex = Math.max(0, Math.min(index, this.totalElements - 1));
     this.currentElement?.classList?.remove('highlight');
+    this.clearWordHighlight();
     this.currentElement = this.allReadableElements[targetIndex];
     this.elementsRead = targetIndex + 1;
     this.started = true;
+    const mapped = this.mapFromElement(this.currentElement);
+    if (mapped) {
+      mapped.paragraphId = String(targetIndex);
+      this.wordMap = mapped;
+    }
     this.scrollToElement(this.currentElement);
     this.currentElement.classList.add('highlight');
     const progress = document.getElementById('TTS-Progress');
@@ -446,7 +822,9 @@ window.tts = new (function () {
     );
   };
 
-  // UPDATED: Scroll to top or center based on settings with padding for notch/camera
+  // Scrolls the active paragraph to a ~20% anchor line (like NoveLA's TTS
+  // follow), re-anchoring smoothly within a viewport and jumping otherwise.
+  // Only kick in once the user's own scroll has settled.
   this.scrollToElement = element => {
     if (!element) return;
     // Check if element is partially visible (at least some part is in viewport)
@@ -466,37 +844,199 @@ window.tts = new (function () {
       );
       return;
     }
+    if (this.userScrolling) return;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const isPartiallyVisible =
-      rect.top < windowHeight &&
-      rect.bottom > 0 &&
-      rect.left < window.innerWidth &&
-      rect.right > 0;
 
-    // Only scroll if element is not visible or barely visible
-    if (!isPartiallyVisible || rect.top < 0 || rect.bottom > windowHeight) {
-      // Check scrollToTop setting (default to true for better reading experience)
-      const scrollToTop = reader.readerSettings.val.tts?.scrollToTop !== false;
+    const scrollToTop = reader.readerSettings.val.tts?.scrollToTop !== false;
 
-      if (scrollToTop) {
-        // Scroll to top with padding for notch/camera (80px from top)
-        const elementTop =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementTop - 80; // 80px padding for notch/camera
+    if (!scrollToTop) {
+      // Center scroll (toggle disabled)
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+      return;
+    }
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
-      } else {
-        // Center scroll (original behavior)
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest',
-        });
+    // Anchors the paragraph top near the top of the viewport (~8%), clamped to
+    // a sane band so short windows still leave breathing room above the text.
+    const anchor = Math.min(Math.max(Math.round(windowHeight * 0.08), 70), 160);
+    const elementTop = rect.top + window.pageYOffset;
+    const targetScroll = elementTop - anchor;
+    const delta = targetScroll - window.pageYOffset;
+
+    // Already positioned around the anchor line, or still safely in view
+    // without a tighter anchor above it.
+    if (Math.abs(delta) <= 16) return;
+    if (rect.top >= 0 && rect.bottom <= windowHeight) return;
+
+    const smooth = Math.abs(delta) <= windowHeight;
+    window.scrollTo({
+      top: Math.max(targetScroll, 0),
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+  };
+
+  // Flattens an element's text into `normalizeText`-equivalent output while
+  // recording, for every output character, the raw code-unit offset it came
+  // from. Native engines report spoken ranges relative to the very string they
+  // were handed (`normalizeText(el.innerText)`), so this map lets those ranges
+  // be translated back onto the DOM nodes that render that text.
+  this.mapFromElement = element => {
+    if (!element || typeof element.childNodes === 'undefined') return null;
+    const segments = [];
+    let raw = '';
+    const isRendered = el => {
+      try {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      } catch (error) {
+        return true;
       }
+    };
+    const walk = el => {
+      for (let i = 0; i < el.childNodes.length; i++) {
+        const child = el.childNodes[i];
+        if (child.nodeType === Node.TEXT_NODE) {
+          segments.push({
+            node: child,
+            start: raw.length,
+            end: raw.length + child.data.length,
+          });
+          raw += child.data;
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          if (child.nodeName === 'BR') {
+            raw += '\n';
+          } else if (isRendered(child)) {
+            walk(child);
+          }
+        }
+      }
+    };
+    walk(element);
+    if (!raw) return null;
+    const { text, offsets } = this.normalizeWithOffsets(raw);
+    if (!text) return null;
+    return { element, text, offsets, segments };
+  };
+
+  // Offset-tracked twin of normalizeText: both run the same token pipeline, so
+  // the spoken queue text and the highlight map can never drift apart.
+  this.normalizeWithOffsets = raw => {
+    if (!raw) return { text: '', offsets: [] };
+    const { chars, src } = this.normalizeTokens(raw);
+    return { text: chars.join(''), offsets: src };
+  };
+
+  // Turns a normalized [start,end) span into one DOM Range per text-node run.
+  this.rangesFor = (map, start, end) => {
+    if (!map || !map.text) return [];
+    const lo = Math.max(0, Math.floor(start));
+    const hi = Math.min(map.text.length, Math.ceil(end));
+    if (hi <= lo || !map.offsets || !map.segments) return [];
+    const seen = new Set();
+    const positions = [];
+    for (let i = lo; i < hi; i++) {
+      const offset = map.offsets[i];
+      if (!seen.has(offset)) {
+        seen.add(offset);
+        positions.push(offset);
+      }
+    }
+    positions.sort((a, b) => a - b);
+    const ranges = [];
+    let runStart = -1;
+    let runEnd = -1;
+    positions.forEach(pos => {
+      if (runStart === -1) {
+        runStart = pos;
+        runEnd = pos;
+      } else if (pos === runEnd + 1) {
+        runEnd = pos;
+      } else {
+        map.segments.forEach(segment => {
+          if (runEnd < segment.start || runStart >= segment.end) return;
+          const localStart = Math.max(runStart, segment.start) - segment.start;
+          const localEnd = Math.min(runEnd + 1, segment.end) - segment.start;
+          if (localEnd > localStart) {
+            const range = document.createRange();
+            range.setStart(segment.node, localStart);
+            range.setEnd(segment.node, localEnd);
+            ranges.push(range);
+          }
+        });
+        runStart = pos;
+        runEnd = pos;
+      }
+    });
+    if (runStart !== -1) {
+      map.segments.forEach(segment => {
+        if (runEnd < segment.start || runStart >= segment.end) return;
+        const localStart = Math.max(runStart, segment.start) - segment.start;
+        const localEnd = Math.min(runEnd + 1, segment.end) - segment.start;
+        if (localEnd > localStart) {
+          const range = document.createRange();
+          range.setStart(segment.node, localStart);
+          range.setEnd(segment.node, localEnd);
+          ranges.push(range);
+        }
+      });
+    }
+    return ranges;
+  };
+
+  this.clearWordHighlight = () => {
+    if (typeof CSS === 'undefined' || !CSS.highlights) return;
+    try {
+      CSS.highlights.delete('tts-word');
+    } catch (error) {
+      // Custom Highlight API unsupported – degrade gracefully.
+    }
+  };
+
+  // Applies the spoken-word highlight rendered only via the Custom Highlight
+  // API, so no DOM mutations are ever performed while narrating.
+  this.setWordRange = (paragraphId, start, end) => {
+    if (!this.highlightEnabled) {
+      this.clearWordHighlight();
+      return;
+    }
+    if (
+      typeof CSS === 'undefined' ||
+      !CSS.highlights ||
+      typeof Highlight === 'undefined'
+    ) {
+      return;
+    }
+    if (!this.wordMap || this.wordMap.paragraphId !== paragraphId) return;
+    const ranges = this.rangesFor(this.wordMap, start, end);
+    try {
+      if (ranges.length === 0) {
+        this.clearWordHighlight();
+        return;
+      }
+      const highlight = CSS.highlights.get('tts-word') || new Highlight();
+      highlight.clear();
+      ranges.forEach(range => highlight.add(range));
+      CSS.highlights.set('tts-word', highlight);
+    } catch (error) {
+      // Custom Highlight API unsupported – degrade gracefully.
+    }
+  };
+
+  this.setHighlightSettings = settings => {
+    this.highlightEnabled = settings.enabled !== false;
+    this.highlightColor = settings.color || '';
+    const fallback =
+      'color-mix(in srgb, var(--readerSettings-textColor) 20%, var(--readerSettings-theme))';
+    document.documentElement.style.setProperty(
+      '--tts-highlight-color',
+      this.highlightColor || fallback,
+    );
+    if (!this.highlightEnabled) {
+      this.clearWordHighlight();
     }
   };
 

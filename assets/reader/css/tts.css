@@ -82,3 +82,18 @@
   padding-right: 6px;
   text-align: center;
 }
+
+/* Currently-spoken words, painted via the Custom Highlight API (Chromium 105+).
+   No DOM nodes are touched, so this stays independent of the paragraph-level
+   `.highlight` background used for narration position. */
+::highlight(tts-word) {
+  color: var(--readerSettings-textColor) !important;
+  background-color: var(
+    --tts-highlight-color,
+    color-mix(
+      in srgb,
+      var(--readerSettings-textColor) 20%,
+      var(--readerSettings-theme)
+    )
+  );
+}

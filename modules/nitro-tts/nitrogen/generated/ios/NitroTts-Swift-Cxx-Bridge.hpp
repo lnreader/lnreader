@@ -24,6 +24,8 @@ namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
 // Forward declaration of `TtsVoice` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsVoice; }
+// Forward declaration of `TtsWordRange` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsWordRange; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridTtsFactorySpec_cxx` to properly resolve imports.
@@ -40,6 +42,7 @@ namespace NitroTts { class HybridTtsSessionSpec_cxx; }
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
 #include "TtsVoice.hpp"
+#include "TtsWordRange.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -377,6 +380,28 @@ namespace margelo::nitro::nitrotts::bridge::swift {
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
     return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const TtsWordRange& /* range */)>
+  /**
+   * Specialized version of `std::function<void(const TtsWordRange&)>`.
+   */
+  using Func_void_TtsWordRange = std::function<void(const TtsWordRange& /* range */)>;
+  /**
+   * Wrapper class for a `std::function<void(const TtsWordRange& / * range * /)>`, this can be used from Swift.
+   */
+  class Func_void_TtsWordRange_Wrapper final {
+  public:
+    explicit Func_void_TtsWordRange_Wrapper(std::function<void(const TtsWordRange& /* range */)>&& func): _function(std::make_unique<std::function<void(const TtsWordRange& /* range */)>>(std::move(func))) {}
+    inline void call(TtsWordRange range) const noexcept {
+      _function->operator()(range);
+    }
+  private:
+    std::unique_ptr<std::function<void(const TtsWordRange& /* range */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_TtsWordRange create_Func_void_TtsWordRange(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_TtsWordRange_Wrapper wrap_Func_void_TtsWordRange(Func_void_TtsWordRange value) noexcept {
+    return Func_void_TtsWordRange_Wrapper(std::move(value));
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<void>>>

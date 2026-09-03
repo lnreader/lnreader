@@ -37,3 +37,12 @@ export { default as AnimatedIconButton } from './IconButtonV2/AnimatedIconButton
 export { default as TextInput } from './TextInput';
 export { default as Slider } from './Slider/Slider';
 export type { SliderProps, SliderSize } from './Slider/Slider';
+export {
+  default as OptionPickerDialog,
+  type TranslationOption,
+} from './Translation/OptionPickerDialog';
+export { default as RegexRulesEditor } from './Translation/RegexRulesEditor';
+export { default as PromptsManager } from './Translation/PromptsManager';
+export { default as LanguagePickerDialog } from './Translation/LanguagePickerDialog';
+export { default as ProviderSettingsPanel } from './Translation/ProviderSettingsPanel';
+export { default as ExpandableSection } from './Translation/ExpandableSection';
