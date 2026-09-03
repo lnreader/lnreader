@@ -1,10 +1,6 @@
 import type { DriveFile } from '@api/drive/types';
 import type { NovelInfo } from '@database/types';
 import type { NativeBackgroundTaskRecord } from '@modules/native-background-tasks';
-import type {
-  EpubExportChapter,
-  EpubExportMetadata,
-} from '@modules/nitro-epub';
 import type { BackupOptions } from '@services/backup/options';
 
 export type SelfHostData = {
@@ -45,9 +41,7 @@ export type EpubImportFile = {
 };
 
 export type EpubExportData = {
-  novelName: string;
-  metadata: EpubExportMetadata;
-  chapters: EpubExportChapter[];
+  novelId: number;
   destinationUri: string;
   fileName: string;
 };

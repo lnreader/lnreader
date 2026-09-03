@@ -95,9 +95,7 @@ export const getBackgroundTaskTitle = (task: BackgroundTask) => {
             task.data.files.length
           })`;
     case 'EXPORT_EPUB':
-      return `${getString('notifications.EXPORT_EPUB')}: ${
-        task.data.novelName
-      }`;
+      return `${getString('notifications.EXPORT_EPUB')}: ${task.data.fileName}`;
     case 'MIGRATE_NOVEL':
       return `${getString('notifications.MIGRATE_NOVEL')}: ${
         task.data.fromNovel.name
