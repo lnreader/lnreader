@@ -8,6 +8,7 @@ import { showToast } from '@utils/showToast';
 import type {
   BackgroundTask,
   BackgroundTaskMetadata,
+  DownloadChapterTask,
   QueuedBackgroundTask,
 } from './contracts';
 import { executeBackgroundTask } from './executeTask';
@@ -97,6 +98,41 @@ export class BackgroundTaskQueue {
     tasks.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
     await Promise.all(tasks.map(task => NativeBackgroundTasks.cancel(task.id)));
     await this.refresh();
+  }
+
+  /**
+   * Cancel queued DOWNLOAD_CHAPTER tasks belonging to the given novels only
+   * (#1874 rulings round 1): scoping by task name alone would over-cancel
+   * the whole queue. Tasks persisted before per-novel queue identity carry
+   * no novelId and are deliberately left running — silently killing
+   * unattributable work would be worse than letting it finish. Returns the
+   * NUMBER of such legacy tasks encountered while cancelling (round-2
+   * review fix: selected-novels-without-tasks are NOT unattributable —
+   * they simply have nothing queued), so the caller can surface a toast
+   * only when legacy tasks actually exist.
+   */
+  async cancelForNovels(novelIds: number[]): Promise<number> {
+    const wanted = new Set(novelIds);
+    const snapshot = this.getSnapshot();
+    const matched = snapshot.filter(
+      task =>
+        task.task.name === 'DOWNLOAD_CHAPTER' &&
+        (task.task as DownloadChapterTask).data.novelId !== undefined &&
+        wanted.has((task.task as DownloadChapterTask).data.novelId as number),
+    );
+    const legacyTaskCount = snapshot.filter(
+      task =>
+        task.task.name === 'DOWNLOAD_CHAPTER' &&
+        (task.task as DownloadChapterTask).data.novelId === undefined,
+    ).length;
+
+    matched.forEach(task => this.interruptedTasks.set(task.id, 'cancel'));
+    await Promise.all(
+      matched.map(task => NativeBackgroundTasks.cancel(task.id)),
+    );
+    await this.refresh();
+
+    return legacyTaskCount;
   }
 
   async cancelAll() {

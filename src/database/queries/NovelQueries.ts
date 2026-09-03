@@ -215,8 +215,10 @@ export const switchNovelToLibraryQuery = async (
 
 /**
  * Removes multiple novels from the library and clears their categories.
+ * DB write only — for flows that surface their own outcome toast
+ * (e.g. the History bulk purge, which reports per-action results).
  */
-export const removeNovelsFromLibrary = async (novelIds: number[]) => {
+export const removeNovelsFromLibrarySilent = async (novelIds: number[]) => {
   if (!novelIds.length) return;
 
   await dbManager.write(async tx => {
@@ -231,6 +233,14 @@ export const removeNovelsFromLibrary = async (novelIds: number[]) => {
       .where(inArray(novelCategorySchema.novelId, novelIds))
       .run();
   });
+};
+
+/**
+ * Same removal, plus the "removed from library" toast for direct
+ * user-initiated removals (Library bulk-remove etc.).
+ */
+export const removeNovelsFromLibrary = async (novelIds: number[]) => {
+  await removeNovelsFromLibrarySilent(novelIds);
   showToast(getString('browseScreen.removeFromLibrary'));
 };
 

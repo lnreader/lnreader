@@ -4,12 +4,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 
-import { IconButtonV2, NovelCoverImage } from '@components';
+import { IconButtonV2, NovelCoverImage, Checkbox } from '@components';
 import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
 
 import { History } from '@database/types';
 import { HistoryScreenProps } from '@navigators/types';
+
+import { useHistorySelectionContext } from '../../HistorySelectionContext';
 
 interface HistoryCardProps {
   history: History;
@@ -20,31 +22,51 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ history, onRemove }) => {
   const theme = useTheme();
   const { navigate } = useNavigation<HistoryScreenProps['navigation']>();
 
+  const { selectedIdsSet, hasSelection, toggleSelection } =
+    useHistorySelectionContext();
+  const isSelected = selectedIdsSet.has(history.novelId);
+
+  const handleLongPress = () => toggleSelection(history.novelId);
+
+  const handlePress = () => {
+    if (hasSelection) {
+      handleLongPress();
+      return;
+    }
+    navigate('ReaderStack', {
+      screen: 'Chapter',
+      params: {
+        novel: {
+          id: history.novelId,
+          path: history.novelPath,
+          name: history.novelName,
+          pluginId: history.pluginId,
+          cover: history.novelCover,
+          inLibrary: history.inLibrary,
+        },
+        chapter: history,
+      },
+    });
+  };
+
   return (
     <View>
       <Pressable
-        style={styles.row}
+        style={[
+          styles.row,
+          isSelected && { backgroundColor: theme.rippleColor },
+        ]}
         android_ripple={{ color: theme.rippleColor }}
-        onPress={() =>
-          navigate('ReaderStack', {
-            screen: 'Chapter',
-            params: {
-              novel: {
-                id: history.novelId,
-                path: history.novelPath,
-                name: history.novelName,
-                pluginId: history.pluginId,
-                cover: history.novelCover,
-                inLibrary: history.inLibrary,
-              },
-              chapter: history,
-            },
-          })
-        }
+        onLongPress={handleLongPress}
+        onPress={handlePress}
       >
         <Pressable
           onPress={event => {
             event.stopPropagation();
+            if (hasSelection) {
+              handleLongPress();
+              return;
+            }
             navigate('ReaderStack', {
               screen: 'Novel',
               params: {
@@ -82,16 +104,29 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ history, onRemove }) => {
               }`}
           </Text>
         </View>
-        <View style={styles.buttonSpacer} />
+        {hasSelection ? (
+          <View style={styles.buttonContainer}>
+            <Checkbox
+              label=""
+              status={isSelected}
+              theme={theme}
+              viewStyle={{ paddingHorizontal: 0 }}
+            />
+          </View>
+        ) : (
+          <>
+            <View style={styles.buttonSpacer} />
+            <View style={styles.buttonContainer}>
+              <IconButtonV2
+                accessibilityLabel={getString('common.remove')}
+                name="delete-outline"
+                theme={theme}
+                onPress={() => onRemove(history)}
+              />
+            </View>
+          </>
+        )}
       </Pressable>
-      <View style={styles.buttonContainer}>
-        <IconButtonV2
-          accessibilityLabel={getString('common.remove')}
-          name="delete-outline"
-          theme={theme}
-          onPress={() => onRemove(history)}
-        />
-      </View>
     </View>
   );
 };
