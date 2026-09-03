@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Önbellekteki romanlar silindi",
     "chapterInsertFailed": "bölüm yüklenirken hata",
     "clearCachedNovels": "Önbellekteki romanları sil",
-    "clearCachedNovelsDesc": "Kütüphanede olmayan romanları önbellekten sil",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Okunmuş ve indirilmiş bölümler ve kitaplıkta bulunmayan ögelerin ilerlemesi kaybolacak.",
     "clearUpdatesMessage": "Güncellemeler temizlendi.",
     "clearUpdatesTab": "Güncellemeler sekmesini temizle",
@@ -172,13 +172,13 @@
       "description": "Choose what to include in this backup.",
       "selectAll": "Select all",
       "library": "Library data",
-      "libraryDescription": "Novels, chapter lists, reading progress, bookmarks, and categories.",
+      "libraryDescription": "Novels, covers, chapter lists, reading progress, bookmarks, and categories.",
       "settings": "Settings",
       "settingsDescription": "App, reader, and update preferences.",
       "plugins": "Plugins",
       "pluginsDescription": "Installed source plugin files.",
-      "downloadedFiles": "Downloaded chapters and covers",
-      "downloadedFilesDescription": "Downloaded chapter content and saved novel covers. This may be large."
+      "downloadedFiles": "Downloaded chapters",
+      "downloadedFilesDescription": "Downloaded chapter content for offline reading. This may be large."
     },
     "preparingData": "Veri hazırlanıyor",
     "preparingSelectedFiles": "Preparing selected files",
@@ -238,12 +238,12 @@
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",
     "pinSource": "Pin %{name}",
-    "pinnedPlugins": "Pinned",
+    "pinnedPlugins": "Pinned plugins",
     "pluginDetails": "Plugin details",
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Kitaplıktan kaldırıldı",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Kaynak ara",
     "searchResults": "Search results",
@@ -271,7 +271,7 @@
   },
   "categories": {
     "addCategories": "Kategori ekle",
-    "cantDeleteDefault": "Varsayılan kategorisi silinemez",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Varsayılan",
     "defaultCategory": "Varsayılan kategori",
     "deleteModal": {
@@ -280,14 +280,18 @@
     },
     "duplicateError": "Bu ada sahip bir kategori zaten var!",
     "editCategories": "Kategoriyi yeniden adlandır",
-    "emptyMsg": "Kategoriniz bulunmuyor. Kitaplığınızı düzenlemek için bir tane oluşturmak için artı butonuna basın",
+    "emptyMsg": "Kategoriniz bulunmuyor.  Kitaplığınızı düzenlemek için bir tane oluşturmak için artı butonuna basın",
     "header": "Kategorileri düzenle",
     "local": "Yerel",
     "setCategories": "Kategorileri ayarla",
     "setModalEmptyMsg": "Hiç kategoriniz yok. Kitaplığınızı düzenlemek üzere bir tane oluşturmak için Düzenle düğmesine dokunun."
   },
   "repositories": {
-    "emptyMsg": "Uzantı deponuz yok. Başlamak için ilk uzantı deponuzu ekleyin."
+    "disable": "Disable",
+    "disableTitle": "Disable repository?",
+    "disableWarning": "LNReader will stop checking %{name}. Its plugins will be hidden unless another enabled repository provides them. Installed plugins will remain installed.",
+    "emptyMsg": "Uzantı deponuz yok. Başlamak için ilk uzantı deponuzu ekleyin.",
+    "toggle": "Toggle %{name} repository"
   },
   "common": {
     "about": "Hakkında",
@@ -340,7 +344,12 @@
     "submit": "Gönder",
     "loading": "Yükleniyor ...",
     "moreOptions": "More options",
-    "warning": "Dikkat"
+    "warning": "Dikkat",
+    "code": "Code",
+    "custom_code": "Custom Code",
+    "textToReplace": "Text to replace",
+    "replaceWith": "Replace with",
+    "replaceText": "Replace text"
   },
   "webview": {
     "refresh": "Yenile",
@@ -429,7 +438,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sıralama Düzeni",
     "updateLibrary": "Açılışta kitaplığı güncelle",
-    "updateLibraryDesc": "Eski cihazlarda önerilmez",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Son güncelleme süresini göster",
     "useFAB": "Kitaplıkta FAB kullan",
     "timeTracking": "Time Tracking",
@@ -441,7 +450,10 @@
   },
   "globalSearch": {
     "allSources": "tüm kaynaklarda",
-    "searchIn": "Şurada bir novel arayın"
+    "searchIn": "Şurada bir novel arayın",
+    "openNovel": "Open novel",
+    "openCopiedNovel": "Open copied novel",
+    "noSourceForUrl": "No source found for this URL"
   },
   "history": "Geçmiş",
   "historyScreen": {
@@ -555,7 +567,7 @@
     },
     "coverSaved": "Kapak kaydedildi",
     "coverNotSaved": "Kapak kaydedilemedi",
-    "deleteChapterError": "Bölüm klasörü silinemedi",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Bütün indirilmiş bölümler silinecek?",
     "deletedAllDownloads": "Bütün indirilenleri sil",
     "download": {
@@ -563,8 +575,8 @@
       "customAmount": "İstediğiniz sayıda indirin",
       "delete": "İndirilenleri sil",
       "next": "Sonraki bölüm",
-      "next10": "Sonraki 10 bölüm",
-      "next5": "Sonraki 5 bölüm",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Okunmadı"
     },
     "edit": {
@@ -591,9 +603,11 @@
       "searchByName": "Search by Chapter Name",
       "searchByNameDescription": "Turn off to search by chapter number."
     },
+    "loadFailed": "Unable to load novel",
     "migrate": "Taşın",
     "noSummary": "Özet bilgisi yok",
     "noCoverFound": "Kapak bulunamadı",
+    "notFound": "Novel not found on the source",
     "progress": "İlerleme %{progress}%",
     "readChaptersDeleted": "Okunmuş bölümler silindi",
     "startReadingChapters": "%{name} okumaya başla",
@@ -662,7 +676,7 @@
       "scrollToCurrentChapter": "Mevcut bölüme kaydır",
       "scrollToTop": "Yukarı kaydır"
     },
-    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
+    "emptyChapterMessage": "<h2>Chapter couldn't be loaded</h2><p>No readable content was found. Check the chapter in WebView; if it loads there, <a href='%{reportUrl}'>report the plugin issue</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Biten",
     "nextChapter": "Sonraki: %{name}",
     "noNextChapter": "Başka bölüm yok",
@@ -779,6 +793,28 @@
       "one": "%{count} day",
       "other": "%{count} days"
     }
+  },
+  "customCodeSettings": {
+    "textManipulation": "Text Manipulation",
+    "codeSnippets": "Code Snippets",
+    "cssSnippets": "CSS Snippets",
+    "javascriptSnippets": "JavaScript Snippets",
+    "createCSSSnippet": "Create CSS Snippet",
+    "addCssCode": "Add custom CSS code that applies to all chapters",
+    "createJSSnippet": "Create JS Snippet",
+    "addJavascriptCode": "Add custom JavaScript code that applies to all chapters",
+    "noCodeSnippets": "No code snippets",
+    "renameSnippet": "Rename Snippet",
+    "yourCodeHere": "Your code here",
+    "editReplace": "Edit Replace/Remove",
+    "enterAMatch": "Enter a match pattern",
+    "enterAReplace": "Enter a replace value",
+    "itemAlreadyExists": "Item already exists",
+    "replace": "Replace",
+    "removeText": "Remove Text",
+    "snippetSaved": "Snippet saved",
+    "snippetUpdated": "Snippet updated",
+    "imported": "Imported"
   },
   "genreStats": {
     "title": "Genre statistics",
