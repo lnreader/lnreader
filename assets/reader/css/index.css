@@ -42,6 +42,10 @@ a {
   color: var(--theme-primary);
 }
 
+a:target {
+  scroll-margin-top: 64vh;
+}
+
 sup {
   line-height: 0.1em;
 }
