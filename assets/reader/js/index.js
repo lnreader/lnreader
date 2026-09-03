@@ -314,6 +314,12 @@ const TTSController = () => {
   const collapsed = van.state(true);
   let collapseButtonElement = null;
   let lastBubbleTouchEnd = 0;
+  const savedTtsControllerPosition =
+    initialReaderConfig?.ttsControllerPosition ?? null;
+  // Latest position applied or persisted; re-applied after the van style
+  // binding replaces the whole inline style string (TTS toggle).
+  let lastAppliedPosition = savedTtsControllerPosition;
+  let restoringPosition = false;
 
   const stopEvent = e => {
     e.preventDefault();
@@ -354,6 +360,66 @@ const TTSController = () => {
     controllerElement.style.right = 'auto';
     controllerElement.style.bottom = 'auto';
   };
+
+  /**
+   * One post per drag gesture, on release; only when it actually moved
+   * (wasMoved). A tap must never persist a clamped default position.
+   */
+  const postTtsControllerPosition = wasMoved => {
+    if (!wasMoved) {
+      return;
+    }
+    const left = parseFloat(controllerElement?.style?.left);
+    const top = parseFloat(controllerElement?.style?.top);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      lastAppliedPosition = { left, top };
+      reader.post({ type: 'tts-controller-position', data: { left, top } });
+    }
+  };
+
+  /**
+   * Apply the saved (or last persisted) controller position. Single rAF:
+   * apply + clamp land before the first paint, so there is no flash of the
+   * CSS default position.
+   */
+  const applyControllerPosition = () => {
+    controllerElement ??= document.getElementById('TTS-Controller');
+    if (!controllerElement || !lastAppliedPosition) {
+      return;
+    }
+    controllerElement.style.left = `${lastAppliedPosition.left}px`;
+    controllerElement.style.top = `${lastAppliedPosition.top}px`;
+    // Clamp only when the controller is VISIBLE (TTS enabled). A hidden
+    // (display:none) element has 0 size and clamp would math to 8,8 and
+    // destroy the saved position.
+    if (
+      controllerElement.offsetWidth !== 0 &&
+      controllerElement.offsetHeight !== 0
+    ) {
+      clampControllerToViewport();
+    }
+  };
+
+  /**
+   * The van style binding replaces the WHOLE inline style string when
+   * TTSEnable changes, wiping left/top set here. Re-apply the last position
+   * on that wipe (clamping when visible; preserving it while hidden).
+   */
+  const positionObserver =
+    typeof MutationObserver === 'undefined'
+      ? null
+      : new MutationObserver(() => {
+          if (restoringPosition) {
+            return;
+          }
+          const left = controllerElement?.style?.left;
+          const top = controllerElement?.style?.top;
+          if (!left && !top && lastAppliedPosition) {
+            restoringPosition = true;
+            applyControllerPosition();
+            restoringPosition = false;
+          }
+        });
 
   const setCollapsed = value => {
     collapsed.val = value;
@@ -415,7 +481,9 @@ const TTSController = () => {
     }
     hoverElement?.classList.remove('highlight');
     hoverElement = null;
+    const wasMoved = moved;
     moved = false;
+    postTtsControllerPosition(wasMoved);
   };
 
   const startBubbleDrag = e => {
@@ -463,8 +531,10 @@ const TTSController = () => {
     }
     stopEvent(e);
     const shouldExpand = !moved;
+    const wasMoved = moved;
     lastBubbleTouchEnd = Date.now();
     finishBubbleDrag();
+    postTtsControllerPosition(wasMoved);
     if (shouldExpand) {
       setCollapsed(false);
     }
@@ -476,7 +546,10 @@ const TTSController = () => {
     }
     stopEvent(e);
     lastBubbleTouchEnd = Date.now();
+    const wasMoved = moved;
     finishBubbleDrag();
+    // A cancel during a real drag must persist the new position (C4).
+    postTtsControllerPosition(wasMoved);
   };
 
   const toggleCollapsed = e => {
@@ -504,6 +577,27 @@ const TTSController = () => {
     ontouchend: endBubbleDrag,
     ontouchcancel: cancelBubbleDrag,
     onclick: toggleCollapsed,
+  });
+
+  // Apply the saved position before the first paint, re-clamp on orientation
+  // changes (resize is the signal; a drag keeps 'active'), and watch the
+  // style attribute because the van style binding replaces the whole inline
+  // style string on TTSEnable changes.
+  requestAnimationFrame(() => {
+    applyControllerPosition();
+    controllerElement ??= document.getElementById('TTS-Controller');
+    if (controllerElement && positionObserver) {
+      positionObserver.observe(controllerElement, {
+        attributes: true,
+        attributeFilter: ['style'],
+      });
+    }
+  });
+  window.addEventListener('resize', () => {
+    controllerElement ??= document.getElementById('TTS-Controller');
+    if (controllerElement && !controllerElement.classList.contains('active')) {
+      clampControllerToViewport();
+    }
   });
 
   return div(

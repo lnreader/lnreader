@@ -39,6 +39,13 @@ export const LIBRARY_SETTINGS = 'LIBRARY_SETTINGS';
 export const CHAPTER_GENERAL_SETTINGS = 'CHAPTER_GENERAL_SETTINGS';
 export const CHAPTER_READER_SETTINGS = 'CHAPTER_READER_SETTINGS';
 
+/**
+ * Floating TTS controller position (#2000). The controller is rendered in the
+ * reader WebView (assets/reader/js/index.js) and its dragged position is
+ * absolute px. null means the user never moved it, so the CSS default applies.
+ */
+export const TTS_CONTROLLER_POSITION = 'TTS_CONTROLLER_POSITION';
+
 export interface AppSettings {
   /**
    * General settings
