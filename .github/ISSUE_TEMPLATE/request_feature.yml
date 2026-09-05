@@ -32,9 +32,9 @@ body:
           required: true
         - label: I have written a short but informative title.
           required: true
-        - label: If this is an issue with a source, I should be opening an issue in the [sources repository](https://github.com/lnreader/lnreader-sources/issues/new/choose).
+        - label: If this is an issue with a plugin, I should be opening an issue in the **[PLUGINS REPOSITORY](https://github.com/lnreader/lnreader-plugins/issues/new/choose)**.
           required: true
         - label: I have updated the app to version **[2.1.3](https://github.com/lnreader/lnreader/releases/latest)**.
           required: true
-        - label: I will fill out all of the requested information in this form.
+        - label: If I skip the reading of the above menzioned acknowledgments, I admit to being a maidenless teletubbie.
           required: true
