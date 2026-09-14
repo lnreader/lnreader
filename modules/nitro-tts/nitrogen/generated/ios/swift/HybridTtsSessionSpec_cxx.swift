@@ -345,4 +345,21 @@ open class HybridTtsSessionSpec_cxx {
       return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
+  
+  @inline(__always)
+  public final func addOnWordRangeChangedListener(listener: bridge.Func_void_TtsWordRange) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnWordRangeChangedListener(listener: { () -> (TtsWordRange) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_TtsWordRange(listener)
+        return { (__range: TtsWordRange) -> Void in
+          __wrappedFunction.call(__range)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
 }

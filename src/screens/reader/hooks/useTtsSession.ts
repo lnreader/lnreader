@@ -7,6 +7,7 @@ import {
   TtsProgress,
   TtsSession,
   TtsSettings,
+  TtsWordRange,
 } from '@modules/nitro-tts';
 
 type TtsCommand = 'next' | 'pause' | 'play' | 'previous' | 'replay' | 'stop';
@@ -24,6 +25,7 @@ export const useTtsSession = () => {
   const mountedRef = useRef(true);
   const [state, setState] = useState<TtsPlaybackState>('idle');
   const [progress, setProgress] = useState<TtsProgress>(initialProgress);
+  const [wordRange, setWordRange] = useState<TtsWordRange | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const ensureSession = useCallback(async () => {
@@ -41,6 +43,7 @@ export const useTtsSession = () => {
           subscriptionsRef.current = [
             session.addOnStateChangedListener(setState),
             session.addOnProgressChangedListener(setProgress),
+            session.addOnWordRangeChangedListener(setWordRange),
             session.addOnErrorListener(setError),
           ];
           return session;
@@ -152,5 +155,6 @@ export const useTtsSession = () => {
     seekTo,
     state,
     updateSettings,
+    wordRange,
   };
 };

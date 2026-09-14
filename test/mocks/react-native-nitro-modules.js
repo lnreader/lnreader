@@ -11,6 +11,7 @@ const mockTtsSession = {
   updateSettings: jest.fn(async () => undefined),
   addOnStateChangedListener: jest.fn(() => mockSubscription),
   addOnProgressChangedListener: jest.fn(() => mockSubscription),
+  addOnWordRangeChangedListener: jest.fn(() => mockSubscription),
   addOnErrorListener: jest.fn(() => mockSubscription),
 };
 

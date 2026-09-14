@@ -5,6 +5,7 @@ import type { TtsParagraph } from '../types/TtsParagraph';
 import type { TtsPlaybackState } from '../types/TtsPlaybackState';
 import type { TtsProgress } from '../types/TtsProgress';
 import type { TtsSettings } from '../types/TtsSettings';
+import type { TtsWordRange } from '../types/TtsWordRange';
 
 /**
  * Controls one native text-to-speech queue and its media controls.
@@ -65,4 +66,12 @@ export interface TtsSession
    * Observes native playback failures.
    */
   addOnErrorListener(listener: (message: string) => void): ListenerSubscription;
+
+  /**
+   * Observes the character range currently being spoken within the active
+   * paragraph. Engines that never report ranges simply never emit.
+   */
+  addOnWordRangeChangedListener(
+    listener: (range: TtsWordRange) => void,
+  ): ListenerSubscription;
 }

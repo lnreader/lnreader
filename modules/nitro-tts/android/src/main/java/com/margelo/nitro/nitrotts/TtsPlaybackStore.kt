@@ -18,6 +18,7 @@ internal object TtsPlaybackStore {
     private val ownerHandler = Handler(Looper.getMainLooper())
     private val stateListeners = TtsListenerRegistry<TtsPlaybackState>()
     private val progressListeners = TtsListenerRegistry<TtsProgress>()
+    private val wordRangeListeners = TtsListenerRegistry<TtsWordRange>()
     private val errorListeners = TtsListenerRegistry<String>()
     private val snapshotListeners = TtsListenerRegistry<TtsPlaybackSnapshot>()
     private val pendingInitialization = mutableListOf<(Result<Unit>) -> Unit>()
@@ -336,6 +337,10 @@ internal object TtsPlaybackStore {
         return errorListeners.add(listener)
     }
 
+    fun addWordRangeListener(listener: (TtsWordRange) -> Unit): () -> Unit {
+        return wordRangeListeners.add(listener)
+    }
+
     fun addSnapshotListener(listener: (TtsPlaybackSnapshot) -> Unit): () -> Unit {
         listener(snapshot())
         return snapshotListeners.add(listener)
@@ -438,6 +443,22 @@ internal object TtsPlaybackStore {
         snapshotListeners.emit(snapshot())
     }
 
+    private fun emitWordRange(utteranceId: String, start: Int, end: Int) {
+        if (utteranceId != utteranceId(generation, currentIndex)) {
+            return
+        }
+        val paragraph = paragraphs.getOrNull(currentIndex) ?: return
+        val clampedStart = start.coerceAtLeast(0)
+        val clampedEnd = end.coerceIn(clampedStart, paragraph.text.length)
+        wordRangeListeners.emit(
+            TtsWordRange(
+                paragraphId = paragraph.id,
+                start = clampedStart.toDouble(),
+                end = clampedEnd.toDouble(),
+            ),
+        )
+    }
+
     private fun currentProgress(): TtsProgress? {
         val paragraph = paragraphs.getOrNull(currentIndex) ?: return null
         return TtsProgress(
@@ -481,6 +502,10 @@ internal object TtsPlaybackStore {
 
         override fun onDone(utteranceId: String) {
             runOnOwner { advance(utteranceId) }
+        }
+
+        override fun onRangeStart(utteranceId: String, start: Int, end: Int, frame: Int) {
+            runOnOwner { emitWordRange(utteranceId, start, end) }
         }
 
         @Deprecated("Deprecated by Android")

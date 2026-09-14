@@ -85,14 +85,16 @@ function readEnvValue(filePath, key) {
 }
 
 function resolveOptionalValue({ argument, existingValue, environmentValue }) {
-  const value = argument ?? existingValue ?? environmentValue;
+  let value = argument ?? existingValue ?? environmentValue;
+
+  if (value === true) {
+    // An explicitly-passed empty value (`--flag ""`) parses as a bare flag;
+    // fall back to the .env/environment values rather than failing the build.
+    value = existingValue ?? environmentValue;
+  }
 
   if (value === undefined || value === null || value === '') {
     return undefined;
-  }
-
-  if (value === true) {
-    throw new Error('Expected a value after the client ID argument');
   }
 
   return String(value);

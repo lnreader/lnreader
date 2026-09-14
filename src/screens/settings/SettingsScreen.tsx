@@ -113,6 +113,16 @@ const SettingsScreen = ({ navigation }: SettingsScreenProps) => {
           }
           theme={theme}
         />
+        <List.Item
+          title={getString('translationSettings.title')}
+          icon="translate"
+          onPress={() =>
+            navigation.navigate('SettingsStack', {
+              screen: 'TranslationSettings',
+            })
+          }
+          theme={theme}
+        />
       </ScrollView>
     </SafeAreaView>
   );

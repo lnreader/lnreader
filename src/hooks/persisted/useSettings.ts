@@ -217,6 +217,10 @@ export interface ChapterReaderSettings {
     pitch?: number;
     autoPageAdvance?: boolean;
     scrollToTop?: boolean;
+    /** Highlights the paragraph being read. */
+    highlight?: boolean;
+    /** Highlight color for spoken text; derived from the theme when empty. */
+    highlightColor?: string;
   };
   epubLocation: string;
   epubUseAppTheme: boolean;
@@ -334,6 +338,8 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
     pitch: 1,
     autoPageAdvance: false,
     scrollToTop: true,
+    highlight: true,
+    highlightColor: '',
   },
   epubLocation: '',
   epubUseAppTheme: false,
@@ -431,6 +437,8 @@ export const useChapterReaderSettings = () => {
         scrollToTop: storedSettings.tts?.scrollToTop ?? true,
         rate: storedSettings.tts?.rate ?? 1,
         pitch: storedSettings.tts?.pitch ?? 1,
+        highlight: storedSettings.tts?.highlight ?? true,
+        highlightColor: storedSettings.tts?.highlightColor ?? '',
       },
     }),
     [storedSettings],

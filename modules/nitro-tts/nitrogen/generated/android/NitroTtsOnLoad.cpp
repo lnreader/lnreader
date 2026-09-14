@@ -21,6 +21,7 @@
 #include "JFunc_void_TtsPlaybackState.hpp"
 #include "JFunc_void_TtsProgress.hpp"
 #include "JFunc_void_std__string.hpp"
+#include "JFunc_void_TtsWordRange.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrotts {
@@ -51,6 +52,7 @@ void registerAllNatives() {
   margelo::nitro::nitrotts::JFunc_void_TtsPlaybackState_cxx::registerNatives();
   margelo::nitro::nitrotts::JFunc_void_TtsProgress_cxx::registerNatives();
   margelo::nitro::nitrotts::JFunc_void_std__string_cxx::registerNatives();
+  margelo::nitro::nitrotts::JFunc_void_TtsWordRange_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(

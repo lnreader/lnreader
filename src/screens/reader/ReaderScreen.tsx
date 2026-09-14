@@ -1,5 +1,9 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import {
+  useChapterGeneralSettings,
+  useTheme,
+  useTranslationSettings,
+} from '@hooks/persisted';
 
 import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
@@ -100,6 +104,8 @@ export const ChapterContent = ({
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
+  const { enabled: translationEnabled, setTranslationSettings } =
+    useTranslationSettings();
   const [bookmarked, setBookmarked] = useState<boolean>(
     chapter.bookmark ?? false,
   );
@@ -238,6 +244,12 @@ export const ChapterContent = ({
     void Share.share({ message: chapterUrl });
   }, [chapterUrl]);
 
+  const toggleTranslation = useCallback(() => {
+    // Single source of truth: the useChapterTranslation effect watches the
+    // persisted settings and pushes config + (re)translation into the page.
+    setTranslationSettings({ enabled: !translationEnabled });
+  }, [setTranslationSettings, translationEnabled]);
+
   if (error) {
     return (
       <ErrorScreenV2
@@ -276,7 +288,23 @@ export const ChapterContent = ({
         />
       )}
       {readerSheetMounted ? (
-        <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+        <ReaderBottomSheetV2
+          bottomSheetRef={readerSheetRef}
+          novelId={novel.id}
+          onRedoTranslation={() =>
+            webViewRef.current?.injectJavaScript(`
+              (()=>{
+                const cfg = window.reader?.translation?.config ?? {};
+                window.reader?.applyTranslationConfig?.({
+                  enabled: true,
+                  parallelMode: cfg.parallelMode ?? 'PARALLEL_TRANSLATION_FIRST',
+                });
+                window.reader?.requestTranslation?.(true);
+              })();
+              true;
+            `)
+          }
+        />
       ) : null}
       {!hidden ? (
         <>
@@ -295,6 +323,8 @@ export const ChapterContent = ({
             openInWebView={openChapterInWebView}
             openInBrowser={openChapterInBrowser}
             shareChapter={shareChapter}
+            translationEnabled={translationEnabled}
+            onToggleTranslation={toggleTranslation}
           />
           {!searchVisible ? (
             <ReaderFooter

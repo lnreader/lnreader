@@ -8,6 +8,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private let synthesizer = AVSpeechSynthesizer()
   private let stateListeners = TtsListenerRegistry<TtsPlaybackState>()
   private let progressListeners = TtsListenerRegistry<TtsProgress>()
+  private let wordRangeListeners = TtsListenerRegistry<TtsWordRange>()
   private let errorListeners = TtsListenerRegistry<String>()
   private let nowPlaying = TtsNowPlayingController()
 
@@ -156,6 +157,12 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     return errorListeners.add(listener)
   }
 
+  func addWordRangeListener(
+    _ listener: @escaping (TtsWordRange) -> Void
+  ) -> () -> Void {
+    return wordRangeListeners.add(listener)
+  }
+
   func speechSynthesizer(
     _ synthesizer: AVSpeechSynthesizer,
     didFinish utterance: AVSpeechUtterance
@@ -168,6 +175,25 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
       currentIndex += 1
       speakCurrent()
     }
+  }
+
+  func speechSynthesizer(
+    _ synthesizer: AVSpeechSynthesizer,
+    willSpeakRangeOfSpeechString characterRange: NSRange,
+    utterance: AVSpeechUtterance
+  ) {
+    guard utterance === activeUtterance, characterRange.location != NSNotFound,
+      paragraphs.indices.contains(currentIndex) else { return }
+    let text = paragraphs[currentIndex].text
+    let clampedEnd = min(characterRange.location + characterRange.length, text.count)
+    guard characterRange.location >= 0, clampedEnd > characterRange.location else { return }
+    wordRangeListeners.emit(
+      TtsWordRange(
+        paragraphId: paragraphs[currentIndex].id,
+        start: Double(characterRange.location),
+        end: Double(clampedEnd)
+      )
+    )
   }
 
   func speechSynthesizer(

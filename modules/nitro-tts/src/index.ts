@@ -12,4 +12,5 @@ export type { TtsParagraph } from './types/TtsParagraph';
 export type { TtsPlaybackState } from './types/TtsPlaybackState';
 export type { TtsProgress } from './types/TtsProgress';
 export type { TtsSettings } from './types/TtsSettings';
+export type { TtsWordRange } from './types/TtsWordRange';
 export type { TtsVoice } from './types/TtsVoice';

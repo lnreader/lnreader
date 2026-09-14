@@ -25,6 +25,8 @@ namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsWordRange` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsWordRange; }
 
 #include <NitroModules/Promise.hpp>
 #include "TtsParagraph.hpp"
@@ -36,6 +38,7 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include <functional>
 #include "TtsProgress.hpp"
 #include <string>
+#include "TtsWordRange.hpp"
 
 namespace margelo::nitro::nitrotts {
 
@@ -80,6 +83,7 @@ namespace margelo::nitro::nitrotts {
       virtual ListenerSubscription addOnStateChangedListener(const std::function<void(TtsPlaybackState /* state */)>& listener) = 0;
       virtual ListenerSubscription addOnProgressChangedListener(const std::function<void(const TtsProgress& /* progress */)>& listener) = 0;
       virtual ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) = 0;
+      virtual ListenerSubscription addOnWordRangeChangedListener(const std::function<void(const TtsWordRange& /* range */)>& listener) = 0;
 
     protected:
       // Hybrid Setup
