@@ -384,10 +384,10 @@
     "removeDownloadsWarning": "Är du säker? Alla nedladdade kapitel kommer att tas bort."
   },
   "taskQueue": {
-    "cancelTaskAction": "Cancel task",
-    "cancelTaskTitle": "Cancel task?",
-    "cancelTaskConfirmation": "Are you sure you want to cancel %{task}?",
-    "keepTaskAction": "Keep task"
+    "cancelTaskAction": "Avbryt uppgift",
+    "cancelTaskTitle": "Avbryt uppgift",
+    "cancelTaskConfirmation": "Är du säker på att du vill avbryta %{task}?",
+    "keepTaskAction": "Behåll uppgiften"
   },
   "errorBoundary": {
     "title": "Ett oväntat fel uppstod",
@@ -457,9 +457,9 @@
   "globalSearch": {
     "allSources": "Alla källor",
     "searchIn": "Sök efter en roman i",
-    "openNovel": "Open novel",
-    "openCopiedNovel": "Open copied novel",
-    "noSourceForUrl": "No source found for this URL"
+    "openNovel": "Öppna romanen",
+    "openCopiedNovel": "Öppna kopierad roman",
+    "noSourceForUrl": "Ingen källa hittades för den här webbadressen"
   },
   "history": "Historik",
   "historyScreen": {
@@ -609,11 +609,11 @@
       "searchByName": "Sök efter kapitlets namn",
       "searchByNameDescription": "Stäng av för att söka efter kapitlets nummer."
     },
-    "loadFailed": "Unable to load novel",
+    "loadFailed": "Det går inte att hämta romanen",
     "migrate": "Migrera",
     "noSummary": "Ingen sammanfattning",
     "noCoverFound": "Inget omslag hittades",
-    "notFound": "Novel not found on the source",
+    "notFound": "Romanen hittades inte på källan",
     "progress": "Framsteg %{progress}%",
     "readChaptersDeleted": "Läs kapitel borttagna",
     "startReadingChapters": "Börja läsa %{name}",
