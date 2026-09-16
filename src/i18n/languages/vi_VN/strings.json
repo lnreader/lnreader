@@ -22,6 +22,7 @@
     "dataManagement": "Quản lý dữ liệu",
     "deleteReadChapters": "Xóa chương đã đọc",
     "deleteReadChaptersDialogTitle": "All chapters marked as read will be deleted.",
+    "diagnostics": "Diagnostics",
     "disabled": "Disabled",
     "dnsOverHttps": "DNS over HTTPS (DoH)",
     "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
@@ -37,7 +38,10 @@
     "recreateDBIndexesToast": "Recreated DB indexes",
     "recreateDBIndexesDialogTitle": "All DB indexes will be recreated.\nThis may take a while.",
     "recreateDBIndexesDesc": "Recreates DB indexes. This may improve performance on slower devices.",
-    "restartRequired": "Restart LNReader to apply this change."
+    "restartRequired": "Restart LNReader to apply this change.",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsDescription": "Create a diagnostic report with app, device, plugin, exception, and app-accessible logcat information.",
+    "shareCrashLogsFailed": "Failed to create crash logs."
   },
   "appearance": "Giao diện",
   "appearanceScreen": {
@@ -391,8 +395,11 @@
   },
   "errorBoundary": {
     "title": "An Unexpected Error Occurred",
-    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "description": "The application ran into an unexpected error. Please share the crash logs in our Discord support channel.",
     "copyStackTrace": "Copy stack trace",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsFailed": "Could not share crash logs. The stack trace was copied instead.",
+    "shareCrashLogsFailedWithoutCopy": "Could not share crash logs or copy the stack trace.",
     "restart": "Restart the application"
   },
   "generalSettings": "Chung",
