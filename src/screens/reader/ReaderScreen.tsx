@@ -5,6 +5,7 @@ import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
 
 import WebViewReader from './components/WebViewReader';
+import { pageReaderMovePageScript } from './bridge/pageReader';
 import ReaderBottomSheetV2 from './components/ReaderBottomSheet/ReaderBottomSheet';
 import ChapterDrawer from './components/ChapterDrawer';
 import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
@@ -197,8 +198,8 @@ export const ChapterContent = ({
                 window.scrollTo({top:0,behavior:'smooth'})
               })()`
           : `(()=>{
-              window.pageReader?.movePage(0);
-            })()`,
+                ${pageReaderMovePageScript(0)}
+              })()`,
       );
     });
   }, [onUserInteraction, pageReader, webViewRef]);

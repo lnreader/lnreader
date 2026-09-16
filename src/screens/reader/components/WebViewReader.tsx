@@ -37,6 +37,21 @@ import {
   isChapterRefreshUrl,
   isPluginIssueReportUrl,
 } from '../utils/sanitizeChapterText';
+import {
+  readerSetAdjacentChaptersScript,
+  readerSetBatteryLevelGuardedScript,
+  readerSetBatteryLevelScript,
+  readerSetGeneralSettingsScript,
+  readerSetSettingsScript,
+} from '../bridge/reader';
+import { readerSearchScript } from '../bridge/search';
+import {
+  ttsAutoStartScript,
+  ttsCompleteScript,
+  ttsSetActiveIndexScript,
+  ttsSetPlaybackStateScript,
+} from '../bridge/tts';
+import { buildCustomJsInlineScript } from '../bridge/customJs';
 
 export type WebViewPostEvent = {
   type: string;
@@ -93,22 +108,14 @@ const toNativeTtsSettings = (
  * The adjacent chapters are resolved after the chapter itself is on screen, so
  * they are pushed into the loaded page instead of being baked into the HTML –
  * rebuilding the HTML would reload the WebView and lose the reading position.
+ * The script is built by the reader bridge (readerSetAdjacentChaptersScript),
+ * whose emission is parse-tested; only the i18n strings stay here.
  */
-const buildAdjacentChapterScript = (
-  nextChapter?: ChapterInfo,
-  prevChapter?: ChapterInfo,
-) => `
-  window.reader?.setAdjacentChapters?.(${JSON.stringify({
-    nextChapter,
-    prevChapter,
-    strings: {
-      nextChapter: getString('readerScreen.nextChapter', {
-        name: nextChapter?.name,
-      }),
-    },
-  })});
-  true;
-`;
+const buildAdjacentChapterStrings = (nextChapter?: ChapterInfo) => ({
+  nextChapter: getString('readerScreen.nextChapter', {
+    name: nextChapter?.name,
+  }),
+});
 
 const { RNDeviceInfo } = NativeModules;
 const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
@@ -169,7 +176,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
   const activeChapterIdRef = useRef(chapter.id);
-  const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
+  const adjacentChapterScriptRef = useRef(
+    readerSetAdjacentChaptersScript(undefined, undefined, {
+      nextChapter: getString('readerScreen.nextChapter', {}),
+    }),
+  );
   const {
     command: runTtsCommand,
     loadAndPlay,
@@ -207,21 +218,17 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   useEffect(() => {
     isTTSReadingRef.current = ttsState === 'playing';
-    webViewRef.current?.injectJavaScript(`
-      window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
-      true;
-    `);
+    webViewRef.current?.injectJavaScript(ttsSetPlaybackStateScript(ttsState));
     if (ttsState === 'completed') {
-      webViewRef.current?.injectJavaScript('window.tts?.complete?.(); true;');
+      webViewRef.current?.injectJavaScript(ttsCompleteScript());
     }
   }, [isTTSReadingRef, ttsState, webViewRef]);
 
   useEffect(() => {
     if (ttsProgress.total > 0) {
-      webViewRef.current?.injectJavaScript(`
-        window.tts?.setActiveIndex?.(${ttsProgress.index});
-        true;
-      `);
+      webViewRef.current?.injectJavaScript(
+        ttsSetActiveIndexScript(ttsProgress.index),
+      );
     }
   }, [ttsProgress, webViewRef]);
 
@@ -233,7 +240,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   }, [chapter.id, runTtsCommand]);
 
   useEffect(() => {
-    const script = buildAdjacentChapterScript(nextChapter, prevChapter);
+    const script = readerSetAdjacentChaptersScript(
+      nextChapter,
+      prevChapter,
+      buildAdjacentChapterStrings(nextChapter),
+    );
     // Kept for onLoadEnd: an update that lands before the document is ready is
     // dropped by the WebView, so it is replayed once the page has loaded.
     adjacentChapterScriptRef.current = script;
@@ -259,9 +270,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           }
           // Update WebView settings
           webViewRef.current?.injectJavaScript(
-            `
-            reader.readerSettings.val = ${JSON.stringify(newReaderSettings)}
-            `,
+            readerSetSettingsScript(newReaderSettings),
           );
           break;
         }
@@ -270,9 +279,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS) ||
             initialChapterGeneralSettings;
           webViewRef.current?.injectJavaScript(
-            `reader.generalSettings.val = ${JSON.stringify(
-              newGeneralSettings,
-            )}`,
+            readerSetGeneralSettingsScript(newGeneralSettings),
           );
           break;
         }
@@ -284,7 +291,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       (level: number) => {
         lastKnownBatteryLevel = level;
         webViewRef.current?.injectJavaScript(
-          `reader.batteryLevel.val = ${level}`,
+          readerSetBatteryLevelScript(level),
         );
       },
     );
@@ -292,9 +299,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     getBatteryLevel().then(level => {
       lastKnownBatteryLevel = level;
       webViewRef.current?.injectJavaScript(
-        `if (window.reader?.batteryLevel) {
-          window.reader.batteryLevel.val = ${level};
-        }`,
+        readerSetBatteryLevelGuardedScript(level),
       );
     });
 
@@ -418,14 +423,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script src="${assetsUriPrefix}/js/textRemover.js"></script>
               <script src="${pluginCustomJS}"></script>
-              <script id="ln-custom-js">
-              function fn(){
-                let html = document.querySelector('#LNReader-chapter').innerHTML;
-                ${customJS}
-                document.querySelector('#LNReader-chapter').innerHTML = html;
-              }
-              document.addEventListener('DOMContentLoaded', fn);
-              </script>
+              <script id="ln-custom-js">${buildCustomJsInlineScript(
+                customJS,
+              )}</script>
           </html>
           `,
     };
@@ -434,8 +434,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     chapter,
     chapterGeneralSettings,
     processedHtml,
-      customJS,
-      customCSS,
+    customJS,
+    customCSS,
     initialReaderSettings,
     novel,
     plugin,
@@ -446,33 +446,31 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   ]);
 
   return (
-      <>
-    <WebView
-      ref={webViewRef}
-      onTouchStart={onTouchStart}
-      style={{ backgroundColor: readerSettings.theme }}
-      allowFileAccess={true}
-      originWhitelist={['*']}
-      scalesPageToFit={true}
-      showsVerticalScrollIndicator={false}
-      javaScriptEnabled={true}
-      webviewDebuggingEnabled={__DEV__}
-      onShouldStartLoadWithRequest={({ url }) => {
-        if (isPluginIssueReportUrl(url)) {
-          void Linking.openURL(url);
-          return false;
-        }
-        if (isChapterRefreshUrl(url)) {
-          refetch();
-          return false;
-        }
-        return true;
-      }}
-      onLoadEnd={() => {
-        webViewRef.current?.injectJavaScript(
-          `if (window.reader && window.reader.batteryLevel) {
-            window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
-          }`,
+    <>
+      <WebView
+        ref={webViewRef}
+        onTouchStart={onTouchStart}
+        style={{ backgroundColor: readerSettings.theme }}
+        allowFileAccess={true}
+        originWhitelist={['*']}
+        scalesPageToFit={true}
+        showsVerticalScrollIndicator={false}
+        javaScriptEnabled={true}
+        webviewDebuggingEnabled={__DEV__}
+        onShouldStartLoadWithRequest={({ url }) => {
+          if (isPluginIssueReportUrl(url)) {
+            void Linking.openURL(url);
+            return false;
+          }
+          if (isChapterRefreshUrl(url)) {
+            refetch();
+            return false;
+          }
+          return true;
+        }}
+        onLoadEnd={() => {
+          webViewRef.current?.injectJavaScript(
+            readerSetBatteryLevelGuardedScript(lastKnownBatteryLevel),
           );
           webViewRef.current?.injectJavaScript(
             adjacentChapterScriptRef.current,
@@ -481,24 +479,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           const searchText = searchTextRef.current.trim();
           if (searchText) {
             webViewRef.current?.injectJavaScript(
-              `window.readerSearch?.search(${JSON.stringify(
-                searchText,
-              )}); true;`,
+              readerSearchScript(searchText),
             );
           }
 
           if (autoStartTTSRef.current) {
             autoStartTTSRef.current = false;
             setTimeout(() => {
-              webViewRef.current?.injectJavaScript(`
-              (function() {
-                if (window.tts && reader.generalSettings.val.TTSEnable) {
-                  setTimeout(() => {
-                    tts.start();
-                  }, 500);
-                }
-              })();
-            `);
+              webViewRef.current?.injectJavaScript(ttsAutoStartScript());
             }, 300);
           }
         }}

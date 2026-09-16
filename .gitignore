@@ -114,3 +114,6 @@ release-artifacts/
 !plugins/android/
 ios/
 !modules/**/ios/
+
+# graphify tooling output
+graphify-out/

@@ -26,6 +26,7 @@ import {
 } from 'react';
 import { sanitizeChapterText } from '../utils/sanitizeChapterText';
 import { parseChapterNumber } from '@utils/parseChapterNumber';
+import { readerSearchNavigateScript, SearchDirection } from '../bridge/search';
 import WebView from 'react-native-webview';
 import { useFullscreenMode } from '@hooks';
 import { Dimensions } from 'react-native';
@@ -373,10 +374,9 @@ export default function useChapter(
   }, [webViewRef]);
 
   const navigateChapterSearch = useCallback(
-    (direction: 'NEXT' | 'PREV', text: string) => {
-      const method = direction === 'NEXT' ? 'next' : 'previous';
+    (direction: SearchDirection, text: string) => {
       webViewRef.current?.injectJavaScript(
-        `window.readerSearch?.${method}(${JSON.stringify(text)}); true;`,
+        readerSearchNavigateScript(direction, text),
       );
     },
     [webViewRef],
