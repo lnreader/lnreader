@@ -1,0 +1,71 @@
+src/screens/novel/components/SetCategoriesModal.tsx
+  s_1087a5628549b9::t_53a611324ab729 19,24,29,34,46-52,58,107-112
+src/database/queries/__tests__/NovelQueries.test.ts
+  s_1087a5628549b9::t_1f0e71f190f908 283-286
+  s_1087a5628549b9::t_5916bab2fe43be 289-319
+  s_1087a5628549b9::t_03aa1a3944438f 257-282,287-288
+src/screens/library/hooks/useLibrary.ts
+  s_1087a5628549b9::t_05f8e4ee303387 16-18,29-31,41-47,57,76-77,158-164,177-178,183-195,197-202,206-217,232-233,312-314
+  s_1087a5628549b9::t_db4b035c72648d 221-227,229,231,234-241
+  s_1087a5628549b9::t_1f0e71f190f908 203,205
+  s_1087a5628549b9::t_e50fcaedf1382c 228,230
+  s_1087a5628549b9::t_53a27be819f63b 196,204,218-220
+  s_1087a5628549b9::t_33671c21abc322 68-75
+  s_1087a5628549b9::t_e055c8f40255cc 15
+  s_1087a5628549b9::t_e4da9ed92807bc 242
+src/screens/library/hooks/__tests__/useLibrary.test.ts
+  s_1087a5628549b9::t_03aa1a3944438f 11-15,19,23,36,71-80,86-90,94-97,149-168,170-183,215-237
+  s_1087a5628549b9::t_33671c21abc322 93
+  s_1087a5628549b9::t_ec4410cfe805ec 204-209
+  s_1087a5628549b9::t_119200c060fe94 84-85
+  s_1087a5628549b9::t_5916bab2fe43be 169,184-203,210-214
+src/i18n/types/index.ts
+  s_1087a5628549b9::t_1f0e71f190f908 244
+src/hooks/persisted/useNovel/store/createStore.ts
+  s_1087a5628549b9::t_05f8e4ee303387 23-26
+src/screens/settings/SettingsLibraryScreen/DefaultCategoryDialog.tsx
+  s_1087a5628549b9::t_9c39a1ba5dceef 16-17,26-27,36-41,49
+src/hooks/persisted/useNovel/store/novelStore.types.ts
+  s_1087a5628549b9::t_05f8e4ee303387 99-102
+src/hooks/persisted/useSettings.ts
+  s_1087a5628549b9::t_ca8f30c9b6dfb7 381
+  s_1087a5628549b9::t_9c39a1ba5dceef 117-118
+src/components/Context/LibraryContext.tsx
+  s_1087a5628549b9::t_40a2874ab86fd7 15-16,40
+  s_1087a5628549b9::t_05f8e4ee303387 7,27-31,34-39,41-47
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  s_1087a5628549b9::t_9c39a1ba5dceef 75,129-134,299-300,428-429
+  s_1087a5628549b9::t_53a27be819f63b 135-137
+  s_1087a5628549b9::t_1f0e71f190f908 301
+src/i18n/languages/en/strings.json
+  s_1087a5628549b9::t_9c39a1ba5dceef 281
+src/database/queries/NovelQueries.ts
+  s_1087a5628549b9::t_db4b035c72648d 194
+  s_1087a5628549b9::t_2f5b5821aabca9 41-44,56,59-60,71,174,195,197,234,236
+  s_1087a5628549b9::t_33671c21abc322 201,240
+  s_1087a5628549b9::t_1f0e71f190f908 200,202-205,239,241-244
+  s_1087a5628549b9::t_42a9f9df7dd130 78-80
+  s_1087a5628549b9::t_53a27be819f63b 31-40,45-55,57-58,75
+src/hooks/persisted/useNovel/store/novelStore.actions.ts
+  s_1087a5628549b9::t_05f8e4ee303387 265-269
+src/components/Context/__mocks__/LibraryContext.tsx
+  s_1087a5628549b9::t_40a2874ab86fd7 11-14
+src/hooks/__tests__/useNovelStore.test.ts
+  s_1087a5628549b9::t_40a2874ab86fd7 26,126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f1119d8c3073d14af4dfebf5e5a256c35786c666",
+  "prompts": {},
+  "sessions": {
+    "s_1087a5628549b9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a4f2-b3f8-7ad3-96b8-00648f4fc3ef",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
