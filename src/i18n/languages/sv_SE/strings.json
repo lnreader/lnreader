@@ -22,6 +22,7 @@
     "dataManagement": "Datahantering",
     "deleteReadChapters": "Ta bort lästa kapitel",
     "deleteReadChaptersDialogTitle": "Alla kapitel markerade som lästa kommer att raderas.",
+    "diagnostics": "Diagnostics",
     "disabled": "Inaktiverad",
     "dnsOverHttps": "DNS över HTTPS (DoH)",
     "dnsOverHttpsDescription": "Använder den valda resolver för appförfrågningar och nedladdningar. WebView trafik påverkas inte.",
@@ -37,7 +38,10 @@
     "recreateDBIndexesToast": "Omarbetade DB-index",
     "recreateDBIndexesDialogTitle": "Alla DB-index kommer att återskapas.\nDetta kan ta ett tag.",
     "recreateDBIndexesDesc": "Återskapar DB-index. Detta kan förbättra prestandan på långsammare enheter.",
-    "restartRequired": "Starta om LNReader för att tillämpa denna ändring."
+    "restartRequired": "Starta om LNReader för att tillämpa denna ändring.",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsDescription": "Create a diagnostic report with app, device, plugin, exception, and app-accessible logcat information.",
+    "shareCrashLogsFailed": "Failed to create crash logs."
   },
   "appearance": "Utseende",
   "appearanceScreen": {
@@ -391,8 +395,11 @@
   },
   "errorBoundary": {
     "title": "Ett oväntat fel uppstod",
-    "description": "Ett oväntat fel uppstod i programmet. Kopiera stackspåret nedan och dela det i vår supportkanal på Discord.",
+    "description": "The application ran into an unexpected error. Please share the crash logs in our Discord support channel.",
     "copyStackTrace": "Kopiera stackspår",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsFailed": "Could not share crash logs. The stack trace was copied instead.",
+    "shareCrashLogsFailedWithoutCopy": "Could not share crash logs or copy the stack trace.",
     "restart": "Starta om programmet"
   },
   "generalSettings": "Allmänt",
