@@ -22,6 +22,7 @@
     "dataManagement": "Manejo de informação",
     "deleteReadChapters": "Excluir capítulos lidos",
     "deleteReadChaptersDialogTitle": "Você tem certeza? Todos os capítulos marcados como lidos serão excluídos.",
+    "diagnostics": "Diagnostics",
     "disabled": "Disabled",
     "dnsOverHttps": "DNS over HTTPS (DoH)",
     "dnsOverHttpsDescription": "Uses the selected resolver for app requests and downloads. WebView traffic is not affected.",
@@ -37,7 +38,10 @@
     "recreateDBIndexesToast": "Índices do BD foi recriado",
     "recreateDBIndexesDialogTitle": "Todos os índices do BD vai ser Recriado.\nIsso pode demorar um pouco.",
     "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos.",
-    "restartRequired": "Restart LNReader to apply this change."
+    "restartRequired": "Restart LNReader to apply this change.",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsDescription": "Create a diagnostic report with app, device, plugin, exception, and app-accessible logcat information.",
+    "shareCrashLogsFailed": "Failed to create crash logs."
   },
   "appearance": "Aparência",
   "appearanceScreen": {
@@ -391,8 +395,11 @@
   },
   "errorBoundary": {
     "title": "An Unexpected Error Occurred",
-    "description": "The application ran into an unexpected error. Please copy the stack trace below and share it on our Discord support channel.",
+    "description": "The application ran into an unexpected error. Please share the crash logs in our Discord support channel.",
     "copyStackTrace": "Copy stack trace",
+    "shareCrashLogs": "Share crash logs",
+    "shareCrashLogsFailed": "Could not share crash logs. The stack trace was copied instead.",
+    "shareCrashLogsFailedWithoutCopy": "Could not share crash logs or copy the stack trace.",
     "restart": "Restart the application"
   },
   "generalSettings": "Geral",
