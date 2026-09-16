@@ -1,0 +1,89 @@
+src/i18n/languages/ja_JP/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 250
+src/i18n/languages/he_IL/strings.json
+  s_b6597bcdcb3edb::t_c2aa9d9c55c475 16
+  s_b6597bcdcb3edb::t_03374836c26c39 5
+src/i18n/languages/id_ID/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 8-9,11,13,15-16,18-19,21-22,26-38,40-41,46,49-50,52,57-72,75,89-103,105-106,109-110,116-117,122-129,131-132,135-136,138-147,149-150,153-154,156-161,163-167,170-173,175-178,180-183,187-188,190,192,195-204,209-210,212,214,217-219,224-235,237-244,246-251,253-264,266-267,272,278,289,297,304,310-313,315-316,318,322-324,327,329-332,335,338,340,344-346,349-351,359-361,363-365,382-384,387-388,397,399,403,409-416,420-421,423-427,434-439,442,448-452,454,457-462,475-478,493,495,515,517-519,527-528,530,536-537,540-543,546-547,550,554-557,559-570,573,575-579,581-585,587-593,596-599,601-602,608,615-617,622,624-626,628-634,636,638-641,645-655,657,660-667,669-675,677-685,697-698,701-702,704-707,710-712,714-715,717-719,721,723-724,734,740-746,748,750-753,757,760,762,764,766,769-774,777-790,794-795,798-799,802-803,806-807,833,836,839-840,842-844,847,849-868
+src/i18n/languages/it_IT/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,250
+src/i18n/languages/uk_UA/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,250,278,454,583,591-592
+src/i18n/languages/ru_RU/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,169,250,278,454,583,591-592
+src/i18n/languages/nl_NL/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 250
+src/i18n/languages/cs_CZ/strings.json
+  s_b6597bcdcb3edb::t_676b2afe8f4446 250
+src/i18n/languages/or_IN/strings.json
+  s_b6597bcdcb3edb::t_463e43783083b2 25,42-44,398,400-402
+src/i18n/languages/af_ZA/strings.json
+  s_b6597bcdcb3edb::t_4dcd8c7662baa8 179
+src/i18n/languages/ar_SA/strings.json
+  s_b6597bcdcb3edb::t_93464453761c9f 16
+  s_b6597bcdcb3edb::t_e9cebd4adac902 454
+  s_b6597bcdcb3edb::t_7d587762fe39d5 278
+  s_b6597bcdcb3edb::t_b8301f26ff7036 169
+  s_b6597bcdcb3edb::t_037581290dbbed 250
+src/i18n/languages/el_GR/strings.json
+  s_b6597bcdcb3edb::t_27271a81921246 250
+src/i18n/languages/de_DE/strings.json
+  s_b6597bcdcb3edb::t_ede9ebc5b13282 250
+src/i18n/languages/pt_BR/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,41,188,199,203,250,278,454,583,591-592
+src/i18n/languages/tr_TR/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,250,278,454,583,591-592
+src/i18n/languages/vi_VN/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,250,278,454,583,591-592
+src/i18n/languages/zh_CN/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 16,169,250,278,454,583,591-592
+src/i18n/languages/as_IN/strings.json
+  s_b6597bcdcb3edb::t_3da201a4c66ef0 250
+src/i18n/languages/hu_HU/strings.json
+  s_b6597bcdcb3edb::t_89735bbefb4c39 250
+src/i18n/languages/zh_TW/strings.json
+  s_b6597bcdcb3edb::t_90dcd0580a9869 250
+src/i18n/languages/fr_FR/strings.json
+  s_b6597bcdcb3edb::t_caf38ce34cdae3 592
+  s_b6597bcdcb3edb::t_851ff42a2dcd8c 454
+  s_b6597bcdcb3edb::t_05e065f9296b10 583
+  s_b6597bcdcb3edb::t_d869912ffa13b8 16
+  s_b6597bcdcb3edb::t_c5ffbb94f29e3e 591
+  s_b6597bcdcb3edb::t_c8cc53d215ab7f 167
+  s_b6597bcdcb3edb::t_5917bc654afd04 197
+  s_b6597bcdcb3edb::t_5d107c5a974d85 278
+  s_b6597bcdcb3edb::t_2e82a00ef6db1b 250
+src/i18n/languages/es_ES/strings.json
+  s_b6597bcdcb3edb::t_8337ff16a9a952 278
+  s_b6597bcdcb3edb::t_95772f3dc5ebcd 250
+  s_b6597bcdcb3edb::t_4978699d95844d 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "003cf8861d014d44f0cf14d8e2ccc0a99f129b12",
+  "prompts": {
+    "b6597bcdcb3edbbd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a888-fa6b-7f91-965e-48ff4460f279",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_b6597bcdcb3edb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a888-fa6b-7f91-965e-48ff4460f279",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
