@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Кэшированные новеллы удалены",
     "chapterInsertFailed": "не удалось вставить главу",
     "clearCachedNovels": "Очистить кэш новелл",
-    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
+    "clearCachedNovelsDesc": "Удалить кэшированные новеллы, которые не находятся в вашей библиотеке",
     "clearDatabaseWarning": "Вы уверены? Прочитанные и загруженные главы и прогресс не библиотечных новелл будут потеряны.",
     "clearUpdatesMessage": "Обновления очищены.",
     "clearUpdatesTab": "Очистить вкладку обновления",
@@ -166,7 +166,7 @@
       "restore": "Восстановление диска",
       "restoreInterruped": "Восстановление диска прервано"
     },
-    "googeDrive": "Google Drive",
+    "googeDrive": "Google Диск",
     "googeDriveDesc": "Резервное копирование на Google Диск",
     "invalidBackupFolder": "Неверная папка резервной копии",
     "localBackup": "Локальное резервное копирование",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removed from library",
+    "removeFromLibrary": "Удалено из библиотеки",
     "repositories": "Repositories",
     "searchbar": "Поиск источника",
     "searchResults": "Результаты поиска",
@@ -275,7 +275,7 @@
   },
   "categories": {
     "addCategories": "Добавить категорию",
-    "cantDeleteDefault": "You can't delete the default category",
+    "cantDeleteDefault": "Вы не можете удалить категорию по умолчанию",
     "default": "По умолчанию",
     "defaultCategory": "Категория по умолчанию",
     "deleteModal": {
@@ -451,7 +451,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Порядок сортировки",
     "updateLibrary": "Обновлять библиотеку при запуске",
-    "updateLibraryDesc": "Not recommended for low-end devices",
+    "updateLibraryDesc": "Не рекомендуется для слабых устройств",
     "updateTime": "Показать время последнего обновления",
     "useFAB": "Использовать FAB в библиотеке",
     "timeTracking": "Time Tracking",
@@ -580,7 +580,7 @@
     },
     "coverSaved": "Обложка сохранена",
     "coverNotSaved": "Обложка не сохранена",
-    "deleteChapterError": "Can't delete the chapter folder",
+    "deleteChapterError": "Не получается удалить папку с главами",
     "deleteMessage": "Удалить загруженные главы?",
     "deletedAllDownloads": "Удалить все загрузки",
     "download": {
@@ -588,8 +588,8 @@
       "customAmount": "Загрузить конкретное количество",
       "delete": "Удалить загруженные",
       "next": "Следующую главу",
-      "next10": "Next 10 chapters",
-      "next5": "Next 5 chapters",
+      "next10": "Следующие 10 глав",
+      "next5": "Следующие 5 глав",
       "unread": "Непрочитанные"
     },
     "edit": {

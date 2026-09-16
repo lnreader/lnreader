@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Novelas en caché eliminadas",
     "chapterInsertFailed": "inserción de capítulo fallida",
     "clearCachedNovels": "Limpiar novelas en caché",
-    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
+    "clearCachedNovelsDesc": "Elimina novelas en caché que no están en tu biblioteca",
     "clearDatabaseWarning": "Capítulos leídos y descargados, y el progreso de novelas de fuera de la librería será perdido.",
     "clearUpdatesMessage": "Actualizaciones borradas.",
     "clearUpdatesTab": "Borrar pestaña de actualizaciones",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removed from library",
+    "removeFromLibrary": "Eliminar de la biblioteca",
     "repositories": "Repositories",
     "searchbar": "Buscar fuente",
     "searchResults": "Search results",
@@ -275,7 +275,7 @@
   },
   "categories": {
     "addCategories": "Añadir categoría",
-    "cantDeleteDefault": "You can't delete the default category",
+    "cantDeleteDefault": "No se puede eliminar la categoría predeterminada",
     "default": "Predeterminado",
     "defaultCategory": "Categoría por defecto",
     "deleteModal": {

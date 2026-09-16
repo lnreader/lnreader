@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "缓存的小说已删除",
     "chapterInsertFailed": "章节插入失败",
     "clearCachedNovels": "清除缓存的小说",
-    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
+    "clearCachedNovelsDesc": "删除不在您的书库中的缓存小说",
     "clearDatabaseWarning": "不在书库中的阅读进度和下载章节将会丢失。",
     "clearUpdatesMessage": "更新页面已清除。",
     "clearUpdatesTab": "清除更新页面",
@@ -166,7 +166,7 @@
       "restore": "云端硬盘恢复",
       "restoreInterruped": "云端硬盘恢复中断"
     },
-    "googeDrive": "Google Drive",
+    "googeDrive": "Google 云端硬盘",
     "googeDriveDesc": "备份到您的 Google 云端硬盘",
     "invalidBackupFolder": "备份文件夹有误",
     "localBackup": "本地备份",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removed from library",
+    "removeFromLibrary": "已从书库中删除",
     "repositories": "Repositories",
     "searchbar": "搜索资源",
     "searchResults": "搜索结果",
@@ -275,7 +275,7 @@
   },
   "categories": {
     "addCategories": "添加分类",
-    "cantDeleteDefault": "You can't delete the default category",
+    "cantDeleteDefault": "您不能删除默认分类",
     "default": "默认",
     "defaultCategory": "默认分类",
     "deleteModal": {
@@ -451,7 +451,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "排序",
     "updateLibrary": "打开应用时更新书库",
-    "updateLibraryDesc": "Not recommended for low-end devices",
+    "updateLibraryDesc": "不推荐在低端设备上启用",
     "updateTime": "显示上次更新时间",
     "useFAB": "在书库中使用浮动操作按钮",
     "timeTracking": "Time Tracking",
@@ -580,7 +580,7 @@
     },
     "coverSaved": "封面已保存",
     "coverNotSaved": "封面未保存",
-    "deleteChapterError": "Can't delete the chapter folder",
+    "deleteChapterError": "无法删除章节文件夹",
     "deleteMessage": "删除下载的章节？",
     "deletedAllDownloads": "所有下载已删除",
     "download": {
@@ -588,8 +588,8 @@
       "customAmount": "下载自定义数量",
       "delete": "删除下载",
       "next": "后续 1 章",
-      "next10": "Next 10 chapters",
-      "next5": "Next 5 chapters",
+      "next10": "后续 10 章",
+      "next5": "后续 5 章",
       "unread": "未读"
     },
     "edit": {
