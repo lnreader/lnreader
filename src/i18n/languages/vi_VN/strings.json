@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Đã xoá các truyện được lưu tạm thời",
     "chapterInsertFailed": "lỗi khi thêm chương",
     "clearCachedNovels": "Dọn truyện được lưu tạm thời",
-    "clearCachedNovelsDesc": "Xoá bỏ những truyện không có trong thư viện",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Read and Downloaded chapters and progress of non-library novels will be lost.",
     "clearUpdatesMessage": "Đã dọn cập nhật.",
     "clearUpdatesTab": "Dọn mục cập nhật",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Đã xoá khỏi thư viện",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Tìm nguồn truyện",
     "searchResults": "Search results",
@@ -275,9 +275,10 @@
   },
   "categories": {
     "addCategories": "Tạo Danh mục",
-    "cantDeleteDefault": "Bạn không thể xoá danh mục mặc định",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Mặc định",
     "defaultCategory": "Danh mục mặc định",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Bạn có muốn xóa danh mục này",
       "header": "Xóa danh mục"
@@ -451,7 +452,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Thứ tự sắp xếp",
     "updateLibrary": "Cập nhật thư viện khi khởi động",
-    "updateLibraryDesc": "Không khuyến khích cho thiết bị yếu",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Hiện lần cập nhật trước",
     "useFAB": "Sử dụng FAB trong thư viện",
     "timeTracking": "Time Tracking",
@@ -580,7 +581,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Không thể xoá thư mục chương",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Xoá chương đã tải xuống?",
     "deletedAllDownloads": "Xoá tất cả tải xuống",
     "download": {
@@ -588,8 +589,8 @@
       "customAmount": "Số lượng tải xuống tuỳ chỉnh",
       "delete": "Xoá tải xuống",
       "next": "Chương kế",
-      "next10": "10 chương kế",
-      "next5": "5 chương kế",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Chưa đọc"
     },
     "edit": {
