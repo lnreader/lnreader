@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Verwijderd uit bibliotheek",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Zoek bronnen",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Standaard categorie",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Wilt u deze categorie verwijderen",
       "header": "Categorie verwijderen"
