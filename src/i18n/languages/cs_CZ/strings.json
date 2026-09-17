@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Odstraněno z knihovny",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Zdroje hledání",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Výchozí kategorie",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Přejete si odstranit kategorii",
       "header": "Smazat kategorii"
