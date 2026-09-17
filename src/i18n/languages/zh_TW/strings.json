@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "從書庫中移除",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "搜索资源",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "預設類別",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "你想刪除此類別嗎",
       "header": "刪除類別"
