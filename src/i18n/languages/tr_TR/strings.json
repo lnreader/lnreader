@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Önbellekteki romanlar silindi",
     "chapterInsertFailed": "bölüm yüklenirken hata",
     "clearCachedNovels": "Önbellekteki romanları sil",
-    "clearCachedNovelsDesc": "Kütüphanede olmayan romanları önbellekten sil",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Okunmuş ve indirilmiş bölümler ve kitaplıkta bulunmayan ögelerin ilerlemesi kaybolacak.",
     "clearUpdatesMessage": "Güncellemeler temizlendi.",
     "clearUpdatesTab": "Güncellemeler sekmesini temizle",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Kitaplıktan kaldırıldı",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Kaynak ara",
     "searchResults": "Search results",
@@ -275,9 +275,10 @@
   },
   "categories": {
     "addCategories": "Kategori ekle",
-    "cantDeleteDefault": "Varsayılan kategorisi silinemez",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "Varsayılan",
     "defaultCategory": "Varsayılan kategori",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Şu kategoriyi silmek istiyor musunuz:",
       "header": "Kategoriyi sil"
@@ -451,7 +452,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sıralama Düzeni",
     "updateLibrary": "Açılışta kitaplığı güncelle",
-    "updateLibraryDesc": "Eski cihazlarda önerilmez",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "Son güncelleme süresini göster",
     "useFAB": "Kitaplıkta FAB kullan",
     "timeTracking": "Time Tracking",
@@ -580,7 +581,7 @@
     },
     "coverSaved": "Kapak kaydedildi",
     "coverNotSaved": "Kapak kaydedilemedi",
-    "deleteChapterError": "Bölüm klasörü silinemedi",
+    "deleteChapterError": "Can't delete the chapter folder",
     "deleteMessage": "Bütün indirilmiş bölümler silinecek?",
     "deletedAllDownloads": "Bütün indirilenleri sil",
     "download": {
@@ -588,8 +589,8 @@
       "customAmount": "İstediğiniz sayıda indirin",
       "delete": "İndirilenleri sil",
       "next": "Sonraki bölüm",
-      "next10": "Sonraki 10 bölüm",
-      "next5": "Sonraki 5 bölüm",
+      "next10": "Next 10 chapters",
+      "next5": "Next 5 chapters",
       "unread": "Okunmadı"
     },
     "edit": {
