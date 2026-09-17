@@ -278,6 +278,7 @@
     "cantDeleteDefault": "Du kan inte ta bort standardkategorin",
     "default": "Standard",
     "defaultCategory": "Standard kategori",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Vill du ta bort kategorin",
       "header": "Radera kategorin"
