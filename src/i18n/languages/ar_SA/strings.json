@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "تم حذف الروايات المخزنة مؤقتًا",
     "chapterInsertFailed": "فشل إدراج الفصل",
     "clearCachedNovels": "مسح الروايات المخزنة مؤقتا",
-    "clearCachedNovelsDesc": "احذف الروايات المخزنة مؤقتًا و التي ليست موجودة في مكتبتك",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "هل أنت متيقِّن؟ سيتم فقدان الفصول المقروءة والمُنزّلة، بالإضافة إلى تقدم الروايات غير المُدرجة في المكتبة.",
     "clearUpdatesMessage": "تمت إزالة التحديثات.",
     "clearUpdatesTab": "مسح علامة تبويب التحديثات",
@@ -166,7 +166,7 @@
       "restore": "استعادة من الدرايف",
       "restoreInterruped": "انقطعت الاستعادة من الدرايف"
     },
-    "googeDrive": "جوجل درايف",
+    "googeDrive": "Google Drive",
     "googeDriveDesc": "نسخ احتياطي إلى جوجل درايف الخاص بك",
     "invalidBackupFolder": "مجلد نسخة احتياطية غير صالح",
     "localBackup": "نسخ احتياطي محلي",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "تمت إزالته من المكتبة",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "البحث في المصادر",
     "searchResults": "نتائج البحث",
@@ -275,9 +275,10 @@
   },
   "categories": {
     "addCategories": "إضافة تصنيف",
-    "cantDeleteDefault": "لا يمكنك حذف التصنيف الافتراضي",
+    "cantDeleteDefault": "You can't delete the default category",
     "default": "افتراضي",
     "defaultCategory": "التصنيف الافتراضي",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "هل ترغب في حذف التصنيف",
       "header": "حذف التصنيف"
@@ -451,7 +452,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "ترتيب الفرز",
     "updateLibrary": "تحديث المكتبة عند التشغيل",
-    "updateLibraryDesc": "لا ينصح به للأجهزة الضعيفة",
+    "updateLibraryDesc": "Not recommended for low-end devices",
     "updateTime": "إظهار وقت آخر تحديث",
     "useFAB": "استخدام الزر العائم (FAB) في المكتبة",
     "timeTracking": "Time Tracking",
