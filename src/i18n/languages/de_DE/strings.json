@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Aus der Bibliothek entfernt",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Quellen durchsuchen",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Standard-Kategorie",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Möchten Sie diese Kategorie löschen?",
       "header": "Kategorie löschen"
