@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Default category",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Do you wish to delete category",
       "header": "Delete category"
