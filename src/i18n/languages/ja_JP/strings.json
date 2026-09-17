@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "ライブラリから削除",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "ソースを検索",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "デフォルトカテゴリー",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "カテゴリーを削除しますか?",
       "header": "カテゴリーを削除"
