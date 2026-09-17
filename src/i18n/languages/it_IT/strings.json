@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Romanzi in cache eliminati",
     "chapterInsertFailed": "Inserimento capitolo non riuscito",
     "clearCachedNovels": "Pulisci i romanzi in cache",
-    "clearCachedNovelsDesc": "Elimina i romanzi in cache che non sono nella tua libreria",
+    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
     "clearDatabaseWarning": "Progressi dei romanzi non presenti in libreria, assieme ai capitoli Letti e Scaricati saranno persi.",
     "clearUpdatesMessage": "Aggiornamenti cancellati.",
     "clearUpdatesTab": "Pulisci scheda aggiornamenti",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Rimosso dalla libreria",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Cerca fonti",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Categoria predefinita",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Vuoi eliminare la categoria",
       "header": "Elimina categoria"
