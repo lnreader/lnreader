@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Eltávolítva a könyvtárból",
+    "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
     "searchbar": "Források keresése",
     "searchResults": "Search results",
@@ -278,6 +278,7 @@
     "cantDeleteDefault": "You can't delete the default category",
     "default": "Default",
     "defaultCategory": "Alapértelmezett kategória",
+    "alwaysAsk": "Always ask",
     "deleteModal": {
       "desc": "Do you wish to delete category",
       "header": "Kategória törlése"
