@@ -316,6 +316,8 @@ export interface StringMap {
   'novelScreen.bottomSheet.filters.unread': 'string';
   'novelScreen.bottomSheet.order.byChapterName': 'string';
   'novelScreen.bottomSheet.order.bySource': 'string';
+  'novelScreen.chaptersDownloaded': 'string';
+  'novelScreen.fetchingMissingPages': 'string';
   'novelScreen.chapterChapnum': 'string';
   'novelScreen.chapters': 'string';
   'novelScreen.continueReading': 'string';
@@ -490,6 +492,8 @@ export interface StringMap {
   'translation.advanced': 'string';
   'translation.clearTranslationCache': 'string';
   'translation.clearTranslationCacheDesc': 'string';
+  'translation.clearChapterTranslation': 'string';
+  'translation.clearChapterTranslationDesc': 'string';
   'translation.googleTranslate': 'string';
   'translation.translationProvider': 'string';
   'translation.provider': 'string';
@@ -529,4 +533,8 @@ export interface StringMap {
   'notifications.TRANSLATE_NOVEL': 'string';
   'notifications.TRANSLATE_NOVEL_PROGRESS': 'string';
   'notifications.TRANSLATE_NOVEL_COMPLETE': 'string';
+  'generalSettingsScreen.fastDownload': 'string';
+  'generalSettingsScreen.fastDownloadDesc': 'string';
+  'generalSettingsScreen.disableChapterPagination': 'string';
+  'generalSettingsScreen.disableChapterPaginationDesc': 'string';
 }

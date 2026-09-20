@@ -20,6 +20,7 @@ interface Props {
   path: string;
   novel?: NovelInfo;
   defaultChapterSort: ChapterOrderKey;
+  showPaginatedChaptersAsOneList?: boolean;
   switchNovelToLibrary: (novelPath: string, pluginId: string) => Promise<void>;
 }
 
@@ -28,6 +29,7 @@ export function createStore({
   defaultChapterSort,
   path,
   pluginId,
+  showPaginatedChaptersAsOneList,
   switchNovelToLibrary,
 }: Props): NovelStoreApi {
   const persistenceInput = {
@@ -40,7 +42,10 @@ export function createStore({
     ...novelPersistence.readSettings(persistenceInput),
   };
 
-  const bootstrapService = createBootstrapService();
+  const bootstrapService = createBootstrapService(
+    {},
+    { showPaginatedChaptersAsOneList },
+  );
   const deps: NovelStoreDependencies = {
     bootstrapService,
     chapterActionsDependencies: defaultChapterActionsDependencies,

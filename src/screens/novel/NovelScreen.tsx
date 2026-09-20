@@ -29,6 +29,7 @@ import {
   getAllUndownloadedChapters,
   updateChapterProgressByIds,
 } from '@database/queries/ChapterQueries';
+import { updateNovel } from '@services/updates/LibraryUpdateQueries';
 import { MaterialDesignIconName } from '@type/icon';
 import NovelScreenList from './components/NovelScreenList';
 import { ThemeColors } from '@theme/types';
@@ -69,6 +70,21 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
       }
 
       let chaptersToUse = chapters;
+
+      if (amount === 'all' || amount === 'unread') {
+        if (novel.totalPages && novel.totalPages > 1) {
+          showToast(getString('novelScreen.fetchingMissingPages'));
+          try {
+            await updateNovel(novel.pluginId, novel.path, novel.id, {
+              downloadNewChapters: false,
+              refreshNovelMetadata: false,
+              fetchMissingPages: true,
+            });
+          } catch (e: any) {
+            showToast(e.message);
+          }
+        }
+      }
 
       if (amount === 'all') {
         const allChapters = await getAllUndownloadedChapters(novel.id);

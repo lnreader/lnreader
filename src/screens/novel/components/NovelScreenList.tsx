@@ -96,6 +96,7 @@ const NovelScreenList = ({
     disableHapticFeedback,
     downloadNewChapters,
     refreshNovelMetadata,
+    showPaginatedChaptersAsOneList,
   } = useAppSettings();
 
   const { filter, showChapterTitles = false } = novelSettings;
@@ -245,6 +246,7 @@ const NovelScreenList = ({
       updateNovel(pluginId, novel.path, novel.id, {
         downloadNewChapters,
         refreshNovelMetadata,
+        fetchMissingPages: showPaginatedChaptersAsOneList,
       })
         .then(() => refreshNovel())
         .then(() =>
@@ -261,7 +263,19 @@ const NovelScreenList = ({
     downloadNewChapters,
     refreshNovelMetadata,
     refreshNovel,
+    showPaginatedChaptersAsOneList,
   ]);
+
+  useEffect(() => {
+    if (
+      showPaginatedChaptersAsOneList &&
+      novel.totalPages &&
+      novel.totalPages > 1
+    ) {
+      onRefresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPaginatedChaptersAsOneList]);
 
   const onRefreshPage = useCallback(
     async (page: string) => {

@@ -46,6 +46,8 @@ export interface AppSettings {
   updateLibraryOnLaunch: boolean;
   downloadNewChapters: boolean;
   refreshNovelMetadata: boolean;
+  fastDownload: boolean;
+  showPaginatedChaptersAsOneList: boolean;
 
   /**
    * Novel settings
@@ -154,6 +156,8 @@ const initialAppSettings: AppSettings = {
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,
+  fastDownload: false,
+  showPaginatedChaptersAsOneList: false,
 
   /**
    * Novel settings

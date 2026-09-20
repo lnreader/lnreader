@@ -39,7 +39,8 @@ export function NovelContextProvider({ children, route }: Props) {
   const storeKey = `${pluginId}:${path}`;
 
   const { switchNovelToLibrary } = useLibraryContext();
-  const { defaultChapterSort } = useAppSettings();
+  const { defaultChapterSort, showPaginatedChaptersAsOneList } =
+    useAppSettings();
 
   const switchNovelToLibraryRef = useRef(switchNovelToLibrary);
 
@@ -59,6 +60,7 @@ export function NovelContextProvider({ children, route }: Props) {
         pluginId,
         novel: initialNovel,
         defaultChapterSort,
+        showPaginatedChaptersAsOneList,
         switchNovelToLibrary: switchNovelToLibraryRef.current,
       }),
     };

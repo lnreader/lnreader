@@ -6,12 +6,17 @@ import EpubBuilder from '@cd-z/react-native-epub-creator';
 import NativeFile from '@specs/NativeFile';
 
 import { NovelInfo } from '@database/types';
-import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
+import {
+  useChapterReaderSettings,
+  useTheme,
+  useTranslateSettings,
+} from '@hooks/persisted';
 import { useBoolean } from '@hooks/index';
 import { showToast } from '@utils/showToast';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { getString } from '@strings/translations';
 import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
+import { getCachedTranslation } from '@utils/translate';
 
 import ExportEpubModal from './ExportEpubModal';
 import { MaterialDesignIconName } from '@type/icon';
@@ -44,6 +49,16 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
     epubUseCustomCSS = false,
     epubUseCustomJS = false,
   } = readerSettings;
+
+  const {
+    translateEnabled,
+    translateMode,
+    translateTargetLanguage,
+    translateColor,
+    translateItalic,
+    translateUnderline,
+    translateTextAlign,
+  } = useTranslateSettings();
 
   const epubStylesheet = useMemo(() => {
     if (!novel) {
@@ -158,6 +173,22 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
 
         if (NativeFile.exists(chapterFilePath)) {
           let chapterContent = NativeFile.readFile(chapterFilePath);
+
+          // If translation is enabled, prefer the cached translated version
+          if (translateEnabled) {
+            const cachedTranslation = getCachedTranslation(
+              chapter.id,
+              translateTargetLanguage,
+              translateMode,
+              translateColor,
+              translateItalic,
+              translateUnderline,
+              translateTextAlign || 'origin',
+            );
+            if (cachedTranslation) {
+              chapterContent = cachedTranslation;
+            }
+          }
 
           const chapterDir = `${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}`;
           const escapedDir = chapterDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

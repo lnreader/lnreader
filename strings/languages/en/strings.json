@@ -300,7 +300,11 @@
     "updateLibraryDesc": "Not recommended for low devices",
     "updateOngoing": "Only update ongoing novels",
     "updateTime": "Show last update time",
-    "useFAB": "Use FAB in Library"
+    "useFAB": "Use FAB in Library",
+    "fastDownload": "Fast download",
+    "fastDownloadDesc": "Removes delay and downloads multiple chapters simultaneously",
+    "disableChapterPagination": "Disable chapter pagination",
+    "disableChapterPaginationDesc": "Show all chapters as a single continuous list instead of separating them by pages."
   },
   "globalSearch": {
     "allSources": "all sources",
@@ -461,7 +465,9 @@
     "tracked": "Tracked",
     "tracking": "Tracking",
     "unknownStatus": "Unknown status",
-    "updatedToast": "Updated %{name}"
+    "updatedToast": "Updated %{name}",
+    "chaptersDownloaded": "Chapters downloaded",
+    "fetchingMissingPages": "Fetching missing pages, please wait..."
   },
   "readerScreen": {
     "bottomSheet": {
@@ -589,6 +595,8 @@
     "advanced": "Advanced",
     "clearTranslationCache": "Clear Translation Cache",
     "clearTranslationCacheDesc": "Deletes all locally cached chapter translations",
+    "clearChapterTranslation": "Clear Chapter Translation",
+    "clearChapterTranslationDesc": "Deletes the cached translation for this chapter only",
     "googleTranslate": "Google Translate",
     "translationProvider": "Translation Provider",
     "provider": "Provider",

@@ -58,6 +58,8 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
     refreshNovelMetadata,
     disableHapticFeedback,
     useLibraryFAB,
+    fastDownload,
+    showPaginatedChaptersAsOneList,
     setAppSettings,
   } = useAppSettings();
 
@@ -221,6 +223,13 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
             }
             theme={theme}
           />
+          <SettingSwitch
+            label={getString('generalSettingsScreen.fastDownload')}
+            description={getString('generalSettingsScreen.fastDownloadDesc')}
+            value={fastDownload}
+            onPress={() => setAppSettings({ fastDownload: !fastDownload })}
+            theme={theme}
+          />
           <List.Divider theme={theme} />
           <List.SubHeader theme={theme}>
             {getString('generalSettings')}
@@ -247,6 +256,20 @@ const GenralSettings: React.FC<GenralSettingsProps> = ({ navigation }) => {
                 disableLoadingAnimations: !disableLoadingAnimations,
               })
             }
+            theme={theme}
+          />
+          <List.Divider theme={theme} />
+          <SettingSwitch
+            value={showPaginatedChaptersAsOneList}
+            onPress={() =>
+              setAppSettings({
+                showPaginatedChaptersAsOneList: !showPaginatedChaptersAsOneList,
+              })
+            }
+            label={getString('generalSettingsScreen.disableChapterPagination')}
+            description={getString(
+              'generalSettingsScreen.disableChapterPaginationDesc',
+            )}
             theme={theme}
           />
         </List.Section>

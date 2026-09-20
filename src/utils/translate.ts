@@ -31,9 +31,10 @@ export const getTranslationCachePath = (
   color: string,
   italic: boolean,
   underline: boolean,
+  textAlign: string,
 ): string => {
   const cleanColor = color.replace('#', '');
-  return `${CACHE_DIR}/${chapterId}_${targetLang}_${mode}_${cleanColor}_${italic}_${underline}.html`;
+  return `${CACHE_DIR}/${chapterId}_${targetLang}_${mode}_${cleanColor}_${italic}_${underline}_${textAlign}.html`;
 };
 
 export const getCachedTranslation = (
@@ -43,6 +44,7 @@ export const getCachedTranslation = (
   color: string,
   italic: boolean,
   underline: boolean,
+  textAlign: string,
 ): string | null => {
   try {
     const path = getTranslationCachePath(
@@ -52,6 +54,7 @@ export const getCachedTranslation = (
       color,
       italic,
       underline,
+      textAlign,
     );
     if (NativeFile.exists(path)) {
       return NativeFile.readFile(path);
@@ -67,6 +70,7 @@ export const saveTranslationToCache = (
   color: string,
   italic: boolean,
   underline: boolean,
+  textAlign: string,
   html: string,
 ): void => {
   try {
@@ -80,6 +84,7 @@ export const saveTranslationToCache = (
       color,
       italic,
       underline,
+      textAlign,
     );
     NativeFile.writeFile(path, html);
   } catch {}
@@ -111,6 +116,21 @@ export const clearNovelTranslationCache = (chapters: any[]): void => {
         if (chapterIdSet.has(chapterIdStr)) {
           NativeFile.unlink(file.path);
         }
+      }
+    }
+  } catch {}
+};
+
+export const clearChapterTranslationCache = (chapterId: number): void => {
+  try {
+    if (!NativeFile.exists(CACHE_DIR)) {
+      return;
+    }
+    const files = NativeFile.readDir(CACHE_DIR);
+    const prefix = `${chapterId}_`;
+    for (const file of files) {
+      if (file.name.startsWith(prefix)) {
+        NativeFile.unlink(file.path);
       }
     }
   } catch {}
@@ -210,7 +230,12 @@ export const translateHtml = async (
   html: string,
   targetLang: string,
   mode: 'translated' | 'dual',
-  styles: { color: string; italic: boolean; underline: boolean },
+  styles: {
+    color: string;
+    italic: boolean;
+    underline: boolean;
+    textAlign?: string;
+  },
   providerConfig?: TranslateProviderConfig,
 ): Promise<string> => {
   const providerId = providerConfig?.providerId ?? 'gtx';
@@ -307,12 +332,17 @@ export const translateHtml = async (
 
     // Translate paragraphs directly
     const translatedParagraphs: { idx: number; html: string }[] = [];
-    const rtlLangsSet = new Set(['ar', 'he', 'fa', 'ur']);
-    const isTargetRtl = rtlLangsSet.has(targetLang);
-    const dirAttr = isTargetRtl ? ' dir="rtl"' : '';
-    const inlineStyle = `color: ${styles.color};${
+    let alignAttr = '';
+    if (styles.textAlign && styles.textAlign !== 'origin') {
+      alignAttr = ` text-align: ${styles.textAlign};`;
+    }
+    const colorStyle =
+      styles.color === 'inherit'
+        ? 'color: inherit;'
+        : `color: ${styles.color};`;
+    const inlineStyle = `${colorStyle}${
       styles.italic ? ' font-style: italic;' : ''
-    }${styles.underline ? ' text-decoration: underline;' : ''}`;
+    }${styles.underline ? ' text-decoration: underline;' : ''}${alignAttr}`;
 
     // --- Provider-based batch for fallback paragraphs ---
     if (useProviderBatch) {
@@ -330,7 +360,7 @@ export const translateHtml = async (
           if (mode === 'translated') {
             translatedParagraphs.push({
               idx: i,
-              html: `<p${dirAttr}>${trans || original}</p>`,
+              html: `<p style="${alignAttr.trim()}">${trans || original}</p>`,
             });
           } else {
             translatedParagraphs.push({
@@ -340,7 +370,7 @@ export const translateHtml = async (
             if (trans) {
               translatedParagraphs.push({
                 idx: i * 2 + 1,
-                html: `<p class="translated-text" style="${inlineStyle}"${dirAttr}>${trans}</p>`,
+                html: `<p class="translated-text" style="${inlineStyle.trim()}">${trans}</p>`,
               });
             }
           }
@@ -409,7 +439,7 @@ export const translateHtml = async (
           if (mode === 'translated') {
             translatedParagraphs.push({
               idx: sIdx + j,
-              html: `<p${dirAttr}>${trans || original}</p>`,
+              html: `<p style="${alignAttr.trim()}">${trans || original}</p>`,
             });
           } else {
             translatedParagraphs.push({
@@ -419,7 +449,7 @@ export const translateHtml = async (
             if (trans) {
               translatedParagraphs.push({
                 idx: (sIdx + j) * 2 + 1,
-                html: `<p class="translated-text" style="${inlineStyle}"${dirAttr}>${trans}</p>`,
+                html: `<p class="translated-text" style="${inlineStyle.trim()}">${trans}</p>`,
               });
             }
           }
@@ -568,33 +598,39 @@ export const translateHtml = async (
   return $.html();
 };
 
-const rtlLangs = new Set(['ar', 'he', 'fa', 'ur']);
-
 const applyTranslation = (
   $: any,
   el: any,
   translatedText: string,
   mode: 'translated' | 'dual',
-  styles: { color: string; italic: boolean; underline: boolean },
-  targetLang: string,
+  styles: {
+    color: string;
+    italic: boolean;
+    underline: boolean;
+    textAlign?: string;
+  },
+  _targetLang: string,
 ): void => {
   if (!translatedText) return;
 
-  const inlineStyle = `color: ${styles.color};${
+  const colorStyle =
+    styles.color === 'inherit' ? 'color: inherit;' : `color: ${styles.color};`;
+  const inlineStyle = `${colorStyle}${
     styles.italic ? ' font-style: italic;' : ''
   }${styles.underline ? ' text-decoration: underline;' : ''}`;
-  const isRtl = rtlLangs.has(targetLang);
-  const dirAttribute = isRtl ? ' dir="rtl"' : '';
+
+  let alignAttr = '';
+  if (styles.textAlign && styles.textAlign !== 'origin') {
+    alignAttr = ` text-align: ${styles.textAlign};`;
+  }
 
   if (mode === 'translated') {
     $(el).text(translatedText);
-    if (isRtl) {
-      $(el).attr('dir', 'rtl');
-    } else {
-      if ($(el).attr('dir') === 'rtl') {
-        $(el).removeAttr('dir');
-      }
+    if (styles.textAlign && styles.textAlign !== 'origin') {
+      const existingStyle = $(el).attr('style') || '';
+      $(el).attr('style', `${existingStyle} text-align: ${styles.textAlign};`);
     }
+    $(el).attr('dir', 'auto');
   } else {
     const tagName = el.tagName ? el.tagName.toLowerCase() : 'p';
     let wrapperTag = 'p';
@@ -617,7 +653,7 @@ const applyTranslation = (
       extraStyle = ' margin-top: 4px;';
     }
 
-    const translatedHtml = `<${wrapperTag} class="translated-text" style="${inlineStyle}${extraStyle}"${dirAttribute}>${translatedText}</${wrapperTag}>`;
+    const translatedHtml = `<${wrapperTag} dir="auto" class="translated-text" style="${inlineStyle}${extraStyle}${alignAttr}">${translatedText}</${wrapperTag}>`;
     $(el).after(translatedHtml);
   }
 };

@@ -154,17 +154,8 @@ const updateNovelChapters = async (
 export interface UpdateNovelOptions {
   downloadNewChapters?: boolean;
   refreshNovelMetadata?: boolean;
+  fetchMissingPages?: boolean;
 }
-
-const getStoredTotalPages = async (novelId: number): Promise<number> => {
-  const result = await dbManager
-    .select({ totalPages: novelSchema.totalPages })
-    .from(novelSchema)
-    .where(eq(novelSchema.id, novelId))
-    .get();
-
-  return result?.totalPages ?? 0;
-};
 
 /**
  * Main function to update a novel's metadata and chapters.
@@ -179,8 +170,6 @@ const updateNovel = async (
     return;
   }
   const { downloadNewChapters, refreshNovelMetadata } = options;
-
-  const oldTotalPages = await getStoredTotalPages(novelId);
 
   const novel = await fetchNovel(pluginId, novelPath);
 
@@ -200,26 +189,36 @@ const updateNovel = async (
   if (novel.totalPages && novel.totalPages > 1) {
     const plugin = getPlugin(pluginId);
     if (plugin?.parsePage) {
+      const existingPagesRaw = await dbManager
+        .selectDistinct({ page: chapterSchema.page })
+        .from(chapterSchema)
+        .where(eq(chapterSchema.novelId, novelId))
+        .all();
+      const existingPages = new Set(
+        existingPagesRaw.map(c => Number(c.page)).filter(n => !isNaN(n)),
+      );
+      const maxExistingPage = Math.max(1, ...Array.from(existingPages));
+
       // Re-fetch the last known page to check for new chapters
-      if (oldTotalPages > 1) {
+      if (maxExistingPage > 1) {
         try {
           const sourcePage = await fetchPage(
             pluginId,
             novelPath,
-            String(oldTotalPages),
+            String(maxExistingPage),
           );
           await updateNovelChapters(
             novel.name,
             novelId,
             sourcePage.chapters || [],
             downloadNewChapters,
-            String(oldTotalPages),
+            String(maxExistingPage),
           );
         } catch {}
       }
 
       // Fetch any new pages that were added
-      for (let page = oldTotalPages + 1; page <= novel.totalPages; page++) {
+      for (let page = maxExistingPage + 1; page <= novel.totalPages; page++) {
         try {
           const sourcePage = await fetchPage(pluginId, novelPath, String(page));
           await updateNovelChapters(
@@ -230,6 +229,28 @@ const updateNovel = async (
             String(page),
           );
         } catch {}
+      }
+
+      // Fetch any missing pages in between if explicitly requested
+      if (options.fetchMissingPages) {
+        for (let page = 2; page < maxExistingPage; page++) {
+          if (!existingPages.has(page)) {
+            try {
+              const sourcePage = await fetchPage(
+                pluginId,
+                novelPath,
+                String(page),
+              );
+              await updateNovelChapters(
+                novel.name,
+                novelId,
+                sourcePage.chapters || [],
+                downloadNewChapters,
+                String(page),
+              );
+            } catch {}
+          }
+        }
       }
     }
   }

@@ -10,10 +10,15 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTheme, useTranslateSettings } from '@hooks/persisted';
 import { List, Button } from '@components/index';
 import { Portal, Modal } from 'react-native-paper';
+import { ToggleButton } from '@components/Common/ToggleButton';
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
-import { clearTranslationCache } from '@utils/translate';
+import {
+  clearTranslationCache,
+  clearChapterTranslationCache,
+} from '@utils/translate';
 import { getString } from '@strings/translations';
 import { showToast } from '@utils/showToast';
+import { useChapterContext } from '@screens/reader/ChapterContext';
 
 export const LANGUAGES = [
   { label: 'English', code: 'en' },
@@ -37,6 +42,7 @@ export const LANGUAGES = [
 ];
 
 const COLOR_PRESETS = [
+  'inherit', // Origin / Inherit color
   '#6b7280', // Default Gray
   '#4b5563', // Dark Gray
   '#9ca3af', // Light Gray
@@ -123,8 +129,13 @@ const TranslateTab: React.FC = () => {
     translateColor,
     translateItalic,
     translateUnderline,
+    translateTextAlign,
     setTranslateSettings,
   } = useTranslateSettings();
+  const { chapter, getChapter } = useChapterContext();
+  // chapter can be undefined before the context fully populates (context default is {}).
+  // Guard every access to chapter.id to prevent a crash on first render of the tab.
+  const chapterId = chapter?.id;
 
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
@@ -230,6 +241,58 @@ const TranslateTab: React.FC = () => {
                 </View>
               </View>
 
+              <View style={styles.segmentedRowNoPadding}>
+                <Text style={[styles.label, { color: theme.onSurface }]}>
+                  {getString('readerScreen.bottomSheet.textAlign')}
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.modesContainerScrollable}
+                >
+                  <ToggleButton
+                    selected={translateTextAlign === 'origin'}
+                    icon="format-clear"
+                    theme={theme}
+                    onPress={() =>
+                      setTranslateSettings({ translateTextAlign: 'origin' })
+                    }
+                  />
+                  <ToggleButton
+                    selected={translateTextAlign === 'left'}
+                    icon="format-align-left"
+                    theme={theme}
+                    onPress={() =>
+                      setTranslateSettings({ translateTextAlign: 'left' })
+                    }
+                  />
+                  <ToggleButton
+                    selected={translateTextAlign === 'center'}
+                    icon="format-align-center"
+                    theme={theme}
+                    onPress={() =>
+                      setTranslateSettings({ translateTextAlign: 'center' })
+                    }
+                  />
+                  <ToggleButton
+                    selected={translateTextAlign === 'right'}
+                    icon="format-align-right"
+                    theme={theme}
+                    onPress={() =>
+                      setTranslateSettings({ translateTextAlign: 'right' })
+                    }
+                  />
+                  <ToggleButton
+                    selected={translateTextAlign === 'justify'}
+                    icon="format-align-justify"
+                    theme={theme}
+                    onPress={() =>
+                      setTranslateSettings({ translateTextAlign: 'justify' })
+                    }
+                  />
+                </ScrollView>
+              </View>
+
               {translateMode === 'dual' && (
                 <>
                   <List.SubHeader theme={theme}>
@@ -274,17 +337,29 @@ const TranslateTab: React.FC = () => {
                           key={color}
                           style={[
                             styles.colorButton,
-                            { backgroundColor: color },
+                            color !== 'inherit' && { backgroundColor: color },
                             translateColor === color &&
                               styles.colorButtonActive,
                             translateColor === color && {
                               borderColor: theme.primary,
                             },
+                            color === 'inherit' && styles.colorButtonInherit,
                           ]}
                           onPress={() =>
                             setTranslateSettings({ translateColor: color })
                           }
-                        />
+                        >
+                          {color === 'inherit' && (
+                            <Text
+                              style={[
+                                styles.colorButtonLabel,
+                                { color: theme.onSurfaceVariant },
+                              ]}
+                            >
+                              Org
+                            </Text>
+                          )}
+                        </TouchableOpacity>
                       ))}
                     </ScrollView>
                   </View>
@@ -297,10 +372,29 @@ const TranslateTab: React.FC = () => {
             {getString('translation.advanced')}
           </List.SubHeader>
           <TouchableOpacity
+            style={[
+              styles.settingItem,
+              !chapterId && styles.settingItemDisabled,
+            ]}
+            disabled={!chapterId}
+            onPress={() => {
+              clearChapterTranslationCache(chapterId!);
+              getChapter();
+              showToast(getString('translation.clearChapterTranslation'));
+            }}
+          >
+            <Text style={[styles.label, { color: theme.onSurface }]}>
+              {getString('translation.clearChapterTranslation')}
+            </Text>
+            <Text style={[styles.value, { color: theme.primary }]}>
+              {getString('common.clear')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.settingItem}
             onPress={() => {
               clearTranslationCache();
-              showToast('Translation cache cleared');
+              showToast(getString('translation.clearTranslationCache'));
             }}
           >
             <Text style={[styles.label, { color: theme.onSurface }]}>
@@ -346,12 +440,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
+  settingItemDisabled: {
+    opacity: 0.4,
+  },
   segmentedRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  segmentedRowNoPadding: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingRight: 0,
   },
   colorRow: {
     flexDirection: 'row',
@@ -362,6 +467,12 @@ const styles = StyleSheet.create({
   },
   modesContainer: {
     flexDirection: 'row',
+  },
+  modesContainerScrollable: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 8,
+    paddingRight: 16,
   },
   modeButton: {
     paddingHorizontal: 12,
@@ -383,6 +494,14 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     marginHorizontal: 4,
+  },
+  colorButtonInherit: {
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  colorButtonLabel: {
+    fontSize: 10,
+    fontWeight: 'bold' as const,
   },
   colorButtonActive: {
     borderWidth: 2,

@@ -449,7 +449,7 @@ export const getPageChapters = async (
     .where(
       and(
         eq(chapterSchema.novelId, novelId),
-        eq(chapterSchema.page, page || '1'),
+        !page ? sql.raw('true') : eq(chapterSchema.page, page),
         chapterFilterToSQL(filter),
       ),
     )
@@ -477,7 +477,7 @@ export const getChapterCount = async (
     chapterSchema,
     and(
       eq(chapterSchema.novelId, novelId),
-      eq(chapterSchema.page, page),
+      !page ? sql.raw('true') : eq(chapterSchema.page, page),
       chapterFilterToSQL(filter),
     ),
   );
@@ -495,7 +495,7 @@ export const getChapterCountSync = (
       .where(
         and(
           eq(chapterSchema.novelId, novelId),
-          eq(chapterSchema.page, page),
+          !page ? sql.raw('true') : eq(chapterSchema.page, page),
           chapterFilterToSQL(filter),
         ),
       ),
@@ -519,7 +519,7 @@ export const getPageChaptersBatched = async (
     .where(
       and(
         eq(chapterSchema.novelId, novelId),
-        eq(chapterSchema.page, page || '1'),
+        !page ? sql.raw('true') : eq(chapterSchema.page, page),
         chapterFilterToSQL(filter),
       ),
     )
@@ -561,7 +561,7 @@ export const getFirstUnreadChapter = (
       .where(
         and(
           eq(chapterSchema.novelId, novelId),
-          eq(chapterSchema.page, page || '1'),
+          !page ? sql.raw('true') : eq(chapterSchema.page, page),
           eq(chapterSchema.unread, true),
           chapterFilterToSQL(filter),
         ),

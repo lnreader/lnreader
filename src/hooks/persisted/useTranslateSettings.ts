@@ -18,6 +18,7 @@ export interface TranslateSettings {
   translateProvider: ProviderId;
   deeplPlan: 'free' | 'pro';
   microsoftRegion: string;
+  translateTextAlign: 'origin' | 'left' | 'right' | 'center' | 'justify';
 }
 
 export const initialTranslateSettings: TranslateSettings = {
@@ -30,6 +31,7 @@ export const initialTranslateSettings: TranslateSettings = {
   translateProvider: 'gtx',
   deeplPlan: 'free',
   microsoftRegion: 'eastus',
+  translateTextAlign: 'origin',
 };
 
 // Secure API key storage keys — one per provider that requires a key

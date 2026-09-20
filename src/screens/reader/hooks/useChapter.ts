@@ -62,6 +62,10 @@ export default function useChapter(
   const [chapter, setChapter] = useState(initialChapter);
   const [loading, setLoading] = useState(true);
   const [chapterText, setChapterText] = useState('');
+  // Guard: prevents the translate-settings useEffect from re-triggering when
+  // chapter state changes are caused by our own navigation (not by external
+  // translate-setting changes).
+  const isNavigatingRef = useRef(false);
 
   const [[nextChapter, prevChapter], setAdjacentChapter] = useState<
     ChapterInfo[] | undefined[]
@@ -88,6 +92,7 @@ export default function useChapter(
     translateProvider,
     deeplPlan,
     microsoftRegion,
+    translateTextAlign,
   } = useTranslateSettings();
 
   const connectVolumeButton = useCallback(() => {
@@ -159,6 +164,11 @@ export default function useChapter(
 
   const getChapter = useCallback(
     async (navChapter?: ChapterInfo) => {
+      // Mark that we are performing a navigation so the translate-settings
+      // useEffect does not re-fire when chapter state updates mid-navigation.
+      if (navChapter) {
+        isNavigatingRef.current = true;
+      }
       try {
         const dbChapter = navChapter
           ? undefined
@@ -245,6 +255,7 @@ export default function useChapter(
             translateColor,
             translateItalic,
             translateUnderline,
+            translateTextAlign || 'origin',
           );
           if (cachedTr) {
             finalText = cachedTr;
@@ -272,6 +283,7 @@ export default function useChapter(
                 color: translateColor,
                 italic: translateItalic,
                 underline: translateUnderline,
+                textAlign: translateTextAlign || 'origin',
               },
               providerConfig,
             );
@@ -282,6 +294,7 @@ export default function useChapter(
               translateColor,
               translateItalic,
               translateUnderline,
+              translateTextAlign || 'origin',
               finalText,
             );
           }
@@ -295,6 +308,7 @@ export default function useChapter(
         setError(e.message);
       } finally {
         setLoading(false);
+        isNavigatingRef.current = false;
       }
     },
     [
@@ -317,6 +331,7 @@ export default function useChapter(
       translateProvider,
       deeplPlan,
       microsoftRegion,
+      translateTextAlign,
     ],
   );
 
@@ -433,6 +448,7 @@ export default function useChapter(
     translateProvider,
     deeplPlan,
     microsoftRegion,
+    translateTextAlign,
   });
 
   useEffect(() => {
@@ -446,7 +462,8 @@ export default function useChapter(
       prev.translateUnderline !== translateUnderline ||
       prev.translateProvider !== translateProvider ||
       prev.deeplPlan !== deeplPlan ||
-      prev.microsoftRegion !== microsoftRegion;
+      prev.microsoftRegion !== microsoftRegion ||
+      prev.translateTextAlign !== translateTextAlign;
 
     prevTranslateRef.current = {
       translateEnabled,
@@ -458,12 +475,15 @@ export default function useChapter(
       translateProvider,
       deeplPlan,
       microsoftRegion,
+      translateTextAlign,
     };
 
     if (!initialLoadDone.current) {
       initialLoadDone.current = true;
       getChapter();
-    } else if (changed) {
+    } else if (changed && !isNavigatingRef.current) {
+      // Only re-fetch when translate settings changed, not when chapter state
+      // was updated as a side-effect of our own navigation call.
       getChapter();
     }
   }, [
@@ -477,6 +497,7 @@ export default function useChapter(
     translateProvider,
     deeplPlan,
     microsoftRegion,
+    translateTextAlign,
   ]);
 
   const refetch = useCallback(() => {

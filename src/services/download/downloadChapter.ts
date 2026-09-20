@@ -19,6 +19,7 @@ import {
   initialTranslateSettings,
   getProviderApiKey,
 } from '@hooks/persisted/useTranslateSettings';
+import { AppSettings, APP_SETTINGS } from '@hooks/persisted/useSettings';
 import {
   translateHtml,
   saveTranslationToCache,
@@ -38,6 +39,7 @@ const createChapterFolder = async (
   NativeFile.mkdir(chapterFolder);
   const nomediaPath = chapterFolder + '/.nomedia';
   NativeFile.writeFile(nomediaPath, ',');
+  await sleep(10); // Yield to JS thread after sync I/O
   return chapterFolder;
 };
 
@@ -52,6 +54,7 @@ const downloadFiles = async (
     novelId,
     chapterId,
   });
+  await sleep(10); // Yield to JS thread before heavy parsing
   const loadedCheerio = cheerio.load(html);
   const imgs = loadedCheerio('img').toArray();
   for (let i = 0; i < imgs.length; i++) {
@@ -68,8 +71,10 @@ const downloadFiles = async (
       }
     }
   }
+  await sleep(10); // Yield to JS thread before heavy serialization
   const offlineHtml = loadedCheerio.html();
   NativeFile.writeFile(folder + '/index.html', offlineHtml);
+  await sleep(10); // Yield to JS thread after sync I/O
   return offlineHtml;
 };
 
@@ -125,7 +130,13 @@ export const downloadChapter = async (
       );
     }
 
-    if (translateSettings.translateEnabled) {
+    // Skip pre-translation in fast-download mode: with up to 5 concurrent
+    // downloads each making 2 sequential GTX calls, that's 10 simultaneous
+    // API requests which reliably triggers HTTP 429 rate-limiting.
+    // The reader will translate on first open and cache the result as normal.
+    const appSettings = (getMMKVObject<AppSettings>(APP_SETTINGS) ||
+      {}) as Partial<AppSettings>;
+    if (translateSettings.translateEnabled && !appSettings.fastDownload) {
       try {
         // Build provider config
         const providerId = translateSettings.translateProvider ?? 'gtx';
@@ -155,6 +166,7 @@ export const downloadChapter = async (
               color: translateSettings.translateColor,
               italic: translateSettings.translateItalic,
               underline: translateSettings.translateUnderline,
+              textAlign: translateSettings.translateTextAlign || 'origin',
             },
             providerConfig,
           );
@@ -165,6 +177,7 @@ export const downloadChapter = async (
             translateSettings.translateColor,
             translateSettings.translateItalic,
             translateSettings.translateUnderline,
+            translateSettings.translateTextAlign || 'origin',
             translatedHtml,
           );
         }
@@ -178,7 +191,9 @@ export const downloadChapter = async (
         .run();
     });
 
-    await sleep(1000);
+    if (!appSettings.fastDownload) {
+      await sleep(1000);
+    }
   } else {
     throw new Error(getString('downloadScreen.chapterEmptyOrScrapeError'));
   }

@@ -95,6 +95,7 @@ export const translateNovel = async (
             translateSettings.translateColor,
             translateSettings.translateItalic,
             translateSettings.translateUnderline,
+            translateSettings.translateTextAlign || 'origin',
           );
           if (!cached) {
             allCached = false;
@@ -141,6 +142,7 @@ export const translateNovel = async (
                 translateSettings.translateColor,
                 translateSettings.translateItalic,
                 translateSettings.translateUnderline,
+                translateSettings.translateTextAlign || 'origin',
               )
             ) {
               continue;
@@ -154,6 +156,7 @@ export const translateNovel = async (
                 color: translateSettings.translateColor,
                 italic: translateSettings.translateItalic,
                 underline: translateSettings.translateUnderline,
+                textAlign: translateSettings.translateTextAlign || 'origin',
               },
               providerConfig,
             );
@@ -165,6 +168,7 @@ export const translateNovel = async (
               translateSettings.translateColor,
               translateSettings.translateItalic,
               translateSettings.translateUnderline,
+              translateSettings.translateTextAlign || 'origin',
               translatedHtml,
             );
           }

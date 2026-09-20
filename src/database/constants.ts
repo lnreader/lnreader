@@ -1,8 +1,8 @@
 export const CHAPTER_ORDER = {
   readTimeAsc: 'readTime ASC',
   readTimeDesc: 'readTime DESC',
-  positionAsc: 'position ASC',
-  positionDesc: 'position DESC',
+  positionAsc: 'CAST(page AS INTEGER) ASC, position ASC',
+  positionDesc: 'CAST(page AS INTEGER) DESC, position DESC',
   nameAsc: 'name ASC',
   nameDesc: 'name DESC',
 } as const;

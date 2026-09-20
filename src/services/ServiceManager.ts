@@ -12,6 +12,7 @@ import {
   SelfHostData,
   selfHostRestore,
 } from './backup/selfhost';
+import { AppSettings, APP_SETTINGS } from '@hooks/persisted/useSettings';
 import { createBackup, restoreBackup } from './backup/local';
 import { migrateNovel, MigrateNovelData } from './migrate/migrateNovel';
 import { downloadChapter } from './download/downloadChapter';
@@ -145,21 +146,24 @@ export default class ServiceManager {
 
   setMeta(
     transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
+    taskId?: string,
   ) {
     const taskList = [...this.getTaskList()];
-    if (taskList.length === 0 || !taskList[0]?.meta) {
+    const idx = taskId ? taskList.findIndex(t => t.id === taskId) : 0;
+    const targetIdx = idx >= 0 ? idx : 0;
+    if (taskList.length === 0 || !taskList[targetIdx]?.meta) {
       return;
     }
 
-    taskList[0] = {
-      ...taskList[0],
-      meta: transformer(taskList[0].meta),
+    taskList[targetIdx] = {
+      ...taskList[targetIdx],
+      meta: transformer(taskList[targetIdx].meta),
     };
 
     if (
-      taskList[0].meta?.isRunning &&
-      taskList[0].task?.name !== 'DOWNLOAD_CHAPTER' &&
-      taskList[0].task?.name !== 'TRANSLATE_NOVEL'
+      taskList[targetIdx].meta?.isRunning &&
+      taskList[targetIdx].task?.name !== 'DOWNLOAD_CHAPTER' &&
+      taskList[targetIdx].task?.name !== 'TRANSLATE_NOVEL'
     ) {
       const now = Date.now();
       if (now - this.lastNotifUpdate > 1000) {
@@ -170,11 +174,11 @@ export default class ServiceManager {
             return;
           }
           BackgroundService.updateNotification({
-            taskTitle: taskList[0].meta?.name || 'Unknown Task',
-            taskDesc: taskList[0].meta?.progressText ?? '',
+            taskTitle: taskList[targetIdx].meta?.name || 'Unknown Task',
+            taskDesc: taskList[targetIdx].meta?.progressText ?? '',
             progressBar: {
-              indeterminate: taskList[0].meta?.progress === undefined,
-              value: (taskList[0].meta?.progress || 0) * 100,
+              indeterminate: taskList[targetIdx].meta?.progress === undefined,
+              value: (taskList[targetIdx].meta?.progress || 0) * 100,
               max: 100,
             },
           });
@@ -182,11 +186,11 @@ export default class ServiceManager {
       } else {
         this.lastNotifUpdate = now;
         BackgroundService.updateNotification({
-          taskTitle: taskList[0].meta?.name || 'Unknown Task',
-          taskDesc: taskList[0].meta?.progressText ?? '',
+          taskTitle: taskList[targetIdx].meta?.name || 'Unknown Task',
+          taskDesc: taskList[targetIdx].meta?.progressText ?? '',
           progressBar: {
-            indeterminate: taskList[0].meta?.progress === undefined,
-            value: (taskList[0].meta?.progress || 0) * 100,
+            indeterminate: taskList[targetIdx].meta?.progress === undefined,
+            value: (taskList[targetIdx].meta?.progress || 0) * 100,
             max: 100,
           },
         });
@@ -228,11 +232,16 @@ export default class ServiceManager {
   async executeTask(
     task: QueuedBackgroundTask,
     startingTasks: QueuedBackgroundTask[],
+    setMetaFn?: (
+      transformer: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
+    ) => void,
   ) {
     // Safety check for old format tasks
     if (!task?.task?.name) {
       return;
     }
+
+    const setMeta = setMetaFn ?? this.setMeta.bind(this);
 
     const progress =
       task.task.name === 'DOWNLOAD_CHAPTER'
@@ -252,27 +261,27 @@ export default class ServiceManager {
 
     switch (task.task.name) {
       case 'IMPORT_EPUB':
-        return importEpub(task.task.data, this.setMeta.bind(this));
+        return importEpub(task.task.data, setMeta);
       case 'UPDATE_LIBRARY':
-        return updateLibrary(task.task.data || {}, this.setMeta.bind(this));
+        return updateLibrary(task.task.data || {}, setMeta);
       case 'DRIVE_BACKUP':
-        return createDriveBackup(task.task.data, this.setMeta.bind(this));
+        return createDriveBackup(task.task.data, setMeta);
       case 'DRIVE_RESTORE':
-        return driveRestore(task.task.data, this.setMeta.bind(this));
+        return driveRestore(task.task.data, setMeta);
       case 'SELF_HOST_BACKUP':
-        return createSelfHostBackup(task.task.data, this.setMeta.bind(this));
+        return createSelfHostBackup(task.task.data, setMeta);
       case 'SELF_HOST_RESTORE':
-        return selfHostRestore(task.task.data, this.setMeta.bind(this));
+        return selfHostRestore(task.task.data, setMeta);
       case 'LOCAL_BACKUP':
-        return createBackup(this.setMeta.bind(this));
+        return createBackup(setMeta);
       case 'LOCAL_RESTORE':
-        return restoreBackup(this.setMeta.bind(this));
+        return restoreBackup(setMeta);
       case 'MIGRATE_NOVEL':
-        return migrateNovel(task.task.data, this.setMeta.bind(this));
+        return migrateNovel(task.task.data, setMeta);
       case 'DOWNLOAD_CHAPTER':
-        return downloadChapter(task.task.data, this.setMeta.bind(this));
+        return downloadChapter(task.task.data, setMeta);
       case 'TRANSLATE_NOVEL':
-        return translateNovel(task.task.data, this.setMeta.bind(this));
+        return translateNovel(task.task.data, setMeta);
     }
   }
 
@@ -294,37 +303,88 @@ export default class ServiceManager {
     };
     const startingTasks = manager.getTaskList();
     const tasksSet = new Set(startingTasks.map(t => t.id));
+    const activePromises = new Map<string, Promise<void>>();
+
     while (BackgroundService.isRunning()) {
       const currentTasks = manager.getTaskList();
-      const currentTask = currentTasks[0];
-      if (!currentTask) {
-        break;
-      }
 
-      //Add any newly queued tasks to the starting tasks list
+      // Add any newly queued tasks to the starting tasks list
       const newtasks = currentTasks.filter(t => !tasksSet.has(t.id));
       startingTasks.push(...newtasks);
       newtasks.forEach(t => tasksSet.add(t.id));
 
-      try {
+      const pendingTasks = currentTasks.filter(t => !activePromises.has(t.id));
+
+      if (pendingTasks.length === 0 && activePromises.size === 0) {
+        break; // No more tasks left and nothing running
+      }
+
+      while (activePromises.size < 5 && pendingTasks.length > 0) {
+        const nextTask = pendingTasks[0];
+
         // Safety check - getTaskList() should already handle conversion, but double-check
-        if (!currentTask?.task?.name) {
-          // Skip invalid tasks
-          setMMKVObject(manager.STORE_KEY, manager.getTaskList().slice(1));
+        if (!nextTask?.task?.name) {
+          pendingTasks.shift();
+          const currentList = manager.getTaskList();
+          setMMKVObject(
+            manager.STORE_KEY,
+            currentList.filter(t => t.id !== nextTask?.id),
+          );
           continue;
         }
-        await manager.executeTask(currentTask, startingTasks);
-        doneTasks[currentTask.task.name] += 1;
-      } catch (error: any) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: currentTask.meta?.name || 'Task Error',
-            body: error?.message || String(error),
-          },
-          trigger: null,
-        });
-      } finally {
-        setMMKVObject(manager.STORE_KEY, manager.getTaskList().slice(1));
+
+        const appSettings = (getMMKVObject<AppSettings>(APP_SETTINGS) ||
+          {}) as Partial<AppSettings>;
+        const isFastDownload =
+          nextTask.task.name === 'DOWNLOAD_CHAPTER' && appSettings.fastDownload;
+
+        if (!isFastDownload && activePromises.size > 0) {
+          // If the next task is sequential, we MUST wait for all current fast tasks to finish
+          break;
+        }
+
+        pendingTasks.shift(); // remove from local pending queue
+
+        const worker = (async () => {
+          try {
+            const taskSetMeta = (
+              transformer: (
+                meta: BackgroundTaskMetadata,
+              ) => BackgroundTaskMetadata,
+            ) => manager.setMeta(transformer, nextTask.id);
+            await manager.executeTask(nextTask, startingTasks, taskSetMeta);
+            doneTasks[nextTask.task.name] += 1;
+          } catch (error: any) {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: nextTask.meta?.name || 'Task Error',
+                body: error?.message || String(error),
+              },
+              trigger: null,
+            });
+          } finally {
+            activePromises.delete(nextTask.id);
+            // Remove completed task from queue in MMKV
+            const currentList = manager.getTaskList();
+            setMMKVObject(
+              manager.STORE_KEY,
+              currentList.filter(t => t.id !== nextTask.id),
+            );
+          }
+        })();
+
+        activePromises.set(nextTask.id, worker);
+
+        if (!isFastDownload) {
+          // Sequential task - don't start any more until this one is done
+          break;
+        }
+      }
+
+      if (activePromises.size > 0) {
+        // Wait for exactly ONE promise to resolve, then the loop will repeat
+        // and instantly pick up the next task in the queue to fill the slot.
+        await Promise.race(activePromises.values());
       }
     }
 

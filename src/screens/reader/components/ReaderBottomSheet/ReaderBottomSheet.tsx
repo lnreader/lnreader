@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import Color from 'color';
 
-import { BottomSheetFlashList, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
@@ -117,14 +117,12 @@ const GeneralTab: React.FC = React.memo(() => {
     [settings, theme, toggleSetting],
   );
 
+  // The general tab has only 12 static items — a plain BottomSheetScrollView
+  // with mapped rows is cleaner and avoids FlashList API churn.
   return (
-    <BottomSheetFlashList
-      data={preferences}
-      extraData={[settings]}
-      keyExtractor={(item: { key: string; label: string }) => item.key}
-      renderItem={renderItem}
-      estimatedItemSize={60}
-    />
+    <BottomSheetScrollView>
+      {preferences.map(item => renderItem({ item }))}
+    </BottomSheetScrollView>
   );
 });
 

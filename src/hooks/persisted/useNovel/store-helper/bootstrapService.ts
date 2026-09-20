@@ -68,6 +68,7 @@ export type BootstrapServiceDependencies =
 
 export const createBootstrapService = (
   dependencies: Partial<BootstrapServiceDependencies> = {},
+  options?: { showPaginatedChaptersAsOneList?: boolean },
 ) => {
   const deps: BootstrapServiceDependencies = {
     ...defaultBootstrapServiceDependencies,
@@ -75,6 +76,14 @@ export const createBootstrapService = (
   };
 
   const calculatePages = (tmpNovel: NovelInfo): string[] => {
+    if (
+      options?.showPaginatedChaptersAsOneList &&
+      ((tmpNovel.totalPages ?? 0) > 1 ||
+        deps.getCustomPages(tmpNovel.id).length > 1)
+    ) {
+      return [''];
+    }
+
     let tmpPages: string[];
     if ((tmpNovel.totalPages ?? 0) > 0) {
       tmpPages = Array(tmpNovel.totalPages)
@@ -145,11 +154,16 @@ export const createBootstrapService = (
         newChapters = [];
       }
     } else if (settingsFilter.length === 0) {
-      const sourcePage = await deps.fetchPage(pluginId, novelPath, page);
+      const fetchPageNum = page || '1';
+      const sourcePage = await deps.fetchPage(
+        pluginId,
+        novelPath,
+        fetchPageNum,
+      );
       const sourceChapters = sourcePage.chapters.map(ch => {
         return {
           ...ch,
-          page,
+          page: fetchPageNum,
         };
       });
       await deps.insertChapters(novel.id, sourceChapters);
@@ -350,9 +364,13 @@ export const createBootstrapService = (
       }
 
       const pages = calculatePages(novel);
-      const page = pages[pageIndex] ?? '1';
+      const page =
+        pages[pageIndex] ??
+        (options?.showPaginatedChaptersAsOneList ? '' : '1');
       const chapterCount =
-        settingsFilter.length === 0 && pages.length === 1
+        settingsFilter.length === 0 &&
+        pages.length === 1 &&
+        !options?.showPaginatedChaptersAsOneList
           ? novel.totalChapters ?? 0
           : deps.getChapterCountSync(novel.id, page, settingsFilter);
       if (chapterCount === 0 && settingsFilter.length === 0) {
