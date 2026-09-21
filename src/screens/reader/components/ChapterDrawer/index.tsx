@@ -186,15 +186,19 @@ const ChapterDrawer = ({ onClose }: ChapterDrawerProps) => {
   }, []);
 
   useEffect(() => {
-    if (currentScrollIndex !== undefined) {
-      if (
-        scrollToIndex.current === undefined ||
-        currentScrollIndex !== scrollToIndex.current
-      ) {
-        scroll(currentScrollIndex);
-      }
-      scrollToIndex.current = currentScrollIndex;
+    if (currentScrollIndex === undefined) {
+      return;
     }
+    // An `undefined` previous index means the list was still loading and is
+    // only mounting now, with `initialScrollIndex` already pointing at the
+    // right row; animating to it would add a second, visible jump.
+    if (
+      scrollToIndex.current !== undefined &&
+      currentScrollIndex !== scrollToIndex.current
+    ) {
+      scroll(currentScrollIndex);
+    }
+    scrollToIndex.current = currentScrollIndex;
   }, [currentScrollIndex, scroll]);
 
   return (

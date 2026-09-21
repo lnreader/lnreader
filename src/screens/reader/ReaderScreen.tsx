@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 
 import ReaderAppbar from './components/ReaderAppbar';
@@ -20,20 +20,51 @@ import {
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, Share, StyleSheet, View } from 'react-native';
+import {
+  InteractionManager,
+  Keyboard,
+  Share,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
 import { EMPTY_READER_SEARCH_RESULT, ReaderSearchResult } from './types';
 import * as Linking from 'expo-linking';
 import { resolveUrl } from '@services/plugin/fetch';
 
-const Chapter = ({ route, navigation }: ChapterScreenProps) => {
+const Chapter = ({ route, navigation }: ChapterScreenProps) => (
+  <ChapterContextProvider
+    novel={route.params.novel}
+    initialChapter={route.params.chapter}
+  >
+    <ReaderDrawerLayout route={route} navigation={navigation} />
+  </ChapterContextProvider>
+);
+
+const ReaderDrawerLayout = ({ route, navigation }: ChapterScreenProps) => {
+  const theme = useTheme();
+  const { loading } = useChapterContext();
   const [open, setOpen] = useState(false);
   /**
-   * The drawer renders a list of every chapter in the novel and is mounted
-   * off-screen by `Drawer`. Mounting it up front competes with the chapter load
-   * for the JS thread, so it is only created once the drawer is actually used.
+   * The drawer renders a list of every chapter in the novel. Mounting it up
+   * front competes with the chapter load for the JS thread, so it is deferred
+   * until the chapter is on screen -- but it is mounted *before* the drawer is
+   * first opened rather than on the tap that opens it. `Drawer` keeps a closed
+   * panel laid out (it is only translated off-screen), so the list measures
+   * and renders its first rows out of sight instead of during the open
+   * animation, which is what left the panel empty on slower devices.
    */
   const [drawerMounted, setDrawerMounted] = useState(false);
+
+  useEffect(() => {
+    if (loading || drawerMounted) {
+      return;
+    }
+    const handle = InteractionManager.runAfterInteractions(() =>
+      setDrawerMounted(true),
+    );
+    return () => handle.cancel();
+  }, [drawerMounted, loading]);
 
   useBackHandler(() => {
     if (open) {
@@ -55,25 +86,31 @@ const Chapter = ({ route, navigation }: ChapterScreenProps) => {
     [closeDrawer, drawerMounted],
   );
 
+  /**
+   * `react-native-drawer-layout` paints the panel white by default and applies
+   * `drawerStyle` last, so the panel itself has to carry the drawer's surface
+   * colour. Left transparent, the reader showed through the panel for every
+   * frame before the content painted.
+   */
+  const drawerStyle = useMemo(
+    () => ({ backgroundColor: theme.surface }),
+    [theme.surface],
+  );
+
   return (
-    <ChapterContextProvider
-      novel={route.params.novel}
-      initialChapter={route.params.chapter}
+    <Drawer
+      drawerStyle={drawerStyle}
+      open={open}
+      onOpen={openDrawer}
+      onClose={closeDrawer}
+      renderDrawerContent={renderDrawerContent}
     >
-      <Drawer
-        drawerStyle={styles.drawer}
-        open={open}
-        onOpen={openDrawer}
-        onClose={closeDrawer}
-        renderDrawerContent={renderDrawerContent}
-      >
-        <ChapterContent
-          route={route}
-          navigation={navigation}
-          openDrawer={openDrawer}
-        />
-      </Drawer>
-    </ChapterContextProvider>
+      <ChapterContent
+        route={route}
+        navigation={navigation}
+        openDrawer={openDrawer}
+      />
+    </Drawer>
   );
 };
 
@@ -313,5 +350,4 @@ export default Chapter;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  drawer: { backgroundColor: 'transparent' },
 });
