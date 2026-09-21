@@ -55,7 +55,7 @@
     "appLanguageDefault": "Default",
     "appTheme": "App theme",
     "darkTheme": "Dark Theme",
-    "dateFormat": "Date format",
+    "dateFormat": "Μορφοποίησή ημερομηνίας",
     "dateFormatDefault": "Default (%{date})",
     "dynamicColors": "Dynamic",
     "hideBackdrop": "Hide backdrop",
