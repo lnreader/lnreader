@@ -69,7 +69,7 @@ const Application = () => {
   useRozeniteSqlitePlugin({ adapters: sqliteAdapters });
   const { success: databaseReady, error: databaseError } = useInitDatabase();
   const { ready: servicesReady, error: servicesError } =
-    useInitializeAppServices(Boolean(databaseReady));
+    useInitializeAppServices();
 
   useEffect(() => {
     if ((databaseReady && servicesReady) || databaseError || servicesError) {

@@ -10,7 +10,7 @@ import type {
   BackgroundTaskMetadata,
   QueuedBackgroundTask,
 } from './contracts';
-import { executeBackgroundTask } from './executeTask';
+import type { executeBackgroundTask as ExecuteBackgroundTask } from './executeTask';
 import {
   ACTIVE_BACKGROUND_TASK_STATES,
   allowsDuplicateTask,
@@ -20,6 +20,18 @@ import {
   willTaskWaitInQueue,
 } from './taskDefinitions';
 import { BACKGROUND_TASKS_STORE_KEY } from './constants';
+
+/**
+ * Every task implementation – backups, EPUB import/export, downloads, library
+ * updates – hangs off `./executeTask`, but the queue only reaches it once a
+ * task is actually dispatched. Requiring it there keeps that whole graph, and
+ * the Google Drive and EPUB modules with it, off the startup path.
+ */
+const executeBackgroundTask: typeof ExecuteBackgroundTask = (...args) =>
+  (
+    require('./executeTask')
+      .executeBackgroundTask as typeof ExecuteBackgroundTask
+  )(...args);
 
 const makeTemporaryId = () =>
   `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;

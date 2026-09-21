@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
 import Novel from '../screens/novel/NovelScreen';
-import Reader from '../screens/reader/ReaderScreen';
 
 import {
   ChapterScreenProps,
@@ -41,7 +40,7 @@ const ReaderStack = ({ route }) => {
         <Stack.Screen name="Novel" component={Novel} />
         <Stack.Screen
           name="Chapter"
-          component={Reader}
+          getComponent={() => require('../screens/reader/ReaderScreen').default}
           options={{ contentStyle: { backgroundColor: readerBackground } }}
         />
       </Stack.Navigator>

@@ -2,14 +2,17 @@ import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
 import { AppRegistry, I18nManager } from 'react-native';
 import { i18n } from './src/i18n/translations';
-import { runHeadlessBackgroundTask } from './src/services/backgroundTasks';
 import { installJsCrashHandler } from './src/services/crashLogs/installJsCrashHandler';
 
 installJsCrashHandler();
 
+// The factory only runs when Android dispatches the headless task, so the task
+// implementations stay out of the bundle the UI has to evaluate on launch.
 AppRegistry.registerHeadlessTask(
   'LNReaderBackgroundTask',
-  () => runHeadlessBackgroundTask,
+  () =>
+    require('./src/services/backgroundTasks/headlessTask')
+      .runHeadlessBackgroundTask,
 );
 
 const isRTL = i18n.locale.startsWith('ar') || i18n.locale.startsWith('he');

@@ -10,12 +10,18 @@ type AppServicesState = {
 
 let initializationPromise: Promise<void> | undefined;
 
+/**
+ * Neither of these touches the database, so they run alongside the migration
+ * instead of queueing up behind it – and alongside each other, rather than
+ * paying for the plugin bundles and the native task table back to back.
+ */
 const initializeAppServices = (): Promise<void> => {
   if (!initializationPromise) {
-    initializationPromise = initializeInstalledPlugins()
-      .then(async () => {
-        await backgroundTasks.refresh();
-      })
+    initializationPromise = Promise.all([
+      initializeInstalledPlugins(),
+      backgroundTasks.refresh(),
+    ])
+      .then(() => undefined)
       .catch(error => {
         initializationPromise = undefined;
         throw error;
@@ -25,14 +31,10 @@ const initializeAppServices = (): Promise<void> => {
   return initializationPromise;
 };
 
-export const useInitializeAppServices = (
-  databaseReady: boolean,
-): AppServicesState => {
+export const useInitializeAppServices = (): AppServicesState => {
   const [state, setState] = useState<AppServicesState>({ ready: false });
 
   useEffect(() => {
-    if (!databaseReady) return;
-
     let isActive = true;
 
     initializeAppServices()
@@ -51,7 +53,7 @@ export const useInitializeAppServices = (
     return () => {
       isActive = false;
     };
-  }, [databaseReady]);
+  }, []);
 
   return state;
 };

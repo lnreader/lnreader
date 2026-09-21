@@ -1,11 +1,6 @@
-import { gcm } from '@noble/ciphers/aes.js';
-import { utf8ToBytes, bytesToUtf8 } from '@noble/ciphers/utils.js';
 import dayjs from 'dayjs';
-import { load } from 'cheerio';
-import { Parser } from 'htmlparser2';
 import reverse from 'lodash-es/reverse';
 import uniqBy from 'lodash-es/uniqBy';
-import { encode, decode } from 'urlencode';
 
 import { getEnabledRepositoriesFromDb } from '@database/queries/RepositoryQueries';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
@@ -28,18 +23,39 @@ import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
 import { FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
 
-const packages: Record<string, any> = {
-  'htmlparser2': { Parser },
-  'cheerio': { load },
-  'dayjs': dayjs,
-  'urlencode': { encode, decode },
-  '@libs/novelStatus': { NovelStatus },
-  '@libs/fetch': { fetchApi, fetchText, fetchProto },
-  '@libs/isAbsoluteUrl': { isUrlAbsolute },
-  '@libs/filterInputs': { FilterTypes },
-  '@libs/defaultCover': { defaultCover },
-  '@libs/aes': { gcm },
-  '@libs/utils': { utf8ToBytes, bytesToUtf8 },
+/**
+ * The scraping libraries a plugin may ask for are several hundred kilobytes of
+ * JavaScript that most launches never touch. Each one is required the first
+ * time a plugin asks for it rather than when this module is evaluated, which
+ * keeps them off the app's startup path.
+ */
+const packageLoaders: Record<string, () => any> = {
+  'htmlparser2': () => ({ Parser: require('htmlparser2').Parser }),
+  'cheerio': () => ({ load: require('cheerio').load }),
+  'dayjs': () => dayjs,
+  'urlencode': () => {
+    const { encode, decode } = require('urlencode');
+    return { encode, decode };
+  },
+  '@libs/novelStatus': () => ({ NovelStatus }),
+  '@libs/fetch': () => ({ fetchApi, fetchText, fetchProto }),
+  '@libs/isAbsoluteUrl': () => ({ isUrlAbsolute }),
+  '@libs/filterInputs': () => ({ FilterTypes }),
+  '@libs/defaultCover': () => ({ defaultCover }),
+  '@libs/aes': () => ({ gcm: require('@noble/ciphers/aes.js').gcm }),
+  '@libs/utils': () => {
+    const { utf8ToBytes, bytesToUtf8 } = require('@noble/ciphers/utils.js');
+    return { utf8ToBytes, bytesToUtf8 };
+  },
+};
+
+const loadedPackages: Record<string, any> = {};
+
+const requirePackage = (packageName: string) => {
+  if (!(packageName in loadedPackages)) {
+    loadedPackages[packageName] = packageLoaders[packageName]?.();
+  }
+  return loadedPackages[packageName];
 };
 
 const initPlugin = (pluginId: string, rawCode: string) => {
@@ -52,7 +68,7 @@ const initPlugin = (pluginId: string, rawCode: string) => {
           sessionStorage: new SessionStorage(pluginId),
         };
       }
-      return packages[packageName];
+      return requirePackage(packageName);
     };
     /* eslint no-new-func: "off", curly: "error" */
     const plugin: Plugin = Function(

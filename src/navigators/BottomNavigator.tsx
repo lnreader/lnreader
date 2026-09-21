@@ -1,11 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+// The library is the tab the app opens on; the others are required the first
+// time they are focused so they stay off the cold-start path.
 import Library from '../screens/library/LibraryScreen';
-import Updates from '../screens/updates/UpdatesScreen';
-import History from '../screens/history/HistoryScreen';
-import Browse from '../screens/browse/BrowseScreen';
-import More from '../screens/more/MoreScreen';
 
 import { getString } from '@i18n/translations';
 import {
@@ -98,7 +96,9 @@ const BottomNavigator = () => {
       {showUpdatesTab ? (
         <Tab.Screen
           name="Updates"
-          component={Updates}
+          getComponent={() =>
+            require('../screens/updates/UpdatesScreen').default
+          }
           options={{
             title: getString('updates'),
           }}
@@ -107,7 +107,9 @@ const BottomNavigator = () => {
       {showHistoryTab ? (
         <Tab.Screen
           name="History"
-          component={History}
+          getComponent={() =>
+            require('../screens/history/HistoryScreen').default
+          }
           options={{
             title: getString('history'),
           }}
@@ -115,7 +117,7 @@ const BottomNavigator = () => {
       ) : null}
       <Tab.Screen
         name="Browse"
-        component={Browse}
+        getComponent={() => require('../screens/browse/BrowseScreen').default}
         options={{
           title: getString('browse'),
           freezeOnBlur: false,
@@ -126,7 +128,7 @@ const BottomNavigator = () => {
       />
       <Tab.Screen
         name="More"
-        component={More}
+        getComponent={() => require('../screens/more/MoreScreen').default}
         options={{
           title: getString('more'),
         }}

@@ -1,7 +1,5 @@
- 
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
-import NativeFile from '@modules/native-file'
-import { parse as parseProto } from 'protobufjs';
+import NativeFile from '@modules/native-file';
 
 type FetchInit = {
   headers?: Record<string, string> | Headers;
@@ -136,6 +134,10 @@ export const fetchProto = async function (
   url: string,
   init?: FetchInit,
 ) {
+  // protobufjs is only needed by the handful of sources that speak gRPC, so it
+  // is required here instead of on every app start.
+  const { parse: parseProto } =
+    require('protobufjs') as typeof import('protobufjs');
   const protoRoot = parseProto(protoInit.proto).root;
   const RequestMessge = protoRoot.lookupType(protoInit.requestType);
   if (RequestMessge.verify(protoInit.requestData)) {
