@@ -93,23 +93,32 @@ function CustomBottomTabBar({
             style={styles.pressable}
           >
             {/* Icon */}
-            <Animated.View
+            <View
               style={[
                 styles.iconContainer,
-                {
-                  transitionProperty: ['width', 'backgroundColor'],
-                  transitionDuration: 250,
-                  transitionTimingFunction: 'ease-in-out',
-                  marginBottom: showLabel ? 4 : 20,
-                  width: isFocused ? 64 : 32,
-                  backgroundColor: isFocused
-                    ? theme.primaryContainer
-                    : transparentBg,
-                },
+                { marginBottom: showLabel ? 4 : 20 },
               ]}
             >
+              {/* The indicator is absolutely positioned and animated with a
+                  transform so that growing it never re-runs layout, which
+                  would otherwise make the icon and label tremble sideways as
+                  their rounded pixel positions shift on every frame. */}
+              <Animated.View
+                style={[
+                  styles.indicator,
+                  {
+                    transitionProperty: ['transform', 'backgroundColor'],
+                    transitionDuration: 250,
+                    transitionTimingFunction: 'ease-in-out',
+                    transform: [{ scaleX: isFocused ? 1 : 0.5 }],
+                    backgroundColor: isFocused
+                      ? theme.primaryContainer
+                      : transparentBg,
+                  },
+                ]}
+              />
               {renderIcon({ color: iconColor, route })}
-            </Animated.View>
+            </View>
 
             {/* Label */}
             {showLabel ? (
@@ -155,7 +164,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    width: 64,
     height: 32,
+  },
+  indicator: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     borderRadius: 16,
   },
   label: {
