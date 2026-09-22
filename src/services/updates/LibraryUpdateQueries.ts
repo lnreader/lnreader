@@ -260,9 +260,28 @@ const updateNovel = async (
   if (totalPages > 1 && getPlugin(pluginId)?.parsePage) {
     if (pageOrder === 'DESC') {
       // Page 1 holds the newest chapters, so it alone decides whether
-      // anything was published. When nothing was, this costs no extra
-      // requests at all.
-      if (newOnFirstPage > 0) {
+      // anything was published, however many pages of them there are. When
+      // nothing was, this costs no extra requests at all.
+      let newOnNewestPage = newOnFirstPage;
+
+      // parseNovel normally returns page 1. A plugin that returns metadata
+      // only would otherwise look permanently up to date, so fetch it.
+      if (!novel.chapters?.length) {
+        try {
+          const firstPage = await fetchPage(pluginId, novelPath, '1');
+          newOnNewestPage = await updateNovelChapters(
+            pluginId,
+            novel.name,
+            novelId,
+            firstPage.chapters || [],
+            downloadNewChapters,
+            '1',
+            enqueue,
+          );
+        } catch {}
+      }
+
+      if (newOnNewestPage > 0) {
         await refetchAllPages(
           pluginId,
           novelPath,

@@ -121,6 +121,56 @@ describe('updateNovel', () => {
         '4',
       ]);
     });
+    it('refetches every page when a long absence spans several pages of new chapters', async () => {
+      // 30 chapters known, 12 published since: pages 1 and 2 are entirely new.
+      const before = descendingPages(30, 10);
+      const after = descendingPages(42, 10);
+      mockStoredTotalPages = 3;
+      mockStoredPaths = before.flat().map(chapter => chapter.path);
+      mockedFetchNovel.mockResolvedValue({
+        name: 'Novel',
+        path: '/n',
+        chapters: after[0],
+        totalPages: 5,
+      } as any);
+      mockedFetchPage.mockImplementation(async (_id, _path, page) => ({
+        chapters: after[Number(page) - 1] ?? [],
+      }));
+
+      await updateNovel('plugin', '/n', 1, {});
+
+      expect(mockedFetchPage.mock.calls.map(call => call[2])).toEqual([
+        '2',
+        '3',
+        '4',
+        '5',
+      ]);
+    });
+
+    it('fetches page 1 itself when parseNovel returns metadata only', async () => {
+      const after = descendingPages(10, 3);
+      mockStoredTotalPages = 3;
+      mockStoredPaths = [];
+      mockedFetchNovel.mockResolvedValue({
+        name: 'Novel',
+        path: '/n',
+        chapters: [],
+        totalPages: 4,
+      } as any);
+      mockedFetchPage.mockImplementation(async (_id, _path, page) => ({
+        chapters: after[Number(page) - 1] ?? [],
+      }));
+
+      await updateNovel('plugin', '/n', 1, {});
+
+      // Page 1 is fetched to decide, then the rest follow.
+      expect(mockedFetchPage.mock.calls.map(call => call[2])).toEqual([
+        '1',
+        '2',
+        '3',
+        '4',
+      ]);
+    });
   });
 
   describe('ASC sources', () => {
