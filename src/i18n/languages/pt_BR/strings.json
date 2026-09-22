@@ -13,7 +13,7 @@
     "cachedNovelsDeletedToast": "Cache de novels deletado",
     "chapterInsertFailed": "falha ao inserir capítulo",
     "clearCachedNovels": "Limpar capitulo em app",
-    "clearCachedNovelsDesc": "Delete cached novels that aren't in your library",
+    "clearCachedNovelsDesc": "Deletar novel que não está em sua biblioteca",
     "clearDatabaseWarning": "O progresso de capítulo lido e baixados de novels que não pertencem à biblioteca serão perdidos.",
     "clearUpdatesMessage": "Novos capítulos limpos.",
     "clearUpdatesTab": "Aba de limpeza de novidades",
@@ -38,7 +38,7 @@
     "recreateDBIndexesToast": "Índices do BD foi recriado",
     "recreateDBIndexesDialogTitle": "Todos os índices do BD vai ser Recriado.\nIsso pode demorar um pouco.",
     "recreateDBIndexesDesc": "Recrie os índices do BD. Isso pode melhorar o desempenho em dispositivos mais lentos.",
-    "restartRequired": "Restart LNReader to apply this change.",
+    "restartRequired": "Reinicie o LNReader para aplicar esta alteração.",
     "shareCrashLogs": "Share crash logs",
     "shareCrashLogsDescription": "Create a diagnostic report with app, device, plugin, exception, and app-accessible logcat information.",
     "shareCrashLogsFailed": "Failed to create crash logs."
@@ -185,7 +185,7 @@
       "downloadedFilesDescription": "Downloaded chapter content for offline reading. This may be large."
     },
     "preparingData": "Preparando os dados",
-    "preparingSelectedFiles": "Preparing selected files",
+    "preparingSelectedFiles": "Preparando arquivos selecionados",
     "remote": {
       "backup": "“Backup” do servidor pessoal",
       "host": "Servidor",
@@ -196,11 +196,11 @@
     "restoreBackupDesc": "Restaure a biblioteca a partir de um arquivo de backup ",
     "restorinBackup": "Restaurando cópia de segurança",
     "restoringData": "Restaurando dados",
-    "restoringSelectedFiles": "Restoring selected files",
+    "restoringSelectedFiles": "Restaurando arquivos selecionados",
     "selfHost": "Auto hospedar",
     "selfHostDesc": "Fazer “backup” em seu servidor",
     "uploadingData": "Enviando dados",
-    "uploadingSelectedFiles": "Uploading selected files",
+    "uploadingSelectedFiles": "Enviando arquivos selecionados",
     "uploadingDownloadedFiles": "Baixando arquivos salvos"
   },
   "browse": "Navegar",
@@ -247,7 +247,7 @@
     "pluginIcon": "plugin icon",
     "pluginNotInstalled": "This plugin is not installed",
     "plugins": "Plugins",
-    "removeFromLibrary": "Removed from library",
+    "removeFromLibrary": "Removido da biblioteca",
     "repositories": "Repositories",
     "searchbar": "Pesquisar nas fontes",
     "searchResults": "Resultados da pesquisa",
@@ -275,7 +275,7 @@
   },
   "categories": {
     "addCategories": "Adicionar categoria",
-    "cantDeleteDefault": "You can't delete the default category",
+    "cantDeleteDefault": "Categoria padrão não pode ser deletada",
     "default": "Padrão",
     "defaultCategory": "Categoria padrão",
     "alwaysAsk": "Always ask",
@@ -452,7 +452,7 @@
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Ordenar",
     "updateLibrary": "Atualizar biblioteca ao iniciar",
-    "updateLibraryDesc": "Not recommended for low-end devices",
+    "updateLibraryDesc": "Não recomendado para dispositivos de baixo desempenho",
     "updateTime": "Mostrar horário da última atualização",
     "useFAB": "Usar Botões flutuantes na Biblioteca",
     "timeTracking": "Time Tracking",
@@ -581,7 +581,7 @@
     },
     "coverSaved": "Cover saved",
     "coverNotSaved": "Cover not saved",
-    "deleteChapterError": "Can't delete the chapter folder",
+    "deleteChapterError": "Não foi possível excluir a pasta do capítulo",
     "deleteMessage": "Delete downloaded chapters?",
     "deletedAllDownloads": "Deleted all Downloads",
     "download": {
@@ -589,8 +589,8 @@
       "customAmount": "Download custom amount",
       "delete": "Delete downloads",
       "next": "Next chapter",
-      "next10": "Next 10 chapters",
-      "next5": "Next 5 chapters",
+      "next10": "Próximos 10 capítulos",
+      "next5": "Próximos 5 capítulos",
       "unread": "Unread"
     },
     "edit": {
