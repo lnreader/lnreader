@@ -8,6 +8,7 @@ type TestNodeList = TestNode[] & { item(index: number): TestNode };
 class TestElement {
   readonly childNodes: TestNodeList;
   readonly children: TestElement[];
+  parentElement: TestElement | null = null;
 
   constructor(readonly nodeName: string, childNodes: TestNode[]) {
     this.childNodes = [...childNodes] as TestNodeList;
@@ -15,6 +16,9 @@ class TestElement {
     this.children = childNodes.filter(
       (node): node is TestElement => node instanceof TestElement,
     );
+    this.children.forEach(child => {
+      child.parentElement = this;
+    });
   }
 
   hasChildNodes() {
@@ -31,6 +35,11 @@ class TestElement {
 type TtsTraversal = {
   getAllReadableElements(element: TestElement): TestElement[];
   normalizeText(text: string): string;
+  getStartIndex(
+    element: TestElement | undefined,
+    readableElements: TestElement[],
+  ): number;
+  resolveReadableElement(element: TestElement): TestElement | null;
 };
 
 const text = (value: string): TestNode => ({
@@ -183,5 +192,28 @@ describe('reader TTS traversal', () => {
       'First paragraph',
       'Second paragraph',
     ]);
+  });
+
+  it('resolves nested formatting to its queued paragraph', () => {
+    const firstSpan = element('span', text('First paragraph'));
+    const secondSpan = element('span', text('Second paragraph'));
+    const firstParagraph = element('p', firstSpan);
+    const secondParagraph = element('p', secondSpan);
+    const chapter = element('div', firstParagraph, secondParagraph);
+    const tts = loadTtsTraversal(chapter);
+    const readableElements = tts.getAllReadableElements(chapter);
+
+    expect(tts.resolveReadableElement(secondSpan)).toBe(secondParagraph);
+    expect(tts.getStartIndex(secondSpan, readableElements)).toBe(1);
+  });
+
+  it('does not fall back to the chapter start for an invalid target', () => {
+    const chapter = element('div', element('p', text('Chapter paragraph')));
+    const detachedParagraph = element('p', text('Detached paragraph'));
+    const tts = loadTtsTraversal(chapter);
+    const readableElements = tts.getAllReadableElements(chapter);
+
+    expect(tts.resolveReadableElement(detachedParagraph)).toBeNull();
+    expect(tts.getStartIndex(detachedParagraph, readableElements)).toBe(-1);
   });
 });

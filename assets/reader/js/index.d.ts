@@ -61,7 +61,8 @@ interface TTS {
   resume: () => void;
   stop: () => void;
   pause: () => void;
-  readable: (element?: HTMLElement) => void;
+  readable: (element?: HTMLElement) => boolean;
+  resolveReadableElement: (element: HTMLElement) => HTMLElement | null;
 }
 
 declare global {

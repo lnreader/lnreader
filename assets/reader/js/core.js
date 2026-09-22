@@ -306,25 +306,44 @@ window.tts = new (function () {
     reader.post({ type: 'tts-command', data: { command: 'previous' } });
   };
 
-  this.start = element => {
-    const startElement = element ?? reader.chapterElement;
+  this.resolveReadableElement = element => {
+    let currentElement = element;
+    let readableElement = null;
 
+    while (currentElement) {
+      if (this.readable(currentElement)) {
+        readableElement = currentElement;
+      }
+      if (currentElement === reader.chapterElement) {
+        return readableElement;
+      }
+      currentElement = currentElement.parentElement;
+    }
+
+    return null;
+  };
+
+  this.getStartIndex = (element, readableElements) => {
+    if (!element) return 0;
+    const readableElement = this.resolveReadableElement(element);
+    return readableElement ? readableElements.indexOf(readableElement) : -1;
+  };
+
+  this.start = element => {
     const readableEntries = this.getAllReadableElements(reader.chapterElement)
       .map(readableElement => ({
         element: readableElement,
         text: this.normalizeText(readableElement.innerText),
       }))
       .filter(entry => !!entry.text);
-    this.allReadableElements = readableEntries.map(entry => entry.element);
+    const readableElements = readableEntries.map(entry => entry.element);
+    const startIndex = this.getStartIndex(element, readableElements);
+
+    if (startIndex < 0) return;
+
+    this.allReadableElements = readableElements;
     this.totalElements = this.allReadableElements.length;
     this.textQueue = readableEntries.map(entry => entry.text);
-
-    const requestedIndex =
-      element && element !== reader.chapterElement
-        ? this.allReadableElements.indexOf(startElement)
-        : 0;
-    const startIndex = requestedIndex >= 0 ? requestedIndex : 0;
-
     this.started = this.totalElements > 0;
     this.reading = this.started;
     this.setActiveIndex(startIndex);

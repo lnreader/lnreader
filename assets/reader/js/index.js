@@ -392,17 +392,26 @@ const TTSController = () => {
     moved = true;
     setControllerPosition(touch);
 
-    const newHoverElement = document
-      .elementsFromPoint(touch.clientX, touch.clientY)
-      .find(
-        element =>
-          !element.closest('#TTS-Controller') &&
-          !element.id.includes('scrollbar') &&
-          tts.readable(element),
-      );
-    hoverElement?.classList.remove('highlight');
-    hoverElement = newHoverElement ?? null;
-    hoverElement?.classList.add('highlight');
+    let newHoverElement = null;
+    for (const element of document.elementsFromPoint(
+      touch.clientX,
+      touch.clientY,
+    )) {
+      if (
+        element.closest('#TTS-Controller') ||
+        element.id.includes('scrollbar')
+      ) {
+        continue;
+      }
+      newHoverElement = tts.resolveReadableElement(element);
+      if (newHoverElement) break;
+    }
+
+    if (hoverElement !== newHoverElement) {
+      hoverElement?.classList.remove('highlight');
+      hoverElement = newHoverElement;
+      hoverElement?.classList.add('highlight');
+    }
   };
 
   const endDrag = e => {
