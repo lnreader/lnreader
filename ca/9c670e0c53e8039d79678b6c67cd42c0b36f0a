@@ -1,0 +1,57 @@
+src/i18n/languages/uk_UA/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,250,278,455,584,592-593
+src/i18n/languages/es_ES/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,250,278
+src/i18n/languages/zh_CN/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,169,250,278,455,584,592-593
+src/i18n/languages/he_IL/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 5,16
+src/i18n/languages/fr_FR/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,167,197,250,278,455,584,592-593
+src/i18n/languages/vi_VN/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,250,278,455,584,592-593
+src/i18n/languages/cs_CZ/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/hu_HU/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/el_GR/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/pt_BR/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,41,188,199,203,250,278,455,584,592-593
+src/i18n/languages/as_IN/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/ar_SA/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,169,250,278,455
+src/i18n/languages/de_DE/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/it_IT/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,250
+src/i18n/languages/ru_RU/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 169,250,278,455,584,592-593
+src/i18n/languages/tr_TR/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 16,250,278,455,584,592-593
+src/i18n/languages/ja_JP/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/zh_TW/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/nl_NL/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 250
+src/i18n/languages/id_ID/strings.json
+  s_b6597bcdcb3edb::t_79f4b0845d8ec3 8-9,11,13,15-16,18-19,21-22,26-38,40-41,46,49-50,52,57-72,75,89-103,105-106,109-110,116-117,122-129,131-132,135-136,138-147,149-150,153-154,156-161,163-167,170-173,175-178,180-183,187-188,190,192,195-204,209-210,212,214,217-219,224-235,237-244,246-251,253-264,266-267,272,278,290,298,305,311-314,316-317,319,323-325,328,330-333,336,339,341,345-347,350-352,360-362,364-366,383-385,388-389,398,400,404,410-417,421-422,424-428,435-440,443,449-453,455,458-463,476-479,494,496,516,518-520,528-529,531,537-538,541-544,547-548,551,555-558,560-571,574,576-580,582-586,588-594,597-600,602-603,609,616-618,623,625-627,629-635,637,639-642,646-656,658,661-668,670-676,678-686,698-699,702-703,705-708,711-713,715-716,718-720,722,724-725,735,741-747,749,751-754,758,761,763,765,767,770-775,778-791,795-796,799-800,803-804,807-808,834,837,840-841,843-845,848,850-869
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ca9c670e0c53e8039d79678b6c67cd42c0b36f0a",
+  "prompts": {},
+  "sessions": {
+    "s_b6597bcdcb3edb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a888-fa6b-7f91-965e-48ff4460f279",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
