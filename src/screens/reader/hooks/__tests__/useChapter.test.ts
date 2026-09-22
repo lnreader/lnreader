@@ -22,6 +22,7 @@ const mockSanitizeChapterText = jest.fn();
 const mockParseChapterNumber = jest.fn();
 
 const mockUseNovelValue = jest.fn();
+const mockGetPluginPageOrder = jest.fn((..._args: unknown[]) => 'ASC');
 
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
@@ -55,6 +56,10 @@ jest.mock('@database/queries/HistoryQueries', () => ({
 jest.mock('@services/plugin/fetch', () => ({
   fetchChapter: (...args: unknown[]) => mockFetchChapter(...args),
   fetchPage: (...args: unknown[]) => mockFetchPage(...args),
+}));
+
+jest.mock('@plugins/pluginManager', () => ({
+  getPluginPageOrder: (...args: unknown[]) => mockGetPluginPageOrder(...args),
 }));
 
 jest.mock('../../utils/sanitizeChapterText', () => ({
@@ -160,6 +165,7 @@ describe('useChapter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetPluginPageOrder.mockReturnValue('ASC');
     (NativeFile.exists as jest.Mock).mockReturnValue(false);
     // The native module rejects when the chapter is not downloaded.
     (NativeFile.readFile as jest.Mock).mockRejectedValue(
@@ -239,6 +245,44 @@ describe('useChapter', () => {
     // A single native call doubles as the existence check.
     expect(NativeFile.readFile).toHaveBeenCalledTimes(1);
     expect(NativeFile.exists).not.toHaveBeenCalled();
+  });
+
+  describe('adjacent source pages', () => {
+    /**
+     * Resolve the chapter sitting on `page`, with nothing adjacent already in
+     * the database, and report which source pages the hook reached for.
+     */
+    const fetchedPagesAround = async (page: string) => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      // Nothing cached for the neighbouring pages, so the hook has to fetch.
+      mockGetChapterCount.mockResolvedValue(0);
+
+      const chapter = makeChapter(4, page);
+      mockGetDbChapter.mockResolvedValue(chapter);
+
+      const { result } = renderHook(() => useFlatChapter(chapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await waitFor(() => expect(mockFetchPage).toHaveBeenCalled());
+
+      return mockFetchPage.mock.calls.map(call => call[2]);
+    };
+
+    it('reads forwards towards higher page numbers on an ASC source', async () => {
+      mockGetPluginPageOrder.mockReturnValue('ASC');
+
+      const pages = await fetchedPagesAround('2');
+
+      expect(pages).toEqual(['3', '1']);
+    });
+
+    it('reads forwards towards lower page numbers on a DESC source', async () => {
+      mockGetPluginPageOrder.mockReturnValue('DESC');
+
+      const pages = await fetchedPagesAround('2');
+
+      expect(pages).toEqual(['1', '3']);
+    });
   });
 
   it('renders the chapter before its adjacent chapters are resolved', async () => {

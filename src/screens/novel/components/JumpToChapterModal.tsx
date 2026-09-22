@@ -87,8 +87,12 @@ const JumpToChapterModal = ({
       return;
     }
 
-    if ((chap.position ?? -1) >= 0) {
-      const targetBatch = Math.floor((chap.position ?? 0) / CHAPTER_BATCH_SIZE);
+    // Batches page through the chapters of one source page, so the offset is
+    // the chapter's index within its page, not its novel-global position.
+    if ((chap.pagePosition ?? -1) >= 0) {
+      const targetBatch = Math.floor(
+        (chap.pagePosition ?? 0) / CHAPTER_BATCH_SIZE,
+      );
       await loadUpToBatch(targetBatch);
       if (requestId !== requestIdRef.current) {
         return;

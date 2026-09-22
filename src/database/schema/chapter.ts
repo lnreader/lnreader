@@ -22,7 +22,12 @@ export const chapter = sqliteTable(
     updatedTime: text('updatedTime'),
     chapterNumber: real('chapterNumber'),
     page: text('page').default('1'),
+    // Reading-order index across the whole novel. Derived from
+    // (page, pagePosition) plus the plugin's pageOrder, so it stays correct
+    // for sources that paginate newest-first.
     position: integer('position').default(0),
+    // Index of the chapter within the source page that served it.
+    pagePosition: integer('pagePosition').default(0),
     progress: integer('progress'),
     scanlator: text('scanlator'),
     timeSpent: integer('timeSpent').default(0),

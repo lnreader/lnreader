@@ -2,6 +2,7 @@ import {
   eq,
   getColumns,
   sql,
+  SQL,
   inArray,
   and,
   lte,
@@ -18,7 +19,7 @@ import {
 } from 'drizzle-orm';
 import { showToast } from '@utils/showToast';
 import { ChapterInfo, DownloadedChapter, Update } from '../types';
-import { ChapterItem } from '@plugins/types';
+import { ChapterItem, PageOrder } from '@plugins/types';
 
 import { getString } from '@i18n/translations';
 import { NOVEL_STORAGE } from '@utils/Storages';
@@ -44,6 +45,51 @@ const chunkChapterIds = (chapterIds: number[]) =>
 // #region Mutations
 
 /**
+ * A chapter is only "updated" for the user when something they can see
+ * changed. Page and position churn is bookkeeping: sources that paginate
+ * newest-first reshuffle every chapter onto a new page whenever one is
+ * published, and stamping those rows would flood the Updates screen.
+ */
+const chapterContentChangedSql = (nowSql: SQL) => sql`CASE WHEN NOT (
+    ${chapterSchema.name} IS excluded.name
+    AND ${chapterSchema.releaseTime} IS excluded.releaseTime
+    AND ${chapterSchema.scanlator} IS excluded.scanlator
+  ) THEN ${nowSql} ELSE ${chapterSchema.updatedTime} END`;
+
+/**
+ * Rebuild `position` as a novel-global reading-order index.
+ *
+ * `page`/`pagePosition` record where the source served a chapter; on a DESC
+ * source that pair moves every time a chapter is published, so it cannot be
+ * the ordering key. This derives a stable reading order from it instead:
+ * walking the source's pages in ascending order is reading order for an ASC
+ * source and reversed reading order for a DESC one.
+ */
+export const resequenceNovelChapters = async (
+  novelId: number,
+  pageOrder: PageOrder = 'ASC',
+): Promise<void> => {
+  const direction = sql.raw(pageOrder === 'DESC' ? 'DESC' : 'ASC');
+
+  await dbManager.write(async tx => {
+    await tx.run(sql`
+      WITH ranked AS (
+        SELECT
+          id,
+          ROW_NUMBER() OVER (
+            ORDER BY CAST(page AS INTEGER) ${direction}, pagePosition ${direction}
+          ) - 1 AS rn
+        FROM Chapter
+        WHERE novelId = ${novelId}
+      )
+      UPDATE Chapter SET position = ranked.rn
+      FROM ranked
+      WHERE Chapter.id = ranked.id AND Chapter.position IS NOT ranked.rn
+    `);
+  });
+};
+
+/**
  * Insert or update chapters using Drizzle ORM
  */
 export const insertChapters = async (
@@ -51,8 +97,14 @@ export const insertChapters = async (
   chapters?: ChapterItem[],
   options?: {
     page?: string;
+    pageOrder?: PageOrder;
     touchUpdatedTime?: boolean;
     preferNullReleaseTime?: boolean;
+    /**
+     * Skip the reading-order rebuild. Callers that insert several pages in a
+     * row set this and call resequenceNovelChapters once at the end.
+     */
+    deferResequence?: boolean;
   },
 ): Promise<void> => {
   if (!chapters?.length) {
@@ -78,6 +130,7 @@ export const insertChapters = async (
       chapterNumber: c.chapterNumber ?? index + 1,
       page: options?.page ?? c.page ?? '1',
       position: index,
+      pagePosition: index,
       scanlator: scanlatorStr,
     };
   });
@@ -92,6 +145,7 @@ export const insertChapters = async (
         chapterNumber: ph('chapterNumber'),
         page: ph('page'),
         position: ph('position'),
+        pagePosition: ph('pagePosition'),
         scanlator: ph('scanlator'),
         ...(options?.touchUpdatedTime ? { updatedTime: nowSql } : {}),
       })
@@ -99,16 +153,21 @@ export const insertChapters = async (
         target: [chapterSchema.novelId, chapterSchema.path],
         set: {
           page: sql`excluded.page`,
-          position: sql`excluded.position`,
+          pagePosition: sql`excluded.pagePosition`,
           name: sql`excluded.name`,
           releaseTime: sql`excluded.releaseTime`,
           chapterNumber: sql`excluded.chapterNumber`,
           scanlator: sql`excluded.scanlator`,
-          ...(options?.touchUpdatedTime ? { updatedTime: nowSql } : {}),
+          // Reading order is rebuilt by resequenceNovelChapters once every
+          // page of this update has landed, so position is deliberately not
+          // carried over from the incoming row here.
+          ...(options?.touchUpdatedTime
+            ? { updatedTime: chapterContentChangedSql(nowSql) }
+            : {}),
         },
         where: sql`NOT (
           ${chapterSchema.page} IS excluded.page
-          AND ${chapterSchema.position} IS excluded.position
+          AND ${chapterSchema.pagePosition} IS excluded.pagePosition
           AND ${chapterSchema.name} IS excluded.name
           AND ${chapterSchema.releaseTime} IS excluded.releaseTime
           AND ${chapterSchema.chapterNumber} IS excluded.chapterNumber
@@ -117,6 +176,10 @@ export const insertChapters = async (
       })
       .prepare(),
   );
+
+  if (!options?.deferResequence) {
+    await resequenceNovelChapters(novelId, options?.pageOrder);
+  }
 };
 
 export const markChapterRead = async (chapterId: number): Promise<void> => {
@@ -528,7 +591,7 @@ export const getAllUndownloadedChapters = async (
         eq(chapterSchema.isDownloaded, false),
       ),
     )
-    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position));
+    .orderBy(asc(chapterSchema.position));
 /**
  * @deprecated, use getNovelChapters with whereConditions instead
  */
@@ -545,7 +608,7 @@ export const getAllUndownloadedAndUnreadChapters = async (
         eq(chapterSchema.unread, true),
       ),
     )
-    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
+    .orderBy(asc(chapterSchema.position))
     .all();
 
 export const getChapter = async (chapterId: number) =>
@@ -763,18 +826,11 @@ export const getNovelChaptersByName = async (
 export const getPrevChapter = async (
   novelId: number,
   chapterPosition: number,
-  page: string,
   excludedScanlators?: string[],
 ) => {
   const conditions = [
     eq(chapterSchema.novelId, novelId),
-    or(
-      and(
-        eq(chapterSchema.page, castInt(page)),
-        lt(chapterSchema.position, castInt(chapterPosition)),
-      ),
-      lt(chapterSchema.page, castInt(page)),
-    ),
+    lt(chapterSchema.position, castInt(chapterPosition)),
     scanlatorFilterToSQL(excludedScanlators),
   ].filter(Boolean) as any[];
 
@@ -782,28 +838,18 @@ export const getPrevChapter = async (
     .select()
     .from(chapterSchema)
     .where(and(...conditions))
-    .orderBy(
-      desc(castInt(chapterSchema.page)),
-      desc(castInt(chapterSchema.position)),
-    )
+    .orderBy(desc(chapterSchema.position))
     .get();
 };
 
 export const getNextChapter = async (
   novelId: number,
   chapterPosition: number,
-  page: string,
   excludedScanlators?: string[],
 ) => {
   const conditions = [
     eq(chapterSchema.novelId, novelId),
-    or(
-      and(
-        eq(chapterSchema.page, castInt(page)),
-        gt(chapterSchema.position, castInt(chapterPosition)),
-      ),
-      gt(chapterSchema.page, castInt(page)),
-    ),
+    gt(chapterSchema.position, castInt(chapterPosition)),
     scanlatorFilterToSQL(excludedScanlators),
   ].filter(Boolean) as any[];
 
@@ -811,10 +857,7 @@ export const getNextChapter = async (
     .select()
     .from(chapterSchema)
     .where(and(...conditions))
-    .orderBy(
-      asc(castInt(chapterSchema.page)),
-      asc(castInt(chapterSchema.position)),
-    )
+    .orderBy(asc(chapterSchema.position))
     .get();
 };
 
@@ -863,7 +906,7 @@ export const getNovelDownloadedChapters = async (
         eq(chapterSchema.isDownloaded, true),
       ),
     )
-    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
+    .orderBy(asc(chapterSchema.position))
     .$dynamic();
 
   if (startPosition !== undefined && endPosition !== undefined) {

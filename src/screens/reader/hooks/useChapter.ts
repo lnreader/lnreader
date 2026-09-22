@@ -15,6 +15,7 @@ import {
   useTracker,
 } from '@hooks/persisted';
 import { fetchChapter, fetchPage } from '@services/plugin/fetch';
+import { getPluginPageOrder } from '@plugins/pluginManager';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import {
   RefObject,
@@ -226,18 +227,13 @@ export default function useChapter(
         const count = await getChapterCount(chap.novelId, page);
         if (count === 0) {
           const sourcePage = await fetchPage(novel.pluginId, novel.path, page);
-          await insertChapters(
-            chap.novelId,
-            sourcePage.chapters.map(ch => ({ ...ch, page })),
-          );
+          await insertChapters(chap.novelId, sourcePage.chapters, {
+            page,
+            pageOrder: getPluginPageOrder(novel.pluginId),
+          });
         }
         const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
-        return await query(
-          chap.novelId,
-          chap.position!,
-          chap.page ?? '',
-          excludedScanlators,
-        );
+        return await query(chap.novelId, chap.position!, excludedScanlators);
       } catch {
         return undefined;
       }
@@ -262,18 +258,8 @@ export default function useChapter(
 
       try {
         const [nextChapResult, prevChapResult] = await Promise.all([
-          getNextChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
-          getPrevChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
+          getNextChapter(chap.novelId, chap.position!, excludedScanlators),
+          getPrevChapter(chap.novelId, chap.position!, excludedScanlators),
         ]);
         if (isStale()) {
           return;
@@ -286,12 +272,19 @@ export default function useChapter(
 
         const totalPages = novel.totalPages ?? 0;
         const currentPage = Number(chap.page);
+        // On a DESC source page 1 holds the newest chapters, so reading
+        // forwards walks towards lower page numbers.
+        const step = getPluginPageOrder(novel.pluginId) === 'DESC' ? -1 : 1;
+        const nextPage = currentPage + step;
+        const prevPage = currentPage - step;
+        const inRange = (page: number) =>
+          page >= 1 && (totalPages > 0 ? page <= totalPages : true);
 
         // Pull in the adjacent source pages if we are at a page boundary.
-        if (!nextChap && totalPages > 0 && currentPage < totalPages) {
+        if (!nextChap && totalPages > 0 && inRange(nextPage)) {
           nextChap = await loadPageBoundaryChapter(
             chap,
-            String(currentPage + 1),
+            String(nextPage),
             'NEXT',
             excludedScanlators,
           );
@@ -303,10 +296,10 @@ export default function useChapter(
             prefetchChapter(nextChap);
           }
         }
-        if (!prevChap && currentPage > 1) {
+        if (!prevChap && inRange(prevPage)) {
           prevChap = await loadPageBoundaryChapter(
             chap,
-            String(currentPage - 1),
+            String(prevPage),
             'PREV',
             excludedScanlators,
           );
@@ -321,7 +314,12 @@ export default function useChapter(
         // Neighbouring chapters are optional; the current chapter stays usable.
       }
     },
-    [loadPageBoundaryChapter, novel.totalPages, prefetchChapter],
+    [
+      loadPageBoundaryChapter,
+      novel.pluginId,
+      novel.totalPages,
+      prefetchChapter,
+    ],
   );
 
   const getChapter = useCallback(

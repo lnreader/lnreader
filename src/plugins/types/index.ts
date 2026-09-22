@@ -88,6 +88,22 @@ export interface SourcePage {
   chapters: ChapterItem[];
 }
 
+/**
+ * Direction of a source's flat chapter enumeration relative to reading order.
+ *
+ * The flat enumeration is every page walked in ascending page number, taking
+ * each page's chapters in the order the source serves them.
+ *
+ * - `ASC` (default): that enumeration is already reading order, so page 1
+ *   holds the oldest chapters.
+ * - `DESC`: that enumeration is reversed reading order, so page 1 holds the
+ *   newest chapters and new chapters push older ones onto later pages.
+ *
+ * Only set `DESC` when both the page sequence and the order within each page
+ * are newest-first; a source that mixes the two is not expressible here.
+ */
+export type PageOrder = 'ASC' | 'DESC';
+
 export interface PopularNovelsOptions<Q extends Filters> {
   showLatestNovels?: boolean;
   filters?: FilterToValues<Q>;
@@ -125,6 +141,8 @@ export interface Plugin extends PluginItem {
   ) => Promise<NovelItem[]>;
   parseNovel: (novelPath: string) => Promise<SourceNovel>;
   parsePage?: (novelPath: string, page: string) => Promise<SourcePage>;
+  /** Defaults to `'ASC'` when a plugin does not declare it. */
+  pageOrder?: PageOrder;
   parseChapter: (chapterPath: string) => Promise<string>;
   searchNovels: (searchTerm: string, pageNo: number) => Promise<NovelItem[]>;
   resolveUrl?: (path: string, isNovel?: boolean) => string;
