@@ -75,8 +75,13 @@ describe('sanitizeChapterText', () => {
         refreshUrl: CHAPTER_REFRESH_URL,
       }),
     );
+    expect(result).toContain('template=report_issue.yml');
     expect(result).toContain(
-      'template=report_issue.yml&amp;title=%5Bplugin.test%5D%20Empty%20chapter%3A%20A%20%3CNovel%3E%20%E2%80%94%20Chapter%201%20%26%20%22After%22',
+      'title=%5Bplugin.test%5D+Empty+chapter%3A+A+%3CNovel%3E+%E2%80%94+Chapter+1+%26+%22After%22',
+    );
+    expect(result).toContain('labels=Bug');
+    expect(result).toContain(
+      'body=**Plugin%3A**+plugin.test%0A**Novel%3A**+A+%3CNovel%3E%0A**Chapter%3A**+Chapter+1+%26+%22After%22',
     );
     expect(result).toContain(CHAPTER_REFRESH_URL);
   });

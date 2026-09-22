@@ -33,10 +33,24 @@ const getPluginIssueReportUrl = (
   chapterName: string,
 ): string => {
   const title = `[${pluginId}] Empty chapter: ${novelName} — ${chapterName}`;
+  // Pre-fill the label and body too: if the linked GitHub form template
+  // fails to load (e.g. the browser drops the query string during a
+  // sign-in redirect), GitHub falls back to a blank issue and these are
+  // the only details that survive.
+  const body = [
+    `**Plugin:** ${pluginId}`,
+    `**Novel:** ${novelName}`,
+    `**Chapter:** ${chapterName}`,
+  ].join('\n');
 
-  return `${PLUGIN_ISSUE_REPORT_URL}?template=report_issue.yml&title=${encodeURIComponent(
+  const params = new URLSearchParams({
+    template: 'report_issue.yml',
     title,
-  )}`;
+    labels: 'Bug',
+    body,
+  });
+
+  return `${PLUGIN_ISSUE_REPORT_URL}?${params.toString()}`;
 };
 
 /** Built once: rebuilding it per chapter allocates the whole tag list again. */
