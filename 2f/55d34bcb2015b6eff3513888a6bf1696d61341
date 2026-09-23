@@ -1,0 +1,67 @@
+src/hooks/persisted/__mocks__/useSettings.ts
+  s_9b9f3d2926240e::t_5f1d0a7bbbbc93 47
+src/screens/library/LibraryScreen.tsx
+  s_9b9f3d2926240e::t_5f1d0a7bbbbc93 94
+  s_9b9f3d2926240e::t_5215e72a94f5dc 50
+  s_9b9f3d2926240e::t_649b33ce74dba3 106-110,291,299
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 292,300
+src/i18n/types/index.ts
+  s_9b9f3d2926240e::t_8c2c250ef752f5 402,426,433
+  s_9b9f3d2926240e::t_40ec73dc0afecd 389
+src/i18n/languages/en/strings.json
+  s_9b9f3d2926240e::t_bc85f17f9485de 458-459,491
+  s_9b9f3d2926240e::t_06712220d40b68 498
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 446
+src/screens/library/components/LibraryListView.tsx
+  s_9b9f3d2926240e::t_649b33ce74dba3 8,22,34,51-60,85-86,97-98
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 23,35,87,99
+  s_9b9f3d2926240e::t_cb33db7c36907f 71-75,154
+src/hooks/persisted/useSettings.ts
+  s_9b9f3d2926240e::t_5f1d0a7bbbbc93 389
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 127
+src/screens/settings/SettingsLibraryScreen/SettingsLibraryScreen.tsx
+  s_9b9f3d2926240e::t_bc85f17f9485de 328
+  s_9b9f3d2926240e::t_5f1d0a7bbbbc93 73
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 282-289
+  s_9b9f3d2926240e::t_e9e35e9aff4b2b 290-291
+src/components/ListView.tsx
+  s_9b9f3d2926240e::t_66032fa69ef287 19,31,63
+src/screens/library/components/LibraryBottomSheet/LibraryBottomSheet.tsx
+  s_9b9f3d2926240e::t_bc85f17f9485de 153-160
+  s_9b9f3d2926240e::t_5f1d0a7bbbbc93 113
+  s_9b9f3d2926240e::t_06712220d40b68 121
+  s_9b9f3d2926240e::t_7f5847046600ab 161-163
+  s_9b9f3d2926240e::t_95648bee5784be 164
+src/screens/library/components/LibraryNovelItem.tsx
+  s_9b9f3d2926240e::t_649b33ce74dba3 3,14-15,27-28,44-49
+  s_9b9f3d2926240e::t_f6cb0f558d6f27 16,29,58-62
+src/components/NovelCover.tsx
+  h_f56025180c46fa 126
+  s_9b9f3d2926240e::t_66032fa69ef287 23,66,90,132,259,406-407,410,412-414,416
+  s_9b9f3d2926240e::t_220488d1718f01 222-223,225-227,408,415
+  s_9b9f3d2926240e::t_27872c71289cbe 129,224,409,411
+  s_9b9f3d2926240e::t_e08e947eaa8aa2 11
+  s_9b9f3d2926240e::t_e649a2e7150c75 115-125,127-128,130-131
+  s_9b9f3d2926240e::t_ef3ce94f43f28b 228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2f55d34bcb2015b6eff3513888a6bf1696d61341",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9b9f3d2926240e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd05-a410-77e1-af12-d5dba4885f40",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
