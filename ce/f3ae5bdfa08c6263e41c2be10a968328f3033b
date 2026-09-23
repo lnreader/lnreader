@@ -1,0 +1,71 @@
+src/screens/StatsScreen/components/DonutChartWithLegend.tsx
+  s_a1d8dde659aa93::t_e8d8144527fb25 21-22,50-63,65-66,75,77-83
+  s_a1d8dde659aa93::t_da98cb5af7d8d4 76
+  s_a1d8dde659aa93::t_aac0b4d8a004f2 49
+src/screens/StatsScreen/components/ChartLegend.tsx
+  s_a1d8dde659aa93::t_aac0b4d8a004f2 60,64
+  s_a1d8dde659aa93::t_e8d8144527fb25 26-27,56,62,66,77,82-83,90-91,94-100
+  s_a1d8dde659aa93::t_bae4b8643ab812 61
+src/screens/StatsScreen/StatsScreen.tsx
+  s_a1d8dde659aa93::t_26122aebac86bb 140-143
+  s_a1d8dde659aa93::t_f26201a7314956 125,152
+src/screens/StatsScreen/OverviewTab.tsx
+  s_a1d8dde659aa93::t_da98cb5af7d8d4 75,139-140,150
+  s_a1d8dde659aa93::t_98b1348d556335 93,105,107-109,141,146,149,151-159
+src/screens/StatsScreen/PluginsTab.tsx
+  s_a1d8dde659aa93::t_91f253dd149ee1 81,115-116
+  s_a1d8dde659aa93::t_2ba0a537df3c88 117
+src/screens/StatsScreen/components/PluginSection.tsx
+  s_a1d8dde659aa93::t_b081714ab42eb1 128-129,131
+  s_a1d8dde659aa93::t_91f253dd149ee1 119,130
+  s_a1d8dde659aa93::t_16c29678237614 48,80
+  s_a1d8dde659aa93::t_496ce65343c02e 78-79,81-84,100-104,118,122,125-127,132,134,136,138
+src/screens/StatsScreen/components/DonutChart.tsx
+  s_a1d8dde659aa93::t_e8d8144527fb25 185
+  s_a1d8dde659aa93::t_9b4001dfeec003 220
+src/i18n/types/index.ts
+  s_a1d8dde659aa93::t_980e486e499790 629-631
+  s_a1d8dde659aa93::t_9f92b01fdf552f 730
+  s_a1d8dde659aa93::t_704b4ab5c4176c 624-625
+src/screens/GenreStatsScreen/components/NovelCard.tsx
+  s_a1d8dde659aa93::t_24ca3298f5113e 30,43,53
+src/screens/GenreStatsScreen/components/NovelCarousel.tsx
+  s_a1d8dde659aa93::t_6d0119b6a1df04 54
+  s_a1d8dde659aa93::t_24ca3298f5113e 59,101,105-109,113-114,118
+src/screens/GenreStatsScreen/components/GenreSection.tsx
+  s_a1d8dde659aa93::t_496ce65343c02e 156,167
+  s_a1d8dde659aa93::t_7f0429746699df 89-91
+  s_a1d8dde659aa93::t_24ca3298f5113e 61,105-118,134,140-141,144-147,170
+  s_a1d8dde659aa93::t_556988857c5b08 75,80-83,88,92-94
+src/screens/GenreStatsScreen/components/GenreRow.tsx
+  s_a1d8dde659aa93::t_24ca3298f5113e 83
+src/screens/StatsScreen/TimeTab.tsx
+  s_a1d8dde659aa93::t_9381e4cf86aa77 194
+  s_a1d8dde659aa93::t_da98cb5af7d8d4 80,85,98,103,215-217,221
+  s_a1d8dde659aa93::t_724870fdfa4c70 81-84,99-102
+  s_a1d8dde659aa93::t_2c7bdf24383725 2,76,117-119,127,132,141-147,151,179-180,183-184,187-188,199,203,205-209,212-214,220,222-232
+  s_a1d8dde659aa93::t_aac0b4d8a004f2 140
+src/i18n/languages/en/strings.json
+  s_a1d8dde659aa93::t_6d0119b6a1df04 873
+  s_a1d8dde659aa93::t_26122aebac86bb 740-742
+  s_a1d8dde659aa93::t_1b86660cb0354a 735-736
+src/screens/StatsScreen/components/ChapterBar.tsx
+  s_a1d8dde659aa93::t_41196ee7ca2556 20,24-31,37,43-46,48-54,56-58,60-68,75,77-81,84-88,91-92,97,101-104,106-107,109-124
+  s_a1d8dde659aa93::t_1b86660cb0354a 47,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cef3ae5bdfa08c6263e41c2be10a968328f3033b",
+  "prompts": {},
+  "sessions": {
+    "s_a1d8dde659aa93": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccd6-e83f-7a10-a320-a7ed1c404d45",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
