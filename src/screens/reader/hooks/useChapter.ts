@@ -74,6 +74,8 @@ export default function useChapter(
     autoScrollOffset,
     useVolumeButtons,
     volumeButtonsOffset,
+    pageReader,
+    pageReaderInvertVolumeButtons,
   } = useChapterGeneralSettings();
   const { incognitoMode } = useLibrarySettings();
   const { timeTrackingEnabled, inactivityTimeoutMs } = useAppSettings();
@@ -124,15 +126,36 @@ export default function useChapter(
     Math.round(Dimensions.get('window').height * 0.75),
   );
 
+  const volumeUpDelta = pageReaderInvertVolumeButtons ? 1 : -1;
+  const volumeDownDelta = pageReaderInvertVolumeButtons ? -1 : 1;
+
   useEventListener(NativeVolumeButtonListener, 'VolumeUp', () => {
     webViewRef.current?.injectJavaScript(`(()=>{
-      window.scrollBy({top: -${volumeButtonOffset}, behavior: 'smooth'})
+      const isPaged = ${Boolean(
+        pageReader,
+      )} || document.body.classList.contains('page-reader');
+      if (isPaged && window.pageReader) {
+        window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
+          volumeUpDelta >= 0 ? '+' : '-'
+        } 1);
+      } else {
+        window.scrollBy({top: -${volumeButtonOffset}, behavior: 'smooth'});
+      }
     })()`);
   });
 
   useEventListener(NativeVolumeButtonListener, 'VolumeDown', () => {
     webViewRef.current?.injectJavaScript(`(()=>{
-      window.scrollBy({top: ${volumeButtonOffset}, behavior: 'smooth'})
+      const isPaged = ${Boolean(
+        pageReader,
+      )} || document.body.classList.contains('page-reader');
+      if (isPaged && window.pageReader) {
+        window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
+          volumeDownDelta >= 0 ? '+' : '-'
+        } 1);
+      } else {
+        window.scrollBy({top: ${volumeButtonOffset}, behavior: 'smooth'});
+      }
     })()`);
   });
 

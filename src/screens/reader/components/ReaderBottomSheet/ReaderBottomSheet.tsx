@@ -138,6 +138,19 @@ const navigationPreferences: GeneralPreference[] = [
   },
 ];
 
+const pagedModePreferences: GeneralPreference[] = [
+  {
+    key: 'pageReaderInvertVolumeButtons',
+    label: 'invertVolumeButtons',
+    description: 'invertVolumeButtonsDescription',
+  },
+  {
+    key: 'pageReaderDisableAnimation',
+    label: 'disablePageTransitions',
+    description: 'disablePageTransitionsDescription',
+  },
+];
+
 const GeneralTab: React.FC = React.memo(() => {
   const theme = useTheme();
   const { setChapterGeneralSettings, ...settings } =
@@ -182,7 +195,18 @@ const GeneralTab: React.FC = React.memo(() => {
       <List.SubHeader theme={theme}>
         {getString('readerScreen.bottomSheet.navigation')}
       </List.SubHeader>
-      {navigationPreferences.map(renderPreference)}
+      {navigationPreferences.map(item => {
+        if (item.key === 'pageReader') {
+          return (
+            <React.Fragment key={item.key}>
+              {renderPreference(item)}
+              {settings.pageReader &&
+                pagedModePreferences.map(renderPreference)}
+            </React.Fragment>
+          );
+        }
+        return renderPreference(item);
+      })}
     </BottomSheetScrollView>
   );
 });

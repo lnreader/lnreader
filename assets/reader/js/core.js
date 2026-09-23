@@ -544,18 +544,21 @@ window.pageReader = new (function () {
         document.getElementsByClassName('transition-chapter')[0];
       if (!this.chapterEnding) return;
     }
+    const noAnim = Boolean(
+      reader.generalSettings?.val?.pageReaderDisableAnimation,
+    );
     this.chapterEnding.style.transition = 'unset';
     if (bool) {
       this.chapterEnding.style.transform = `translateX(${left ? -200 : 0}vw)`;
       requestAnimationFrame(() => {
-        if (!instant) {
+        if (!instant && !noAnim) {
           this.chapterEnding.style.transition = 'transform 200ms';
         }
         this.chapterEnding.style.transform = 'translateX(-100vw)';
       });
       this.chapterEndingVisible.val = true;
     } else {
-      if (!instant) {
+      if (!instant && !noAnim) {
         this.chapterEnding.style.transition = 'transform 200ms';
       }
       this.chapterEnding.style.transform = `translateX(${left ? -200 : 0}vw)`;
@@ -579,29 +582,41 @@ window.pageReader = new (function () {
       return;
     }
     destPage = parseInt(destPage, 10);
+    const noAnim = Boolean(
+      reader.generalSettings?.val?.pageReaderDisableAnimation,
+    );
     if (destPage < 0) {
       if (!reader.prevChapter) return;
       document.getElementsByClassName('transition-chapter')[0].innerText =
         reader.prevChapter.name;
-      this.showChapterEnding(true, false, true);
+      this.showChapterEnding(true, noAnim, true);
       this.chapterNavigationPending = true;
-      setTimeout(() => {
-        reader.post({ type: 'prev' });
-      }, 200);
+      setTimeout(
+        () => {
+          reader.post({ type: 'prev' });
+        },
+        noAnim ? 0 : 200,
+      );
       return;
     }
     if (destPage >= this.totalPages.val) {
       if (!reader.nextChapter) return;
       document.getElementsByClassName('transition-chapter')[0].innerText =
         reader.nextChapter.name;
-      this.showChapterEnding(true);
+      this.showChapterEnding(true, noAnim);
       this.chapterNavigationPending = true;
-      setTimeout(() => {
-        reader.post({ type: 'next' });
-      }, 200);
+      setTimeout(
+        () => {
+          reader.post({ type: 'next' });
+        },
+        noAnim ? 0 : 200,
+      );
       return;
     }
     this.page.val = destPage;
+    if (noAnim) {
+      reader.chapterElement.style.transition = 'none';
+    }
     reader.chapterElement.style.transform =
       'translateX(-' + destPage * 100 + '%)';
 
@@ -686,6 +701,13 @@ window.pageReader = new (function () {
         });
       });
     }
+  });
+
+  van.derive(() => {
+    document.body.classList.toggle(
+      'no-animation',
+      Boolean(reader.generalSettings.val.pageReaderDisableAnimation),
+    );
   });
 })();
 
@@ -905,7 +927,10 @@ window.addEventListener('load', () => {
       if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
         pageReader.ignoreClickUntil = Date.now() + 400;
       }
-      reader.chapterElement.style.transition = 'transform 200ms';
+      reader.chapterElement.style.transition = reader.generalSettings.val
+        .pageReaderDisableAnimation
+        ? 'none'
+        : 'transform 200ms';
       const diffXPercentage = diffX / reader.layoutWidth;
       if (diffXPercentage < -0.3) {
         pageReader.movePage(pageReader.page.val + 1);

@@ -15,6 +15,12 @@ body.page-reader > #LNReader-chapter {
   column-fill: auto;
   transition: transform 200ms;
 }
+body.page-reader.no-animation > #LNReader-chapter {
+  transition: none !important;
+}
+body.page-reader.no-animation .transition-chapter {
+  transition: none !important;
+}
 .transition-chapter {
   height: 100vh;
   width: 100vw;
