@@ -1,0 +1,27 @@
+test/mocks/nativeModules.js
+  s_574bee43f39c86::t_7ec6d6a27ea207 4-24
+src/screens/settings/SettingsCustomCodeScreen/Components/__tests__/CustomCodeCards.test.tsx
+  s_574bee43f39c86::t_abe5ff4a89114e 37-53
+  s_574bee43f39c86::t_bc2897867bfe50 2,33-36
+  s_574bee43f39c86::t_363764a48c8aa8 28-32
+  s_574bee43f39c86::t_1c124662531638 54
+  s_574bee43f39c86::t_25300a57f4f385 107-109
+jest.config.js
+  s_574bee43f39c86::t_d63fa8eafe6d39 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "920f88aee4460a53ac0a3cf73cdc77ee915eb282",
+  "prompts": {},
+  "sessions": {
+    "s_574bee43f39c86": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccf1-5869-7ac1-a8e5-46eabfc06fa6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
