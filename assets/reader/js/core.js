@@ -614,9 +614,6 @@ window.pageReader = new (function () {
       return;
     }
     this.page.val = destPage;
-    if (noAnim) {
-      reader.chapterElement.style.transition = 'none';
-    }
     reader.chapterElement.style.transform =
       'translateX(-' + destPage * 100 + '%)';
 
@@ -708,6 +705,11 @@ window.pageReader = new (function () {
       'no-animation',
       Boolean(reader.generalSettings.val.pageReaderDisableAnimation),
     );
+    reader.chapterElement?.style.removeProperty('transition');
+    const chapterEnding =
+      pageReader.chapterEnding ||
+      document.getElementsByClassName('transition-chapter')[0];
+    chapterEnding?.style.removeProperty('transition');
   });
 })();
 
@@ -931,6 +933,7 @@ window.addEventListener('load', () => {
         .pageReaderDisableAnimation
         ? 'none'
         : 'transform 200ms';
+      reader.chapterElement.style.removeProperty('transition');
       const diffXPercentage = diffX / reader.layoutWidth;
       if (diffXPercentage < -0.3) {
         pageReader.movePage(pageReader.page.val + 1);
