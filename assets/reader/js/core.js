@@ -524,7 +524,8 @@ van.derive(() => {
   }
 });
 
-window.pageReader = new (function () {
+var pageReader;
+window.pageReader = pageReader = new (function () {
   const config =
     typeof initialPageReaderConfig === 'undefined'
       ? {}
@@ -618,7 +619,7 @@ window.pageReader = new (function () {
       'translateX(-' + destPage * 100 + '%)';
 
     const newProgress = parseInt(
-      ((pageReader.page.val + 1) / pageReader.totalPages.val) * 100,
+      ((this.page.val + 1) / this.totalPages.val) * 100,
       10,
     );
 
@@ -707,7 +708,7 @@ window.pageReader = new (function () {
     );
     reader.chapterElement?.style.removeProperty('transition');
     const chapterEnding =
-      pageReader.chapterEnding ||
+      this.chapterEnding ||
       document.getElementsByClassName('transition-chapter')[0];
     chapterEnding?.style.removeProperty('transition');
   });
