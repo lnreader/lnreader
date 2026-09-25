@@ -92,8 +92,32 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
   const injectJavaScriptCode =
     'window.ReactNativeWebView.postMessage(JSON.stringify({localStorage, sessionStorage}))';
 
-  // A new `source` reloads the page, so keep it stable across progress updates.
-  const source = useMemo(() => ({ uri }), [uri]);
+  // A new `source` reloads the page, so keep it stable across progress updates
+  // and only replace it when the route or the address bar asks for a new page.
+  const [source, setSource] = useState(() => ({ uri }));
+  const [routeUri, setRouteUri] = useState(uri);
+  if (routeUri !== uri) {
+    setRouteUri(uri);
+    setSource({ uri });
+  }
+
+  const navigateTo = useCallback(
+    (target: string) => {
+      if (source.uri !== target) {
+        setSource({ uri: target });
+        setCurrentUrl(target);
+      } else if (target === currentUrl) {
+        webViewRef.current?.reload();
+      } else {
+        // `source` already holds this address, so a new prop would be diffed
+        // away before reaching the native side; navigate from inside the page.
+        webViewRef.current?.injectJavaScript(
+          `window.location.href = ${JSON.stringify(target)}; true;`,
+        );
+      }
+    },
+    [currentUrl, source.uri],
+  );
 
   return (
     <>
@@ -105,6 +129,7 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
         canGoForward={canGoForward}
         webView={webViewRef}
         setMenuVisible={setMenuVisible}
+        navigateTo={navigateTo}
         goBack={() => {
           saveData();
           navigation.goBack();
