@@ -131,9 +131,7 @@ export default function useChapter(
 
   useEventListener(NativeVolumeButtonListener, 'VolumeUp', () => {
     webViewRef.current?.injectJavaScript(`(()=>{
-      const isPaged = ${Boolean(
-        pageReader,
-      )} || document.body.classList.contains('page-reader');
+      const isPaged = ${Boolean(pageReader)};
       if (isPaged && window.pageReader) {
         window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
           volumeUpDelta >= 0 ? '+' : '-'
@@ -146,9 +144,7 @@ export default function useChapter(
 
   useEventListener(NativeVolumeButtonListener, 'VolumeDown', () => {
     webViewRef.current?.injectJavaScript(`(()=>{
-      const isPaged = ${Boolean(
-        pageReader,
-      )} || document.body.classList.contains('page-reader');
+      const isPaged = ${Boolean(pageReader)};
       if (isPaged && window.pageReader) {
         window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
           volumeDownDelta >= 0 ? '+' : '-'
