@@ -20,6 +20,7 @@ import {
   fetchNovel as defaultFetchNovel,
   fetchPage as defaultFetchPage,
 } from '@services/plugin/fetch';
+import { getPluginPageOrder as defaultGetPluginPageOrder } from '@plugins/pluginManager';
 import { getString as defaultGetString } from '@i18n/translations';
 import { BatchInfo } from '../types';
 
@@ -94,6 +95,7 @@ const defaultBootstrapServiceDependencies = {
   getPageChapters: defaultGetPageChapters,
   getFirstUnreadChapter: defaultGetFirstUnreadChapter,
   getNovelScanlatorsSync: defaultGetNovelScanlatorsSync,
+  getPluginPageOrder: defaultGetPluginPageOrder,
   getString: defaultGetString,
 } as const;
 export type BootstrapServiceDependencies =
@@ -118,6 +120,12 @@ export const createBootstrapService = (
         .getCustomPages(tmpNovel.id)
         .map(c => c.page)
         .filter((page): page is string => page !== null);
+    }
+
+    // The page picker walks chapters forwards, so a DESC source's last page
+    // (its oldest chapters) is the one to show first.
+    if (deps.getPluginPageOrder(tmpNovel.pluginId) === 'DESC') {
+      tmpPages.reverse();
     }
 
     return tmpPages.length > 1 ? tmpPages : ['1'];
@@ -185,13 +193,10 @@ export const createBootstrapService = (
         )) || [];
     } else if (settingsFilter.length === 0) {
       const sourcePage = await deps.fetchPage(pluginId, novelPath, page);
-      const sourceChapters = sourcePage.chapters.map(ch => {
-        return {
-          ...ch,
-          page,
-        };
+      await deps.insertChapters(novel.id, sourcePage.chapters, {
+        page,
+        pageOrder: deps.getPluginPageOrder(pluginId),
       });
-      await deps.insertChapters(novel.id, sourceChapters);
       newChapters = await deps.getPageChapters(
         novel.id,
         settingsSort,

@@ -15,7 +15,7 @@ import {
 import { SourceNovel } from '@plugins/types';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { downloadFile } from '@plugins/helpers/fetch';
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, getPluginPageOrder } from '@plugins/pluginManager';
 import { dbManager } from '@database/db';
 import {
   novelSchema,
@@ -131,7 +131,9 @@ export const insertNovelAndChapters = async (
         // Silently fail cover download
       }
     }
-    await insertChapters(novelId, sourceNovel.chapters);
+    await insertChapters(novelId, sourceNovel.chapters, {
+      pageOrder: getPluginPageOrder(pluginId),
+    });
   }
   return novelId;
 };
@@ -346,7 +348,9 @@ export const restoreLibrary = async (novel: NovelInfo) => {
   });
 
   if (novelId && sourceNovel.chapters) {
-    await insertChapters(novelId, sourceNovel.chapters);
+    await insertChapters(novelId, sourceNovel.chapters, {
+      pageOrder: getPluginPageOrder(novel.pluginId),
+    });
   }
 };
 

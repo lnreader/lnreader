@@ -1,6 +1,10 @@
 import { fetchNovel, fetchPage } from '../plugin/fetch';
-import { ChapterItem, SourceNovel } from '@plugins/types';
-import { getPlugin, LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
+import { ChapterItem, PageOrder, SourceNovel } from '@plugins/types';
+import {
+  getPlugin,
+  getPluginPageOrder,
+  LOCAL_PLUGIN_ID,
+} from '@plugins/pluginManager';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { downloadFile } from '@plugins/helpers/fetch';
 import type { BackgroundTaskEnqueuer } from '@services/backgroundTasks/contracts';
@@ -8,7 +12,10 @@ import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import NativeFile from '@modules/native-file';
-import { insertChapters } from '@database/queries/ChapterQueries';
+import {
+  insertChapters,
+  resequenceNovelChapters,
+} from '@database/queries/ChapterQueries';
 
 /**
  * Update novel metadata in the database including cover image.
@@ -85,9 +92,9 @@ const updateNovelChapters = async (
   downloadNewChapters?: boolean,
   page?: string,
   enqueue?: BackgroundTaskEnqueuer,
-) => {
+): Promise<number> => {
   if (!chapters.length) {
-    return;
+    return 0;
   }
 
   const incomingPaths = Array.from(
@@ -114,6 +121,8 @@ const updateNovelChapters = async (
   await insertChapters(novelId, chapters, {
     page,
     touchUpdatedTime: true,
+    // updateNovel rebuilds reading order once, after every page has landed.
+    deferResequence: true,
   });
 
   if (downloadNewChapters && newPaths.length && enqueue) {
@@ -156,6 +165,8 @@ const updateNovelChapters = async (
       });
     }
   }
+
+  return newPaths.length;
 };
 
 export interface UpdateNovelOptions {
@@ -175,6 +186,40 @@ const getStoredTotalPages = async (novelId: number): Promise<number> => {
 };
 
 /**
+ * Fetch every page of a paginated novel and write it back.
+ *
+ * Used for DESC sources once a new chapter is known to exist: publishing a
+ * chapter there shifts every later chapter onto a different page, so reading
+ * order can only be re-derived from a complete, self-consistent snapshot of
+ * the source's pagination.
+ */
+const refetchAllPages = async (
+  pluginId: string,
+  novelPath: string,
+  novelName: string,
+  novelId: number,
+  totalPages: number,
+  fromPage: number,
+  downloadNewChapters: boolean | undefined,
+  enqueue: BackgroundTaskEnqueuer | undefined,
+) => {
+  for (let page = fromPage; page <= totalPages; page++) {
+    try {
+      const sourcePage = await fetchPage(pluginId, novelPath, String(page));
+      await updateNovelChapters(
+        pluginId,
+        novelName,
+        novelId,
+        sourcePage.chapters || [],
+        downloadNewChapters,
+        String(page),
+        enqueue,
+      );
+    } catch {}
+  }
+};
+
+/**
  * Main function to update a novel's metadata and chapters.
  */
 const updateNovel = async (
@@ -187,6 +232,7 @@ const updateNovel = async (
     return;
   }
   const { downloadNewChapters, refreshNovelMetadata, enqueue } = options;
+  const pageOrder: PageOrder = getPluginPageOrder(pluginId);
 
   const oldTotalPages = await getStoredTotalPages(novelId);
 
@@ -197,7 +243,10 @@ const updateNovel = async (
   } else if (novel.totalPages) {
     await updateNovelTotalPages(novelId, novel.totalPages);
   }
-  await updateNovelChapters(
+
+  // parseNovel returns the source's first page, which is where a DESC source
+  // publishes new chapters.
+  const newOnFirstPage = await updateNovelChapters(
     pluginId,
     novel.name,
     novelId,
@@ -207,11 +256,45 @@ const updateNovel = async (
     enqueue,
   );
 
-  // For paged novels: re-fetch the last known page and fetch any new pages
-  if (novel.totalPages && novel.totalPages > 1) {
-    const plugin = getPlugin(pluginId);
-    if (plugin?.parsePage) {
-      // Re-fetch the last known page to check for new chapters
+  const totalPages = novel.totalPages ?? 0;
+  if (totalPages > 1 && getPlugin(pluginId)?.parsePage) {
+    if (pageOrder === 'DESC') {
+      // Page 1 holds the newest chapters, so it alone decides whether
+      // anything was published, however many pages of them there are. When
+      // nothing was, this costs no extra requests at all.
+      let newOnNewestPage = newOnFirstPage;
+
+      // parseNovel normally returns page 1. A plugin that returns metadata
+      // only would otherwise look permanently up to date, so fetch it.
+      if (!novel.chapters?.length) {
+        try {
+          const firstPage = await fetchPage(pluginId, novelPath, '1');
+          newOnNewestPage = await updateNovelChapters(
+            pluginId,
+            novel.name,
+            novelId,
+            firstPage.chapters || [],
+            downloadNewChapters,
+            '1',
+            enqueue,
+          );
+        } catch {}
+      }
+
+      if (newOnNewestPage > 0) {
+        await refetchAllPages(
+          pluginId,
+          novelPath,
+          novel.name,
+          novelId,
+          totalPages,
+          2,
+          downloadNewChapters,
+          enqueue,
+        );
+      }
+    } else {
+      // ASC: a chapter's page never changes, so only the tail can move.
       if (oldTotalPages > 1) {
         try {
           const sourcePage = await fetchPage(
@@ -231,23 +314,20 @@ const updateNovel = async (
         } catch {}
       }
 
-      // Fetch any new pages that were added
-      for (let page = oldTotalPages + 1; page <= novel.totalPages; page++) {
-        try {
-          const sourcePage = await fetchPage(pluginId, novelPath, String(page));
-          await updateNovelChapters(
-            pluginId,
-            novel.name,
-            novelId,
-            sourcePage.chapters || [],
-            downloadNewChapters,
-            String(page),
-            enqueue,
-          );
-        } catch {}
-      }
+      await refetchAllPages(
+        pluginId,
+        novelPath,
+        novel.name,
+        novelId,
+        totalPages,
+        oldTotalPages + 1,
+        downloadNewChapters,
+        enqueue,
+      );
     }
   }
+
+  await resequenceNovelChapters(novelId, pageOrder);
 };
 
 /**
@@ -273,6 +353,8 @@ const updateNovelPage = async (
     page,
     options.enqueue,
   );
+
+  await resequenceNovelChapters(novelId, getPluginPageOrder(pluginId));
 };
 
 export { updateNovel, updateNovelPage };

@@ -89,6 +89,7 @@ export async function insertTestChapter(
     chapterNumber: null,
     page: '1',
     position: 0,
+    pagePosition: 0,
     progress: null,
     scanlator: null,
     timeSpent: 0,

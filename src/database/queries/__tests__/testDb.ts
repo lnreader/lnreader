@@ -42,6 +42,7 @@ const MIGRATION_STATEMENTS = [
 	chapterNumber real,
 	page text DEFAULT '1',
 	position integer DEFAULT 0,
+	pagePosition integer DEFAULT 0,
 	progress integer,
 	scanlator text,
 	timeSpent integer DEFAULT 0

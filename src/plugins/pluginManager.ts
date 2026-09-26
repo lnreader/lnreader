@@ -22,7 +22,7 @@ import {
   LocalStorage,
   SessionStorage,
 } from './helpers/storage';
-import { NovelStatus, Plugin, PluginItem } from './types';
+import { NovelStatus, PageOrder, Plugin, PluginItem } from './types';
 import { defaultCover } from './helpers/constants';
 import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
 import { FilterTypes } from './types/filterTypes';
@@ -202,6 +202,14 @@ const getPlugin = (pluginId: string) => {
   return plugins[pluginId];
 };
 
+/**
+ * Reading direction of a source's paginated chapter list. Plugins that do not
+ * declare `pageOrder`, and sources we have no plugin for, are treated as
+ * `'ASC'` so existing behaviour is unchanged.
+ */
+const getPluginPageOrder = (pluginId: string): PageOrder =>
+  getPlugin(pluginId)?.pageOrder === 'DESC' ? 'DESC' : 'ASC';
+
 const loadPlugin = async (pluginId: string) => {
   if (pluginId === LOCAL_PLUGIN_ID) {
     return undefined;
@@ -269,6 +277,7 @@ const LOCAL_PLUGIN_ID = 'local';
 
 export {
   getPlugin,
+  getPluginPageOrder,
   loadPlugin,
   initializeInstalledPlugins,
   reloadInstalledPlugins,

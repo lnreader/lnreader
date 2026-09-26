@@ -52,6 +52,7 @@ import {
   getNovelScanlators,
   getNovelScanlatorsSync,
   increaseTimeSpent,
+  resequenceNovelChapters,
 } from '../ChapterQueries';
 
 describe('ChapterQueries', () => {
@@ -1021,7 +1022,7 @@ describe('ChapterQueries', () => {
         position: 1,
       });
 
-      const result = await getPrevChapter(novelId, 1, '1');
+      const result = await getPrevChapter(novelId, 1);
 
       expect(result).toBeDefined();
       expect(result?.position).toBe(0);
@@ -1036,10 +1037,10 @@ describe('ChapterQueries', () => {
       });
       await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 0,
+        position: 1,
       });
 
-      const result = await getPrevChapter(novelId, 0, '2');
+      const result = await getPrevChapter(novelId, 1);
 
       expect(result).toBeDefined();
       expect(result?.page).toBe('1');
@@ -1057,10 +1058,10 @@ describe('ChapterQueries', () => {
       });
       await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 1,
+        position: 2,
       });
 
-      const result = await getPrevChapter(novelId, 1, '2');
+      const result = await getPrevChapter(novelId, 2);
 
       expect(result?.id).toBe(chapterId2);
     });
@@ -1085,15 +1086,15 @@ describe('ChapterQueries', () => {
       });
 
       // From chapter 3, previous should be chapter 2 (Scan B) if nothing excluded
-      const resultNormal = await getPrevChapter(novelId, 2, '1');
+      const resultNormal = await getPrevChapter(novelId, 2);
       expect(resultNormal?.id).toBe(chapterId2);
 
       // From chapter 3, previous should be chapter 1 (Scan A) if Scan B is excluded
-      const resultExcludeB = await getPrevChapter(novelId, 2, '1', ['Scan B']);
+      const resultExcludeB = await getPrevChapter(novelId, 2, ['Scan B']);
       expect(resultExcludeB?.id).toBe(chapterId1);
 
       // From chapter 3, previous should be undefined if both Scan B and Scan A are excluded
-      const resultExcludeBoth = await getPrevChapter(novelId, 2, '1', [
+      const resultExcludeBoth = await getPrevChapter(novelId, 2, [
         'Scan B',
         'Scan A',
       ]);
@@ -1114,7 +1115,7 @@ describe('ChapterQueries', () => {
         position: 1,
       });
 
-      const result = await getNextChapter(novelId, 0, '1');
+      const result = await getNextChapter(novelId, 0);
 
       expect(result).toBeDefined();
       expect(result?.position).toBe(1);
@@ -1129,10 +1130,10 @@ describe('ChapterQueries', () => {
       });
       const chapterId2 = await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 0,
+        position: 1,
       });
 
-      const result = await getNextChapter(novelId, 0, '1');
+      const result = await getNextChapter(novelId, 0);
 
       expect(result?.id).toBe(chapterId2);
     });
@@ -1149,10 +1150,10 @@ describe('ChapterQueries', () => {
       });
       await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 0,
+        position: 2,
       });
 
-      const result = await getNextChapter(novelId, 0, '1');
+      const result = await getNextChapter(novelId, 0);
 
       expect(result?.id).toBe(chapterId2);
     });
@@ -1165,14 +1166,14 @@ describe('ChapterQueries', () => {
       });
       const chapterId2 = await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 0,
+        position: 1,
       });
       await insertTestChapter(testDb, novelId, {
         page: '10',
-        position: 0,
+        position: 2,
       });
 
-      const result = await getNextChapter(novelId, 0, '1');
+      const result = await getNextChapter(novelId, 0);
 
       expect(result?.id).toBe(chapterId2);
     });
@@ -1197,15 +1198,15 @@ describe('ChapterQueries', () => {
       });
 
       // From chapter 1, next should be chapter 2 (Scan B) if nothing excluded
-      const resultNormal = await getNextChapter(novelId, 0, '1');
+      const resultNormal = await getNextChapter(novelId, 0);
       expect(resultNormal?.id).toBe(chapterId2);
 
       // From chapter 1, next should be chapter 3 (Scan C) if Scan B is excluded
-      const resultExcludeB = await getNextChapter(novelId, 0, '1', ['Scan B']);
+      const resultExcludeB = await getNextChapter(novelId, 0, ['Scan B']);
       expect(resultExcludeB?.id).toBe(chapterId3);
 
       // From chapter 1, next should be undefined if both Scan B and Scan C are excluded
-      const resultExcludeBoth = await getNextChapter(novelId, 0, '1', [
+      const resultExcludeBoth = await getNextChapter(novelId, 0, [
         'Scan B',
         'Scan C',
       ]);
@@ -1222,17 +1223,17 @@ describe('ChapterQueries', () => {
       // Page 2, position 0 is excluded scanlator
       await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 0,
+        position: 1,
         scanlator: 'Scan A',
       });
-      // Page 2, position 1 is not excluded
+      // Page 2, position 2 is not excluded
       const nextPageChapter1 = await insertTestChapter(testDb, novelId, {
         page: '2',
-        position: 1,
+        position: 2,
         scanlator: 'Scan B',
       });
 
-      const result = await getNextChapter(novelId, 0, '1', ['Scan A']);
+      const result = await getNextChapter(novelId, 0, ['Scan A']);
       expect(result?.id).toBe(nextPageChapter1);
     });
   });
@@ -1257,18 +1258,18 @@ describe('ChapterQueries', () => {
   });
 
   describe('getNovelDownloadedChapters', () => {
-    it('should return downloaded chapters in page and position order', async () => {
+    it('should return downloaded chapters in reading order across pages', async () => {
       const testDb = getTestDb();
       const novelId = await insertTestNovel(testDb, { inLibrary: true });
       await insertTestChapter(testDb, novelId, {
         isDownloaded: true,
         page: '10',
-        position: 1,
+        position: 4,
       });
       await insertTestChapter(testDb, novelId, {
         isDownloaded: true,
         page: '2',
-        position: 1,
+        position: 3,
       });
       await insertTestChapter(testDb, novelId, {
         isDownloaded: true,
@@ -1278,7 +1279,7 @@ describe('ChapterQueries', () => {
       await insertTestChapter(testDb, novelId, {
         isDownloaded: true,
         page: '2',
-        position: 0,
+        position: 2,
       });
       await insertTestChapter(testDb, novelId, {
         isDownloaded: false,
@@ -1290,9 +1291,9 @@ describe('ChapterQueries', () => {
 
       expect(result.map(chapter => [chapter.page, chapter.position])).toEqual([
         ['1', 1],
-        ['2', 0],
-        ['2', 1],
-        ['10', 1],
+        ['2', 2],
+        ['2', 3],
+        ['10', 4],
       ]);
     });
 
@@ -1315,13 +1316,13 @@ describe('ChapterQueries', () => {
         name: 'Chapter 3',
         isDownloaded: true,
         page: '2',
-        position: 0,
+        position: 2,
       });
       await insertTestChapter(testDb, novelId, {
         name: 'Chapter 4',
         isDownloaded: true,
         page: '2',
-        position: 1,
+        position: 3,
       });
 
       const result = await getNovelDownloadedChapters(novelId, 2, 3);
@@ -1632,6 +1633,179 @@ describe('ChapterQueries', () => {
       const chapters = await getNovelChapters(novelId);
       const chapter = chapters.find(c => c.id === chapterId);
       expect(chapter?.timeSpent).toBe(750);
+    });
+  });
+  describe('reading order for paginated sources', () => {
+    /** A DESC source serves its chapters newest-first across its pages. */
+    const serveDescending = (total: number, pageSize: number) => {
+      const newestFirst = Array.from({ length: total }, (_, i) => total - i);
+      const pages: {
+        page: string;
+        chapters: { name: string; path: string }[];
+      }[] = [];
+      for (let i = 0; i < newestFirst.length; i += pageSize) {
+        pages.push({
+          page: String(pages.length + 1),
+          chapters: newestFirst.slice(i, i + pageSize).map(n => ({
+            name: `Chapter ${n}`,
+            path: `/c/${n}`,
+          })),
+        });
+      }
+      return pages;
+    };
+
+    const readingOrder = async (novelId: number) =>
+      (await getNovelChapters(novelId, 'positionAsc', [], undefined, 1000)).map(
+        chapter => chapter.name,
+      );
+
+    it('derives reading order from a DESC source pagination', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      for (const { page, chapters } of serveDescending(9, 3)) {
+        await insertChapters(novelId, chapters, {
+          page,
+          pageOrder: 'DESC',
+          deferResequence: true,
+        });
+      }
+      await resequenceNovelChapters(novelId, 'DESC');
+
+      expect(await readingOrder(novelId)).toEqual([
+        'Chapter 1',
+        'Chapter 2',
+        'Chapter 3',
+        'Chapter 4',
+        'Chapter 5',
+        'Chapter 6',
+        'Chapter 7',
+        'Chapter 8',
+        'Chapter 9',
+      ]);
+    });
+
+    it('reverses a single DESC page, as served on first import', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      // parseNovel hands back page 1, newest chapter first.
+      await insertChapters(
+        novelId,
+        [
+          { name: 'Chapter 3', path: '/c/3' },
+          { name: 'Chapter 2', path: '/c/2' },
+          { name: 'Chapter 1', path: '/c/1' },
+        ],
+        { pageOrder: 'DESC' },
+      );
+
+      expect(await readingOrder(novelId)).toEqual([
+        'Chapter 1',
+        'Chapter 2',
+        'Chapter 3',
+      ]);
+    });
+
+    it('numbers positions across pages for an ASC source', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      await insertChapters(
+        novelId,
+        [
+          { name: 'Chapter 1', path: '/c/1' },
+          { name: 'Chapter 2', path: '/c/2' },
+        ],
+        { page: '1', deferResequence: true },
+      );
+      await insertChapters(
+        novelId,
+        [
+          { name: 'Chapter 3', path: '/c/3' },
+          { name: 'Chapter 4', path: '/c/4' },
+        ],
+        { page: '2', deferResequence: true },
+      );
+      await resequenceNovelChapters(novelId, 'ASC');
+
+      const chapters = await getNovelChapters(
+        novelId,
+        'positionAsc',
+        [],
+        undefined,
+        1000,
+      );
+      expect(chapters.map(c => [c.name, c.position, c.pagePosition])).toEqual([
+        ['Chapter 1', 0, 0],
+        ['Chapter 2', 1, 1],
+        ['Chapter 3', 2, 0],
+        ['Chapter 4', 3, 1],
+      ]);
+    });
+
+    it('keeps reading order and flags only new chapters when a DESC source shifts pages', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      for (const { page, chapters } of serveDescending(9, 3)) {
+        await insertChapters(novelId, chapters, {
+          page,
+          pageOrder: 'DESC',
+          deferResequence: true,
+        });
+      }
+      await resequenceNovelChapters(novelId, 'DESC');
+      await clearUpdates();
+
+      // Chapter 10 is published: every chapter shifts onto a different page.
+      for (const { page, chapters } of serveDescending(10, 3)) {
+        await insertChapters(novelId, chapters, {
+          page,
+          pageOrder: 'DESC',
+          touchUpdatedTime: true,
+          deferResequence: true,
+        });
+      }
+      await resequenceNovelChapters(novelId, 'DESC');
+
+      expect(await readingOrder(novelId)).toEqual([
+        'Chapter 1',
+        'Chapter 2',
+        'Chapter 3',
+        'Chapter 4',
+        'Chapter 5',
+        'Chapter 6',
+        'Chapter 7',
+        'Chapter 8',
+        'Chapter 9',
+        'Chapter 10',
+      ]);
+
+      const flagged = await getDetailedUpdatesFromDb(novelId);
+      expect(flagged.map(update => update.name)).toEqual(['Chapter 10']);
+    });
+
+    it('still flags a chapter whose name or release time changed', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      await insertChapters(novelId, [{ name: 'Chapter 1', path: '/c/1' }], {
+        page: '1',
+      });
+      await clearUpdates();
+
+      await insertChapters(
+        novelId,
+        [{ name: 'Chapter 1 (revised)', path: '/c/1' }],
+        { page: '1', touchUpdatedTime: true },
+      );
+
+      const flagged = await getDetailedUpdatesFromDb(novelId);
+      expect(flagged.map(update => update.name)).toEqual([
+        'Chapter 1 (revised)',
+      ]);
     });
   });
 });

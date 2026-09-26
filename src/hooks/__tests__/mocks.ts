@@ -28,6 +28,13 @@ jest.mock('@hooks/persisted/useTheme');
 jest.mock('@hooks/persisted/useTrackedNovel');
 jest.mock('@hooks/persisted/useUpdates');
 jest.mock('@services/plugin/fetch');
+// pluginManager pulls in the whole scraping stack (cheerio, htmlparser2, ...),
+// which Jest cannot transform; these suites only need the page-order lookup.
+jest.mock('@plugins/pluginManager', () => ({
+  getPlugin: jest.fn(() => undefined),
+  getPluginPageOrder: jest.fn(() => 'ASC'),
+  LOCAL_PLUGIN_ID: 'local',
+}));
 jest.mock('@components/Context/LibraryContext');
 
 const createMockChapterTextCache = () => {

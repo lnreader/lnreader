@@ -39,6 +39,7 @@ export interface ChapterInfo {
   page: string | null;
   progress: number | null;
   position?: number | null;
+  pagePosition?: number | null;
   scanlator?: string | null;
   timeSpent: number | null;
 }

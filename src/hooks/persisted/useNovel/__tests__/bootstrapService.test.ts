@@ -57,6 +57,7 @@ const makeChapter = (
   progress: 0,
   page: '1',
   position: id,
+  pagePosition: id,
   scanlator: null,
   timeSpent: 0,
   ...overrides,

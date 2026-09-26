@@ -93,6 +93,7 @@ jest.mock('@plugins/pluginManager', () => ({
   getPlugin: jest.fn().mockReturnValue({
     imageRequestInit: undefined,
   }),
+  getPluginPageOrder: jest.fn().mockReturnValue('ASC'),
 }));
 
 jest.mock('@services/plugin/fetch', () => ({
