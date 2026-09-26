@@ -36,6 +36,7 @@ import { getString } from '@i18n/translations';
 import NativeVolumeButtonListener from '@modules/native-volume-button-listener';
 import NativeFile from '@modules/native-file';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
+import { downloadChaptersAhead } from '@hooks/persisted/useDownload';
 import useTimeTracking from './useTimeTracking';
 import { useEventListener } from 'expo';
 
@@ -46,6 +47,9 @@ type AdjacentChapters = [
 
 /** Stable identity so resetting the adjacent chapters never renders twice. */
 const NO_ADJACENT_CHAPTERS: AdjacentChapters = [undefined, undefined];
+
+/** Chapters queued ahead of the one being read when auto-download is on. */
+const DOWNLOAD_AHEAD_COUNT = 3;
 
 export default function useChapter(
   webViewRef: RefObject<WebView | null>,
@@ -76,7 +80,8 @@ export default function useChapter(
     volumeButtonsOffset,
   } = useChapterGeneralSettings();
   const { incognitoMode } = useLibrarySettings();
-  const { timeTrackingEnabled, inactivityTimeoutMs } = useAppSettings();
+  const { timeTrackingEnabled, inactivityTimeoutMs, autoDownloadWhileReading } =
+    useAppSettings();
   const [error, setError] = useState<string>();
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
@@ -284,6 +289,15 @@ export default function useChapter(
         publish([nextChap, prevChap]);
         prefetchChapter(nextChap);
 
+        if (autoDownloadWhileReading && !incognitoMode) {
+          void downloadChaptersAhead(
+            novel,
+            chap,
+            DOWNLOAD_AHEAD_COUNT,
+            excludedScanlators,
+          );
+        }
+
         const totalPages = novel.totalPages ?? 0;
         const currentPage = Number(chap.page);
 
@@ -321,7 +335,13 @@ export default function useChapter(
         // Neighbouring chapters are optional; the current chapter stays usable.
       }
     },
-    [loadPageBoundaryChapter, novel.totalPages, prefetchChapter],
+    [
+      autoDownloadWhileReading,
+      incognitoMode,
+      loadPageBoundaryChapter,
+      novel,
+      prefetchChapter,
+    ],
   );
 
   const getChapter = useCallback(
