@@ -291,6 +291,26 @@ describe('ChapterQueries', () => {
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.unread === true)).toBe(true);
     });
+
+    it('should reset reading progress when marking all chapters unread (issue #1431)', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 96,
+      });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+      });
+
+      await markAllChaptersUnread(novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+      expect(chapters.every(c => (c.progress ?? 0) === 0)).toBe(true);
+    });
   });
 
   describe('insertChapters', () => {
@@ -715,6 +735,39 @@ describe('ChapterQueries', () => {
       expect(chapter1?.unread).toBe(true);
       expect(chapter2?.unread).toBe(true);
       expect(chapter3?.unread).toBe(false);
+    });
+
+    it('should reset reading progress when marking previous chapters unread', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 80,
+        position: 0,
+      });
+      const chapterId2 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+        position: 1,
+      });
+      const chapterId3 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 45,
+        position: 2,
+      });
+
+      await markPreviousChaptersUnread(chapterId2, novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter1 = chapters.find(c => c.id === chapterId1);
+      const chapter2 = chapters.find(c => c.id === chapterId2);
+      const chapter3 = chapters.find(c => c.id === chapterId3);
+      expect(chapter1?.unread).toBe(true);
+      expect(chapter2?.unread).toBe(true);
+      expect(chapter3?.unread).toBe(false);
+      expect(chapter1?.progress).toBe(0);
+      expect(chapter2?.progress).toBe(0);
+      expect(chapter3?.progress).toBe(45);
     });
   });
 
