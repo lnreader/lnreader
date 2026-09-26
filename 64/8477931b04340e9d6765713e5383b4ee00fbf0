@@ -1,0 +1,33 @@
+src/components/AppErrorBoundary/__tests__/AppErrorBoundary.test.tsx
+  s_3b4f47a3779a0a::t_a6f108b893d531 4
+  s_3b4f47a3779a0a::t_e5f7503e849b22 82-83
+  s_3b4f47a3779a0a::t_88e140066ade0b 29,32-33,76-81
+src/components/AppErrorBoundary/AppErrorBoundary.tsx
+  s_3b4f47a3779a0a::t_9bd4f66d76208d 2,111,118,120-123,164,169,172-173,177-179,198
+  s_3b4f47a3779a0a::t_7e3b985ee797e9 42-45,107-108
+  s_3b4f47a3779a0a::t_76d238dba09e56 5-7,41,46-50,109-110,194
+  s_3b4f47a3779a0a::t_469b074b7ef531 128-144
+  h_f56025180c46fa 166,182,187,196-197
+  s_3b4f47a3779a0a::t_48035f58adac31 126-127,145,163,165,171,195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "648477931b04340e9d6765713e5383b4ee00fbf0",
+  "prompts": {},
+  "humans": {
+    "h_f56025180c46fa": {
+      "author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3b4f47a3779a0a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d8bc-5418-7b12-8154-432f5cede7c4",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Rajarshee Chatterjee <rajarshee.adm@gmail.com>"
+    }
+  }
+}
