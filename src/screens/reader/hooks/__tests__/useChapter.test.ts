@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import useChapter from '../useChapter';
 import NativeFile from '@modules/native-file';
+import NativeVolumeButtonListener from '@modules/native-volume-button-listener';
 
 const mockUseNovelActions = jest.fn();
 const mockUseChapterGeneralSettings = jest.fn();
@@ -172,6 +173,9 @@ describe('useChapter', () => {
       autoScrollOffset: 100,
       useVolumeButtons: false,
       volumeButtonsOffset: 100,
+      pageReader: false,
+      pageReaderInvertVolumeButtons: false,
+      pageReaderDisableAnimation: false,
     });
     mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
     mockUseAppSettings.mockReturnValue({
@@ -422,5 +426,109 @@ describe('useChapter', () => {
 
     expect(result.current.chapter.id).toBe(nextChapter.id);
     expect(result.current.chapterText).toBe('SANITIZED:next body');
+  });
+
+  it('injects scripts supporting paged and normal modes when volume buttons are pressed', async () => {
+    const store = createStore();
+    mockUseNovelActions.mockReturnValue(store.state);
+    const mockInjectJavaScript = jest.fn();
+
+    const { result } = renderHook(() =>
+      useChapter(
+        { current: { injectJavaScript: mockInjectJavaScript } as any },
+        initialChapter,
+        novel,
+      ),
+    );
+
+    await waitFor(() =>
+      expect(result.current.chapterContext.loading).toBe(false),
+    );
+
+    const volumeUpCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'VolumeUp');
+    const volumeDownCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'VolumeDown');
+
+    expect(volumeUpCall).toBeDefined();
+    expect(volumeDownCall).toBeDefined();
+
+    // Trigger VolumeUp callback
+    volumeUpCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) - 1)',
+      ),
+    );
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining('window.scrollBy'),
+    );
+
+    // Trigger VolumeDown callback
+    volumeDownCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) + 1)',
+      ),
+    );
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining('window.scrollBy'),
+    );
+  });
+
+  it('inverts volume button directions in paged mode when pageReaderInvertVolumeButtons is enabled', async () => {
+    const store = createStore();
+    mockUseNovelActions.mockReturnValue(store.state);
+    mockUseChapterGeneralSettings.mockReturnValue({
+      autoScroll: false,
+      autoScrollInterval: 1,
+      autoScrollOffset: 100,
+      useVolumeButtons: false,
+      volumeButtonsOffset: 100,
+      pageReader: true,
+      pageReaderInvertVolumeButtons: true,
+      pageReaderDisableAnimation: false,
+    });
+    const mockInjectJavaScript = jest.fn();
+
+    const { result } = renderHook(() =>
+      useChapter(
+        { current: { injectJavaScript: mockInjectJavaScript } as any },
+        initialChapter,
+        novel,
+      ),
+    );
+
+    await waitFor(() =>
+      expect(result.current.chapterContext.loading).toBe(false),
+    );
+
+    const volumeUpCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'VolumeUp');
+    const volumeDownCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'VolumeDown');
+
+    expect(volumeUpCall).toBeDefined();
+    expect(volumeDownCall).toBeDefined();
+
+    // VolumeUp callback should move +1 (forward) when inverted
+    volumeUpCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) + 1)',
+      ),
+    );
+
+    // VolumeDown callback should move -1 (backward) when inverted
+    volumeDownCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) - 1)',
+      ),
+    );
   });
 });

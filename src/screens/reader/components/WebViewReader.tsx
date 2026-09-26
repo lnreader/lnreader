@@ -374,7 +374,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             </head>
             <body class="${
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
-            }">
+            } ${
+        chapterGeneralSettings.pageReaderDisableAnimation ? 'no-animation' : ''
+      }">
               <div class="transition-chapter" style="transform: ${
                 isNextChapterScreenVisible
                   ? 'translateX(-100%)'
@@ -437,8 +439,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     chapter,
     chapterGeneralSettings,
     processedHtml,
-      customJS,
-      customCSS,
+    customJS,
+    customCSS,
     initialReaderSettings,
     novel,
     plugin,
@@ -449,31 +451,31 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   ]);
 
   return (
-      <>
-    <WebView
-      ref={webViewRef}
-      onTouchStart={onTouchStart}
-      style={{ backgroundColor: readerSettings.theme }}
-      allowFileAccess={true}
-      originWhitelist={['*']}
-      scalesPageToFit={true}
-      showsVerticalScrollIndicator={false}
-      javaScriptEnabled={true}
-      webviewDebuggingEnabled={__DEV__}
-      onShouldStartLoadWithRequest={({ url }) => {
-        if (isPluginIssueReportUrl(url)) {
-          void Linking.openURL(url);
-          return false;
-        }
-        if (isChapterRefreshUrl(url)) {
-          refetch();
-          return false;
-        }
-        return true;
-      }}
-      onLoadEnd={() => {
-        webViewRef.current?.injectJavaScript(
-          `if (window.reader && window.reader.batteryLevel) {
+    <>
+      <WebView
+        ref={webViewRef}
+        onTouchStart={onTouchStart}
+        style={{ backgroundColor: readerSettings.theme }}
+        allowFileAccess={true}
+        originWhitelist={['*']}
+        scalesPageToFit={true}
+        showsVerticalScrollIndicator={false}
+        javaScriptEnabled={true}
+        webviewDebuggingEnabled={__DEV__}
+        onShouldStartLoadWithRequest={({ url }) => {
+          if (isPluginIssueReportUrl(url)) {
+            void Linking.openURL(url);
+            return false;
+          }
+          if (isChapterRefreshUrl(url)) {
+            refetch();
+            return false;
+          }
+          return true;
+        }}
+        onLoadEnd={() => {
+          webViewRef.current?.injectJavaScript(
+            `if (window.reader && window.reader.batteryLevel) {
             window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
           }`,
           );

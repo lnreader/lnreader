@@ -194,6 +194,8 @@ export interface ChapterGeneralSettings {
   bionicReading: boolean;
   tapToScroll: boolean;
   TTSEnable: boolean;
+  pageReaderInvertVolumeButtons: boolean;
+  pageReaderDisableAnimation: boolean;
 }
 
 export interface ReaderTheme {
@@ -319,6 +321,8 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   bionicReading: false,
   tapToScroll: false,
   TTSEnable: true,
+  pageReaderInvertVolumeButtons: false,
+  pageReaderDisableAnimation: false,
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {

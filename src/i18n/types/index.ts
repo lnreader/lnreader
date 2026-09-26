@@ -566,6 +566,10 @@ export interface StringMap {
   'readerScreen.bottomSheet.padding': 'string';
   'readerScreen.bottomSheet.pageReader': 'string';
   'readerScreen.bottomSheet.pageReaderDescription': 'string';
+  'readerScreen.bottomSheet.invertVolumeButtons': 'string';
+  'readerScreen.bottomSheet.invertVolumeButtonsDescription': 'string';
+  'readerScreen.bottomSheet.disablePageTransitions': 'string';
+  'readerScreen.bottomSheet.disablePageTransitionsDescription': 'string';
   'readerScreen.bottomSheet.removeExtraSpacing': 'string';
   'readerScreen.bottomSheet.removeExtraSpacingDescription': 'string';
   'readerScreen.bottomSheet.scrollAmount': 'string';
