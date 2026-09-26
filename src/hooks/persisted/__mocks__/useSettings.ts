@@ -24,6 +24,7 @@ export const initialAppSettings = {
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,
+  autoDownloadWhileReading: false,
   hideBackdrop: false,
   defaultChapterSort: 'positionAsc',
 };

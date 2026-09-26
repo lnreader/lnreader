@@ -90,6 +90,11 @@ export interface AppSettings {
   chapterDownloadCooldownMs?: number;
 
   /**
+   * Queue the following chapters for download while a chapter is being read.
+   */
+  autoDownloadWhileReading: boolean;
+
+  /**
    * Novel settings
    */
 
@@ -283,6 +288,12 @@ const initialAppSettings: AppSettings = {
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,
+
+  /**
+   * Download settings
+   */
+
+  autoDownloadWhileReading: false,
 
   /**
    * Novel settings
