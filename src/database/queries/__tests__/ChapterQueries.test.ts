@@ -1008,6 +1008,114 @@ describe('ChapterQueries', () => {
     });
   });
 
+  describe('chapter neighbors', () => {
+    it('limits rows transferred by both neighbor lookups to one', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      for (let position = 0; position < 5; position++) {
+        await insertTestChapter(testDb, novelId, { position });
+      }
+      const client = testDb.sqlite as typeof testDb.sqlite & {
+        executeRawAsync: typeof testDb.sqlite.executeRaw;
+      };
+      const executeRaw = jest.spyOn(client, 'executeRawAsync');
+      try {
+        expect((await getNextChapter(novelId, 0, '1'))?.position).toBe(1);
+        expect((await getPrevChapter(novelId, 4, '1'))?.position).toBe(3);
+        expect(executeRaw).toHaveBeenCalledTimes(2);
+        for (const call of executeRaw.mock.calls) {
+          expect(call[0]).toMatch(/limit \?/i);
+          expect(call[1]?.at(-1)).toBe(1);
+        }
+        for (const result of executeRaw.mock.results) {
+          expect(await result.value).toHaveLength(1);
+        }
+      } finally {
+        executeRaw.mockRestore();
+      }
+    });
+
+    it('returns no neighbor before the first or after the last chapter', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      await insertTestChapter(testDb, novelId, { page: '1', position: 0 });
+      await insertTestChapter(testDb, novelId, { page: '2', position: 1 });
+
+      expect(await getPrevChapter(novelId, 0, '1')).toBeUndefined();
+      expect(await getNextChapter(novelId, 1, '2')).toBeUndefined();
+    });
+
+    it('breaks duplicate position ties by id in the navigation direction', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const firstId = await insertTestChapter(testDb, novelId, { position: 1 });
+      const secondId = await insertTestChapter(testDb, novelId, {
+        position: 1,
+      });
+
+      expect((await getNextChapter(novelId, 0, '1'))?.id).toBe(firstId);
+      expect((await getPrevChapter(novelId, 2, '1'))?.id).toBe(secondId);
+      expect(await getNextChapter(novelId, 1, '1')).toBeUndefined();
+      expect(await getPrevChapter(novelId, 1, '1')).toBeUndefined();
+    });
+
+    it('preserves numeric-looking page comparisons and integer page ordering', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const page1 = await insertTestChapter(testDb, novelId, { page: '1' });
+      const page02 = await insertTestChapter(testDb, novelId, { page: '02' });
+      const page2 = await insertTestChapter(testDb, novelId, { page: '2' });
+      const page10 = await insertTestChapter(testDb, novelId, { page: '10' });
+
+      // The cast parameter gives comparisons numeric affinity: '02' and '2'
+      // compare equally, and page 10 sorts after page 2.
+      expect((await getPrevChapter(novelId, 0, '2'))?.id).toBe(page1);
+      expect((await getPrevChapter(novelId, 0, '10'))?.id).toBe(page2);
+      expect((await getNextChapter(novelId, 0, '02'))?.id).toBe(page10);
+      expect((await getPrevChapter(novelId, 0, '02'))?.id).toBe(page1);
+      expect((await getNextChapter(novelId, 0, '1'))?.id).toBe(page02);
+    });
+
+    it('preserves integer-cast behavior for source-defined page labels', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      await insertTestChapter(testDb, novelId, {
+        page: 'Volume A',
+        position: 2,
+      });
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        page: 'Volume B',
+        position: 0,
+      });
+
+      // Labels cast to zero, so existing eligibility treats both as later
+      // pages and sorting resolves their equal page casts by position.
+      expect(await getPrevChapter(novelId, 1, 'Volume A')).toBeUndefined();
+      expect((await getNextChapter(novelId, 1, 'Volume A'))?.id).toBe(
+        chapterId,
+      );
+    });
+
+    it('skips excluded chapters at the previous page boundary', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        page: '1',
+        position: 0,
+        scanlator: null,
+      });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        position: 1,
+        scanlator: 'Excluded',
+      });
+
+      expect((await getPrevChapter(novelId, 0, '2', ['Excluded']))?.id).toBe(
+        chapterId,
+      );
+    });
+  });
+
   describe('getPrevChapter', () => {
     it('should return previous chapter in same page', async () => {
       const testDb = getTestDb();
