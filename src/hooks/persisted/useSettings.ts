@@ -90,6 +90,11 @@ export interface AppSettings {
   chapterDownloadCooldownMs?: number;
 
   /**
+   * Delete a chapter's downloaded content as soon as the chapter is read.
+   */
+  autoDeleteReadChapters: boolean;
+
+  /**
    * Novel settings
    */
 
@@ -283,6 +288,12 @@ const initialAppSettings: AppSettings = {
   updateLibraryOnLaunch: false,
   downloadNewChapters: false,
   refreshNovelMetadata: false,
+
+  /**
+   * Download settings
+   */
+
+  autoDeleteReadChapters: false,
 
   /**
    * Novel settings

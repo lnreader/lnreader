@@ -4,10 +4,19 @@ import { Plugin } from '@plugins/types';
 import { downloadFile } from '@plugins/helpers/fetch';
 import { getPlugin } from '@plugins/pluginManager';
 import { getString } from '@i18n/translations';
-import { getChapter } from '@database/queries/ChapterQueries';
+import {
+  deleteChapter as removeChapterContent,
+  getChapter,
+} from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
-import { getChapterDownloadCooldownMs } from '@hooks/persisted/useSettings';
+import {
+  APP_SETTINGS,
+  AppSettings,
+  getChapterDownloadCooldownMs,
+} from '@hooks/persisted/useSettings';
+import { getMMKVObject } from '@utils/mmkv/mmkv';
 import { getNovelById } from '@database/queries/NovelQueries';
+import { NovelInfo } from '@database/types';
 import { dbManager } from '@database/db';
 import { chapterSchema } from '@database/schema';
 import type {
@@ -64,6 +73,33 @@ const downloadFiles = async (
   await NativeFile.writeFile(folder + '/index.html', loadedCheerio.html());
 };
 
+/**
+ * A download can be queued for a chapter that is still unread and then be read
+ * online before the task actually runs. The reader's delete-after-read check
+ * skips it at that moment because there is nothing on disk yet, so without this
+ * the content written by the task would stay forever.
+ *
+ * Re-reads the chapter rather than trusting the copy fetched before the
+ * download, because the read can land while the chapter is being fetched.
+ */
+const discardIfReadWhileQueued = async (
+  chapterId: number,
+  novel: NovelInfo,
+) => {
+  const { autoDeleteReadChapters } =
+    getMMKVObject<AppSettings>(APP_SETTINGS) ?? {};
+  if (!autoDeleteReadChapters) {
+    return;
+  }
+
+  const chapter = await getChapter(chapterId);
+  if (chapter?.unread) {
+    return;
+  }
+
+  await removeChapterContent(novel.pluginId, novel.id, chapterId);
+};
+
 const downloadChapter = async (chapterId: number) => {
   const chapter = await getChapter(chapterId);
   if (!chapter) {
@@ -90,6 +126,8 @@ const downloadChapter = async (chapterId: number) => {
         .where(eq(chapterSchema.id, chapter.id))
         .run();
     });
+
+    await discardIfReadWhileQueued(chapter.id, novel);
 
     await sleep(getChapterDownloadCooldownMs());
   } else {

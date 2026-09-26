@@ -349,6 +349,8 @@ export interface StringMap {
   'errorBoundary.restart': 'string';
   'generalSettings': 'string';
   'generalSettingsScreen.asc': 'string';
+  'generalSettingsScreen.autoDeleteReadChapters': 'string';
+  'generalSettingsScreen.autoDeleteReadChaptersDescription': 'string';
   'generalSettingsScreen.autoDownload': 'string';
   'generalSettingsScreen.automaticUpdates': 'string';
   'generalSettingsScreen.automaticUpdatesDaily': 'string';

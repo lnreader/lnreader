@@ -85,6 +85,7 @@ export const testModules = {
       'getUnreadNovelChapters',
       'getAllUndownloadedChapters',
       'getAllUndownloadedAndUnreadChapters',
+      'getUndownloadedUnreadChaptersByPaths',
       'getChapter',
       'getPageChapters',
       'getChapterCount',
