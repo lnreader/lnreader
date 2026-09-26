@@ -17,6 +17,7 @@ export type RestoreResult = {
   failedSectionCount: number;
   pluginIds: string[];
   novelMappings: RestoredNovelMapping[];
+  restoreRunId: string;
   manifest: ResolvedBackupManifest;
 };
 

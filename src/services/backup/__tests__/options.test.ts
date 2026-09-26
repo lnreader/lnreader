@@ -7,6 +7,10 @@ import {
 import { getSelectedBackupFileSections } from '../fileSections';
 import { ZipBackupName } from '../types';
 
+jest.mock('@database/queries/NovelRestoreQueries', () => ({
+  getRestoreChapterMappings: jest.fn(),
+}));
+
 jest.mock('@utils/Storages', () => ({
   NOVEL_STORAGE: '/storage/Novels',
   PLUGIN_STORAGE: '/storage/Plugins',

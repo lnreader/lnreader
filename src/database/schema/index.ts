@@ -3,6 +3,7 @@ import { novel } from './novel';
 import { chapter } from './chapter';
 import { novelCategory } from './novelCategory';
 import { repository } from './repository';
+import { restoreChapterMapping } from './restoreChapterMapping';
 
 export {
   category as categorySchema,
@@ -25,6 +26,11 @@ export {
   type RepositoryRow,
   type RepositoryInsert,
 } from './repository';
+export {
+  restoreChapterMapping as restoreChapterMappingSchema,
+  type RestoreChapterMappingRow,
+  type RestoreChapterMappingInsert,
+} from './restoreChapterMapping';
 
 /**
  * Unified schema object containing all database tables
@@ -36,6 +42,7 @@ export const schema = {
   chapter,
   novelCategory,
   repository,
+  restoreChapterMapping,
 } as const;
 
 export type Schema = typeof schema;

@@ -6,12 +6,15 @@ import {
   text,
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
+import { novel } from './novel';
 
 export const chapter = sqliteTable(
   'Chapter',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    novelId: integer('novelId').notNull(),
+    novelId: integer('novelId')
+      .notNull()
+      .references(() => novel.id, { onDelete: 'cascade' }),
     path: text('path').notNull(),
     name: text('name').notNull(),
     releaseTime: text('releaseTime'),

@@ -65,6 +65,7 @@ const successfulResult: RestoreResult = {
   failedSectionCount: 0,
   pluginIds: ['installed'],
   novelMappings: [],
+  restoreRunId: 'restore-run-1',
   manifest: {
     appVersion: '2.1.0',
     formatVersion: 2,

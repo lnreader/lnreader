@@ -6,12 +6,7 @@ import { insertChapters } from './ChapterQueries';
 
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
-import {
-  BackupNovel,
-  DBNovelInfo,
-  NovelInfo,
-  type RestoredNovelMapping,
-} from '../types';
+import { DBNovelInfo, NovelInfo } from '../types';
 import { SourceNovel } from '@plugins/types';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { downloadFile } from '@plugins/helpers/fetch';
@@ -21,7 +16,6 @@ import {
   novelSchema,
   novelCategorySchema,
   categorySchema,
-  chapterSchema,
 } from '@database/schema';
 import type { TransactionParameter } from '@database/manager/manager.d';
 import { getLibraryDefaultCategoryId } from '@hooks/persisted/useSettings';
@@ -75,7 +69,7 @@ const getCategoriesForNewNovel = async (
   return getBuiltInDefaultCategory(tx);
 };
 
-const getCategoryForNewNovel = async (tx: TransactionParameter) =>
+export const getCategoryForNewNovel = async (tx: TransactionParameter) =>
   (await getCategoriesForNewNovel(tx))[0];
 
 /**
@@ -287,69 +281,6 @@ export const deleteCachedNovels = async () => {
   showToast(getString('advancedSettingsScreen.cachedNovelsDeletedToast'));
 };
 
-/**
- * Restore a novel from backup using Drizzle ORM.
- */
-export const restoreLibrary = async (novel: NovelInfo) => {
-  const sourceNovel = await fetchNovel(novel.pluginId, novel.path).catch(e => {
-    throw e;
-  });
-
-  const novelId = await dbManager.write(async tx => {
-    const row = await tx
-      .insert(novelSchema)
-      .values({
-        path: sourceNovel.path,
-        name: novel.name,
-        pluginId: novel.pluginId,
-        cover: novel.cover || '',
-        summary: novel.summary || '',
-        author: novel.author || '',
-        artist: novel.artist || '',
-        status: novel.status || '',
-        genres: novel.genres || '',
-        totalPages: sourceNovel.totalPages || 0,
-        inLibrary: true,
-      })
-      .onConflictDoUpdate({
-        target: [novelSchema.path, novelSchema.pluginId],
-        set: {
-          name: novel.name,
-          cover: novel.cover || '',
-          summary: novel.summary || '',
-          author: novel.author || '',
-          artist: novel.artist || '',
-          status: novel.status || '',
-          genres: novel.genres || '',
-          totalPages: sourceNovel.totalPages || 0,
-          inLibrary: true,
-        },
-      })
-      .returning()
-      .get();
-
-    if (row) {
-      const defaultCategory = await getCategoryForNewNovel(tx);
-
-      if (defaultCategory) {
-        await tx
-          .insert(novelCategorySchema)
-          .values({
-            novelId: row.id,
-            categoryId: defaultCategory.id,
-          })
-          .onConflictDoNothing()
-          .run();
-      }
-    }
-    return row?.id;
-  });
-
-  if (novelId && sourceNovel.chapters) {
-    await insertChapters(novelId, sourceNovel.chapters);
-  }
-};
-
 export const updateNovelInfo = async (info: NovelInfo) => {
   await dbManager.write(async tx => {
     await tx
@@ -472,91 +403,5 @@ export const updateNovelCategories = async (
         }
       }
     }
-  });
-};
-
-/**
- * Restores novel and chapters from a backup object.
- */
-export const _restoreNovelAndChapters = async (
-  backupNovel: BackupNovel,
-): Promise<RestoredNovelMapping> => {
-  const { chapters, id: backupNovelId, ...novel } = backupNovel;
-  return dbManager.write(async tx => {
-    // Match novels by their stable source identity, not the database-local ID.
-    const restoredNovel = await tx
-      .insert(novelSchema)
-      .values({
-        ...novel,
-        totalChapters: 0,
-        chaptersDownloaded: 0,
-        chaptersUnread: 0,
-      })
-      .onConflictDoUpdate({
-        target: [novelSchema.path, novelSchema.pluginId],
-        set: {
-          ...novel,
-          totalChapters: 0,
-          chaptersDownloaded: 0,
-          chaptersUnread: 0,
-        },
-      })
-      .returning({ id: novelSchema.id })
-      .get();
-
-    if (novel.cover?.startsWith(`file://${NOVEL_STORAGE}/`)) {
-      const cacheSuffix = novel.cover.match(/[?#].*$/)?.[0] ?? '';
-      await tx
-        .update(novelSchema)
-        .set({
-          cover: `file://${NOVEL_STORAGE}/${novel.pluginId}/${restoredNovel.id}/cover.png${cacheSuffix}`,
-        })
-        .where(eq(novelSchema.id, restoredNovel.id))
-        .run();
-    }
-
-    await tx
-      .delete(chapterSchema)
-      .where(eq(chapterSchema.novelId, restoredNovel.id))
-      .run();
-
-    const chapterMappings: RestoredNovelMapping['chapters'] = [];
-
-    // Restore chapters in batches
-    if (chapters.length > 0) {
-      const BATCH_SIZE = 100;
-      for (let i = 0; i < chapters.length; i += BATCH_SIZE) {
-        const batch = chapters.slice(i, i + BATCH_SIZE);
-        const restoredChapters = await tx
-          .insert(chapterSchema)
-          .values(
-            batch.map(({ id: _chapterId, novelId: _novelId, ...chapter }) => ({
-              ...chapter,
-              novelId: restoredNovel.id,
-            })),
-          )
-          .returning({ id: chapterSchema.id, path: chapterSchema.path })
-          .all();
-        const restoredIdsByPath = new Map(
-          restoredChapters.map(chapter => [chapter.path, chapter.id]),
-        );
-        for (const chapter of batch) {
-          const restoredChapterId = restoredIdsByPath.get(chapter.path);
-          if (restoredChapterId !== undefined) {
-            chapterMappings.push({
-              backupChapterId: chapter.id,
-              restoredChapterId,
-            });
-          }
-        }
-      }
-    }
-
-    return {
-      pluginId: novel.pluginId,
-      backupNovelId,
-      restoredNovelId: restoredNovel.id,
-      chapters: chapterMappings,
-    };
   });
 };

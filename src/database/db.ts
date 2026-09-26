@@ -66,6 +66,7 @@ export const drizzleDb = drizzle(_db, {
   schema,
   logger: __DEV__ ? new MyLogger() : false,
 });
+export type DrizzleDb = typeof drizzleDb
 
 export const dbManager = createDbManager(drizzleDb);
 

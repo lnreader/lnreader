@@ -124,6 +124,8 @@ export interface StringMap {
   'backupScreen.novelDirectoryReadFailed': 'string';
   'backupScreen.restoringCategories': 'string';
   'backupScreen.restoringCategoriesProgress': 'string';
+  'backupScreen.validatingNovels': 'string';
+  'backupScreen.validatingNovelsProgress': 'string';
   'backupScreen.restoringNovels': 'string';
   'backupScreen.restoringNovelsProgress': 'string';
   'backupScreen.restoringSettings': 'string';

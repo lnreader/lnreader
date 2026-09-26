@@ -3,6 +3,10 @@ import { requireNativeModule } from 'expo-modules-core';
 type NativeZipArchiveModule = {
   unzip(sourceFilePath: string, distDirPath: string): Promise<void>;
   zip(sourceDirPath: string, zipFilePath: string): Promise<void>;
+  zipDirectories(
+    sources: Array<{ path: string; prefix: string }>,
+    zipFilePath: string,
+  ): Promise<void>;
   remoteUnzip(
     distDirPath: string,
     urlString: string,

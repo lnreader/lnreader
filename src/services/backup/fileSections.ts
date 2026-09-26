@@ -3,7 +3,7 @@ import type { BackupOptions } from './options';
 import { ZipBackupName } from './types';
 import NativeFile from '@modules/native-file';
 import type { RestoredNovelMapping } from '@database/types';
-
+import { getRestoreChapterMappings } from '@database/queries/NovelRestoreQueries';
 export type BackupFileSection = {
   archiveName: ZipBackupName;
   storagePath: string;
@@ -11,6 +11,7 @@ export type BackupFileSection = {
 
 export const getSelectedBackupFileSections = (
   options: BackupOptions,
+  formatVersion: 2 | 3 = 3,
 ): BackupFileSection[] => {
   const sections: BackupFileSection[] = [];
 
@@ -20,7 +21,7 @@ export const getSelectedBackupFileSections = (
       storagePath: PLUGIN_STORAGE,
     });
   }
-  if (options.downloadedFiles) {
+  if (formatVersion === 2 && options.downloadedFiles) {
     sections.push({
       archiveName: ZipBackupName.NOVEL_FILES,
       storagePath: NOVEL_STORAGE,
@@ -51,9 +52,12 @@ const moveDirectoryContents = async (source: string, destination: string) => {
   }
 };
 
+const RESTORE_CHAPTER_LOOKUP_BATCH_SIZE = 100;
+
 export const restoreNovelFiles = async (
   stagingPath: string,
   novelMappings: RestoredNovelMapping[],
+  restoreRunId: string,
 ) => {
   for (const mapping of novelMappings) {
     const sourceNovelPath = `${stagingPath}/${mapping.pluginId}/${mapping.backupNovelId}`;
@@ -63,28 +67,48 @@ export const restoreNovelFiles = async (
 
     const destinationNovelPath = `${NOVEL_STORAGE}/${mapping.pluginId}/${mapping.restoredNovelId}`;
     await NativeFile.mkdir(destinationNovelPath);
-    const chapterIds = new Map(
-      mapping.chapters.map(chapter => [
-        String(chapter.backupChapterId),
-        chapter.restoredChapterId,
-      ]),
-    );
-
-    for (const item of await NativeFile.readDir(sourceNovelPath)) {
+    const items = await NativeFile.readDir(sourceNovelPath);
+    for (const item of items) {
       if (!item.isDirectory) {
         await NativeFile.moveFile(
           item.path,
           `${destinationNovelPath}/${item.name}`,
         );
-        continue;
       }
+    }
 
-      const restoredChapterId = chapterIds.get(item.name);
-      if (restoredChapterId !== undefined) {
-        await moveDirectoryContents(
-          item.path,
-          `${destinationNovelPath}/${restoredChapterId}`,
-        );
+    const chapterItems = items.filter(item => item.isDirectory);
+    for (
+      let start = 0;
+      start < chapterItems.length;
+      start += RESTORE_CHAPTER_LOOKUP_BATCH_SIZE
+    ) {
+      const chapterBatch = chapterItems.slice(
+        start,
+        start + RESTORE_CHAPTER_LOOKUP_BATCH_SIZE,
+      );
+      const backupChapterIds = chapterBatch
+        .map(item => Number(item.name))
+        .filter(id => Number.isInteger(id) && id > 0);
+      const chapterMappings = await getRestoreChapterMappings(
+        restoreRunId,
+        mapping.backupNovelId,
+        backupChapterIds,
+      );
+      const restoredChapterIds = new Map(
+        chapterMappings.map(chapter => [
+          String(chapter.backupChapterId),
+          chapter.restoredChapterId,
+        ]),
+      );
+      for (const item of chapterBatch) {
+        const restoredChapterId = restoredChapterIds.get(item.name);
+        if (restoredChapterId !== undefined) {
+          await moveDirectoryContents(
+            item.path,
+            `${destinationNovelPath}/${restoredChapterId}`,
+          );
+        }
       }
     }
   }
@@ -97,9 +121,10 @@ export const restoreNovelFiles = async (
 export const restoreLegacyFiles = async (
   stagingPath: string,
   novelMappings: RestoredNovelMapping[],
+  restoreRunId: string,
 ) => {
   await moveDirectoryContents(`${stagingPath}/Plugins`, PLUGIN_STORAGE);
-  await restoreNovelFiles(`${stagingPath}/Novels`, novelMappings);
+  await restoreNovelFiles(`${stagingPath}/Novels`, novelMappings, restoreRunId);
   if (await NativeFile.exists(stagingPath)) {
     await NativeFile.unlink(stagingPath);
   }

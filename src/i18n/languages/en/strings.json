@@ -141,6 +141,8 @@
     "novelDirectoryReadFailed": "Failed to read novel directory: %{error}",
     "restoringCategories": "Restoring Categories",
     "restoringCategoriesProgress": "Restoring categories (%{current}/%{total})",
+    "validatingNovels": "Validating Novels",
+    "validatingNovelsProgress": "Validating novels (%{current}/%{total})",
     "restoringNovels": "Restoring Novels",
     "restoringNovelsProgress": "Restoring novels (%{current}/%{total})",
     "restoringSettings": "Restoring Settings",
