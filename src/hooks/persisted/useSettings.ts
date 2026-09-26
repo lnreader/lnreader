@@ -220,6 +220,7 @@ export interface ChapterReaderSettings {
     pitch?: number;
     autoPageAdvance?: boolean;
     scrollToTop?: boolean;
+    strictSanitization?: boolean;
   };
   epubLocation: string;
   epubUseAppTheme: boolean;
@@ -337,6 +338,7 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
     pitch: 1,
     autoPageAdvance: false,
     scrollToTop: true,
+    strictSanitization: true,
   },
   epubLocation: '',
   epubUseAppTheme: false,
@@ -434,6 +436,7 @@ export const useChapterReaderSettings = () => {
         // Explicitly ensure these defaults if undefined
         autoPageAdvance: storedSettings.tts?.autoPageAdvance ?? false,
         scrollToTop: storedSettings.tts?.scrollToTop ?? true,
+        strictSanitization: storedSettings.tts?.strictSanitization ?? true,
         rate: storedSettings.tts?.rate ?? 1,
         pitch: storedSettings.tts?.pitch ?? 1,
       },

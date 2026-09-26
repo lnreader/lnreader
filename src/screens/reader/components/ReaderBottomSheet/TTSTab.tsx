@@ -438,6 +438,18 @@ const TTSTab: React.FC = () => {
               />
             </>
           ) : null}
+
+          <ReaderSheetPreferenceItem
+            description="Removes hidden elements and duplicate paragraphs before reading"
+            label="Strict Text Sanitization"
+            value={tts?.strictSanitization !== false}
+            onPress={() =>
+              setChapterReaderSettings({
+                tts: { ...tts, strictSanitization: !(tts?.strictSanitization !== false) },
+              })
+            }
+            theme={theme}
+          />
         </View>
 
         <View style={styles.bottomSpacing} />
