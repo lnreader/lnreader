@@ -90,7 +90,7 @@ const MIGRATION_STATEMENTS = [
  */
 export function createTestDb() {
   // Create in-memory database
-  const sqlite = open({ name: ':memory:' });
+  const sqlite = open({ name: ':memory:', location: ':memory:' });
   // drizzle-orm/op-sqlite expects executeAsync on the client
   (sqlite as any).executeAsync ??= sqlite.execute;
   (sqlite as any).executeRawAsync ??= sqlite.executeRaw;

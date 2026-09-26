@@ -58,8 +58,10 @@ export default function useChapter(
     updateChapterProgress,
     increaseTimeSpent,
     chapterTextCache,
+    deleteChapter,
   } = useNovelActions();
   const novelSettings = useNovelValue('novelSettings');
+  const { autoDeleteReadChapters } = useAppSettings();
 
   const [hidden, setHidden] = useState(true);
   const [chapter, setChapter] = useState(initialChapter);
@@ -425,12 +427,17 @@ export default function useChapter(
           // a relative number
           markedReadRef.current = chapter.id;
           markChapterRead(chapter.id);
+          if (autoDeleteReadChapters && chapter.isDownloaded) {
+            deleteChapter(chapter);
+          }
           updateTracker();
         }
       }
     },
     [
-      chapter.id,
+      chapter,
+      autoDeleteReadChapters,
+      deleteChapter,
       incognitoMode,
       markChapterRead,
       updateChapterProgress,

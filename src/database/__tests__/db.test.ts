@@ -204,7 +204,7 @@ const createExecutor = (sqlite: DB) => ({
 
 describe('new database initialization', () => {
   it('creates schema, triggers, and default data', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -252,7 +252,7 @@ describe('new database initialization', () => {
 
 describe('runDatabaseBootstrap', () => {
   it('applies pragmas, triggers, and default categories', () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -291,7 +291,7 @@ describe('runDatabaseBootstrap', () => {
   });
 
   it('repairs only an empty default category name', () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     try {
       createSchema(sqlite);
       sqlite.executeSync(
@@ -314,7 +314,7 @@ describe('runDatabaseBootstrap', () => {
 
 describe('production migrations', () => {
   it('rebuilds novel counters with one scan of the Chapter snapshot', () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     try {
       createSchema(sqlite);
 
@@ -351,7 +351,7 @@ describe('production migrations', () => {
   });
 
   it('can run after test schema exists', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -448,7 +448,7 @@ describe('production migrations', () => {
   });
 
   it('repairs a legacy Novel table that is missing counter columns', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -536,7 +536,7 @@ describe('production migrations', () => {
   });
 
   it('resumes after Novel was dropped during the previous repair migration', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -634,7 +634,7 @@ describe('production migrations', () => {
   });
 
   it('repairs an interrupted Chapter snapshot missing recent columns', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -725,7 +725,7 @@ describe('production migrations', () => {
   });
 
   it('preserves snapshot columns while adding a missing timeSpent column', () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     try {
       createSchema(sqlite);
       sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
@@ -754,7 +754,7 @@ describe('production migrations', () => {
   });
 
   it('recovers when Chapter columns exist without migration records', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -840,7 +840,7 @@ describe('production migrations', () => {
   };
 
   it('recovers when novels were added while the migration was interrupted', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     sqlite.executeSync('PRAGMA foreign_keys = ON');
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
@@ -907,7 +907,7 @@ describe('production migrations', () => {
   });
 
   it('preserves novels added while the migration was interrupted (no legacy FK)', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
     try {
@@ -961,7 +961,7 @@ describe('production migrations', () => {
   });
 
   it('recovers when NovelCategory rows were added while the migration was interrupted', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     sqlite.executeSync('PRAGMA foreign_keys = ON');
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
@@ -1019,7 +1019,7 @@ describe('production migrations', () => {
   });
 
   it('unsticks a device whose previous attempt already crashed the migration', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     sqlite.executeSync('PRAGMA foreign_keys = ON');
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;
@@ -1124,7 +1124,7 @@ describe('production migrations', () => {
   });
 
   it('runs the full production initialization on a legacy database', async () => {
-    const sqlite = open({ name: ':memory:' });
+    const sqlite = open({ name: ':memory:', location: ':memory:' });
     sqlite.executeSync('PRAGMA foreign_keys = ON');
     (sqlite as any).executeAsync ??= sqlite.execute;
     (sqlite as any).executeRawAsync ??= sqlite.executeRaw;

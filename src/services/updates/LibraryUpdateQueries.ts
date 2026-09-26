@@ -8,7 +8,10 @@ import { dbManager } from '@database/db';
 import { novelSchema, chapterSchema } from '@database/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import NativeFile from '@modules/native-file';
-import { insertChapters } from '@database/queries/ChapterQueries';
+import {
+  getUndownloadedUnreadChaptersByPaths,
+  insertChapters,
+} from '@database/queries/ChapterQueries';
 
 /**
  * Update novel metadata in the database including cover image.
@@ -117,20 +120,10 @@ const updateNovelChapters = async (
   });
 
   if (downloadNewChapters && newPaths.length && enqueue) {
-    const insertedNewChapters = await dbManager
-      .select({
-        id: chapterSchema.id,
-        path: chapterSchema.path,
-        name: chapterSchema.name,
-      })
-      .from(chapterSchema)
-      .where(
-        and(
-          eq(chapterSchema.novelId, novelId),
-          inArray(chapterSchema.path, newPaths),
-        ),
-      )
-      .all();
+    const chaptersToDownload = await getUndownloadedUnreadChaptersByPaths(
+      novelId,
+      newPaths,
+    );
 
     const chapterNameByPath = new Map(
       chapters.map((chapter, index) => [
@@ -139,14 +132,14 @@ const updateNovelChapters = async (
       ]),
     );
 
-    if (insertedNewChapters.length) {
+    if (chaptersToDownload.length) {
       enqueue({
         name: 'DOWNLOAD_CHAPTER',
         data: {
           novelName,
           novelId,
           pluginId,
-          chapters: insertedNewChapters.map(insertedChapter => ({
+          chapters: chaptersToDownload.map(insertedChapter => ({
             chapterId: insertedChapter.id,
             chapterName:
               chapterNameByPath.get(insertedChapter.path) ||

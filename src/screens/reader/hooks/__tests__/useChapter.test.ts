@@ -128,6 +128,7 @@ const createStore = (
     chapterTextCache,
     setLastRead: jest.fn(),
     increaseTimeSpent: jest.fn(),
+    deleteChapter: jest.fn(),
   };
 
   return {
@@ -328,6 +329,114 @@ describe('useChapter', () => {
       initialChapter.name,
     );
     expect(updateAllTrackedNovels).toHaveBeenCalledWith({ progress: 5 });
+  });
+
+  describe('autoDeleteReadChapters', () => {
+    const downloadedChapter = {
+      ...initialChapter,
+      isDownloaded: true,
+    };
+
+    const renderAndFinish = async (
+      chapter: typeof initialChapter,
+    ): Promise<{
+      store: ReturnType<typeof createStore>;
+      saveProgress: (percentage: number) => void;
+    }> => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetDbChapter.mockResolvedValue(chapter);
+
+      const { result } = renderHook(() => useFlatChapter(chapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      return { store, saveProgress: result.current.saveProgress };
+    };
+
+    it('deletes the downloaded content once the chapter is marked read', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDeleteReadChapters: true,
+      });
+
+      const { store, saveProgress } = await renderAndFinish(downloadedChapter);
+
+      act(() => saveProgress(98));
+
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(
+        downloadedChapter.id,
+      );
+      expect(store.state.deleteChapter).toHaveBeenCalledWith(downloadedChapter);
+    });
+
+    it('keeps the content when the setting is disabled', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDeleteReadChapters: false,
+      });
+
+      const { store, saveProgress } = await renderAndFinish(downloadedChapter);
+
+      act(() => saveProgress(98));
+
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(
+        downloadedChapter.id,
+      );
+      expect(store.state.deleteChapter).not.toHaveBeenCalled();
+    });
+
+    it('does not delete a chapter that was never downloaded', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDeleteReadChapters: true,
+      });
+
+      const { store, saveProgress } = await renderAndFinish(initialChapter);
+
+      act(() => saveProgress(98));
+
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(
+        initialChapter.id,
+      );
+      expect(store.state.deleteChapter).not.toHaveBeenCalled();
+    });
+
+    it('deletes at most once even as progress keeps reporting the end', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDeleteReadChapters: true,
+      });
+
+      const { store, saveProgress } = await renderAndFinish(downloadedChapter);
+
+      act(() => {
+        saveProgress(97);
+        saveProgress(98);
+        saveProgress(100);
+      });
+
+      expect(store.state.deleteChapter).toHaveBeenCalledTimes(1);
+    });
+
+    it('never deletes while reading incognito', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDeleteReadChapters: true,
+      });
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: true });
+
+      const { store, saveProgress } = await renderAndFinish(downloadedChapter);
+
+      act(() => saveProgress(100));
+
+      expect(store.state.markChapterRead).not.toHaveBeenCalled();
+      expect(store.state.deleteChapter).not.toHaveBeenCalled();
+    });
   });
 
   it('sets error and drops the failed load from the cache so a retry refetches', async () => {
