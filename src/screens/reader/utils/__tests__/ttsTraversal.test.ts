@@ -117,6 +117,109 @@ describe('reader TTS traversal', () => {
     );
   });
 
+  describe('symbol stripping (issue 2063)', () => {
+    const tts = loadTtsTraversal(element('div'));
+
+    it('strips brackets from system status text but keeps the words', () => {
+      expect(tts.normalizeText('[Ding! Host has connected.]')).toBe(
+        'Ding! Host has connected.',
+      );
+    });
+
+    it('keeps a meaningful question mark in hidden-status markers', () => {
+      expect(tts.normalizeText('[?]')).toBe('?');
+    });
+
+    it.each([
+      ['Success rate 99%', 'Success rate 99%'],
+      ['$50', '$50'],
+      ['ATK +5', 'ATK +5'],
+      ['HP 100/100', 'HP 100/100'],
+      ['Tom & Jerry', 'Tom & Jerry'],
+      ['@reader', '@reader'],
+      ['ユーザー＠example', 'ユーザー＠example'],
+      // @ survives; the pre-existing prose-dot spacing still applies.
+      ['reader@example.com', 'reader@example. com'],
+    ])('preserves meaning-bearing symbols in %s', (input, expected) => {
+      expect(tts.normalizeText(input)).toBe(expected);
+    });
+
+    it.each([
+      ['["Status"]', 'Status'],
+      ['[“Skill acquired”]', 'Skill acquired'],
+    ])('strips quotes exposed by bracket removal in %s', (input, expected) => {
+      expect(tts.normalizeText(input)).toBe(expected);
+    });
+
+    it('preserves CJK sentence boundaries', () => {
+      expect(tts.normalizeText('你好。再见。')).toBe('你好。再见。');
+    });
+
+    it('preserves other meaning-bearing glyphs and CJK punctuation', () => {
+      expect(tts.normalizeText('It is 36°')).toBe('It is 36°');
+      expect(tts.normalizeText('§ 12')).toBe('§ 12');
+      expect(tts.normalizeText('a · b')).toBe('a · b');
+      expect(tts.normalizeText('「你好，世界。」')).toBe('「你好，世界。」');
+      expect(tts.normalizeText('（注）【第12章】')).toBe('（注）【第12章】');
+    });
+
+    it.each([
+      ['€50', '€50'],
+      ['¥5000', '¥5000'],
+      ['3×4', '3×4'],
+      ['10÷2', '10÷2'],
+      ['HP<30%', 'HP<30%'],
+      ['a>b', 'a>b'],
+      ['HP≤30%', 'HP≤30%'],
+      ['a≥b', 'a≥b'],
+      ['a≈b', 'a≈b'],
+      ['a≠b', 'a≠b'],
+      ['ATK ±5', 'ATK ±5'],
+      ['50‰', '50‰'],
+      ['５＋３', '５＋３'],
+      ['１００／１００', '１００／１００'],
+      ['５０％', '５０％'],
+      ['＆', '＆'],
+      ['￥5000', '￥5000'],
+      ['＄50', '＄50'],
+      ['LV.10〜20', 'LV. 10〜20'],
+      ['10～20', '10～20'],
+      ['√9', '√9'],
+      ['1⁄2', '1⁄2'],
+      ['3⋅5', '3⋅5'],
+      ['50‱', '50‱'],
+      ['5′10″', '5′10″'],
+      ['HP ∞', 'HP ∞'],
+    ])(
+      'preserves sibling currencies, relations, and fullwidth math in %s',
+      (input, expected) => {
+        expect(tts.normalizeText(input)).toBe(expected);
+      },
+    );
+
+    it('strips asterisk emphasis but keeps the word', () => {
+      expect(tts.normalizeText('*Important* announcement')).toBe(
+        'Important announcement',
+      );
+    });
+
+    it('strips bullets and decorative glyphs', () => {
+      expect(tts.normalizeText('• First item')).toBe('First item');
+      expect(tts.normalizeText('❖ ✦ ★ Chapter 12 ★ ✦ ❖')).toBe('Chapter 12');
+    });
+
+    it('folds ellipses marking hesitation or silence into a pause', () => {
+      expect(tts.normalizeText('He hesitated... then spoke.')).toBe(
+        'He hesitated… then spoke.',
+      );
+    });
+
+    it('drops symbol-only paragraphs from the queue', () => {
+      expect(tts.normalizeText('✦✦✦')).toBe('');
+      expect(tts.normalizeText('***')).toBe('');
+    });
+  });
+
   it('queues paragraphs wrapped in spans only once', () => {
     const chapter = element(
       'div',
