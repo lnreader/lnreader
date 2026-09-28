@@ -97,7 +97,7 @@
     "automaticBackupLocation": "Automatic backup location",
     "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Tên sao lưu",
-    "backupCreated": "Backup created successfully",
+    "backupCreated": "Sao lưu thành công",
     "backupCreatedWithWarnings": "Backup created with warnings: %{warnings}",
     "backupRestored": "Backup restored successfully",
     "backupRestoredSelectedWithWarnings": "Backup restored with warnings: %{warnings}",
