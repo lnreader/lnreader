@@ -478,9 +478,8 @@ describe('selective backup data', () => {
       );
     });
 
-    const novelProgress = async (now: () => number) => {
+    const novelProgress = async () => {
       const texts: string[] = [];
-      jest.spyOn(Date, 'now').mockImplementation(now);
       await restoreData('/cache', transformer => {
         texts.push(transformer({} as never).progressText ?? '');
       });
@@ -494,33 +493,19 @@ describe('selective backup data', () => {
       for (let id = 1; id <= 120; id++) files[`${id}.json`] = novelFile(id);
       mockBackup(files);
 
-      const texts = await novelProgress(() => 1000);
+      const texts = await novelProgress();
 
       expect(texts[texts.length - 1]).toBe(
         'backupScreen.restoringNovelsProgress {"current":120,"total":120}',
       );
     });
 
-    it('reports progress as each batch is written', async () => {
+    it('reports every batch boundary even when batches finish instantly', async () => {
       const files: Record<string, string> = {};
       for (let id = 1; id <= 120; id++) files[`${id}.json`] = novelFile(id);
       mockBackup(files);
-      let now = 0;
-      jest
-        .mocked(_restoreNovelsAndChapters)
-        .mockImplementation(async novels => {
-          now += 1000;
-          return novels.map(novel => ({
-            mapping: {
-              pluginId: novel.pluginId,
-              backupNovelId: novel.id,
-              restoredNovelId: novel.id,
-              chapters: [],
-            },
-          }));
-        });
 
-      const texts = await novelProgress(() => now);
+      const texts = await novelProgress();
 
       expect(texts).toEqual(
         [0, 50, 100, 120].map(
