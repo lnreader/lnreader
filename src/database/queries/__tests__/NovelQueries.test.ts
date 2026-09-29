@@ -7,6 +7,7 @@
 import './mockDb';
 import { setupTestDatabase, getTestDb, teardownTestDatabase } from './setup';
 import {
+  insertTestChapter,
   insertTestNovel,
   insertTestNovelCategory,
   insertTestCategory,
@@ -20,6 +21,7 @@ import {
 } from '@database/schema';
 import { eq } from 'drizzle-orm';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
+import type { BackupNovel } from '@database/types';
 
 import {
   getAllNovels,
@@ -35,7 +37,7 @@ import {
   pickCustomNovelCover,
   updateNovelCategoryById,
   updateNovelCategories,
-  _restoreNovelAndChapters,
+  _restoreNovelsAndChapters,
 } from '../NovelQueries';
 
 const mockGetLibraryDefaultCategoryId = jest.fn<number | undefined, []>();
@@ -460,7 +462,62 @@ describe('NovelQueries', () => {
     });
   });
 
-  describe('_restoreNovelAndChapters', () => {
+  describe('_restoreNovelsAndChapters', () => {
+    const backupChapter = (
+      index: number,
+      data: Partial<BackupNovel['chapters'][number]> = {},
+    ): BackupNovel['chapters'][number] => ({
+      id: 1000 + index,
+      novelId: 1,
+      path: `/restored/chapter-${index}`,
+      name: `Chapter ${index}`,
+      releaseTime: null,
+      readTime: null,
+      bookmark: false,
+      unread: true,
+      isDownloaded: false,
+      updatedTime: null,
+      chapterNumber: index,
+      page: '1',
+      progress: null,
+      position: index,
+      scanlator: null,
+      timeSpent: 0,
+      ...data,
+    });
+
+    const backupNovel = (
+      data: Partial<BackupNovel> = {},
+      chapterCount = 1,
+    ): BackupNovel => ({
+      id: 1,
+      path: '/restored/novel',
+      pluginId: 'restored-plugin',
+      name: 'Restored Novel',
+      cover: null,
+      summary: null,
+      author: null,
+      artist: null,
+      status: 'Ongoing',
+      genres: null,
+      inLibrary: true,
+      isLocal: false,
+      totalPages: 0,
+      chapters: Array.from({ length: chapterCount }, (_, i) =>
+        backupChapter(i + 1),
+      ),
+      ...data,
+    });
+
+    const rowsWithoutIds = <T extends Record<string, unknown>>(rows: T[]) =>
+      rows.map(({ id: _id, novelId: _novelId, ...row }) => row);
+
+    const restoreOne = async (novel: BackupNovel) => {
+      const [result] = await _restoreNovelsAndChapters([novel]);
+      if (!result.mapping) throw result.error;
+      return result.mapping;
+    };
+
     it('does not replace an unrelated novel when backup IDs collide', async () => {
       const testDb = getTestDb();
       await insertTestNovel(testDb, {
@@ -470,41 +527,11 @@ describe('NovelQueries', () => {
         inLibrary: true,
       });
 
-      const mapping = await _restoreNovelAndChapters({
-        id: 1,
-        path: '/restored/novel',
-        pluginId: 'restored-plugin',
-        name: 'Restored Novel',
-        cover: null,
-        summary: null,
-        author: null,
-        artist: null,
-        status: 'Ongoing',
-        genres: null,
-        inLibrary: true,
-        isLocal: false,
-        totalPages: 0,
-        chapters: [
-          {
-            id: 10,
-            novelId: 1,
-            path: '/restored/chapter-1',
-            name: 'Chapter 1',
-            releaseTime: null,
-            readTime: null,
-            bookmark: false,
-            unread: true,
-            isDownloaded: true,
-            updatedTime: null,
-            chapterNumber: 1,
-            page: '1',
-            progress: null,
-            position: 0,
-            scanlator: null,
-            timeSpent: 0,
-          },
-        ],
-      });
+      const mapping = await restoreOne(
+        backupNovel({
+          chapters: [backupChapter(0, { id: 10, isDownloaded: true })],
+        }),
+      );
 
       expect(mapping.restoredNovelId).not.toBe(1);
       expect(
@@ -523,6 +550,202 @@ describe('NovelQueries', () => {
           backupChapterId: 10,
           restoredChapterId: restoredChapters[0].id,
         },
+      ]);
+    });
+
+    it('stores the same rows as inserting the backup through Drizzle', async () => {
+      const testDb = getTestDb();
+      // Older backups can omit newer columns; values also arrive loosely typed.
+      const {
+        scanlator: _s,
+        timeSpent: _t,
+        ...legacyChapter
+      } = backupChapter(3, {
+        unread: false,
+        readTime: '2024-02-01T10:00:00.000Z',
+        bookmark: true,
+        progress: 40,
+      });
+      const chapters = [
+        backupChapter(1, {
+          isDownloaded: true,
+          updatedTime: '2024-03-05 10:00:00',
+        }),
+        backupChapter(2, {
+          updatedTime: 'not a date',
+          page: 2 as unknown as string,
+        }),
+        legacyChapter as BackupNovel['chapters'][number],
+        backupChapter(4, {
+          unread: 'yes' as unknown as boolean,
+          updatedTime: '2024-03-01 10:00:00',
+        }),
+      ];
+      const {
+        status: _status,
+        totalPages: _pages,
+        ...novelWithoutDefaults
+      } = backupNovel({
+        cover: 'https://example.com/cover.png',
+        lastReadAt: '2024-02-01T10:00:00.000Z',
+        lastUpdatedAt: '2024-03-02 10:00:00',
+      } as Partial<BackupNovel>);
+
+      const mapping = await restoreOne({
+        ...(novelWithoutDefaults as BackupNovel),
+        chapters,
+      });
+
+      const { chapters: _c, id: _id, ...novel } = novelWithoutDefaults;
+      const reference = await testDb.drizzleDb
+        .insert(novelSchema)
+        .values({
+          ...novel,
+          pluginId: 'reference-plugin',
+          totalChapters: 0,
+          chaptersDownloaded: 0,
+          chaptersUnread: 0,
+        })
+        .returning({ id: novelSchema.id })
+        .get();
+      await testDb.drizzleDb
+        .insert(chapterSchema)
+        .values(
+          chapters.map(({ id: _chapterId, ...chapter }) => ({
+            ...chapter,
+            novelId: reference.id,
+          })),
+        )
+        .run();
+
+      const selectChapters = (novelId: number) =>
+        testDb.drizzleDb
+          .select()
+          .from(chapterSchema)
+          .where(eq(chapterSchema.novelId, novelId))
+          .orderBy(chapterSchema.id)
+          .all();
+      expect(
+        rowsWithoutIds(await selectChapters(mapping.restoredNovelId)),
+      ).toEqual(rowsWithoutIds(await selectChapters(reference.id)));
+
+      const restoredNovel = await getNovelById(mapping.restoredNovelId);
+      const referenceNovel = await getNovelById(reference.id);
+      expect({ ...restoredNovel, id: 0, pluginId: '' }).toEqual({
+        ...referenceNovel,
+        id: 0,
+        pluginId: '',
+      });
+      expect(restoredNovel).toMatchObject({
+        status: 'Unknown',
+        totalChapters: 4,
+        chaptersDownloaded: 1,
+        chaptersUnread: 3,
+        lastUpdatedAt: '2024-03-05 10:00:00',
+      });
+    });
+
+    it('maps every chapter across insert batch boundaries', async () => {
+      const testDb = getTestDb();
+      const novel = backupNovel({}, 250);
+
+      const mapping = await restoreOne(novel);
+
+      const restoredChapters = await testDb.drizzleDb
+        .select({ id: chapterSchema.id, path: chapterSchema.path })
+        .from(chapterSchema)
+        .where(eq(chapterSchema.novelId, mapping.restoredNovelId))
+        .all();
+      const idsByPath = new Map(restoredChapters.map(c => [c.path, c.id]));
+      expect(restoredChapters).toHaveLength(250);
+      expect(mapping.chapters).toEqual(
+        novel.chapters.map(chapter => ({
+          backupChapterId: chapter.id,
+          restoredChapterId: idsByPath.get(chapter.path),
+        })),
+      );
+      expect((await getNovelById(mapping.restoredNovelId))?.totalChapters).toBe(
+        250,
+      );
+    });
+
+    it('replaces the chapters of an existing novel like the delete trigger would', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, {
+        path: '/restored/novel',
+        pluginId: 'restored-plugin',
+        name: 'Old Name',
+        author: 'Kept Author',
+        inLibrary: true,
+      });
+      for (let i = 0; i < 3; i++) {
+        await insertTestChapter(testDb, novelId, {
+          path: `/old/chapter-${i}`,
+          readTime: '2024-01-01T00:00:00.000Z',
+          updatedTime: '2024-01-02 00:00:00',
+        });
+      }
+      const { author: _author, ...novel } = backupNovel(
+        {
+          lastReadAt: '2024-02-01T10:00:00.000Z',
+          lastUpdatedAt: '2024-03-02 10:00:00',
+        } as Partial<BackupNovel>,
+        2,
+      );
+
+      const mapping = await restoreOne(novel as BackupNovel);
+
+      expect(mapping.restoredNovelId).toBe(novelId);
+      const chapters = await testDb.drizzleDb
+        .select({ path: chapterSchema.path })
+        .from(chapterSchema)
+        .where(eq(chapterSchema.novelId, novelId))
+        .all();
+      expect(chapters.map(c => c.path)).toEqual([
+        '/restored/chapter-1',
+        '/restored/chapter-2',
+      ]);
+      expect(await getNovelById(novelId)).toMatchObject({
+        name: 'Restored Novel',
+        author: 'Kept Author',
+        totalChapters: 2,
+        chaptersUnread: 2,
+        lastReadAt: null,
+        lastUpdatedAt: null,
+      });
+
+      // The suspended delete trigger is back in place after the restore.
+      await testDb.drizzleDb
+        .delete(chapterSchema)
+        .where(eq(chapterSchema.path, '/restored/chapter-1'))
+        .run();
+      expect((await getNovelById(novelId))?.totalChapters).toBe(1);
+    });
+
+    it('rolls back only the novels that fail', async () => {
+      const testDb = getTestDb();
+      const broken = backupNovel(
+        { id: 2, path: '/broken/novel', name: 'Broken' },
+        2,
+      );
+      broken.chapters[1].path = broken.chapters[0].path;
+
+      const results = await _restoreNovelsAndChapters([
+        backupNovel({ id: 1 }),
+        broken,
+        backupNovel({ id: 3, path: '/third/novel', name: 'Third' }),
+      ]);
+
+      expect(results[0].mapping?.backupNovelId).toBe(1);
+      expect(results[1].error).toBeDefined();
+      expect(results[2].mapping?.backupNovelId).toBe(3);
+      expect(await getNovelByPath('/broken/novel', 'restored-plugin')).toBe(
+        undefined,
+      );
+      const novels = await testDb.drizzleDb.select().from(novelSchema).all();
+      expect(novels.map(n => n.name).sort()).toEqual([
+        'Restored Novel',
+        'Third',
       ]);
     });
   });
