@@ -227,6 +227,8 @@ export const getAllNovelCategories = async (): Promise<NovelCategory[]> => {
   return await dbManager.select().from(novelCategorySchema).all();
 };
 
+const NOVEL_CATEGORY_BATCH_SIZE = 500;
+
 /**
  * Restore a category from backup
  * Used during the restore process
@@ -270,18 +272,20 @@ export const _restoreCategory = async (
     }
 
     // Insert novel-category associations
-    if (category.novelIds && category.novelIds.length > 0) {
-      for (const backupNovelId of category.novelIds) {
-        const novelId = novelIdMap?.get(backupNovelId) ?? backupNovelId;
-        await tx
-          .insert(novelCategorySchema)
-          .values({
-            categoryId,
-            novelId: novelId,
-          })
-          .onConflictDoNothing()
-          .run();
-      }
+    const novelIds = category.novelIds ?? [];
+    for (let i = 0; i < novelIds.length; i += NOVEL_CATEGORY_BATCH_SIZE) {
+      await tx
+        .insert(novelCategorySchema)
+        .values(
+          novelIds
+            .slice(i, i + NOVEL_CATEGORY_BATCH_SIZE)
+            .map(backupNovelId => ({
+              categoryId,
+              novelId: novelIdMap?.get(backupNovelId) ?? backupNovelId,
+            })),
+        )
+        .onConflictDoNothing()
+        .run();
     }
 
     return categoryId;
