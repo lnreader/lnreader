@@ -46,6 +46,8 @@ const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
 const RESTORE_BATCH_MAX_NOVELS = 50;
 const RESTORE_BATCH_MAX_CHAPTERS = 5000;
 const RESTORE_PROGRESS_INTERVAL_MS = 250;
+// Cover copies run on native threads, so a few can overlap.
+const RESTORE_COVER_CONCURRENCY = 8;
 
 type PendingRestoreNovel = {
   backupNovel: BackupNovel;
@@ -322,18 +324,27 @@ export const restoreData = async (
           return;
         }
 
-        for (const [
-          index,
-          { backupNovel, hasStoredCover },
-        ] of batch.entries()) {
+        const restoredNovels: {
+          backupNovel: BackupNovel;
+          hasStoredCover: boolean;
+          novelMapping: RestoredNovelMapping;
+        }[] = [];
+        for (const [index, pending] of batch.entries()) {
           const novelMapping = results[index].mapping;
           if (!novelMapping) {
             failedCount++;
             continue;
           }
           novelMappings.push(novelMapping);
-          novelIdMap.set(backupNovel.id, novelMapping.restoredNovelId);
+          novelIdMap.set(pending.backupNovel.id, novelMapping.restoredNovelId);
+          restoredNovels.push({ ...pending, novelMapping });
+        }
 
+        const restoreCover = async ({
+          backupNovel,
+          hasStoredCover,
+          novelMapping,
+        }: (typeof restoredNovels)[number]) => {
           try {
             if (hasStoredCover) {
               const coverBackupPath = coversDirPath + '/' + backupNovel.id;
@@ -347,6 +358,17 @@ export const restoreData = async (
           } catch {
             failedCount++;
           }
+        };
+        for (
+          let start = 0;
+          start < restoredNovels.length;
+          start += RESTORE_COVER_CONCURRENCY
+        ) {
+          await Promise.all(
+            restoredNovels
+              .slice(start, start + RESTORE_COVER_CONCURRENCY)
+              .map(restoreCover),
+          );
         }
       };
 
