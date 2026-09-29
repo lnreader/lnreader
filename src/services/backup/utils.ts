@@ -351,21 +351,29 @@ export const restoreData = async (
       };
 
       let lastProgressAt: number | undefined;
-      for (const [index, item] of items.entries()) {
+      const reportProgress = (completed: number, force = false) => {
         const now = Date.now();
         if (
-          lastProgressAt === undefined ||
-          now - lastProgressAt >= RESTORE_PROGRESS_INTERVAL_MS
+          !force &&
+          lastProgressAt !== undefined &&
+          now - lastProgressAt < RESTORE_PROGRESS_INTERVAL_MS
         ) {
-          lastProgressAt = now;
-          updateRestoreProgress(
-            setMeta,
-            getString('backupScreen.restoringNovelsProgress', {
-              current: index + 1,
-              total: items.length,
-            }),
-          );
+          return;
         }
+        lastProgressAt = now;
+        updateRestoreProgress(
+          setMeta,
+          getString('backupScreen.restoringNovelsProgress', {
+            current: completed,
+            total: items.length,
+          }),
+        );
+      };
+
+      if (items.length > 0) {
+        reportProgress(0, true);
+      }
+      for (const [index, item] of items.entries()) {
         try {
           const fileContent = await NativeFile.readFile(item.path);
           const backupNovel = JSON.parse(fileContent) as BackupNovel;
@@ -388,9 +396,13 @@ export const restoreData = async (
           pendingChapterCount >= RESTORE_BATCH_MAX_CHAPTERS
         ) {
           await restorePendingNovels();
+          reportProgress(index + 1);
         }
       }
       await restorePendingNovels();
+      if (items.length > 0) {
+        reportProgress(items.length, true);
+      }
     } catch {
       failedSectionCount++;
     }

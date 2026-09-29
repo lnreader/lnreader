@@ -50,7 +50,8 @@ jest.mock('@utils/mmkv/mmkv', () => ({
 }));
 
 jest.mock('@i18n/translations', () => ({
-  getString: (key: string) => key,
+  getString: (key: string, params?: object) =>
+    params ? `${key} ${JSON.stringify(params)}` : key,
 }));
 
 jest.mock('@plugins/pluginManager', () => ({
@@ -474,6 +475,58 @@ describe('selective backup data', () => {
           [1, 101],
           [4, 104],
         ]),
+      );
+    });
+
+    const novelProgress = async (now: () => number) => {
+      const texts: string[] = [];
+      jest.spyOn(Date, 'now').mockImplementation(now);
+      await restoreData('/cache', transformer => {
+        texts.push(transformer({} as never).progressText ?? '');
+      });
+      return texts.filter(text =>
+        text.startsWith('backupScreen.restoringNovelsProgress'),
+      );
+    };
+
+    it('reports the completed count after the last batch is written', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 120; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+
+      const texts = await novelProgress(() => 1000);
+
+      expect(texts[texts.length - 1]).toBe(
+        'backupScreen.restoringNovelsProgress {"current":120,"total":120}',
+      );
+    });
+
+    it('reports progress as each batch is written', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 120; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+      let now = 0;
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementation(async novels => {
+          now += 1000;
+          return novels.map(novel => ({
+            mapping: {
+              pluginId: novel.pluginId,
+              backupNovelId: novel.id,
+              restoredNovelId: novel.id,
+              chapters: [],
+            },
+          }));
+        });
+
+      const texts = await novelProgress(() => now);
+
+      expect(texts).toEqual(
+        [0, 50, 100, 120].map(
+          current =>
+            `backupScreen.restoringNovelsProgress {"current":${current},"total":120}`,
+        ),
       );
     });
 
