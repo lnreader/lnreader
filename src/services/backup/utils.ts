@@ -45,7 +45,6 @@ const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
 // live queries it wakes) covers many novels instead of one.
 const RESTORE_BATCH_MAX_NOVELS = 50;
 const RESTORE_BATCH_MAX_CHAPTERS = 5000;
-const RESTORE_PROGRESS_INTERVAL_MS = 250;
 // Cover copies run on native threads, so a few can overlap.
 const RESTORE_COVER_CONCURRENCY = 8;
 
@@ -372,17 +371,7 @@ export const restoreData = async (
         }
       };
 
-      let lastProgressAt: number | undefined;
-      const reportProgress = (completed: number, force = false) => {
-        const now = Date.now();
-        if (
-          !force &&
-          lastProgressAt !== undefined &&
-          now - lastProgressAt < RESTORE_PROGRESS_INTERVAL_MS
-        ) {
-          return;
-        }
-        lastProgressAt = now;
+      const reportProgress = (completed: number) => {
         updateRestoreProgress(
           setMeta,
           getString('backupScreen.restoringNovelsProgress', {
@@ -393,7 +382,7 @@ export const restoreData = async (
       };
 
       if (items.length > 0) {
-        reportProgress(0, true);
+        reportProgress(0);
       }
       for (const [index, item] of items.entries()) {
         try {
@@ -423,7 +412,7 @@ export const restoreData = async (
       }
       await restorePendingNovels();
       if (items.length > 0) {
-        reportProgress(items.length, true);
+        reportProgress(items.length);
       }
     } catch {
       failedSectionCount++;
