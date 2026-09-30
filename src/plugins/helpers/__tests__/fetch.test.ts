@@ -18,14 +18,28 @@ const response = (status: number, headers: Record<string, string> = {}) =>
 const challenge = () =>
   response(403, { 'cf-mitigated': 'challenge', 'server': 'cloudflare' });
 
+const textResponse = (text: string) =>
+  ({ ...response(200), blob: async () => ({ text }) } as unknown as Response);
+
+// React Native's FileReader needs the native blob module, which Jest lacks.
+class TextFileReader {
+  result: string | null = null;
+  onloadend?: () => void;
+  readAsText(blob: { text: string }) {
+    this.result = blob.text;
+    this.onloadend?.();
+  }
+}
+
 // The solver keeps per-host state at module level, so each test gets a fresh copy.
-const loadFetchApi = () => {
-  let fetchApi!: typeof import('../fetch').fetchApi;
+const loadFetch = () => {
+  let fetchModule!: typeof import('../fetch');
   jest.isolateModules(() => {
-    fetchApi = require('../fetch').fetchApi;
+    fetchModule = require('../fetch');
   });
-  return fetchApi;
+  return fetchModule;
 };
+const loadFetchApi = () => loadFetch().fetchApi;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -138,5 +152,52 @@ describe('fetchApi Cloudflare bypass', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('keeps solves for different user agents on the same host apart', async () => {
+    fetchMock.mockResolvedValue(challenge());
+    solveChallenge.mockResolvedValue(false);
+    const fetchApi = loadFetchApi();
+
+    await fetchApi('https://site.test/novel/1');
+    await fetchApi('https://site.test/novel/2', {
+      headers: { 'User-Agent': 'Plugin UA' },
+    });
+
+    expect(solveChallenge.mock.calls.map(([, userAgent]) => userAgent)).toEqual(
+      ['LNReader test', 'Plugin UA'],
+    );
+  });
+});
+
+describe('fetchText Cloudflare bypass', () => {
+  const originalFileReader = global.FileReader;
+  beforeAll(() => {
+    global.FileReader = TextFileReader as unknown as typeof FileReader;
+  });
+  afterAll(() => {
+    global.FileReader = originalFileReader;
+  });
+
+  it('returns the page text after solving the challenge', async () => {
+    fetchMock
+      .mockResolvedValueOnce(challenge())
+      .mockResolvedValueOnce(textResponse('<p>chapter</p>'));
+    solveChallenge.mockResolvedValue(true);
+
+    await expect(
+      loadFetch().fetchText('https://site.test/chapter'),
+    ).resolves.toBe('<p>chapter</p>');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns an empty string when the challenge cannot be solved', async () => {
+    fetchMock.mockResolvedValue(challenge());
+    solveChallenge.mockResolvedValue(false);
+
+    await expect(
+      loadFetch().fetchText('https://site.test/chapter'),
+    ).resolves.toBe('');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

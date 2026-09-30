@@ -21,9 +21,12 @@ const lastResults = new Map<string, SolveResult>();
 export const isCloudflareChallenge = (response: Response) =>
   response.headers.get('cf-mitigated') === 'challenge';
 
-const getHost = (url: string) => {
+// cf_clearance is bound to the User-Agent, so a clearance (or failure) for one
+// User-Agent says nothing about another on the same host.
+const getSolveKey = (url: string, userAgent: string) => {
   try {
-    return new URL(url).host || undefined;
+    const host = new URL(url).host;
+    return host ? `${host}\n${userAgent}` : undefined;
   } catch {
     return undefined;
   }
@@ -34,7 +37,7 @@ const isFresh = ({ solved, at }: SolveResult) =>
 
 /**
  * Solves the Cloudflare challenge for `url` in a hidden WebView. At most one
- * solve runs per host; concurrent callers share it.
+ * solve runs per host and User-Agent; concurrent callers share it.
  *
  * @param userAgent must match the User-Agent of the request being retried,
  * because Cloudflare binds `cf_clearance` to it.
@@ -43,16 +46,16 @@ export const solveCloudflareChallenge = (
   url: string,
   userAgent: string,
 ): Promise<boolean> => {
-  const host = getHost(url);
-  if (!NativeCloudflare || !host) {
+  const key = getSolveKey(url, userAgent);
+  if (!NativeCloudflare || !key) {
     return Promise.resolve(false);
   }
 
-  const inFlight = inFlightSolves.get(host);
+  const inFlight = inFlightSolves.get(key);
   if (inFlight) {
     return inFlight;
   }
-  const lastResult = lastResults.get(host);
+  const lastResult = lastResults.get(key);
   if (lastResult && isFresh(lastResult)) {
     return Promise.resolve(lastResult.solved);
   }
@@ -64,10 +67,10 @@ export const solveCloudflareChallenge = (
   )
     .catch(() => false)
     .then(solved => {
-      lastResults.set(host, { solved, at: Date.now() });
-      inFlightSolves.delete(host);
+      lastResults.set(key, { solved, at: Date.now() });
+      inFlightSolves.delete(key);
       return solved;
     });
-  inFlightSolves.set(host, solve);
+  inFlightSolves.set(key, solve);
   return solve;
 };

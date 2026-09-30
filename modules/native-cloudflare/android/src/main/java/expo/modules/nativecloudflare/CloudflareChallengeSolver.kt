@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -38,7 +39,10 @@ internal class CloudflareChallengeSolver(
 
     private var webView: WebView? = null
     private var previousClearance: String? = null
-    private var challengeFound = false
+    // Set when the main-frame response being loaded is a challenge page, and
+    // consumed when that page finishes, so every load (including one reached
+    // through a redirect) is judged on its own response.
+    private var pageChallenged = false
     private var finished = false
 
     fun start() {
@@ -106,10 +110,20 @@ internal class CloudflareChallengeSolver(
                 ?.firstOrNull { it.key.equals("cf-mitigated", ignoreCase = true) }
                 ?.value
             if (mitigated == "challenge") {
-                challengeFound = true
+                pageChallenged = true
             } else {
                 // A plain error page (e.g. a firewall block) will not turn into a
                 // clearance, but the challenge may already have issued one.
+                finish(isSolved())
+            }
+        }
+
+        override fun onReceivedError(
+            view: WebView,
+            request: WebResourceRequest,
+            error: WebResourceError,
+        ) {
+            if (request.isForMainFrame) {
                 finish(isSolved())
             }
         }
@@ -120,9 +134,11 @@ internal class CloudflareChallengeSolver(
                 finish(true)
                 return
             }
-            if (loadedUrl != url) return
-            if (!challengeFound) {
-                // The WebView was not challenged, so there is nothing to solve.
+            val challenged = pageChallenged
+            pageChallenged = false
+            if (!challenged) {
+                // This page loaded without a challenge (also after a redirect), so
+                // no clearance is coming; fail now instead of at the timeout.
                 finish(false)
                 return
             }
