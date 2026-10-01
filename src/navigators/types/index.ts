@@ -4,7 +4,7 @@ import {
   NavigatorScreenParams,
 } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { MaterialBottomTabScreenProps } from 'react-native-paper';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 export type RootStackParamList = {
   BottomNavigator: NavigatorScreenParams<BottomNavigatorParamList> | undefined;
@@ -41,27 +41,27 @@ export type BottomNavigatorParamList = {
 };
 
 export type LibraryScreenProps = CompositeScreenProps<
-  MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Library'>,
+  BottomTabScreenProps<BottomNavigatorParamList, 'Library'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
 export type HistoryScreenProps = CompositeScreenProps<
-  MaterialBottomTabScreenProps<BottomNavigatorParamList, 'History'>,
+  BottomTabScreenProps<BottomNavigatorParamList, 'History'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
 export type UpdateScreenProps = CompositeScreenProps<
-  MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Updates'>,
+  BottomTabScreenProps<BottomNavigatorParamList, 'Updates'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
 export type BrowseScreenProps = CompositeScreenProps<
-  MaterialBottomTabScreenProps<BottomNavigatorParamList, 'Browse'>,
+  BottomTabScreenProps<BottomNavigatorParamList, 'Browse'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
 export type MoreStackScreenProps = CompositeScreenProps<
-  MaterialBottomTabScreenProps<BottomNavigatorParamList, 'More'>,
+  BottomTabScreenProps<BottomNavigatorParamList, 'More'>,
   NativeStackScreenProps<RootStackParamList, 'MoreStack'>
 >;
 export type MoreStackParamList = {
@@ -86,6 +86,7 @@ export type SettingsStackParamList = {
   CustomCode: undefined;
   CodeSnippets: { snippetIndex: number; isJS: boolean } | undefined;
   GenreTaxonomy: undefined;
+  About: undefined;
 };
 
 export type NovelScreenProps = NativeStackScreenProps<
@@ -167,6 +168,10 @@ export type WebviewScreenProps = NativeStackScreenProps<
 export type SettingsScreenProps = CompositeScreenProps<
   NativeStackScreenProps<SettingsStackParamList, 'Settings'>,
   NativeStackScreenProps<MoreStackParamList, 'SettingsStack'>
+>;
+export type GeneralSettingsScreenProps = NativeStackScreenProps<
+  SettingsStackParamList,
+  'GeneralSettings'
 >;
 export type AppearanceSettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,

@@ -28,3 +28,7 @@ export const readerFonts: Font[] = [
   { fontFamily: 'pt-serif', name: 'PT Serif' },
   { fontFamily: 'OpenDyslexic3-Regular', name: 'OpenDyslexic' },
 ];
+
+// Auto-scroll seconds per screen: from a quick skim to a slow read.
+export const MIN_AUTO_SCROLL_INTERVAL = 10;
+export const MAX_AUTO_SCROLL_INTERVAL = 120;

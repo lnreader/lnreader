@@ -70,7 +70,14 @@ describe('SwitchItem', () => {
   });
 
   it('renders label text', () => {
-    render(<SwitchItem label="Test Label" value={false} onPress={() => { }} theme={mockTheme} />);
+    render(
+      <SwitchItem
+        label="Test Label"
+        value={false}
+        onPress={() => {}}
+        theme={mockTheme}
+      />,
+    );
     expect(screen.getByText('Test Label')).toBeTruthy();
   });
 
@@ -80,7 +87,7 @@ describe('SwitchItem', () => {
         label="Test"
         description="A helpful description"
         value={false}
-        onPress={() => { }}
+        onPress={() => {}}
         theme={mockTheme}
       />,
     );
@@ -88,34 +95,40 @@ describe('SwitchItem', () => {
   });
 
   it('does not render description when omitted', () => {
-    render(<SwitchItem label="Test" value={false} onPress={() => { }} theme={mockTheme} />);
+    render(
+      <SwitchItem
+        label="Test"
+        value={false}
+        onPress={() => {}}
+        theme={mockTheme}
+      />,
+    );
     expect(screen.queryByText('A helpful description')).toBeNull();
   });
 
   it('calls onPress on press', () => {
     const onPress = jest.fn();
-    render(<SwitchItem label="Pressable" value={false} onPress={onPress} theme={mockTheme} />);
+    render(
+      <SwitchItem
+        label="Pressable"
+        value={false}
+        onPress={onPress}
+        theme={mockTheme}
+      />,
+    );
     fireEvent.press(screen.getByText('Pressable'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onLongPress on long press', () => {
-    const onLongPress = jest.fn();
+  it('has correct accessibility role and label', () => {
     render(
       <SwitchItem
-        label="Long Press"
+        label="Accessible"
         value={false}
-        onPress={() => { }}
-        onLongPress={onLongPress}
+        onPress={() => {}}
         theme={mockTheme}
       />,
     );
-    fireEvent(screen.getByText('Long Press'), 'onLongPress');
-    expect(onLongPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('has correct accessibility role and label', () => {
-    render(<SwitchItem label="Accessible" value={false} onPress={() => { }} theme={mockTheme} />);
     const element = screen.getByRole('switch', { name: 'Accessible' });
     expect(element).toBeTruthy();
   });

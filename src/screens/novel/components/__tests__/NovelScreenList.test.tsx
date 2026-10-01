@@ -129,16 +129,18 @@ jest.mock('../PageNavigationBottomSheet', () => {
     React.createElement(Text, { testID: 'page-navigation-sheet' }, 'navsheet');
 });
 
-jest.mock('react-native-paper', () => {
+jest.mock('@components', () => {
   const React = require('react');
   const { Pressable, Text } = require('react-native');
 
   return {
-    AnimatedFAB: ({ onPress, label }: any) =>
+    ...jest.requireActual('@components'),
+    Fab: ({ onPress, label, ...props }: any) =>
       React.createElement(
         Pressable,
         {
-          testID: label ? 'continue-reading-fab' : 'scroll-to-top-fab',
+          testID:
+            'extended' in props ? 'continue-reading-fab' : 'scroll-to-top-fab',
           onPress,
         },
         React.createElement(Text, null, label || 'fab'),

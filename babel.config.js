@@ -31,8 +31,6 @@ export default function (api) {
             '@modules/nitro-epub': './modules/nitro-epub/src/index',
             '@modules/nitro-tts': './modules/nitro-tts/src/index',
             '@modules': './modules',
-            'react-native-vector-icons/MaterialCommunityIcons':
-              '@react-native-vector-icons/material-design-icons',
           },
         },
       ],

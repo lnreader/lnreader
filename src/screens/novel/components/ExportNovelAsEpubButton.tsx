@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Portal } from 'react-native-paper';
 import { StatusBar } from 'react-native';
 
 import { type EpubExportChapter } from '@modules/nitro-epub';
@@ -182,16 +181,14 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
   return (
     <>
       {renderIcon(showModal)}
-      <Portal>
-        {isModalVisible ? (
-          <ExportEpubModal
-            isVisible
-            defaultFileName={novel?.name || 'novel'}
-            hideModal={hideModal}
-            onSubmit={exportNovelAsEpub}
-          />
-        ) : null}
-      </Portal>
+      {isModalVisible ? (
+        <ExportEpubModal
+          isVisible
+          defaultFileName={novel?.name || 'novel'}
+          hideModal={hideModal}
+          onSubmit={exportNovelAsEpub}
+        />
+      ) : null}
     </>
   );
 };

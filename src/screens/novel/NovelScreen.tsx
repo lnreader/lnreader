@@ -1,12 +1,13 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, StatusBar, Text } from 'react-native';
-import Animated, {
-  SlideInUp,
-  SlideOutUp,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Row, type SnackbarHostRef } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useSharedValue } from 'react-native-reanimated';
 
-import { Portal, Appbar, Snackbar } from 'react-native-paper';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import JumpToChapterModal from './components/JumpToChapterModal';
 import { Actionbar } from '../../components/Actionbar/Actionbar';
@@ -18,17 +19,26 @@ import { NovelScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
 import NovelAppbar from './components/NovelAppbar';
 import NovelScreenList from './components/NovelScreenList';
-import { ThemeColors } from '@theme/types';
-import { EmptyView, SafeAreaView } from '@components';
+import {
+  AppText,
+  EmptyView,
+  IconButtonV2,
+  Screen,
+  useScreenInsets,
+  type ComposeListHandle,
+} from '@components';
 import { useNovelActions, useNovelValue } from './NovelContext';
-import { LegendListRef } from '@legendapp/list/react-native';
 import { useCustomNovelCover } from './hooks/useCustomNovelCover';
 import { useChapterSelection } from './hooks/useChapterSelection';
 import { useNovelScreenActions } from './hooks/useNovelScreenActions';
 import { useNovelRefresh } from './hooks/useNovelRefresh';
 import SetCategoryModal from './components/SetCategoriesModal';
 import { backgroundTasks } from '@services/backgroundTasks';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
 import { getPageChapterIds } from '@database/queries/ChapterQueries';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import SelectAllIcon from '@expo/material-symbols/select_all.xml';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
@@ -41,6 +51,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   const { setNovel, deleteChapters, refreshNovel } = useNovelActions();
 
   const theme = useTheme();
+  const { top } = useScreenInsets();
+  const layout = useWindowLayout();
   const { downloadNewChapters, refreshNovelMetadata } = useAppSettings();
 
   const showNovelError = !novel && !loading && error;
@@ -67,7 +79,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   } = useChapterSelection(chapters, getAllChapterIds);
   const [editInfoModal, showEditInfoModal] = useState(false);
 
-  const chapterListRef = useRef<LegendListRef | null>(null);
+  const chapterListRef = useRef<ComposeListHandle | null>(null);
+  const snackbarRef = useRef<SnackbarHostRef>(null);
 
   const deleteDownloadsSnackbar = useBoolean();
   const {
@@ -113,132 +126,121 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     [],
   );
   const hideEditInfoModal = useCallback(() => showEditInfoModal(false), []);
-  const snackbarTheme = useMemo(() => ({ colors: theme }), [theme]);
-  const snackbarTextStyle = useMemo(
-    () => ({ color: theme.onSurface }),
-    [theme.onSurface],
-  );
-  const titleStyle = useMemo(
-    () => ({ color: theme.onSurface }),
-    [theme.onSurface],
-  );
-  const snackbarAction = useMemo(
-    () => ({
-      label: getString('common.delete'),
-      onPress: () => {
-        deleteChapters(
-          chapters.filter(c => c.isDownloaded).map(chapter => chapter.id),
-        );
-      },
-    }),
-    [chapters, deleteChapters],
-  );
 
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const containerStyle = useMemo(
-    () => [styles.container, { backgroundColor: theme.background }],
-    [styles.container, theme.background],
-  );
+  // Compose snackbars are shown imperatively, so the visibility flag
+  // triggers one and is reset once it closes.
+  const { value: deleteSnackbarVisible, setFalse: hideDeleteSnackbar } =
+    deleteDownloadsSnackbar;
+  useEffect(() => {
+    if (!deleteSnackbarVisible) {
+      return;
+    }
+    void snackbarRef.current
+      ?.showSnackbar({
+        message: getString('novelScreen.deleteMessage'),
+        actionLabel: getString('common.delete'),
+        duration: 'long',
+      })
+      .then(result => {
+        hideDeleteSnackbar();
+        if (result === 'actionPerformed') {
+          deleteChapters(
+            chapters.filter(c => c.isDownloaded).map(chapter => chapter.id),
+          );
+        }
+      });
+    // Only a new request should show it again, not later chapter changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deleteSnackbarVisible]);
 
   return (
-    <Portal.Host>
-      <View style={containerStyle}>
-        <Portal>
-          {selected.length === 0 ? (
-            <NovelAppbar
-              novel={novel}
-              deleteChapters={deleteDownloadedChapters}
-              downloadChapters={downloadAvailableChapters}
-              showEditInfoModal={showEditInfoModal}
-              setCustomNovelCover={setCustomNovelCover}
-              downloadCustomChapterModal={openDlChapterModal}
-              showJumpToChapterModal={showJumpToChapterModal}
-              shareNovel={shareNovel}
-              refreshNovel={onRefresh}
-              editCategories={showSetCategoriesModal}
-              theme={theme}
-              isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
-              goBack={navigation.goBack}
-              headerOpacity={headerOpacity}
-              hideActions={!!showNovelError}
-            />
-          ) : (
-            <Animated.View
-              entering={SlideInUp.duration(250)}
-              exiting={SlideOutUp.duration(250)}
-              style={styles.appbar}
-            >
-              <Appbar.Action
-                icon="close"
-                iconColor={theme.onBackground}
-                onPress={clearSelection}
-              />
-              <Appbar.Content
-                title={`${selected.length}`}
-                titleStyle={titleStyle}
-              />
-              <Appbar.Action
-                icon="select-all"
-                iconColor={theme.onBackground}
-                onPress={selectAll}
-              />
-            </Animated.View>
-          )}
-        </Portal>
-        <SafeAreaView excludeTop excludeBottom>
-          {showNovelError ? (
-            <EmptyView
-              icon="Σ(ಠ_ಠ)"
-              description={error}
-              theme={theme}
-              actions={[
-                {
-                  iconName: 'arrow-left',
-                  title: getString('common.back'),
-                  onPress: navigation.goBack,
-                },
-              ]}
-            />
-          ) : (
-            <Suspense fallback={<NovelScreenLoading theme={theme} />}>
-              <NovelScreenList
-                headerOpacity={headerOpacity}
-                listRef={chapterListRef}
-                navigation={navigation}
-                routeBaseNovel={route.params}
-                selected={selected}
-                setSelected={setSelected}
-                deleteDownloadSnackbar={deleteDownloadsSnackbar}
-                onRefresh={onRefresh}
-                updating={updating}
-              />
-            </Suspense>
-          )}
-        </SafeAreaView>
-
-        {novel && setCategoriesModalVisible ? (
-          <SetCategoryModal
-            novelIds={[novel.id]}
-            closeModal={closeSetCategoriesModal}
-            visible
+    <Screen
+      // On phones the backdrop runs up behind the bar, as it always has.
+      topBarOverContent={!layout.isExpanded}
+      topBar={
+        selected.length === 0 ? (
+          <NovelAppbar
+            novel={novel}
+            deleteChapters={deleteDownloadedChapters}
+            downloadChapters={downloadAvailableChapters}
+            showEditInfoModal={showEditInfoModal}
+            setCustomNovelCover={setCustomNovelCover}
+            downloadCustomChapterModal={openDlChapterModal}
+            showJumpToChapterModal={showJumpToChapterModal}
+            shareNovel={shareNovel}
+            refreshNovel={onRefresh}
+            editCategories={showSetCategoriesModal}
+            theme={theme}
+            isLocal={novel?.isLocal ?? route.params?.isLocal ?? false}
+            goBack={navigation.goBack}
+            headerOpacity={headerOpacity}
+            hideActions={!!showNovelError}
           />
-        ) : null}
-
-        <Portal>
-          <Actionbar active={selected.length > 0} actions={selectionActions} />
-          <Snackbar
-            visible={deleteDownloadsSnackbar.value}
-            onDismiss={deleteDownloadsSnackbar.setFalse}
-            action={snackbarAction}
-            theme={snackbarTheme}
-            style={styles.snackbar}
+        ) : (
+          <Row
+            verticalAlignment="center"
+            modifiers={[
+              fillMaxWidth(),
+              background(theme.surface2 ?? theme.surfaceContainer),
+              padding(0, top, 0, 8),
+            ]}
           >
-            <Text style={snackbarTextStyle}>
-              {getString('novelScreen.deleteMessage')}
-            </Text>
-          </Snackbar>
-        </Portal>
-        <Portal>
+            <IconButtonV2
+              name={CloseIcon}
+              accessibilityLabel={getString('common.cancel')}
+              color={theme.onBackground}
+              onPress={clearSelection}
+              theme={theme}
+            />
+            <AppText
+              variant="titleLarge"
+              color={theme.onSurface}
+              modifiers={[weight(1)]}
+            >
+              {`${selected.length}`}
+            </AppText>
+            <IconButtonV2
+              name={SelectAllIcon}
+              accessibilityLabel={getString('backupScreen.options.selectAll')}
+              color={theme.onBackground}
+              onPress={selectAll}
+              theme={theme}
+            />
+          </Row>
+        )
+      }
+      list={
+        showNovelError ? undefined : (
+          <Suspense fallback={<NovelScreenLoading theme={theme} />}>
+            <NovelScreenList
+              headerOpacity={headerOpacity}
+              listRef={chapterListRef}
+              navigation={navigation}
+              routeBaseNovel={route.params}
+              selected={selected}
+              setSelected={setSelected}
+              deleteDownloadSnackbar={deleteDownloadsSnackbar}
+              onRefresh={onRefresh}
+              updating={updating}
+            />
+          </Suspense>
+        )
+      }
+      bottomBar={
+        selected.length > 0 ? (
+          <Actionbar active actions={selectionActions} />
+        ) : null
+      }
+      snackbarRef={snackbarRef}
+      overlays={
+        <>
+          {novel && setCategoriesModalVisible ? (
+            <SetCategoryModal
+              novelIds={[novel.id]}
+              closeModal={closeSetCategoriesModal}
+              visible
+            />
+          ) : null}
           {novel ? (
             <>
               <JumpToChapterModal
@@ -265,33 +267,25 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
               />
             </>
           ) : null}
-        </Portal>
-      </View>
-    </Portal.Host>
+        </>
+      }
+    >
+      {showNovelError ? (
+        <EmptyView
+          icon="Σ(ಠ_ಠ)"
+          description={error}
+          actions={[
+            {
+              iconName: ArrowBackIcon,
+              title: getString('common.back'),
+              onPress: navigation.goBack,
+            },
+          ]}
+          theme={theme}
+        />
+      ) : null}
+    </Screen>
   );
 };
 
 export default Novel;
-
-function createStyles(theme: ThemeColors) {
-  return StyleSheet.create({
-    appbar: {
-      alignItems: 'center',
-      backgroundColor: theme.surface2,
-      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-      flexDirection: 'row',
-      paddingBottom: 8,
-      paddingTop: StatusBar.currentHeight || 0,
-      position: 'absolute',
-      width: '100%',
-    },
-    container: { flex: 1 },
-    rowBack: {
-      alignItems: 'center',
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    snackbar: { backgroundColor: theme.surface, marginBottom: 32 },
-  });
-}

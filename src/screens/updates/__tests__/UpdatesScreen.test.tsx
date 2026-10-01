@@ -9,10 +9,12 @@ jest.mock('@components', () => {
   const ReactModule = require('react');
 
   return {
+    AppText: () => null,
+    ComposeSectionList: () => null,
     EmptyView: () => null,
     ErrorScreenV2: () => null,
     SearchbarV2: () => null,
-    SafeAreaView: ({ children }: { children: React.ReactNode }) =>
+    Screen: ({ children }: { children: React.ReactNode }) =>
       ReactModule.createElement(ReactModule.Fragment, null, children),
   };
 });

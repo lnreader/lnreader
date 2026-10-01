@@ -1,11 +1,20 @@
-import React, { memo, useMemo } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { memo } from 'react';
+import { useWindowDimensions } from 'react-native';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
 import LoadingNovel from '@screens/browse/loadingAnimation/LoadingNovel';
-import { useLibrarySettings } from '@hooks/persisted';
 import { DisplayModes } from '@screens/library/constants/constants';
-import { useDeviceOrientation } from '@hooks';
+import {
+  GRID_PADDING,
+  GRID_SPACING,
+  useNovelCoverLayoutValue,
+} from '@components/NovelCoverLayoutContext';
 
 interface Props {
   theme: ThemeColors;
@@ -19,33 +28,18 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
   const [highlightColor, backgroundColor, disableLoadingAnimations] =
     useLoadingColors(theme);
 
-  const { displayMode = DisplayModes.Comfortable, novelsPerRow = 3 } =
-    useLibrarySettings();
-
   const window = useWindowDimensions();
-  const orientation = useDeviceOrientation();
-
-  const numColumns = useMemo(
-    () =>
-      displayMode === DisplayModes.List
-        ? 1
-        : orientation === 'landscape'
-        ? 6
-        : novelsPerRow,
-    [displayMode, orientation, novelsPerRow],
-  );
-
-  const [pictureHeight, pictureWidth] = useMemo(() => {
-    const width = (window.width - 12 - 9.6 * numColumns) / numColumns;
-    return [width * (4 / 3), width];
-  }, [numColumns, window.width]);
+  // Sized like the novel grid it stands in for.
+  const {
+    displayMode,
+    numColumns,
+    coverWidth: pictureWidth,
+    coverHeight: pictureHeight,
+  } = useNovelCoverLayoutValue();
 
   const renderLoadingNovel = (item: number) => {
     return (
-      <View
-        key={'sourceLoading' + item}
-        style={[styles.item, { flex: 1 / numColumns }]}
-      >
+      <Box key={'sourceLoading' + item} modifiers={[weight(1)]}>
         <LoadingNovel
           availableWidth={window.width}
           backgroundColor={backgroundColor}
@@ -55,7 +49,7 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
           pictureWidth={pictureWidth}
           displayMode={displayMode}
         />
-      </View>
+      </Box>
     );
   };
   const renderLoading = (item: number) => {
@@ -67,9 +61,13 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
       }
     }
     return (
-      <View key={'sourceSkeletonRow' + item} style={styles.row}>
+      <Row
+        key={'sourceSkeletonRow' + item}
+        horizontalArrangement={{ spacedBy: GRID_SPACING }}
+        modifiers={[fillMaxWidth()]}
+      >
         {items.map(renderLoadingNovel)}
-      </View>
+      </Row>
     );
   };
   let items: number[] = [];
@@ -89,24 +87,16 @@ const SourceScreenSkeletonLoading: React.FC<Props> = ({
     }
   }
 
-  return <View style={styles.container}>{items.map(renderLoading)}</View>;
+  return (
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        padding(GRID_PADDING, completeRow === 2 ? 0 : 4, GRID_PADDING, 8),
+      ]}
+    >
+      {items.map(renderLoading)}
+    </Column>
+  );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    marginBottom: 8,
-    marginHorizontal: 2,
-    marginTop: 2,
-    overflow: 'visible',
-  },
-  item: {
-    minWidth: 0,
-  },
-  row: {
-    flexDirection: 'row',
-    paddingHorizontal: 1,
-  },
-});
 
 export default memo(SourceScreenSkeletonLoading);

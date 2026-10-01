@@ -1,183 +1,235 @@
-import React, { useCallback } from 'react';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, View, StyleSheet } from 'react-native';
-import { Text } from 'react-native-paper';
-import { ThemeColors } from '@theme/types';
-import Animated from 'react-native-reanimated';
-import Color from 'color';
+import { Fragment } from 'react';
+import {
+  Badge,
+  BadgedBox,
+  Box,
+  Column,
+  HorizontalDivider,
+  NavigationBar,
+  NavigationBarItem,
+  Surface,
+} from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clickable,
+  clip,
+  fillMaxHeight,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  size,
+  verticalScroll,
+  width,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@hooks/persisted/useTheme';
+import AppHost from '../AppHost/AppHost';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
 
-interface CustomBottomTabBarProps extends BottomTabBarProps {
-  theme: ThemeColors;
-  showLabelsInNav: boolean;
-  renderIcon: ({
-    color,
-    route,
-  }: {
-    route: { name: string };
-    color: string;
-  }) => React.ReactNode;
+export interface NavDestination {
+  key: string;
+  label: string;
+  icon: IconSource;
+  badge?: string;
+  groupStart?: boolean;
 }
 
-function CustomBottomTabBar({
-  navigation,
-  state,
-  descriptors,
-  insets,
-  theme,
-  showLabelsInNav,
-  renderIcon,
-}: CustomBottomTabBarProps) {
-  const transparentBg = Color(theme.primaryContainer).fade(1).rgb().toString();
-  const getLabelText = useCallback(
-    (route: any) => {
-      if (!showLabelsInNav && route.name !== state.routeNames[state.index]) {
-        return '';
-      }
+interface NavigationSuiteProps {
+  destinations: readonly NavDestination[];
+  selectedKey: string;
+  onSelect: (key: string) => void;
+  showLabels: boolean;
+}
 
-      const { options } = descriptors[route.key];
-      const label =
-        typeof options.tabBarLabel === 'string'
-          ? options.tabBarLabel
-          : typeof options.title === 'string'
-          ? options.title
-          : route.name;
+export const NAVIGATION_BAR_HEIGHT = 80;
+export const NAVIGATION_RAIL_WIDTH = 88;
 
-      return label;
-    },
-    [descriptors, showLabelsInNav, state.index, state.routeNames],
-  );
+// Rail item: 6 + 32 (indicator) + 4 + 16 (label) + 6.
+const RAIL_ITEM_HEIGHT = 64;
+const RAIL_PADDING = 24;
+const RAIL_DIVIDER_HEIGHT = 17;
+const railSpacing = (count: number) => (count > 5 ? 4 : 12);
 
+export const railHeightFor = (count: number, groups = 1) =>
+  RAIL_PADDING * 2 +
+  count * RAIL_ITEM_HEIGHT +
+  (count - 1) * railSpacing(count) +
+  (groups - 1) * RAIL_DIVIDER_HEIGHT;
+
+const DestinationIcon = ({
+  destination,
+  selected,
+}: {
+  destination: NavDestination;
+  selected: boolean;
+}) => {
+  const theme = useTheme();
+  const icon = <AppIcon source={destination.icon} />;
+  if (!destination.badge) {
+    return icon;
+  }
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.surface2 || theme.surface,
-          paddingBottom: 16 + (insets?.bottom || 0),
-        },
+    <BadgedBox>
+      <BadgedBox.Badge>
+        <Badge containerColor={theme.error} contentColor={theme.onError}>
+          <AppText variant="labelSmall" color={theme.onError}>
+            {destination.badge}
+          </AppText>
+        </Badge>
+      </BadgedBox.Badge>
+      {icon}
+    </BadgedBox>
+  );
+};
+
+export const AppNavigationBar = ({
+  destinations,
+  selectedKey,
+  onSelect,
+  showLabels,
+}: NavigationSuiteProps) => {
+  const theme = useTheme();
+  const { bottom } = useSafeAreaInsets();
+  return (
+    <AppHost style={{ height: NAVIGATION_BAR_HEIGHT + bottom }}>
+      <NavigationBar
+        containerColor={theme.surfaceContainer}
+        contentColor={theme.onSurface}
+        modifiers={[fillMaxWidth()]}
+      >
+        {destinations.map(destination => {
+          const selected = destination.key === selectedKey;
+          return (
+            <NavigationBarItem
+              key={destination.key}
+              selected={selected}
+              alwaysShowLabel={showLabels}
+              onClick={() => onSelect(destination.key)}
+              colors={{
+                selectedIconColor: theme.onSecondaryContainer,
+                selectedTextColor: theme.onSurface,
+                selectedIndicatorColor: theme.secondaryContainer,
+                unselectedIconColor: theme.onSurfaceVariant,
+                unselectedTextColor: theme.onSurfaceVariant,
+              }}
+            >
+              <NavigationBarItem.Icon>
+                <DestinationIcon
+                  destination={destination}
+                  selected={selected}
+                />
+              </NavigationBarItem.Icon>
+              <NavigationBarItem.Label>
+                <AppText variant="labelMedium" maxLines={1}>
+                  {destination.label}
+                </AppText>
+              </NavigationBarItem.Label>
+            </NavigationBarItem>
+          );
+        })}
+      </NavigationBar>
+    </AppHost>
+  );
+};
+
+const RailItem = ({
+  destination,
+  selected,
+  showLabel,
+  onPress,
+}: {
+  destination: NavDestination;
+  selected: boolean;
+  showLabel: boolean;
+  onPress: () => void;
+}) => {
+  const theme = useTheme();
+  return (
+    <Column
+      horizontalAlignment="center"
+      verticalArrangement={{ spacedBy: 4 }}
+      modifiers={[
+        width(NAVIGATION_RAIL_WIDTH),
+        padding(0, 6, 0, 6),
+        clickable(onPress, { indication: false }),
       ]}
     >
-      {state.routes.map((route, index) => {
-        const label = getLabelText(route);
-        const isFocused = state.index === index;
-        const showLabel = (showLabelsInNav || isFocused) && label;
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+      <Box
+        contentAlignment="center"
+        modifiers={[
+          size(56, 32),
+          clip(Shapes.RoundedCorner(16)),
+          background(selected ? theme.secondaryContainer : 'transparent'),
+        ]}
+      >
+        <Surface
+          color="transparent"
+          contentColor={
+            selected ? theme.onSecondaryContainer : theme.onSurfaceVariant
           }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
-
-        const iconColor = isFocused
-          ? theme.onPrimaryContainer
-          : theme.onSurfaceVariant;
-
-        return (
-          <Pressable
-            key={route.key}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={styles.pressable}
-          >
-            {/* Icon */}
-            <View
-              style={[
-                styles.iconContainer,
-                { marginBottom: showLabel ? 4 : 20 },
-              ]}
-            >
-              {/* The indicator is absolutely positioned and animated with a
-                  transform so that growing it never re-runs layout, which
-                  would otherwise make the icon and label tremble sideways as
-                  their rounded pixel positions shift on every frame. */}
-              <Animated.View
-                style={[
-                  styles.indicator,
-                  {
-                    transitionProperty: ['transform', 'backgroundColor'],
-                    transitionDuration: 250,
-                    transitionTimingFunction: 'ease-in-out',
-                    transform: [{ scaleX: isFocused ? 1 : 0.5 }],
-                    backgroundColor: isFocused
-                      ? theme.primaryContainer
-                      : transparentBg,
-                  },
-                ]}
-              />
-              {renderIcon({ color: iconColor, route })}
-            </View>
-
-            {/* Label */}
-            {showLabel ? (
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color: isFocused ? theme.onSurface : theme.onSurfaceVariant,
-                    fontWeight: '500',
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {label}
-              </Text>
-            ) : null}
-          </Pressable>
-        );
-      })}
-    </View>
+        >
+          <DestinationIcon destination={destination} selected={selected} />
+        </Surface>
+      </Box>
+      {showLabel || selected ? (
+        <AppText
+          variant="labelMedium"
+          weight={selected ? '700' : undefined}
+          color={selected ? theme.onSurface : theme.onSurfaceVariant}
+          maxLines={1}
+        >
+          {destination.label}
+        </AppText>
+      ) : null}
+    </Column>
   );
-}
+};
 
-export default CustomBottomTabBar;
-export type { CustomBottomTabBarProps };
+export const AppNavigationRail = ({
+  destinations,
+  selectedKey,
+  onSelect,
+  showLabels,
+}: NavigationSuiteProps) => {
+  const theme = useTheme();
+  const { top, bottom, left } = useSafeAreaInsets();
+  return (
+    <AppHost style={[styles.rail, { width: NAVIGATION_RAIL_WIDTH + left }]}>
+      <Column
+        verticalArrangement={{ spacedBy: railSpacing(destinations.length) }}
+        horizontalAlignment="center"
+        modifiers={[
+          fillMaxHeight(),
+          width(NAVIGATION_RAIL_WIDTH + left),
+          background(theme.surfaceContainer),
+          // Scrolls only when the window is too short for every item.
+          verticalScroll(),
+          padding(left, top + RAIL_PADDING, 0, bottom + RAIL_PADDING),
+        ]}
+      >
+        {destinations.map(destination => (
+          <Fragment key={destination.key}>
+            {destination.groupStart ? (
+              <HorizontalDivider
+                color={theme.outlineVariant}
+                modifiers={[width(56), padding(0, 8, 0, 8)]}
+              />
+            ) : null}
+            <RailItem
+              destination={destination}
+              selected={destination.key === selectedKey}
+              showLabel={showLabels}
+              onPress={() => onSelect(destination.key)}
+            />
+          </Fragment>
+        ))}
+      </Column>
+    </AppHost>
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    paddingTop: 12,
-    paddingBottom: 16,
-    paddingHorizontal: 0,
-    minHeight: 80,
-  },
-  pressable: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    position: 'relative',
-  },
-  iconContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 64,
-    height: 32,
-  },
-  indicator: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 16,
-  },
-  label: {
-    height: 16,
-    fontSize: 12,
-    textAlign: 'center',
-  },
+  rail: { height: '100%' },
 });

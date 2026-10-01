@@ -1,14 +1,20 @@
 import * as React from 'react';
 import ChapterItem from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { Column } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxSize,
+  verticalScroll,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
 import { getString } from '@i18n/translations';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  RefreshControl,
+  StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -24,8 +30,12 @@ import NovelBottomSheet from './NovelBottomSheet';
 import PageNavigationBottomSheet from './PageNavigationBottomSheet';
 import * as Haptics from 'expo-haptics';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList, LegendListRef } from '@legendapp/list/react-native';
+import {
+  AppHost,
+  ComposeList,
+  OverlayHost,
+  type ComposeListHandle,
+} from '@components';
 import PagePaginationControl from './PagePaginationControl';
 import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
@@ -36,9 +46,11 @@ import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 
+const DETAILS_PANE_WIDTH = 400;
+
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
-  listRef: React.RefObject<LegendListRef | null>;
+  listRef: React.RefObject<ComposeListHandle | null>;
   navigation: Pick<NovelScreenProps['navigation'], 'navigate'>;
   selected: number[];
   setSelected: React.Dispatch<React.SetStateAction<number[]>>;
@@ -102,7 +114,8 @@ const NovelScreenList = ({
   const { filter, showChapterTitles = false } = novelSettings;
 
   const theme = useTheme();
-  const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
+  const layout = useWindowLayout();
+  const { bottom: bottomInset } = useSafeAreaInsets();
 
   const {
     downloadQueue,
@@ -133,9 +146,10 @@ const NovelScreenList = ({
   const scrollOffset = useSharedValue(0);
   const { height: screenHeight } = useWindowDimensions();
 
-  const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
-  const trackerSheetRef = useRef<BottomSheetModalMethods>(null);
-  const pageNavigationSheetRef = useRef<BottomSheetModalMethods>(null);
+  const [novelBottomSheetVisible, setNovelBottomSheetVisible] = useState(false);
+  const [trackerSheetVisible, setTrackerSheetVisible] = useState(false);
+  const [pageNavigationSheetVisible, setPageNavigationSheetVisible] =
+    useState(false);
 
   // Derive selectedIds Set for O(1) lookups
   const selectedIds = useMemo(() => new Set(selected), [selected]);
@@ -257,21 +271,8 @@ const NovelScreenList = ({
     [novel, downloadChapter],
   );
 
-  const refreshControlElement = useMemo(
-    () => (
-      <RefreshControl
-        progressViewOffset={topInset + 32}
-        onRefresh={onRefresh}
-        refreshing={updating}
-        colors={[theme.primary]}
-        progressBackgroundColor={theme.onPrimary}
-      />
-    ),
-    [onRefresh, updating, topInset, theme.primary, theme.onPrimary],
-  );
-
   const scrollToTop = useCallback(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    listRef.current?.scrollToTop();
   }, [listRef]);
 
   const setCustomNovelCover = useCustomNovelCover(
@@ -295,9 +296,14 @@ const NovelScreenList = ({
   const hasMultiplePages = pages.length > 1 || (novel?.totalPages ?? 0) > 1;
 
   const openPageNavDrawer = useCallback(
-    () => pageNavigationSheetRef.current?.present(),
+    () => setPageNavigationSheetVisible(true),
     [],
   );
+  const openNovelBottomSheet = useCallback(
+    () => setNovelBottomSheetVisible(true),
+    [],
+  );
+  const openTrackerSheet = useCallback(() => setTrackerSheetVisible(true), []);
 
   // --- Memoized list components ---
 
@@ -306,45 +312,41 @@ const NovelScreenList = ({
       return null;
     }
     return (
-      <View>
-        <PagePaginationControl
-          pages={pages}
-          currentPageIndex={pageIndex}
-          onPageChange={openPage}
-          onOpenDrawer={openPageNavDrawer}
-          theme={theme}
-        />
-      </View>
+      <PagePaginationControl
+        pages={pages}
+        currentPageIndex={pageIndex}
+        onPageChange={openPage}
+        onOpenDrawer={openPageNavDrawer}
+        theme={theme}
+      />
     );
   }, [hasMultiplePages, pages, pageIndex, openPage, openPageNavDrawer, theme]);
 
   const listEmptyComponent = useMemo(
-    () => (fetching ? <ChapterListSkeleton /> : null),
-    [fetching],
+    () => (fetching && chapters.length === 0 ? <ChapterListSkeleton /> : null),
+    [chapters.length, fetching],
   );
 
-  const listHeader = useMemo(
+  const novelInfoHeader = useMemo(
     () => (
-      <>
-        <NovelInfoHeader
-          hasDownloadedChapters={hasDownloadedChapters}
-          deleteDownloadSnackbar={deleteDownloadSnackbar}
-          fetching={fetching}
-          filter={filter}
-          firstUnreadChapter={firstUnreadChapter}
-          isLoading={loading}
-          lastRead={lastRead}
-          navigateToChapter={navigateToChapter}
-          novel={novel}
-          novelBottomSheetRef={novelBottomSheetRef}
-          setCustomNovelCover={setCustomNovelCover}
-          saveNovelCover={saveNovelCover}
-          theme={theme}
-          totalChapters={batchInformation.totalChapters}
-          trackerSheetRef={trackerSheetRef}
-        />
-        {paginationControl}
-      </>
+      <NovelInfoHeader
+        hasDownloadedChapters={hasDownloadedChapters}
+        deleteDownloadSnackbar={deleteDownloadSnackbar}
+        fetching={fetching}
+        filter={filter}
+        firstUnreadChapter={firstUnreadChapter}
+        isLoading={loading}
+        lastRead={lastRead}
+        navigateToChapter={navigateToChapter}
+        novel={novel}
+        openNovelBottomSheet={openNovelBottomSheet}
+        setCustomNovelCover={setCustomNovelCover}
+        saveNovelCover={saveNovelCover}
+        theme={theme}
+        totalChapters={batchInformation.totalChapters}
+        openTrackerSheet={openTrackerSheet}
+        underTopBar={!layout.isExpanded}
+      />
     ),
     [
       hasDownloadedChapters,
@@ -356,12 +358,24 @@ const NovelScreenList = ({
       lastRead,
       navigateToChapter,
       novel,
+      openNovelBottomSheet,
       setCustomNovelCover,
       saveNovelCover,
       theme,
       batchInformation.totalChapters,
-      paginationControl,
+      openTrackerSheet,
+      layout.isExpanded,
     ],
+  );
+
+  // On wide windows the novel details get their own pane beside the chapters.
+  const sidePane = layout.isExpanded;
+  const listHeader = useMemo(
+    () =>
+      [sidePane ? null : novelInfoHeader, paginationControl].filter(
+        (element): element is React.JSX.Element => element !== null,
+      ),
+    [novelInfoHeader, paginationControl, sidePane],
   );
 
   const continueFabLabel = useMemo(
@@ -373,7 +387,7 @@ const NovelScreenList = ({
   );
 
   const renderChapter = useCallback(
-    ({ item }: { item: ChapterInfo }) => {
+    (item: ChapterInfo) => {
       if (novel.id === 'NO_ID') {
         return null;
       }
@@ -414,46 +428,73 @@ const NovelScreenList = ({
     () => ({ downloadingChapterIds, selectedIds }),
     [downloadingChapterIds, selectedIds],
   );
-  const contentContainerStyle = useMemo(
-    () => ({ paddingBottom: 100 + bottomInset }),
-    [bottomInset],
+
+  const list = (
+    <ComposeList
+      ref={listRef}
+      estimatedItemSize={64}
+      data={chapters}
+      footer={listEmptyComponent}
+      renderItem={renderChapter}
+      keyExtractor={chapterKeyExtractor}
+      extraData={listExtraData}
+      contentPadding={{ bottom: 100 + bottomInset }}
+      refreshing={updating}
+      onRefresh={onRefresh}
+      onEndReached={getNextChapterBatch}
+      onEndReachedThreshold={6}
+      onScroll={scrollHandler}
+      header={listHeader}
+    />
   );
 
   return (
     <>
-      <LegendList
-        ref={listRef}
-        estimatedItemSize={64}
-        data={chapters}
-        recycleItems
-        ListEmptyComponent={listEmptyComponent}
-        renderItem={renderChapter}
-        keyExtractor={chapterKeyExtractor}
-        extraData={listExtraData}
-        contentContainerStyle={contentContainerStyle}
-        refreshControl={refreshControlElement}
-        onEndReached={getNextChapterBatch}
-        onEndReachedThreshold={6}
-        onScroll={scrollHandler}
-        //drawDistance={1000}
-        ListHeaderComponent={listHeader}
-      />
+      {sidePane ? (
+        <View style={styles.panes}>
+          <AppHost
+            style={{ width: Math.min(DETAILS_PANE_WIDTH, layout.width * 0.4) }}
+          >
+            <Column modifiers={[fillMaxSize(), verticalScroll()]}>
+              {novelInfoHeader}
+            </Column>
+          </AppHost>
+          <View
+            style={[
+              styles.chapters,
+              { backgroundColor: theme.surfaceContainerLow },
+            ]}
+          >
+            {list}
+          </View>
+        </View>
+      ) : (
+        list
+      )}
       {novel.id !== 'NO_ID' ? (
         <>
-          <NovelBottomSheet
-            bottomSheetRef={novelBottomSheetRef}
-            theme={theme}
-          />
-          <TrackSheet bottomSheetRef={trackerSheetRef} novel={novel} />
-          {(novel.totalPages ?? 0) > 1 || pages.length > 1 ? (
-            <PageNavigationBottomSheet
-              bottomSheetRef={pageNavigationSheetRef}
+          <OverlayHost>
+            <NovelBottomSheet
+              visible={novelBottomSheetVisible}
+              onDismiss={() => setNovelBottomSheetVisible(false)}
               theme={theme}
-              pages={pages}
-              pageIndex={pageIndex}
-              openPage={openPage}
             />
-          ) : null}
+            <TrackSheet
+              visible={trackerSheetVisible}
+              onDismiss={() => setTrackerSheetVisible(false)}
+              novel={novel}
+            />
+            {(novel.totalPages ?? 0) > 1 || pages.length > 1 ? (
+              <PageNavigationBottomSheet
+                visible={pageNavigationSheetVisible}
+                onDismiss={() => setPageNavigationSheetVisible(false)}
+                theme={theme}
+                pages={pages}
+                pageIndex={pageIndex}
+                openPage={openPage}
+              />
+            ) : null}
+          </OverlayHost>
           <NovelFloatingActions
             bottomInset={bottomInset}
             continueLabel={continueFabLabel}
@@ -475,3 +516,8 @@ const NovelScreenList = ({
 };
 
 export default React.memo(NovelScreenList);
+
+const styles = StyleSheet.create({
+  panes: { flex: 1, flexDirection: 'row' },
+  chapters: { flex: 1, borderTopLeftRadius: 28, overflow: 'hidden' },
+});

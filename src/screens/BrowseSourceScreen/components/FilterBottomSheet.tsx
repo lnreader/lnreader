@@ -1,468 +1,321 @@
 import React, { useState } from 'react';
+import { Box, Column, FlowRow, Row } from '@expo/ui/jetpack-compose';
 import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useBoolean } from '@hooks';
 
-import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-
-import { useTheme } from '@hooks/persisted';
+import { useTheme } from '@hooks/persisted/useTheme';
+import { getString } from '@i18n/translations';
 import {
   FilterTypes,
-  FilterToValues,
-  Filters,
+  type FilterToValues,
+  type Filters,
 } from '@plugins/types/filterTypes';
-import { Button, Menu } from '@components/index';
-import { Checkbox } from '@components/Checkbox/Checkbox';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { useBoolean } from '@hooks';
-import { TextInput, overlay } from 'react-native-paper';
 import { getValueFor } from './filterUtils';
-import { getString } from '@i18n/translations';
-import { ThemeColors } from '@theme/types';
-import Switch from '@components/Switch/Switch';
+import BlockIcon from '@expo/material-symbols/block.xml';
+import ArrowDropDownIcon from '@expo/material-symbols/arrow_drop_down.xml';
+import CheckIcon from '@expo/material-symbols/check.xml';
+import FilterListIcon from '@expo/material-symbols/filter_list.xml';
+import {
+  BottomSheet,
+  Button,
+  Chip,
+  AppText,
+  TextInput,
+  Menu,
+  AppIcon,
+  SwitchItem,
+  List,
+} from '@components';
 
-const insertOrRemoveIntoArray = (array: string[], val: string): string[] =>
-  array.indexOf(val) > -1 ? array.filter(ele => ele !== val) : [...array, val];
+export type SelectedFilters = FilterToValues<Filters>;
+type FilterValue = SelectedFilters[string];
 
-type SelectedFilters = FilterToValues<Filters>;
+const toggle = (values: readonly string[], value: string) =>
+  values.includes(value)
+    ? values.filter(item => item !== value)
+    : [...values, value];
 
 interface FilterItemProps {
-  theme: ThemeColors;
+  filterKey: string;
   filter: Filters[string];
-  filterKey: keyof Filters;
-  selectedFilters: SelectedFilters;
-  setSelectedFilters: React.Dispatch<React.SetStateAction<SelectedFilters>>;
+  selected: SelectedFilters;
+  onChange: (key: string, value: FilterValue) => void;
 }
 
-const FilterItem: React.FC<FilterItemProps> = ({
-  theme,
-  filter,
-  filterKey,
-  selectedFilters,
-  setSelectedFilters,
+const GroupTitle = ({ title }: { title: string }) => {
+  const theme = useTheme();
+  return (
+    <AppText
+      variant="titleSmall"
+      color={theme.onSurfaceVariant}
+      modifiers={[padding(16, 12, 16, 4)]}
+    >
+      {title}
+    </AppText>
+  );
+};
+
+const PickerItem = ({
+  label,
+  value,
+  options,
+  onSelect,
+}: {
+  label: string;
+  value: string;
+  options: readonly { label: string; value: string }[];
+  onSelect: (value: string) => void;
 }) => {
   const {
     value: isVisible,
-    toggle: toggleCard,
+    setTrue: openCard,
     setFalse: closeCard,
   } = useBoolean();
-  const { width: screenWidth } = useWindowDimensions();
-  if (filter.type === FilterTypes.TextInput) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    return (
-      <View style={styles.textContainer}>
-        <TextInput
-          style={[styles.flex, { width: screenWidth - 48 }]}
-          mode="outlined"
-          label={
-            <Text
-              style={[
-                {
-                  color: theme.onSurface,
-                  backgroundColor: overlay(2, theme.surface),
-                },
-              ]}
-            >
-              {` ${filter.label} `}
-            </Text>
-          }
-          defaultValue={value}
-          theme={{ colors: { background: 'transparent' } }}
-          outlineColor={theme.onSurface}
-          textColor={theme.onSurface}
-          onChangeText={text =>
-            setSelectedFilters(prevState => ({
-              ...prevState,
-              [filterKey]: { value: text, type: FilterTypes.TextInput },
-            }))
-          }
-        />
-      </View>
-    );
-  }
-  if (filter.type === FilterTypes.Picker) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    const label =
-      filter.options.find(option => option.value === value)?.label ||
-      'whatever';
-    return (
-      <View style={styles.pickerContainer}>
-        <Menu
-          fullWidth
-          visible={isVisible}
-          contentStyle={{ backgroundColor: theme.surfaceVariant }}
-          anchor={
-            <Pressable
-              style={[styles.flex, { width: screenWidth - 48 }]}
-              onPress={toggleCard}
-            >
-              <TextInput
-                mode="outlined"
-                label={
-                  <Text
-                    style={[
-                      {
-                        color: isVisible ? theme.primary : theme.onSurface,
-                        backgroundColor: overlay(2, theme.surface),
-                      },
-                    ]}
-                  >
-                    {` ${filter.label} `}
-                  </Text>
-                }
-                value={label}
-                editable={false}
-                theme={{ colors: { background: 'transparent' } }}
-                outlineColor={isVisible ? theme.primary : theme.onSurface}
-                textColor={isVisible ? theme.primary : theme.onSurface}
-              />
-            </Pressable>
-          }
-          onDismiss={closeCard}
-        >
-          {filter.options.map(val => {
-            return (
-              <Menu.Item
-                key={val.label}
-                title={val.label}
-                titleStyle={{ color: theme.onSurfaceVariant }}
-                onPress={() => {
-                  closeCard();
-                  setSelectedFilters(prevFilters => ({
-                    ...prevFilters,
-                    [filterKey]: { value: val.value, type: FilterTypes.Picker },
-                  }));
-                }}
-              />
-            );
-          })}
-        </Menu>
-      </View>
-    );
-  }
-  if (filter.type === FilterTypes.CheckboxGroup) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    return (
-      <View>
-        <Pressable
-          style={styles.checkboxHeader}
-          onPress={toggleCard}
-          android_ripple={{ color: theme.rippleColor }}
-        >
-          <Text style={[{ color: theme.onSurfaceVariant }]}>
-            {filter.label}
-          </Text>
-          <MaterialCommunityIcons
-            name={isVisible ? 'chevron-up' : 'chevron-down'}
-            color={theme.onSurface}
-            size={24}
-          />
-        </Pressable>
-        {isVisible
-          ? filter.options.map(val => {
-              return (
-                <Checkbox
-                  key={val.label}
-                  label={val.label}
-                  theme={theme}
-                  status={value.includes(val.value)}
-                  onPress={() =>
-                    setSelectedFilters(prevFilters => ({
-                      ...prevFilters,
-                      [filterKey]: {
-                        type: FilterTypes.CheckboxGroup,
-                        value: insertOrRemoveIntoArray(value, val.value),
-                      },
-                    }))
-                  }
-                />
-              );
-            })
-          : null}
-      </View>
-    );
-  }
-  if (filter.type === FilterTypes.Switch) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    return (
-      <Pressable
-        android_ripple={{ color: theme.rippleColor }}
-        style={styles.container}
-        onPress={() => {
-          setSelectedFilters(prevState => ({
-            ...prevState,
-            [filterKey]: { value: !value, type: FilterTypes.Switch },
-          }));
-        }}
+  return (
+    <Box modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
+      <Menu
+        visible={isVisible}
+        onDismiss={closeCard}
+        anchor={
+          <Box modifiers={[fillMaxWidth(), clickable(openCard)]}>
+            <TextInput
+              outlined
+              label={label}
+              value={value}
+              onChangeText={() => undefined}
+              disabled
+              trailing={<AppIcon source={ArrowDropDownIcon} />}
+            />
+          </Box>
+        }
       >
-        <View style={styles.switchContainer}>
-          <View style={styles.switchLabelContainer}>
-            <Text style={[{ color: theme.onSurface }, styles.switchLabel]}>
-              {filter.label}
-            </Text>
-          </View>
-          <Switch
-            value={value}
-            onValueChange={() => {
-              setSelectedFilters(prevState => ({
-                ...prevState,
-                [filterKey]: { value: !value, type: FilterTypes.Switch },
-              }));
+        {options.map(option => (
+          <Menu.Item
+            key={option.label}
+            title={option.label}
+            onPress={() => {
+              closeCard();
+              onSelect(option.value);
             }}
           />
-        </View>
-      </Pressable>
-    );
-  }
-  if (filter.type === FilterTypes.ExcludableCheckboxGroup) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    return (
-      <View>
-        <Pressable
-          style={styles.checkboxHeader}
-          onPress={toggleCard}
-          android_ripple={{ color: theme.rippleColor }}
-        >
-          <Text style={[{ color: theme.onSurfaceVariant }]}>
-            {filter.label}
-          </Text>
-          <MaterialCommunityIcons
-            name={isVisible ? 'chevron-up' : 'chevron-down'}
-            color={theme.onSurface}
-            size={24}
-          />
-        </Pressable>
-        {isVisible
-          ? filter.options.map(val => {
+        ))}
+      </Menu>
+    </Box>
+  );
+};
+
+const FilterItem = ({
+  filterKey,
+  filter,
+  selected,
+  onChange,
+}: FilterItemProps) => {
+  const theme = useTheme();
+  const current = selected[filterKey];
+  switch (filter.type) {
+    case FilterTypes.TextInput: {
+      const value = getValueFor<FilterTypes.TextInput>(filter, current);
+      return (
+        <TextInput
+          outlined
+          label={filter.label}
+          value={value}
+          onChangeText={text =>
+            onChange(filterKey, { type: FilterTypes.TextInput, value: text })
+          }
+          modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
+        />
+      );
+    }
+    case FilterTypes.Picker: {
+      const value = getValueFor<FilterTypes.Picker>(filter, current);
+      return (
+        <PickerItem
+          label={filter.label}
+          value={
+            filter.options.find(option => option.value === value)?.label ||
+            'whatever'
+          }
+          options={filter.options}
+          onSelect={next =>
+            onChange(filterKey, { type: FilterTypes.Picker, value: next })
+          }
+        />
+      );
+    }
+    case FilterTypes.Switch: {
+      const value = getValueFor<FilterTypes.Switch>(filter, current);
+      return (
+        <SwitchItem
+          label={filter.label}
+          value={value}
+          onPress={() =>
+            onChange(filterKey, { type: FilterTypes.Switch, value: !value })
+          }
+          theme={theme}
+        />
+      );
+    }
+    case FilterTypes.CheckboxGroup: {
+      const value = getValueFor<FilterTypes.CheckboxGroup>(filter, current);
+      return (
+        <Column modifiers={[fillMaxWidth()]}>
+          <GroupTitle title={filter.label} />
+          <FlowRow
+            horizontalArrangement={{ spacedBy: 8 }}
+            verticalArrangement={{ spacedBy: 0 }}
+            modifiers={[fillMaxWidth(), padding(16, 0, 16, 8)]}
+          >
+            {filter.options.map(option => (
+              <Chip
+                key={option.value}
+                label={option.label}
+                selected={value.includes(option.value)}
+                onPress={() =>
+                  onChange(filterKey, {
+                    type: FilterTypes.CheckboxGroup,
+                    value: toggle(value, option.value),
+                  })
+                }
+                theme={theme}
+              />
+            ))}
+          </FlowRow>
+        </Column>
+      );
+    }
+    case FilterTypes.ExcludableCheckboxGroup: {
+      const value = getValueFor<FilterTypes.ExcludableCheckboxGroup>(
+        filter,
+        current,
+      );
+      const include = value.include ?? [];
+      const exclude = value.exclude ?? [];
+      // Tapping cycles: off → include → exclude → off.
+      const cycle = (option: string) => {
+        const next = include.includes(option)
+          ? {
+              include: include.filter(item => item !== option),
+              exclude: [...exclude, option],
+            }
+          : exclude.includes(option)
+          ? { include, exclude: exclude.filter(item => item !== option) }
+          : { include: [...include, option], exclude };
+        onChange(filterKey, {
+          type: FilterTypes.ExcludableCheckboxGroup,
+          value: next,
+        });
+      };
+      return (
+        <Column modifiers={[fillMaxWidth()]}>
+          <GroupTitle title={filter.label} />
+          <FlowRow
+            horizontalArrangement={{ spacedBy: 8 }}
+            verticalArrangement={{ spacedBy: 0 }}
+            modifiers={[fillMaxWidth(), padding(16, 0, 16, 8)]}
+          >
+            {filter.options.map(option => {
+              const excluded = exclude.includes(option.value);
               return (
-                <Checkbox
-                  key={val.label}
-                  label={val.label}
+                <Chip
+                  key={option.value}
+                  label={option.label}
+                  selected={excluded || include.includes(option.value)}
+                  selectedIcon={excluded ? BlockIcon : CheckIcon}
+                  tone={excluded ? 'error' : 'default'}
+                  onPress={() => cycle(option.value)}
                   theme={theme}
-                  status={
-                    value.include?.includes(val.value)
-                      ? true
-                      : value.exclude?.includes(val.value)
-                      ? 'indeterminate'
-                      : false
-                  }
-                  onPress={() => {
-                    if (value.exclude?.includes(val.value)) {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [...(value.include || [])],
-                              exclude: [
-                                ...(value.exclude?.filter(
-                                  f => f !== val.value,
-                                ) || []),
-                              ],
-                            },
-                          },
-                        };
-                      });
-                    } else if (value.include?.includes(val.value)) {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [
-                                ...(value.include?.filter(
-                                  f => f !== val.value,
-                                ) || []),
-                              ],
-                              exclude: [...(value.exclude || []), val.value],
-                            },
-                          },
-                        };
-                      });
-                    } else {
-                      setSelectedFilters(prev => {
-                        return {
-                          ...prev,
-                          [filterKey]: {
-                            type: FilterTypes.ExcludableCheckboxGroup,
-                            value: {
-                              include: [...(value.include || []), val.value],
-                              exclude: value.exclude,
-                            },
-                          },
-                        };
-                      });
-                    }
-                  }}
                 />
               );
-            })
-          : null}
-      </View>
-    );
+            })}
+          </FlowRow>
+        </Column>
+      );
+    }
+    default:
+      return null;
   }
-  return <></>;
 };
 
 interface BottomSheetProps {
-  filterSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  visible: boolean;
+  onDismiss: () => void;
   filters: Filters;
   setFilters: (filters?: SelectedFilters) => void;
   clearFilters: (filters: Filters) => void;
+  /** Laid out in place (a side pane on wide windows) instead of a sheet. */
+  inline?: boolean;
 }
 
 const FilterBottomSheet: React.FC<BottomSheetProps> = ({
+  visible,
+  onDismiss,
   filters,
-  filterSheetRef,
   clearFilters,
   setFilters,
+  inline,
 }) => {
   const theme = useTheme();
   const [selectedFilters, setSelectedFilters] =
     useState<SelectedFilters>(filters);
 
-  return (
-    <BottomSheet bottomSheetRef={filterSheetRef} snapPoints={[400, 600]}>
-      <View style={styles.flex}>
-        <View
-          style={[
-            styles.buttonContainer,
-            { borderBottomColor: theme.outlineVariant },
-          ]}
-        >
-          <Button
-            title={getString('common.reset')}
-            onPress={() => {
-              setSelectedFilters(filters);
-              clearFilters(filters);
-            }}
-          />
-          <Button
-            title={getString('common.filter')}
-            textColor={theme.onPrimary}
-            onPress={() => {
-              setFilters(selectedFilters);
-              filterSheetRef?.current?.close();
-            }}
-            mode="contained"
-          />
-        </View>
-        <BottomSheetFlatList
-          data={
-            filters && (Object.entries(filters) as [string, Filters[string]][])
-          }
-          keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
-          renderItem={({ item }: { item: [string, Filters[string]] }) => (
-            <FilterItem
-              theme={theme}
-              filter={item[1]}
-              filterKey={item[0]}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-            />
-          )}
+  const content = (
+    <Column modifiers={[fillMaxWidth()]}>
+      <Row
+        verticalAlignment="center"
+        horizontalArrangement={{ spacedBy: 8 }}
+        modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
+      >
+        <AppText variant="titleLarge" modifiers={[weight(1)]}>
+          {getString('common.filter')}
+        </AppText>
+        <Button
+          mode="text"
+          title={getString('common.reset')}
+          onPress={() => {
+            setSelectedFilters(filters);
+            clearFilters(filters);
+          }}
         />
-      </View>
-      {/*<BottomSheetFlatList
-        data={filters && Object.entries(filters)}
-        keyExtractor={(item: [string, unknown]) => 'filter' + item[0]}
-        renderItem={({ item }: { item: [string, Filters[string]] }) => (
-          <FilterItem
-            theme={theme}
-            filter={item[1]}
-            filterKey={item[0] as keyof Filters}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-          />
-        )}
-      />*/}
+        <Button
+          mode="contained"
+          icon={FilterListIcon}
+          title={getString('common.filter')}
+          onPress={() => {
+            setFilters(selectedFilters);
+            if (!inline) {
+              onDismiss();
+            }
+          }}
+        />
+      </Row>
+      <List.Divider theme={theme} />
+      {Object.entries(filters).map(([key, filter]) => (
+        <FilterItem
+          key={key}
+          filterKey={key}
+          filter={filter}
+          selected={selectedFilters}
+          onChange={(filterKey, value) =>
+            setSelectedFilters(prev => ({ ...prev, [filterKey]: value }))
+          }
+        />
+      ))}
+    </Column>
+  );
+
+  return inline ? (
+    content
+  ) : (
+    <BottomSheet visible={visible} onDismiss={onDismiss} expanded>
+      {content}
     </BottomSheet>
   );
 };
 
 export default FilterBottomSheet;
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  transparent: {
-    backgroundColor: 'transparent',
-  },
-  buttonContainer: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 8,
-    paddingHorizontal: 24,
-    paddingTop: 8,
-  },
-  checkboxHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  container: {
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    flex: 1,
-  },
-
-  picker: {
-    paddingHorizontal: 24,
-    width: 200,
-  },
-  pickerContainer: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 8,
-    paddingHorizontal: 24,
-  },
-  switchContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 8,
-    paddingHorizontal: 24,
-  },
-  switchLabel: {
-    fontSize: 16,
-  },
-  switchLabelContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  textContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 8,
-    paddingHorizontal: 24,
-  },
-});

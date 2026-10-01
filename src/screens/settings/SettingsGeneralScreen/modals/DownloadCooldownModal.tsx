@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
-
-import { Dialog } from '@components';
+import { padding } from '@expo/ui/jetpack-compose/modifiers';
+import { AppText, Dialog, TextInput } from '@components';
 import { useAppSettings } from '@hooks/persisted';
 import { DEFAULT_CHAPTER_DOWNLOAD_COOLDOWN_MS } from '@hooks/persisted/useSettings';
 import { getString } from '@i18n/translations';
@@ -88,21 +87,21 @@ const DownloadCooldownModal: React.FC<DownloadCooldownModalProps> = ({
         <TextInput
           value={draft}
           onChangeText={text => setDraft(sanitizeNumericInput(text))}
-          onSubmitEditing={save}
-          keyboardType="decimal-pad"
+          onSubmit={save}
+          keyboardType="decimal"
           placeholder={getString(
             'generalSettingsScreen.chapterDownloadCooldownPlaceholder',
           )}
-          placeholderTextColor={theme.onSurfaceVariant}
-          style={[
-            styles.input,
-            { color: theme.onSurface, borderColor: theme.outline },
-          ]}
+          singleLine
           autoFocus
         />
-        <Text style={[styles.warning, { color: theme.error }]}>
+        <AppText
+          variant="bodySmall"
+          color={theme.error}
+          modifiers={[padding(0, 12, 0, 0)]}
+        >
           {getString('generalSettingsScreen.chapterDownloadCooldownWarning')}
-        </Text>
+        </AppText>
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.Action title={getString('common.reset')} onPress={reset} />
@@ -113,17 +112,3 @@ const DownloadCooldownModal: React.FC<DownloadCooldownModalProps> = ({
 };
 
 export default DownloadCooldownModal;
-
-const styles = StyleSheet.create({
-  input: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  warning: {
-    fontSize: 12,
-    marginTop: 12,
-  },
-});

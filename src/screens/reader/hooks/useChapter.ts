@@ -1,56 +1,99 @@
 import {
-  getChapter as getDbChapter,
-  getChapterCount,
-  getNextChapter,
-  getPrevChapter,
-  insertChapters,
-} from '@database/queries/ChapterQueries';
-import { insertHistory } from '@database/queries/HistoryQueries';
-import { ChapterInfo, NovelInfo } from '@database/types';
-import {
-  useAppSettings,
-  useChapterGeneralSettings,
-  useLibrarySettings,
-  useTrackedNovel,
-  useTracker,
-} from '@hooks/persisted';
-import { fetchChapter, fetchPage } from '@services/plugin/fetch';
-import { NOVEL_STORAGE } from '@utils/Storages';
-import {
-  RefObject,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { sanitizeChapterText } from '../utils/sanitizeChapterText';
-import { parseChapterNumber } from '@utils/parseChapterNumber';
-import WebView from 'react-native-webview';
+import { Dimensions, NativeEventEmitter, NativeModules } from 'react-native';
+import * as Linking from 'expo-linking';
+import { useEventListener } from 'expo';
+import type WebView from 'react-native-webview';
+import type { WebViewMessageEvent } from 'react-native-webview';
+import { getBatteryLevel } from 'react-native-device-info';
+
+import { getChapter as getDbChapter } from '@database/queries/ChapterQueries';
+import { insertHistory } from '@database/queries/HistoryQueries';
+import { getReaderChapters } from '@database/queries/ReaderQueries';
+import type { ChapterInfo, NovelInfo } from '@database/types';
 import { useFullscreenMode } from '@hooks';
-import { Dimensions } from 'react-native';
-import { runWhenIdle } from '@utils/runWhenIdle';
-import defaultTo from 'lodash-es/defaultTo';
-import { showToast } from '@utils/showToast';
+import {
+  useAppSettings,
+  useChapterGeneralSettings,
+  useChapterReaderSettings,
+  useLibrarySettings,
+  useTheme,
+  useTrackedNovel,
+  useTracker,
+} from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import NativeVolumeButtonListener from '@modules/native-volume-button-listener';
-import NativeFile from '@modules/native-file';
+import type { TtsSettings } from '@modules/nitro-tts';
+import { getPlugin } from '@plugins/pluginManager';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
+import { applyTextModifications } from '@utils/customCode';
+import { parseChapterNumber } from '@utils/parseChapterNumber';
+import { getReaderAssetsUri, READER_FONTS_URI } from '@utils/readerAssets';
+import { runWhenIdle } from '@utils/runWhenIdle';
+import { showToast } from '@utils/showToast';
+import { PLUGIN_STORAGE } from '@utils/Storages';
+import { toReaderPreferences } from '../engine/preferences';
+import {
+  type NativeToWebMessage,
+  parseWebMessage,
+  type ReaderSection,
+  toInjectedScript,
+  type WebToNativeMessage,
+} from '../engine/protocol';
+import { buildShellHtml } from '../engine/shell';
 import useTimeTracking from './useTimeTracking';
-import { useEventListener } from 'expo';
+import { useTtsSession } from './useTtsSession';
+import { EMPTY_READER_SEARCH_RESULT, type ReaderSearchResult } from '../types';
+import { loadChapterHtml, readPluginFile } from '../utils/chapterContent';
+import { readerCssVariables } from '../utils/cssVariables';
+import { loadAdjacentPage } from '../utils/pages';
+import { startFraction, writePosition } from '../utils/positions';
+import {
+  MAX_AUTO_SCROLL_INTERVAL,
+  MIN_AUTO_SCROLL_INTERVAL,
+} from '@utils/constants/readerConstants';
+import useCustomCode from '../components/Hooks/useCustomCode';
+import useTextModifications from '../components/Hooks/useTextModifications';
 
-type AdjacentChapters = [
-  nextChapter: ChapterInfo | undefined,
-  prevChapter: ChapterInfo | undefined,
-];
+export interface ReaderPosition {
+  chapterId: number;
+  fraction: number;
+  endFraction: number;
+  page?: number;
+  pages?: number;
+  atStart: boolean;
+  atEnd: boolean;
+}
 
-/** Stable identity so resetting the adjacent chapters never renders twice. */
-const NO_ADJACENT_CHAPTERS: AdjacentChapters = [undefined, undefined];
+const RTL_LANGUAGES = new Set(['Arabic', 'Hebrew', 'Persian', 'Urdu']);
+
+const { RNDeviceInfo } = NativeModules;
+const deviceInfoEmitter = RNDeviceInfo
+  ? new NativeEventEmitter(RNDeviceInfo)
+  : undefined;
+
+const toSections = (chapters: readonly ChapterInfo[]): ReaderSection[] =>
+  chapters.map(chapter => ({ id: chapter.id, name: chapter.name }));
+
+const toNativeTtsSettings = (
+  settings: ReturnType<typeof useChapterReaderSettings>['tts'],
+): TtsSettings => ({
+  engineName: settings?.engine?.name,
+  voiceIdentifier: settings?.voice?.identifier,
+  rate: settings?.rate ?? 1,
+  pitch: settings?.pitch ?? 1,
+});
 
 export default function useChapter(
-  webViewRef: RefObject<WebView | null>,
-  initialChapter: ChapterInfo,
+  webViewRef: RefObject<WebView<object> | null>,
   novel: NovelInfo,
+  initialChapter: ChapterInfo,
 ) {
   const {
     setLastRead,
@@ -60,435 +103,212 @@ export default function useChapter(
     chapterTextCache,
   } = useNovelActions();
   const novelSettings = useNovelValue('novelSettings');
-
-  const [hidden, setHidden] = useState(true);
-  const [chapter, setChapter] = useState(initialChapter);
-  const [loading, setLoading] = useState(true);
-  const [chapterText, setChapterText] = useState('');
-
-  const [[nextChapter, prevChapter], setAdjacentChapter] =
-    useState<AdjacentChapters>(NO_ADJACENT_CHAPTERS);
-  const {
-    autoScroll,
-    autoScrollInterval,
-    autoScrollOffset,
-    useVolumeButtons,
-    volumeButtonsOffset,
-    pageReader,
-    pageReaderInvertVolumeButtons,
-  } = useChapterGeneralSettings();
-  const { incognitoMode } = useLibrarySettings();
+  const readerSettings = useChapterReaderSettings();
+  const generalSettings = useChapterGeneralSettings();
+  const { incognitoMode = false } = useLibrarySettings();
   const { timeTrackingEnabled, inactivityTimeoutMs } = useAppSettings();
-  const [error, setError] = useState<string>();
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
   const { setImmersiveMode, showStatusAndNavBar } = useFullscreenMode();
+  const plugin = getPlugin(novel.pluginId);
+  const excludedScanlators = novelSettings?.excludedScanlators;
 
-  const { onUserInteraction, isTTSReadingRef } = useTimeTracking(
-    chapter.id,
-    incognitoMode || false,
-    inactivityTimeoutMs,
-    timeTrackingEnabled,
-    increaseTimeSpent,
+  const [chapters, setChapters] = useState<ChapterInfo[]>([]);
+  const [chapter, setChapter] = useState(initialChapter);
+  const [position, setPosition] = useState<ReaderPosition>();
+  const [error, setError] = useState<string>();
+  const [hidden, setHidden] = useState(true);
+  const [searchResult, setSearchResult] = useState<ReaderSearchResult>(
+    EMPTY_READER_SEARCH_RESULT,
   );
+  const [selection, setSelection] = useState<string>();
+  const [pluginCode, setPluginCode] = useState<{ css: string; js: string }>();
 
-  /**
-   * Mirrors of state that async work reads. Keeping them in refs is what makes
-   * `getChapter` & friends referentially stable: an unstable `getChapter` would
-   * invalidate the whole ChapterContext value on every chapter change and
-   * re-render the appbar, footer, drawer and WebView with it.
-   */
-  const chapterRef = useRef(chapter);
-  const adjacentChapterRef = useRef<AdjacentChapters>(NO_ADJACENT_CHAPTERS);
-  const excludedScanlatorsRef = useRef(novelSettings?.excludedScanlators);
-  const hiddenRef = useRef(hidden);
-  /** Increments on every load so a superseded load can never publish state. */
-  const loadIdRef = useRef(0);
+  const chaptersRef = useRef<ChapterInfo[]>([]);
+  const chapterRef = useRef(initialChapter);
+  const hiddenRef = useRef(true);
+  const readyRef = useRef(false);
+  const openedRef = useRef(false);
+  const markedReadRef = useRef(new Set<number>());
+  const lastEndRef = useRef(0);
+  const savedProgressRef = useRef(new Map<number, number>());
+  const searchQueryRef = useRef('');
+  const ttsAutoStartRef = useRef(false);
+  const loadingPageRef = useRef(false);
 
   useEffect(() => {
     chapterRef.current = chapter;
   }, [chapter]);
 
-  useEffect(() => {
-    adjacentChapterRef.current = [nextChapter, prevChapter];
-  }, [nextChapter, prevChapter]);
-
-  useEffect(() => {
-    excludedScanlatorsRef.current = novelSettings?.excludedScanlators;
-  }, [novelSettings?.excludedScanlators]);
-
-  useEffect(() => {
-    hiddenRef.current = hidden;
-  }, [hidden]);
-
-  const volumeButtonOffset = defaultTo(
-    volumeButtonsOffset,
-    Math.round(Dimensions.get('window').height * 0.75),
-  );
-
-  const volumeUpDelta = pageReaderInvertVolumeButtons ? 1 : -1;
-  const volumeDownDelta = pageReaderInvertVolumeButtons ? -1 : 1;
-
-  useEventListener(NativeVolumeButtonListener, 'VolumeUp', () => {
-    webViewRef.current?.injectJavaScript(`(()=>{
-      const isPaged = ${Boolean(pageReader)};
-      if (isPaged && window.pageReader) {
-        window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
-          volumeUpDelta >= 0 ? '+' : '-'
-        } 1);
-      } else {
-        window.scrollBy({top: -${volumeButtonOffset}, behavior: 'smooth'});
-      }
-    })()`);
-  });
-
-  useEventListener(NativeVolumeButtonListener, 'VolumeDown', () => {
-    webViewRef.current?.injectJavaScript(`(()=>{
-      const isPaged = ${Boolean(pageReader)};
-      if (isPaged && window.pageReader) {
-        window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
-          volumeDownDelta >= 0 ? '+' : '-'
-        } 1);
-      } else {
-        window.scrollBy({top: ${volumeButtonOffset}, behavior: 'smooth'});
-      }
-    })()`);
-  });
-
-  useEffect(() => {
-    NativeVolumeButtonListener.setActive(useVolumeButtons);
-    return () => NativeVolumeButtonListener.setActive(false);
-  }, [useVolumeButtons]);
-
-  /**
-   * Reads the chapter from local storage, falling back to the plugin when it
-   * is not downloaded. A single `readFile` doubles as the existence check to
-   * save a native round trip on the critical path of a downloaded chapter.
-   */
-  const loadChapterText = useCallback(
-    async (chap: ChapterInfo) => {
-      const filePath = `${NOVEL_STORAGE}/${novel.pluginId}/${chap.novelId}/${chap.id}/index.html`;
-      try {
-        return await NativeFile.readFile(filePath);
-      } catch {
-        return await fetchChapter(novel.pluginId, chap.path);
-      }
-    },
-    [novel.pluginId],
-  );
-
-  /**
-   * Returns render-ready (sanitized) chapter HTML, reusing the novel-scoped
-   * cache. Sanitizing before caching keeps `sanitize-html` – which is the most
-   * expensive synchronous step of a chapter load – off the critical path for
-   * prefetched chapters. In-flight loads are cached as promises so the same
-   * chapter is never loaded twice concurrently.
-   */
-  const loadChapterHtml = useCallback(
-    (chap: ChapterInfo): string | Promise<string> => {
-      const cached = chapterTextCache.read(chap.id);
-      if (cached) {
-        return cached;
-      }
-
-      const pending = loadChapterText(chap).then(text => {
-        const sanitized = sanitizeChapterText(
-          novel.pluginId,
-          novel.name,
-          chap.name,
-          text,
-        );
-        if (!text.trim()) {
-          chapterTextCache.remove(chap.id);
-        }
-        return sanitized;
-      });
-      chapterTextCache.write(chap.id, pending);
-      // Never keep a failed load in the cache, otherwise a retry would
-      // resolve instantly with the same failure.
-      pending.catch(() => chapterTextCache.remove(chap.id));
-
-      return pending;
-    },
-    [chapterTextCache, loadChapterText, novel.name, novel.pluginId],
-  );
-
-  const prefetchChapter = useCallback(
-    (chap?: ChapterInfo) => {
-      if (!chap || chapterTextCache.read(chap.id)) {
-        return;
-      }
-      // Deliberately deferred: prefetching during the current chapter's load
-      // competes with it for the JS thread, storage and the network.
-      runWhenIdle(() => {
-        const pending = loadChapterHtml(chap);
-        if (typeof pending !== 'string') {
-          pending.catch(() => {});
-        }
-      });
-    },
-    [chapterTextCache, loadChapterHtml],
-  );
-
-  /**
-   * Materialises the first/last chapter of an adjacent source page, fetching
-   * that page from the plugin when it is not in the database yet.
-   */
-  const loadPageBoundaryChapter = useCallback(
-    async (
-      chap: ChapterInfo,
-      page: string,
-      direction: 'NEXT' | 'PREV',
-      excludedScanlators: string[],
-    ) => {
-      try {
-        const count = await getChapterCount(chap.novelId, page);
-        if (count === 0) {
-          const sourcePage = await fetchPage(novel.pluginId, novel.path, page);
-          await insertChapters(
-            chap.novelId,
-            sourcePage.chapters.map(ch => ({ ...ch, page })),
-          );
-        }
-        const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
-        return await query(
-          chap.novelId,
-          chap.position!,
-          chap.page ?? '',
-          excludedScanlators,
-        );
-      } catch {
-        return undefined;
-      }
-    },
-    [novel.path, novel.pluginId],
-  );
-
-  /**
-   * Resolves the neighbouring chapters *after* the current one is on screen.
-   * These queries (and the page-boundary fetch above, which can hit the
-   * network) used to gate the first paint even for downloaded chapters.
-   */
-  const resolveAdjacentChapters = useCallback(
-    async (chap: ChapterInfo, loadId: number) => {
-      const excludedScanlators = excludedScanlatorsRef.current || [];
-      const isStale = () => loadId !== loadIdRef.current;
-      const publish = (adjacent: AdjacentChapters) => {
-        if (!isStale()) {
-          setAdjacentChapter(adjacent);
-        }
-      };
-
-      try {
-        const [nextChapResult, prevChapResult] = await Promise.all([
-          getNextChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
-          getPrevChapter(
-            chap.novelId,
-            chap.position!,
-            chap.page ?? '',
-            excludedScanlators,
-          ),
-        ]);
-        if (isStale()) {
-          return;
-        }
-
-        let nextChap = nextChapResult;
-        let prevChap = prevChapResult;
-        publish([nextChap, prevChap]);
-        prefetchChapter(nextChap);
-
-        const totalPages = novel.totalPages ?? 0;
-        const currentPage = Number(chap.page);
-
-        // Pull in the adjacent source pages if we are at a page boundary.
-        if (!nextChap && totalPages > 0 && currentPage < totalPages) {
-          nextChap = await loadPageBoundaryChapter(
-            chap,
-            String(currentPage + 1),
-            'NEXT',
-            excludedScanlators,
-          );
-          if (isStale()) {
-            return;
-          }
-          if (nextChap) {
-            publish([nextChap, prevChap]);
-            prefetchChapter(nextChap);
-          }
-        }
-        if (!prevChap && currentPage > 1) {
-          prevChap = await loadPageBoundaryChapter(
-            chap,
-            String(currentPage - 1),
-            'PREV',
-            excludedScanlators,
-          );
-          if (isStale()) {
-            return;
-          }
-          if (prevChap) {
-            publish([nextChap, prevChap]);
-          }
-        }
-      } catch {
-        // Neighbouring chapters are optional; the current chapter stays usable.
-      }
-    },
-    [loadPageBoundaryChapter, novel.totalPages, prefetchChapter],
-  );
-
-  const getChapter = useCallback(
-    async (navChapter?: ChapterInfo) => {
-      const loadId = ++loadIdRef.current;
-      const isStale = () => loadId !== loadIdRef.current;
-      const requested = navChapter ?? chapterRef.current;
-
-      try {
-        // Start the text load first: it is the only thing needed to paint.
-        const htmlPromise = loadChapterHtml(requested);
-        const [dbChapter, html] = await Promise.all([
-          navChapter ? undefined : getDbChapter(requested.id),
-          htmlPromise,
-        ]);
-        if (isStale()) {
-          return;
-        }
-
-        const chap = dbChapter ?? requested;
-        setChapter(chap);
-        setChapterText(html);
-        setAdjacentChapter(NO_ADJACENT_CHAPTERS);
-        setLoading(false);
-
-        void resolveAdjacentChapters(chap, loadId);
-      } catch (e: any) {
-        if (isStale()) {
-          return;
-        }
-        setError(e.message);
-        setLoading(false);
-      }
-    },
-    [loadChapterHtml, resolveAdjacentChapters],
-  );
-
-  const searchChapterText = useCallback(
-    (text: string) => {
-      webViewRef.current?.injectJavaScript(
-        `window.readerSearch?.search(${JSON.stringify(text)}); true;`,
-      );
+  const send = useCallback(
+    (message: NativeToWebMessage) => {
+      webViewRef.current?.injectJavaScript(toInjectedScript(message));
     },
     [webViewRef],
   );
 
-  const clearChapterSearch = useCallback(() => {
-    webViewRef.current?.injectJavaScript('window.readerSearch?.clear(); true;');
-  }, [webViewRef]);
-
-  const navigateChapterSearch = useCallback(
-    (direction: 'NEXT' | 'PREV', text: string) => {
-      const method = direction === 'NEXT' ? 'next' : 'previous';
-      webViewRef.current?.injectJavaScript(
-        `window.readerSearch?.${method}(${JSON.stringify(text)}); true;`,
-      );
-    },
-    [webViewRef],
+  const { onUserInteraction, isTTSReadingRef } = useTimeTracking(
+    chapter.id,
+    incognitoMode,
+    inactivityTimeoutMs,
+    timeTrackingEnabled,
+    increaseTimeSpent,
   );
 
-  const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (!autoScroll) {
-      return undefined;
-    }
-
-    scrollInterval.current = setInterval(() => {
-      webViewRef.current?.injectJavaScript(`(()=>{
-        window.scrollBy({top:${defaultTo(
-          autoScrollOffset,
-          Dimensions.get('window').height,
-        )},behavior:'smooth'})
-      })()`);
-    }, autoScrollInterval * 1000);
-
+    let cancelled = false;
+    Promise.all([
+      getReaderChapters(novel.id, excludedScanlators),
+      readPluginFile(`${PLUGIN_STORAGE}/${novel.pluginId}/custom.css`),
+      readPluginFile(`${PLUGIN_STORAGE}/${novel.pluginId}/custom.js`),
+    ])
+      .then(([list, css, js]) => {
+        if (cancelled) {
+          return;
+        }
+        const found = list.some(item => item.id === initialChapter.id);
+        const book = found ? list : [initialChapter];
+        chaptersRef.current = book;
+        setChapters(book);
+        setPluginCode({ css, js });
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setError(cause instanceof Error ? cause.message : String(cause));
+        }
+      });
     return () => {
-      if (scrollInterval.current) {
-        clearInterval(scrollInterval.current);
-        scrollInterval.current = null;
-      }
+      cancelled = true;
     };
-  }, [autoScroll, autoScrollInterval, autoScrollOffset, webViewRef]);
+    // The book is built once per reader session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const updateTracker = useCallback(() => {
-    const chapterNumber = parseChapterNumber(novel.name, chapter.name);
-    if (tracker && trackedNovel && chapterNumber > trackedNovel.progress) {
-      updateAllTrackedNovels({ progress: chapterNumber });
-    }
-  }, [chapter.name, novel.name, trackedNovel, tracker, updateAllTrackedNovels]);
+  const { customJS, customCSS } = useCustomCode(readerSettings);
+  const theme = useTheme();
+  const preferences = useMemo(
+    () =>
+      toReaderPreferences(
+        readerSettings,
+        generalSettings,
+        [customCSS, pluginCode?.css ?? ''].filter(Boolean).join('\n'),
+        readerCssVariables(readerSettings, theme),
+      ),
+    [customCSS, generalSettings, pluginCode?.css, readerSettings, theme],
+  );
+  const preferencesRef = useRef(preferences);
 
-  const markedReadRef = useRef<number | undefined>(undefined);
-  const saveProgress = useCallback(
-    (percentage: number) => {
-      if (!incognitoMode) {
-        updateChapterProgress(chapter.id, percentage > 100 ? 100 : percentage);
+  const assetsUri = getReaderAssetsUri();
+  // Built once: a new source would reload the page and lose the position.
+  const [shellHtml] = useState(() =>
+    buildShellHtml(assetsUri, readerSettings.theme),
+  );
 
-        // Progress is reported repeatedly while reading the end of a chapter;
-        // marking it read (and pushing it to the tracker, which is a network
-        // call) only has to happen once.
-        if (percentage >= 97 && markedReadRef.current !== chapter.id) {
-          // a relative number
-          markedReadRef.current = chapter.id;
-          markChapterRead(chapter.id);
-          updateTracker();
-        }
-      }
+  const openBook = useCallback(
+    (book: readonly ChapterInfo[], target: ChapterInfo, fraction: number) => {
+      openedRef.current = true;
+      void getBatteryLevel()
+        .catch(() => -1)
+        .then(level =>
+          send({
+            type: 'open',
+            novelName: novel.name,
+            novelId: novel.id,
+            pluginId: novel.pluginId,
+            sections: toSections(book),
+            start: { chapterId: target.id, fraction },
+            preferences: preferencesRef.current,
+            assetsUri: READER_FONTS_URI,
+            dir: RTL_LANGUAGES.has(plugin?.lang ?? '') ? 'rtl' : 'ltr',
+            customJs: customJS,
+            pluginJs: pluginCode?.js ?? '',
+            battery: level,
+            strings: {
+              retry: getString('common.retry'),
+              finished: getString('readerScreen.finished'),
+              nextChapter: getString('readerScreen.nextChapter', {
+                name: '%{name}',
+              }),
+              noNextChapter: getString('readerScreen.noNextChapter'),
+            },
+          }),
+        );
     },
     [
-      chapter.id,
-      incognitoMode,
-      markChapterRead,
-      updateChapterProgress,
-      updateTracker,
+      novel.id,
+      novel.name,
+      novel.pluginId,
+      plugin?.lang,
+      pluginCode?.js,
+      customJS,
+      send,
     ],
   );
 
-  const hideHeader = useCallback(() => {
-    const nextHidden = !hiddenRef.current;
-    // Updated here as well as in the effect below so two taps within the same
-    // tick cannot both read the pre-toggle value.
-    hiddenRef.current = nextHidden;
-    webViewRef.current?.injectJavaScript(
-      `reader.hidden.val = ${nextHidden ? 'true' : 'false'}`,
-    );
-    if (nextHidden) {
-      setImmersiveMode();
-    } else {
-      showStatusAndNavBar();
+  const tryOpen = useCallback(() => {
+    const book = chaptersRef.current;
+    if (!readyRef.current || openedRef.current || !book.length || !pluginCode) {
+      return;
     }
-    setHidden(nextHidden);
-  }, [setImmersiveMode, showStatusAndNavBar, webViewRef]);
+    // The stored row: the navigation param can be stale.
+    const start =
+      book.find(item => item.id === chapterRef.current.id) ??
+      chapterRef.current;
+    openBook(book, start, startFraction(start.id, start.progress));
+  }, [openBook, pluginCode]);
 
-  const navigateChapter = useCallback(
-    (position: 'NEXT' | 'PREV') => {
-      const [next, prev] = adjacentChapterRef.current;
-      const navChapter = position === 'NEXT' ? next : prev;
+  useEffect(tryOpen, [chapters, pluginCode, tryOpen]);
 
-      if (navChapter) {
-        getChapter(navChapter);
-      } else {
-        showToast(
-          position === 'NEXT'
-            ? getString('readerScreen.noNextChapter')
-            : getString('readerScreen.noPreviousChapter'),
-        );
+  useEffect(() => {
+    preferencesRef.current = preferences;
+    if (openedRef.current) {
+      send({ type: 'preferences', preferences });
+    }
+  }, [preferences, send]);
+
+  const updateTracker = useCallback(
+    (read: ChapterInfo) => {
+      const chapterNumber = parseChapterNumber(novel.name, read.name);
+      if (tracker && trackedNovel && chapterNumber > trackedNovel.progress) {
+        updateAllTrackedNovels({ progress: chapterNumber });
       }
     },
-    [getChapter],
+    [novel.name, trackedNovel, tracker, updateAllTrackedNovels],
+  );
+
+  const markRead = useCallback(
+    (read: ChapterInfo) => {
+      // Progress is reported repeatedly while reading the end of a chapter;
+      // marking it read (and pushing it to the tracker, which is a network
+      // call) only has to happen once.
+      if (incognitoMode || markedReadRef.current.has(read.id)) {
+        return;
+      }
+      markedReadRef.current.add(read.id);
+      markChapterRead(read.id);
+      updateTracker(read);
+    },
+    [incognitoMode, markChapterRead, updateTracker],
+  );
+
+  // Saved on every stop; with pages only when it grows.
+  const saveProgress = useCallback(
+    (read: ChapterInfo, endFraction: number, paged: boolean) => {
+      if (incognitoMode) {
+        return;
+      }
+      const percentage = Math.floor(endFraction * 100);
+      const saved = savedProgressRef.current.get(read.id) ?? read.progress ?? 0;
+      if (paged && percentage <= saved) {
+        return;
+      }
+      savedProgressRef.current.set(read.id, percentage);
+      updateChapterProgress(read.id, percentage > 100 ? 100 : percentage);
+      if (percentage >= 97) {
+        markRead(read);
+      }
+    },
+    [incognitoMode, markRead, updateChapterProgress],
   );
 
   // Keep the history/last-read entry up to date, off the critical path of the
@@ -497,7 +317,6 @@ export default function useChapter(
     if (incognitoMode) {
       return undefined;
     }
-
     const chapterId = chapter.id;
     let started = false;
     const cancel = runWhenIdle(() => {
@@ -515,68 +334,552 @@ export default function useChapter(
     };
   }, [incognitoMode, setLastRead, chapter.id]);
 
-  const initialLoadRef = useRef(false);
-  useEffect(() => {
-    if (initialLoadRef.current) {
-      return;
+  const hideHeader = useCallback(() => {
+    const next = !hiddenRef.current;
+    // Updated synchronously so two taps within the same tick cannot both
+    // read the pre-toggle value.
+    hiddenRef.current = next;
+    if (next) {
+      setImmersiveMode();
+    } else {
+      showStatusAndNavBar();
     }
-    initialLoadRef.current = true;
-    getChapter();
-  }, [getChapter]);
+    setHidden(next);
+  }, [setImmersiveMode, showStatusAndNavBar]);
+
+  const indexOf = (id: number) =>
+    chaptersRef.current.findIndex(item => item.id === id);
+
+  const openChapter = useCallback(
+    (target: ChapterInfo, fraction?: number) => {
+      const at = fraction ?? startFraction(target.id, target.progress);
+      if (indexOf(target.id) !== -1) {
+        send({
+          type: 'go-to',
+          location: { chapterId: target.id, fraction: at },
+        });
+        return;
+      }
+      // Outside the stored book (another source page): rebuild it.
+      void getReaderChapters(novel.id, excludedScanlators).then(list => {
+        const book = list.some(item => item.id === target.id) ? list : [target];
+        chaptersRef.current = book;
+        setChapters(book);
+        openBook(book, target, at);
+      });
+    },
+    [excludedScanlators, novel.id, openBook, send],
+  );
+
+  const neighbours = useMemo(() => {
+    const index = chapters.findIndex(item => item.id === chapter.id);
+    return {
+      nextChapter: index === -1 ? undefined : chapters[index + 1],
+      prevChapter: index > 0 ? chapters[index - 1] : undefined,
+    };
+  }, [chapter.id, chapters]);
+
+  const navigateChapter = useCallback(
+    (direction: 'NEXT' | 'PREV') => {
+      const target =
+        direction === 'NEXT' ? neighbours.nextChapter : neighbours.prevChapter;
+      if (target) {
+        // Read on from the start: a glimpse of it from the end of this one
+        // can have saved a position part way in.
+        openChapter(target, direction === 'NEXT' ? 0 : undefined);
+      } else {
+        send({
+          type: 'turn',
+          direction: direction === 'NEXT' ? 'next' : 'prev',
+        });
+      }
+    },
+    [neighbours, openChapter, send],
+  );
+
+  const seek = useCallback(
+    (fraction: number) =>
+      send({
+        type: 'go-to',
+        location: { chapterId: chapterRef.current.id, fraction },
+      }),
+    [send],
+  );
+
+  const turnPage = useCallback(
+    (direction: 'next' | 'prev') => send({ type: 'turn', direction }),
+    [send],
+  );
+
+  const extendBook = useCallback(
+    async (direction: 'next' | 'prev', turnAfter: boolean) => {
+      if (loadingPageRef.current) {
+        return;
+      }
+      loadingPageRef.current = true;
+      try {
+        const current = chaptersRef.current;
+        const list = await loadAdjacentPage(
+          novel,
+          current,
+          direction,
+          excludedScanlators,
+        );
+        if (!list) {
+          if (turnAfter) {
+            showToast(
+              getString(
+                direction === 'next'
+                  ? 'readerScreen.noNextChapter'
+                  : 'readerScreen.noPreviousChapter',
+              ),
+            );
+          }
+          return;
+        }
+        chaptersRef.current = list;
+        setChapters(list);
+        if (direction === 'next') {
+          const known = new Set(current.map(item => item.id));
+          send({
+            type: 'append-sections',
+            sections: toSections(list.filter(item => !known.has(item.id))),
+          });
+          if (turnAfter) {
+            send({ type: 'turn', direction: 'next' });
+          }
+        } else {
+          // Sections can only be appended; earlier chapters reopen the book
+          // at the end of the chapter just before.
+          const firstIndex = list.findIndex(item => item.id === current[0]?.id);
+          const target =
+            list[Math.max(0, firstIndex - 1)] ?? chapterRef.current;
+          openBook(list, target, turnAfter ? 1 : 0);
+        }
+      } catch (cause) {
+        showToast(cause instanceof Error ? cause.message : String(cause));
+      } finally {
+        loadingPageRef.current = false;
+      }
+    },
+    [excludedScanlators, novel, openBook, send],
+  );
 
   const refetch = useCallback(() => {
     chapterTextCache.remove(chapterRef.current.id);
-    setLoading(true);
-    setError('');
-    getChapter();
-  }, [chapterTextCache, getChapter]);
+    setError(undefined);
+    send({ type: 'reload-section', chapterId: chapterRef.current.id });
+  }, [chapterTextCache, send]);
 
-  /**
-   * Everything except `hidden`, which toggles on every tap on the page. Keeping
-   * it out of this object is what lets the WebView, the drawer and the searchbar
-   * skip re-rendering when the reader UI is shown or hidden.
-   */
-  const chapterContext = useMemo(
-    () => ({
-      chapter,
-      nextChapter,
-      prevChapter,
-      error,
-      loading,
-      chapterText,
-      setHidden,
-      saveProgress,
-      hideHeader,
-      navigateChapter,
-      navigateChapterSearch,
-      searchChapterText,
-      clearChapterSearch,
-      refetch,
-      setChapter,
-      setLoading,
-      getChapter,
-      onUserInteraction,
-      isTTSReadingRef,
-    }),
+  const tts = useTtsSession();
+  const {
+    command: ttsCommand,
+    loadAndPlay,
+    progress: ttsProgress,
+    state: ttsState,
+    updateSettings: updateTtsSettings,
+  } = tts;
+
+  const startTts = useCallback(() => send({ type: 'tts-start' }), [send]);
+  const targetTts = useCallback(
+    (point?: { x: number; y: number }) =>
+      send(
+        point ? { type: 'tts-target', ...point } : { type: 'tts-target-clear' },
+      ),
+    [send],
+  );
+  const startTtsAt = useCallback(
+    (point: { x: number; y: number }) =>
+      send({ type: 'tts-start-at', ...point }),
+    [send],
+  );
+  const stopTts = useCallback(() => {
+    ttsAutoStartRef.current = false;
+    ttsCommand('stop');
+    send({ type: 'tts-stop' });
+  }, [send, ttsCommand]);
+
+  useEffect(() => {
+    isTTSReadingRef.current = ttsState === 'playing';
+  }, [isTTSReadingRef, ttsState]);
+
+  useEffect(() => {
+    if (ttsProgress.total > 0) {
+      send({ type: 'tts-highlight', index: ttsProgress.index });
+    }
+  }, [send, ttsProgress]);
+
+  // Opening the next chapter changes the neighbours while the state still
+  // reads completed; each finished queue advances only once.
+  const ttsCompletionHandledRef = useRef(false);
+  useEffect(() => {
+    if (ttsState !== 'completed') {
+      ttsCompletionHandledRef.current = false;
+      return;
+    }
+    if (ttsCompletionHandledRef.current) {
+      return;
+    }
+    ttsCompletionHandledRef.current = true;
+    send({ type: 'tts-stop' });
+    const next = neighbours.nextChapter;
+    if (readerSettings.tts?.autoPageAdvance && next) {
+      ttsAutoStartRef.current = true;
+      openChapter(next);
+    }
+  }, [
+    neighbours.nextChapter,
+    openChapter,
+    readerSettings.tts?.autoPageAdvance,
+    send,
+    ttsState,
+  ]);
+
+  const ttsSettingsKey = JSON.stringify(
+    toNativeTtsSettings(readerSettings.tts),
+  );
+  useEffect(() => {
+    updateTtsSettings(JSON.parse(ttsSettingsKey) as TtsSettings);
+  }, [ttsSettingsKey, updateTtsSettings]);
+
+  const searchChapter = useCallback(
+    (query: string) => {
+      searchQueryRef.current = query.trim();
+      if (!searchQueryRef.current) {
+        send({ type: 'search-clear' });
+        setSearchResult(EMPTY_READER_SEARCH_RESULT);
+        return;
+      }
+      send({ type: 'search', query });
+    },
+    [send],
+  );
+  const stepSearch = useCallback(
+    (direction: 1 | -1) => send({ type: 'search-step', direction }),
+    [send],
+  );
+  const clearSearch = useCallback(() => {
+    searchQueryRef.current = '';
+    send({ type: 'search-clear' });
+    setSearchResult(EMPTY_READER_SEARCH_RESULT);
+  }, [send]);
+
+  const clearSelection = useCallback(() => {
+    setSelection(undefined);
+    send({ type: 'clear-selection' });
+  }, [send]);
+
+  const clearSelectionState = useCallback(() => setSelection(undefined), []);
+  const { removeText, replaceText } = useTextModifications(
+    send,
+    clearSelectionState,
+  );
+
+  const textRulesRef = useRef({
+    remove: readerSettings.removeText,
+    replace: readerSettings.replaceText,
+  });
+  useEffect(() => {
+    textRulesRef.current = {
+      remove: readerSettings.removeText,
+      replace: readerSettings.replaceText,
+    };
+  }, [readerSettings.removeText, readerSettings.replaceText]);
+
+  // Chapters whose text could not be loaded: scrolling past one does not read it.
+  const failedIdsRef = useRef(new Set<number>());
+
+  const deliverSection = useCallback(
+    (requestId: number, chapterId: number) => {
+      const target =
+        chaptersRef.current.find(item => item.id === chapterId) ??
+        (chapterId === initialChapter.id ? initialChapter : undefined);
+      if (!target) {
+        send({ type: 'section-error', requestId, message: 'Unknown chapter' });
+        return;
+      }
+      loadChapterHtml(chapterTextCache, novel, target)
+        .then(html => {
+          failedIdsRef.current.delete(chapterId);
+          send({
+            type: 'section-content',
+            requestId,
+            html: applyTextModifications(
+              html,
+              textRulesRef.current.remove,
+              textRulesRef.current.replace,
+            ),
+            // Downloaded chapters point at local files; online ones resolve
+            // relative links against the source site.
+            baseUrl: target.isDownloaded ? undefined : plugin?.site,
+          });
+        })
+        .catch((cause: unknown) => {
+          failedIdsRef.current.add(chapterId);
+          send({
+            type: 'section-error',
+            requestId,
+            message: cause instanceof Error ? cause.message : String(cause),
+          });
+        });
+    },
+    [chapterTextCache, initialChapter, novel, plugin?.site, send],
+  );
+
+  const onRelocate = useCallback(
+    (message: Extract<WebToNativeMessage, { type: 'relocate' }>) => {
+      const list = chaptersRef.current;
+      const index = list.findIndex(item => item.id === message.chapterId);
+      const visible = list[index];
+      if (!visible) {
+        return;
+      }
+      const previous = chapterRef.current;
+      if (visible.id !== previous.id) {
+        // Scrolling on from the end of the chapter before counts it as read.
+        if (
+          generalSettings.continuousChapters &&
+          index === indexOf(previous.id) + 1 &&
+          lastEndRef.current >= 0.9 &&
+          !failedIdsRef.current.has(previous.id)
+        ) {
+          markRead(previous);
+        }
+        chapterRef.current = visible;
+        setChapter(visible);
+        if (ttsAutoStartRef.current) {
+          ttsAutoStartRef.current = false;
+          startTts();
+        }
+      }
+      lastEndRef.current = message.endFraction;
+      setPosition(message);
+      if (!failedIdsRef.current.has(visible.id)) {
+        if (!incognitoMode) {
+          writePosition(visible.id, message.fraction);
+        }
+        saveProgress(visible, message.endFraction, message.pages !== undefined);
+      }
+      // Keep the next source page ready before the book runs out.
+      if (index >= list.length - 2) {
+        void extendBook('next', false);
+      }
+    },
     [
-      chapter,
-      nextChapter,
-      prevChapter,
-      error,
-      loading,
-      chapterText,
+      extendBook,
+      generalSettings.continuousChapters,
+      incognitoMode,
+      markRead,
       saveProgress,
-      hideHeader,
-      navigateChapter,
-      navigateChapterSearch,
-      searchChapterText,
-      clearChapterSearch,
-      refetch,
-      getChapter,
-      onUserInteraction,
-      isTTSReadingRef,
+      startTts,
     ],
   );
 
-  return { hidden, chapterContext };
+  const onMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      const message = parseWebMessage(event.nativeEvent.data);
+      if (!message) {
+        return;
+      }
+      switch (message.type) {
+        case 'ready':
+          readyRef.current = true;
+          openedRef.current = false;
+          tryOpen();
+          break;
+        case 'request-section':
+          deliverSection(message.requestId, message.chapterId);
+          break;
+        case 'relocate':
+          onRelocate(message);
+          break;
+        case 'tap':
+          hideHeader();
+          break;
+        case 'boundary':
+          void extendBook(message.direction, true);
+          break;
+        case 'navigate-chapter':
+          navigateChapter(message.direction === 'next' ? 'NEXT' : 'PREV');
+          break;
+        case 'search-result':
+          if (message.query.trim() === searchQueryRef.current) {
+            setSearchResult({
+              query: message.query,
+              current: message.current,
+              total: message.total,
+              renderedTotal: message.total,
+              isTruncated: false,
+            });
+          }
+          break;
+        case 'tts-queue': {
+          const read = chaptersRef.current.find(
+            item => item.id === message.chapterId,
+          );
+          void loadAndPlay(
+            message.utterances,
+            0,
+            {
+              novelName: novel.name,
+              chapterName: read?.name ?? chapterRef.current.name,
+              coverUri: novel.cover || undefined,
+            },
+            toNativeTtsSettings(readerSettings.tts),
+          );
+          break;
+        }
+        case 'selection':
+          setSelection(message.text);
+          break;
+        case 'selection-cleared':
+          setSelection(undefined);
+          break;
+        case 'open-link':
+          void Linking.openURL(message.href);
+          break;
+        case 'refresh-section':
+          chapterTextCache.remove(message.chapterId);
+          send({ type: 'reload-section', chapterId: message.chapterId });
+          break;
+        case 'interaction':
+          onUserInteraction();
+          break;
+        case 'error':
+        case 'log':
+          if (__DEV__) {
+            // eslint-disable-next-line no-console
+            console.warn(`[reader] ${message.message}`);
+          }
+          break;
+      }
+    },
+    [
+      chapterTextCache,
+      deliverSection,
+      extendBook,
+      navigateChapter,
+      hideHeader,
+      loadAndPlay,
+      novel.cover,
+      novel.name,
+      onRelocate,
+      onUserInteraction,
+      readerSettings.tts,
+      send,
+      tryOpen,
+    ],
+  );
+
+  const {
+    useVolumeButtons: volumeKeys,
+    volumeButtonsOffset,
+    pageReaderInvertVolumeButtons,
+    autoScroll,
+    autoScrollInterval,
+    autoScrollSmooth = false,
+    pageReader,
+  } = generalSettings;
+  useEffect(() => {
+    NativeVolumeButtonListener.setActive(volumeKeys);
+    return () => NativeVolumeButtonListener.setActive(false);
+  }, [volumeKeys]);
+  const onVolumeKey = (key: 'up' | 'down') => {
+    if (pageReader) {
+      const forward = (key === 'down') !== pageReaderInvertVolumeButtons;
+      send({ type: 'turn', direction: forward ? 'next' : 'prev' });
+      return;
+    }
+    send({
+      type: 'turn',
+      direction: key === 'down' ? 'next' : 'prev',
+      distance:
+        volumeButtonsOffset ??
+        Math.round(Dimensions.get('window').height * 0.75),
+    });
+  };
+  useEventListener(NativeVolumeButtonListener, 'VolumeUp', () =>
+    onVolumeKey('up'),
+  );
+  useEventListener(NativeVolumeButtonListener, 'VolumeDown', () =>
+    onVolumeKey('down'),
+  );
+
+  useEffect(() => {
+    const subscription = deviceInfoEmitter?.addListener(
+      'RNDeviceInfo_batteryLevelDidChange',
+      (level: number) => send({ type: 'battery', level }),
+    );
+    return () => subscription?.remove();
+  }, [send]);
+
+  // Starts once the first chapter is on screen.
+  // Auto-scroll is a scrolling feature; pages turn by taps and the volume keys.
+  const scrollInterval =
+    autoScroll && !pageReader
+      ? Math.min(
+          MAX_AUTO_SCROLL_INTERVAL,
+          Math.max(MIN_AUTO_SCROLL_INTERVAL, autoScrollInterval),
+        )
+      : 0;
+  // A screen per interval; the interval alone sets the speed.
+  const scrollDistance = Math.round(Dimensions.get('window').height);
+  const onScreen = position !== undefined;
+  useEffect(() => {
+    if (onScreen) {
+      send({
+        type: 'auto-scroll',
+        interval: scrollInterval,
+        distance: scrollDistance,
+        smooth: autoScrollSmooth,
+      });
+    }
+  }, [onScreen, scrollInterval, scrollDistance, autoScrollSmooth, send]);
+
+  return {
+    hidden,
+    webView: {
+      source: { html: shellHtml },
+      onMessage,
+    },
+    session: {
+      novel,
+      chapter,
+      chapters,
+      ...neighbours,
+      position,
+      loading: position === undefined && !error,
+      error,
+      hideHeader,
+      openChapter,
+      navigateChapter,
+      seek,
+      turnPage,
+      refetch,
+      search: {
+        result: searchResult,
+        run: searchChapter,
+        step: stepSearch,
+        clear: clearSearch,
+      },
+      tts: {
+        state: ttsState,
+        progress: ttsProgress,
+        error: tts.error,
+        start: startTts,
+        startAt: startTtsAt,
+        target: targetTts,
+        stop: stopTts,
+        command: ttsCommand,
+      },
+      selection: {
+        text: selection,
+        clear: clearSelection,
+        remove: removeText,
+        replace: replaceText,
+      },
+    },
+  };
 }
+
+export type ReaderSession = ReturnType<typeof useChapter>['session'];

@@ -14,10 +14,9 @@ import {
   useMMKVString,
 } from 'react-native-mmkv';
 import type { Material3Theme } from '@pchmn/expo-material3-theme';
-import { overlay } from 'react-native-paper';
 import Color from 'color';
 
-import { ThemeColors } from '@theme/types';
+import { AppThemeColors, ThemeColors } from '@theme/types';
 import { darkThemes, lightThemes } from '@theme/md3';
 import {
   DYNAMIC_THEME_ID,
@@ -45,12 +44,27 @@ const getSurfaceContainerLow = (colors: ThemeColors): string =>
     .rgb()
     .string();
 
-const addComputedColors = (colors: ThemeColors): ThemeColors => ({
+const getSurfaceContainer = (colors: ThemeColors): string =>
+  Color(colors.surface)
+    .mix(Color(colors.onSurface), colors.isDark ? 0.08 : 0.06)
+    .rgb()
+    .string();
+
+const getSurfaceContainerHighest = (colors: ThemeColors): string =>
+  Color(colors.surface)
+    .mix(Color(colors.onSurface), colors.isDark ? 0.14 : 0.11)
+    .rgb()
+    .string();
+
+export const addComputedColors = (colors: ThemeColors): AppThemeColors => ({
   ...colors,
   surfaceContainerLow: getSurfaceContainerLow(colors),
+  surfaceContainer: getSurfaceContainer(colors),
   surfaceContainerHigh: getSurfaceContainerHigh(colors),
+  surfaceContainerHighest: getSurfaceContainerHighest(colors),
   surface2: getElevationColor(colors, 0.08),
-  overlay3: overlay(3, colors.surface),
+  // Material's elevation-3 overlay: the surface lightened by 8%.
+  overlay3: Color(colors.surface).mix(Color('white'), 0.08).hex(),
   rippleColor: Color(colors.primary).alpha(0.12).toString(),
   surfaceReader: Color(colors.surface).alpha(0.9).toString(),
 });
@@ -152,7 +166,7 @@ const getBaseTheme = (
   return findThemeById(themeId, isDark);
 };
 
-const ThemeContext = createContext<ThemeColors | null>(null);
+const ThemeContext = createContext<AppThemeColors | null>(null);
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const [themeId] = useMMKVNumber('APP_THEME_ID');
@@ -183,7 +197,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     };
   }, []);
 
-  const theme = useMemo<ThemeColors>(() => {
+  const theme = useMemo<AppThemeColors>(() => {
     const baseTheme = getBaseTheme(
       themeMode,
       themeId,
@@ -207,12 +221,12 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   return createElement(ThemeContext.Provider, { value: theme }, children);
 };
 
-export const useTheme = (): ThemeColors => {
+export const useTheme = (): AppThemeColors => {
   const theme = useContext(ThemeContext);
   if (!theme) {
     // eslint-disable-next-line no-console
     console.error('useTheme must be used within a <ThemeProvider />');
-    return {} as ThemeColors;
+    return {} as AppThemeColors;
   }
 
   return theme;

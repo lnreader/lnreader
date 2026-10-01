@@ -1,88 +1,73 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import {
-  NavigationState,
-  SceneRendererProps,
-  TabView,
-} from 'react-native-tab-view';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Box } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
 import {
-  SearchbarV2,
+  AppHost,
+  Actionbar,
   Button,
   EmptyView,
   ErrorScreenV2,
-  SafeAreaView,
-  TopTabBar,
+  Fab,
+  Screen,
+  SearchbarV2,
+  TabPager,
+  useScreenInsets,
 } from '@components/index';
 import { LibraryView } from './components/LibraryListView';
 import LibraryBottomSheet from './components/LibraryBottomSheet/LibraryBottomSheet';
 import { Banner } from './components/Banner';
-import { Actionbar } from '@components/Actionbar/Actionbar';
+import CategoryPane, { CATEGORY_PANE_WIDTH } from './components/CategoryPane';
 
 import { useAppSettings, useHistory, useTheme } from '@hooks/persisted';
 import { useSearch, useBackHandler, useBoolean } from '@hooks';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
 import { getString } from '@i18n/translations';
-import { FAB, Portal } from 'react-native-paper';
 import {
   markAllChaptersRead,
   markAllChaptersUnread,
 } from '@database/queries/ChapterQueries';
 import { removeNovelsFromLibrary } from '@database/queries/NovelQueries';
 import SetCategoryModal from '@screens/novel/components/SetCategoriesModal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
-import { Row } from '@components/Common';
 import { LibraryScreenProps } from '@navigators/types';
 import { History, NovelInfo } from '@database/types';
 import * as DocumentPicker from 'expo-document-picker';
 import { backgroundTasks } from '@services/backgroundTasks';
 import useImport from '@hooks/persisted/useImport';
-import { ThemeColors } from '@theme/types';
 import { useLibraryContext } from '@components/Context/LibraryContext';
 import xor from 'lodash-es/xor';
 import { SelectionContext } from './SelectionContext';
 import { getLibraryCategoryIndex } from './constants/constants';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import RefreshIcon from '@expo/material-symbols/refresh.xml';
+import CloudOffIcon from '@expo/material-symbols/cloud_off.xml';
+import DeleteIcon from '@expo/material-symbols/delete.xml';
+import DoneAllIcon from '@expo/material-symbols/done_all.xml';
+import ExploreIcon from '@expo/material-symbols/explore.xml';
+import FilterListIcon from '@expo/material-symbols/filter_list.xml';
+import LabelIcon from '@expo/material-symbols/label.xml';
+import PlayArrowIcon from '@expo/material-symbols/play_arrow.xml';
+import RemoveDoneIcon from '@expo/material-symbols/remove_done.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
+import FlipToBackIcon from '@expo/material-symbols/flip_to_back.xml';
+import SelectAllIcon from '@expo/material-symbols/select_all.xml';
+import VisibilityOffIcon from '@expo/material-symbols/visibility_off.xml';
 
-type State = NavigationState<{
+type LibraryRoute = {
+  id: number;
+  name: string;
+  sort: number;
+  novelIds: number[];
   key: string;
   title: string;
-}>;
-
-type TabViewLabelProps = {
-  route: {
-    id: number;
-    name: string;
-    sort: number;
-    novelIds: number[];
-    key: string;
-    title: string;
-  };
-  labelText?: string;
-  focused: boolean;
-  color: string;
-  allowFontScaling?: boolean;
-  style?: StyleProp<TextStyle>;
 };
 
 const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   const { searchText, setSearchText, clearSearchbar } = useSearch();
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const { left: leftInset, right: rightInset } = useSafeAreaInsets();
+  const { left: leftInset, right: rightInset } = useScreenInsets();
   const {
     library,
     categories,
@@ -109,9 +94,13 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     return chapters;
   }, [history]);
 
-  const layout = useWindowDimensions();
+  const layout = useWindowLayout();
 
-  const bottomSheetRef = useRef<BottomSheetModalMethods | null>(null);
+  const {
+    value: bottomSheetVisible,
+    setTrue: showBottomSheet,
+    setFalse: closeBottomSheet,
+  } = useBoolean();
 
   const [selectedCategoryId, setSelectedCategoryId] =
     useState(lastUsedCategoryId);
@@ -177,10 +166,10 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
         if (navigation.isFocused()) {
           e.preventDefault();
 
-          bottomSheetRef.current?.present?.();
+          showBottomSheet();
         }
       }),
-    [navigation],
+    [navigation, showBottomSheet],
   );
 
   const searchbarPlaceholder =
@@ -209,53 +198,41 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
 
   const searchLower = useMemo(() => searchText.toLowerCase(), [searchText]);
 
-  const renderTabBar = useCallback(
-    (props: SceneRendererProps & { navigationState: State }) => {
-      return categories.length ? (
-        <TopTabBar
-          {...props}
-          scrollEnabled
-          indicatorStyle={styles.tabBarIndicator}
-          style={[
-            {
-              backgroundColor: theme.surface,
-              borderBottomColor: theme.outlineVariant,
-            },
-            styles.tabBar,
-          ]}
-          tabStyle={styles.tabStyle}
-          gap={8}
-          inactiveColor={theme.secondary}
-          activeColor={theme.primary}
-          android_ripple={{ color: theme.rippleColor }}
-        />
-      ) : null;
-    },
-    [
-      categories.length,
-      styles.tabBar,
-      styles.tabBarIndicator,
-      styles.tabStyle,
-      theme.outlineVariant,
-      theme.primary,
-      theme.rippleColor,
-      theme.secondary,
-      theme.surface,
-    ],
+  const navigationState = useMemo(
+    () => ({
+      index,
+      routes: categories.map(
+        (category): LibraryRoute => ({
+          key: String(category.id),
+          title: category.name,
+          id: category.id,
+          name: category.name,
+          sort: category.sort ?? 0,
+          novelIds: category.novelIds,
+        }),
+      ),
+    }),
+    [categories, index],
   );
+
+  const tabs = useMemo(
+    () =>
+      navigationState.routes.map((route, i) => ({
+        key: i,
+        label: route.title,
+        count: route.novelIds.filter(id => id !== 0).length,
+      })),
+    [navigationState],
+  );
+
+  const panesWidth =
+    layout.width -
+    leftInset -
+    rightInset -
+    (layout.isExpanded ? CATEGORY_PANE_WIDTH : 0);
+
   const renderScene = useCallback(
-    ({
-      route,
-    }: {
-      route: {
-        id: number;
-        name: string;
-        sort: number;
-        novelIds: number[];
-        key: string;
-        title: string;
-      };
-    }) => {
+    ({ route }: { route: LibraryRoute }) => {
       const idsSet = new Set(route.novelIds);
       const unfilteredNovels = library.filter(l => idsSet.has(l.id));
 
@@ -268,30 +245,35 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
         : unfilteredNovels;
 
       return (
-        <>
-          {searchText ? (
-            <Button
-              title={`${getString(
-                'common.searchFor',
-              )} "${searchText}" ${getString('common.globally')}`}
-              style={styles.globalSearchBtn}
-              onPress={() =>
-                navigation.navigate('GlobalSearchScreen', {
-                  searchText,
-                })
-              }
-            />
-          ) : null}
-          <LibraryView
-            categoryId={route.id}
-            categoryName={route.name}
-            novels={novels}
-            pickAndImport={pickAndImport}
-            navigation={navigation}
-            historyByNovelId={historyByNovelId}
-            showContinueReadingButton={showContinueReadingButton}
-          />
-        </>
+        <LibraryView
+          categoryId={route.id}
+          categoryName={route.name}
+          novels={novels}
+          pickAndImport={pickAndImport}
+          navigation={navigation}
+          historyByNovelId={historyByNovelId}
+          showContinueReadingButton={showContinueReadingButton}
+          availableWidth={panesWidth}
+          // Clear of the rounded corner of the tablet pane.
+          topPadding={layout.isExpanded ? 16 : undefined}
+          header={
+            searchText ? (
+              <Box modifiers={[fillMaxWidth(), padding(0, 0, 0, 12)]}>
+                <Button
+                  mode="contained-tonal"
+                  title={`${getString(
+                    'common.searchFor',
+                  )} "${searchText}" ${getString('common.globally')}`}
+                  onPress={() =>
+                    navigation.navigate('GlobalSearchScreen', {
+                      searchText,
+                    })
+                  }
+                />
+              </Box>
+            ) : null
+          }
+        />
       );
     },
     [
@@ -302,41 +284,8 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       pickAndImport,
       searchText,
       searchLower,
-      styles.globalSearchBtn,
-    ],
-  );
-
-  const renderLabel = useCallback(
-    ({ route, color }: TabViewLabelProps) => {
-      const novelIds = route?.novelIds?.filter(id => id !== 0);
-
-      return (
-        <Row>
-          <Text style={[{ color }, styles.fontWeight500]}>{route.title}</Text>
-          {showNumberOfNovels ? (
-            <View
-              style={[
-                styles.badgeCtn,
-                { backgroundColor: theme.surfaceVariant },
-              ]}
-            >
-              <Text
-                style={[styles.badgetText, { color: theme.onSurfaceVariant }]}
-              >
-                {novelIds.length}
-              </Text>
-            </View>
-          ) : null}
-        </Row>
-      );
-    },
-    [
-      showNumberOfNovels,
-      styles.badgeCtn,
-      styles.badgetText,
-      styles.fontWeight500,
-      theme.onSurfaceVariant,
-      theme.surfaceVariant,
+      panesWidth,
+      layout.isExpanded,
     ],
   );
 
@@ -351,18 +300,27 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       selectedNovelIds.length
         ? [
             {
-              iconName: 'select-all' as const,
+              iconName: SelectAllIcon,
               onPress: () =>
                 setSelectedNovelIds(currentNovels.map(novel => novel.id)),
+            },
+            {
+              iconName: FlipToBackIcon,
+              onPress: () =>
+                setSelectedNovelIds(
+                  currentNovels
+                    .filter(novel => !selectedNovelIds.includes(novel.id))
+                    .map(novel => novel.id),
+                ),
             },
           ]
         : [
             {
-              iconName: 'filter-variant' as const,
-              onPress: () => bottomSheetRef.current?.present(),
+              iconName: FilterListIcon,
+              onPress: showBottomSheet,
             },
           ],
-    [selectedNovelIds.length, currentNovels],
+    [selectedNovelIds, currentNovels, showBottomSheet],
   );
 
   const menuButtons = useMemo(
@@ -401,9 +359,12 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
         screen: 'Chapter',
         params: {
           novel: {
+            id: history[0].novelId,
             path: history[0].novelPath,
             pluginId: history[0].pluginId,
             name: history[0].novelName,
+            cover: history[0].novelCover,
+            inLibrary: history[0].inLibrary,
           } as NovelInfo,
           chapter: history[0],
         },
@@ -417,16 +378,6 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [refetchLibrary]);
-
-  const bottomSheetStyle = useMemo(
-    () => ({ marginStart: leftInset, marginEnd: rightInset }),
-    [leftInset, rightInset],
-  );
-
-  const actionbarViewStyle = useMemo(
-    () => ({ paddingStart: leftInset, paddingEnd: rightInset }),
-    [leftInset, rightInset],
-  );
 
   const markAllRead = useCallback(async () => {
     await Promise.all(selectedNovelIds.map(id => markAllChaptersRead(id)));
@@ -448,177 +399,175 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
 
   const actionbarActions = useMemo(
     () => [
-      { icon: 'label-outline' as const, onPress: showSetCategoryModal },
-      { icon: 'check' as const, onPress: markAllRead },
-      { icon: 'check-outline' as const, onPress: markAllUnread },
-      { icon: 'delete-outline' as const, onPress: deleteSelected },
+      { icon: LabelIcon, onPress: showSetCategoryModal },
+      { icon: DoneAllIcon, onPress: markAllRead },
+      { icon: RemoveDoneIcon, onPress: markAllUnread },
+      { icon: DeleteIcon, onPress: deleteSelected },
     ],
     [showSetCategoryModal, markAllRead, markAllUnread, deleteSelected],
   );
 
-  const navigationState = useMemo(
-    () => ({
-      index,
-      routes: categories.map(category => ({
-        key: String(category.id),
-        title: category.name,
-        id: category.id,
-        name: category.name,
-        sort: category.sort ?? 0,
-        novelIds: category.novelIds,
-      })),
-    }),
-    [categories, index],
-  );
-
-  return (
-    <SafeAreaView excludeBottom>
-      <SearchbarV2
-        searchText={searchText}
-        clearSearchbar={clearSearchbar}
-        placeholder={searchbarPlaceholder}
-        onLeftIconPress={handleLeftIconPress}
-        onChangeText={setSearchText}
-        leftIcon={selectedNovelIds.length ? 'close' : 'magnify'}
-        rightIcons={rightIcons}
-        menuButtons={menuButtons}
-        theme={theme}
-      />
-      {downloadedOnlyMode ? (
-        <Banner
-          icon="cloud-off-outline"
-          label={getString('moreScreen.downloadOnly')}
-          theme={theme}
-        />
-      ) : null}
-      {incognitoMode ? (
-        <Banner
-          icon="incognito"
-          label={getString('moreScreen.incognitoMode')}
-          theme={theme}
-          backgroundColor={theme.tertiary}
-          textColor={theme.onTertiary}
-        />
-      ) : null}
-
-      <SelectionContext.Provider value={selectionContextValue}>
-        {isLoading ? (
-          <SourceScreenSkeletonLoading theme={theme} />
-        ) : libraryError ? (
+  const content = () => {
+    if (isLoading) {
+      return { content: <SourceScreenSkeletonLoading theme={theme} /> };
+    }
+    if (libraryError) {
+      return {
+        content: (
           <ErrorScreenV2
             error={libraryError}
             actions={[
               {
-                iconName: 'refresh',
+                iconName: RefreshIcon,
                 title: getString('common.retry'),
                 onPress: refetchLibrary,
               },
             ]}
           />
-        ) : categories.length ? (
-          <TabView
-            commonOptions={{
-              label: renderLabel,
-            }}
-            lazy
-            navigationState={navigationState}
-            renderTabBar={renderTabBar}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            initialLayout={{ width: layout.width }}
-          />
-        ) : (
+        ),
+      };
+    }
+    if (!categories.length) {
+      return {
+        content: (
           <EmptyView
-            theme={theme}
             icon="Σ(ಠ_ಠ)"
             description={getString('libraryScreen.emptyCategory')}
             actions={[
               {
-                iconName: 'compass-outline',
+                iconName: ExploreIcon,
                 title: getString('browse'),
                 onPress: () => navigation.navigate('Browse'),
               },
             ]}
+            theme={theme}
           />
-        )}
-      </SelectionContext.Provider>
+        ),
+      };
+    }
+    if (layout.isExpanded) {
+      return {
+        list: (
+          <View style={styles.panes}>
+            <AppHost style={styles.categoryPane}>
+              <CategoryPane
+                categories={categories}
+                selectedIndex={index}
+                onSelect={setIndex}
+                showCounts={!!showNumberOfNovels}
+                onEdit={() =>
+                  navigation.navigate('MoreStack', { screen: 'Categories' })
+                }
+              />
+            </AppHost>
+            <View
+              style={[
+                styles.pane,
+                { backgroundColor: theme.surfaceContainerLow },
+              ]}
+            >
+              {renderScene({ route: navigationState.routes[index] })}
+            </View>
+          </View>
+        ),
+      };
+    }
+    return {
+      list: (
+        <TabPager
+          tabs={tabs}
+          index={index}
+          onIndexChange={setIndex}
+          renderPage={i => renderScene({ route: navigationState.routes[i] })}
+          showCounts={showNumberOfNovels}
+        />
+      ),
+    };
+  };
 
-      {useLibraryFAB &&
-      !isHistoryLoading &&
-      history &&
-      history.length !== 0 &&
-      !error ? (
-        <FAB
-          style={[
-            styles.fab,
-            { backgroundColor: theme.primary, marginEnd: rightInset + 16 },
-          ]}
-          color={theme.onPrimary}
-          uppercase={false}
-          label={getString('common.resume')}
-          icon="play"
-          onPress={handleFABPress}
-        />
-      ) : null}
-      <SetCategoryModal
-        novelIds={selectedNovelIds}
-        closeModal={closeSetCategoryModal}
-        onEditCategories={handleEditCategories}
-        visible={setCategoryModalVisible}
-        onSuccess={handleCategorySuccess}
-      />
-      <LibraryBottomSheet
-        bottomSheetRef={bottomSheetRef}
-        style={bottomSheetStyle}
-      />
-      <Portal>
-        <Actionbar
-          viewStyle={actionbarViewStyle}
-          active={hasSelection}
-          actions={actionbarActions}
-        />
-      </Portal>
-    </SafeAreaView>
+  const body = content();
+
+  return (
+    <SelectionContext.Provider value={selectionContextValue}>
+      <Screen
+        list={body.list}
+        topBar={
+          <>
+            <SearchbarV2
+              searchText={searchText}
+              clearSearchbar={clearSearchbar}
+              placeholder={searchbarPlaceholder}
+              onLeftIconPress={handleLeftIconPress}
+              onChangeText={setSearchText}
+              leftIcon={selectedNovelIds.length ? CloseIcon : SearchIcon}
+              rightIcons={rightIcons}
+              menuButtons={menuButtons}
+              theme={theme}
+            />
+            {downloadedOnlyMode ? (
+              <Banner
+                icon={CloudOffIcon}
+                label={getString('moreScreen.downloadOnly')}
+                theme={theme}
+              />
+            ) : null}
+            {incognitoMode ? (
+              <Banner
+                icon={VisibilityOffIcon}
+                label={getString('moreScreen.incognitoMode')}
+                theme={theme}
+                backgroundColor={theme.tertiary}
+                textColor={theme.onTertiary}
+              />
+            ) : null}
+          </>
+        }
+        bottomBar={
+          hasSelection ? (
+            <Actionbar active actions={actionbarActions} />
+          ) : undefined
+        }
+        floatingAction={
+          useLibraryFAB &&
+          !isHistoryLoading &&
+          history &&
+          history.length !== 0 &&
+          !error &&
+          !hasSelection ? (
+            <Fab
+              extended
+              icon={PlayArrowIcon}
+              label={getString('common.resume')}
+              onPress={handleFABPress}
+            />
+          ) : undefined
+        }
+        overlays={
+          <>
+            <SetCategoryModal
+              novelIds={selectedNovelIds}
+              closeModal={closeSetCategoryModal}
+              onEditCategories={handleEditCategories}
+              visible={setCategoryModalVisible}
+              onSuccess={handleCategorySuccess}
+            />
+            <LibraryBottomSheet
+              visible={bottomSheetVisible}
+              onDismiss={closeBottomSheet}
+            />
+          </>
+        }
+      >
+        {body.content}
+      </Screen>
+    </SelectionContext.Provider>
   );
 };
 
 export default React.memo(LibraryScreen);
 
-function createStyles(theme: ThemeColors) {
-  return StyleSheet.create({
-    badgeCtn: {
-      borderRadius: 50,
-      marginStart: 4,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      position: 'relative',
-    },
-    badgetText: {
-      fontSize: 12,
-    },
-    fab: {
-      bottom: 0,
-      margin: 16,
-      position: 'absolute',
-      end: 0,
-    },
-    fontWeight500: {
-      fontWeight: 500,
-    },
-    globalSearchBtn: {
-      margin: 16,
-    },
-    tabBar: {
-      borderBottomWidth: 1,
-      elevation: 0,
-    },
-    tabBarIndicator: {
-      backgroundColor: theme.primary,
-      height: 3,
-    },
-    tabStyle: {
-      minWidth: 100,
-      width: 'auto',
-    },
-  });
-}
+const styles = StyleSheet.create({
+  panes: { flex: 1, flexDirection: 'row', paddingTop: 8 },
+  categoryPane: { width: CATEGORY_PANE_WIDTH },
+  pane: { flex: 1, borderTopLeftRadius: 28, overflow: 'hidden' },
+});

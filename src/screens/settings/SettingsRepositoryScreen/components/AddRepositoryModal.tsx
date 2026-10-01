@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { TextInput } from 'react-native-paper';
 
-import { Dialog } from '@components/index';
+import { Dialog, TextInput } from '@components/index';
 
 import { Repository } from '@database/types';
-import { useTheme } from '@hooks/persisted';
 
 import { getString } from '@i18n/translations';
 
@@ -21,7 +19,6 @@ const AddRepositoryModal: React.FC<AddRepositoryModalProps> = ({
   visible,
   upsertRepository,
 }) => {
-  const theme = useTheme();
   const [repositoryUrl, setRepositoryUrl] = useState(repository?.url || '');
 
   return (
@@ -32,12 +29,9 @@ const AddRepositoryModal: React.FC<AddRepositoryModalProps> = ({
       <Dialog.Content>
         <TextInput
           autoFocus
-          defaultValue={repositoryUrl}
+          value={repositoryUrl}
           placeholder={'Repo URL'}
           onChangeText={setRepositoryUrl}
-          mode="outlined"
-          underlineColor={theme.outline}
-          theme={{ colors: { ...theme } }}
         />
       </Dialog.Content>
       <Dialog.Actions>

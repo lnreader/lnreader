@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  NavigationState,
-  SceneRendererProps,
-  TabView,
-} from 'react-native-tab-view';
-import { StyleSheet, useWindowDimensions } from 'react-native';
-
-import { Appbar, IconButtonV2, SafeAreaView, TopTabBar } from '@components';
+import { Appbar, IconButtonV2, Screen, TabPager } from '@components';
+import FileOpenIcon from '@expo/material-symbols/file_open.xml';
+import SaveIcon from '@expo/material-symbols/save.xml';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
@@ -15,11 +10,7 @@ import SettingsReaderWebView from '../SettingsReaderScreen/components/SettingsRe
 import { CodeSnippetsScreenProps } from '@navigators/types';
 import NativeFile from '@modules/native-file';
 import * as DocumentPicker from 'expo-document-picker';
-
-type State = NavigationState<{
-  key: string;
-  title: string;
-}>;
+import { useKeyboardHeight } from '@hooks/common/useKeyboardHeight';
 
 const routes = [
   { key: 'code', title: getString('common.code') },
@@ -30,30 +21,24 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
   navigation,
   route,
 }) => {
+  const theme = useTheme();
   const snippetIndex = route?.params?.snippetIndex;
   const isJS = route?.params?.isJS;
   const language = isJS === false ? 'css' : 'js';
-  const theme = useTheme();
   const { codeSnippetsCSS, codeSnippetsJS } = useChapterReaderSettings();
   const snippetName =
     snippetIndex !== undefined && snippetIndex >= 0
       ? (language === 'css' ? codeSnippetsCSS : codeSnippetsJS)[snippetIndex]
           ?.name ?? ''
       : '';
-  const layout = useWindowDimensions();
 
   const [index, setIndex] = React.useState(0);
   const [exampleCode, setExampleCode] = React.useState<string>();
   const editorRef = React.useRef<SnippetEditorHandle>(null);
+  // Drags in the editor move the cursor and selection, not the page.
+  const editing = useKeyboardHeight() > 0;
 
-  const renderScene = ({
-    route: r,
-  }: SceneRendererProps & {
-    route: {
-      key: string;
-      title: string;
-    };
-  }) => {
+  const renderScene = ({ route: r }: { route: (typeof routes)[number] }) => {
     switch (r.key) {
       case 'code':
         return (
@@ -74,37 +59,6 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         return null;
     }
   };
-
-  const renderTabBar = React.useCallback(
-    (props: SceneRendererProps & { navigationState: State }) => (
-      <TopTabBar
-        {...props}
-        indicatorStyle={[
-          styles.tabBarIndicator,
-          { backgroundColor: theme.primary },
-        ]}
-        style={[
-          {
-            backgroundColor: theme.surface,
-            borderBottomColor: theme.outlineVariant,
-          },
-          styles.tabBar,
-        ]}
-        tabStyle={styles.flex}
-        gap={8}
-        inactiveColor={theme.secondary}
-        activeColor={theme.primary}
-        android_ripple={{ color: theme.rippleColor, foreground: true }}
-      />
-    ),
-    [
-      theme.outlineVariant,
-      theme.primary,
-      theme.rippleColor,
-      theme.secondary,
-      theme.surface,
-    ],
-  );
 
   const handleImport = async () => {
     try {
@@ -133,64 +87,47 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
   };
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={snippetName}
-        handleGoBack={() => navigation.goBack()}
-        theme={theme}
-        mode="small"
-      >
-        <IconButtonV2
-          accessibilityLabel={getString('customCodeSettings.importCode')}
-          name="file-import-outline"
-          size={24}
-          padding={10}
-          onPress={handleImport}
+    <Screen
+      topBar={
+        <Appbar
+          title={snippetName}
+          handleGoBack={() => navigation.goBack()}
           theme={theme}
+          mode="small"
+        >
+          <IconButtonV2
+            accessibilityLabel={getString('customCodeSettings.importCode')}
+            name={FileOpenIcon}
+            size={24}
+            onPress={handleImport}
+            theme={theme}
+          />
+          <IconButtonV2
+            accessibilityLabel={getString('common.save')}
+            name={SaveIcon}
+            size={24}
+            onPress={() => editorRef.current?.save()}
+            theme={theme}
+          />
+        </Appbar>
+      }
+      list={
+        <TabPager
+          tabs={routes.map((r, i) => ({ key: i, label: r.title }))}
+          index={index}
+          onIndexChange={i => {
+            if (routes[i]?.key === 'example') {
+              setExampleCode(editorRef.current?.getCode());
+            }
+            setIndex(i);
+          }}
+          renderPage={i => renderScene({ route: routes[i] })}
+          swipeEnabled={!editing}
+          fixed
         />
-        <IconButtonV2
-          accessibilityLabel={getString('common.save')}
-          name="content-save-outline"
-          size={24}
-          padding={10}
-          onPress={() => editorRef.current?.save()}
-          style={styles.saveAction}
-          theme={theme}
-        />
-      </Appbar>
-      <TabView
-        collapsable={false}
-        lazy
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={i => {
-          if (routes[i]?.key === 'example') {
-            setExampleCode(editorRef.current?.getCode());
-          }
-          setIndex(i);
-        }}
-        initialLayout={{ width: layout.width }}
-      />
-    </SafeAreaView>
+      }
+    />
   );
 };
 
 export default CodeSnippetsScreen;
-
-const styles = StyleSheet.create({
-  saveAction: {
-    marginStart: 8,
-  },
-  tabBar: {
-    borderBottomWidth: 1,
-    elevation: 0,
-    marginBottom: -8,
-  },
-  tabBarIndicator: {
-    height: 3,
-  },
-  flex: {
-    flex: 1,
-  },
-});

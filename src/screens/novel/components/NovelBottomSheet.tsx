@@ -1,31 +1,22 @@
-import React, { useCallback, useState, useMemo } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  useWindowDimensions,
-  Pressable,
-  ScrollView,
-  Modal as RNModal,
-} from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import color from 'color';
+import { useCallback, useState, useMemo } from 'react';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, height } from '@expo/ui/jetpack-compose/modifiers';
 
-import { TabView, TabViewProps } from 'react-native-tab-view';
-import { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { getString } from '@i18n/translations';
 
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
-import { Button, TopTabBar } from '@components';
+import { BottomSheet, ComposeTabPager, Dialog, List } from '@components';
 
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { ThemeColors } from '@theme/types';
 import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
 import { useNovelValue } from '@screens/novel/NovelContext';
+import ChevronRightIcon from '@expo/material-symbols/chevron_right.xml';
+import { ThemeColors } from '@theme/types';
+
+const SHEET_HEIGHT = 290;
 
 interface ChaptersSettingsSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  visible: boolean;
+  onDismiss: () => void;
   theme: ThemeColors;
 }
 
@@ -35,7 +26,8 @@ type SettingsRoute = {
 };
 
 const ChaptersSettingsSheet = ({
-  bottomSheetRef,
+  visible,
+  onDismiss,
   theme,
 }: ChaptersSettingsSheetProps) => {
   const {
@@ -78,157 +70,118 @@ const ChaptersSettingsSheet = ({
       ? 'indeterminate'
       : false;
 
-  const renderFilters = useCallback(
-    () => (
-      <BottomSheetScrollView style={styles.flex}>
-        <Checkbox
-          theme={theme}
-          label={getString('novelScreen.bottomSheet.filters.downloaded')}
-          status={getChapterFilterState('downloaded')}
-          onPress={() => {
-            cycleChapterFilter('downloaded');
-          }}
-        />
-        <Checkbox
-          theme={theme}
-          label={getString('novelScreen.bottomSheet.filters.unread')}
-          status={unreadStatus}
-          onPress={() => {
-            switch (readStatus) {
-              case 'indeterminate':
-                setChapterFilterValue('read', 'ON');
-                break;
-              case true:
-                setChapterFilterValue('read', 'OFF');
-                break;
-              default:
-                setChapterFilterValue('read', 'INDETERMINATE');
-            }
-          }}
-        />
-        <Checkbox
-          theme={theme}
-          label={getString('novelScreen.bottomSheet.filters.bookmarked')}
-          status={getChapterFilterState('bookmarked')}
-          onPress={() => {
-            cycleChapterFilter('bookmarked');
-          }}
-        />
-        {scanlators.length > 0 && (
-          <View style={styles.scanlatorsContainer}>
-            <Pressable
-              style={styles.scanlatorHeader}
-              onPress={() => {
-                setTempExcludedScanlators(excludedScanlators);
-                setScanlatorsModalVisible(true);
-              }}
-            >
-              <Text
-                style={[
-                  styles.sectionHeader,
-                  { color: theme.onSurfaceVariant, flex: 1 },
-                ]}
-              >
-                {getString('novelScreen.bottomSheet.filters.scanlators')}
-              </Text>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                color={theme.onSurfaceVariant}
-                size={20}
-                style={styles.chevron}
-              />
-            </Pressable>
-          </View>
-        )}
-      </BottomSheetScrollView>
-    ),
-    [
-      cycleChapterFilter,
-      getChapterFilterState,
-      readStatus,
-      setChapterFilterValue,
-      theme,
-      unreadStatus,
-      scanlators,
-      excludedScanlators,
-    ],
+  const renderFilters = () => (
+    <Column modifiers={[fillMaxWidth()]}>
+      <Checkbox
+        label={getString('novelScreen.bottomSheet.filters.downloaded')}
+        status={getChapterFilterState('downloaded')}
+        onPress={() => {
+          cycleChapterFilter('downloaded');
+        }}
+        theme={theme}
+      />
+      <Checkbox
+        label={getString('novelScreen.bottomSheet.filters.unread')}
+        status={unreadStatus}
+        onPress={() => {
+          switch (readStatus) {
+            case 'indeterminate':
+              setChapterFilterValue('read', 'ON');
+              break;
+            case true:
+              setChapterFilterValue('read', 'OFF');
+              break;
+            default:
+              setChapterFilterValue('read', 'INDETERMINATE');
+          }
+        }}
+        theme={theme}
+      />
+      <Checkbox
+        label={getString('novelScreen.bottomSheet.filters.bookmarked')}
+        status={getChapterFilterState('bookmarked')}
+        onPress={() => {
+          cycleChapterFilter('bookmarked');
+        }}
+        theme={theme}
+      />
+      {scanlators.length > 0 && (
+        <>
+          <List.Divider theme={theme} />
+          <List.Item
+            title={getString('novelScreen.bottomSheet.filters.scanlators')}
+            right={ChevronRightIcon}
+            onPress={() => {
+              setTempExcludedScanlators(excludedScanlators);
+              setScanlatorsModalVisible(true);
+            }}
+            theme={theme}
+          />
+        </>
+      )}
+    </Column>
   );
 
-  const renderSort = useCallback(
-    () => (
-      <View style={styles.flex}>
-        <SortItem
-          label={getString('novelScreen.bottomSheet.order.bySource')}
-          status={
-            sort === 'positionAsc'
-              ? 'asc'
-              : sort === 'positionDesc'
-              ? 'desc'
-              : undefined
-          }
-          onPress={() =>
-            sort === 'positionAsc'
-              ? setChapterSort('positionDesc')
-              : setChapterSort('positionAsc')
-          }
-          theme={theme}
-        />
-        <SortItem
-          label={getString('novelScreen.bottomSheet.order.byChapterName')}
-          status={
-            sort === 'nameAsc'
-              ? 'asc'
-              : sort === 'nameDesc'
-              ? 'desc'
-              : undefined
-          }
-          onPress={() =>
-            sort === 'nameAsc'
-              ? setChapterSort('nameDesc')
-              : setChapterSort('nameAsc')
-          }
-          theme={theme}
-        />
-      </View>
-    ),
-    [sort, setChapterSort, theme],
+  const renderSort = () => (
+    <Column modifiers={[fillMaxWidth()]}>
+      <SortItem
+        label={getString('novelScreen.bottomSheet.order.bySource')}
+        status={
+          sort === 'positionAsc'
+            ? 'asc'
+            : sort === 'positionDesc'
+            ? 'desc'
+            : undefined
+        }
+        onPress={() =>
+          sort === 'positionAsc'
+            ? setChapterSort('positionDesc')
+            : setChapterSort('positionAsc')
+        }
+        theme={theme}
+      />
+      <SortItem
+        label={getString('novelScreen.bottomSheet.order.byChapterName')}
+        status={
+          sort === 'nameAsc' ? 'asc' : sort === 'nameDesc' ? 'desc' : undefined
+        }
+        onPress={() =>
+          sort === 'nameAsc'
+            ? setChapterSort('nameDesc')
+            : setChapterSort('nameAsc')
+        }
+        theme={theme}
+      />
+    </Column>
   );
 
-  const renderDisplay = useCallback(
-    () => (
-      <View style={styles.flex}>
-        <Checkbox
-          status={showChapterTitles ?? true}
-          label={getString('novelScreen.bottomSheet.displays.sourceTitle')}
-          onPress={() => setShowChapterTitles(true)}
-          theme={theme}
-        />
-        <Checkbox
-          status={!showChapterTitles}
-          label={getString('novelScreen.bottomSheet.displays.chapterNumber')}
-          onPress={() => setShowChapterTitles(false)}
-          theme={theme}
-        />
-      </View>
-    ),
-    [setShowChapterTitles, showChapterTitles, theme],
+  const renderDisplay = () => (
+    <Column modifiers={[fillMaxWidth()]}>
+      <Checkbox
+        status={showChapterTitles ?? true}
+        label={getString('novelScreen.bottomSheet.displays.sourceTitle')}
+        onPress={() => setShowChapterTitles(true)}
+        theme={theme}
+      />
+      <Checkbox
+        status={!showChapterTitles}
+        label={getString('novelScreen.bottomSheet.displays.chapterNumber')}
+        onPress={() => setShowChapterTitles(false)}
+        theme={theme}
+      />
+    </Column>
   );
 
-  const renderScene = useCallback(
-    ({ route }: { route: SettingsRoute }) => {
-      switch (route.key) {
-        case 'first':
-          return renderFilters();
-        case 'second':
-          return renderSort();
-        case 'third':
-          return renderDisplay();
-      }
-    },
-    [renderDisplay, renderFilters, renderSort],
-  );
-
-  const layout = useWindowDimensions();
+  const renderScene = ({ route }: { route: SettingsRoute }) => {
+    switch (route.key) {
+      case 'first':
+        return renderFilters();
+      case 'second':
+        return renderSort();
+      case 'third':
+        return renderDisplay();
+    }
+  };
 
   const [index, setIndex] = useState(0);
   const [routes] = useState<SettingsRoute[]>([
@@ -237,160 +190,62 @@ const ChaptersSettingsSheet = ({
     { key: 'third', title: getString('common.display') },
   ]);
 
-  const renderTabBar: TabViewProps<SettingsRoute>['renderTabBar'] = props => (
-    <TopTabBar
-      {...props}
-      indicatorStyle={{ backgroundColor: theme.primary }}
-      style={[
-        {
-          backgroundColor: theme.surfaceContainerLow ?? theme.surface,
-          borderBottomColor: theme.outlineVariant,
-        },
-        styles.tabBar,
-      ]}
-      inactiveColor={theme.onSurfaceVariant}
-      activeColor={theme.primary}
-      pressColor={color(theme.primary).alpha(0.12).string()}
-    />
-  );
-
-  const renderLabel = useCallback(
-    ({ route, color: localColor }: { route: SettingsRoute; color: string }) => {
-      return <Text style={{ color: localColor }}>{route.title}</Text>;
-    },
-    [],
-  );
   return (
     <>
-      <BottomSheet snapPoints={[290]} bottomSheetRef={bottomSheetRef}>
-        <BottomSheetView style={styles.contentContainer}>
-          <TabView
-            commonOptions={{
-              label: renderLabel,
-            }}
-            navigationState={{ index, routes }}
-            renderTabBar={renderTabBar}
-            renderScene={renderScene}
+      <BottomSheet visible={visible} onDismiss={onDismiss} scrollable={false}>
+        {/* A fixed height, as before, so switching tabs doesn't resize it. */}
+        <Column modifiers={[fillMaxWidth(), height(SHEET_HEIGHT)]}>
+          <ComposeTabPager
+            tabs={routes.map((route, i) => ({ key: i, label: route.title }))}
+            index={index}
             onIndexChange={setIndex}
-            initialLayout={{ width: layout.width }}
-            style={styles.tabView}
+            swipeEnabled={false}
+            renderPage={page => renderScene({ route: routes[page] })}
+            fixed
           />
-        </BottomSheetView>
+        </Column>
       </BottomSheet>
       {scanlators.length > 0 && (
-        <RNModal
+        <Dialog.Root
           visible={scanlatorsModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setScanlatorsModalVisible(false)}
+          onDismiss={() => setScanlatorsModalVisible(false)}
         >
-          <View style={styles.modalBackdrop}>
-            <View
-              style={[
-                styles.scanlatorModalContent,
-                { backgroundColor: theme.surface },
-              ]}
+          <Dialog.Title>
+            {getString('novelScreen.bottomSheet.filters.scanlators')}
+          </Dialog.Title>
+          <Dialog.Content>
+            <Column modifiers={[fillMaxWidth()]}>
+              {scanlators.map(scanlator => (
+                <Checkbox
+                  key={scanlator}
+                  label={scanlator}
+                  status={tempExcludedScanlators.includes(scanlator)}
+                  onPress={() => toggleTempScanlator(scanlator)}
+                  theme={theme}
+                />
+              ))}
+            </Column>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Dialog.Action onPress={() => setTempExcludedScanlators([])}>
+              {getString('common.reset')}
+            </Dialog.Action>
+            <Dialog.Action onPress={() => setScanlatorsModalVisible(false)}>
+              {getString('common.cancel')}
+            </Dialog.Action>
+            <Dialog.Action
+              onPress={() => {
+                setExcludedScanlators(tempExcludedScanlators);
+                setScanlatorsModalVisible(false);
+              }}
             >
-              <Text style={[styles.modalTitle, { color: theme.onSurface }]}>
-                {getString('novelScreen.bottomSheet.filters.scanlators')}
-              </Text>
-              <ScrollView style={styles.scanlatorModalScroll}>
-                {scanlators.map(scanlator => (
-                  <Checkbox
-                    key={scanlator}
-                    theme={theme}
-                    label={scanlator}
-                    status={tempExcludedScanlators.includes(scanlator)}
-                    onPress={() => toggleTempScanlator(scanlator)}
-                  />
-                ))}
-              </ScrollView>
-              <View style={styles.modalFooterCtn}>
-                <Button
-                  title={getString('common.submit')}
-                  onPress={() => {
-                    setExcludedScanlators(tempExcludedScanlators);
-                    setScanlatorsModalVisible(false);
-                  }}
-                />
-                <Button
-                  title={getString('common.cancel')}
-                  onPress={() => setScanlatorsModalVisible(false)}
-                />
-                <Button
-                  title={getString('common.reset')}
-                  onPress={() => setTempExcludedScanlators([])}
-                />
-              </View>
-            </View>
-          </View>
-        </RNModal>
+              {getString('common.submit')}
+            </Dialog.Action>
+          </Dialog.Actions>
+        </Dialog.Root>
       )}
     </>
   );
 };
 
 export default ChaptersSettingsSheet;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  tabView: {
-    height: 290,
-  },
-  flex: {
-    flex: 1,
-  },
-  tabBar: {
-    borderBottomWidth: 1,
-    elevation: 0,
-  },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  scanlatorsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(128,128,128,0.2)',
-    marginTop: 8,
-    paddingBottom: 16,
-  },
-  scanlatorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 16,
-  },
-  chevron: {
-    marginTop: 8,
-  },
-  scanlatorModalContent: {
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
-    maxHeight: '80%',
-    width: '90%',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanlatorModalScroll: {
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalFooterCtn: {
-    flexDirection: 'row-reverse',
-    paddingTop: 8,
-  },
-});

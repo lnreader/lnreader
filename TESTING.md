@@ -17,7 +17,7 @@ The project has global mocks configured in Jest. These are automatically applied
 
 There is a custom render wrapper at `test/test-utils.tsx` with:
 
-- `render` - wraps with GestureHandlerRootView, SafeAreaProvider, PaperProvider, etc.
+- `render` - wraps with GestureHandlerRootView, SafeAreaProvider and ThemeProvider
 - `renderNovel` - includes NovelContextProvider
 - `AllTheProviders` - the full provider wrapper
 

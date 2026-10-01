@@ -8,13 +8,14 @@ import {
   setStatusBarColor,
 } from '@theme/utils/setBarColor';
 import { useAppSettings, usePluginActions, useTheme } from '@hooks/persisted';
-import { AppUpdateChecker } from '@components';
+import AppUpdateChecker from '@components/AppUpdateChecker';
 
 /**
  * Navigators
  */
 import BottomNavigator from './BottomNavigator';
 import MoreStack from './MoreStack';
+import NavigationRailFrame from './NavigationRailFrame';
 
 /**
  * Screens
@@ -121,6 +122,11 @@ const MainNavigator = () => {
               contentStyle: { backgroundColor: theme.background },
               headerShown: false,
             }}
+            layout={({ state, navigation, children }) => (
+              <NavigationRailFrame state={state} navigation={navigation}>
+                {children}
+              </NavigationRailFrame>
+            )}
           >
             <Stack.Screen name="BottomNavigator" component={BottomNavigator} />
             <Stack.Screen name="ReaderStack" component={ReaderStack} />

@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { HelperText, TextInput } from 'react-native-paper';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { Dialog, SwitchItem } from '@components';
+import {
+  AppText,
+  Dialog,
+  IconButtonV2,
+  SwitchItem,
+  TextInput,
+} from '@components';
+import FolderIcon from '@expo/material-symbols/folder.xml';
 import NativeFile from '@modules/native-file';
 
 import { useBoolean } from '@hooks';
@@ -156,149 +168,123 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
         </Dialog.Description>
       </Dialog.Header>
       <Dialog.ScrollArea>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <Column
+          verticalArrangement={{ spacedBy: 12 }}
+          modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
         >
-          <View style={styles.form}>
-            <Pressable
-              accessibilityHint={uri || undefined}
-              accessibilityLabel={getString(
+          <Box
+            modifiers={[
+              fillMaxWidth(),
+              clickable(() => void openFolderPicker()),
+            ]}
+          >
+            <TextInput
+              disabled
+              label={getString('novelScreen.exportEpubModal.directory')}
+              placeholder={getString(
                 'novelScreen.exportEpubModal.selectFolder',
               )}
-              accessibilityRole="button"
-              onPress={() => void openFolderPicker()}
-            >
-              <TextInput
-                editable={false}
-                label={getString('novelScreen.exportEpubModal.directory')}
-                mode="outlined"
-                pointerEvents="none"
-                placeholder={getString(
-                  'novelScreen.exportEpubModal.selectFolder',
-                )}
-                right={
-                  <TextInput.Icon
-                    accessibilityLabel={getString(
-                      'novelScreen.exportEpubModal.selectFolder',
-                    )}
-                    forceTextInputFocus={false}
-                    icon="folder-outline"
-                    onPress={() => void openFolderPicker()}
-                  />
-                }
-                theme={{ colors: { ...theme } }}
-                value={uri}
-              />
-            </Pressable>
-            <View>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                error={fileNameError}
-                label={getString('novelScreen.exportEpubModal.fileName')}
-                mode="outlined"
-                onChangeText={value => {
-                  setFileName(value);
-                  if (value.trim()) {
-                    setFileNameError(false);
-                  }
-                }}
-                onSubmitEditing={() => void onSubmit()}
-                returnKeyType="done"
-                right={<TextInput.Affix text=".epub" />}
-                theme={{ colors: { ...theme } }}
-                value={fileName}
-              />
-              {fileNameError ? (
-                <HelperText type="error">
-                  {getString('novelScreen.exportEpubModal.fileNameRequired')}
-                </HelperText>
-              ) : null}
-            </View>
-          </View>
-          <SwitchItem
-            label={getString('novelScreen.exportEpubModal.exportAll')}
-            value={exportAll.value}
-            onPress={() => {
-              exportAll.toggle();
-              setRangeError('');
+              trailing={
+                <IconButtonV2
+                  accessibilityLabel={getString(
+                    'novelScreen.exportEpubModal.selectFolder',
+                  )}
+                  name={FolderIcon}
+                  onPress={() => void openFolderPicker()}
+                  theme={theme}
+                />
+              }
+              value={uri}
+              onChangeText={() => undefined}
+            />
+          </Box>
+          <TextInput
+            error={
+              fileNameError
+                ? getString('novelScreen.exportEpubModal.fileNameRequired')
+                : null
+            }
+            label={getString('novelScreen.exportEpubModal.fileName')}
+            onChangeText={value => {
+              setFileName(value);
+              if (value.trim()) {
+                setFileNameError(false);
+              }
             }}
-            theme={theme}
+            onSubmit={() => void onSubmit()}
+            singleLine
+            trailing={<AppText variant="bodyLarge">.epub</AppText>}
+            value={fileName}
           />
-          <SwitchItem
-            label={getString(
-              'novelScreen.exportEpubModal.includeChapterNumber',
-            )}
-            value={includeChapterNumber.value}
-            onPress={includeChapterNumber.toggle}
-            theme={theme}
-          />
-          {!exportAll.value ? (
-            <>
-              <View style={styles.rangeInputs}>
-                <TextInput
-                  error={Boolean(rangeError)}
-                  label={getString('novelScreen.exportEpubModal.startChapter')}
-                  value={startChapter}
-                  onChangeText={value => {
-                    setStartChapter(value);
-                    setRangeError('');
-                  }}
-                  keyboardType="number-pad"
-                  mode="outlined"
-                  returnKeyType="next"
-                  theme={{ colors: { ...theme } }}
-                  style={styles.rangeInput}
-                />
-                <TextInput
-                  error={Boolean(rangeError)}
-                  label={getString('novelScreen.exportEpubModal.endChapter')}
-                  value={endChapter}
-                  onChangeText={value => {
-                    setEndChapter(value);
-                    setRangeError('');
-                  }}
-                  keyboardType="number-pad"
-                  mode="outlined"
-                  onSubmitEditing={() => void onSubmit()}
-                  returnKeyType="done"
-                  theme={{ colors: { ...theme } }}
-                  style={styles.rangeInput}
-                />
-              </View>
-              <HelperText
-                style={styles.rangeError}
-                type="error"
-                visible={Boolean(rangeError)}
-              >
+        </Column>
+        <SwitchItem
+          label={getString('novelScreen.exportEpubModal.exportAll')}
+          value={exportAll.value}
+          onPress={() => {
+            exportAll.toggle();
+            setRangeError('');
+          }}
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('novelScreen.exportEpubModal.includeChapterNumber')}
+          value={includeChapterNumber.value}
+          onPress={includeChapterNumber.toggle}
+          theme={theme}
+        />
+        {!exportAll.value ? (
+          <Column modifiers={[fillMaxWidth(), padding(16, 0, 16, 8)]}>
+            <Row horizontalArrangement={{ spacedBy: 12 }}>
+              <TextInput
+                label={getString('novelScreen.exportEpubModal.startChapter')}
+                value={startChapter}
+                onChangeText={value => {
+                  setStartChapter(value);
+                  setRangeError('');
+                }}
+                keyboardType="number"
+                singleLine
+                modifiers={[weight(1)]}
+              />
+              <TextInput
+                label={getString('novelScreen.exportEpubModal.endChapter')}
+                value={endChapter}
+                onChangeText={value => {
+                  setEndChapter(value);
+                  setRangeError('');
+                }}
+                keyboardType="number"
+                onSubmit={() => void onSubmit()}
+                singleLine
+                modifiers={[weight(1)]}
+              />
+            </Row>
+            {rangeError ? (
+              <AppText variant="bodySmall" color={theme.error}>
                 {rangeError}
-              </HelperText>
-            </>
-          ) : null}
-          <SwitchItem
-            label={getString('novelScreen.exportEpubModal.applyReaderTheme')}
-            value={useAppTheme.value}
-            onPress={useAppTheme.toggle}
-            theme={theme}
-          />
-          <SwitchItem
-            label={getString('novelScreen.exportEpubModal.includeCustomCSS')}
-            value={useCustomCSS.value}
-            onPress={useCustomCSS.toggle}
-            theme={theme}
-          />
-          <SwitchItem
-            label={getString('novelScreen.exportEpubModal.includeCustomJS')}
-            description={getString(
-              'novelScreen.exportEpubModal.customJSWarning',
-            )}
-            value={useCustomJS.value}
-            onPress={useCustomJS.toggle}
-            theme={theme}
-          />
-        </ScrollView>
+              </AppText>
+            ) : null}
+          </Column>
+        ) : null}
+        <SwitchItem
+          label={getString('novelScreen.exportEpubModal.applyReaderTheme')}
+          value={useAppTheme.value}
+          onPress={useAppTheme.toggle}
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('novelScreen.exportEpubModal.includeCustomCSS')}
+          value={useCustomCSS.value}
+          onPress={useCustomCSS.toggle}
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('novelScreen.exportEpubModal.includeCustomJS')}
+          description={getString('novelScreen.exportEpubModal.customJSWarning')}
+          value={useCustomJS.value}
+          onPress={useCustomJS.toggle}
+          theme={theme}
+        />
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action
@@ -318,26 +304,3 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
 };
 
 export default ExportEpubModal;
-
-const styles = StyleSheet.create({
-  form: {
-    gap: 12,
-    paddingBottom: 8,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  rangeInputs: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-  },
-  rangeError: {
-    paddingHorizontal: 16,
-  },
-  rangeInput: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 8,
-  },
-});

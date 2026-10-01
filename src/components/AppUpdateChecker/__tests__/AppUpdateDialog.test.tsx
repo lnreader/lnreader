@@ -46,16 +46,6 @@ describe('AppUpdateDialog', () => {
     );
 
     expect(screen.getByText('## Changes\n- First\n- Second')).toBeTruthy();
-    expect(screen.getByTestId('app-update-release-notes').props.style).toEqual({
-      maxHeight: expect.any(Number),
-    });
-    expect(
-      screen.getByTestId('app-update-release-notes').props
-        .contentContainerStyle,
-    ).toEqual({
-      paddingHorizontal: 24,
-      paddingVertical: 16,
-    });
   });
 
   it('exposes dismiss, skip, and install actions', () => {

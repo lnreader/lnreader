@@ -9,11 +9,19 @@ interface DownloadedNovelChapterGroupProps {
   chapterCountLabel: string;
   chapters: DownloadedChapter[];
   onDeleteChapter: (chapter: GroupedNovelChapter) => void;
+  expanded?: boolean;
+  onToggleExpanded?: () => void;
 }
 
 const DownloadedNovelChapterGroup: React.FC<
   DownloadedNovelChapterGroupProps
-> = ({ chapterCountLabel, chapters, onDeleteChapter }) => {
+> = ({
+  chapterCountLabel,
+  chapters,
+  onDeleteChapter,
+  expanded,
+  onToggleExpanded,
+}) => {
   const firstChapter = chapters[0];
   const novel = useMemo(
     () =>
@@ -40,6 +48,8 @@ const DownloadedNovelChapterGroup: React.FC<
       chapters={chapters}
       novel={novel}
       onDeleteChapter={onDeleteChapter}
+      expanded={expanded}
+      onToggleExpanded={onToggleExpanded}
     />
   );
 };

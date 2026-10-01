@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import WebView, { WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
-import { ProgressBar } from 'react-native-paper';
+import { StyleSheet } from 'react-native';
+import { fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
 
 import { getPlugin } from '@plugins/pluginManager';
 import { useBackHandler } from '@hooks';
@@ -14,6 +15,7 @@ import {
   WEBVIEW_SESSION_STORAGE,
   store,
 } from '@plugins/helpers/storage';
+import { AppHost, ProgressIndicator } from '@components';
 import Appbar from './components/Appbar';
 import Menu from './components/Menu';
 
@@ -110,11 +112,14 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
           navigation.goBack();
         }}
       />
-      <ProgressBar
-        color={theme.primary}
-        progress={Math.round(1000 * progress) / 1000}
-        visible={progress !== 1}
-      />
+      {progress !== 1 ? (
+        <AppHost style={styles.progress}>
+          <ProgressIndicator
+            progress={Math.round(1000 * progress) / 1000}
+            modifiers={[fillMaxWidth()]}
+          />
+        </AppHost>
+      ) : null}
       <WebView<object>
         userAgent={userAgent}
         ref={webViewRef}
@@ -142,3 +147,7 @@ const WebviewScreen = ({ route, navigation }: WebviewScreenProps) => {
 };
 
 export default WebviewScreen;
+
+const styles = StyleSheet.create({
+  progress: { height: 4 },
+});

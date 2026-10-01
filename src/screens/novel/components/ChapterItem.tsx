@@ -1,12 +1,23 @@
-import React, { memo, useCallback, useMemo, ReactNode } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { memo, useCallback, ReactNode } from 'react';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clip,
+  combinedClickable,
+  fillMaxWidth,
+  height,
+  padding,
+  Shapes,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import {
   ChapterBookmarkButton,
   DownloadButton,
 } from './Chapter/ChapterDownloadButtons';
 import { ThemeColors } from '@theme/types';
 import { ChapterInfo } from '@database/types';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { AppText } from '@components';
 import { getString } from '@i18n/translations';
 import { DateFormat, formatDate } from '@utils/dateFormat';
 
@@ -47,7 +58,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   dateFormat = 'default',
   relativeTimestamps = true,
 }) => {
-  const { id, name, unread, releaseTime, bookmark, chapterNumber, progress } =
+  const { name, unread, releaseTime, bookmark, chapterNumber, progress } =
     chapter;
   const isGrouped = variant === 'grouped';
 
@@ -70,186 +81,109 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     [onDownloadChapter, chapter],
   );
 
-  const selectedStyle = useMemo(
-    () =>
-      isSelected
-        ? [styles.chapterCardContainer, { backgroundColor: theme.rippleColor }]
-        : styles.chapterCardContainer,
-    [isSelected, theme.rippleColor],
-  );
+  const titleColor = !unread
+    ? theme.outline
+    : bookmark
+    ? theme.primary
+    : theme.onSurface;
 
-  const titleColor = useMemo(
-    () =>
-      !unread ? theme.outline : bookmark ? theme.primary : theme.onSurface,
-    [unread, bookmark, theme.outline, theme.primary, theme.onSurface],
-  );
+  const releaseColor = !unread
+    ? theme.outline
+    : bookmark
+    ? theme.primary
+    : theme.onSurfaceVariant;
 
-  const releaseColor = useMemo(
-    () =>
-      !unread
-        ? theme.outline
-        : bookmark
-        ? theme.primary
-        : theme.onSurfaceVariant,
-    [unread, bookmark, theme.outline, theme.primary, theme.onSurfaceVariant],
-  );
-
-  const ripple = useMemo(
-    () => ({ color: theme.rippleColor }),
-    [theme.rippleColor],
-  );
-
-  const releaseTimeStyle = {
-    color: theme.outline,
-    marginStart: chapter.releaseTime || chapter.scanlator ? 5 : 0,
-  } as const;
   function parseTime(time?: string | Date | null) {
     if (!time) return undefined;
     return formatDate(time, dateFormat, relativeTimestamps);
   }
   const parsedTime = parseTime(releaseTime);
 
-  return (
-    <View key={'chapterItem' + id}>
-      <Pressable
-        style={selectedStyle}
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        android_ripple={ripple}
-      >
-        <View style={styles.row}>
-          {left}
-          {isBookmarked ? <ChapterBookmarkButton theme={theme} /> : null}
-          <View style={styles.flex1}>
-            {isGrouped ? (
-              <Text
-                style={[
-                  styles.groupedChapterNovelName,
-                  { color: unread ? theme.onSurface : theme.outline },
-                ]}
-                numberOfLines={1}
-              >
-                {novelName}
-              </Text>
-            ) : null}
-            <View style={styles.titleRow}>
-              {unread ? (
-                <MaterialCommunityIcons
-                  name="circle"
-                  color={theme.primary}
-                  size={8}
-                  style={styles.unreadIcon}
-                />
-              ) : null}
+  const meta = isGrouped
+    ? []
+    : [
+        parsedTime,
+        chapter.scanlator,
+        progress && progress > 0 && unread
+          ? getString('novelScreen.progress', { progress })
+          : undefined,
+      ].filter(Boolean);
 
-              <Text
-                style={[
-                  isGrouped ? styles.textSmall : styles.textNormal,
-                  { color: titleColor },
-                  styles.flex1,
-                ]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {showChapterTitles
-                  ? name
-                  : getString('novelScreen.chapterChapnum', {
-                      num: chapterNumber,
-                    })}
-              </Text>
-            </View>
-            <View style={styles.metaRow}>
-              {parsedTime && !isGrouped ? (
-                <Text
-                  style={[{ color: releaseColor }, styles.mt4, styles.text]}
-                  numberOfLines={1}
-                >
-                  {parsedTime}
-                </Text>
-              ) : null}
-              {chapter.scanlator && !isGrouped ? (
-                <Text
-                  style={[
-                    { color: releaseColor },
-                    styles.mt4,
-                    styles.text,
-                    { marginStart: parsedTime ? 5 : 0 },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {parsedTime ? '•  ' : null}
-                  {chapter.scanlator}
-                </Text>
-              ) : null}
-              {!isGrouped && progress && progress > 0 && chapter.unread ? (
-                <Text
-                  style={[styles.text, styles.mt4, releaseTimeStyle]}
-                  numberOfLines={1}
-                >
-                  {chapter.releaseTime || chapter.scanlator ? '•  ' : null}
-                  {getString('novelScreen.progress', { progress })}
-                </Text>
-              ) : null}
-            </View>
-          </View>
-        </View>
-        {!isLocal ? (
-          <DownloadButton
-            isDownloading={isDownloading}
-            isDownloaded={chapter.isDownloaded ?? false}
-            theme={theme}
-            deleteChapter={handleDelete}
-            downloadChapter={handleDownload}
-          />
+  return (
+    <Row
+      verticalAlignment="center"
+      modifiers={[
+        fillMaxWidth(),
+        height(64),
+        ...(isSelected
+          ? [background(theme.rippleColor ?? theme.secondaryContainer)]
+          : []),
+        combinedClickable({
+          onClick: handlePress,
+          onLongClick: handleLongPress,
+        }),
+        padding(16, 8, 16, 8),
+      ]}
+    >
+      {left}
+      {isBookmarked ? <ChapterBookmarkButton theme={theme} /> : null}
+      <Column modifiers={[weight(1)]}>
+        {isGrouped ? (
+          <AppText
+            variant="bodyMedium"
+            color={unread ? theme.onSurface : theme.outline}
+            maxLines={1}
+          >
+            {novelName}
+          </AppText>
         ) : null}
-      </Pressable>
-    </View>
+        <Row verticalAlignment="center">
+          {unread ? (
+            <Box modifiers={[padding(0, 0, 4, 0)]}>
+              <Box
+                modifiers={[
+                  size(8, 8),
+                  clip(Shapes.Circle),
+                  background(theme.primary),
+                ]}
+              />
+            </Box>
+          ) : null}
+          <AppText
+            variant={isGrouped ? 'bodySmall' : 'bodyMedium'}
+            color={titleColor}
+            maxLines={1}
+            modifiers={[weight(1)]}
+          >
+            {showChapterTitles
+              ? name
+              : getString('novelScreen.chapterChapnum', {
+                  num: chapterNumber,
+                })}
+          </AppText>
+        </Row>
+        {meta.length ? (
+          <AppText
+            variant="bodySmall"
+            color={releaseColor}
+            maxLines={1}
+            modifiers={[padding(0, 4, 0, 0)]}
+          >
+            {meta.join(' •  ')}
+          </AppText>
+        ) : null}
+      </Column>
+      {!isLocal ? (
+        <DownloadButton
+          isDownloading={isDownloading}
+          isDownloaded={chapter.isDownloaded ?? false}
+          theme={theme}
+          deleteChapter={handleDelete}
+          downloadChapter={handleDownload}
+        />
+      ) : null}
+    </Row>
   );
 };
 
 export default memo(ChapterItem);
-
-const styles = StyleSheet.create({
-  chapterCardContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    height: 64,
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  flex1: {
-    flex: 1,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  row: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-  },
-  text: {
-    fontSize: 12,
-  },
-  textNormal: {
-    fontSize: 14,
-  },
-  textSmall: {
-    fontSize: 12,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  unreadIcon: {
-    marginEnd: 4,
-  },
-  groupedChapterNovelName: {
-    fontSize: 14,
-  },
-  mt4: {
-    marginTop: 4,
-  },
-});

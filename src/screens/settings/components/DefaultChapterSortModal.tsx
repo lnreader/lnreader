@@ -29,7 +29,6 @@ const DefaultChapterSortModal = ({
       <Dialog.List>
         <SortItem
           label={getString('generalSettingsScreen.bySource')}
-          theme={theme}
           status={defaultChapterSort === 'positionAsc' ? 'asc' : 'desc'}
           onPress={() =>
             defaultChapterSort === 'positionAsc'
@@ -40,6 +39,7 @@ const DefaultChapterSortModal = ({
                   defaultChapterSort: 'positionAsc',
                 })
           }
+          theme={theme}
         />
       </Dialog.List>
       <Dialog.Actions>

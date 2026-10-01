@@ -1,8 +1,7 @@
-import { Dialog } from '@components';
+import { Dialog, TextInput } from '@components';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import React from 'react';
-import { TextInput } from 'react-native-paper';
 
 interface ConnectionModalProps {
   title: string;
@@ -35,19 +34,8 @@ const ConnectionModal: React.FC<ConnectionModalProps> = ({
           value={ipv4}
           placeholder={'xxx.xxx.xxx.xxx'}
           onChangeText={setIpv4}
-          mode="outlined"
-          underlineColor={theme.outline}
-          theme={{ colors: { ...theme } }}
-          placeholderTextColor={theme.onSurfaceDisabled}
         />
-        <TextInput
-          value={port}
-          onChangeText={setPort}
-          mode="outlined"
-          underlineColor={theme.outline}
-          theme={{ colors: { ...theme } }}
-          placeholderTextColor={theme.onSurfaceDisabled}
-        />
+        <TextInput value={port} onChangeText={setPort} />
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.Action onPress={closeModal}>

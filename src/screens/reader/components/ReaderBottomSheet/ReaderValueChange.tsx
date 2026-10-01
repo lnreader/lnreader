@@ -1,8 +1,13 @@
-import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import React from 'react';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { Slider } from '@components';
+import { AppText, Slider } from '@components';
 import { ChapterReaderSettings } from '@hooks/persisted/useSettings';
 
 type ValueKey<T extends object> = Exclude<
@@ -13,7 +18,6 @@ type ValueKey<T extends object> = Exclude<
 >;
 
 interface ReaderValueChangeProps {
-  labelStyle?: TextStyle | TextStyle[];
   valueChange?: number;
   label: string;
   valueKey: ValueKey<ChapterReaderSettings>;
@@ -24,7 +28,6 @@ interface ReaderValueChangeProps {
 }
 
 const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
-  labelStyle,
   label,
   valueChange = 0.1,
   valueKey,
@@ -35,48 +38,37 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
 }) => {
   const theme = useTheme();
   const { setChapterReaderSettings, ...settings } = useChapterReaderSettings();
+  const [dragValue, setDragValue] = React.useState<number>();
+  const value = dragValue ?? settings[valueKey] ?? min;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.labelRow}>
-        <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
+    <Column modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
+      <Row verticalAlignment="center" modifiers={[fillMaxWidth()]}>
+        <AppText
+          variant="bodyMedium"
+          color={theme.onSurfaceVariant}
+          modifiers={[weight(1)]}
+        >
           {label}
-        </Text>
-        <Text style={[styles.value, { color: theme.onSurface }]}>
-          {`${((settings[valueKey] * 10) / 10).toFixed(decimals)}${unit}`}
-        </Text>
-      </View>
+        </AppText>
+        <AppText variant="labelLarge">
+          {`${((value * 10) / 10).toFixed(decimals)}${unit}`}
+        </AppText>
+      </Row>
       <Slider
-        value={settings[valueKey]}
+        value={settings[valueKey] ?? min}
         min={min}
         max={max}
         step={valueChange}
         showStops
-        showValueIndicator
-        formatValue={value => `${value.toFixed(decimals)}${unit}`}
-        accessibilityLabel={label}
-        onSlidingComplete={value =>
-          setChapterReaderSettings({ [valueKey]: value })
-        }
+        onValueChange={setDragValue}
+        onSlidingComplete={next => {
+          setDragValue(undefined);
+          setChapterReaderSettings({ [valueKey]: next });
+        }}
       />
-    </View>
+    </Column>
   );
 };
 
 export default ReaderValueChange;
-
-const styles = StyleSheet.create({
-  labelRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  value: {
-    fontVariant: ['tabular-nums'],
-    textAlign: 'center',
-  },
-});

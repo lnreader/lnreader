@@ -1,11 +1,18 @@
-import { Appbar, Button, Dialog, SafeAreaView } from '@components';
+import { AppIcon, AppText, Button, Dialog, List, TextInput } from '@components';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { CustomCodeSettingsScreenProps } from '@navigators/types';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import React from 'react';
-import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { Keyboard } from 'react-native';
+import { Column, FlowRow, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import AddIcon from '@expo/material-symbols/add.xml';
+import CodeIcon from '@expo/material-symbols/code.xml';
+import SettingsPage from '../components/SettingsPage';
 import { ThemeColors } from '@theme/types';
 import Snippet from './Components/Snippet';
 import ReplaceItemModal from './Modals/ReplaceItemModal';
@@ -17,16 +24,19 @@ type SectionHeaderProps = {
 };
 
 const SectionHeader = ({ status, theme, title }: SectionHeaderProps) => (
-  <View style={styles.sectionHeader}>
-    <Text style={[styles.sectionTitle, { color: theme.onSurface }]}>
+  <Row
+    verticalAlignment="center"
+    modifiers={[fillMaxWidth(), padding(24, 0, 24, 8)]}
+  >
+    <AppText variant="titleMedium" modifiers={[weight(1)]}>
       {title}
-    </Text>
+    </AppText>
     {status ? (
-      <Text style={[styles.sectionStatus, { color: theme.onSurfaceVariant }]}>
+      <AppText variant="bodyMedium" color={theme.onSurfaceVariant}>
         {status}
-      </Text>
+      </AppText>
     ) : null}
-  </View>
+  </Row>
 );
 
 const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
@@ -110,211 +120,140 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   }, []);
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={getString('common.custom_code')}
-        handleGoBack={() => {
-          Keyboard.dismiss();
-          navigation.goBack();
-        }}
-        theme={theme}
-      />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+    <SettingsPage
+      title={getString('common.custom_code')}
+      onBack={() => {
+        Keyboard.dismiss();
+        navigation.goBack();
+      }}
+      overlays={
+        <Dialog.Root
+          visible={renameSnippet !== null}
+          onDismiss={handleRenameCancel}
+        >
+          <Dialog.Header>
+            <Dialog.Title>
+              {getString('customCodeSettings.renameSnippet')}
+            </Dialog.Title>
+          </Dialog.Header>
+          <Dialog.Content>
+            <TextInput
+              label={getString('common.name')}
+              value={renameSnippet?.name ?? ''}
+              onChangeText={name => {
+                if (renameSnippet) setRenameSnippet({ ...renameSnippet, name });
+              }}
+              autoFocus
+              singleLine
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Dialog.Action onPress={handleRenameCancel}>
+              {getString('common.cancel')}
+            </Dialog.Action>
+            <Dialog.Action onPress={handleRenameSave}>
+              {getString('common.save')}
+            </Dialog.Action>
+          </Dialog.Actions>
+        </Dialog.Root>
+      }
+    >
+      <AppText
+        variant="bodyMedium"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(24, 16, 24, 24)]}
       >
-        <Text style={[styles.description, { color: theme.onSurfaceVariant }]}>
-          {getString('customCodeSettings.description')}
-        </Text>
+        {getString('customCodeSettings.description')}
+      </AppText>
 
-        <View style={styles.section}>
-          <SectionHeader
-            status={getString('customCodeSettings.ruleCount', {
-              count: totalRules,
-            })}
-            theme={theme}
-            title={getString('customCodeSettings.textRules')}
-          />
-          <ReplaceItemModal showReplace />
-          <ReplaceItemModal />
-        </View>
+      <Column modifiers={[fillMaxWidth()]}>
+        <SectionHeader
+          status={getString('customCodeSettings.ruleCount', {
+            count: totalRules,
+          })}
+          theme={theme}
+          title={getString('customCodeSettings.textRules')}
+        />
+        <ReplaceItemModal showReplace />
+        <ReplaceItemModal />
+      </Column>
 
-        <View
-          style={[styles.divider, { backgroundColor: theme.outlineVariant }]}
+      <List.Divider theme={theme} />
+
+      <Column modifiers={[fillMaxWidth()]}>
+        <SectionHeader
+          status={
+            totalSnippets > 0
+              ? getString('customCodeSettings.activeSnippetCount', {
+                  count: activeSnippets,
+                  total: totalSnippets,
+                })
+              : undefined
+          }
+          theme={theme}
+          title={getString('customCodeSettings.codeSnippets')}
         />
 
-        <View style={styles.section}>
-          <SectionHeader
-            status={
-              totalSnippets > 0
-                ? getString('customCodeSettings.activeSnippetCount', {
-                    count: activeSnippets,
-                    total: totalSnippets,
-                  })
-                : undefined
-            }
-            theme={theme}
-            title={getString('customCodeSettings.codeSnippets')}
+        {codeSnippetsCSS.map((snippet, index) => (
+          <Snippet
+            key={`css-${index}`}
+            toggle={toggleSnippet}
+            rename={handleRenameSnippet}
+            edit={handleEditSnippet}
+            delete={deleteSnippet}
+            index={index}
+            snippet={snippet}
           />
+        ))}
+        {codeSnippetsJS.map((snippet, index) => (
+          <Snippet
+            key={`js-${index}`}
+            toggle={toggleSnippet}
+            rename={handleRenameSnippet}
+            edit={handleEditSnippet}
+            delete={deleteSnippet}
+            index={index}
+            snippet={snippet}
+          />
+        ))}
 
-          {codeSnippetsCSS.map((snippet, index) => (
-            <Snippet
-              key={`css-${index}`}
-              toggle={toggleSnippet}
-              rename={handleRenameSnippet}
-              edit={handleEditSnippet}
-              delete={deleteSnippet}
-              index={index}
-              snippet={snippet}
-            />
-          ))}
-          {codeSnippetsJS.map((snippet, index) => (
-            <Snippet
-              key={`js-${index}`}
-              toggle={toggleSnippet}
-              rename={handleRenameSnippet}
-              edit={handleEditSnippet}
-              delete={deleteSnippet}
-              index={index}
-              snippet={snippet}
-            />
-          ))}
-
-          {totalSnippets === 0 ? (
-            <View style={styles.emptyState}>
-              <Icon
-                accessible={false}
-                name="code-tags"
-                size={24}
-                color={theme.onSurfaceVariant}
-              />
-              <Text
-                style={[styles.emptyText, { color: theme.onSurfaceVariant }]}
-              >
-                {getString('customCodeSettings.noCodeSnippets')}
-              </Text>
-            </View>
-          ) : null}
-
-          <View style={styles.snippetActions}>
-            <Button
-              icon="plus"
-              mode="outlined"
-              onPress={() => handleEditSnippet(-1, false)}
-              style={styles.snippetButton}
+        {totalSnippets === 0 ? (
+          <Column
+            horizontalAlignment="center"
+            verticalArrangement={{ spacedBy: 8 }}
+            modifiers={[fillMaxWidth(), padding(32, 24, 32, 24)]}
+          >
+            <AppIcon source={CodeIcon} tint={theme.onSurfaceVariant} />
+            <AppText
+              variant="bodyMedium"
+              color={theme.onSurfaceVariant}
+              align="center"
             >
-              CSS
-            </Button>
-            <Button
-              icon="plus"
-              mode="outlined"
-              onPress={() => handleEditSnippet(-1, true)}
-              style={styles.snippetButton}
-            >
-              JavaScript
-            </Button>
-          </View>
-        </View>
-      </ScrollView>
-      <Dialog.Root
-        visible={renameSnippet !== null}
-        onDismiss={handleRenameCancel}
-      >
-        <Dialog.Header>
-          <Dialog.Title>
-            {getString('customCodeSettings.renameSnippet')}
-          </Dialog.Title>
-        </Dialog.Header>
-        <Dialog.Content>
-          <TextInput
-            label={getString('common.name')}
-            value={renameSnippet?.name ?? ''}
-            onChangeText={name => {
-              if (renameSnippet) setRenameSnippet({ ...renameSnippet, name });
-            }}
-            autoFocus
+              {getString('customCodeSettings.noCodeSnippets')}
+            </AppText>
+          </Column>
+        ) : null}
+
+        <FlowRow
+          horizontalArrangement={{ spacedBy: 8 }}
+          modifiers={[fillMaxWidth(), padding(16, 8, 16, 0)]}
+        >
+          <Button
+            icon={AddIcon}
             mode="outlined"
-            style={styles.textfield}
-            theme={{ colors: theme }}
+            onPress={() => handleEditSnippet(-1, false)}
+            title="CSS"
           />
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Dialog.Action onPress={handleRenameCancel}>
-            {getString('common.cancel')}
-          </Dialog.Action>
-          <Dialog.Action onPress={handleRenameSave}>
-            {getString('common.save')}
-          </Dialog.Action>
-        </Dialog.Actions>
-      </Dialog.Root>
-    </SafeAreaView>
+          <Button
+            icon={AddIcon}
+            mode="outlined"
+            onPress={() => handleEditSnippet(-1, true)}
+            title="JavaScript"
+          />
+        </FlowRow>
+      </Column>
+    </SettingsPage>
   );
 };
 
 export default SettingsCustomCode;
-
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 40,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 24,
-    marginHorizontal: 24,
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginHorizontal: 16,
-    marginVertical: 16,
-  },
-  emptyState: {
-    alignItems: 'center',
-    marginHorizontal: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-  },
-  emptyText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  section: {
-    width: '100%',
-  },
-  sectionHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-    marginHorizontal: 24,
-  },
-  sectionStatus: {
-    flexShrink: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    marginLeft: 16,
-    textAlign: 'right',
-  },
-  sectionTitle: {
-    flexShrink: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 24,
-  },
-  snippetActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  snippetButton: {
-    flexBasis: 140,
-    flexGrow: 1,
-  },
-  textfield: {
-    marginBottom: 16,
-  },
-});

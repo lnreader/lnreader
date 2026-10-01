@@ -1,11 +1,21 @@
-import { IconButtonV2 } from '@components';
+import { IconButtonV2, AppText } from '@components';
 import Switch from '@components/Switch/Switch';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { CodeSnippet } from '@utils/customCode';
-import { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { memo } from 'react';
+import { Box, Card, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clip,
+  combinedClickable,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import DeleteIcon from '@expo/material-symbols/delete.xml';
+import EditIcon from '@expo/material-symbols/edit.xml';
 
 function Snippet({
   delete: deleteSnippet,
@@ -23,153 +33,92 @@ function Snippet({
   snippet: CodeSnippet;
 }) {
   const theme = useTheme();
-  const colorTheme = useMemo(() => ({ colors: theme }), [theme]);
   const isJS = snippet.lang === 'js';
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.secondaryContainer }]}>
-      <Pressable
-        accessibilityHint={getString('customCodeSettings.renameHint')}
-        accessibilityLabel={snippet.name}
-        accessibilityRole="button"
-        accessibilityActions={[
-          {
-            name: 'activate',
-            label: getString('customCodeSettings.renameSnippet'),
-          },
+    <Card
+      colors={{
+        // Not a primary-tinted container: some themes (Midnight Dusk) make it
+        // the same colour as an enabled switch's track.
+        containerColor: theme.surfaceContainerHigh,
+        contentColor: theme.onSurface,
+      }}
+      modifiers={[fillMaxWidth(), padding(16, 4, 16, 4)]}
+    >
+      <Column
+        modifiers={[
+          fillMaxWidth(),
+          combinedClickable({
+            onClick: () => undefined,
+            onLongClick: () => rename(index, isJS, snippet.name),
+          }),
+          padding(16, 12, 16, 0),
         ]}
-        onAccessibilityAction={({ nativeEvent }) => {
-          if (nativeEvent.actionName === 'activate') {
-            rename(index, isJS, snippet.name);
-          }
-        }}
-        onLongPress={() => rename(index, isJS, snippet.name)}
-        style={styles.content}
       >
-        <View style={styles.header}>
-          <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor: isJS
-                  ? theme.tertiaryContainer
-                  : theme.primaryContainer,
-              },
+        <Row
+          verticalAlignment="center"
+          horizontalArrangement={{ spacedBy: 12 }}
+          modifiers={[fillMaxWidth()]}
+        >
+          <Box
+            modifiers={[
+              clip(Shapes.RoundedCorner(8)),
+              background(
+                isJS ? theme.tertiaryContainer : theme.primaryContainer,
+              ),
+              padding(8, 2, 8, 2),
             ]}
           >
-            <Text
-              style={[
-                styles.badgeText,
-                {
-                  color: isJS
-                    ? theme.onTertiaryContainer
-                    : theme.onPrimaryContainer,
-                },
-              ]}
-              theme={colorTheme}
+            <AppText
+              variant="labelMedium"
+              weight="700"
+              color={
+                isJS ? theme.onTertiaryContainer : theme.onPrimaryContainer
+              }
             >
               {isJS ? 'JS' : 'CSS'}
-            </Text>
-          </View>
-          <Text
-            numberOfLines={2}
-            style={[styles.name, { color: theme.onSurface }]}
-            theme={colorTheme}
-          >
+            </AppText>
+          </Box>
+          <AppText variant="titleMedium" maxLines={2} modifiers={[weight(1)]}>
             {snippet.name}
-          </Text>
-        </View>
-        <Text
-          numberOfLines={2}
-          style={[styles.preview, { color: theme.onSurfaceVariant }]}
-          theme={colorTheme}
+          </AppText>
+        </Row>
+        <AppText
+          variant="bodySmall"
+          color={theme.onSurfaceVariant}
+          maxLines={2}
+          modifiers={[padding(0, 8, 0, 0)]}
         >
           {snippet.code}
-        </Text>
-      </Pressable>
-      <View style={styles.footer}>
-        <Switch
-          accessibilityLabel={snippet.name}
-          containerStyle={styles.switchContainer}
-          value={snippet.active}
-          onValueChange={() => toggle(index, isJS)}
+        </AppText>
+      </Column>
+      <Row
+        verticalAlignment="center"
+        modifiers={[fillMaxWidth(), padding(16, 0, 4, 4)]}
+      >
+        <Row modifiers={[weight(1)]}>
+          <Switch
+            value={snippet.active}
+            onValueChange={() => toggle(index, isJS)}
+          />
+        </Row>
+        <IconButtonV2
+          accessibilityLabel={getString('common.edit')}
+          name={EditIcon}
+          color={theme.onSurface}
+          onPress={() => edit(index, isJS)}
+          theme={theme}
         />
-        <View style={styles.actions}>
-          <IconButtonV2
-            accessibilityLabel={getString('common.edit')}
-            name="pencil-outline"
-            color={theme.onSurface}
-            onPress={() => edit(index, isJS)}
-            padding={12}
-            theme={theme}
-          />
-          <IconButtonV2
-            accessibilityLabel={getString('common.delete')}
-            color={theme.onSurface}
-            name="delete-outline"
-            onPress={() => deleteSnippet(index, isJS)}
-            padding={12}
-            theme={theme}
-          />
-        </View>
-      </View>
-    </View>
+        <IconButtonV2
+          accessibilityLabel={getString('common.delete')}
+          color={theme.onSurface}
+          name={DeleteIcon}
+          onPress={() => deleteSnippet(index, isJS)}
+          theme={theme}
+        />
+      </Row>
+    </Card>
   );
 }
 
 export default memo(Snippet);
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: 'row',
-  },
-  badge: {
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  card: {
-    borderCurve: 'continuous',
-    borderRadius: 12,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-    marginBottom: 8,
-    marginHorizontal: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  content: {
-    minHeight: 48,
-  },
-  footer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 12,
-  },
-  name: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 24,
-  },
-  preview: {
-    fontFamily: 'monospace',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
-  },
-  switchContainer: {
-    justifyContent: 'center',
-    minHeight: 48,
-  },
-});

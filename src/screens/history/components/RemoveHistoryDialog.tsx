@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import { Checkbox, Dialog } from '@components';
-import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
+import { useTheme } from '@hooks/persisted';
 
 interface RemoveHistoryDialogProps {
   visible: boolean;
@@ -42,7 +42,6 @@ const RemoveHistoryDialog: React.FC<RemoveHistoryDialogProps> = ({
           status={resetAllChapters}
           onPress={() => setResetAllChapters(value => !value)}
           theme={theme}
-          viewStyle={{ paddingHorizontal: 0 }}
         />
       </Dialog.Content>
       <Dialog.Actions>

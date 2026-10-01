@@ -1,7 +1,7 @@
 import { Checkbox, Dialog } from '@components';
 import type { SmartUpdateFilters } from '@hooks/persisted/useSettings';
-import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
+import { useTheme } from '@hooks/persisted';
 
 interface SmartUpdateDialogProps {
   filters: SmartUpdateFilters;
@@ -19,7 +19,6 @@ const SmartUpdateDialog = ({
   onSave,
 }: SmartUpdateDialogProps) => {
   const theme = useTheme();
-
   return (
     <Dialog.Root visible={visible} onDismiss={onCancel}>
       <Dialog.Title>

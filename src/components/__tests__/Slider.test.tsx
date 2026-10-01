@@ -3,47 +3,18 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import Slider from '../Slider/Slider';
 
-const mockUseTheme = jest.fn();
-
-jest.mock('@hooks/persisted', () => ({
-  useTheme: () => mockUseTheme(),
-}));
-
 describe('Slider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseTheme.mockReturnValue({
-      primary: '#6750a4',
-      onPrimary: '#ffffff',
-      secondaryContainer: '#e8def8',
-      onSecondaryContainer: '#1d192b',
-      onSurface: '#1d1b20',
-      inverseSurface: '#322f35',
-      inverseOnSurface: '#f5eff7',
-      rippleColor: 'rgba(103, 80, 164, 0.12)',
-    });
   });
 
-  const layoutSlider = () => {
-    const slider = screen.getByTestId('slider');
-    fireEvent(slider, 'layout', {
-      nativeEvent: {
-        layout: { width: 200, height: 48, x: 0, y: 0 },
-      },
-    });
-    return slider;
-  };
-
   it('exposes the current range to accessibility services', () => {
-    render(
-      <Slider value={4} min={0} max={10} accessibilityLabel="Reading size" />,
-    );
+    render(<Slider value={4} min={0} max={10} />);
 
-    expect(screen.getByLabelText('Reading size')).toHaveAccessibilityValue({
+    expect(screen.getByRole('adjustable')).toHaveAccessibilityValue({
       min: 0,
       max: 10,
       now: 4,
-      text: '4',
     });
   });
 
@@ -58,68 +29,10 @@ describe('Slider', () => {
         onValueChange={onValueChange}
       />,
     );
-    const slider = layoutSlider();
 
-    fireEvent(slider, 'responderGrant', {
-      nativeEvent: { locationX: 142 },
-      touchHistory: {
-        indexOfSingleActiveTouch: -1,
-        mostRecentTimeStamp: 0,
-        numberActiveTouches: 0,
-        touchBank: [],
-      },
-    });
+    fireEvent(screen.getByRole('adjustable'), 'valueChange', 7.3);
 
     expect(onValueChange).toHaveBeenLastCalledWith(8);
-  });
-
-  it('uses a continuous MD3 XS track and handle by default', () => {
-    render(<Slider value={5} min={0} max={10} />);
-    layoutSlider();
-
-    expect(screen.getByTestId('slider')).toHaveStyle({ height: 48 });
-    expect(screen.getByTestId('slider-handle')).toHaveStyle({
-      borderRadius: 2,
-      height: 44,
-      top: 2,
-      width: 4,
-    });
-    expect(screen.getByTestId('slider-active-track')).toHaveStyle({
-      borderRadius: 8,
-      height: 16,
-      top: 16,
-      width: 100,
-    });
-    expect(screen.getByTestId('slider-inactive-track')).toHaveStyle({
-      borderRadius: 8,
-      height: 16,
-      top: 16,
-      width: 200,
-    });
-  });
-
-  it('supports accessibility increment and decrement actions', () => {
-    const onValueChange = jest.fn();
-    render(
-      <Slider
-        value={4}
-        min={0}
-        max={10}
-        step={2}
-        onValueChange={onValueChange}
-      />,
-    );
-    const slider = screen.getByTestId('slider');
-
-    fireEvent(slider, 'accessibilityAction', {
-      nativeEvent: { actionName: 'increment' },
-    });
-    fireEvent(slider, 'accessibilityAction', {
-      nativeEvent: { actionName: 'decrement' },
-    });
-
-    expect(onValueChange).toHaveBeenNthCalledWith(1, 6);
-    expect(onValueChange).toHaveBeenNthCalledWith(2, 2);
   });
 
   it('reports the final value when sliding completes', () => {
@@ -133,62 +46,10 @@ describe('Slider', () => {
         onSlidingComplete={onSlidingComplete}
       />,
     );
-    const slider = layoutSlider();
-    const responderEvent = {
-      nativeEvent: { locationX: 100 },
-      touchHistory: {
-        indexOfSingleActiveTouch: -1,
-        mostRecentTimeStamp: 0,
-        numberActiveTouches: 0,
-        touchBank: [],
-      },
-    };
 
-    fireEvent(slider, 'responderGrant', responderEvent);
-    fireEvent(slider, 'responderRelease', responderEvent);
+    fireEvent(screen.getByRole('adjustable'), 'valueChange', 5);
 
     expect(onSlidingComplete).toHaveBeenCalledWith(5);
-  });
-
-  it('keeps the released value visible until the controlled value updates', () => {
-    const onSlidingComplete = jest.fn();
-    const { rerender } = render(
-      <Slider
-        value={5}
-        min={1}
-        max={5}
-        step={1}
-        onSlidingComplete={onSlidingComplete}
-      />,
-    );
-    const slider = layoutSlider();
-    const responderEvent = {
-      nativeEvent: { locationX: 2 },
-      touchHistory: {
-        indexOfSingleActiveTouch: -1,
-        mostRecentTimeStamp: 0,
-        numberActiveTouches: 0,
-        touchBank: [],
-      },
-    };
-
-    fireEvent(slider, 'responderGrant', responderEvent);
-    fireEvent(slider, 'responderRelease', responderEvent);
-
-    expect(onSlidingComplete).toHaveBeenCalledWith(1);
-    expect(screen.getByTestId('slider-handle')).toHaveStyle({ left: 2 });
-
-    rerender(
-      <Slider
-        value={1}
-        min={1}
-        max={5}
-        step={1}
-        onSlidingComplete={onSlidingComplete}
-      />,
-    );
-
-    expect(screen.getByTestId('slider-handle')).toHaveStyle({ left: 2 });
   });
 
   it('does not respond while disabled', () => {
@@ -202,20 +63,8 @@ describe('Slider', () => {
         onValueChange={onValueChange}
       />,
     );
-    const slider = layoutSlider();
 
-    fireEvent(slider, 'responderGrant', {
-      nativeEvent: { locationX: 150 },
-      touchHistory: {
-        indexOfSingleActiveTouch: -1,
-        mostRecentTimeStamp: 0,
-        numberActiveTouches: 0,
-        touchBank: [],
-      },
-    });
-    fireEvent(slider, 'accessibilityAction', {
-      nativeEvent: { actionName: 'increment' },
-    });
+    fireEvent(screen.getByRole('adjustable'), 'valueChange', 6);
 
     expect(onValueChange).not.toHaveBeenCalled();
   });

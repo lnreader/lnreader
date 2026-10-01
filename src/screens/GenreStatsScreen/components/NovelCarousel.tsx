@@ -1,129 +1,105 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { useState } from 'react';
+import { Box, Column, LazyRow } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  clip,
+  fillMaxWidth,
+  height,
+  padding,
+  Shapes,
+  width,
+  background,
+} from '@expo/ui/jetpack-compose/modifiers';
+
+import type { NovelWithGenres } from '@database/queries/StatsQueries';
+import { useTheme } from '@hooks/persisted/useTheme';
 import { getString } from '@i18n/translations';
-import NovelCard from './NovelCard';
-import type { ThemeColors } from '@theme/types';
-import { FlatList } from 'react-native-gesture-handler';
+import { getPlugin } from '@plugins/pluginManager';
+import { AppText, COVER_ASPECT } from '@components';
+import { NovelCoverCard } from '@components/NovelCover';
 
-interface NovelCarouselProps {
-  novels: {
-    id: number;
-    name: string;
-    path: string;
-    cover: string | null;
-    pluginId: string;
-  }[];
-  theme: ThemeColors;
-  onNovelPress: (novel: {
-    id: number;
-    name: string;
-    path: string;
-    cover: string | null;
-    pluginId: string;
-  }) => void;
-}
-
+const CARD_WIDTH = 96;
 const MAX_VISIBLE = 10;
 
-const NovelCarousel: React.FC<NovelCarouselProps> = ({
-  novels,
-  theme,
-  onNovelPress,
-}) => {
-  const [showAll, setShowAll] = useState(false);
+export type StatsNovel = Pick<
+  NovelWithGenres,
+  'id' | 'name' | 'path' | 'cover' | 'pluginId'
+>;
 
-  if (novels.length === 0) {
+const NovelCarousel = ({
+  novels,
+  onPress,
+}: {
+  novels: readonly StatsNovel[];
+  onPress: (novel: StatsNovel) => void;
+}) => {
+  const theme = useTheme();
+  const [showAll, setShowAll] = useState(false);
+  if (!novels.length) {
     return (
-      <Text style={[styles.emptyText, { color: theme.onSurfaceVariant }]}>
+      <AppText
+        variant="bodyMedium"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(16, 0, 16, 0)]}
+      >
         {getString('genreStats.noNovels')}
-      </Text>
+      </AppText>
     );
   }
-
-  const visibleNovels = showAll ? novels : novels.slice(0, MAX_VISIBLE);
-  const hasMore = !showAll && novels.length > MAX_VISIBLE;
-
-  const data = hasMore
-    ? [...visibleNovels, { id: -1, name: '', cover: null, pluginId: '' } as any]
-    : visibleNovels;
-
+  const visible = showAll ? novels : novels.slice(0, MAX_VISIBLE);
+  const coverHeight = Math.round(CARD_WIDTH * COVER_ASPECT);
   return (
-    <View style={styles.container}>
-      <Text style={[styles.heading, { color: theme.onSurfaceVariant }]}>
+    <Column modifiers={[fillMaxWidth()]}>
+      <AppText
+        variant="labelLarge"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(16, 0, 16, 8)]}
+      >
         {getString('genreStats.novels')}
-      </Text>
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        data={data}
-        keyExtractor={item =>
-          item.id != null && item.id !== -1 ? String(item.id) : 'see-all'
-        }
-        renderItem={({ item }) => {
-          if (item.id === -1) {
-            return (
-              <Pressable
-                onPress={() => setShowAll(true)}
-                accessibilityRole="button"
-                accessibilityLabel={getString('genreStats.seeAllNovels')}
-                style={styles.seeAllCard}
-              >
-                <Text style={[styles.seeAllText, { color: theme.primary }]}>
-                  {getString('genreStats.seeAllNovels')}
-                </Text>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  color={theme.primary}
-                  size={20}
-                />
-              </Pressable>
-            );
-          }
-          return (
-            <NovelCard
-              novel={item}
+      </AppText>
+      <LazyRow
+        horizontalArrangement={{ spacedBy: 10 }}
+        contentPadding={{ start: 16, end: 16 }}
+        modifiers={[fillMaxWidth()]}
+      >
+        {visible.map(novel => (
+          <Box key={novel.id} modifiers={[width(CARD_WIDTH)]}>
+            <NovelCoverCard
+              title={novel.name}
+              coverUri={novel.cover}
+              requestInit={getPlugin(novel.pluginId)?.imageRequestInit}
+              width={CARD_WIDTH}
+              onPress={() => onPress(novel)}
               theme={theme}
-              onPress={() => onNovelPress(item)}
             />
-          );
-        }}
-        windowSize={5}
-        maxToRenderPerBatch={10}
-      />
-    </View>
+          </Box>
+        ))}
+        {!showAll && novels.length > MAX_VISIBLE ? (
+          <Column
+            key="see-all"
+            horizontalAlignment="center"
+            verticalArrangement={{ spacedBy: 4 }}
+            modifiers={[
+              width(CARD_WIDTH),
+              height(coverHeight),
+              clip(Shapes.RoundedCorner(12)),
+              background(theme.secondaryContainer),
+              clickable(() => setShowAll(true)),
+              padding(8, coverHeight / 2 - 12, 8, 0),
+            ]}
+          >
+            <AppText
+              variant="labelLarge"
+              align="center"
+              color={theme.onSecondaryContainer}
+            >
+              {`${getString('genreStats.seeAllNovels')} (${novels.length})`}
+            </AppText>
+          </Column>
+        ) : null}
+      </LazyRow>
+    </Column>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 12,
-  },
-  heading: {
-    fontSize: 14,
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-  },
-  emptyText: {
-    fontSize: 13,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  seeAllCard: {
-    width: 80,
-    marginRight: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-});
 
 export default NovelCarousel;

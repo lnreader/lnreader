@@ -1,10 +1,22 @@
 import React, { RefObject } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  defaultMinSize,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconButtonV2 } from '@components';
+import { AppHost, AppText, IconButtonV2 } from '@components';
 import { ThemeColors } from '@theme/types';
 import WebView from 'react-native-webview';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import ArrowForwardIcon from '@expo/material-symbols/arrow_forward.xml';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import MoreVertIcon from '@expo/material-symbols/more_vert.xml';
 
 interface AppbarProps {
   title: string;
@@ -30,93 +42,65 @@ const Appbar: React.FC<AppbarProps> = ({
   const { top } = useSafeAreaInsets();
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: top, backgroundColor: theme.surface },
-      ]}
-    >
-      <View style={styles.appbar}>
+    <AppHost matchContents={{ vertical: true }} style={styles.container}>
+      <Row
+        verticalAlignment="center"
+        modifiers={[
+          fillMaxWidth(),
+          background(theme.surface),
+          padding(4, top, 4, 0),
+          defaultMinSize({ minHeight: 64 + top }),
+        ]}
+      >
         <IconButtonV2
-          name="close"
+          name={CloseIcon}
           color={theme.onSurface}
           onPress={goBack}
-          padding={12}
           theme={theme}
         />
-        <View style={styles.titleContainer}>
-          <Text
-            numberOfLines={1}
-            style={[styles.title, { color: theme.onSurface }]}
-          >
+        <Column modifiers={[weight(1), padding(8, 0, 8, 0)]}>
+          <AppText variant="titleMedium" maxLines={1} color={theme.onSurface}>
             {title}
-          </Text>
-          <Text
-            numberOfLines={1}
-            style={[styles.url, { color: theme.onSurfaceVariant }]}
+          </AppText>
+          <AppText
+            variant="bodySmall"
+            maxLines={1}
+            color={theme.onSurfaceVariant}
           >
             {currentUrl}
-          </Text>
-        </View>
-        <View style={styles.iconContainer}>
+          </AppText>
+        </Column>
+        <Row modifiers={[padding(4, 0, 0, 0)]}>
           <IconButtonV2
-            name="arrow-left"
+            name={ArrowBackIcon}
             color={theme.onSurface}
             disabled={!canGoBack}
             onPress={() => webView.current?.goBack()}
-            padding={12}
             theme={theme}
           />
           <IconButtonV2
-            name="arrow-right"
+            name={ArrowForwardIcon}
             color={theme.onSurface}
             disabled={!canGoForward}
             onPress={() => webView.current?.goForward()}
-            padding={12}
             theme={theme}
           />
           <IconButtonV2
-            name="dots-vertical"
+            name={MoreVertIcon}
             color={theme.onSurface}
             onPress={() => setMenuVisible(true)}
-            padding={12}
             theme={theme}
           />
-        </View>
-      </View>
-    </View>
+        </Row>
+      </Row>
+    </AppHost>
   );
 };
 
 export default Appbar;
 
 const styles = StyleSheet.create({
-  appbar: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 64,
-    paddingHorizontal: 4,
-  },
   container: {
     width: '100%',
-  },
-  iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginLeft: 4,
-  },
-  title: {
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  titleContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    minWidth: 0,
-    paddingHorizontal: 8,
-  },
-  url: {
-    fontSize: 12,
-    lineHeight: 16,
   },
 });

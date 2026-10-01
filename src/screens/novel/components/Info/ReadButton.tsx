@@ -1,9 +1,8 @@
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 import { Button } from '@components';
 import { getString } from '@i18n/translations';
 import { ChapterInfo } from '@database/types';
 import { useAppSettings } from '@hooks/persisted';
-import Animated, { ZoomIn } from 'react-native-reanimated';
-import { StyleSheet } from 'react-native';
 
 interface ReadButtonProps {
   firstUnreadChapter?: ChapterInfo;
@@ -28,20 +27,18 @@ const ReadButton = ({
 
   if (!useFabForContinueReading) {
     return targetChapter ? (
-      <Animated.View entering={ZoomIn.duration(150)}>
-        <Button
-          title={
-            lastRead
-              ? `${getString('novelScreen.continueReading')} ${lastRead.name}`
-              : getString('novelScreen.startReadingChapters', {
-                  name: targetChapter.name,
-                })
-          }
-          style={styles.margin}
-          onPress={navigateToTargetChapter}
-          mode="contained"
-        />
-      </Animated.View>
+      <Button
+        title={
+          lastRead
+            ? `${getString('novelScreen.continueReading')} ${lastRead.name}`
+            : getString('novelScreen.startReadingChapters', {
+                name: targetChapter.name,
+              })
+        }
+        modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
+        onPress={navigateToTargetChapter}
+        mode="contained"
+      />
     ) : null;
   } else {
     return null;
@@ -49,7 +46,3 @@ const ReadButton = ({
 };
 
 export default ReadButton;
-
-const styles = StyleSheet.create({
-  margin: { margin: 16 },
-});

@@ -153,14 +153,30 @@ jest.mock('@components', () => {
   const React = require('react');
   const { Pressable, Text, View } = require('react-native');
   return {
-    SafeAreaView: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
+    Screen: ({ topBar, list, bottomBar, overlays, children }: any) =>
+      React.createElement(
+        View,
+        null,
+        topBar,
+        list,
+        children,
+        bottomBar,
+        overlays,
+      ),
+    AppText: ({ children }: any) => React.createElement(Text, null, children),
+    IconButtonV2: ({ accessibilityLabel, onPress }: any) =>
+      React.createElement(
+        Pressable,
+        { testID: `appbar-action-${accessibilityLabel}`, onPress },
+        React.createElement(Text, null, accessibilityLabel),
+      ),
+    useScreenInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
     EmptyView: ({
       description,
       actions,
     }: {
       description: string;
-      actions?: { iconName: string; title: string; onPress: () => void }[];
+      actions?: { iconName: unknown; title: string; onPress: () => void }[];
     }) =>
       React.createElement(
         View,
@@ -171,38 +187,13 @@ jest.mock('@components', () => {
             Pressable,
             {
               key: action.title,
-              testID: `emptyview-action-${action.iconName}`,
+              testID: `emptyview-action-${action.title}`,
               onPress: action.onPress,
             },
             React.createElement(Text, null, action.title),
           ),
         ),
       ),
-  };
-});
-
-jest.mock('react-native-paper', () => {
-  const React = require('react');
-  const { Pressable, Text } = require('react-native');
-
-  const Portal: any = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children);
-  Portal.Host = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children);
-
-  return {
-    Portal,
-    Appbar: {
-      Action: ({ icon, onPress }: any) =>
-        React.createElement(
-          Pressable,
-          { testID: `appbar-action-${icon}`, onPress },
-          React.createElement(Text, null, icon),
-        ),
-      Content: ({ title }: any) => React.createElement(Text, null, title),
-    },
-    Snackbar: ({ visible, children }: any) =>
-      visible ? React.createElement(React.Fragment, null, children) : null,
   };
 });
 
@@ -347,7 +338,7 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     );
 
     fireEvent.press(screen.getByTestId('select-unread'));
-    fireEvent.press(screen.getByTestId('action-check'));
+    fireEvent.press(screen.getByTestId('action-done_all'));
 
     expect(store.state.markChaptersRead).toHaveBeenCalledTimes(1);
   });
@@ -365,12 +356,14 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     );
 
     fireEvent.press(screen.getByTestId('select-unread'));
-    fireEvent.press(screen.getByTestId('appbar-action-select-all'));
+    fireEvent.press(
+      screen.getByTestId('appbar-action-backupScreen.options.selectAll'),
+    );
 
     expect(await screen.findByText('1001')).toBeOnTheScreen();
     expect(mockGetPageChapterIds).toHaveBeenCalledWith(7, [], '1', []);
 
-    fireEvent.press(screen.getByTestId('action-check'));
+    fireEvent.press(screen.getByTestId('action-done_all'));
     expect(store.state.markChaptersRead).toHaveBeenCalledWith(
       Array.from({ length: 1001 }, (_, index) => index + 1),
     );
@@ -386,7 +379,7 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     );
 
     fireEvent.press(screen.getByTestId('select-read'));
-    fireEvent.press(screen.getByTestId('action-check-outline'));
+    fireEvent.press(screen.getByTestId('action-remove_done'));
 
     expect(
       store.state.markChaptersUnreadAndResetProgress,
@@ -412,7 +405,7 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
       'appbar-actions-hidden',
     );
 
-    fireEvent.press(screen.getByTestId('emptyview-action-arrow-left'));
+    fireEvent.press(screen.getByTestId('emptyview-action-common.back'));
     expect(navigation.goBack).toHaveBeenCalled();
   });
 
@@ -447,7 +440,7 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     expect(screen.queryByTestId('download-custom-modal')).toBeNull();
 
     fireEvent.press(screen.getByTestId('select-undownloaded'));
-    fireEvent.press(screen.getByTestId('action-download-outline'));
+    fireEvent.press(screen.getByTestId('action-download'));
 
     expect(mockDownloadChapters).not.toHaveBeenCalled();
   });

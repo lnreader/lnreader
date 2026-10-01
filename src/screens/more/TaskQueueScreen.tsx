@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FlatList, View, Text, StyleSheet } from 'react-native';
+import { Column, Row } from '@expo/ui/jetpack-compose';
 import {
-  FAB,
-  ProgressBar,
-  Appbar as MaterialAppbar,
-  overlay,
-} from 'react-native-paper';
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { useTheme } from '@hooks/persisted';
 
@@ -13,11 +12,15 @@ import { showToast } from '../../utils/showToast';
 import { getString } from '@i18n/translations';
 import {
   Appbar,
+  AppText,
+  ComposeList,
   ConfirmationDialog,
   EmptyView,
+  Fab,
   IconButtonV2,
   Menu,
-  SafeAreaView,
+  ProgressIndicator,
+  Screen,
 } from '@components';
 import { TaskQueueScreenProps } from '@navigators/types';
 import {
@@ -27,10 +30,14 @@ import {
 } from '@services/backgroundTasks';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMMKVObject } from 'react-native-mmkv';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import MoreVertIcon from '@expo/material-symbols/more_vert.xml';
+import PauseIcon from '@expo/material-symbols/pause.xml';
+import PlayArrowIcon from '@expo/material-symbols/play_arrow.xml';
 
 const DownloadQueue = ({ navigation }: TaskQueueScreenProps) => {
   const theme = useTheme();
-  const { bottom, right } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const [taskQueue] = useMMKVObject<QueuedBackgroundTask[]>(
     BACKGROUND_TASKS_STORE_KEY,
   );
@@ -47,136 +54,124 @@ const DownloadQueue = ({ navigation }: TaskQueueScreenProps) => {
   }, [taskQueue]);
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={'Task Queue'}
-        handleGoBack={navigation.goBack}
-        theme={theme}
-      >
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={
-            taskQueue?.length ? (
-              <MaterialAppbar.Action
-                icon="dots-vertical"
-                iconColor={theme.onSurface}
-                onPress={openMenu}
-              />
-            ) : null
-          }
-          contentStyle={{ backgroundColor: overlay(2, theme.surface) }}
+    <Screen
+      topBar={
+        <Appbar
+          title={'Task Queue'}
+          handleGoBack={navigation.goBack}
+          theme={theme}
         >
-          <Menu.Item
-            onPress={() => {
-              backgroundTasks.cancelAll();
-              setIsRunning(false);
-              showToast(getString('downloadScreen.cancelled'));
-              closeMenu();
-            }}
-            title={getString('downloadScreen.cancelDownloads')}
-            titleStyle={{ color: theme.onSurface }}
-          />
-        </Menu>
-      </Appbar>
-
-      <FlatList
-        contentContainerStyle={styles.paddingBottom}
-        keyExtractor={item => item.id}
-        data={taskQueue || []}
-        renderItem={({ item }) => (
-          <View style={styles.padding}>
-            <View style={styles.taskRow}>
-              <View style={styles.taskDetails}>
-                <Text style={{ color: theme.onSurface }}>{item.meta.name}</Text>
-                {item.meta.progressText ? (
-                  <Text style={{ color: theme.onSurfaceVariant }}>
-                    {item.meta.progressText}
-                  </Text>
-                ) : null}
-                <ProgressBar
-                  indeterminate={
-                    item.meta.isRunning && item.meta.progress === undefined
-                  }
-                  progress={item.meta.progress}
-                  color={theme.primary}
-                  style={[
-                    { backgroundColor: theme.surface2 },
-                    styles.marginTop,
-                  ]}
+          {taskQueue?.length ? (
+            <Menu
+              visible={visible}
+              onDismiss={closeMenu}
+              anchor={
+                <IconButtonV2
+                  name={MoreVertIcon}
+                  color={theme.onSurface}
+                  onPress={openMenu}
+                  theme={theme}
                 />
-              </View>
+              }
+            >
+              <Menu.Item
+                onPress={() => {
+                  backgroundTasks.cancelAll();
+                  setIsRunning(false);
+                  showToast(getString('downloadScreen.cancelled'));
+                  closeMenu();
+                }}
+                title={getString('downloadScreen.cancelDownloads')}
+              />
+            </Menu>
+          ) : null}
+        </Appbar>
+      }
+      list={
+        <ComposeList
+          contentPadding={{ bottom: bottom + 100 }}
+          keyExtractor={item => item.id}
+          data={taskQueue || []}
+          renderItem={item => (
+            <Row
+              verticalAlignment="center"
+              horizontalArrangement={{ spacedBy: 8 }}
+              modifiers={[fillMaxWidth(), padding(16, 16, 16, 16)]}
+            >
+              <Column modifiers={[weight(1)]}>
+                <AppText color={theme.onSurface}>{item.meta.name}</AppText>
+                {item.meta.progressText ? (
+                  <AppText color={theme.onSurfaceVariant}>
+                    {item.meta.progressText}
+                  </AppText>
+                ) : null}
+                <ProgressIndicator
+                  progress={
+                    item.meta.isRunning && item.meta.progress === undefined
+                      ? undefined
+                      : item.meta.progress ?? 0
+                  }
+                  modifiers={[fillMaxWidth(), padding(0, 8, 0, 0)]}
+                />
+              </Column>
               <IconButtonV2
                 accessibilityLabel={`${getString('common.cancel')} ${
                   item.meta.name
                 }`}
-                name="close"
+                name={CloseIcon}
                 onPress={() => setTaskToCancel(item)}
                 theme={theme}
               />
-            </View>
-          </View>
-        )}
-        ListEmptyComponent={
-          <EmptyView
-            icon="(･o･;)"
-            description={'No running tasks'}
-            theme={theme}
-          />
-        }
-      />
-      {taskQueue && taskQueue.length > 0 ? (
-        <FAB
-          style={[
-            styles.fab,
-            { backgroundColor: theme.primary, bottom, right },
-          ]}
-          color={theme.onPrimary}
-          label={
-            isRunning ? getString('common.pause') : getString('common.resume')
+            </Row>
+          )}
+          footer={
+            taskQueue?.length ? null : (
+              <EmptyView
+                icon="(･o･;)"
+                description={'No running tasks'}
+                theme={theme}
+              />
+            )
           }
-          uppercase={false}
-          icon={isRunning ? 'pause' : 'play'}
-          onPress={() => {
-            if (isRunning) {
-              backgroundTasks.pauseAll();
-              setIsRunning(false);
-            } else {
-              backgroundTasks.resumeAll();
-              setIsRunning(true);
-            }
-          }}
         />
-      ) : null}
-      <ConfirmationDialog
-        title={getString('taskQueue.cancelTaskTitle')}
-        message={getString('taskQueue.cancelTaskConfirmation', {
-          task: taskToCancel?.meta.name ?? '',
-        })}
-        visible={taskToCancel !== undefined}
-        confirmLabel={getString('taskQueue.cancelTaskAction')}
-        cancelLabel={getString('taskQueue.keepTaskAction')}
-        onDismiss={() => setTaskToCancel(undefined)}
-        onConfirm={() =>
-          taskToCancel ? backgroundTasks.cancel(taskToCancel.id) : undefined
-        }
-      />
-    </SafeAreaView>
+      }
+      floatingAction={
+        taskQueue && taskQueue.length > 0 ? (
+          <Fab
+            extended
+            label={
+              isRunning ? getString('common.pause') : getString('common.resume')
+            }
+            icon={isRunning ? PauseIcon : PlayArrowIcon}
+            onPress={() => {
+              if (isRunning) {
+                backgroundTasks.pauseAll();
+                setIsRunning(false);
+              } else {
+                backgroundTasks.resumeAll();
+                setIsRunning(true);
+              }
+            }}
+          />
+        ) : null
+      }
+      overlays={
+        <ConfirmationDialog
+          title={getString('taskQueue.cancelTaskTitle')}
+          message={getString('taskQueue.cancelTaskConfirmation', {
+            task: taskToCancel?.meta.name ?? '',
+          })}
+          visible={taskToCancel !== undefined}
+          confirmLabel={getString('taskQueue.cancelTaskAction')}
+          cancelLabel={getString('taskQueue.keepTaskAction')}
+          onDismiss={() => setTaskToCancel(undefined)}
+          onConfirm={() =>
+            taskToCancel ? backgroundTasks.cancel(taskToCancel.id) : undefined
+          }
+        />
+      }
+    />
   );
 };
 
 export default DownloadQueue;
-
-const styles = StyleSheet.create({
-  fab: {
-    bottom: 16,
-    margin: 16,
-    position: 'absolute',
-    right: 0,
-  },
-  marginTop: { marginTop: 8 },
-  paddingBottom: { paddingBottom: 100, flexGrow: 1 },
-  padding: { padding: 16 },
-  taskDetails: { flex: 1 },
-  taskRow: { alignItems: 'center', flexDirection: 'row', gap: 8 },
-});

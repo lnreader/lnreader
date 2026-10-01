@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Spacer } from '@expo/ui/jetpack-compose';
+import { padding, weight } from '@expo/ui/jetpack-compose/modifiers';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-import { Dialog } from '@components/index';
+import { AppText, Dialog } from '@components/index';
 
 import { useTheme } from '@hooks/persisted';
 
@@ -60,12 +61,11 @@ const SetCategoryModal: React.FC<SetCategoryModalProps> = ({
   return (
     <Dialog.Root visible={visible} onDismiss={closeModal}>
       <Dialog.Title>{getString('categories.setCategories')}</Dialog.Title>
-      <Dialog.ScrollArea>
-        <FlatList
-          data={categories}
-          style={styles.categoryList}
-          renderItem={({ item }) => (
+      <Dialog.ScrollArea fixed>
+        {categories.length ? (
+          categories.map(item => (
             <Checkbox
+              key={item.id}
               status={
                 selectedCategories.find(category => category.id === item.id) !==
                 undefined
@@ -76,15 +76,15 @@ const SetCategoryModal: React.FC<SetCategoryModalProps> = ({
               }
               theme={theme}
             />
-          )}
-          ListEmptyComponent={
-            <Text
-              style={[styles.emptyMessage, { color: theme.onSurfaceVariant }]}
-            >
-              {getString('categories.setModalEmptyMsg')}
-            </Text>
-          }
-        />
+          ))
+        ) : (
+          <AppText
+            color={theme.onSurfaceVariant}
+            modifiers={[padding(16, 16, 16, 16)]}
+          >
+            {getString('categories.setModalEmptyMsg')}
+          </AppText>
+        )}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action
@@ -98,7 +98,7 @@ const SetCategoryModal: React.FC<SetCategoryModalProps> = ({
         >
           {getString('common.edit')}
         </Dialog.Action>
-        <View style={styles.flex} />
+        <Spacer modifiers={[weight(1)]} />
         <Dialog.Action onPress={closeModal}>
           {getString('common.cancel')}
         </Dialog.Action>
@@ -122,16 +122,3 @@ const SetCategoryModal: React.FC<SetCategoryModalProps> = ({
 };
 
 export default SetCategoryModal;
-
-const styles = StyleSheet.create({
-  categoryList: {
-    maxHeight: Dimensions.get('window').height * 0.4,
-  },
-  emptyMessage: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  flex: {
-    flex: 1,
-  },
-});

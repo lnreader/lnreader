@@ -1,5 +1,5 @@
-export { default as AnimatedHeight } from './AnimatedHeight';
-export { StatsCard } from './StatsCard';
+export { StatsCard, MeterBar, DistributionCard } from './StatsCard';
+export type { ChartEntry } from './StatsCard';
 export { DonutChart, getDonutPalette } from './DonutChart';
 export { ChapterBar } from './ChapterBar';
 export { default as PluginSection } from './PluginSection';

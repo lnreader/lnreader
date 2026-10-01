@@ -1,14 +1,23 @@
 import { getString } from '@i18n/translations';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Row } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 import CodeInput from './Components/CodeInput';
 import { showToast } from '@utils/showToast';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { TextInput as PaperTextInput } from 'react-native-paper';
 
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Dialog, IconButtonV2 } from '@components';
+import {
+  AppHost,
+  Dialog,
+  IconButtonV2,
+  OverlayHost,
+  TextInput,
+} from '@components';
+import FormatIndentIncreaseIcon from '@expo/material-symbols/format_indent_increase.xml';
+import DataObjectIcon from '@expo/material-symbols/data_object.xml';
 import type { HighlightMode } from './Components/SimpleCodeEditor';
 import { useMMKVString } from 'react-native-mmkv';
 import { formatSnippet } from './formatSnippet';
@@ -120,41 +129,46 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
     return (
       <>
         <View style={styles.editorContainer}>
-          <View style={styles.toolbar}>
-            <IconButtonV2
-              accessibilityLabel={getString('customCodeSettings.beautifyCode')}
-              name="auto-fix"
-              disabled={!code.trim()}
-              padding={10}
-              theme={theme}
-              onPress={handleBeautify}
-            />
-            <IconButtonV2
-              accessibilityLabel={getString(
-                'customCodeSettings.syntaxHighlighting',
-              )}
-              name="code-braces"
-              color={
-                highlightMode === 'off'
-                  ? theme.outline
-                  : highlightMode === 'on'
-                  ? theme.primary
-                  : theme.secondary
-              }
-              size={24}
-              padding={10}
-              theme={theme}
-              onPress={() =>
-                setHighlightMode((prev: HighlightMode) =>
-                  prev === 'off'
-                    ? 'combined'
-                    : prev === 'combined'
-                    ? 'on'
-                    : 'off',
-                )
-              }
-            />
-          </View>
+          <AppHost matchContents={{ vertical: true }}>
+            <Row
+              horizontalArrangement="end"
+              modifiers={[fillMaxWidth(), padding(8, 0, 8, 0)]}
+            >
+              <IconButtonV2
+                accessibilityLabel={getString(
+                  'customCodeSettings.beautifyCode',
+                )}
+                name={FormatIndentIncreaseIcon}
+                disabled={!code.trim()}
+                onPress={handleBeautify}
+                theme={theme}
+              />
+              <IconButtonV2
+                accessibilityLabel={getString(
+                  'customCodeSettings.syntaxHighlighting',
+                )}
+                name={DataObjectIcon}
+                color={
+                  highlightMode === 'off'
+                    ? theme.outline
+                    : highlightMode === 'on'
+                    ? theme.primary
+                    : theme.secondary
+                }
+                size={24}
+                onPress={() =>
+                  setHighlightMode((prev: HighlightMode) =>
+                    prev === 'off'
+                      ? 'combined'
+                      : prev === 'combined'
+                      ? 'on'
+                      : 'off',
+                  )
+                }
+                theme={theme}
+              />
+            </Row>
+          </AppHost>
           <KeyboardAwareScrollView
             style={styles.scrollContainer}
             bottomOffset={100}
@@ -175,34 +189,37 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
             />
           </KeyboardAwareScrollView>
         </View>
-        <Dialog.Root visible={showNameModal} onDismiss={handleNameModalCancel}>
-          <Dialog.Header>
-            <Dialog.Title>{getString('common.name')}</Dialog.Title>
-          </Dialog.Header>
-          <Dialog.Content>
-            <PaperTextInput
-              label={getString('common.name')}
-              defaultValue={snippetName}
-              onChangeText={setSnippetName}
-              autoFocus
-              mode="outlined"
-              style={styles.mb16}
-              theme={{ colors: theme }}
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Dialog.Action onPress={handleNameModalCancel}>
-              Cancel
-            </Dialog.Action>
-            <Dialog.Action
-              onPress={() => {
-                if (handleNameModalSave()) setShowNameModal(false);
-              }}
-            >
-              Save
-            </Dialog.Action>
-          </Dialog.Actions>
-        </Dialog.Root>
+        <OverlayHost>
+          <Dialog.Root
+            visible={showNameModal}
+            onDismiss={handleNameModalCancel}
+          >
+            <Dialog.Header>
+              <Dialog.Title>{getString('common.name')}</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Content>
+              <TextInput
+                label={getString('common.name')}
+                value={snippetName}
+                onChangeText={setSnippetName}
+                autoFocus
+                singleLine
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Dialog.Action onPress={handleNameModalCancel}>
+                Cancel
+              </Dialog.Action>
+              <Dialog.Action
+                onPress={() => {
+                  if (handleNameModalSave()) setShowNameModal(false);
+                }}
+              >
+                Save
+              </Dialog.Action>
+            </Dialog.Actions>
+          </Dialog.Root>
+        </OverlayHost>
       </>
     );
   },

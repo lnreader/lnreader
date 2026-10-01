@@ -1,234 +1,123 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
-
-import { IconButtonV2 } from '@components';
-import { ThemeColors } from '@theme/types';
-import { useChapterContext } from '../ChapterContext';
-import { ReaderSearchResult } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import { Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  height,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useTheme } from '@hooks/persisted/useTheme';
 import { getString } from '@i18n/translations';
+import { useChapterContext } from '../ChapterContext';
+import KeyboardArrowDownIcon from '@expo/material-symbols/keyboard_arrow_down.xml';
+import KeyboardArrowUpIcon from '@expo/material-symbols/keyboard_arrow_up.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
+import { IconButtonV2, AppText, TextInput } from '@components';
 
-interface ReaderSearchbarProps {
-  theme: ThemeColors;
-  searchText: string;
-  setSearchText: (text: string) => void;
-  searchResult: ReaderSearchResult;
-  resetSearchResult: () => void;
-  resetSearch: () => void;
-}
+export const SEARCH_HEIGHT = 72;
 
 const SEARCH_DEBOUNCE_MS = 300;
+
 const MIN_SEARCH_LENGTH = 3;
-const SPECIAL_CHARACTER_REGEX = /[^\p{L}\p{N}\s]/u;
 
-const ReaderSearchbar = ({
-  theme,
-  searchText,
-  setSearchText,
-  searchResult,
-  resetSearchResult,
-  resetSearch,
-}: ReaderSearchbarProps) => {
-  const inputRef = useRef<TextInput>(null);
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { searchChapterText, clearChapterSearch, navigateChapterSearch } =
-    useChapterContext();
-  const normalizedSearchText = searchText.trim();
-  const hasSearchText = normalizedSearchText.length > 0;
-  const hasSpecialCharacter =
-    SPECIAL_CHARACTER_REGEX.test(normalizedSearchText);
-  const isSearchBlocked =
-    hasSearchText &&
-    normalizedSearchText.length < MIN_SEARCH_LENGTH &&
-    !hasSpecialCharacter;
-  const hasCurrentSearchResult = searchResult.query === normalizedSearchText;
-  const hasMatches = hasCurrentSearchResult && searchResult.renderedTotal > 0;
-  const resultTotalText = searchResult.isTruncated
-    ? `${searchResult.renderedTotal}+`
-    : String(searchResult.total);
+const SPECIAL_CHARACTER = /[^\p{L}\p{N}\s]/u;
 
-  const clearPendingSearch = useCallback(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-      searchTimeoutRef.current = null;
-    }
-  }, []);
+const ReaderSearchbar = ({ initialQuery }: { initialQuery: string }) => {
+  const theme = useTheme();
+  const { search } = useChapterContext();
+  const [text, setText] = useState(initialQuery);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const query = text.trim();
+  const blocked =
+    query.length > 0 &&
+    query.length < MIN_SEARCH_LENGTH &&
+    !SPECIAL_CHARACTER.test(query);
+  const hasMatches =
+    search.result.query.trim() === query && search.result.total > 0;
+  const { clear, run } = search;
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => inputRef.current?.focus());
-
+    if (initialQuery.trim()) {
+      run(initialQuery);
+    }
     return () => {
-      cancelAnimationFrame(frame);
-      clearPendingSearch();
-      Keyboard.dismiss();
-      resetSearch();
-      clearChapterSearch();
-    };
-  }, [clearChapterSearch, clearPendingSearch, resetSearch]);
-
-  const handleSearchTextChange = useCallback(
-    (text: string) => {
-      setSearchText(text);
-      resetSearchResult();
-      clearPendingSearch();
-
-      const normalizedText = text.trim();
-
-      const containsSpecialCharacter =
-        SPECIAL_CHARACTER_REGEX.test(normalizedText);
-
-      if (
-        !normalizedText ||
-        (normalizedText.length < MIN_SEARCH_LENGTH && !containsSpecialCharacter)
-      ) {
-        clearChapterSearch();
-        return;
+      if (timer.current) {
+        clearTimeout(timer.current);
       }
+      clear();
+    };
+    // Runs once per opening of the search row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      searchTimeoutRef.current = setTimeout(() => {
-        searchChapterText(text);
-        searchTimeoutRef.current = null;
-      }, SEARCH_DEBOUNCE_MS);
-    },
-    [
-      clearChapterSearch,
-      clearPendingSearch,
-      resetSearchResult,
-      searchChapterText,
-      setSearchText,
-    ],
-  );
-
-  const handleClearSearch = useCallback(() => {
-    clearPendingSearch();
-    resetSearch();
-    clearChapterSearch();
-    requestAnimationFrame(() => inputRef.current?.focus());
-  }, [clearChapterSearch, clearPendingSearch, resetSearch]);
-
-  const handleSubmitEditing = useCallback(() => {
-    clearPendingSearch();
-    if (isSearchBlocked) {
-      clearChapterSearch();
+  const onChange = (value: string) => {
+    setText(value);
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+    const normalized = value.trim();
+    if (
+      !normalized ||
+      (normalized.length < MIN_SEARCH_LENGTH &&
+        !SPECIAL_CHARACTER.test(normalized))
+    ) {
+      clear();
       return;
     }
-
-    if (hasMatches) {
-      navigateChapterSearch('NEXT', searchText);
-      return;
-    }
-    if (hasSearchText) {
-      searchChapterText(searchText);
-    }
-  }, [
-    clearPendingSearch,
-    hasMatches,
-    hasSearchText,
-    isSearchBlocked,
-    clearChapterSearch,
-    navigateChapterSearch,
-    searchChapterText,
-    searchText,
-  ]);
+    timer.current = setTimeout(() => run(value), SEARCH_DEBOUNCE_MS);
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchbar}>
-        <IconButtonV2
-          name="magnify"
-          color={theme.onSurfaceVariant}
-          onPress={() => inputRef.current?.focus()}
-          padding={12}
-          theme={theme}
-        />
-        <TextInput
-          ref={inputRef}
-          autoCapitalize="none"
-          autoCorrect={false}
-          onChangeText={handleSearchTextChange}
-          onSubmitEditing={handleSubmitEditing}
-          placeholder={getString('readerScreen.searchPlaceholder')}
-          placeholderTextColor={theme.onSurfaceVariant}
-          returnKeyType="search"
-          selectionColor={theme.primary}
-          style={[styles.input, { color: theme.onSurface }]}
-          submitBehavior="submit"
-          value={searchText}
-        />
-        {hasSearchText && !isSearchBlocked ? (
-          <Text style={[styles.resultText, { color: theme.onSurfaceVariant }]}>
-            {searchResult.current}/{resultTotalText}
-          </Text>
-        ) : null}
-        <IconButtonV2
-          name="chevron-up"
-          color={theme.onSurface}
-          disabled={!hasMatches}
-          onPress={() => navigateChapterSearch('PREV', searchText)}
-          padding={12}
-          theme={theme}
-        />
-        <IconButtonV2
-          name="chevron-down"
-          color={theme.onSurface}
-          disabled={!hasMatches}
-          onPress={() => navigateChapterSearch('NEXT', searchText)}
-          padding={12}
-          theme={theme}
-        />
-        {hasSearchText ? (
-          <IconButtonV2
-            name="close"
-            color={theme.onSurface}
-            onPress={handleClearSearch}
-            padding={12}
-            theme={theme}
-          />
-        ) : null}
-      </View>
-      {isSearchBlocked ? (
-        <Text
-          style={[styles.helperText, { color: theme.onSurfaceVariant }]}
-          numberOfLines={1}
-        >
-          {getString('readerScreen.searchMinLength', {
-            count: MIN_SEARCH_LENGTH,
-          })}
-        </Text>
-      ) : null}
-    </View>
+    <Row
+      verticalAlignment="center"
+      modifiers={[fillMaxWidth(), height(SEARCH_HEIGHT), padding(12, 0, 4, 8)]}
+    >
+      <TextInput
+        value={text}
+        onChangeText={onChange}
+        placeholder={getString('readerScreen.searchPlaceholder')}
+        leadingIcon={SearchIcon}
+        autoFocus={!initialQuery}
+        imeAction="search"
+        onSubmit={() => {
+          if (hasMatches) {
+            search.step(1);
+          } else if (query && !blocked) {
+            run(text);
+          }
+        }}
+        supportingText={
+          blocked
+            ? getString('readerScreen.searchMinLength', {
+                count: MIN_SEARCH_LENGTH,
+              })
+            : undefined
+        }
+        trailing={
+          query && !blocked ? (
+            <AppText variant="labelMedium" color={theme.onSurfaceVariant}>
+              {`${search.result.current}/${search.result.total}`}
+            </AppText>
+          ) : undefined
+        }
+        modifiers={[weight(1)]}
+      />
+      <IconButtonV2
+        name={KeyboardArrowUpIcon}
+        accessibilityLabel={getString('common.previous')}
+        disabled={!hasMatches}
+        onPress={() => search.step(-1)}
+        theme={theme}
+      />
+      <IconButtonV2
+        name={KeyboardArrowDownIcon}
+        accessibilityLabel={getString('common.next')}
+        disabled={!hasMatches}
+        onPress={() => search.step(1)}
+        theme={theme}
+      />
+    </Row>
   );
 };
 
 export default ReaderSearchbar;
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 4,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    height: 56,
-    includeFontPadding: false,
-    lineHeight: 20,
-    paddingVertical: 0,
-    textAlignVertical: 'center',
-  },
-  resultText: {
-    fontSize: 12,
-    includeFontPadding: false,
-    lineHeight: 16,
-    minWidth: 44,
-    textAlign: 'center',
-  },
-  helperText: {
-    fontSize: 12,
-    marginTop: 4,
-    paddingHorizontal: 16,
-  },
-  searchbar: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 56,
-  },
-});

@@ -1,13 +1,18 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
+import NativeFile from '@modules/native-file';
 
 import { defaultCover } from '@plugins/helpers/constants';
 import type { ThemeColors } from '@theme/types';
 import NovelCoverImage, { isMissingNovelCover } from '../NovelCoverImage';
 
-jest.mock('@react-native-vector-icons/material-design-icons', () => 'Icon');
-
 const theme = {
   onSurfaceVariant: '#404040',
+  outline: '#707070',
   surfaceVariant: '#d0d0d0',
 } as ThemeColors;
 
@@ -21,12 +26,15 @@ describe('NovelCoverImage', () => {
 
   it('shows the themed placeholder when a cover is missing', () => {
     render(
-      <NovelCoverImage testID="novel-cover" theme={theme} uri={undefined} />,
+      <NovelCoverImage
+        testID="novel-cover"
+        theme={theme}
+        uri={undefined}
+        height={80}
+      />,
     );
 
-    expect(screen.getByTestId('novel-cover')).toHaveStyle({
-      backgroundColor: theme.surfaceVariant,
-    });
+    expect(screen.getByTestId('novel-cover')).toBeTruthy();
     expect(screen.getByTestId('novel-cover').props.source).toBeUndefined();
   });
 
@@ -36,28 +44,21 @@ describe('NovelCoverImage', () => {
         testID="novel-cover"
         theme={theme}
         uri="https://example.com/broken.webp"
+        height={80}
       />,
     );
 
-    expect(screen.getByTestId('novel-cover').props.source).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          uri: 'https://example.com/broken.webp',
-        }),
-      ]),
-    );
-
-    fireEvent(screen.getByTestId('novel-cover'), 'error', {
-      nativeEvent: { error: 'Failed to load image' },
+    expect(screen.getByTestId('novel-cover').props.source).toEqual({
+      uri: 'https://example.com/broken.webp',
     });
 
-    expect(screen.getByTestId('novel-cover')).toHaveStyle({
-      backgroundColor: theme.surfaceVariant,
-    });
+    fireEvent(screen.getByTestId('novel-cover'), 'error', 'Failed to load');
+
     expect(screen.getByTestId('novel-cover').props.source).toBeUndefined();
   });
 
-  it('preserves request bodies through the React Native compatibility path', () => {
+  it('preserves request bodies when the cover needs the plugin request', async () => {
+    (NativeFile.exists as jest.Mock).mockReturnValueOnce(false);
     render(
       <NovelCoverImage
         requestInit={{
@@ -68,14 +69,18 @@ describe('NovelCoverImage', () => {
         testID="novel-cover"
         theme={theme}
         uri="https://example.com/cover"
+        height={80}
       />,
     );
 
-    expect(screen.getByTestId('novel-cover').props.source).toEqual({
-      body: 'token=secret',
-      headers: { Referer: 'https://example.com' },
-      method: 'POST',
-      uri: 'https://example.com/cover',
-    });
+    await waitFor(() =>
+      expect(NativeFile.downloadFile).toHaveBeenCalledWith(
+        'https://example.com/cover',
+        expect.any(String),
+        'POST',
+        { Referer: 'https://example.com' },
+        'token=secret',
+      ),
+    );
   });
 });

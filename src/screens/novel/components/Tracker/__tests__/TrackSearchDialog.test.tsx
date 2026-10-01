@@ -22,80 +22,36 @@ jest.mock('@hooks/persisted', () => ({
 
 jest.mock('@components', () => {
   const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { Text, View } =
+  const { Text, TextInput, View } =
     jest.requireActual<typeof import('react-native')>('react-native');
   const Section = ({ children }: { children: React.ReactNode }) =>
     ReactModule.createElement(View, null, children);
 
   return {
+    AppIcon: () => null,
+    AppText: ({ children }: { children: React.ReactNode }) =>
+      ReactModule.createElement(Text, null, children),
     Dialog: {
-      Action: ({ onPress, title }: { onPress: () => void; title: string }) =>
-        ReactModule.createElement(Text, { onPress }, title),
+      Action: ({
+        onPress,
+        children,
+      }: {
+        onPress: () => void;
+        children: string;
+      }) => ReactModule.createElement(Text, { onPress }, children),
       Actions: Section,
       Content: Section,
       Root: Section,
       ScrollArea: Section,
       Title: Section,
     },
+    IconButtonV2: () => null,
     NovelCoverImage: () => null,
+    ProgressIndicator: () => null,
+    TextInput: (props: Record<string, unknown>) =>
+      ReactModule.createElement(TextInput, props),
   };
 });
-
-jest.mock('react-native-paper', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { Pressable, TextInput: NativeTextInput } =
-    jest.requireActual<typeof import('react-native')>('react-native');
-  const TextInput = (props: Record<string, unknown>) =>
-    ReactModule.createElement(NativeTextInput, {
-      ...props,
-      testID: 'tracker-search-input',
-    });
-  TextInput.Icon = () => null;
-
-  return {
-    TextInput,
-    TouchableRipple: ({
-      children,
-      onPress,
-    }: {
-      children: React.ReactNode;
-      onPress: () => void;
-    }) => ReactModule.createElement(Pressable, { onPress }, children),
-  };
-});
-
-jest.mock('@legendapp/list/react-native', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { View } =
-    jest.requireActual<typeof import('react-native')>('react-native');
-
-  return {
-    LegendList: ({
-      data,
-      ListEmptyComponent,
-      renderItem,
-    }: {
-      data: SearchResult[];
-      ListEmptyComponent?: React.ReactNode;
-      renderItem: ({ item }: { item: SearchResult }) => React.ReactElement;
-    }) =>
-      ReactModule.createElement(
-        View,
-        null,
-        data.length
-          ? data.map(item =>
-              ReactModule.createElement(
-                ReactModule.Fragment,
-                { key: item.id },
-                renderItem({ item }),
-              ),
-            )
-          : ListEmptyComponent,
-      ),
-  };
-});
-
-jest.mock('@react-native-vector-icons/material-design-icons', () => 'Icon');
 
 const tracker = {
   auth: { accessToken: 'token' },

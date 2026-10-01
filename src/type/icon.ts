@@ -1,5 +1,2 @@
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-
-export type MaterialDesignIconName = Parameters<
-  typeof MaterialCommunityIcons
->[0]['name'];
+// An `@expo/material-symbols` import (a Metro asset id).
+export type IconSource = number;

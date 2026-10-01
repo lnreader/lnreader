@@ -1,19 +1,21 @@
 import { useCallback, useState } from 'react';
+import { Column, Image, Row } from '@expo/ui/jetpack-compose';
 import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+  clip,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import {
-  Appbar,
+  AppText,
   Button,
   ConfirmationDialog,
   EmptyView,
-  SafeAreaView,
+  List,
+  LoadingMoreIndicator,
 } from '@components';
 import {
   useInstalledPlugins,
@@ -24,6 +26,7 @@ import { PluginDetailsScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 import { showToast } from '@utils/showToast';
+import SettingsPage from '@screens/settings/components/SettingsPage';
 
 import { PluginSettingField } from './components/PluginSettingField';
 import { usePluginSettings } from './hooks/usePluginSettings';
@@ -64,126 +67,119 @@ const PluginDetailsScreen = ({
 
   if (!plugin) {
     return (
-      <SafeAreaView excludeTop>
-        <Appbar
-          mode="small"
-          title={getString('browseScreen.pluginDetails')}
-          handleGoBack={navigation.goBack}
-          theme={theme}
-        />
+      <SettingsPage
+        title={getString('browseScreen.pluginDetails')}
+        onBack={navigation.goBack}
+      >
         <EmptyView
           icon="(･Д･。"
           description={getString('browseScreen.pluginNotInstalled')}
           theme={theme}
         />
-      </SafeAreaView>
+      </SettingsPage>
     );
   }
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        mode="small"
-        title={getString('browseScreen.pluginDetails')}
-        handleGoBack={navigation.goBack}
-        theme={theme}
-      />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+    <SettingsPage
+      title={getString('browseScreen.pluginDetails')}
+      onBack={navigation.goBack}
+      overlays={
+        <ConfirmationDialog
+          title={getString('browseScreen.uninstall')}
+          confirmLabel={getString('browseScreen.uninstall')}
+          visible={showUninstallDialog}
+          message={getString('browseScreen.deletePluginMessage', {
+            name: plugin.name,
+          })}
+          onDismiss={() => setShowUninstallDialog(false)}
+          onConfirm={uninstall}
+        />
+      }
+    >
+      <Column
+        horizontalAlignment="center"
+        verticalArrangement={{ spacedBy: 4 }}
+        modifiers={[fillMaxWidth(), padding(24, 16, 24, 16)]}
       >
-        <View style={styles.hero}>
-          <Image
-            accessibilityLabel={`${plugin.name} ${getString(
-              'browseScreen.pluginIcon',
-            )}`}
-            accessible
-            source={{ uri: plugin.iconUrl }}
-            style={[styles.heroIcon, { backgroundColor: theme.surfaceVariant }]}
-          />
-          <Text style={[styles.pluginName, { color: theme.onSurface }]}>
-            {plugin.name}
-          </Text>
-          <Text style={[styles.pluginId, { color: theme.onSurfaceVariant }]}>
-            {plugin.id}
-          </Text>
-        </View>
+        <Image
+          contentDescription={`${plugin.name} ${getString(
+            'browseScreen.pluginIcon',
+          )}`}
+          source={{ uri: plugin.iconUrl }}
+          contentScale="crop"
+          modifiers={[size(88, 88), clip(Shapes.RoundedCorner(24))]}
+        />
+        <AppText variant="headlineSmall" align="center">
+          {plugin.name}
+        </AppText>
+        <AppText
+          variant="bodyMedium"
+          align="center"
+          color={theme.onSurfaceVariant}
+        >
+          {plugin.id}
+        </AppText>
+      </Column>
 
-        <View style={styles.metadata}>
-          <Metadata
-            label={getString('aboutScreen.version')}
-            value={plugin.version}
-            theme={theme}
-          />
-          <View style={[styles.divider, { backgroundColor: theme.outline }]} />
-          <Metadata
-            label={getString('browseScreen.language')}
-            value={getLocaleLanguageName(plugin.lang)}
-            theme={theme}
-          />
-        </View>
+      <Row
+        horizontalArrangement="spaceEvenly"
+        modifiers={[fillMaxWidth(), padding(24, 0, 24, 16)]}
+      >
+        <Metadata
+          label={getString('aboutScreen.version')}
+          value={plugin.version}
+          theme={theme}
+        />
+        <Metadata
+          label={getString('browseScreen.language')}
+          value={getLocaleLanguageName(plugin.lang)}
+          theme={theme}
+        />
+      </Row>
 
-        <View style={styles.actions}>
-          <Button
-            mode="outlined"
-            style={styles.action}
-            title={getString('browseScreen.uninstall')}
-            onPress={() => setShowUninstallDialog(true)}
-          />
-          <Button
-            mode="contained"
-            style={styles.action}
-            title={getString('aboutScreen.website')}
-            onPress={() =>
-              navigation.navigate('WebviewScreen', {
-                name: plugin.name,
-                url: plugin.site,
-                pluginId: plugin.id,
-              })
-            }
-          />
-        </View>
-        {settingsLoading ? (
-          <ActivityIndicator
-            accessibilityLabel={getString('common.loading')}
-            color={theme.primary}
-            style={styles.settingsLoading}
-          />
-        ) : null}
-        {!settingsLoading && settingsEntries.length ? (
-          <>
-            <View
-              style={[
-                styles.settingsDivider,
-                { backgroundColor: theme.outline },
-              ]}
+      <Row
+        horizontalArrangement={{ spacedBy: 12 }}
+        modifiers={[fillMaxWidth(), padding(24, 0, 24, 16)]}
+      >
+        <Button
+          mode="outlined"
+          modifiers={[weight(1)]}
+          title={getString('browseScreen.uninstall')}
+          onPress={() => setShowUninstallDialog(true)}
+        />
+        <Button
+          mode="contained"
+          modifiers={[weight(1)]}
+          title={getString('aboutScreen.website')}
+          onPress={() =>
+            navigation.navigate('WebviewScreen', {
+              name: plugin.name,
+              url: plugin.site,
+              pluginId: plugin.id,
+            })
+          }
+        />
+      </Row>
+      {settingsLoading ? <LoadingMoreIndicator theme={theme} /> : null}
+      {!settingsLoading && settingsEntries.length ? (
+        <>
+          <List.Divider theme={theme} />
+          {settingsEntries.map(([key, setting]) => (
+            <PluginSettingField
+              key={key}
+              onChange={changeAndSaveValue}
+              onChangeText={changeValue}
+              onEndTextEditing={saveTextValue}
+              setting={setting}
+              settingKey={key}
+              theme={theme}
+              value={formValues[key]}
             />
-            {settingsEntries.map(([key, setting]) => (
-              <PluginSettingField
-                key={key}
-                onChange={changeAndSaveValue}
-                onChangeText={changeValue}
-                onEndTextEditing={saveTextValue}
-                setting={setting}
-                settingKey={key}
-                theme={theme}
-                value={formValues[key]}
-              />
-            ))}
-          </>
-        ) : null}
-      </ScrollView>
-      <ConfirmationDialog
-        title={getString('browseScreen.uninstall')}
-        confirmLabel={getString('browseScreen.uninstall')}
-        visible={showUninstallDialog}
-        message={getString('browseScreen.deletePluginMessage', {
-          name: plugin.name,
-        })}
-        onDismiss={() => setShowUninstallDialog(false)}
-        onConfirm={uninstall}
-      />
-    </SafeAreaView>
+          ))}
+        </>
+      ) : null}
+    </SettingsPage>
   );
 };
 
@@ -194,77 +190,12 @@ interface MetadataProps {
 }
 
 const Metadata = ({ label, theme, value }: MetadataProps) => (
-  <View style={styles.metadataItem}>
-    <Text style={[styles.metadataValue, { color: theme.onSurface }]}>
-      {value}
-    </Text>
-    <Text style={[styles.metadataLabel, { color: theme.onSurfaceVariant }]}>
+  <Column horizontalAlignment="center">
+    <AppText variant="titleMedium">{value}</AppText>
+    <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
       {label}
-    </Text>
-  </View>
+    </AppText>
+  </Column>
 );
-
-const styles = StyleSheet.create({
-  action: {
-    flex: 1,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 48,
-  },
-  divider: {
-    height: 44,
-    opacity: 0.5,
-    width: StyleSheet.hairlineWidth,
-  },
-  hero: {
-    alignItems: 'center',
-    paddingBottom: 20,
-    paddingTop: 8,
-  },
-  heroIcon: {
-    borderRadius: 12,
-    height: 112,
-    width: 112,
-  },
-  metadata: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  metadataItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  metadataLabel: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-  metadataValue: {
-    fontSize: 16,
-  },
-  pluginId: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  pluginName: {
-    fontSize: 26,
-    fontWeight: '600',
-    marginTop: 16,
-  },
-  settingsDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginBottom: 12,
-    marginTop: 28,
-    opacity: 0.5,
-  },
-  settingsLoading: {
-    marginTop: 28,
-  },
-});
 
 export default PluginDetailsScreen;

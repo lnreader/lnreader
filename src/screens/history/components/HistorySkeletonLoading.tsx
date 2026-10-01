@@ -1,5 +1,12 @@
 import React, { memo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions } from 'react-native';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
 import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
@@ -19,103 +26,70 @@ interface Props {
 const HistorySkeletonLoading: React.FC<Props> = ({ theme }) => {
   const { width } = useWindowDimensions();
   const textWidth = Math.max(80, width - 144);
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+  const [, backgroundColor, disableLoadingAnimations] = useLoadingColors(theme);
 
   const renderLoadingChapter = (
     { dateWidth }: (typeof SKELETON_ITEMS)[number],
     index: number,
   ) => (
-    <View key={`historyLoading${index}`}>
+    <Column key={`historyLoading${index}`} modifiers={[fillMaxWidth()]}>
       {dateWidth ? (
         <ShimmerPlaceholder
-          style={styles.date}
-          shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+          modifiers={[padding(16, 8, 16, 8)]}
+          corner={6}
+          shimmerColors={[backgroundColor]}
           height={19.3}
           width={dateWidth}
           stopAutoRun={disableLoadingAnimations}
         />
       ) : null}
-      <View style={styles.chapterCtn}>
+      <Row
+        verticalAlignment="center"
+        modifiers={[fillMaxWidth(), padding(0, 8, 0, 8)]}
+      >
         <ShimmerPlaceholder
-          style={styles.picture}
-          shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+          modifiers={[padding(16, 0, 16, 0)]}
+          shimmerColors={[backgroundColor]}
           height={80}
           width={56}
           stopAutoRun={disableLoadingAnimations}
         />
-        <View style={styles.textCtn}>
+        <Column modifiers={[weight(1), padding(0, 5, 0, 2)]}>
           <ShimmerPlaceholder
-            style={styles.text}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            modifiers={[padding(0, 0, 0, 4)]}
+            corner={6}
+            shimmerColors={[backgroundColor]}
             height={16}
             width={textWidth}
             stopAutoRun={disableLoadingAnimations}
           />
           <ShimmerPlaceholder
-            style={styles.text}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            modifiers={[padding(0, 0, 0, 4)]}
+            corner={6}
+            shimmerColors={[backgroundColor]}
             height={12}
             width={textWidth}
             stopAutoRun={disableLoadingAnimations}
           />
-        </View>
-        <View style={styles.buttonCtn}>
+        </Column>
+        <Box contentAlignment="center" modifiers={[size(40, 40)]}>
           <ShimmerPlaceholder
-            style={styles.button}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            corner={12.5}
+            shimmerColors={[backgroundColor]}
             height={24}
             width={24}
             stopAutoRun={disableLoadingAnimations}
           />
-        </View>
-      </View>
-    </View>
+        </Box>
+      </Row>
+    </Column>
   );
 
-  return <View>{SKELETON_ITEMS.map(renderLoadingChapter)}</View>;
+  return (
+    <Column modifiers={[fillMaxWidth()]}>
+      {SKELETON_ITEMS.map(renderLoadingChapter)}
+    </Column>
+  );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 12.5,
-  },
-  buttonCtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  chapterCtn: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginVertical: 8,
-  },
-  contentCtn: {
-    paddingVertical: 8,
-  },
-  date: {
-    borderRadius: 6,
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  picture: {
-    borderRadius: 4,
-    height: 80,
-    marginHorizontal: 16,
-    width: 56,
-  },
-  text: {
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  textCtn: {
-    borderRadius: 6,
-    flex: 1,
-    marginBottom: 2,
-    marginTop: 5,
-    overflow: 'hidden',
-  },
-});
 
 export default memo(HistorySkeletonLoading);

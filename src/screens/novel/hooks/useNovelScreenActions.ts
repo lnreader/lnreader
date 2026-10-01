@@ -10,12 +10,19 @@ import {
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useDownload } from '@hooks/persisted';
 import { resolveUrl } from '@services/plugin/fetch';
-import { MaterialDesignIconName } from '@type/icon';
 
 import { useNovelActions } from '../NovelContext';
+import BookmarkIcon from '@expo/material-symbols/bookmark.xml';
+import DeleteIcon from '@expo/material-symbols/delete.xml';
+import DoneAllIcon from '@expo/material-symbols/done_all.xml';
+import DownloadIcon from '@expo/material-symbols/download.xml';
+import PlaylistAddCheckIcon from '@expo/material-symbols/playlist_add_check.xml';
+import PlaylistRemoveIcon from '@expo/material-symbols/playlist_remove.xml';
+import RemoveDoneIcon from '@expo/material-symbols/remove_done.xml';
+import { type IconSource } from '@components';
 
 type SelectionAction = {
-  icon: MaterialDesignIconName;
+  icon: IconSource;
   onPress: () => void;
 };
 
@@ -99,7 +106,7 @@ export const useNovelScreenActions = ({
         selectedChapters.some(chapter => !chapter.isDownloaded))
     ) {
       actions.push({
-        icon: 'download-outline',
+        icon: DownloadIcon,
         onPress: finish(() => {
           if (novel) {
             void getChaptersByIds(selectedIds).then(chaptersToDownload => {
@@ -121,7 +128,7 @@ export const useNovelScreenActions = ({
         selectedChapters.some(chapter => chapter.isDownloaded))
     ) {
       actions.push({
-        icon: 'trash-can-outline',
+        icon: DeleteIcon,
         onPress: finish(() => {
           void getChaptersByIds(selectedIds).then(selectedChapterRows => {
             const downloadedChapterIds = selectedChapterRows
@@ -136,7 +143,7 @@ export const useNovelScreenActions = ({
     }
 
     actions.push({
-      icon: 'bookmark-outline',
+      icon: BookmarkIcon,
       onPress: finish(() => bookmarkChapters(selectedIds)),
     });
 
@@ -145,7 +152,7 @@ export const useNovelScreenActions = ({
       selectedChapters.some(chapter => chapter.unread)
     ) {
       actions.push({
-        icon: 'check',
+        icon: DoneAllIcon,
         onPress: finish(() => markChaptersRead(selectedIds)),
       });
     }
@@ -155,7 +162,7 @@ export const useNovelScreenActions = ({
       selectedChapters.some(chapter => !chapter.unread)
     ) {
       actions.push({
-        icon: 'check-outline',
+        icon: RemoveDoneIcon,
         onPress: finish(() => {
           void markChaptersUnreadAndResetProgress(selectedIds);
         }),
@@ -165,7 +172,9 @@ export const useNovelScreenActions = ({
     if (selectedChapters.length === 1) {
       const selectedChapter = selectedChapters[0];
       actions.push({
-        icon: selectedChapter.unread ? 'playlist-check' : 'playlist-remove',
+        icon: selectedChapter.unread
+          ? PlaylistAddCheckIcon
+          : PlaylistRemoveIcon,
         onPress: finish(() => {
           if (selectedChapter.unread) {
             markPreviouschaptersRead(selectedChapter.id);

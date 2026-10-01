@@ -59,6 +59,7 @@ jest.mock('@database/queries/RepositoryQueries', () => ({
   createRepository: jest.fn(),
   deleteRepositoryById: jest.fn(),
   updateRepository: jest.fn(),
+  setRepositoryEnabled: jest.fn(),
 }));
 
 jest.mock('@database/queries/StatsQueries', () => ({
@@ -69,4 +70,24 @@ jest.mock('@database/queries/StatsQueries', () => ({
   getChaptersDownloadedCountFromDb: jest.fn(),
   getNovelGenresFromDb: jest.fn(),
   getNovelStatusFromDb: jest.fn(),
+}));
+
+// The native SQLite driver does not exist under Jest. Screen tests only need
+// the module graph to load; tests exercising queries mock them explicitly.
+jest.mock('@op-engineering/op-sqlite', () => ({
+  open: jest.fn(() => ({
+    execute: jest.fn(async () => ({ rows: [] })),
+    executeSync: jest.fn(() => ({ rows: [] })),
+    executeRaw: jest.fn(async () => []),
+    executeRawSync: jest.fn(() => []),
+    executeBatch: jest.fn(async () => undefined),
+    transaction: jest.fn(async fn => fn({ execute: jest.fn() })),
+    close: jest.fn(),
+    reactiveExecute: jest.fn(() => () => undefined),
+    updateHook: jest.fn(),
+  })),
+}));
+
+jest.mock('@database/manager/liveQuery', () => ({
+  useLiveQuery: jest.fn(() => []),
 }));

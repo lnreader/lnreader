@@ -1,25 +1,26 @@
-import { useCallback, useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ActivityIndicator,
-  FlatList,
-  ListRenderItem,
-} from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import * as WebBrowser from 'expo-web-browser';
 
 import { ErrorView } from '@components/ErrorView/ErrorView';
-import { SafeAreaView, SearchbarV2 } from '@components';
+import {
+  ComposeList,
+  LoadingMoreIndicator,
+  Screen,
+  SearchbarV2,
+} from '@components';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import RefreshIcon from '@expo/material-symbols/refresh.xml';
 
 import { showToast } from '@utils/showToast';
 import DiscoverNovelCard from './DiscoverNovelCard';
 import { useTheme, useTracker } from '@hooks/persisted';
-import TrackerLoading from '../loadingAnimation/TrackerLoading';
 import { queryAniList } from '@services/Trackers/aniList';
 import localeData from 'dayjs/plugin/localeData';
 import dayjs from 'dayjs';
+import TrackerLoading from '../loadingAnimation/TrackerLoading';
 import { BrowseALScreenProps } from '@navigators/types';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
 
 interface ALDate {
   month: number;
@@ -151,7 +152,7 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
     searchAniList(true);
   }, [searchAniList]);
 
-  const renderItem: ListRenderItem<ALNovel> = ({ item }) => (
+  const renderItem = (item: ALNovel) => (
     <DiscoverNovelCard
       novel={item}
       theme={theme}
@@ -163,7 +164,7 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
     />
   );
 
-  const ListEmptyComponent = useCallback(
+  const listEmpty = useMemo(
     () => (
       <ErrorView
         errorName={error || 'No results found'}
@@ -175,7 +176,7 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
               setError(undefined);
               searchAniList(true);
             },
-            icon: 'reload',
+            icon: RefreshIcon,
           },
         ]}
         theme={theme}
@@ -185,62 +186,50 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
   );
 
   return (
-    <SafeAreaView>
-      <SearchbarV2
-        theme={theme}
-        placeholder="Search AniList"
-        leftIcon="arrow-left"
-        handleBackAction={() => navigation.goBack()}
-        searchText={searchText}
-        onChangeText={text => setSearchText(text)}
-        onSubmitEditing={() => searchAniList(false, 1)}
-        clearSearchbar={clearSearchbar}
-        rightIcons={[
-          {
-            iconName: 'earth',
-            onPress: () => WebBrowser.openBrowserAsync(anilistUrl),
-          },
-        ]}
-      />
+    <Screen
+      topBar={
+        <SearchbarV2
+          theme={theme}
+          placeholder="Search AniList"
+          leftIcon={ArrowBackIcon}
+          handleBackAction={() => navigation.goBack()}
+          searchText={searchText}
+          onChangeText={text => setSearchText(text)}
+          onSubmitEditing={() => searchAniList(false, 1)}
+          clearSearchbar={clearSearchbar}
+          rightIcons={[
+            {
+              iconName: PublicIcon,
+              onPress: () => WebBrowser.openBrowserAsync(anilistUrl),
+            },
+          ]}
+        />
+      }
+      list={
+        !loading && novels.length ? (
+          <ComposeList
+            contentPadding={{ bottom: 8, horizontal: 4 }}
+            data={novels}
+            keyExtractor={item => item.id + '_' + item.novelName}
+            renderItem={renderItem}
+            onEndReached={() => {
+              if (hasNextPage && !searchText) {
+                searchAniList(true, Math.ceil((limit + 50) / 50));
+                setLimit(before => before + 50);
+              }
+            }}
+            footer={!searchText ? <LoadingMoreIndicator theme={theme} /> : null}
+          />
+        ) : undefined
+      }
+    >
       {loading ? (
         <TrackerLoading theme={theme} />
-      ) : (
-        <FlatList
-          contentContainerStyle={styles.novelsContainer}
-          data={novels}
-          keyExtractor={item => item.id + '_' + item.novelName}
-          renderItem={renderItem}
-          ListEmptyComponent={ListEmptyComponent}
-          onEndReachedThreshold={0.3}
-          onEndReached={() => {
-            if (hasNextPage && !searchText) {
-              searchAniList(true, Math.ceil((limit + 50) / 50));
-              setLimit(before => before + 50);
-            }
-          }}
-          ListFooterComponent={
-            !searchText ? (
-              <View style={styles.paddingVertical}>
-                <ActivityIndicator color={theme.primary} />
-              </View>
-            ) : null
-          }
-        />
+      ) : novels.length ? null : (
+        listEmpty
       )}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 export default BrowseALScreen;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  novelsContainer: {
-    flexGrow: 1,
-    paddingBottom: 8,
-    paddingHorizontal: 4,
-  },
-  paddingVertical: { paddingVertical: 16 },
-});

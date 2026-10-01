@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
+import { AppText, TextInput } from '@components';
 import { RadioButton, RadioButtonGroup } from '@components/RadioButton';
 import { useTheme } from '@hooks/persisted';
 import {
@@ -76,32 +77,23 @@ export const MangaUpdatesScoreSelector: React.FC<ScoreSelectorProps> = ({
   };
 
   return (
-    <View>
-      <Text style={[styles.helperText, { color: theme.onSurfaceVariant }]}>
+    <Column modifiers={[fillMaxWidth()]}>
+      <AppText
+        variant="bodySmall"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(0, 0, 0, 16)]}
+      >
         Enter a score between 0 and 10 (decimals allowed, e.g., 7.5)
-      </Text>
+      </AppText>
       <TextInput
         value={scoreText}
         onChangeText={handleChangeText}
-        mode="outlined"
-        keyboardType="decimal-pad"
+        outlined
+        keyboardType="decimal"
         placeholder="0.0 - 10.0"
-        error={!!error}
-        theme={{
-          colors: {
-            primary: theme.primary,
-            placeholder: theme.outline,
-            text: theme.onSurface,
-            background: 'transparent',
-          },
-        }}
-        underlineColor={theme.outline}
-        style={styles.textInput}
+        error={error}
       />
-      {error && (
-        <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
-      )}
-    </View>
+    </Column>
   );
 };
 
@@ -119,7 +111,7 @@ export const AniListScoreSelector: React.FC<AniListScoreSelectorProps> = ({
   };
 
   return (
-    <ScrollView>
+    <>
       <RadioButtonGroup
         onValueChange={handleValueChange}
         value={trackItem.score}
@@ -133,7 +125,7 @@ export const AniListScoreSelector: React.FC<AniListScoreSelectorProps> = ({
           />
         ))}
       </RadioButtonGroup>
-    </ScrollView>
+    </>
   );
 };
 
@@ -154,7 +146,7 @@ export const KitsuScoreSelector: React.FC<ScoreSelectorProps> = ({
   };
 
   return (
-    <ScrollView>
+    <>
       <RadioButtonGroup
         onValueChange={handleValueChange}
         value={trackItem.score}
@@ -168,29 +160,6 @@ export const KitsuScoreSelector: React.FC<ScoreSelectorProps> = ({
           />
         ))}
       </RadioButtonGroup>
-    </ScrollView>
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  errorText: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  guideText: {
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  guideTitle: {
-    fontSize: 14,
-    fontWeight: 500,
-    marginBottom: 8,
-  },
-  helperText: {
-    fontSize: 13,
-    marginBottom: 16,
-  },
-  textInput: {
-    backgroundColor: 'transparent',
-  },
-});

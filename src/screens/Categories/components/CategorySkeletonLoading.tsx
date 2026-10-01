@@ -1,5 +1,7 @@
 import React, { memo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions } from 'react-native';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
 import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
@@ -15,40 +17,30 @@ interface Props {
 const CategorySkeletonLoading: React.FC<Props> = ({ height, width, theme }) => {
   const window = useWindowDimensions();
   const cardWidth = Math.min(width, window.width - 32);
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+  const [, backgroundColor, disableLoadingAnimations] = useLoadingColors(theme);
 
   const renderLoadingCard = (_: unknown, index: number) => {
     return (
-      <View key={`category-skeleton-${index}`}>
-        <ShimmerPlaceholder
-          style={styles.categoryCard}
-          shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
-          height={height}
-          width={cardWidth}
-          stopAutoRun={disableLoadingAnimations}
-        />
-      </View>
+      <ShimmerPlaceholder
+        key={`category-skeleton-${index}`}
+        modifiers={[padding(16, 0, 16, 0)]}
+        corner={12}
+        shimmerColors={[backgroundColor]}
+        height={height}
+        width={cardWidth}
+        stopAutoRun={disableLoadingAnimations}
+      />
     );
   };
 
   return (
-    <View style={styles.contentCtn}>
+    <Column
+      verticalArrangement={{ spacedBy: 8 }}
+      modifiers={[fillMaxWidth(), padding(0, 16, 0, 100)]}
+    >
       {SKELETON_ITEMS.map(renderLoadingCard)}
-    </View>
+    </Column>
   );
 };
-
-const styles = StyleSheet.create({
-  categoryCard: {
-    borderRadius: 12,
-    marginHorizontal: 16,
-  },
-  contentCtn: {
-    gap: 8,
-    paddingBottom: 100,
-    paddingVertical: 16,
-  },
-});
 
 export default memo(CategorySkeletonLoading);

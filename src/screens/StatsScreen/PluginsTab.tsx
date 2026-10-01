@@ -1,118 +1,69 @@
-import { useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { LegendList } from '@legendapp/list/react-native';
+import React, { useMemo } from 'react';
 
-import { getString } from '@i18n/translations';
-
-import { getPlugin } from '@plugins/pluginManager';
-
-import {
-  getDonutPalette,
-  DonutChartWithLegend,
-  PluginSection,
-} from './components';
-
-import type { ThemeColors } from '@theme/types';
 import type { NovelWithGenres } from '@database/queries/StatsQueries';
+import { getString } from '@i18n/translations';
+import { getPlugin } from '@plugins/pluginManager';
+import {
+  NovelCarousel,
+  type StatsNovel,
+} from '@screens/GenreStatsScreen/components';
+import { ThemeColors } from '@theme/types';
+import { DistributionCard, PluginSection } from './components';
+import { StatsList } from './components/StatsCard';
 
 interface PluginsTabProps {
   allNovels: NovelWithGenres[];
   theme: ThemeColors;
-  onNovelPress: (novel: {
-    id: number;
-    name: string;
-    path: string;
-    cover: string | null;
-    pluginId: string;
-  }) => void;
+  onNovelPress: (novel: StatsNovel) => void;
 }
 
 export const PluginsTab: React.FC<PluginsTabProps> = ({
   allNovels,
-  theme,
   onNovelPress,
 }) => {
-  const pluginData = useMemo(() => {
-    const groups = new Map<
-      string,
-      { name: string; count: number; novelIds: number[] }
-    >();
+  const rows = useMemo(() => {
+    const byId = new Map(allNovels.map(novel => [novel.id, novel]));
+    const groups = new Map<string, number[]>();
     for (const novel of allNovels) {
-      const plugin = getPlugin(novel.pluginId);
-      const name = plugin?.name ?? novel.pluginId;
-      const group = groups.get(novel.pluginId);
-      if (group) {
-        group.novelIds.push(novel.id);
-        group.count++;
-      } else {
-        groups.set(novel.pluginId, { name, count: 1, novelIds: [novel.id] });
-      }
+      groups.set(novel.pluginId, [
+        ...(groups.get(novel.pluginId) ?? []),
+        novel.id,
+      ]);
     }
-    const nodes = Array.from(groups.entries())
-      .map(([pluginId, data]) => ({
+    const plugins = [...groups.entries()]
+      .map(([pluginId, ids]) => ({
         pluginId,
-        name: data.name,
-        count: data.count,
+        name: getPlugin(pluginId)?.name ?? pluginId,
+        novels: ids
+          .map(id => byId.get(id))
+          .filter((novel): novel is NovelWithGenres => novel !== undefined)
+          .sort((a, b) => a.name.localeCompare(b.name)),
       }))
-      .sort((a, b) => b.count - a.count);
-    const keys = nodes.map(n => n.name);
-    const colors = getDonutPalette(keys, theme);
-    const donutEntries = nodes.map(n => ({ key: n.name, value: n.count }));
-    return { nodes, colors, donutEntries };
-  }, [allNovels, theme]);
+      .sort((a, b) => b.novels.length - a.novels.length);
+    return [
+      {
+        key: 'plugin-distribution',
+        render: () => (
+          <DistributionCard
+            title={getString('statsScreen.pluginDistribution')}
+            centerLabel={getString('statsScreen.plugins')}
+            entries={plugins.map(plugin => ({
+              key: plugin.name,
+              value: plugin.novels.length,
+            }))}
+          />
+        ),
+      },
+      ...plugins.map(plugin => ({
+        key: `plugin-${plugin.pluginId}`,
+        render: () => (
+          <PluginSection title={plugin.name} count={plugin.novels.length}>
+            <NovelCarousel novels={plugin.novels} onPress={onNovelPress} />
+          </PluginSection>
+        ),
+      })),
+    ];
+  }, [allNovels, onNovelPress]);
 
-  const renderPluginItem = useCallback(
-    ({ item }: { item: { pluginId: string; name: string; count: number } }) => (
-      <PluginSection
-        pluginId={item.pluginId}
-        name={item.name}
-        count={item.count}
-        novels={allNovels}
-        theme={theme}
-        onNovelPress={onNovelPress}
-      />
-    ),
-    [allNovels, theme, onNovelPress],
-  );
-
-  const { donutEntries, colors: pluginColors } = pluginData;
-  const pluginListHeader = useCallback(
-    () => (
-      <View style={styles.chartHeader}>
-        <DonutChartWithLegend
-          title={getString('statsScreen.pluginDistribution')}
-          entries={donutEntries}
-          colors={pluginColors}
-          theme={theme}
-          centerLabel={getString('statsScreen.plugins')}
-        />
-      </View>
-    ),
-    [donutEntries, pluginColors, theme],
-  );
-
-  return (
-    <LegendList
-      contentContainerStyle={styles.listContent}
-      data={pluginData.nodes}
-      estimatedItemSize={56}
-      keyExtractor={item => item.pluginId}
-      getItemType={() => 'plugin'}
-      ListHeaderComponent={pluginListHeader}
-      renderItem={renderPluginItem}
-      recycleItems
-      showsVerticalScrollIndicator={false}
-      experimental_adaptiveRender={{ initialMode: 'light' }}
-    />
-  );
+  return <StatsList rows={rows} />;
 };
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  chartHeader: {
-    paddingHorizontal: 16,
-  },
-});

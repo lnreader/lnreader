@@ -1,15 +1,10 @@
 import 'react-native-url-polyfill/auto';
 import { enableFreeze } from 'react-native-screens';
-import { PropsWithChildren, Suspense, useEffect, useMemo } from 'react';
+import { PropsWithChildren, Suspense, useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import {
-  MD3DarkTheme,
-  MD3LightTheme,
-  Provider as PaperProvider,
-} from 'react-native-paper';
 
 import AppErrorBoundary, {
   ErrorFallback,
@@ -17,13 +12,11 @@ import AppErrorBoundary, {
 import CrashRecoveryGate from '@components/AppErrorBoundary/CrashRecoveryGate';
 
 import Main from './src/navigators/Main';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useInitDatabase } from '@database/db';
 import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
 import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
 import { useRozeniteSqlitePlugin } from '@rozenite/sqlite-plugin';
 import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 enableFreeze(true);
 const sqliteAdapters = __DEV__ && opSqliteAdapter ? [opSqliteAdapter] : [];
@@ -46,23 +39,6 @@ const ThemedRootView = ({ children }: PropsWithChildren) => {
       {children}
     </GestureHandlerRootView>
   );
-};
-
-const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
-  const theme = useTheme();
-  const paperTheme = useMemo(() => {
-    const baseTheme = theme.isDark ? MD3DarkTheme : MD3LightTheme;
-
-    return {
-      ...baseTheme,
-      colors: {
-        ...baseTheme.colors,
-        ...theme,
-      },
-    };
-  }, [theme]);
-
-  return <PaperProvider theme={paperTheme}>{children}</PaperProvider>;
 };
 
 const Application = () => {
@@ -91,29 +67,25 @@ const Application = () => {
 
   return (
     <ThemedRootView>
-      <KeyboardProvider>
-        <AppErrorBoundary>
-          <SafeAreaProvider>
-            <ThemedPaperProvider>
-              <BottomSheetModalProvider>
-                <StatusBar translucent={true} backgroundColor="transparent" />
-                <Main />
-              </BottomSheetModalProvider>
-            </ThemedPaperProvider>
-          </SafeAreaProvider>
-        </AppErrorBoundary>
-      </KeyboardProvider>
+      <AppErrorBoundary>
+        <>
+          <StatusBar translucent={true} backgroundColor="transparent" />
+          <Main />
+        </>
+      </AppErrorBoundary>
     </ThemedRootView>
   );
 };
 
 const App = () => (
   <Suspense fallback={null}>
-    <ThemeProvider>
-      <CrashRecoveryGate>
-        <Application />
-      </CrashRecoveryGate>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <CrashRecoveryGate>
+          <Application />
+        </CrashRecoveryGate>
+      </ThemeProvider>
+    </SafeAreaProvider>
   </Suspense>
 );
 

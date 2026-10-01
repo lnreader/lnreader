@@ -1,9 +1,19 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, List } from 'react-native-paper';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-import { NovelCoverImage } from '@components';
+import {
+  AppIcon,
+  AppText,
+  LoadingMoreIndicator,
+  NovelCoverImage,
+} from '@components';
 import {
   ChapterInfo,
   DownloadedChapter,
@@ -12,8 +22,9 @@ import {
 } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { RootStackParamList } from '@navigators/types';
-import { ThemeColors } from '@theme/types';
 import ChapterItem from './ChapterItem';
+import KeyboardArrowDownIcon from '@expo/material-symbols/keyboard_arrow_down.xml';
+import KeyboardArrowUpIcon from '@expo/material-symbols/keyboard_arrow_up.xml';
 
 export type GroupedNovelChapter = DownloadedChapter | Update;
 
@@ -25,6 +36,13 @@ interface NovelChapterGroupProps {
   novel: NovelInfo;
   onDeleteChapter: (chapter: GroupedNovelChapter) => void;
   onExpand?: () => void;
+  /**
+   * Controlled expansion. With `onToggleExpanded`, the chapters are not
+   * rendered here: the parent list renders them as rows of its own so they
+   * are virtualized instead of all living in one host.
+   */
+  expanded?: boolean;
+  onToggleExpanded?: () => void;
 }
 
 const NovelChapterGroup: React.FC<NovelChapterGroupProps> = ({
@@ -35,23 +53,29 @@ const NovelChapterGroup: React.FC<NovelChapterGroupProps> = ({
   novel,
   onDeleteChapter,
   onExpand,
+  expanded,
+  onToggleExpanded,
 }) => {
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { downloadChapter, downloadingChapterIds } = useDownload();
   const theme = useTheme();
   const { dateFormat = 'default', relativeTimestamps = true } =
     useAppSettings();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const [expandedState, setIsExpanded] = useState(false);
+  const isExpanded = expanded ?? expandedState;
 
   const handleAccordionPress = useCallback(() => {
+    if (onToggleExpanded) {
+      onToggleExpanded();
+      return;
+    }
     const nextExpanded = !isExpanded;
     setIsExpanded(nextExpanded);
 
     if (nextExpanded) {
       onExpand?.();
     }
-  }, [isExpanded, onExpand]);
+  }, [isExpanded, onExpand, onToggleExpanded]);
 
   const handleDownloadChapter = useCallback(
     (chapter: ChapterInfo) => {
@@ -98,28 +122,26 @@ const NovelChapterGroup: React.FC<NovelChapterGroupProps> = ({
     });
   }, [navigate, novel]);
 
-  const renderCover = useCallback(
+  const coverElement = useMemo(
     () => (
-      <Pressable onPress={navigateToNovel} style={styles.alignSelf}>
+      <Box modifiers={[padding(0, 0, 16, 0), clickable(navigateToNovel)]}>
         <NovelCoverImage
           uri={novel.cover}
+          width={40}
+          height={40}
+          corner={4}
+          label={novel.name}
           theme={theme}
-          iconSize={20}
-          style={styles.cover}
         />
-      </Pressable>
+      </Box>
     ),
-    [navigateToNovel, novel.cover, styles.alignSelf, styles.cover, theme],
-  );
-
-  const coverElement = useMemo(
-    () => <View style={styles.novelCover}>{renderCover()}</View>,
-    [renderCover, styles.novelCover],
+    [navigateToNovel, novel.cover, novel.name, theme],
   );
 
   const renderChapter = useCallback(
     (chapter: GroupedNovelChapter) => (
       <ChapterItem
+        key={`chapter-${chapter.id}`}
         isLocal={false}
         isDownloading={downloadingChapterIds.has(chapter.id)}
         variant="grouped"
@@ -150,41 +172,45 @@ const NovelChapterGroup: React.FC<NovelChapterGroupProps> = ({
 
   if (chapterCount > 1) {
     return (
-      <List.Accordion
-        title={novel.name}
-        titleStyle={styles.title}
-        left={renderCover}
-        descriptionStyle={styles.description}
-        theme={{ colors: theme }}
-        style={[styles.container, styles.padding]}
-        description={`${chapterCount} ${chapterCountLabel}`}
-        expanded={isExpanded}
-        onPress={handleAccordionPress}
-      >
-        <View style={styles.chapterList}>
-          {isLoading ? (
-            <ActivityIndicator
-              color={theme.primary}
-              style={styles.loadingIndicator}
-            />
-          ) : null}
-          {chapters.map(chapter => (
-            <React.Fragment key={`chapter-${chapter.id}`}>
-              {renderChapter(chapter)}
-            </React.Fragment>
-          ))}
-        </View>
-      </List.Accordion>
+      <Column modifiers={[fillMaxWidth()]}>
+        <Row
+          verticalAlignment="center"
+          modifiers={[
+            fillMaxWidth(),
+            clickable(handleAccordionPress),
+            padding(16, 10, 16, 10),
+          ]}
+        >
+          {coverElement}
+          <Column modifiers={[weight(1)]}>
+            <AppText variant="bodyMedium" color={theme.onSurface} maxLines={1}>
+              {novel.name}
+            </AppText>
+            <AppText
+              variant="bodySmall"
+              color={theme.onSurfaceVariant}
+              maxLines={1}
+            >
+              {`${chapterCount} ${chapterCountLabel}`}
+            </AppText>
+          </Column>
+          <AppIcon
+            source={isExpanded ? KeyboardArrowUpIcon : KeyboardArrowDownIcon}
+            tint={theme.onSurfaceVariant}
+          />
+        </Row>
+        {isExpanded && !onToggleExpanded ? (
+          <Column modifiers={[fillMaxWidth(), padding(24, 0, 0, 0)]}>
+            {isLoading ? <LoadingMoreIndicator theme={theme} /> : null}
+            {chapters.map(renderChapter)}
+          </Column>
+        ) : null}
+      </Column>
     );
   }
 
   if (isLoading) {
-    return (
-      <ActivityIndicator
-        color={theme.primary}
-        style={styles.loadingIndicator}
-      />
-    );
+    return <LoadingMoreIndicator theme={theme} />;
   }
 
   return chapters[0] ? renderChapter(chapters[0]) : null;
@@ -199,33 +225,3 @@ const isGroupedNovelChapter = (
   'novelName' in chapter &&
   'novelPath' in chapter &&
   'novelCover' in chapter;
-
-function createStyles(theme: ThemeColors) {
-  return StyleSheet.create({
-    alignSelf: { alignSelf: 'center' },
-    chapterList: {
-      marginStart: -40,
-    },
-    container: {
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    cover: {
-      borderRadius: 4,
-      height: 40,
-      width: 40,
-    },
-    description: { fontSize: 12 },
-    loadingIndicator: {
-      marginVertical: 16,
-    },
-    novelCover: {
-      marginEnd: 16,
-    },
-    padding: {
-      paddingHorizontal: 16,
-      paddingVertical: 2,
-    },
-    title: { color: theme.onSurface, fontSize: 14 },
-  });
-}

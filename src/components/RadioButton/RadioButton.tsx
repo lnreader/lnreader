@@ -1,63 +1,53 @@
-import React from 'react';
 import {
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  ViewStyle,
-} from 'react-native';
-import { RadioButton as PaperRadioButton } from 'react-native-paper';
-import { ThemeColors } from '../../theme/types';
+  ListItem,
+  RadioButton as ComposeRadioButton,
+} from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, selectable } from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
+import { listItemColors, Texts } from '../List/List';
 
 interface Props {
   label: string;
   status: boolean;
   onPress?: () => void;
-  style?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
+  description?: string;
+  disabled?: boolean;
   theme: ThemeColors;
 }
 
-export const RadioButton: React.FC<Props> = ({
+export const RadioButton = ({
   label,
   status,
   onPress,
-  style,
-  labelStyle,
+  description,
+  disabled,
   theme,
-}) => (
-  <Pressable
-    android_ripple={{ color: theme.rippleColor }}
-    style={[styles.pressable, style]}
-    onPress={onPress}
-  >
-    <PaperRadioButton
-      status={status ? 'checked' : 'unchecked'}
-      value={label}
-      onPress={onPress}
-      color={theme.primary}
-      uncheckedColor={theme.onSurfaceVariant}
-    />
-    <Text style={[styles.label, labelStyle, { color: theme.onSurface }]}>
-      {label}
-    </Text>
-  </Pressable>
-);
-
-const styles = StyleSheet.create({
-  icon: {
-    alignSelf: 'center',
-    start: 24,
-    position: 'absolute',
-  },
-  label: {
-    marginStart: 12,
-  },
-  pressable: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-});
+}: Props) => {
+  const press = () => !disabled && onPress?.();
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[fillMaxWidth(), selectable(status, press, 'radioButton')]}
+    >
+      <ListItem.LeadingContent>
+        <ComposeRadioButton
+          selected={status}
+          enabled={!disabled}
+          onClick={press}
+          colors={{
+            selectedColor: theme.primary,
+            unselectedColor: theme.onSurfaceVariant,
+            disabledSelectedColor: theme.onSurfaceDisabled,
+            disabledUnselectedColor: theme.onSurfaceDisabled,
+          }}
+        />
+      </ListItem.LeadingContent>
+      <Texts
+        title={label}
+        description={description}
+        disabled={disabled}
+        theme={theme}
+      />
+    </ListItem>
+  );
+};

@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { List } from '@components/index';
-import SettingSwitch from '../../components/SettingSwitch';
+import { List, SwitchItem } from '@components/index';
+import FullscreenIcon from '@expo/material-symbols/fullscreen.xml';
+import PercentIcon from '@expo/material-symbols/percent.xml';
+import BatteryFullIcon from '@expo/material-symbols/battery_full.xml';
+import LightModeIcon from '@expo/material-symbols/light_mode.xml';
+import FormatBoldIcon from '@expo/material-symbols/format_bold.xml';
+import CompressIcon from '@expo/material-symbols/compress.xml';
 
 const AccessibilityTab: React.FC = () => {
   const theme = useTheme();
@@ -14,21 +19,19 @@ const AccessibilityTab: React.FC = () => {
     showBatteryAndTime = false,
     keepScreenOn = true,
     bionicReading = false,
+    removeExtraParagraphSpacing = false,
     setChapterGeneralSettings,
   } = useChapterGeneralSettings();
 
   return (
-    <BottomSheetScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.contentContainer}
-    >
-      <View style={styles.section}>
+    <Column modifiers={[fillMaxWidth()]}>
+      <Column modifiers={[fillMaxWidth()]}>
         <List.SubHeader theme={theme}>
           {getString('common.display')}
         </List.SubHeader>
-        <SettingSwitch
+        <SwitchItem
           label={getString('readerScreen.bottomSheet.fullscreen')}
+          icon={FullscreenIcon}
           description={getString(
             'readerScreen.bottomSheet.fullscreenDescription',
           )}
@@ -38,8 +41,9 @@ const AccessibilityTab: React.FC = () => {
           }
           theme={theme}
         />
-        <SettingSwitch
+        <SwitchItem
           label={getString('readerScreen.bottomSheet.showProgressPercentage')}
+          icon={PercentIcon}
           description={getString(
             'readerScreen.bottomSheet.showProgressPercentageDescription',
           )}
@@ -51,8 +55,9 @@ const AccessibilityTab: React.FC = () => {
           }
           theme={theme}
         />
-        <SettingSwitch
+        <SwitchItem
           label={getString('readerScreen.bottomSheet.showBatteryAndTime')}
+          icon={BatteryFullIcon}
           description={getString(
             'readerScreen.bottomSheet.showBatteryAndTimeDescription',
           )}
@@ -64,20 +69,22 @@ const AccessibilityTab: React.FC = () => {
           }
           theme={theme}
         />
-        <SettingSwitch
+        <SwitchItem
           label={getString('readerScreen.bottomSheet.keepScreenOn')}
+          icon={LightModeIcon}
           value={keepScreenOn}
           onPress={() =>
             setChapterGeneralSettings({ keepScreenOn: !keepScreenOn })
           }
           theme={theme}
         />
-      </View>
+      </Column>
 
-      <View style={styles.section}>
+      <Column modifiers={[fillMaxWidth()]}>
         <List.SubHeader theme={theme}>Reading Enhancements</List.SubHeader>
-        <SettingSwitch
+        <SwitchItem
           label={getString('readerScreen.bottomSheet.bionicReading')}
+          icon={FormatBoldIcon}
           description={getString(
             'readerScreen.bottomSheet.bionicReadingDescription',
           )}
@@ -87,26 +94,23 @@ const AccessibilityTab: React.FC = () => {
           }
           theme={theme}
         />
-      </View>
-
-      <View style={styles.bottomSpacing} />
-    </BottomSheetScrollView>
+        <SwitchItem
+          label={getString('readerScreen.bottomSheet.removeExtraSpacing')}
+          icon={CompressIcon}
+          description={getString(
+            'readerScreen.bottomSheet.removeExtraSpacingDescription',
+          )}
+          value={removeExtraParagraphSpacing}
+          onPress={() =>
+            setChapterGeneralSettings({
+              removeExtraParagraphSpacing: !removeExtraParagraphSpacing,
+            })
+          }
+          theme={theme}
+        />
+      </Column>
+    </Column>
   );
 };
 
 export default AccessibilityTab;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 24,
-  },
-  section: {
-    marginVertical: 8,
-  },
-  bottomSpacing: {
-    height: 24,
-  },
-});

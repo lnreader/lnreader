@@ -1,16 +1,17 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
-import { ChapterInfo, NovelInfo } from '@database/types';
-import WebView from 'react-native-webview';
-import useChapter from './hooks/useChapter';
+import { createContext, useContext, useRef, type ReactNode } from 'react';
+import type WebView from 'react-native-webview';
 
-type ChapterContextType = ReturnType<typeof useChapter>['chapterContext'] & {
-  novel: NovelInfo;
-  webViewRef: React.RefObject<WebView<object> | null>;
-};
+import type { ChapterInfo, NovelInfo } from '@database/types';
+import useChapter, { type ReaderSession } from './hooks/useChapter';
 
-const defaultValue = {} as ChapterContextType;
+interface ReaderWebViewBinding {
+  ref: React.RefObject<WebView<object> | null>;
+  source: { html: string };
+  onMessage: ReturnType<typeof useChapter>['webView']['onMessage'];
+}
 
-const ChapterContext = createContext<ChapterContextType>(defaultValue);
+const ChapterContext = createContext<ReaderSession | null>(null);
+const WebViewContext = createContext<ReaderWebViewBinding | null>(null);
 
 /**
  * Whether the reader chrome is hidden. It lives in its own context because it
@@ -24,39 +25,42 @@ export function ChapterContextProvider({
   novel,
   initialChapter,
 }: {
-  children: React.JSX.Element;
+  children: ReactNode;
   novel: NovelInfo;
   initialChapter: ChapterInfo;
 }) {
-  const webViewRef = useRef<WebView>(null);
-  const { hidden, chapterContext } = useChapter(
+  const webViewRef = useRef<WebView<object>>(null);
+  const { hidden, session, webView } = useChapter(
     webViewRef,
-    initialChapter,
     novel,
+    initialChapter,
   );
-
-  const contextValue = useMemo(
-    () => ({
-      novel,
-      webViewRef,
-      ...chapterContext,
-    }),
-    [novel, webViewRef, chapterContext],
-  );
-
   return (
-    <ChapterContext.Provider value={contextValue}>
-      <ReaderChromeHiddenContext.Provider value={hidden}>
-        {children}
-      </ReaderChromeHiddenContext.Provider>
+    <ChapterContext.Provider value={session}>
+      <WebViewContext.Provider value={{ ref: webViewRef, ...webView }}>
+        <ReaderChromeHiddenContext.Provider value={hidden}>
+          {children}
+        </ReaderChromeHiddenContext.Provider>
+      </WebViewContext.Provider>
     </ChapterContext.Provider>
   );
 }
 
-export const useChapterContext = () => {
-  return useContext(ChapterContext);
+export const useChapterContext = (): ReaderSession => {
+  const session = useContext(ChapterContext);
+  if (!session) {
+    throw new Error('useChapterContext outside ChapterContextProvider');
+  }
+  return session;
 };
 
-export const useReaderChromeHidden = () => {
-  return useContext(ReaderChromeHiddenContext);
+export const useReaderWebView = (): ReaderWebViewBinding => {
+  const binding = useContext(WebViewContext);
+  if (!binding) {
+    throw new Error('useReaderWebView outside ChapterContextProvider');
+  }
+  return binding;
 };
+
+export const useReaderChromeHidden = () =>
+  useContext(ReaderChromeHiddenContext);

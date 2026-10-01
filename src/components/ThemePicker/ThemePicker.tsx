@@ -1,235 +1,154 @@
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  GestureResponderEvent,
-} from 'react-native';
-import { overlay } from 'react-native-paper';
-import color from 'color';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { ThemeColors } from '@theme/types';
+  align,
+  background,
+  clickable,
+  clip,
+  fillMaxWidth,
+  height,
+  padding,
+  Shapes,
+  size,
+  weight,
+  width,
+} from '@expo/ui/jetpack-compose/modifiers';
+
+import { addComputedColors } from '@hooks/persisted/useTheme';
+import type { ThemeColors } from '@theme/types';
+import CheckIcon from '@expo/material-symbols/check.xml';
+import { AppIcon, AppText, OutlinedBox } from '@components';
+
+const CARD_WIDTH = 116;
+const CARD_HEIGHT = 196;
 
 interface ThemePickerProps {
   theme: ThemeColors;
   currentTheme: ThemeColors;
-  onPress: (event: GestureResponderEvent) => void;
-  horizontal?: boolean;
-  isDark?: boolean;
+  onPress: () => void;
 }
 
 export const ThemePicker = ({
-  theme,
-  currentTheme,
+  theme: previewTheme,
+  currentTheme: theme,
   onPress,
-  horizontal = false,
 }: ThemePickerProps) => {
+  // The preview also shows the surfaces the app derives for the theme.
+  const preview = addComputedColors(previewTheme);
+  const selected = theme.id === previewTheme.id;
+  const bar = (share: number, color: string) => (
+    <Box
+      modifiers={[
+        width(Math.round((CARD_WIDTH - 24) * share)),
+        height(8),
+        clip(Shapes.RoundedCorner(4)),
+        background(color),
+      ]}
+    />
+  );
   return (
-    <View style={[styles.container, horizontal && styles.horizontalContainer]}>
-      <View
-        style={[
-          styles.card,
-          {
-            borderColor:
-              currentTheme.id === theme.id
-                ? theme.primary
-                : currentTheme.background,
-            backgroundColor: theme.background,
-          },
-        ]}
+    <Column
+      horizontalAlignment="center"
+      verticalArrangement={{ spacedBy: 8 }}
+      modifiers={[width(CARD_WIDTH), clickable(onPress, { indication: false })]}
+    >
+      <OutlinedBox
+        shape={20}
+        outlineWidth={selected ? 3 : 1}
+        outlineColor={selected ? theme.primary : theme.outlineVariant}
+        color={preview.background}
+        modifiers={[width(CARD_WIDTH), height(CARD_HEIGHT)]}
       >
-        <Pressable style={styles.flex1} onPress={onPress}>
-          {currentTheme.id !== theme.id ? null : (
-            <MaterialCommunityIcons
-              name="check"
-              color={theme.onPrimary}
-              size={15}
-              style={[styles.checkIcon, { backgroundColor: theme.primary }]}
-            />
-          )}
-          <View
-            style={[
-              styles.topBar,
-              {
-                backgroundColor: overlay(2, theme.surface),
-              },
-            ]}
+        <Column
+          verticalArrangement={{ spacedBy: 8 }}
+          modifiers={[fillMaxWidth(), padding(12, 14, 12, 12)]}
+        >
+          {bar(0.7, preview.onSurface)}
+          <Row
+            horizontalArrangement={{ spacedBy: 6 }}
+            modifiers={[fillMaxWidth()]}
           >
-            <View
-              style={[
-                styles.topBarAccent,
-                { backgroundColor: theme.onSurface },
+            <Box
+              modifiers={[
+                weight(1),
+                height(64),
+                clip(Shapes.RoundedCorner(10)),
+                background(preview.surfaceContainerHigh),
               ]}
             />
-          </View>
-          <View style={styles.content}>
-            <View
-              style={[
-                styles.titleBar,
-                { backgroundColor: theme.onSurfaceVariant },
+            <Box
+              modifiers={[
+                weight(1),
+                height(64),
+                clip(Shapes.RoundedCorner(10)),
+                background(preview.secondaryContainer),
               ]}
             />
-            <View style={styles.row}>
-              <View
-                style={[styles.rowAccent, { backgroundColor: theme.onSurface }]}
-              />
-              <View
-                style={[
-                  styles.rowAccentSmall,
-                  { backgroundColor: theme.primary },
-                ]}
-              />
-            </View>
-            <View style={styles.row}>
-              <View
-                style={[
-                  styles.rowAccentShort,
-                  { backgroundColor: theme.onSurfaceVariant },
-                ]}
-              />
-              <View
-                style={[
-                  styles.rowAccentShort,
-                  styles.marginLeft,
-                  { backgroundColor: theme.onSurfaceVariant },
-                ]}
-              />
-            </View>
-          </View>
-          <View
-            style={[
-              styles.bottomBar,
-              {
-                backgroundColor: color(theme.primary).alpha(0.08).string(),
-              },
+          </Row>
+          {bar(0.9, preview.onSurfaceVariant)}
+          {bar(0.5, preview.onSurfaceVariant)}
+        </Column>
+        <Box
+          modifiers={[
+            align('bottomCenter'),
+            fillMaxWidth(),
+            height(36),
+            background(preview.surfaceContainer),
+          ]}
+        >
+          <Row
+            verticalAlignment="center"
+            horizontalArrangement="spaceEvenly"
+            modifiers={[fillMaxWidth(), padding(0, 12, 0, 0)]}
+          >
+            <Box
+              modifiers={[
+                size(24, 12),
+                clip(Shapes.RoundedCorner(6)),
+                background(preview.secondaryContainer),
+              ]}
+            />
+            <Box
+              modifiers={[
+                size(12, 12),
+                clip(Shapes.Circle),
+                background(preview.outline),
+              ]}
+            />
+            <Box
+              modifiers={[
+                size(12, 12),
+                clip(Shapes.Circle),
+                background(preview.outline),
+              ]}
+            />
+          </Row>
+        </Box>
+        <Box
+          contentAlignment="center"
+          modifiers={[align('bottomEnd'), padding(0, 0, 10, 46)]}
+        >
+          <Box
+            contentAlignment="center"
+            modifiers={[
+              size(28, 28),
+              clip(Shapes.RoundedCorner(8)),
+              background(preview.primary),
             ]}
           >
-            <View style={styles.bottomBarContent}>
-              <View
-                style={[
-                  styles.dot,
-                  styles.opacityDot,
-                  { backgroundColor: theme.onSurface },
-                ]}
-              />
-              <View style={[styles.dot, { backgroundColor: theme.primary }]} />
-              <View
-                style={[
-                  styles.dot,
-                  styles.opacityDot,
-                  { backgroundColor: theme.onSurface },
-                ]}
-              />
-            </View>
-          </View>
-        </Pressable>
-      </View>
-      <Text style={[styles.themeName, { color: currentTheme.onSurface }]}>
-        {theme.name}
-      </Text>
-    </View>
+            {selected ? (
+              <AppIcon source={CheckIcon} size={18} tint={preview.onPrimary} />
+            ) : null}
+          </Box>
+        </Box>
+      </OutlinedBox>
+      <AppText
+        variant="labelMedium"
+        align="center"
+        maxLines={1}
+        color={selected ? theme.primary : theme.onSurface}
+      >
+        {preview.name}
+      </AppText>
+    </Column>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 8,
-  },
-  horizontalContainer: {
-    width: undefined,
-    paddingBottom: 0,
-  },
-  card: {
-    borderWidth: 3.6,
-    width: 95,
-    height: 140,
-    borderRadius: 16,
-    overflow: 'hidden',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    // Elevation for Android
-    //elevation: 2,
-  },
-  flex1: {
-    flex: 1,
-  },
-  checkIcon: {
-    position: 'absolute',
-    top: 5,
-    end: 5,
-    borderRadius: 50,
-    padding: 1.6,
-    zIndex: 1,
-  },
-  topBar: {
-    height: 20,
-    justifyContent: 'center',
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-  },
-  topBarAccent: {
-    width: 44,
-    height: 10,
-    marginStart: 8,
-    borderRadius: 50,
-  },
-  content: {
-    padding: 8,
-  },
-  titleBar: {
-    height: 18,
-    borderRadius: 4,
-  },
-  row: {
-    paddingVertical: 4,
-    flexDirection: 'row',
-  },
-  rowAccent: {
-    height: 10,
-    width: 44,
-    borderRadius: 50,
-  },
-  rowAccentSmall: {
-    height: 10,
-    width: 16,
-    marginStart: 4,
-    borderRadius: 50,
-  },
-  rowAccentShort: {
-    height: 10,
-    width: 24,
-    borderRadius: 50,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 24,
-    justifyContent: 'center',
-  },
-  bottomBarContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-  },
-  dot: {
-    height: 12,
-    width: 12,
-    borderRadius: 50,
-  },
-  opacityDot: {
-    opacity: 0.54,
-  },
-  themeName: {
-    fontSize: 12,
-    paddingVertical: 4,
-  },
-  marginLeft: { marginStart: 4 },
-});

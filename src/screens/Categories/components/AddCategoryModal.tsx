@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { TextInput } from 'react-native-paper';
 
-import { Dialog } from '@components/index';
+import { Dialog, TextInput } from '@components/index';
 
 import { Category } from '../../../database/types';
 import {
@@ -9,7 +8,6 @@ import {
   isCategoryNameDuplicate,
   updateCategory,
 } from '../../../database/queries/CategoryQueries';
-import { useTheme } from '@hooks/persisted';
 
 import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
@@ -29,7 +27,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   visible,
   onSuccess,
 }) => {
-  const theme = useTheme();
   const [categoryName, setCategoryName] = useState(category?.name || '');
 
   function close() {
@@ -51,12 +48,9 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       <Dialog.Content>
         <TextInput
           autoFocus
-          defaultValue={categoryName}
+          value={categoryName}
           placeholder={getString('common.name')}
           onChangeText={setCategoryName}
-          mode="outlined"
-          underlineColor={theme.outline}
-          theme={{ colors: { ...theme } }}
         />
       </Dialog.Content>
       <Dialog.Actions>

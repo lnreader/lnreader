@@ -1,9 +1,17 @@
 import { getString } from '@i18n/translations';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { Box, Column } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  height,
+  padding,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { ThemeColors } from '@theme/types';
+import { AppIcon, AppText } from '@components';
+import KeyboardArrowDownIcon from '@expo/material-symbols/keyboard_arrow_down.xml';
+import KeyboardArrowUpIcon from '@expo/material-symbols/keyboard_arrow_up.xml';
 
 interface NovelSummaryProps {
   summary: string;
@@ -25,67 +33,31 @@ const NovelSummary: React.FC<NovelSummaryProps> = ({
     }
   };
 
-  const bottom = expanded ? 0 : 4;
-  const containerBottomPadding = expanded ? 24 : 8;
-  const opacity = expanded ? 1 : 0.7;
-
   return (
-    <Pressable
-      style={[
-        styles.summaryContainer,
-        { paddingBottom: containerBottomPadding },
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        clickable(toggleExpanded),
+        padding(16, 8, 16, expanded ? 16 : 0),
       ]}
-      onPress={toggleExpanded}
     >
-      <Text
-        style={[styles.summaryText, { color: textColor }]}
-        numberOfLines={expanded ? Number.MAX_SAFE_INTEGER : 3}
+      <AppText
+        variant="bodyMedium"
+        color={textColor}
+        maxLines={expanded ? undefined : 3}
       >
         {summary || getString('novelScreen.noSummary')}
-      </Text>
+      </AppText>
       {summary ? (
-        <View
-          style={[
-            styles.iconContainer,
-            {
-              backgroundColor: theme.background,
-              bottom,
-              opacity,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name={expanded ? 'chevron-up' : 'chevron-down'}
-            color={theme.onBackground}
-            size={24}
-            style={[{ backgroundColor: theme.background }, styles.icon]}
+        <Box modifiers={[fillMaxWidth(), height(24)]} contentAlignment="center">
+          <AppIcon
+            source={expanded ? KeyboardArrowUpIcon : KeyboardArrowDownIcon}
+            tint={theme.onBackground}
           />
-        </View>
+        </Box>
       ) : null}
-    </Pressable>
+    </Column>
   );
 };
 
 export default NovelSummary;
-
-const styles = StyleSheet.create({
-  icon: {
-    borderRadius: 50,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-  },
-  summaryContainer: {
-    marginBottom: 8,
-    padding: 16,
-    paddingTop: 8,
-  },
-  summaryText: {
-    lineHeight: 20,
-  },
-});

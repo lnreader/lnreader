@@ -1,23 +1,27 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
+import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import ReaderTextSize from '../ReaderTextSize';
 import ReaderValueChange from '@screens/reader/components/ReaderBottomSheet/ReaderValueChange';
 import ReaderTextAlignSelector from '@screens/reader/components/ReaderBottomSheet/ReaderTextAlignSelector';
-import { List } from '@components/index';
+import ReaderThemeSelector from '@screens/reader/components/ReaderBottomSheet/ReaderThemeSelector';
+import ReaderFontPicker from '@screens/reader/components/ReaderBottomSheet/ReaderFontPicker';
+import { List, SwitchItem } from '@components/index';
 import { useBoolean } from '@hooks';
-import { Portal } from 'react-native-paper';
 import FontPickerModal from '../Modals/FontPickerModal';
 import { readerFonts } from '@utils/constants/readerConstants';
+import FontDownloadIcon from '@expo/material-symbols/font_download.xml';
+import TitleIcon from '@expo/material-symbols/title.xml';
 
-const DisplayTab: React.FC = () => {
+/**
+ * The reader's sheet has no Theme tab or font dialog: like upstream's sheet it
+ * shows the preset themes and the fonts inline.
+ */
+const DisplayTab = ({ inReaderSheet = false }: { inReaderSheet?: boolean }) => {
   const theme = useTheme();
   const readerSettings = useChapterReaderSettings();
   const readerFontPickerModal = useBoolean();
-
-  const labelStyle = [styles.label, { color: theme.onSurface }];
 
   const currentFontName = readerFonts.find(
     item => item.fontFamily === readerSettings.fontFamily,
@@ -25,20 +29,47 @@ const DisplayTab: React.FC = () => {
 
   return (
     <>
-      <BottomSheetScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <View style={styles.content}>
-          <ReaderTextSize labelStyle={labelStyle} />
+      <Column modifiers={[fillMaxWidth()]}>
+        <Column modifiers={[fillMaxWidth()]}>
+          <ReaderTextSize />
+          {inReaderSheet ? <ReaderThemeSelector /> : null}
+          <ReaderTextAlignSelector />
+          {inReaderSheet ? (
+            <ReaderFontPicker />
+          ) : (
+            <List.Item
+              title={getString('readerScreen.bottomSheet.fontStyle')}
+              icon={FontDownloadIcon}
+              description={currentFontName}
+              onPress={readerFontPickerModal.setTrue}
+              theme={theme}
+            />
+          )}
+          <SwitchItem
+            label={getString('readerSettings.chapterTitles')}
+            icon={TitleIcon}
+            description={getString('readerSettings.chapterTitlesDesc')}
+            value={readerSettings.showChapterTitle ?? false}
+            onPress={() =>
+              readerSettings.setChapterReaderSettings({
+                showChapterTitle: !readerSettings.showChapterTitle,
+              })
+            }
+            theme={theme}
+          />
           <ReaderValueChange
-            labelStyle={labelStyle}
+            label={getString('readerSettings.textIndent')}
+            valueKey="textIndent"
+            valueChange={0.5}
+            min={0}
+            max={4}
+            unit="em"
+          />
+          <ReaderValueChange
             label={getString('readerScreen.bottomSheet.lineHeight')}
             valueKey="lineHeight"
           />
           <ReaderValueChange
-            labelStyle={labelStyle}
             label={getString('readerScreen.bottomSheet.padding')}
             valueKey="padding"
             valueChange={2}
@@ -47,45 +78,24 @@ const DisplayTab: React.FC = () => {
             decimals={0}
             unit="px"
           />
-          <ReaderTextAlignSelector labelStyle={labelStyle} />
-          <List.Item
-            title={getString('readerScreen.bottomSheet.fontStyle')}
-            description={currentFontName}
-            onPress={readerFontPickerModal.setTrue}
-            theme={theme}
+          <ReaderValueChange
+            label={getString('readerSettings.paragraphSpacing')}
+            valueKey="paragraphSpacing"
+            valueChange={0.25}
+            min={0}
+            max={3}
+            decimals={2}
+            unit="em"
           />
-        </View>
-
-        <View style={styles.bottomSpacing} />
-      </BottomSheetScrollView>
-
-      <Portal>
-        <FontPickerModal
-          currentFont={readerSettings.fontFamily}
-          visible={readerFontPickerModal.value}
-          onDismiss={readerFontPickerModal.setFalse}
-        />
-      </Portal>
+        </Column>
+      </Column>
+      <FontPickerModal
+        currentFont={readerSettings.fontFamily}
+        visible={readerFontPickerModal.value}
+        onDismiss={readerFontPickerModal.setFalse}
+      />
     </>
   );
 };
 
 export default DisplayTab;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 24,
-  },
-  content: {
-    paddingTop: 8,
-  },
-  label: {
-    fontSize: 16,
-  },
-  bottomSpacing: {
-    height: 24,
-  },
-});

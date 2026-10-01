@@ -3,12 +3,6 @@ import { ChapterInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
 import RenderListChapter from '../RenderListChapter';
 
-jest.mock('react-native-paper', () => {
-  const { Text } = jest.requireActual('react-native');
-
-  return { Text };
-});
-
 const theme = {
   onSecondaryContainer: '#111111',
   onSurface: '#222222',
@@ -17,13 +11,6 @@ const theme = {
   rippleColor: '#555555',
   secondaryContainer: '#666666',
 } as ThemeColors;
-
-const styles = {
-  chapterCtn: {},
-  drawerElementContainer: {},
-  chapterNameCtn: {},
-  releaseDateCtn: {},
-};
 
 const chapter = {
   id: 1,
@@ -35,7 +22,6 @@ const renderChapter = (item: ChapterInfo, chapterId = 2) =>
   render(
     <RenderListChapter
       item={item}
-      styles={styles}
       theme={theme}
       chapterId={chapterId}
       onPress={jest.fn()}

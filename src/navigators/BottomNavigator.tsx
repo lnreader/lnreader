@@ -1,5 +1,8 @@
-import { useCallback, useMemo } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useCallback, useMemo, type ReactNode } from 'react';
+import {
+  createBottomTabNavigator,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 
 import Library from '../screens/library/LibraryScreen';
 import Updates from '../screens/updates/UpdatesScreen';
@@ -8,21 +11,22 @@ import Browse from '../screens/browse/BrowseScreen';
 import More from '../screens/more/MoreScreen';
 
 import { getString } from '@i18n/translations';
-import {
-  useAppSettings,
-  useFilteredInstalledPlugins,
-  useTheme,
-} from '@hooks/persisted';
+import { useAppSettings, useFilteredInstalledPlugins } from '@hooks/persisted';
 import { BottomNavigatorParamList } from './types';
-import Icon from '@react-native-vector-icons/material-design-icons';
-import { MaterialDesignIconName } from '@type/icon';
-import { BottomTabBar } from '@components';
+import { TAB_ICONS, isTabName } from './destinations';
+import { useTabPressBridge } from './NavigationRailFrame';
+import {
+  AppNavigationBar,
+  InsetOverrideProvider,
+  type NavDestination,
+} from '@components';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
 
 const Tab = createBottomTabNavigator<BottomNavigatorParamList>();
 
 const BottomNavigator = () => {
-  const theme = useTheme();
-
+  const layout = useWindowLayout();
+  const tabPressBridgeRef = useTabPressBridge();
   const {
     showHistoryTab = true,
     showUpdatesTab = true,
@@ -35,82 +39,112 @@ const BottomNavigator = () => {
     [filteredInstalledPlugins],
   );
 
-  const renderIcon = useCallback(
-    ({ color, route }: { route: { name: string }; color: string }) => {
-      let iconName: MaterialDesignIconName;
-      switch (route.name) {
-        case 'Library':
-          iconName = 'bookmark-box-multiple';
-          break;
-        case 'Updates':
-          iconName = 'alert-decagram-outline';
-          break;
-        case 'History':
-          iconName = 'history';
-          break;
-        case 'Browse':
-          iconName = 'compass-outline';
-          break;
-        case 'More':
-          iconName = 'dots-horizontal';
-          break;
-        default:
-          iconName = 'circle';
+  const renderTabBar = useCallback(
+    ({ state, descriptors, navigation }: BottomTabBarProps) => {
+      // Screens listen for re-presses (e.g. Library opens its options).
+      const emitPress = (routeKey: string) =>
+        navigation.emit({
+          type: 'tabPress',
+          target: routeKey,
+          canPreventDefault: true,
+        });
+      if (layout.useNavigationRail) {
+        // The app-wide rail is drawn by NavigationRailFrame beside every
+        // screen; it forwards re-presses of the current tab here.
+        if (tabPressBridgeRef) {
+          tabPressBridgeRef.current = {
+            press: tab => {
+              const route = state.routes.find(r => r.name === tab);
+              if (route) {
+                emitPress(route.key);
+              }
+            },
+          };
+        }
+        return null;
       }
-
-      return <Icon name={iconName} color={color} size={24} />;
+      const destinations: NavDestination[] = state.routes.flatMap(route => {
+        if (!isTabName(route.name)) {
+          return [];
+        }
+        const { options } = descriptors[route.key];
+        return [
+          {
+            key: route.key,
+            label: options.title ?? route.name,
+            ...TAB_ICONS[route.name],
+            badge:
+              options.tabBarBadge === undefined
+                ? undefined
+                : String(options.tabBarBadge),
+          },
+        ];
+      });
+      const selectedKey = state.routes[state.index].key;
+      const onSelect = (key: string) => {
+        const route = state.routes.find(r => r.key === key);
+        if (!route) {
+          return;
+        }
+        const event = emitPress(route.key);
+        if (key !== selectedKey && !event.defaultPrevented) {
+          navigation.navigate(route.name, route.params);
+        }
+      };
+      return (
+        <AppNavigationBar
+          destinations={destinations}
+          selectedKey={selectedKey}
+          onSelect={onSelect}
+          showLabels={showLabelsInNav}
+        />
+      );
     },
-    [],
+    [layout.useNavigationRail, showLabelsInNav, tabPressBridgeRef],
   );
 
-  const renderTabBar = useCallback(
-    (props: any) => (
-      <BottomTabBar
-        {...props}
-        theme={theme}
-        showLabelsInNav={showLabelsInNav}
-        renderIcon={renderIcon}
-      />
+  // The bar owns the bottom system inset (the rail frame handles the left).
+  const insetOverride = useMemo(
+    () => (layout.useNavigationRail ? { left: 0 } : { bottom: 0 }),
+    [layout.useNavigationRail],
+  );
+  const screenLayout = useCallback(
+    ({ children }: { children: ReactNode }) => (
+      <InsetOverrideProvider value={insetOverride}>
+        {children}
+      </InsetOverrideProvider>
     ),
-    [theme, showLabelsInNav, renderIcon],
+    [insetOverride],
   );
 
   return (
     <Tab.Navigator
-      screenOptions={() => ({
+      screenOptions={{
         headerShown: false,
         animation: 'fade',
         lazy: true,
-        tabBarBadgeStyle: {
-          backgroundColor: theme.error,
-          color: theme.onError,
-        },
-      })}
+        tabBarPosition: layout.useNavigationRail ? 'left' : 'bottom',
+      }}
+      screenLayout={screenLayout}
       tabBar={renderTabBar}
     >
       <Tab.Screen
         name="Library"
         component={Library}
-        options={{
-          title: getString('library'),
-        }}
+        options={{ title: getString('library') }}
       />
       {showUpdatesTab ? (
         <Tab.Screen
           name="Updates"
           component={Updates}
-          options={{
-            title: getString('updates'),
-          }}
+          options={{ title: getString('updates') }}
         />
       ) : null}
       {showHistoryTab ? (
         <Tab.Screen
           name="History"
           component={History}
-          options={{
-            title: getString('history'),
-          }}
+          options={{ title: getString('history') }}
         />
       ) : null}
       <Tab.Screen
@@ -119,17 +153,13 @@ const BottomNavigator = () => {
         options={{
           title: getString('browse'),
           freezeOnBlur: false,
-          tabBarBadge: pluginsWithUpdate
-            ? pluginsWithUpdate.toString()
-            : undefined,
+          tabBarBadge: pluginsWithUpdate ? pluginsWithUpdate : undefined,
         }}
       />
       <Tab.Screen
         name="More"
         component={More}
-        options={{
-          title: getString('more'),
-        }}
+        options={{ title: getString('more') }}
       />
     </Tab.Navigator>
   );

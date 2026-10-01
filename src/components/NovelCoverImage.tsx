@@ -1,160 +1,84 @@
 import { memo, useState } from 'react';
+import { Box, Image } from '@expo/ui/jetpack-compose';
 import {
-  Image as ReactNativeImage,
-  type ImageStyle,
-  type ImageURISource,
-  type StyleProp,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { Image, type ImageContentFit, type ImageProps } from 'expo-image';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+  background,
+  clip,
+  fillMaxWidth,
+  height,
+  Shapes,
+  size,
+  testID as testIDModifier,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
+import { type ImageRequestInit } from '@plugins/types';
+import AutoStoriesIcon from '@expo/material-symbols/auto_stories.xml';
+import AppIcon from './AppIcon/AppIcon';
+import { useCoverSource } from '../utils/coverCache';
 
-import { defaultCover } from '@plugins/helpers/constants';
-import type { ImageRequestInit } from '@plugins/types';
-import type { ThemeColors } from '@theme/types';
+export { isMissingNovelCover } from '../utils/coverCache';
 
-interface NovelCoverImageProps
-  extends Pick<
-    ImageProps,
-    | 'accessibilityLabel'
-    | 'accessible'
-    | 'cachePolicy'
-    | 'contentFit'
-    | 'onError'
-    | 'onLayout'
-    | 'priority'
-    | 'recyclingKey'
-    | 'testID'
-    | 'transition'
-  > {
-  iconSize?: number;
-  requestInit?: ImageRequestInit;
-  style?: StyleProp<ImageStyle>;
-  theme: ThemeColors;
+export const COVER_ASPECT = 1.5;
+
+/** Dark in every theme, for legibility over covers. */
+export const COVER_SCRIM = '#000000A6';
+
+export const CORNER = 12;
+
+interface NovelCoverImageProps {
   uri?: string | null;
+  requestInit?: ImageRequestInit;
+  width?: number;
+  height: number;
+  corner?: number;
+  label?: string;
+  dimmed?: boolean;
+  theme: ThemeColors;
+  testID?: string;
 }
 
-export const isMissingNovelCover = (uri?: string | null) => {
-  const normalizedUri = uri?.trim();
-  return !normalizedUri || normalizedUri === defaultCover;
-};
-
-const NovelCoverImage = ({
-  iconSize = 32,
-  onError,
-  requestInit,
-  style,
-  theme,
+const NovelCoverImage = memo(function CoverImageView({
   uri,
-  accessibilityLabel,
-  accessible,
-  cachePolicy = 'memory-disk',
-  contentFit = 'cover',
-  onLayout,
-  priority,
-  recyclingKey,
+  requestInit,
+  width,
+  height: coverHeight,
+  corner = CORNER,
+  label,
+  dimmed,
+  theme,
   testID,
-  transition = 150,
-}: NovelCoverImageProps) => {
-  const normalizedUri = uri?.trim();
+}: NovelCoverImageProps) {
+  const source = useCoverSource(uri, requestInit);
   const [failedUri, setFailedUri] = useState<string>();
-  const showPlaceholder =
-    isMissingNovelCover(normalizedUri) || failedUri === normalizedUri;
-  const requiresReactNativeImage =
-    Boolean(requestInit?.body) ||
-    Boolean(requestInit?.method && requestInit.method.toUpperCase() !== 'GET');
+  const frame = [
+    width === undefined ? fillMaxWidth() : size(width, coverHeight),
+    height(coverHeight),
+    clip(Shapes.RoundedCorner(corner)),
+    background(theme.surfaceContainerHighest ?? theme.surfaceVariant),
+    ...(testID ? [testIDModifier(testID)] : []),
+  ];
 
-  if (showPlaceholder) {
+  if (source.status !== 'ready' || failedUri === source.uri) {
     return (
-      <View
-        accessibilityLabel={accessibilityLabel}
-        accessibilityRole="image"
-        accessible={accessible}
-        onLayout={onLayout}
-        style={[
-          styles.placeholder,
-          { backgroundColor: theme.surfaceVariant },
-          style,
-        ]}
-        testID={testID}
-      >
-        <MaterialCommunityIcons
-          color={theme.onSurfaceVariant}
-          name="book-open-page-variant-outline"
-          size={iconSize}
-          style={styles.icon}
+      <Box contentAlignment="center" modifiers={frame}>
+        <AppIcon
+          source={AutoStoriesIcon}
+          size={32}
+          tint={theme.outline}
+          label={label}
         />
-      </View>
+      </Box>
     );
   }
-
-  if (requiresReactNativeImage) {
-    const source: ImageURISource = {
-      body: requestInit?.body,
-      headers: requestInit?.headers,
-      method: requestInit?.method,
-      uri: normalizedUri,
-    };
-
-    return (
-      <ReactNativeImage
-        accessibilityLabel={accessibilityLabel}
-        accessible={accessible}
-        onLayout={onLayout}
-        onError={event => {
-          setFailedUri(normalizedUri);
-          onError?.({ error: event.nativeEvent.error });
-        }}
-        resizeMode={toReactNativeResizeMode(contentFit)}
-        source={source}
-        style={[{ backgroundColor: theme.surfaceVariant }, style]}
-        testID={testID}
-      />
-    );
-  }
-
   return (
     <Image
-      accessibilityLabel={accessibilityLabel}
-      accessible={accessible}
-      cachePolicy={cachePolicy}
-      contentFit={contentFit}
-      onLayout={onLayout}
-      onError={event => {
-        setFailedUri(normalizedUri);
-        onError?.(event);
-      }}
-      priority={priority}
-      recyclingKey={recyclingKey ?? normalizedUri}
-      source={{ headers: requestInit?.headers, uri: normalizedUri }}
-      style={[{ backgroundColor: theme.surfaceVariant }, style]}
-      testID={testID}
-      transition={transition}
+      source={{ uri: source.uri }}
+      contentScale="crop"
+      contentDescription={label}
+      alpha={dimmed ? 0.5 : 1}
+      onError={() => setFailedUri(source.uri)}
+      modifiers={frame}
     />
   );
-};
-
-const toReactNativeResizeMode = (
-  contentFit: ImageContentFit,
-): 'center' | 'contain' | 'cover' | 'stretch' =>
-  contentFit === 'fill'
-    ? 'stretch'
-    : contentFit === 'none'
-    ? 'center'
-    : contentFit === 'scale-down'
-    ? 'contain'
-    : contentFit;
-
-const styles = StyleSheet.create({
-  icon: {
-    opacity: 0.45,
-  },
-  placeholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
 });
 
-export default memo(NovelCoverImage);
+export default NovelCoverImage;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
-import { Dialog } from '@components';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
+import { AppText, Dialog, TextInput } from '@components';
 import { useTheme } from '@hooks/persisted';
 
 interface TrackerLoginDialogProps {
@@ -57,48 +58,33 @@ const TrackerLoginDialog: React.FC<TrackerLoginDialogProps> = ({
     <Dialog.Root visible={visible} onDismiss={handleCancel}>
       <Dialog.Title>Login to {trackerName}</Dialog.Title>
       <Dialog.Content>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.surface,
-              color: theme.onSurface,
-              borderColor: theme.outline,
-            },
-          ]}
-          placeholder={usernameLabel}
-          placeholderTextColor={theme.onSurfaceVariant}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isLoading}
-        />
+        <Column
+          verticalArrangement={{ spacedBy: 16 }}
+          modifiers={[fillMaxWidth()]}
+        >
+          <TextInput
+            placeholder={usernameLabel}
+            value={username}
+            onChangeText={setUsername}
+            singleLine
+            disabled={isLoading}
+          />
 
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.surface,
-              color: theme.onSurface,
-              borderColor: theme.outline,
-            },
-          ]}
-          placeholder="Password"
-          placeholderTextColor={theme.onSurfaceVariant}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isLoading}
-        />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secure
+            singleLine
+            disabled={isLoading}
+          />
 
-        {error ? (
-          <Text style={[styles.errorText, { color: theme.error }]}>
-            {error}
-          </Text>
-        ) : null}
+          {error ? (
+            <AppText variant="bodyMedium" color={theme.error}>
+              {error}
+            </AppText>
+          ) : null}
+        </Column>
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.Action
@@ -118,19 +104,3 @@ const TrackerLoginDialog: React.FC<TrackerLoginDialogProps> = ({
 };
 
 export default TrackerLoginDialog;
-
-const styles = StyleSheet.create({
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  errorText: {
-    fontSize: 14,
-    marginBottom: 16,
-    marginTop: -8,
-  },
-});

@@ -1,21 +1,33 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Box, Row } from '@expo/ui/jetpack-compose';
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInputSubmitEditingEvent,
-} from 'react-native';
-import { TextInput, TouchableRipple } from 'react-native-paper';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { LegendList } from '@legendapp/list/react-native';
+  align,
+  background,
+  clickable,
+  clip,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { Dialog, NovelCoverImage } from '@components';
+import {
+  AppIcon,
+  AppText,
+  Dialog,
+  IconButtonV2,
+  NovelCoverImage,
+  ProgressIndicator,
+  TextInput,
+} from '@components';
 import { getTracker, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { SearchResult } from '@services/Trackers';
 import { TrackSearchDialogProps } from './types';
 import { showToast } from '@utils/showToast';
 import { getErrorMessage } from '@utils/error';
+import CheckCircleIcon from '@expo/material-symbols/check_circle.xml';
+import CloseIcon from '@expo/material-symbols/close.xml';
 
 const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
   tracker,
@@ -122,9 +134,9 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
   );
 
   const handleSubmitSearch = useCallback(
-    (event: TextInputSubmitEditingEvent) => {
+    (text: string) => {
       cancelScheduledSearch();
-      void getSearchResults(event.nativeEvent.text);
+      void getSearchResults(text);
     },
     [cancelScheduledSearch, getSearchResults],
   );
@@ -165,41 +177,39 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
       const isSelected = selectedNovel?.id === item.id;
 
       return (
-        <TouchableRipple
-          style={[
-            styles.searchResultCard,
-            isSelected && {
-              backgroundColor: theme.rippleColor,
-            },
-          ]}
-          key={item.id}
-          onPress={() => handleSelectNovel(item)}
-          rippleColor={theme.rippleColor}
-          borderless
-        >
-          <>
-            {isSelected && (
-              <MaterialCommunityIcons
-                name="check-circle"
-                color={theme.primary}
-                size={24}
-                style={styles.checkIcon}
-              />
-            )}
+        <Box key={item.id} modifiers={[fillMaxWidth(), padding(8, 8, 8, 8)]}>
+          <Row
+            modifiers={[
+              fillMaxWidth(),
+              clip(Shapes.RoundedCorner(4)),
+              ...(isSelected
+                ? [background(theme.rippleColor ?? theme.surfaceVariant)]
+                : []),
+              clickable(() => handleSelectNovel(item)),
+            ]}
+          >
             <NovelCoverImage
               uri={item.coverImage}
+              width={100}
+              height={150}
+              corner={4}
               theme={theme}
-              iconSize={28}
-              style={styles.coverImage}
             />
-            <Text
-              style={[styles.resultText, { color: theme.onSurface }]}
-              numberOfLines={3}
+            <AppText
+              variant="bodyLarge"
+              color={theme.onSurface}
+              maxLines={3}
+              modifiers={[weight(1), padding(20, 8, 8, 8)]}
             >
               {item.title}
-            </Text>
-          </>
-        </TouchableRipple>
+            </AppText>
+          </Row>
+          {isSelected && (
+            <Box modifiers={[align('topEnd'), padding(0, 8, 8, 0)]}>
+              <AppIcon source={CheckCircleIcon} tint={theme.primary} />
+            </Box>
+          )}
+        </Box>
       );
     },
     [selectedNovel, handleSelectNovel, theme],
@@ -212,42 +222,30 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
         <TextInput
           value={searchText}
           onChangeText={handleSearchTextChange}
-          onSubmitEditing={handleSubmitSearch}
-          returnKeyType="search"
-          textColor={theme.onSurface}
-          theme={{
-            colors: {
-              primary: theme.primary,
-              text: theme.onSurface,
-            },
-          }}
-          style={styles.textInput}
-          underlineColor={theme.outline}
-          right={
-            <TextInput.Icon
+          onSubmit={handleSubmitSearch}
+          imeAction="search"
+          testID="tracker-search-input"
+          trailing={
+            <IconButtonV2
+              name={CloseIcon}
               color={theme.onSurfaceVariant}
-              icon="close"
               onPress={handleClearSearch}
+              theme={theme}
             />
           }
         />
       </Dialog.Content>
-      <Dialog.ScrollArea>
-        <LegendList
-          data={loading ? [] : searchResults}
-          keyExtractor={item => item.id.toString()}
-          ListEmptyComponent={
-            loading ? (
-              <ActivityIndicator
-                color={theme.primary}
-                size={45}
-                style={styles.loader}
-              />
-            ) : null
-          }
-          renderItem={({ item }) => renderSearchResultCard(item)}
-          style={styles.resultsList}
-        />
+      <Dialog.ScrollArea fixed>
+        {loading ? (
+          <Box
+            contentAlignment="center"
+            modifiers={[fillMaxWidth(), padding(16, 16, 16, 16)]}
+          >
+            <ProgressIndicator circular />
+          </Box>
+        ) : (
+          searchResults.map(item => renderSearchResultCard(item))
+        )}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action
@@ -265,41 +263,3 @@ const TrackSearchDialog: React.FC<TrackSearchDialogProps> = ({
 };
 
 export default TrackSearchDialog;
-
-const styles = StyleSheet.create({
-  checkIcon: {
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    zIndex: 1,
-  },
-  coverImage: {
-    borderRadius: 4,
-    height: 150,
-    width: 100,
-  },
-  loader: {
-    margin: 16,
-  },
-  resultText: {
-    flex: 1,
-    flexWrap: 'wrap',
-    fontSize: 16,
-    marginLeft: 20,
-    padding: 8,
-    paddingLeft: 0,
-  },
-  resultsList: {
-    flexGrow: 1,
-    marginVertical: 8,
-    maxHeight: 500,
-  },
-  searchResultCard: {
-    borderRadius: 4,
-    flexDirection: 'row',
-    margin: 8,
-  },
-  textInput: {
-    backgroundColor: 'transparent',
-  },
-});

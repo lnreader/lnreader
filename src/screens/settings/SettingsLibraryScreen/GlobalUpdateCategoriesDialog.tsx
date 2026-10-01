@@ -1,17 +1,14 @@
 import { useCallback } from 'react';
-import {
-  FlatList,
-  ListRenderItemInfo,
-  Pressable,
-  StyleSheet,
-  Text,
-} from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { ListItem } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, toggleable } from '@expo/ui/jetpack-compose/modifiers';
 
-import { Dialog } from '@components';
+import { AppIcon, AppText, Dialog, listItemColors } from '@components';
 import type { Category } from '@database/types';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
+import CheckBoxIcon from '@expo/material-symbols/check_box.xml';
+import CheckBoxOutlineBlankIcon from '@expo/material-symbols/check_box_outline_blank.xml';
+import DisabledByDefaultIcon from '@expo/material-symbols/disabled_by_default.xml';
 
 interface GlobalUpdateCategoriesDialogProps {
   categories: Category[];
@@ -26,8 +23,6 @@ interface GlobalUpdateCategoriesDialogProps {
   onSave: () => void;
 }
 
-const categoryKey = (category: Category) => category.id.toString();
-
 const GlobalUpdateCategoriesDialog = ({
   categories,
   excludedCategoryIds,
@@ -40,14 +35,14 @@ const GlobalUpdateCategoriesDialog = ({
   const theme = useTheme();
 
   const renderCategory = useCallback(
-    ({ item }: ListRenderItemInfo<Category>) => {
+    (item: Category) => {
       const isIncluded = includedCategoryIds.includes(item.id);
       const isExcluded = excludedCategoryIds.includes(item.id);
       const icon = isExcluded
-        ? 'close-box'
+        ? DisabledByDefaultIcon
         : isIncluded
-        ? 'checkbox-marked'
-        : 'checkbox-blank-outline';
+        ? CheckBoxIcon
+        : CheckBoxOutlineBlankIcon;
 
       const toggleCategory = () => {
         if (isExcluded) {
@@ -66,37 +61,33 @@ const GlobalUpdateCategoriesDialog = ({
       };
 
       return (
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityState={{
-            checked: isExcluded ? 'mixed' : isIncluded,
-          }}
-          android_ripple={{ color: theme.rippleColor }}
-          onPress={toggleCategory}
-          style={styles.category}
+        <ListItem
+          key={item.id.toString()}
+          colors={listItemColors(theme)}
+          modifiers={[
+            fillMaxWidth(),
+            toggleable(isIncluded || isExcluded, toggleCategory, {
+              role: 'checkbox',
+            }),
+          ]}
         >
-          <MaterialCommunityIcons
-            color={
-              isIncluded || isExcluded ? theme.primary : theme.onSurfaceVariant
-            }
-            name={icon}
-            size={24}
-          />
-          <Text style={[styles.categoryName, { color: theme.onSurface }]}>
-            {item.name}
-          </Text>
-        </Pressable>
+          <ListItem.LeadingContent>
+            <AppIcon
+              source={icon}
+              tint={
+                isIncluded || isExcluded
+                  ? theme.primary
+                  : theme.onSurfaceVariant
+              }
+            />
+          </ListItem.LeadingContent>
+          <ListItem.HeadlineContent>
+            <AppText variant="bodyLarge">{item.name}</AppText>
+          </ListItem.HeadlineContent>
+        </ListItem>
       );
     },
-    [
-      excludedCategoryIds,
-      includedCategoryIds,
-      onChange,
-      theme.onSurface,
-      theme.onSurfaceVariant,
-      theme.primary,
-      theme.rippleColor,
-    ],
+    [excludedCategoryIds, includedCategoryIds, onChange, theme],
   );
 
   return (
@@ -109,15 +100,7 @@ const GlobalUpdateCategoriesDialog = ({
           {getString('generalSettingsScreen.globalUpdateCategoriesDescription')}
         </Dialog.Description>
       </Dialog.Header>
-      <Dialog.ScrollArea>
-        <FlatList
-          data={categories}
-          initialNumToRender={10}
-          keyExtractor={categoryKey}
-          renderItem={renderCategory}
-          style={styles.list}
-        />
-      </Dialog.ScrollArea>
+      <Dialog.ScrollArea>{categories.map(renderCategory)}</Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onCancel}>
           {getString('common.cancel')}
@@ -129,19 +112,3 @@ const GlobalUpdateCategoriesDialog = ({
 };
 
 export default GlobalUpdateCategoriesDialog;
-
-const styles = StyleSheet.create({
-  category: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  categoryName: {
-    fontSize: 16,
-  },
-  list: {
-    maxHeight: 420,
-  },
-});

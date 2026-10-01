@@ -1,36 +1,56 @@
-import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxSize } from '@expo/ui/jetpack-compose/modifiers';
+import { InteractionManager, Share, StyleSheet, View } from 'react-native';
+import * as Linking from 'expo-linking';
+import * as Clipboard from 'expo-clipboard';
 
-import ReaderAppbar from './components/ReaderAppbar';
-import ReaderFooter from './components/ReaderFooter';
-
-import WebViewReader from './components/WebViewReader';
-import ReaderBottomSheetV2 from './components/ReaderBottomSheet/ReaderBottomSheet';
-import ChapterDrawer from './components/ChapterDrawer';
-import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
-import { ErrorScreenV2 } from '@components';
-import { ChapterScreenProps } from '@navigators/types';
+import {
+  useChapterGeneralSettings,
+  useChapterReaderSettings,
+} from '@hooks/persisted';
+import { useBackHandler } from '@hooks/index';
 import { getString } from '@i18n/translations';
+import type { ChapterScreenProps } from '@navigators/types';
+import { resolveUrl } from '@services/plugin/fetch';
+import { showToast } from '@utils/showToast';
 import KeepScreenAwake from './components/KeepScreenAwake';
+import ChapterDrawer from './components/ChapterDrawer';
+import JumpToChapterModal from '@screens/novel/components/JumpToChapterModal';
+import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
+import ReaderAppbar, { BAR_HEIGHT } from './components/ReaderAppbar';
+import ReaderFooter, {
+  ReaderSideSeekbar,
+  bottomBarHeight,
+} from './components/ReaderFooter';
+import ReaderTtsController from './components/ReaderTtsController';
+import ReaderBottomSheet from './components/ReaderBottomSheet/ReaderBottomSheet';
+import ReaderSidePanel from './components/ReaderSidePanel';
+import WebViewReader, {
+  type ReaderTextAction,
+} from './components/WebViewReader';
 import {
   ChapterContextProvider,
   useChapterContext,
   useReaderChromeHidden,
 } from './ChapterContext';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { useBackHandler } from '@hooks/index';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import RefreshIcon from '@expo/material-symbols/refresh.xml';
 import {
-  InteractionManager,
-  Keyboard,
-  Share,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { Drawer } from 'react-native-drawer-layout';
-import { EMPTY_READER_SEARCH_RESULT, ReaderSearchResult } from './types';
-import * as Linking from 'expo-linking';
-import { resolveUrl } from '@services/plugin/fetch';
+  AppHost,
+  ErrorScreenV2,
+  OverlayHost,
+  BottomSheet,
+  Dialog,
+  TextInput,
+  useScreenInsets,
+  type ComposeListHandle,
+} from '@components';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
+
+const SIDE_PANEL_WIDTH = 400;
+
+const CHAPTERS_PANEL_WIDTH = 400;
 
 const Chapter = ({ route, navigation }: ChapterScreenProps) => (
   <ChapterContextProvider
@@ -42,9 +62,12 @@ const Chapter = ({ route, navigation }: ChapterScreenProps) => (
 );
 
 const ReaderDrawerLayout = ({ route, navigation }: ChapterScreenProps) => {
-  const theme = useTheme();
-  const { loading } = useChapterContext();
+  const { loading, novel, openChapter, hideHeader } = useChapterContext();
+  const insets = useScreenInsets();
+  const { verticalSeekbar = true } = useChapterGeneralSettings();
   const [open, setOpen] = useState(false);
+  const [findingChapter, setFindingChapter] = useState(false);
+  const drawerListRef = useRef<ComposeListHandle | null>(null);
   /**
    * The drawer renders a list of every chapter in the novel. Mounting it up
    * front competes with the chapter load for the JS thread, so it is deferred
@@ -66,13 +89,15 @@ const ReaderDrawerLayout = ({ route, navigation }: ChapterScreenProps) => {
     return () => handle.cancel();
   }, [drawerMounted, loading]);
 
-  useBackHandler(() => {
-    if (open) {
-      setOpen(false);
-      return true;
-    }
-    return false;
-  });
+  useBackHandler(
+    useCallback(() => {
+      if (open) {
+        setOpen(false);
+        return true;
+      }
+      return false;
+    }, [open]),
+  );
 
   const openDrawer = useCallback(() => {
     setDrawerMounted(true);
@@ -81,36 +106,89 @@ const ReaderDrawerLayout = ({ route, navigation }: ChapterScreenProps) => {
 
   const closeDrawer = useCallback(() => setOpen(false), []);
 
-  const renderDrawerContent = useCallback(
-    () => (drawerMounted ? <ChapterDrawer onClose={closeDrawer} /> : null),
-    [closeDrawer, drawerMounted],
-  );
+  const findChapter = useCallback(() => setFindingChapter(true), []);
 
-  /**
-   * `react-native-drawer-layout` paints the panel white by default and applies
-   * `drawerStyle` last, so the panel itself has to carry the drawer's surface
-   * colour. Left transparent, the reader showed through the panel for every
-   * frame before the content painted.
-   */
-  const drawerStyle = useMemo(
-    () => ({ backgroundColor: theme.surface }),
-    [theme.surface],
-  );
+  const layout = useWindowLayout();
 
   return (
-    <Drawer
-      drawerStyle={drawerStyle}
-      open={open}
-      onOpen={openDrawer}
-      onClose={closeDrawer}
-      renderDrawerContent={renderDrawerContent}
-    >
+    <View style={styles.container}>
       <ChapterContent
         route={route}
         navigation={navigation}
         openDrawer={openDrawer}
       />
-    </Drawer>
+      <ReaderSidePanel
+        open={open}
+        onOpenChange={next => (next ? openDrawer() : closeDrawer())}
+        side="start"
+        width={Math.min(layout.width - 56, CHAPTERS_PANEL_WIDTH)}
+        scrim
+        swipeable
+        keepMounted
+        edgeInsets={{
+          top: insets.top + BAR_HEIGHT,
+          bottom: insets.bottom + bottomBarHeight(verticalSeekbar),
+        }}
+        onEdgeTap={hideHeader}
+      >
+        {drawerMounted ? (
+          <ChapterDrawer
+            onClose={closeDrawer}
+            onFindChapter={findChapter}
+            listRef={drawerListRef}
+          />
+        ) : null}
+      </ReaderSidePanel>
+      <OverlayHost>
+        <JumpToChapterModal
+          modalVisible={findingChapter}
+          hideModal={() => setFindingChapter(false)}
+          novel={novel}
+          chapterListRef={drawerListRef}
+          onOpenChapter={chapter => {
+            closeDrawer();
+            openChapter(chapter);
+          }}
+        />
+      </OverlayHost>
+    </View>
+  );
+};
+
+/** Adds a text replacement rule for the selected text. */
+const ReplaceTextDialog = ({
+  text,
+  onSubmit,
+  onDismiss,
+}: {
+  text: string;
+  onSubmit: (replacement: string) => void;
+  onDismiss: () => void;
+}) => {
+  const [replacement, setReplacement] = useState('');
+  return (
+    <Dialog.Root visible onDismiss={onDismiss}>
+      <Dialog.Title>
+        {`${getString('common.replaceText')}: “${text.slice(0, 60)}”`}
+      </Dialog.Title>
+      <Dialog.Content>
+        <TextInput
+          value={replacement}
+          label={getString('common.replaceWith')}
+          onChangeText={setReplacement}
+          onSubmit={() => onSubmit(replacement)}
+          autoFocus
+        />
+      </Dialog.Content>
+      <Dialog.Actions>
+        <Dialog.Action onPress={onDismiss}>
+          {getString('common.cancel')}
+        </Dialog.Action>
+        <Dialog.Action onPress={() => onSubmit(replacement)}>
+          {getString('common.save')}
+        </Dialog.Action>
+      </Dialog.Actions>
+    </Dialog.Root>
   );
 };
 
@@ -122,232 +200,177 @@ export const ChapterContent = ({
   navigation,
   openDrawer,
 }: ChapterContentProps) => {
-  const { left, right } = useSafeAreaInsets();
-  const {
-    novel,
-    chapter,
-    onUserInteraction,
-    loading,
-    error,
-    webViewRef,
-    hideHeader,
-    refetch,
-  } = useChapterContext();
+  const layout = useWindowLayout();
+  const { bottom } = useScreenInsets();
+  const { theme: readerBackground } = useChapterReaderSettings();
+  const { novel, chapter, loading, error, hideHeader, refetch, selection } =
+    useChapterContext();
+  const [replacing, setReplacing] = useState<string>();
   const hidden = useReaderChromeHidden();
-  const readerSheetRef = useRef<BottomSheetModalMethods>(null);
-  const theme = useTheme();
-  const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
-  const [bookmarked, setBookmarked] = useState<boolean>(
-    chapter.bookmark ?? false,
-  );
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [searchResult, setSearchResult] = useState<ReaderSearchResult>(
-    EMPTY_READER_SEARCH_RESULT,
-  );
-  const [searchText, setSearchTextState] = useState('');
-  const searchTextRef = useRef('');
-  /**
-   * The settings sheet mounts a tab view (including the TTS engine/voice
-   * pickers), which is far too much work to do while the chapter is loading.
-   */
-  const [readerSheetMounted, setReaderSheetMounted] = useState(false);
-  const pendingSheetPresentRef = useRef(false);
-
-  const setSearchText = useCallback((text: string) => {
-    searchTextRef.current = text;
-    setSearchTextState(text);
-  }, []);
-
-  const resetSearchResult = useCallback(() => {
-    setSearchResult(EMPTY_READER_SEARCH_RESULT);
-  }, []);
-
-  const resetSearch = useCallback(() => {
-    setSearchText('');
-    resetSearchResult();
-  }, [resetSearchResult, setSearchText]);
-
-  const openReaderSheet = useCallback(() => {
-    if (readerSheetMounted) {
-      readerSheetRef.current?.present();
-      return;
-    }
-    pendingSheetPresentRef.current = true;
-    setReaderSheetMounted(true);
-  }, [readerSheetMounted]);
-
-  useEffect(() => {
-    if (readerSheetMounted && pendingSheetPresentRef.current) {
-      pendingSheetPresentRef.current = false;
-      readerSheetRef.current?.present();
-    }
-  }, [readerSheetMounted]);
+  const { keepScreenOn } = useChapterGeneralSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>();
+  const wide = layout.useNavigationRail;
 
   useBackHandler(
     useCallback(() => {
-      if (searchVisible) {
-        setSearchVisible(false);
+      if (settingsOpen) {
+        setSettingsOpen(false);
         return true;
       }
-
+      if (searchQuery !== undefined) {
+        setSearchQuery(undefined);
+        return true;
+      }
       return false;
-    }, [searchVisible]),
+    }, [settingsOpen, searchQuery]),
   );
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setBookmarked(chapter.bookmark ?? false);
-  }, [chapter]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchVisible(false);
-    resetSearch();
-  }, [chapter.id, resetSearch]);
-
-  useEffect(() => {
-    if (hidden) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSearchVisible(false);
+  // Search belongs to the chrome: it closes when the chrome hides.
+  const [wasHidden, setWasHidden] = useState(hidden);
+  if (wasHidden !== hidden) {
+    setWasHidden(hidden);
+    if (hidden && searchQuery !== undefined) {
+      setSearchQuery(undefined);
     }
-  }, [hidden]);
+  }
 
-  useEffect(() => {
-    if (hidden) {
-      return;
+  const openSettings = useCallback(() => {
+    // The page stays clean beside the side panel; the sheet keeps the bars.
+    if (wide && !hidden) {
+      hideHeader();
     }
-
-    webViewRef.current?.injectJavaScript(`
-      if (window.reader?.hidden) {
-        window.reader.hidden.val = ${searchVisible ? 'true' : 'false'};
-      }
-      true;
-    `);
-  }, [hidden, searchVisible, webViewRef]);
-
-  const scrollToStart = useCallback(() => {
-    onUserInteraction();
-    requestAnimationFrame(() => {
-      webViewRef?.current?.injectJavaScript(
-        !pageReader
-          ? `(()=>{
-                window.scrollTo({top:0,behavior:'smooth'})
-              })()`
-          : `(()=>{
-              window.pageReader?.movePage(0);
-            })()`,
-      );
-    });
-  }, [onUserInteraction, pageReader, webViewRef]);
-
-  const openDrawerI = useCallback(() => {
-    openDrawer();
-    hideHeader();
-  }, [hideHeader, openDrawer]);
-
-  const handleReaderTouchStart = useCallback(() => {
-    if (searchVisible) {
-      Keyboard.dismiss();
-    }
-  }, [searchVisible]);
-
-  const handleReaderPress = useCallback(() => {
-    onUserInteraction();
-    if (searchVisible) {
-      setSearchVisible(false);
-      return;
-    }
-    hideHeader();
-  }, [hideHeader, onUserInteraction, searchVisible]);
+    setSettingsOpen(true);
+  }, [hidden, hideHeader, wide]);
 
   const chapterUrl = resolveUrl(novel.pluginId, chapter.path);
-  const openChapterInWebView = useCallback(() => {
-    navigation.navigate('WebviewScreen', {
-      name: novel.name,
-      url: chapter.path,
-      pluginId: novel.pluginId,
-    });
-  }, [chapter.path, navigation, novel.name, novel.pluginId]);
-  const openChapterInBrowser = useCallback(() => {
-    void Linking.openURL(chapterUrl);
-  }, [chapterUrl]);
-  const shareChapter = useCallback(() => {
-    void Share.share({ message: chapterUrl });
-  }, [chapterUrl]);
+  const openInWebView = useCallback(
+    () =>
+      navigation.navigate('WebviewScreen', {
+        name: novel.name,
+        url: chapter.path,
+        pluginId: novel.pluginId,
+      }),
+    [chapter.path, navigation, novel.name, novel.pluginId],
+  );
+
+  const onTextAction = (action: ReaderTextAction, selectedText: string) => {
+    const text = (selectedText || selection.text || '').trim();
+    selection.clear();
+    if (!text) {
+      return;
+    }
+    switch (action) {
+      case 'copy':
+        void Clipboard.setStringAsync(text);
+        showToast(
+          getString('common.copiedToClipboard', { name: text.slice(0, 40) }),
+        );
+        break;
+      case 'search':
+        if (hidden) {
+          hideHeader();
+        }
+        setSearchQuery(text);
+        break;
+      case 'remove':
+        selection.remove(text);
+        break;
+      case 'replace':
+        setReplacing(text);
+        break;
+    }
+  };
 
   if (error) {
     return (
-      <ErrorScreenV2
-        error={error}
-        actions={[
-          {
-            iconName: 'refresh',
-            title: getString('common.retry'),
-            onPress: refetch,
-          },
-          {
-            iconName: 'earth',
-            title: 'WebView',
-            onPress: () =>
-              navigation.navigate('WebviewScreen', {
-                name: novel.name,
-                url: chapter.path,
-                pluginId: novel.pluginId,
-              }),
-          },
-        ]}
-      />
+      <AppHost style={styles.container}>
+        <ErrorScreenV2
+          error={error}
+          actions={[
+            {
+              iconName: RefreshIcon,
+              title: getString('common.retry'),
+              onPress: refetch,
+            },
+            {
+              iconName: PublicIcon,
+              title: 'WebView',
+              onPress: openInWebView,
+            },
+          ]}
+        />
+      </AppHost>
     );
   }
+
+  const closeSettings = () => setSettingsOpen(false);
+  const searching = searchQuery !== undefined;
+
   return (
-    <View style={[{ paddingStart: left, paddingEnd: right }, styles.container]}>
+    <View style={[styles.container, { backgroundColor: readerBackground }]}>
       {keepScreenOn ? <KeepScreenAwake /> : null}
-      {loading ? (
-        <ChapterLoadingScreen />
-      ) : (
-        <WebViewReader
-          onPress={handleReaderPress}
-          onTouchStart={handleReaderTouchStart}
-          onSearchResult={setSearchResult}
-          searchTextRef={searchTextRef}
-        />
-      )}
-      {readerSheetMounted ? (
-        <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
+      <WebViewReader onTextAction={onTextAction} />
+      {loading ? <ChapterLoadingScreen /> : null}
+      <ReaderAppbar
+        visible={!hidden}
+        onBack={navigation.goBack}
+        searchQuery={searchQuery}
+        onToggleSearch={() =>
+          setSearchQuery(current => (current === undefined ? '' : undefined))
+        }
+        openInWebView={openInWebView}
+        openInBrowser={() => void Linking.openURL(chapterUrl)}
+        shareChapter={() => void Share.share({ message: chapterUrl })}
+      />
+      <ReaderFooter
+        visible={!hidden && !searching}
+        onOpenChapters={openDrawer}
+        onOpenSettings={openSettings}
+      />
+      <ReaderSideSeekbar visible={!hidden && !searching} />
+      <ReaderTtsController />
+      {wide ? (
+        <ReaderSidePanel
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          side="end"
+          width={SIDE_PANEL_WIDTH}
+          title={getString('readerSettings.title')}
+        >
+          <AppHost style={[styles.container, { paddingBottom: bottom }]}>
+            <Column modifiers={[fillMaxSize()]}>
+              <ReaderBottomSheet fill />
+            </Column>
+          </AppHost>
+        </ReaderSidePanel>
       ) : null}
-      {!hidden ? (
-        <>
-          <ReaderAppbar
-            goBack={navigation.goBack}
-            theme={theme}
-            bookmarked={bookmarked}
-            setBookmarked={setBookmarked}
-            searchVisible={searchVisible}
-            setSearchVisible={setSearchVisible}
-            searchText={searchText}
-            setSearchText={setSearchText}
-            searchResult={searchResult}
-            resetSearchResult={resetSearchResult}
-            resetSearch={resetSearch}
-            openInWebView={openChapterInWebView}
-            openInBrowser={openChapterInBrowser}
-            shareChapter={shareChapter}
+      <OverlayHost>
+        <BottomSheet
+          visible={!wide && settingsOpen}
+          onDismiss={closeSettings}
+          scrollable={false}
+          transparentScrim
+        >
+          <ReaderBottomSheet bottomInset={bottom} />
+        </BottomSheet>
+        {replacing !== undefined ? (
+          <ReplaceTextDialog
+            text={replacing}
+            onSubmit={replacement => {
+              selection.replace(replacing, replacement);
+              setReplacing(undefined);
+            }}
+            onDismiss={() => setReplacing(undefined)}
           />
-          {!searchVisible ? (
-            <ReaderFooter
-              openReaderSheet={openReaderSheet}
-              scrollToStart={scrollToStart}
-              openDrawer={openDrawerI}
-            />
-          ) : null}
-        </>
-      ) : null}
+        ) : null}
+      </OverlayHost>
     </View>
   );
 };
 
-export default Chapter;
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
 });
+
+export default Chapter;

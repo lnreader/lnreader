@@ -1,21 +1,34 @@
 import { useEffect } from 'react';
-import { StyleSheet, View, Pressable, Text, ScrollView } from 'react-native';
+import { Column } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxSize,
+  verticalScroll,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { getString } from '@i18n/translations';
 
-import { List, SafeAreaView } from '@components';
+import { List, Screen, SwitchItem } from '@components';
 
 import { MoreHeader } from './components/MoreHeader';
 import { useLibrarySettings, useTheme } from '@hooks/persisted';
+import { useWindowLayout } from '@hooks/common/useWindowLayout';
 import { MoreStackScreenProps } from '@navigators/types';
-import Switch from '@components/Switch/Switch';
 import { useMMKVObject } from 'react-native-mmkv';
 import {
   BACKGROUND_TASKS_STORE_KEY,
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
+import BarChartIcon from '@expo/material-symbols/bar_chart.xml';
+import CloudOffIcon from '@expo/material-symbols/cloud_off.xml';
+import DownloadIcon from '@expo/material-symbols/download.xml';
+import InfoIcon from '@expo/material-symbols/info.xml';
+import LabelIcon from '@expo/material-symbols/label.xml';
+import PendingActionsIcon from '@expo/material-symbols/pending_actions.xml';
+import SettingsIcon from '@expo/material-symbols/settings.xml';
+import VisibilityOffIcon from '@expo/material-symbols/visibility_off.xml';
 
 const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
   const theme = useTheme();
+  const layout = useWindowLayout();
   const [taskQueue] = useMMKVObject<QueuedBackgroundTask[]>(
     BACKGROUND_TASKS_STORE_KEY,
   );
@@ -31,6 +44,9 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
   const enableIncognitoMode = () =>
     setLibrarySettings({ incognitoMode: !incognitoMode });
 
+  // Wide windows show the settings categories beside a page, so open one.
+  const settingsScreen = layout.isExpanded ? 'GeneralSettings' : 'Settings';
+
   useEffect(
     () =>
       navigation.addListener('tabPress', e => {
@@ -40,17 +56,17 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           navigation.navigate('MoreStack', {
             screen: 'SettingsStack',
             params: {
-              screen: 'Settings',
+              screen: settingsScreen,
             },
           });
         }
       }),
-    [navigation],
+    [navigation, settingsScreen],
   );
 
   return (
-    <SafeAreaView excludeTop excludeBottom>
-      <ScrollView>
+    <Screen>
+      <Column modifiers={[fillMaxSize(), verticalScroll()]}>
         <MoreHeader
           // status bar is translucent, text could be mess with it
           title={''}
@@ -58,69 +74,22 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           theme={theme}
         />
         <List.Section>
-          <Pressable
-            android_ripple={{ color: theme.rippleColor }}
-            style={styles.pressable}
+          <SwitchItem
+            icon={CloudOffIcon}
+            label={getString('moreScreen.downloadOnly')}
+            description={getString('moreScreen.downloadOnlyDesc')}
+            value={downloadedOnlyMode}
             onPress={enableDownloadedOnlyMode}
-          >
-            <View style={styles.row}>
-              <List.Icon theme={theme} icon="cloud-off-outline" />
-              <View style={styles.marginLeft16}>
-                <Text
-                  style={[
-                    {
-                      color: theme.onSurface,
-                    },
-                    styles.fontSize16,
-                  ]}
-                >
-                  {getString('moreScreen.downloadOnly')}
-                </Text>
-                <Text
-                  style={[
-                    styles.description,
-                    { color: theme.onSurfaceVariant },
-                  ]}
-                >
-                  {getString('moreScreen.downloadOnlyDesc')}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={downloadedOnlyMode}
-              onValueChange={enableDownloadedOnlyMode}
-            />
-          </Pressable>
-          <Pressable
-            android_ripple={{ color: theme.rippleColor }}
-            style={styles.pressable}
+            theme={theme}
+          />
+          <SwitchItem
+            icon={VisibilityOffIcon}
+            label={getString('moreScreen.incognitoMode')}
+            description={getString('moreScreen.incognitoModeDesc')}
+            value={incognitoMode}
             onPress={enableIncognitoMode}
-          >
-            <View style={styles.row}>
-              <List.Icon theme={theme} icon="glasses" />
-              <View style={styles.marginLeft16}>
-                <Text
-                  style={[
-                    {
-                      color: theme.onSurface,
-                    },
-                    styles.fontSize16,
-                  ]}
-                >
-                  {getString('moreScreen.incognitoMode')}
-                </Text>
-                <Text
-                  style={[
-                    styles.description,
-                    { color: theme.onSurfaceVariant },
-                  ]}
-                >
-                  {getString('moreScreen.incognitoModeDesc')}
-                </Text>
-              </View>
-            </View>
-            <Switch value={incognitoMode} onValueChange={enableIncognitoMode} />
-          </Pressable>
+            theme={theme}
+          />
           <List.Divider theme={theme} />
           <List.Item
             title={'Task Queue'}
@@ -129,7 +98,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
                 ? taskQueue.length + ' remaining'
                 : ''
             }
-            icon="progress-download"
+            icon={PendingActionsIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'TaskQueue',
@@ -139,7 +108,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           />
           <List.Item
             title={getString('common.downloads')}
-            icon="folder-download"
+            icon={DownloadIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'Downloads',
@@ -149,7 +118,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           />
           <List.Item
             title={getString('common.categories')}
-            icon="label-outline"
+            icon={LabelIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'Categories',
@@ -159,7 +128,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           />
           <List.Item
             title={getString('statsScreen.title')}
-            icon="chart-line"
+            icon={BarChartIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'Statistics',
@@ -170,12 +139,12 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           <List.Divider theme={theme} />
           <List.Item
             title={getString('common.settings')}
-            icon="cog-outline"
+            icon={SettingsIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'SettingsStack',
                 params: {
-                  screen: 'Settings',
+                  screen: settingsScreen,
                 },
               })
             }
@@ -183,7 +152,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           />
           <List.Item
             title={getString('common.about')}
-            icon="information-outline"
+            icon={InfoIcon}
             onPress={() =>
               navigation.navigate('MoreStack', {
                 screen: 'About',
@@ -192,26 +161,9 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
             theme={theme}
           />
         </List.Section>
-      </ScrollView>
-    </SafeAreaView>
+      </Column>
+    </Screen>
   );
 };
 
 export default MoreScreen;
-
-const styles = StyleSheet.create({
-  description: {
-    fontSize: 12,
-    lineHeight: 20,
-  },
-  pressable: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  row: { flexDirection: 'row' },
-  fontSize16: { fontSize: 16 },
-  marginLeft16: { marginLeft: 16 },
-});

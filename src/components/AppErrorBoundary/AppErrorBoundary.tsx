@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, StatusBar, ScrollView } from 'react-native';
+import { Card, Column, Row, Text } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxSize,
+  fillMaxWidth,
+  horizontalScroll,
+  padding,
+  verticalScroll,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import ErrorBoundary from 'react-native-error-boundary';
 import * as Clipboard from 'expo-clipboard';
 import DeviceInfo from 'react-native-device-info';
@@ -8,10 +16,17 @@ import { version } from '../../../package.json';
 import { getString } from '@i18n/translations';
 import { getErrorChainMessages } from '@utils/error';
 import { showToast } from '@utils/showToast';
-import { Button, List } from '@components';
-import { useTheme } from '@hooks/persisted';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@hooks/persisted/useTheme';
 import { restartApplication, shareCrashLogs } from '@services/crashLogs';
+import ErrorIcon from '@expo/material-symbols/error.xml';
+import RestartAltIcon from '@expo/material-symbols/restart_alt.xml';
+import ShareIcon from '@expo/material-symbols/share.xml';
+import Button from '../Button/Button';
+import AppIcon from '../AppIcon/AppIcon';
+import ProgressIndicator from '../ProgressIndicator/ProgressIndicator';
+import AppText from '../AppText/AppText';
+import Screen from '../Screen/Screen';
+import { useScreenInsets } from '../Screen/insets';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -23,6 +38,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   resetError,
 }) => {
   const theme = useTheme();
+  const { top, bottom } = useScreenInsets();
   const [isSharing, setIsSharing] = useState(false);
 
   const fallbackGetString = (
@@ -48,11 +64,11 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   ]
     .filter(Boolean)
     .join(' · ');
+  const details = `${chainMessages.join('\n\nCaused by: ')}\n\n${error.stack}`;
 
   const copyStackTrace = async () => {
     try {
-      const message = chainMessages.join('\n\nCaused by: ');
-      await Clipboard.setStringAsync(`${message}\n\n${error.stack}`);
+      await Clipboard.setStringAsync(details);
       return true;
     } catch {
       return false;
@@ -86,64 +102,91 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   };
 
   return (
-    <SafeAreaView
-      style={[styles.mainCtn, { backgroundColor: theme.background }]}
-    >
-      <StatusBar translucent={true} backgroundColor="transparent" />
-      <View style={styles.errorInfoCtn}>
-        <Text style={[styles.errorTitle, { color: theme.onSurface }]}>
+    <Screen>
+      <Column
+        horizontalAlignment="center"
+        verticalArrangement={{ spacedBy: 16 }}
+        modifiers={[
+          fillMaxSize(),
+          verticalScroll(),
+          padding(24, top + 32, 24, bottom + 24),
+        ]}
+      >
+        <AppIcon source={ErrorIcon} size={48} tint={theme.error} />
+        <AppText variant="headlineSmall" align="center">
           {fallbackGetString(
             'errorBoundary.title',
             'An Unexpected Error Occurred',
           )}
-        </Text>
-        <Text style={[styles.errorDesc, { color: theme.onSurface }]}>
+        </AppText>
+        <AppText
+          variant="bodyMedium"
+          align="center"
+          color={theme.onSurfaceVariant}
+        >
           {fallbackGetString(
             'errorBoundary.description',
             'The application ran into an unexpected error. Please share the crash logs in our Discord support channel.',
           )}
-        </Text>
-        <Text
-          style={[styles.versionDetails, { color: theme.onSurfaceVariant }]}
+        </AppText>
+        <AppText
+          variant="bodyMedium"
+          align="center"
+          color={theme.onSurfaceVariant}
         >
           {versionDetails}
-        </Text>
-        <ScrollView
-          style={[
-            styles.errorCtn,
-            {
-              backgroundColor: theme.surfaceVariant,
-            },
-          ]}
-          contentContainerStyle={styles.errorContent}
+        </AppText>
+        <Card
+          colors={{
+            containerColor: theme.surfaceContainerHigh,
+            contentColor: theme.onSurfaceVariant,
+          }}
+          modifiers={[fillMaxWidth()]}
         >
-          <Text style={[styles.errorText, { color: theme.onSurfaceVariant }]}>
-            {`${chainMessages.join('\n\nCaused by: ')}\n\n${error.stack}`}
-          </Text>
-        </ScrollView>
-      </View>
-      <List.Divider theme={theme} />
-      <View style={styles.actionsCtn}>
-        <Button
-          disabled={isSharing}
-          loading={isSharing}
-          onPress={handleShareCrashLogs}
-          title={fallbackGetString(
-            'errorBoundary.shareCrashLogs',
-            'Share crash logs',
-          )}
-          mode="outlined"
-        />
-        <Button
-          onPress={handleRestart}
-          title={fallbackGetString(
-            'errorBoundary.restart',
-            'Restart the application',
-          )}
-          mode="contained"
-        />
-      </View>
-    </SafeAreaView>
+          <Column
+            modifiers={[
+              fillMaxWidth(),
+              horizontalScroll(),
+              padding(16, 16, 16, 16),
+            ]}
+          >
+            <Text
+              style={{ fontFamily: 'monospace', fontSize: 12 }}
+              maxLines={40}
+            >
+              {details}
+            </Text>
+          </Column>
+        </Card>
+        {isSharing ? <ProgressIndicator /> : null}
+        <Row
+          horizontalArrangement={{ spacedBy: 12 }}
+          modifiers={[fillMaxWidth()]}
+        >
+          <Button
+            mode="contained-tonal"
+            icon={ShareIcon}
+            disabled={isSharing}
+            title={fallbackGetString(
+              'errorBoundary.shareCrashLogs',
+              'Share crash logs',
+            )}
+            onPress={() => void handleShareCrashLogs()}
+            modifiers={[weight(1)]}
+          />
+          <Button
+            mode="contained"
+            icon={RestartAltIcon}
+            title={fallbackGetString(
+              'errorBoundary.restart',
+              'Restart the application',
+            )}
+            onPress={handleRestart}
+            modifiers={[weight(1)]}
+          />
+        </Row>
+      </Column>
+    </Screen>
   );
 };
 
@@ -158,45 +201,3 @@ const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({ children }) => {
 };
 
 export default AppErrorBoundary;
-
-const styles = StyleSheet.create({
-  actionsCtn: {
-    gap: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  errorCtn: {
-    flex: 1,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorContent: {
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-  },
-  errorText: {
-    lineHeight: 20,
-  },
-  errorDesc: {
-    lineHeight: 20,
-    marginTop: 8,
-  },
-  errorInfoCtn: {
-    flex: 1,
-    padding: 16,
-    paddingTop: 32,
-  },
-  errorTitle: {
-    fontSize: 20,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  versionDetails: {
-    lineHeight: 24,
-    marginVertical: 16,
-    textAlign: 'center',
-  },
-  mainCtn: {
-    flex: 1,
-  },
-});

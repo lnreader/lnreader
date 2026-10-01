@@ -1,65 +1,58 @@
-import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import React from 'react';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { SegmentedControl, SegmentedControlOption } from '@components';
+import { AppText, SegmentedControl } from '@components';
 import { getString } from '@i18n/translations';
+import FormatAlignCenterIcon from '@expo/material-symbols/format_align_center.xml';
+import FormatAlignJustifyIcon from '@expo/material-symbols/format_align_justify.xml';
+import FormatAlignLeftIcon from '@expo/material-symbols/format_align_left.xml';
+import FormatAlignRightIcon from '@expo/material-symbols/format_align_right.xml';
 
-interface ReaderTextAlignSelectorProps {
-  labelStyle?: TextStyle | TextStyle[];
-}
-
-const ReaderTextAlignSelector: React.FC<ReaderTextAlignSelectorProps> = ({
-  labelStyle,
-}) => {
+const ReaderTextAlignSelector: React.FC = () => {
   const theme = useTheme();
   const { textAlign, setChapterReaderSettings } = useChapterReaderSettings();
-  const options: SegmentedControlOption[] = [
+  const options = [
     {
-      icon: 'format-align-left',
+      icon: FormatAlignLeftIcon,
       label: getString('readerScreen.bottomSheet.alignLeft'),
       value: 'left',
     },
     {
-      icon: 'format-align-center',
+      icon: FormatAlignCenterIcon,
       label: getString('readerScreen.bottomSheet.alignCenter'),
       value: 'center',
     },
     {
-      icon: 'format-align-justify',
+      icon: FormatAlignJustifyIcon,
       label: getString('readerScreen.bottomSheet.alignJustify'),
       value: 'justify',
     },
     {
-      icon: 'format-align-right',
+      icon: FormatAlignRightIcon,
       label: getString('readerScreen.bottomSheet.alignRight'),
       value: 'right',
     },
   ];
 
   return (
-    <View style={styles.container}>
-      <Text style={[{ color: theme.onSurfaceVariant }, labelStyle]}>
+    <Column
+      verticalArrangement={{ spacedBy: 8 }}
+      modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
+    >
+      <AppText variant="bodyMedium" color={theme.onSurfaceVariant}>
         {getString('readerScreen.bottomSheet.textAlign')}
-      </Text>
+      </AppText>
       <SegmentedControl
         options={options}
         value={textAlign}
         onChange={value => setChapterReaderSettings({ textAlign: value })}
-        showCheckIcon={false}
-        showLabels={false}
         theme={theme}
+        iconOnly
       />
-    </View>
+    </Column>
   );
 };
 
 export default ReaderTextAlignSelector;
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-});

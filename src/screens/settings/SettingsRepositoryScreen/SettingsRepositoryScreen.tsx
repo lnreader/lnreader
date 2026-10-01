@@ -1,8 +1,14 @@
 import { useCallback, useEffect } from 'react';
-import { FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
-import { FAB, Portal } from 'react-native-paper';
 
-import { Appbar, EmptyView, SafeAreaView } from '@components';
+import {
+  Appbar,
+  ComposeList,
+  EmptyView,
+  Fab,
+  Screen,
+  useScreenInsets,
+} from '@components';
+import AddIcon from '@expo/material-symbols/add.xml';
 
 import {
   createRepository,
@@ -17,7 +23,6 @@ import { getString } from '@i18n/translations';
 
 import AddRepositoryModal from './components/AddRepositoryModal';
 import RepositoryCard from './components/RepositoryCard';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RespositorySettingsScreenProps } from '@navigators/types';
 import { showToast } from '@utils/showToast';
 import { useLiveQuery } from '@database/manager/liveQuery';
@@ -29,7 +34,7 @@ const SettingsBrowseScreen = ({
   navigation,
 }: RespositorySettingsScreenProps) => {
   const theme = useTheme();
-  const { bottom, right } = useSafeAreaInsets();
+  const { bottom } = useScreenInsets();
   const { refreshPlugins } = usePluginActions();
 
   const repositories = useLiveQuery(dbManager.select().from(repositorySchema), [
@@ -80,7 +85,7 @@ const SettingsBrowseScreen = ({
   );
 
   const renderRepository = useCallback(
-    ({ item }: ListRenderItemInfo<Repository>) => (
+    (item: Repository) => (
       <RepositoryCard
         repository={item}
         refetchRepositories={refreshPlugins}
@@ -98,60 +103,53 @@ const SettingsBrowseScreen = ({
   }, [params, upsertRepository]);
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={getString('browseScreen.repositories')}
-        handleGoBack={() => {
-          if (navigation.canGoBack()) {
-            navigation.goBack();
-          }
-        }}
-        theme={theme}
-      />
-
-      <FlatList
-        data={repositories}
-        contentContainerStyle={styles.contentCtn}
-        keyExtractor={repository => repository.id.toString()}
-        renderItem={renderRepository}
-        ListEmptyComponent={
-          <EmptyView
-            icon="Σ(ಠ_ಠ)"
-            description={getString('repositories.emptyMsg')}
-            theme={theme}
+    <Screen
+      topBar={
+        <Appbar
+          title={getString('browseScreen.repositories')}
+          handleGoBack={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
+          }}
+          theme={theme}
+        />
+      }
+      list={
+        repositories.length ? (
+          <ComposeList
+            data={repositories}
+            contentPadding={{ top: 4, bottom: bottom + 96 }}
+            keyExtractor={repository => repository.id.toString()}
+            renderItem={renderRepository}
           />
-        }
-      />
-      <FAB
-        style={[styles.fab, { backgroundColor: theme.primary, right, bottom }]}
-        color={theme.onPrimary}
-        label={getString('common.add')}
-        uppercase={false}
-        onPress={showAddRepositoryModal}
-        icon={'plus'}
-      />
-      <Portal>
+        ) : undefined
+      }
+      floatingAction={
+        <Fab
+          extended
+          label={getString('common.add')}
+          onPress={showAddRepositoryModal}
+          icon={AddIcon}
+        />
+      }
+      overlays={
         <AddRepositoryModal
           visible={addRepositoryModalVisible}
           closeModal={closeAddRepositoryModal}
           upsertRepository={upsertRepository}
         />
-      </Portal>
-    </SafeAreaView>
+      }
+    >
+      {repositories.length ? null : (
+        <EmptyView
+          icon="Σ(ಠ_ಠ)"
+          description={getString('repositories.emptyMsg')}
+          theme={theme}
+        />
+      )}
+    </Screen>
   );
 };
 
 export default SettingsBrowseScreen;
-
-const styles = StyleSheet.create({
-  contentCtn: {
-    flexGrow: 1,
-    paddingBottom: 100,
-    paddingVertical: 16,
-  },
-  fab: {
-    margin: 16,
-    position: 'absolute',
-    right: 0,
-  },
-});

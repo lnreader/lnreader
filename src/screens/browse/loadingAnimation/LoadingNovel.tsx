@@ -1,5 +1,6 @@
-import React, { memo, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { memo } from 'react';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import { padding } from '@expo/ui/jetpack-compose/modifiers';
 import { DisplayModes } from '@screens/library/constants/constants';
 import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
 
@@ -17,7 +18,6 @@ const LoadingNovel: React.FC<Props> = ({
   availableWidth,
   backgroundColor,
   disableLoadingAnimations,
-  highlightColor,
   pictureHeight,
   pictureWidth,
   displayMode,
@@ -25,20 +25,12 @@ const LoadingNovel: React.FC<Props> = ({
   const showTitle =
     displayMode !== DisplayModes.CoverOnly &&
     displayMode !== DisplayModes.Compact;
-  const loadingContainerStyle = useMemo(
-    () => ({
-      height: pictureHeight + (showTitle ? 54.6 : 9.6),
-      width: pictureWidth + 9.6,
-    }),
-    [pictureHeight, pictureWidth, showTitle],
-  );
 
   if (displayMode !== DisplayModes.List) {
     return (
-      <View style={[styles.loadingContainer, loadingContainerStyle]}>
+      <Column modifiers={[padding(4.8, 4.8, 4.8, 8.8)]}>
         <ShimmerPlaceholder
-          style={styles.picture}
-          shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+          shimmerColors={[backgroundColor]}
           height={pictureHeight}
           width={pictureWidth}
           stopAutoRun={disableLoadingAnimations}
@@ -46,78 +38,52 @@ const LoadingNovel: React.FC<Props> = ({
         {showTitle ? (
           <>
             <ShimmerPlaceholder
-              style={styles.text}
-              shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+              modifiers={[padding(0, 5, 0, 0)]}
+              corner={8}
+              shimmerColors={[backgroundColor]}
               height={16}
               width={pictureWidth}
               stopAutoRun={disableLoadingAnimations}
             />
             <ShimmerPlaceholder
-              style={styles.text}
-              shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+              modifiers={[padding(0, 5, 0, 0)]}
+              corner={8}
+              shimmerColors={[backgroundColor]}
               height={16}
               width={pictureWidth * 0.68}
               stopAutoRun={disableLoadingAnimations}
             />
           </>
         ) : null}
-      </View>
+      </Column>
     );
   }
 
   const chapterNumberWidth = 40;
   const textWidth = Math.max(80, availableWidth - chapterNumberWidth - 88);
   return (
-    <View style={styles.listLoadingContainer}>
+    <Row verticalAlignment="center" modifiers={[padding(8, 8, 8, 8)]}>
       <ShimmerPlaceholder
-        style={styles.picture}
-        shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+        shimmerColors={[backgroundColor]}
         height={40}
         width={40}
         stopAutoRun={disableLoadingAnimations}
       />
       <ShimmerPlaceholder
-        style={styles.listText}
-        shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+        modifiers={[padding(16, 0, 8, 0)]}
+        shimmerColors={[backgroundColor]}
         height={18}
         width={textWidth}
         stopAutoRun={disableLoadingAnimations}
       />
       <ShimmerPlaceholder
-        style={styles.picture}
-        shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+        shimmerColors={[backgroundColor]}
         height={20}
         width={chapterNumberWidth}
         stopAutoRun={disableLoadingAnimations}
       />
-    </View>
+    </Row>
   );
 };
-
-const styles = StyleSheet.create({
-  listLoadingContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginHorizontal: 8,
-    marginVertical: 8,
-  },
-  listText: {
-    borderRadius: 4,
-    marginLeft: 16,
-    marginRight: 8,
-  },
-  loadingContainer: {
-    marginBottom: 4,
-    overflow: 'hidden',
-    padding: 4.8,
-  },
-  picture: {
-    borderRadius: 4,
-  },
-  text: {
-    borderRadius: 8,
-    marginTop: 5,
-  },
-});
 
 export default memo(LoadingNovel);

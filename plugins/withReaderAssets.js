@@ -1,4 +1,5 @@
 const { withDangerousMod } = require('@expo/config-plugins');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -13,7 +14,14 @@ const withReaderAssets = (config) => {
 
       fs.mkdirSync(assetsDir, { recursive: true });
 
-      for (const subdir of ['css', 'js', 'fonts']) {
+      // The web reader bundle is generated (not committed).
+      execFileSync(
+        process.execPath,
+        [path.join(projectRoot, 'scripts', 'build-reader.mjs')],
+        { stdio: 'inherit', cwd: projectRoot },
+      );
+
+      for (const subdir of ['fonts', 'app']) {
         const src = path.join(sourceRoot, subdir);
         const dest = path.join(assetsDir, subdir);
         if (fs.existsSync(src)) {

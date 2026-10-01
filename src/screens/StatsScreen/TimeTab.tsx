@@ -1,14 +1,20 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LegendList } from '@legendapp/list/react-native';
+import React, { useMemo, useState } from 'react';
+import { Column, ListItem } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
+import {
+  AppIcon,
+  AppText,
+  NovelCoverImage,
+  SegmentedControl,
+  listItemColors,
+} from '@components';
 import { getString } from '@i18n/translations';
-
-import { NovelCoverImage } from '@components';
-
 import { getPlugin } from '@plugins/pluginManager';
-import { getUserAgent } from '@hooks/persisted/useUserAgent';
+import LabelIcon from '@expo/material-symbols/label.xml';
 import { formatTimeSpent } from './utils';
+import { StatsCard } from './components';
+import { StatsList } from './components/StatsCard';
 
 import type { ThemeColors } from '@theme/types';
 import type { LibraryStats } from '@database/types';
@@ -28,6 +34,42 @@ interface TimeTabProps {
   stats: LibraryStats;
   theme: ThemeColors;
 }
+
+const TimeRow = ({
+  item,
+  theme,
+}: {
+  item: TimeSpentItem;
+  theme: ThemeColors;
+}) => (
+  <ListItem colors={listItemColors(theme)} modifiers={[fillMaxWidth()]}>
+    <ListItem.LeadingContent>
+      {item.type === 'novel' ? (
+        <NovelCoverImage
+          uri={item.cover}
+          requestInit={getPlugin(item.pluginId)?.imageRequestInit}
+          width={40}
+          height={56}
+          corner={8}
+          label={item.name}
+          theme={theme}
+        />
+      ) : (
+        <AppIcon source={LabelIcon} />
+      )}
+    </ListItem.LeadingContent>
+    <ListItem.HeadlineContent>
+      <AppText variant="bodyLarge" maxLines={2}>
+        {item.name}
+      </AppText>
+    </ListItem.HeadlineContent>
+    <ListItem.SupportingContent>
+      <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
+        {formatTimeSpent(item.timeSpent)}
+      </AppText>
+    </ListItem.SupportingContent>
+  </ListItem>
+);
 
 export const TimeTab: React.FC<TimeTabProps> = ({ stats, theme }) => {
   const [showingNovels, setShowingNovels] = useState(true);
@@ -55,180 +97,53 @@ export const TimeTab: React.FC<TimeTabProps> = ({ stats, theme }) => {
     stats.topCategoriesByTimeSpent,
   ]);
 
-  const renderTimeItem = useCallback(
-    ({ item }: { item: TimeSpentItem }) => {
-      if (item.type === 'novel') {
-        const plugin = getPlugin(item.pluginId);
-        const headers = plugin?.imageRequestInit?.headers || {
-          'User-Agent': getUserAgent(),
-        };
-        const requestInit = { ...plugin?.imageRequestInit, headers };
-        return (
-          <View style={styles.timeSpentRow}>
-            <NovelCoverImage
-              uri={item.cover}
-              requestInit={requestInit}
-              theme={theme}
-              iconSize={22}
-              style={styles.timeSpentNovelCover}
-              contentFit="cover"
-            />
-            <View style={styles.timeSpentText}>
-              <Text style={[styles.timeSpentLabel, { color: theme.onSurface }]}>
-                {item.name}
-              </Text>
-              <Text
-                style={[
-                  styles.timeSpentDetail,
-                  { color: theme.onSurfaceVariant },
-                ]}
-              >
-                {formatTimeSpent(item.timeSpent)}
-              </Text>
-            </View>
-          </View>
-        );
-      }
-      return (
-        <View style={styles.timeSpentRow}>
-          <View>
-            <Text style={[styles.timeSpentLabel, { color: theme.onSurface }]}>
-              {item.name}
-            </Text>
-            <Text
-              style={[
-                styles.timeSpentDetail,
-                { color: theme.onSurfaceVariant },
-              ]}
-            >
-              {formatTimeSpent(item.timeSpent)}
-            </Text>
-          </View>
-        </View>
-      );
-    },
-    [theme],
-  );
-
-  const timeListHeader = useCallback(
-    () => (
-      <>
-        <View style={styles.totalTimeContainer}>
-          <Text style={[styles.totalTimeNumber, { color: theme.onSurface }]}>
+  const rows = [
+    {
+      key: 'total-time',
+      render: () => (
+        <StatsCard>
+          <AppText variant="displaySmall" color={theme.primary}>
             {formatTimeSpent(stats.totalTimeSpent)}
-          </Text>
-          <Text
-            style={[styles.totalTimeLabel, { color: theme.onSurfaceVariant }]}
-          >
+          </AppText>
+          <AppText variant="bodyMedium" color={theme.onSurfaceVariant}>
             {getString('statsScreen.totalTimeSpent')}
-          </Text>
-        </View>
-        <View style={styles.timeSpentHeader}>
-          <Text style={[styles.header, { color: theme.onSurface }]}>
+          </AppText>
+        </StatsCard>
+      ),
+    },
+    {
+      key: 'grouping',
+      render: () => (
+        <Column
+          verticalArrangement={{ spacedBy: 8 }}
+          modifiers={[fillMaxWidth(), padding(0, 12, 0, 0)]}
+        >
+          <AppText variant="titleMedium">
             {showingNovels
               ? getString('statsScreen.topNovelsByTimeSpent')
               : getString('statsScreen.topCategoriesByTimeSpent')}
-          </Text>
-          <Pressable
-            onPress={() => setShowingNovels(!showingNovels)}
-            accessibilityRole="button"
-            accessibilityLabel={
-              showingNovels
-                ? getString('statsScreen.showCategories')
-                : getString('statsScreen.showNovels')
-            }
-            style={[styles.toggleButton, { borderColor: theme.outlineVariant }]}
-          >
-            <Text style={[styles.toggleText, { color: theme.primary }]}>
-              {showingNovels
-                ? getString('statsScreen.showCategories')
-                : getString('statsScreen.showNovels')}
-            </Text>
-          </Pressable>
-        </View>
-      </>
-    ),
-    [stats.totalTimeSpent, theme, showingNovels],
-  );
+          </AppText>
+          <SegmentedControl
+            options={[
+              { label: getString('statsScreen.showNovels'), value: 'novels' },
+              {
+                label: getString('statsScreen.showCategories'),
+                value: 'categories',
+              },
+            ]}
+            value={showingNovels ? 'novels' : 'categories'}
+            onChange={value => setShowingNovels(value === 'novels')}
+            modifiers={[fillMaxWidth()]}
+            theme={theme}
+          />
+        </Column>
+      ),
+    },
+    ...timeSpentData.map(item => ({
+      key: `${item.type}-${item.id}`,
+      render: () => <TimeRow item={item} theme={theme} />,
+    })),
+  ];
 
-  return (
-    <LegendList
-      style={styles.list}
-      contentContainerStyle={styles.listContent}
-      data={timeSpentData}
-      estimatedItemSize={56}
-      getItemType={item => item.type}
-      keyExtractor={item => `${item.type}-${item.id}`}
-      ListHeaderComponent={timeListHeader}
-      recycleItems
-      renderItem={renderTimeItem}
-      showsVerticalScrollIndicator={false}
-    />
-  );
+  return <StatsList rows={rows} />;
 };
-
-const styles = StyleSheet.create({
-  list: {
-    paddingHorizontal: 16,
-  },
-  listContent: {
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  totalTimeContainer: {
-    paddingTop: 4,
-    paddingBottom: 24,
-  },
-  totalTimeLabel: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-  totalTimeNumber: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  timeSpentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  timeSpentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 64,
-    marginBottom: 8,
-  },
-  timeSpentNovelCover: {
-    width: 40,
-    aspectRatio: 2 / 3,
-    marginRight: 12,
-    borderRadius: 6,
-  },
-  timeSpentText: {
-    flex: 1,
-  },
-  timeSpentLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  timeSpentDetail: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  header: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  toggleButton: {
-    minHeight: 36,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  toggleText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-});

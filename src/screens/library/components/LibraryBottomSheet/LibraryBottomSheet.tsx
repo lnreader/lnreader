@@ -1,13 +1,11 @@
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Column, Row } from '@expo/ui/jetpack-compose';
 import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-  ViewStyle,
-} from 'react-native';
-import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
+  fillMaxWidth,
+  height,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -21,15 +19,14 @@ import {
   librarySortOrderList,
 } from '@screens/library/constants/constants';
 import { RadioButton } from '@components/RadioButton/RadioButton';
-import { BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { TopTabBar } from '@components';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList } from '@legendapp/list/react-native';
+import { AppText, ComposeTabPager, Slider } from '@components';
+
+const SHEET_HEIGHT = 520;
 
 interface LibraryBottomSheetProps {
-  bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
-  style?: StyleProp<ViewStyle>;
+  visible: boolean;
+  onDismiss: () => void;
 }
 
 const FirstRoute = () => {
@@ -41,30 +38,24 @@ const FirstRoute = () => {
   } = useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
-      <LegendList
-        recycleItems
-        estimatedItemSize={4}
-        extraData={[filter]}
-        data={libraryFilterList}
-        keyExtractor={item => `filter_${item.filter}`}
-        renderItem={({ item }) => (
-          <Checkbox
-            label={item.label}
-            theme={theme}
-            status={filter === item.filter}
-            onPress={() =>
-              setLibrarySettings({
-                filter: filter === item.filter ? undefined : item.filter,
-              })
-            }
-            disabled={
-              item.filter === LibraryFilter.Downloaded && downloadedOnlyMode
-            }
-          />
-        )}
-      />
-    </View>
+    <Column modifiers={[fillMaxWidth()]}>
+      {libraryFilterList.map(item => (
+        <Checkbox
+          key={`filter_${item.filter}`}
+          label={item.label}
+          status={filter === item.filter}
+          onPress={() =>
+            setLibrarySettings({
+              filter: filter === item.filter ? undefined : item.filter,
+            })
+          }
+          disabled={
+            item.filter === LibraryFilter.Downloaded && downloadedOnlyMode
+          }
+          theme={theme}
+        />
+      ))}
+    </Column>
   );
 };
 
@@ -74,33 +65,27 @@ const SecondRoute = () => {
     useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
-      <LegendList
-        recycleItems
-        data={librarySortOrderList}
-        extraData={[sortOrder]}
-        estimatedItemSize={5}
-        keyExtractor={(item, index) => `sort_${index}_${item.ASC}`}
-        renderItem={({ item }) => (
-          <SortItem
-            label={item.label}
-            theme={theme}
-            status={
-              sortOrder === item.ASC
-                ? 'asc'
-                : sortOrder === item.DESC
-                ? 'desc'
-                : undefined
-            }
-            onPress={() =>
-              setLibrarySettings({
-                sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
-              })
-            }
-          />
-        )}
-      />
-    </View>
+    <Column modifiers={[fillMaxWidth()]}>
+      {librarySortOrderList.map((item, index) => (
+        <SortItem
+          key={`sort_${index}_${item.ASC}`}
+          label={item.label}
+          status={
+            sortOrder === item.ASC
+              ? 'asc'
+              : sortOrder === item.DESC
+              ? 'desc'
+              : undefined
+          }
+          onPress={() =>
+            setLibrarySettings({
+              sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
+            })
+          }
+          theme={theme}
+        />
+      ))}
+    </Column>
   );
 };
 
@@ -112,14 +97,23 @@ const ThirdRoute = () => {
     showUnreadBadges = true,
     showContinueReadingButton = false,
     displayMode = DisplayModes.Comfortable,
+    novelsPerRow = 3,
     setLibrarySettings,
   } = useLibrarySettings();
 
+  const sectionHeader = (title: string) => (
+    <AppText
+      variant="labelLarge"
+      color={theme.onSurfaceVariant}
+      modifiers={[padding(16, 12, 16, 4)]}
+    >
+      {title}
+    </AppText>
+  );
+
   return (
-    <View style={styles.flex}>
-      <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
-        {getString('libraryScreen.bottomSheet.display.overlays')}
-      </Text>
+    <Column modifiers={[fillMaxWidth()]}>
+      {sectionHeader(getString('libraryScreen.bottomSheet.display.overlays'))}
       <Checkbox
         label={getString('libraryScreen.bottomSheet.display.downloadBadges')}
         status={showDownloadBadges}
@@ -162,71 +156,50 @@ const ThirdRoute = () => {
         }
         theme={theme}
       />
-      <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
-        {getString('libraryScreen.bottomSheet.display.displayMode')}
-      </Text>
-      <LegendList
-        recycleItems
-        estimatedItemSize={4}
-        data={displayModesList}
-        extraData={[displayMode]}
-        keyExtractor={item => `display_mode_${item.value}`}
-        renderItem={({ item }) => (
-          <RadioButton
-            label={item.label}
-            status={displayMode === item.value}
-            onPress={() => setLibrarySettings({ displayMode: item.value })}
-            theme={theme}
+      {sectionHeader(
+        getString('libraryScreen.bottomSheet.display.displayMode'),
+      )}
+      {displayModesList.map(item => (
+        <RadioButton
+          key={`display_mode_${item.value}`}
+          label={item.label}
+          status={displayMode === item.value}
+          onPress={() => setLibrarySettings({ displayMode: item.value })}
+          theme={theme}
+        />
+      ))}
+      {displayMode !== DisplayModes.List ? (
+        <Column modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
+          <Row modifiers={[fillMaxWidth()]}>
+            <AppText
+              variant="bodyMedium"
+              color={theme.onSurfaceVariant}
+              modifiers={[weight(1)]}
+            >
+              {getString('generalSettingsScreen.itemsPerRowLibrary')}
+            </AppText>
+            <AppText variant="labelLarge">{String(novelsPerRow)}</AppText>
+          </Row>
+          <Slider
+            value={novelsPerRow}
+            min={1}
+            max={5}
+            step={1}
+            showStops
+            onSlidingComplete={value =>
+              setLibrarySettings({ novelsPerRow: value })
+            }
           />
-        )}
-      />
-    </View>
+        </Column>
+      ) : null}
+    </Column>
   );
 };
 
-const bottomSheetSceneMap = SceneMap({
-  first: FirstRoute,
-  second: SecondRoute,
-  third: ThirdRoute,
-});
-
 const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
-  bottomSheetRef,
-  style,
+  visible,
+  onDismiss,
 }) => {
-  const theme = useTheme();
-
-  const layout = useWindowDimensions();
-
-  const renderTabBar = useCallback(
-    (props: any) => (
-      <TopTabBar
-        {...props}
-        indicatorStyle={{ backgroundColor: theme.primary }}
-        style={[
-          {
-            backgroundColor: theme.surfaceContainerLow ?? theme.surface,
-            borderBottomColor: theme.outlineVariant,
-          },
-          styles.tabBar,
-          style,
-        ]}
-        inactiveColor={theme.onSurfaceVariant}
-        activeColor={theme.primary}
-        pressColor={theme.rippleColor}
-      />
-    ),
-    [
-      theme.primary,
-      theme.surface,
-      theme.surfaceContainerLow,
-      theme.onSurfaceVariant,
-      theme.rippleColor,
-      theme.outlineVariant,
-      style,
-    ],
-  );
-
   const [index, setIndex] = useState(0);
   const routes = useMemo(
     () => [
@@ -237,55 +210,29 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
     [],
   );
 
-  const renderCommonOptions = useCallback(
-    ({ route, color: col }: { route: any; color: string }) => (
-      <Text style={{ color: col }}>{route.title}</Text>
-    ),
-    [],
-  );
-
-  const commonOptions: TabDescriptor<{
-    key: string;
-    title: string;
-  }> = useMemo(() => {
-    return {
-      label: renderCommonOptions,
-    };
-  }, [renderCommonOptions]);
-
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
-      <BottomSheetView style={styles.bottomSheetCtn}>
-        <TabView
-          commonOptions={commonOptions}
-          navigationState={{ index, routes }}
-          renderTabBar={renderTabBar}
-          renderScene={bottomSheetSceneMap}
+    <BottomSheet visible={visible} onDismiss={onDismiss} scrollable={false}>
+      {/* A fixed height, as before, so switching tabs doesn't resize it. */}
+      <Column modifiers={[fillMaxWidth(), height(SHEET_HEIGHT)]}>
+        <ComposeTabPager
+          tabs={routes.map((route, i) => ({ key: i, label: route.title }))}
+          index={index}
           onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          style={styles.tabView}
+          swipeEnabled={false}
+          renderPage={page =>
+            routes[page].key === 'first' ? (
+              <FirstRoute />
+            ) : routes[page].key === 'second' ? (
+              <SecondRoute />
+            ) : (
+              <ThirdRoute />
+            )
+          }
+          fixed
         />
-      </BottomSheetView>
+      </Column>
     </BottomSheet>
   );
 };
 
 export default LibraryBottomSheet;
-
-const styles = StyleSheet.create({
-  bottomSheetCtn: {
-    flex: 1,
-  },
-  sectionHeader: {
-    padding: 16,
-    paddingBottom: 8,
-  },
-  tabBar: {
-    borderBottomWidth: 1,
-    elevation: 0,
-  },
-  tabView: {
-    height: 520,
-  },
-  flex: { flex: 1 },
-});

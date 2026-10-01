@@ -43,7 +43,7 @@ describe('EmptyView', () => {
     const icon = screen.getByText('📚');
     const description = screen.getByText('No items found');
 
-    expect(icon.props.style).toContainEqual({ color: '#999999' });
-    expect(description.props.style).toContainEqual({ color: '#999999' });
+    expect(icon).toHaveStyle({ color: '#999999' });
+    expect(description).toHaveStyle({ color: '#999999' });
   });
 });

@@ -425,7 +425,7 @@ export const getCustomPages = (novelId: number) => {
   );
 };
 
-const scanlatorFilterToSQL = (excludedScanlators?: string[]) => {
+export const scanlatorFilterToSQL = (excludedScanlators?: string[]) => {
   if (!excludedScanlators || excludedScanlators.length === 0) {
     return undefined;
   }

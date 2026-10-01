@@ -1,28 +1,21 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { ThemeColors } from '../../theme/types';
+import { Box } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clickable,
+  clip,
+  Shapes,
+  size,
+} from '@expo/ui/jetpack-compose/modifiers';
 import Color from 'color';
-import { MaterialDesignIconName } from '@type/icon';
-import { Pressable } from 'react-native-gesture-handler';
-
-// --- Dynamic style helpers ---
-
-const getToggleButtonPressableStyle = (
-  selected: boolean,
-  theme: ThemeColors,
-  disabled?: boolean,
-) => ({
-  opacity: disabled ? 0.6 : 1,
-  backgroundColor: selected
-    ? Color(theme.primary).alpha(0.12).string()
-    : 'transparent',
-});
-
-// --- Components ---
+import { ThemeColors } from '../../theme/types';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
+import OutlinedBox from '../OutlinedBox/OutlinedBox';
+import CheckIcon from '@expo/material-symbols/check.xml';
+import FormatColorTextIcon from '@expo/material-symbols/format_color_text.xml';
 
 interface ToggleButtonProps {
-  icon: MaterialDesignIconName;
+  icon: IconSource;
   selected: boolean;
   theme: ThemeColors;
   color?: string;
@@ -38,23 +31,22 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   onPress,
   disabled,
 }) => (
-  <View style={styles.toggleButtonContainer}>
-    <Pressable
-      android_ripple={{ color: theme.rippleColor }}
-      style={[
-        styles.toggleButtonPressable,
-        getToggleButtonPressableStyle(selected, theme, disabled),
-      ]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <MaterialCommunityIcons
-        name={icon}
-        color={selected ? theme.primary : color ? color : theme.onSurface}
-        size={24}
-      />
-    </Pressable>
-  </View>
+  <Box
+    contentAlignment="center"
+    modifiers={[
+      size(44, 44),
+      clip(Shapes.RoundedCorner(8)),
+      background(
+        selected ? Color(theme.primary).alpha(0.12).string() : 'transparent',
+      ),
+      ...(disabled ? [] : [clickable(onPress)]),
+    ]}
+  >
+    <AppIcon
+      source={icon}
+      tint={selected ? theme.primary : color ? color : theme.onSurface}
+    />
+  </Box>
 );
 
 interface ToggleColorButtonProps {
@@ -72,61 +64,18 @@ export const ToggleColorButton: React.FC<ToggleColorButtonProps> = ({
   theme,
   onPress,
 }) => (
-  <Pressable
-    accessibilityRole="radio"
-    accessibilityState={{ checked: selected }}
-    android_ripple={{ color: theme.rippleColor, foreground: true }}
-    style={[
-      styles.toggleColorButtonContainer,
-      {
-        borderColor: selected ? theme.primary : 'transparent',
-      },
-    ]}
+  <OutlinedBox
+    shape="circle"
+    outlineWidth={selected ? 3 : 1}
+    outlineColor={selected ? theme.primary : theme.outlineVariant}
+    color={backgroundColor}
     onPress={onPress}
+    contentAlignment="center"
+    modifiers={[size(48, 48)]}
   >
-    <View
-      style={[
-        styles.toggleColorButtonSwatch,
-        {
-          backgroundColor,
-        },
-      ]}
-    >
-      <MaterialCommunityIcons
-        name={selected ? 'check' : 'format-color-text'}
-        color={textColor}
-        size={24}
-      />
-    </View>
-  </Pressable>
+    <AppIcon
+      source={selected ? CheckIcon : FormatColorTextIcon}
+      tint={textColor}
+    />
+  </OutlinedBox>
 );
-
-const styles = StyleSheet.create({
-  toggleButtonContainer: {
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginHorizontal: 6,
-  },
-  toggleButtonPressable: {
-    padding: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleColorButtonContainer: {
-    alignItems: 'center',
-    borderRadius: 24,
-    borderWidth: 2,
-    height: 48,
-    justifyContent: 'center',
-    marginHorizontal: 4,
-    overflow: 'hidden',
-    width: 48,
-  },
-  toggleColorButtonSwatch: {
-    alignItems: 'center',
-    borderRadius: 50,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
-  },
-});

@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { fillMaxWidth } from '@expo/ui/jetpack-compose/modifiers';
+import { Column } from '@expo/ui/jetpack-compose';
 
-import { Checkbox, Dialog, RadioButton } from '@components';
+import { AppText, Checkbox, Dialog, RadioButton } from '@components';
 import { getString } from '@i18n/translations';
 import type { MigrationNovelOptions } from '@services/backgroundTasks';
 import type { ThemeColors } from '@theme/types';
@@ -36,44 +37,40 @@ const MigrationReviewDialog = ({
       </Dialog.Description>
     </Dialog.Header>
     <Dialog.Content>
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.onSurface }]}>
+      <Column modifiers={[fillMaxWidth()]}>
+        <AppText variant="titleSmall" color={theme.onSurface}>
           {getString('browseScreen.migration.cover')}
-        </Text>
+        </AppText>
         <RadioButton
           label={getString('browseScreen.migration.useDestination')}
           status={options.cover === 'destination'}
           onPress={() => onChange({ ...options, cover: 'destination' })}
-          style={styles.option}
           theme={theme}
         />
         <RadioButton
           label={getString('browseScreen.migration.keepCurrent')}
           status={options.cover === 'current'}
           onPress={() => onChange({ ...options, cover: 'current' })}
-          style={styles.option}
           theme={theme}
         />
-      </View>
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.onSurface }]}>
+      </Column>
+      <Column modifiers={[fillMaxWidth()]}>
+        <AppText variant="titleSmall" color={theme.onSurface}>
           {getString('browseScreen.migration.metadata')}
-        </Text>
+        </AppText>
         <RadioButton
           label={getString('browseScreen.migration.useDestination')}
           status={options.metadata === 'destination'}
           onPress={() => onChange({ ...options, metadata: 'destination' })}
-          style={styles.option}
           theme={theme}
         />
         <RadioButton
           label={getString('browseScreen.migration.keepCurrent')}
           status={options.metadata === 'current'}
           onPress={() => onChange({ ...options, metadata: 'current' })}
-          style={styles.option}
           theme={theme}
         />
-      </View>
+      </Column>
       <Checkbox
         label={getString('browseScreen.migration.redownloadChapters')}
         status={options.redownloadChapters}
@@ -84,7 +81,6 @@ const MigrationReviewDialog = ({
           })
         }
         theme={theme}
-        viewStyle={styles.option}
       />
       <Dialog.Description>
         {getString('browseScreen.migration.preservedState')}
@@ -102,15 +98,3 @@ const MigrationReviewDialog = ({
 );
 
 export default MigrationReviewDialog;
-
-const styles = StyleSheet.create({
-  option: {
-    paddingHorizontal: 0,
-  },
-  section: {
-    gap: 2,
-  },
-  sectionTitle: {
-    fontWeight: '600',
-  },
-});

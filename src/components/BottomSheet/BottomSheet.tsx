@@ -1,113 +1,64 @@
-import React, { RefObject, useCallback, useMemo, useRef } from 'react';
+import { type ReactNode } from 'react';
+import { Column, ModalBottomSheet } from '@expo/ui/jetpack-compose';
 import {
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetModalProps,
-} from '@gorhom/bottom-sheet';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBackHandler } from '@hooks/index';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import BottomSheetBackdrop from './BottomSheetBackdrop';
-import { StyleSheet, useWindowDimensions } from 'react-native';
-import { useTheme } from '@hooks/persisted';
-import { getBottomSheetLayout, normalizeBottomSheetSnapPoints } from './layout';
+  fillMaxWidth,
+  padding,
+  verticalScroll,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useTheme } from '@hooks/persisted/useTheme';
+import AppText from '../AppText/AppText';
+import { useScreenInsets } from '../Screen/insets';
 
-interface BottomSheetProps
-  extends Omit<
-    BottomSheetModalProps,
-    | 'backgroundComponent'
-    | 'backgroundStyle'
-    | 'backdropComponent'
-    | 'bottomInset'
-    | 'containerStyle'
-    | 'enableDynamicSizing'
-    | 'enableOverDrag'
-    | 'enablePanDownToClose'
-    | 'handleComponent'
-    | 'handleIndicatorStyle'
-    | 'handleStyle'
-    | 'onChange'
-    | 'ref'
-    | 'snapPoints'
-    | 'style'
-    | 'topInset'
-  > {
-  bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
-  onChange?: (index: number) => void;
-  snapPoints?: number[];
+export interface BottomSheetProps {
+  visible: boolean;
+  onDismiss: () => void;
+  title?: string;
+  children: ReactNode;
+  expanded?: boolean;
+  /** Disable for lazy lists. */
+  scrollable?: boolean;
+  /** Leave what's behind undimmed, e.g. a page whose colors are being set. */
+  transparentScrim?: boolean;
 }
 
-const BottomSheet: React.FC<BottomSheetProps> = ({
-  bottomSheetRef,
+const BottomSheet = ({
+  visible,
+  onDismiss,
+  title,
   children,
-  onChange,
-  snapPoints,
-  ...otherProps
-}) => {
-  const indexRef = useRef<number>(null);
-  const { bottom, top } = useSafeAreaInsets();
-  const { height, width } = useWindowDimensions();
+  expanded,
+  scrollable = true,
+  transparentScrim = false,
+}: BottomSheetProps) => {
   const theme = useTheme();
-  const { horizontalInset, maxHeight, topMargin } = getBottomSheetLayout({
-    bottom,
-    height,
-    top,
-    width,
-  });
-  const renderBackdrop = useCallback(
-    (backdropProps: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...backdropProps} />
-    ),
-    [],
-  );
-  useBackHandler(() => {
-    if (typeof indexRef.current === 'number' && indexRef.current !== -1) {
-      bottomSheetRef?.current?.close();
-      return true;
-    }
-    return false;
-  });
-
-  const safeSnapPoints = useMemo(() => {
-    return normalizeBottomSheetSnapPoints(snapPoints, maxHeight);
-  }, [maxHeight, snapPoints]);
-
+  const { bottom } = useScreenInsets();
+  if (!visible) {
+    return null;
+  }
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      backdropComponent={renderBackdrop}
-      handleComponent={null}
-      backgroundStyle={[
-        styles.modal,
-        {
-          backgroundColor: theme.surfaceContainerLow ?? theme.surface,
-        },
-      ]}
-      containerStyle={{
-        paddingBottom: bottom,
-        paddingHorizontal: horizontalInset,
-      }}
-      onChange={index => {
-        onChange?.(index);
-        indexRef.current = index;
-      }}
-      enableDynamicSizing={false}
-      enableOverDrag={false}
-      enablePanDownToClose
-      topInset={top + topMargin}
-      snapPoints={safeSnapPoints}
-      {...otherProps}
+    <ModalBottomSheet
+      onDismissRequest={onDismiss}
+      skipPartiallyExpanded={expanded}
+      containerColor={theme.surfaceContainerLow}
+      contentColor={theme.onSurface}
+      scrimColor={transparentScrim ? 'transparent' : theme.backdrop}
     >
-      {children}
-    </BottomSheetModal>
+      <Column
+        modifiers={[
+          fillMaxWidth(),
+          padding(0, 0, 0, bottom + 16),
+          ...(scrollable ? [verticalScroll()] : []),
+        ]}
+      >
+        {title ? (
+          <AppText variant="titleLarge" modifiers={[padding(24, 0, 24, 12)]}>
+            {title}
+          </AppText>
+        ) : null}
+        {children}
+      </Column>
+    </ModalBottomSheet>
   );
 };
 
-export default React.memo(BottomSheet);
-
-const styles = StyleSheet.create({
-  modal: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-  },
-});
+export default BottomSheet;

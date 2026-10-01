@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Checkbox } from '@components/Checkbox/Checkbox';
 import { Dialog } from '@components/Dialog';
+import List from '@components/List/List';
 import { getString } from '@i18n/translations';
 import {
   areAllBackupOptionsSelected,
@@ -85,36 +85,28 @@ export const BackupOptionsList = ({
 
   return (
     <Dialog.ScrollArea>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        nestedScrollEnabled
-      >
-        <Checkbox
-          label={getString('backupScreen.options.selectAll')}
-          onPress={toggleAll}
-          status={allSelected ? true : someSelected ? 'indeterminate' : false}
-          theme={theme}
-        />
-        <View
-          style={[styles.divider, { backgroundColor: theme.outlineVariant }]}
-        />
-        {OPTION_KEYS.map(key => {
-          const disabled = key === 'downloadedFiles' && !options.library;
-          const strings = OPTION_STRINGS[key];
-          return (
-            <Checkbox
-              key={key}
-              description={getString(strings.description)}
-              disabled={disabled}
-              label={getString(strings.label)}
-              onPress={() => toggleOption(key)}
-              status={options[key]}
-              theme={theme}
-              viewStyle={styles.option}
-            />
-          );
-        })}
-      </ScrollView>
+      <Checkbox
+        label={getString('backupScreen.options.selectAll')}
+        onPress={toggleAll}
+        status={allSelected ? true : someSelected ? 'indeterminate' : false}
+        theme={theme}
+      />
+      <List.Divider theme={theme} />
+      {OPTION_KEYS.map(key => {
+        const disabled = key === 'downloadedFiles' && !options.library;
+        const strings = OPTION_STRINGS[key];
+        return (
+          <Checkbox
+            key={key}
+            description={getString(strings.description)}
+            disabled={disabled}
+            label={getString(strings.label)}
+            onPress={() => toggleOption(key)}
+            status={options[key]}
+            theme={theme}
+          />
+        );
+      })}
     </Dialog.ScrollArea>
   );
 };
@@ -155,17 +147,3 @@ export const BackupOptionsDialog = ({
     </Dialog.Actions>
   </Dialog.Root>
 );
-
-const styles = StyleSheet.create({
-  divider: {
-    height: 1,
-    marginVertical: 4,
-  },
-  option: {
-    paddingVertical: 8,
-  },
-  scrollContent: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-});

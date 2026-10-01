@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { TabView } from 'react-native-tab-view';
 
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -10,8 +8,8 @@ import {
   Appbar,
   ErrorScreenV2,
   LoadingScreenV2,
-  SafeAreaView,
-  TopTabBar,
+  Screen,
+  TabPager,
 } from '@components';
 
 import countBy from 'lodash-es/countBy';
@@ -23,6 +21,7 @@ import {
   getNovelsWithGenresFromDb,
   type NovelWithGenres,
 } from '@database/queries/StatsQueries';
+import type { StatsNovel } from '@screens/GenreStatsScreen/components';
 import { OverviewTab } from './OverviewTab';
 import { PluginsTab } from './PluginsTab';
 import { TimeTab } from './TimeTab';
@@ -96,13 +95,7 @@ const StatsScreen = () => {
   }, []);
 
   const handleNovelPress = useCallback(
-    (novel: {
-      id: number;
-      name: string;
-      path: string;
-      cover: string | null;
-      pluginId: string;
-    }) => {
+    (novel: StatsNovel) => {
       navigation.navigate('ReaderStack', {
         screen: 'Novel',
         params: {
@@ -116,8 +109,6 @@ const StatsScreen = () => {
     [navigation],
   );
 
-  const layout = useWindowDimensions();
-
   const routes: StatsRoute[] = useMemo(
     () => [
       { key: 'overview', title: getString('generalSettings') },
@@ -127,41 +118,9 @@ const StatsScreen = () => {
     [],
   );
 
-  const navigationState = useMemo(() => ({ index, routes }), [index, routes]);
-  const initialLayout = useMemo(
-    () => ({ width: layout.width }),
-    [layout.width],
-  );
-
-  const renderTabBar = useCallback(
-    (props: any) => (
-      <TopTabBar
-        {...props}
-        indicatorStyle={[
-          styles.tabBarIndicator,
-          { backgroundColor: theme.primary },
-        ]}
-        style={[
-          styles.tabBar,
-          {
-            backgroundColor: theme.surface,
-            borderBottomColor: theme.outlineVariant,
-          },
-        ]}
-        tabStyle={styles.tabStyle}
-        gap={0}
-        inactiveColor={theme.secondary}
-        activeColor={theme.primary}
-        android_ripple={{ color: theme.rippleColor }}
-      />
-    ),
-    [
-      theme.outlineVariant,
-      theme.primary,
-      theme.rippleColor,
-      theme.secondary,
-      theme.surface,
-    ],
+  const tabs = useMemo(
+    () => routes.map((route, i) => ({ key: i, label: route.title })),
+    [routes],
   );
 
   const renderScene = useCallback(
@@ -200,49 +159,32 @@ const StatsScreen = () => {
     />
   );
 
-  if (error) {
+  if (error || isLoading) {
     return (
-      <>
-        {Header}
-        <ErrorScreenV2 error={error} />
-      </>
-    );
-  }
-  if (isLoading) {
-    return (
-      <>
-        {Header}
-        <LoadingScreenV2 theme={theme} />
-      </>
+      <Screen topBar={Header}>
+        {error ? (
+          <ErrorScreenV2 error={error} />
+        ) : (
+          <LoadingScreenV2 theme={theme} />
+        )}
+      </Screen>
     );
   }
 
   return (
-    <SafeAreaView excludeTop>
-      {Header}
-      <TabView
-        navigationState={navigationState}
-        renderTabBar={renderTabBar}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={initialLayout}
-        lazy
-      />
-    </SafeAreaView>
+    <Screen
+      topBar={Header}
+      list={
+        <TabPager
+          tabs={tabs}
+          index={index}
+          onIndexChange={setIndex}
+          renderPage={i => renderScene({ route: routes[i] })}
+          fixed
+        />
+      }
+    />
   );
 };
 
 export default StatsScreen;
-
-const styles = StyleSheet.create({
-  tabBar: {
-    borderBottomWidth: 1,
-    elevation: 0,
-  },
-  tabBarIndicator: {
-    height: 3,
-  },
-  tabStyle: {
-    flex: 1,
-  },
-});

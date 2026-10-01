@@ -1,3 +1,4 @@
+require('./expo-ui');
 require('./nativeModules');
 require('./react-native-nitro-modules');
 require('./database');

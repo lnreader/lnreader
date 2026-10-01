@@ -1,59 +1,36 @@
 import { useTheme } from '@hooks/persisted';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Box, Column } from '@expo/ui/jetpack-compose';
+import { fillMaxSize, padding } from '@expo/ui/jetpack-compose/modifiers';
+import AppText from './AppText/AppText';
 
 interface EmptyViewProps {
   icon: string;
   description: string;
-  style?: any;
   children?: React.ReactNode;
-  iconStyle?: any;
 }
 
-const EmptyView = ({
-  icon,
-  description,
-  style,
-  children,
-  iconStyle,
-}: EmptyViewProps) => {
+const EmptyView = ({ icon, description, children }: EmptyViewProps) => {
   const theme = useTheme();
 
   return (
-    <View style={styles.emptyViewContainer}>
-      <Text
-        style={[
-          styles.emptyViewIcon,
-          { color: theme.outline },
-          style,
-          iconStyle,
-        ]}
-      >
-        {icon}
-      </Text>
-      <Text style={[styles.emptyViewText, { color: theme.outline }, style]}>
-        {description}
-      </Text>
-      {children}
-    </View>
+    <Box contentAlignment="center" modifiers={[fillMaxSize()]}>
+      <Column horizontalAlignment="center">
+        <AppText variant="displaySmall" color={theme.outline} align="center">
+          {icon}
+        </AppText>
+        <AppText
+          weight="700"
+          color={theme.outline}
+          align="center"
+          modifiers={[padding(30, 10, 30, 0)]}
+        >
+          {description}
+        </AppText>
+        {children}
+      </Column>
+    </Box>
   );
 };
 
 export default EmptyView;
-
-const styles = StyleSheet.create({
-  emptyViewContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  emptyViewIcon: {
-    fontSize: 45,
-  },
-  emptyViewText: {
-    fontWeight: 'bold',
-    marginTop: 10,
-    paddingHorizontal: 30,
-    textAlign: 'center',
-  },
-});

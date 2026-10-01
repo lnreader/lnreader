@@ -1,7 +1,13 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Card, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { NovelCoverImage } from '@components';
+import { AppText, NovelCoverImage } from '@components';
 import { ThemeColors } from '@theme/types';
 
 interface Props {
@@ -15,81 +21,62 @@ interface Props {
   theme: ThemeColors;
 }
 
+const Detail = ({
+  label,
+  value,
+  theme,
+}: {
+  label: string;
+  value: string;
+  theme: ThemeColors;
+}) => (
+  <Row>
+    <AppText variant="bodySmall">{`${label}: `}</AppText>
+    <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
+      {value}
+    </AppText>
+  </Row>
+);
+
 const DiscoverNovelCard: React.FC<Props> = ({ novel, onPress, theme }) => {
   return (
-    <View style={[styles.container, { backgroundColor: theme.overlay3 }]}>
-      <Pressable
-        style={styles.pressable}
-        onPress={onPress}
-        android_ripple={{ color: theme.rippleColor }}
+    <Card
+      colors={{
+        containerColor: theme.surfaceContainerHigh,
+        contentColor: theme.onSurface,
+      }}
+      modifiers={[fillMaxWidth(), padding(8, 8, 8, 8)]}
+    >
+      <Row
+        horizontalArrangement={{ spacedBy: 16 }}
+        modifiers={[fillMaxWidth(), clickable(onPress)]}
       >
         <NovelCoverImage
           uri={novel.novelCover}
+          width={100}
+          height={150}
+          corner={12}
+          label={novel.novelName}
           theme={theme}
-          iconSize={32}
-          style={styles.cover}
         />
-        <View style={styles.infoContainer}>
-          <Text
-            style={[styles.title, { color: theme.onSurface }]}
-            numberOfLines={2}
-          >
+        <Column
+          verticalArrangement={{ spacedBy: 4 }}
+          modifiers={[weight(1), padding(0, 16, 16, 16)]}
+        >
+          <AppText variant="titleMedium" maxLines={2}>
             {novel.novelName}
-          </Text>
-          <Text style={[styles.small, { color: theme.onSurface }]}>
-            Score:{' '}
-            <Text style={{ color: theme.onSurfaceVariant }}>{novel.score}</Text>
-          </Text>
+          </AppText>
+          <Detail label="Score" value={novel.score} theme={theme} />
           {novel?.info?.[1] ? (
-            <Text style={[styles.small, { color: theme.onSurface }]}>
-              Type:{' '}
-              <Text style={{ color: theme.onSurfaceVariant }}>
-                {novel.info[1]}
-              </Text>
-            </Text>
+            <Detail label="Type" value={novel.info[1]} theme={theme} />
           ) : null}
           {novel?.info?.[2] ? (
-            <Text style={[styles.small, { color: theme.onSurface }]}>
-              Published:{' '}
-              <Text style={{ color: theme.onSurfaceVariant }}>
-                {novel.info[2]}
-              </Text>
-            </Text>
+            <Detail label="Published" value={novel.info[2]} theme={theme} />
           ) : null}
-        </View>
-      </Pressable>
-    </View>
+        </Column>
+      </Row>
+    </Card>
   );
 };
 
 export default DiscoverNovelCard;
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 8,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-    flex: 1,
-    margin: 8,
-  },
-  cover: {
-    borderBottomLeftRadius: 8,
-    borderTopLeftRadius: 8,
-    width: 100,
-  },
-  infoContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  pressable: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  small: {
-    fontSize: 12,
-    marginVertical: 4,
-  },
-  title: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-});

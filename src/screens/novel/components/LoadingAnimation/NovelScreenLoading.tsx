@@ -1,11 +1,13 @@
 import React, { createContext, memo, useContext, useMemo } from 'react';
+import { StyleSheet, useWindowDimensions } from 'react-native';
+import { Column, Row } from '@expo/ui/jetpack-compose';
 import {
-  View,
-  StyleSheet,
-  StyleProp,
-  useWindowDimensions,
-  ViewStyle,
-} from 'react-native';
+  fillMaxSize,
+  fillMaxWidth,
+  padding,
+  type ModifierConfig,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { AppHost } from '@components';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
 import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
@@ -38,126 +40,139 @@ const CHAPTER_ITEMS = Array.from({ length: 7 });
 
 export const LoadingShimmer = memo(
   ({
-    style,
+    modifiers,
     height,
     width,
+    corner = 8,
     visible = true,
   }: {
-    style?: StyleProp<ViewStyle>;
+    modifiers?: ModifierConfig[];
     height: number;
-    width: number | string;
+    width: number;
+    corner?: number;
     visible?: boolean;
   }) => {
-    const { backgroundColor, disableLoadingAnimations, highlightColor } =
-      useSkeletonContext();
+    const { backgroundColor, disableLoadingAnimations } = useSkeletonContext();
     if (!visible) {
       return null;
     }
 
     return (
       <ShimmerPlaceholder
-        style={style}
-        shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+        modifiers={modifiers}
+        shimmerColors={[backgroundColor]}
         height={height}
         width={width}
+        corner={corner}
         stopAutoRun={disableLoadingAnimations}
       />
     );
   },
 );
 
+const text = padding(0, 5, 0, 0);
+
 const NovelTop = memo(() => {
   const { fullWidth } = useSkeletonContext();
   const textWidth = Math.max(80, fullWidth - 116);
   return (
-    <View style={styles.headerContainer}>
-      <LoadingShimmer style={styles.picture} height={150} width={100} />
-      <View style={styles.headerText}>
-        <LoadingShimmer style={styles.text} height={25} width={textWidth} />
-        <LoadingShimmer style={styles.text} height={20} width={textWidth} />
-        <LoadingShimmer style={styles.text} height={20} width={textWidth} />
-      </View>
-    </View>
+    <Row
+      horizontalArrangement="spaceEvenly"
+      modifiers={[fillMaxWidth(), padding(0, 118, 0, 0)]}
+    >
+      <LoadingShimmer height={150} width={100} />
+      <Column modifiers={[padding(0, 30, 0, 0)]}>
+        <LoadingShimmer modifiers={[text]} height={25} width={textWidth} />
+        <LoadingShimmer modifiers={[text]} height={20} width={textWidth} />
+        <LoadingShimmer modifiers={[text]} height={20} width={textWidth} />
+      </Column>
+    </Row>
   );
 });
 
 export const LoadingDescription = memo(() => {
   const { fullWidth } = useSkeletonContext();
   return (
-    <View style={styles.novelInformationText}>
+    <Column modifiers={[padding(16, 8, 16, 16)]}>
       {DESCRIPTION_LINES.map((_, index) => (
         <LoadingShimmer
           key={`description-skeleton-${index}`}
-          style={styles.text}
+          modifiers={[text]}
           height={16}
           width={fullWidth}
         />
       ))}
-    </View>
+    </Column>
   );
 });
 
 export const LoadingChips = memo(() => (
-  <View style={styles.novelInformationChips}>
+  <Row
+    horizontalArrangement={{ spacedBy: 8 }}
+    modifiers={[padding(16, 0, 16, 6)]}
+  >
     {CHIP_WIDTHS.map((width, index) => (
       <LoadingShimmer
         key={`chip-skeleton-${index}`}
-        style={styles.chip}
         height={32}
         width={width}
       />
     ))}
-  </View>
+  </Row>
 ));
 
 const NovelInformation = memo(() => (
-  <View style={styles.metadataContainer}>
-    <View style={styles.statsContainer}>
+  <Column modifiers={[fillMaxWidth(), padding(0, 4, 0, 4)]}>
+    <Row
+      horizontalArrangement="spaceAround"
+      modifiers={[fillMaxWidth(), padding(0, 4, 0, 4)]}
+    >
       {STAT_ITEMS.map((_, index) => (
         <LoadingShimmer
           key={`stat-skeleton-${index}`}
-          style={styles.icon}
+          corner={30}
           height={56}
           width={90}
         />
       ))}
-    </View>
+    </Row>
     <LoadingDescription />
     <LoadingChips />
-  </View>
+  </Column>
 ));
 
 export const LoadingChapterItem = memo(() => {
   const { fullWidth } = useSkeletonContext();
   const textWidth = Math.max(80, fullWidth - 50);
   return (
-    <View style={styles.chapter}>
-      <View>
-        <LoadingShimmer style={styles.text} height={20} width={textWidth} />
-        <LoadingShimmer style={styles.text} height={16} width={textWidth} />
-      </View>
+    <Row verticalAlignment="center" modifiers={[padding(16, 8, 16, 8)]}>
+      <Column>
+        <LoadingShimmer modifiers={[text]} height={20} width={textWidth} />
+        <LoadingShimmer modifiers={[text]} height={16} width={textWidth} />
+      </Column>
       <LoadingShimmer
-        style={styles.loadingChapterItem}
+        modifiers={[padding(20, 0, 0, 0)]}
+        corner={20}
         height={30}
         width={30}
       />
-    </View>
+    </Row>
   );
 });
 
 const Chapters = memo(() => {
   const { fullWidth } = useSkeletonContext();
   return (
-    <View>
+    <Column>
       <LoadingShimmer
-        style={[styles.text, styles.chapters]}
+        modifiers={[padding(16, 5, 16, 5)]}
         height={30}
         width={fullWidth}
       />
       {CHAPTER_ITEMS.map((_, index) => (
         <LoadingChapterItem key={`chapter-skeleton-${index}`} />
       ))}
-    </View>
+    </Column>
   );
 });
 
@@ -177,74 +192,21 @@ const NovelScreenLoading: React.FC<Props> = ({ theme }) => {
 
   return (
     <SkeletonContext.Provider value={contextValue}>
-      <View style={styles.container}>
-        <NovelTop />
-        <NovelInformation />
-        <Chapters />
-      </View>
+      <AppHost style={styles.container}>
+        <Column modifiers={[fillMaxSize(), padding(0, 0, 0, 8)]}>
+          <NovelTop />
+          <NovelInformation />
+          <Chapters />
+        </Column>
+      </AppHost>
     </SkeletonContext.Provider>
   );
 };
 
 const styles = StyleSheet.create({
-  loadingChapterItem: { borderRadius: 20, alignSelf: 'center', marginLeft: 20 },
-  chapters: { marginBottom: 5, marginHorizontal: 16 },
-  chapter: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    paddingVertical: 8,
-  },
-  chapterContainer: {
-    marginHorizontal: 16,
-  },
-  chip: {
-    borderRadius: 8,
-    marginLeft: 8,
-  },
   container: {
     flexGrow: 1,
-    marginBottom: 8,
     overflow: 'hidden',
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    height: 268,
-    justifyContent: 'space-evenly',
-    paddingTop: 118,
-    width: '100%',
-  },
-  headerText: {
-    height: 100,
-    justifyContent: 'center',
-    paddingTop: 30,
-  },
-  icon: {
-    borderRadius: 30,
-  },
-  metadataContainer: {
-    marginVertical: 4,
-  },
-  novelInformationChips: {
-    flexDirection: 'row',
-    paddingBottom: 6,
-    paddingLeft: 8,
-  },
-  novelInformationText: {
-    height: 62,
-    margin: 16,
-    marginTop: 8,
-  },
-  picture: {
-    borderRadius: 8,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 4,
-  },
-  text: {
-    borderRadius: 8,
-    marginTop: 5,
   },
 });
 

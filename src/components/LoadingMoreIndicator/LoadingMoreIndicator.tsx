@@ -1,22 +1,20 @@
-import React from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
-import { ThemeColors } from '../../theme/types';
+import { Box, LoadingIndicator } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
 
 interface Props {
   theme: ThemeColors;
 }
 
-const LoadingMoreIndicator: React.FC<Props> = ({ theme }) => (
-  <ActivityIndicator color={theme.primary} style={styles.indicator} />
-);
+const LoadingMoreIndicator: React.FC<Props> = ({ theme }) => {
+  return (
+    <Box
+      contentAlignment="center"
+      modifiers={[fillMaxWidth(), padding(0, 16, 0, 16)]}
+    >
+      <LoadingIndicator color={theme.primary} />
+    </Box>
+  );
+};
 
 export default LoadingMoreIndicator;
-
-const styles = StyleSheet.create({
-  indicator: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 32,
-  },
-});

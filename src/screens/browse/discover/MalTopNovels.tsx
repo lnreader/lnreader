@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ActivityIndicator,
-  FlatList,
-  NativeScrollEvent,
-  FlatListProps,
-} from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { NativeScrollEvent } from 'react-native';
 
 import * as WebBrowser from 'expo-web-browser';
 
 import { ErrorView } from '@components/ErrorView/ErrorView';
-import { SafeAreaView, SearchbarV2 } from '@components';
+import {
+  ComposeList,
+  LoadingMoreIndicator,
+  Screen,
+  SearchbarV2,
+} from '@components';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import RefreshIcon from '@expo/material-symbols/refresh.xml';
 
 import { showToast } from '@utils/showToast';
 import { scrapeSearchResults, scrapeTopNovels } from './MyAnimeListScraper';
@@ -19,6 +19,7 @@ import DiscoverNovelCard from './DiscoverNovelCard';
 import { useTheme } from '@hooks/persisted';
 import MalLoading from '../loadingAnimation/MalLoading';
 import { BrowseMalScreenProps } from '@navigators/types';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
 
 const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
   const theme = useTheme();
@@ -74,7 +75,7 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
     getNovels();
   }, [getNovels]);
 
-  const renderItem: FlatListProps<any>['renderItem'] = ({ item }) => (
+  const renderItem = (item: any) => (
     <DiscoverNovelCard
       novel={item}
       theme={theme}
@@ -117,7 +118,7 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
     [searchText, getNovels],
   );
 
-  const ListEmptyComponent = useCallback(
+  const listEmpty = useMemo(
     () => (
       <ErrorView
         errorName={error || 'No results found'}
@@ -129,7 +130,7 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
               setLoading(true);
               setError('');
             },
-            icon: 'reload',
+            icon: RefreshIcon,
           },
         ]}
         theme={theme}
@@ -139,56 +140,45 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
   );
 
   return (
-    <SafeAreaView>
-      <SearchbarV2
-        theme={theme}
-        placeholder="Search MyAnimeList"
-        leftIcon="arrow-left"
-        handleBackAction={() => navigation.goBack()}
-        searchText={searchText}
-        onChangeText={text => setSearchText(text)}
-        onSubmitEditing={getSearchResults}
-        clearSearchbar={clearSearchbar}
-        rightIcons={[
-          {
-            iconName: 'earth',
-            onPress: () => WebBrowser.openBrowserAsync(malUrl),
-          },
-        ]}
-      />
+    <Screen
+      topBar={
+        <SearchbarV2
+          theme={theme}
+          placeholder="Search MyAnimeList"
+          leftIcon={ArrowBackIcon}
+          handleBackAction={() => navigation.goBack()}
+          searchText={searchText}
+          onChangeText={text => setSearchText(text)}
+          onSubmitEditing={getSearchResults}
+          clearSearchbar={clearSearchbar}
+          rightIcons={[
+            {
+              iconName: PublicIcon,
+              onPress: () => WebBrowser.openBrowserAsync(malUrl),
+            },
+          ]}
+        />
+      }
+      list={
+        !loading && novels.length ? (
+          <ComposeList
+            contentPadding={{ bottom: 8, horizontal: 4 }}
+            data={novels}
+            keyExtractor={(item, index) => item.novelName + index}
+            renderItem={renderItem}
+            onScroll={onScroll}
+            footer={!searchText ? <LoadingMoreIndicator theme={theme} /> : null}
+          />
+        ) : undefined
+      }
+    >
       {loading ? (
         <MalLoading theme={theme} />
-      ) : (
-        <FlatList
-          contentContainerStyle={styles.novelsContainer}
-          data={novels}
-          keyExtractor={(item, index) => item.novelName + index}
-          renderItem={renderItem}
-          ListEmptyComponent={ListEmptyComponent}
-          onScroll={onScroll}
-          ListFooterComponent={
-            !searchText ? (
-              <View style={styles.paddingVertical}>
-                <ActivityIndicator color={theme.primary} />
-              </View>
-            ) : null
-          }
-        />
+      ) : novels.length ? null : (
+        listEmpty
       )}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 export default BrowseMalScreen;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  novelsContainer: {
-    flexGrow: 1,
-    paddingBottom: 8,
-    paddingHorizontal: 4,
-  },
-  paddingVertical: { paddingVertical: 16 },
-});

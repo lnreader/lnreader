@@ -1,234 +1,217 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import color from 'color';
-
-import { Text } from 'react-native-paper';
-import { IconButtonV2, Menu } from '../../../components';
-import Animated, {
-  Easing,
-  ReduceMotion,
-  withTiming,
-} from 'react-native-reanimated';
-import { ThemeColors } from '@theme/types';
+import { useCallback, useState } from 'react';
+import {
+  AnimatedVisibility,
+  Column,
+  EnterTransition,
+  ExitTransition,
+  Row,
+  Surface,
+} from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  height,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { bookmarkChapter } from '@database/queries/ChapterQueries';
-import { useChapterContext } from '../ChapterContext';
-import { useNovelLayout } from '@screens/novel/NovelContext';
-import ReaderSearchbar from './ReaderSearchbar';
-import { ReaderSearchResult } from '../types';
+import { useChapterGeneralSettings } from '@hooks/persisted';
+import { useTheme } from '@hooks/persisted/useTheme';
 import { getString } from '@i18n/translations';
+import { useChapterContext } from '../ChapterContext';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import BookmarkIcon from '@expo/material-symbols/bookmark.xml';
+import BookmarkAddedIcon from '@expo/material-symbols/bookmark_added.xml';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import HeadphonesIcon from '@expo/material-symbols/headphones.xml';
+import OpenInNewIcon from '@expo/material-symbols/open_in_new.xml';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import RefreshIcon from '@expo/material-symbols/refresh.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
+import ShareIcon from '@expo/material-symbols/share.xml';
+import {
+  AppHost,
+  IconButtonV2,
+  AppText,
+  OverflowMenu,
+  useScreenInsets,
+  type MenuAction,
+} from '@components';
+import {
+  MAX_CONTENT_WIDTH,
+  useWindowLayout,
+} from '@hooks/common/useWindowLayout';
+import ReaderSearchbar, { SEARCH_HEIGHT } from './ReaderSearchbar';
+import { StyleSheet } from 'react-native';
+
+export const BAR_HEIGHT = 64;
+
+export const BAR_BUTTON_WIDTH = 48;
+
+export const slideIn = (from: -1 | 1) =>
+  EnterTransition.slideInVertically({ initialOffsetY: from }).plus(
+    EnterTransition.fadeIn(),
+  );
+
+export const slideOut = (to: -1 | 1) =>
+  ExitTransition.slideOutVertically({ targetOffsetY: to }).plus(
+    ExitTransition.fadeOut(),
+  );
+
+export const useBarGutter = () => {
+  const layout = useWindowLayout();
+  return Math.max(0, Math.round((layout.width - MAX_CONTENT_WIDTH) / 2));
+};
 
 interface ReaderAppbarProps {
-  theme: ThemeColors;
-  goBack: () => void;
-  bookmarked: boolean;
-  setBookmarked: React.Dispatch<React.SetStateAction<boolean>>;
-  searchVisible: boolean;
-  setSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  searchText: string;
-  setSearchText: (text: string) => void;
-  searchResult: ReaderSearchResult;
-  resetSearchResult: () => void;
-  resetSearch: () => void;
+  visible: boolean;
+  onBack: () => void;
+  /** `undefined` hides the search row. */
+  searchQuery: string | undefined;
+  onToggleSearch: () => void;
   openInWebView: () => void;
   openInBrowser: () => void;
   shareChapter: () => void;
 }
 
-const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
-
 const ReaderAppbar = ({
-  goBack,
-  theme,
-  bookmarked,
-  setBookmarked,
-  searchVisible,
-  setSearchVisible,
-  searchText,
-  setSearchText,
-  searchResult,
-  resetSearchResult,
-  resetSearch,
+  visible,
+  onBack,
+  searchQuery,
+  onToggleSearch,
   openInWebView,
   openInBrowser,
   shareChapter,
 }: ReaderAppbarProps) => {
-  const { chapter, novel, refetch } = useChapterContext();
-  const { statusBarHeight } = useNovelLayout();
-  const [menuVisible, setMenuVisible] = useState(false);
+  const theme = useTheme();
+  const { top, left, right } = useScreenInsets();
+  const { chapter, novel, refetch, tts } = useChapterContext();
+  const { TTSEnable = true } = useChapterGeneralSettings();
+  // Bookmark state until the chapter row catches up.
+  const [toggled, setToggled] = useState<{
+    chapterId: number;
+    value: boolean;
+  }>();
+  const bookmarked =
+    toggled?.chapterId === chapter.id
+      ? toggled.value
+      : Boolean(chapter.bookmark);
+  const speaking = tts.state === 'playing' || tts.state === 'paused';
+  const searchVisible = searchQuery !== undefined;
 
-  const runMenuAction = useCallback((action: () => void) => {
-    setMenuVisible(false);
-    action();
-  }, []);
+  const toggleBookmark = useCallback(() => {
+    void bookmarkChapter(chapter.id).then(() =>
+      setToggled({ chapterId: chapter.id, value: !bookmarked }),
+    );
+  }, [bookmarked, chapter.id]);
 
-  const entering = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(0, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(1, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: -statusBarHeight,
-      opacity: 0,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
-  const exiting = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(-statusBarHeight, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(0, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: 0,
-      opacity: 1,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
+  const menu: MenuAction[] = [
+    {
+      label: getString('webview.refresh'),
+      icon: RefreshIcon,
+      onPress: refetch,
+    },
+    {
+      label: getString('webview.openInWebView'),
+      icon: PublicIcon,
+      onPress: openInWebView,
+    },
+    {
+      label: getString('webview.openInBrowser'),
+      icon: OpenInNewIcon,
+      onPress: openInBrowser,
+    },
+    {
+      label: getString('webview.share'),
+      icon: ShareIcon,
+      onPress: shareChapter,
+    },
+  ];
 
+  const hostHeight = top + BAR_HEIGHT + (searchVisible ? SEARCH_HEIGHT : 0);
   return (
-    <Animated.View
-      entering={entering}
-      exiting={exiting}
-      style={[
-        styles.container,
-        {
-          paddingTop: statusBarHeight,
-          backgroundColor: color(theme.surface).alpha(0.9).string(),
-        },
-      ]}
+    <AppHost
+      style={[styles.top, { height: hostHeight }]}
+      pointerEvents={visible ? 'auto' : 'none'}
     >
-      <View style={styles.appbar}>
-        <IconButtonV2
-          name="arrow-left"
-          onPress={goBack}
-          color={theme.onSurface}
-          size={26}
-          theme={theme}
-        />
-        <View style={styles.content}>
-          <Text
-            style={[styles.title, { color: theme.onSurface }]}
-            numberOfLines={1}
-          >
-            {novel.name}
-          </Text>
-          <Text
-            style={[styles.subtitle, { color: theme.onSurfaceVariant }]}
-            numberOfLines={1}
-          >
-            {chapter.name}
-          </Text>
-        </View>
-        <IconButtonV2
-          name={searchVisible ? 'close' : 'magnify'}
-          size={24}
-          padding={12}
-          onPress={() => setSearchVisible(current => !current)}
-          color={searchVisible ? theme.primary : theme.onSurface}
-          theme={theme}
-        />
-        <IconButtonV2
-          name={bookmarked ? 'bookmark' : 'bookmark-outline'}
-          size={24}
-          padding={12}
-          onPress={() => {
-            bookmarkChapter(chapter.id).then(() => setBookmarked(!bookmarked));
-          }}
-          color={bookmarked ? theme.primary : theme.onSurface}
-          theme={theme}
-        />
-        {!novel.isLocal ? (
-          <Menu
-            visible={menuVisible}
-            onDismiss={() => setMenuVisible(false)}
-            anchor={
+      <AnimatedVisibility
+        visible={visible}
+        enterTransition={slideIn(-1)}
+        exitTransition={slideOut(-1)}
+        modifiers={[fillMaxWidth()]}
+      >
+        <Surface
+          color={theme.surfaceContainer}
+          contentColor={theme.onSurface}
+          modifiers={[fillMaxWidth()]}
+        >
+          <Column modifiers={[fillMaxWidth(), padding(left, top, right, 0)]}>
+            <Row
+              verticalAlignment="center"
+              modifiers={[
+                fillMaxWidth(),
+                height(BAR_HEIGHT),
+                padding(4, 0, 4, 0),
+              ]}
+            >
               <IconButtonV2
-                accessibilityLabel={getString('common.moreOptions')}
-                name="dots-vertical"
-                size={24}
-                padding={12}
-                onPress={() => setMenuVisible(true)}
+                name={ArrowBackIcon}
+                accessibilityLabel={getString('common.back')}
                 color={theme.onSurface}
+                onPress={onBack}
                 theme={theme}
               />
-            }
-          >
-            <Menu.Item
-              title={getString('webview.refresh')}
-              onPress={() => runMenuAction(refetch)}
-            />
-            <Menu.Item
-              title={getString('webview.openInWebView')}
-              onPress={() => runMenuAction(openInWebView)}
-            />
-            <Menu.Item
-              title={getString('webview.openInBrowser')}
-              onPress={() => runMenuAction(openInBrowser)}
-            />
-            <Menu.Item
-              title={getString('webview.share')}
-              onPress={() => runMenuAction(shareChapter)}
-            />
-          </Menu>
-        ) : null}
-      </View>
-      {searchVisible ? (
-        <ReaderSearchbar
-          theme={theme}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          searchResult={searchResult}
-          resetSearchResult={resetSearchResult}
-          resetSearch={resetSearch}
-        />
-      ) : null}
-    </Animated.View>
+              <Column modifiers={[weight(1), padding(4, 0, 4, 0)]}>
+                <AppText variant="titleMedium" maxLines={1}>
+                  {novel.name}
+                </AppText>
+                <AppText
+                  variant="bodySmall"
+                  color={theme.onSurfaceVariant}
+                  maxLines={1}
+                >
+                  {chapter.name}
+                </AppText>
+              </Column>
+              <IconButtonV2
+                name={searchVisible ? CloseIcon : SearchIcon}
+                accessibilityLabel={getString('common.search')}
+                selected={searchVisible}
+                onPress={onToggleSearch}
+                theme={theme}
+              />
+              {TTSEnable ? (
+                <IconButtonV2
+                  name={HeadphonesIcon}
+                  accessibilityLabel={getString(
+                    speaking
+                      ? 'readerSettings.stopReading'
+                      : 'readerSettings.readAloud',
+                  )}
+                  selected={speaking}
+                  onPress={speaking ? tts.stop : tts.start}
+                  theme={theme}
+                />
+              ) : null}
+              <IconButtonV2
+                name={bookmarked ? BookmarkAddedIcon : BookmarkIcon}
+                selected={bookmarked}
+                onPress={toggleBookmark}
+                theme={theme}
+              />
+              {!novel.isLocal ? <OverflowMenu actions={menu} /> : null}
+            </Row>
+            {searchVisible ? (
+              <ReaderSearchbar initialQuery={searchQuery} />
+            ) : null}
+          </Column>
+        </Surface>
+      </AnimatedVisibility>
+    </AppHost>
   );
 };
 
-export default ReaderAppbar;
-
 const styles = StyleSheet.create({
-  appbar: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 64,
-    paddingHorizontal: 4,
-  },
-  container: {
-    flex: 1,
-    paddingBottom: 8,
-    position: 'absolute',
-    top: 0,
-    width: '100%',
-    zIndex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  title: {
-    fontSize: 20,
-    lineHeight: 24,
-  },
+  top: { position: 'absolute', top: 0, left: 0, right: 0 },
 });
+
+export default ReaderAppbar;

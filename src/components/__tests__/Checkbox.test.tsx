@@ -29,23 +29,6 @@ describe('Checkbox', () => {
       checked: true,
       disabled: undefined,
     });
-    expect(checkbox.props.accessibilityHint).toBe('Include app preferences');
     expect(screen.getByText('Include app preferences')).toBeOnTheScreen();
-  });
-
-  it('centers the checkbox against the label and description block', () => {
-    render(
-      <Checkbox
-        description="Include app preferences"
-        label="Settings"
-        status={false}
-        theme={mockTheme}
-      />,
-    );
-
-    expect(screen.getByRole('checkbox', { name: 'Settings' })).toHaveStyle({
-      alignItems: 'center',
-      flexDirection: 'row',
-    });
   });
 });

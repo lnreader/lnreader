@@ -1,15 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
-import { useWindowDimensions } from 'react-native';
-import { TabView, type TabBarProps } from 'react-native-tab-view';
 
 import { useSearch } from '@hooks';
-import { useTheme } from '@hooks/persisted';
+import { useInstalledPlugins, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
-import { SafeAreaView, SearchbarV2, TopTabBar } from '@components';
+import { Screen, SearchbarV2, TabPager } from '@components';
 import { BrowseScreenProps } from '@navigators/types';
+import TravelExploreIcon from '@expo/material-symbols/travel_explore.xml';
 import { PluginsTab } from './components/PluginsTab';
 import { SourcesTab } from './components/SourcesTab';
+import SearchIcon from '@expo/material-symbols/search.xml';
 
 type BrowseRoute = {
   key: 'sources' | 'plugins';
@@ -24,14 +24,13 @@ const routes: BrowseRoute[] = [
 const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
   const theme = useTheme();
   const { searchText, setSearchText, clearSearchbar } = useSearch();
-  const layout = useWindowDimensions();
 
   const searchbarActions = useMemo(
     () =>
       [
         {
           accessibilityLabel: getString('browseScreen.globalSearch'),
-          iconName: 'book-search',
+          iconName: TravelExploreIcon,
           onPress: () => navigation.navigate('GlobalSearchScreen', {}),
         },
       ] as const,
@@ -62,28 +61,6 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
 
   const [index, setIndex] = React.useState(0);
   const openPlugins = useCallback(() => setIndex(1), []);
-  const navigationState = useMemo(() => ({ index, routes }), [index]);
-  const initialLayout = useMemo(
-    () => ({ width: layout.width }),
-    [layout.width],
-  );
-  const indicatorStyle = useMemo(
-    () => ({ backgroundColor: theme.primary, height: 3 }),
-    [theme.primary],
-  );
-  const tabBarStyle = useMemo(
-    () => ({
-      backgroundColor: theme.surface,
-      elevation: 0,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.outlineVariant,
-    }),
-    [theme.outlineVariant, theme.surface],
-  );
-  const androidRipple = useMemo(
-    () => ({ color: theme.rippleColor }),
-    [theme.rippleColor],
-  );
 
   const renderScene = useCallback(
     ({ route }: { route: BrowseRoute }) => {
@@ -110,49 +87,47 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
     [navigation, openPlugins, searchText, theme],
   );
 
-  const renderTabBar = useCallback(
-    (props: TabBarProps<BrowseRoute>) => (
-      <TopTabBar
-        {...props}
-        indicatorStyle={indicatorStyle}
-        style={tabBarStyle}
-        inactiveColor={theme.secondary}
-        activeColor={theme.primary}
-        android_ripple={androidRipple}
-      />
-    ),
-    [
-      androidRipple,
-      indicatorStyle,
-      tabBarStyle,
-      theme.primary,
-      theme.secondary,
-    ],
+  const pluginUpdates = useInstalledPlugins().filter(
+    plugin => plugin.hasUpdate,
+  ).length;
+
+  const tabs = useMemo(
+    () =>
+      routes.map((route, i) => ({
+        key: i,
+        label: route.title,
+        count:
+          route.key === 'plugins' && pluginUpdates ? pluginUpdates : undefined,
+      })),
+    [pluginUpdates],
   );
 
   return (
-    <SafeAreaView excludeBottom>
-      <SearchbarV2
-        searchText={searchText}
-        placeholder={getString('browseScreen.searchbar')}
-        leftIcon="magnify"
-        onChangeText={setSearchText}
-        clearSearchbar={clearSearchbar}
-        theme={theme}
-        rightIcons={searchbarActions}
-        menuButtons={menuButtons}
-      />
-      <TabView<BrowseRoute>
-        navigationState={navigationState}
-        initialLayout={initialLayout}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        renderTabBar={renderTabBar}
-        lazy
-        lazyPreloadDistance={0}
-        swipeEnabled={false}
-      />
-    </SafeAreaView>
+    <Screen
+      topBar={
+        <SearchbarV2
+          searchText={searchText}
+          placeholder={getString('browseScreen.searchbar')}
+          leftIcon={SearchIcon}
+          onChangeText={setSearchText}
+          clearSearchbar={clearSearchbar}
+          theme={theme}
+          rightIcons={searchbarActions}
+          menuButtons={menuButtons}
+        />
+      }
+      list={
+        <TabPager
+          tabs={tabs}
+          index={index}
+          onIndexChange={setIndex}
+          renderPage={i => renderScene({ route: routes[i] })}
+          showCounts
+          swipeEnabled={false}
+          fixed
+        />
+      }
+    />
   );
 };
 
