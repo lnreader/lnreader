@@ -1,6 +1,9 @@
-import { createDriveBackup, driveRestore } from '../backup/drive';
-import { createBackup, restoreBackup } from '../backup/local';
-import { createSelfHostBackup, selfHostRestore } from '../backup/selfhost';
+import { createDriveBackup } from '../backup/drive';
+import { driveRestore } from '../backup/restore/drive';
+import { createBackup } from '../backup/local';
+import { restoreBackup } from '../backup/restore/local';
+import { createSelfHostBackup } from '../backup/selfhost';
+import { selfHostRestore } from '../backup/restore/selfhost';
 import { downloadChapters } from '../download/downloadChapter';
 import { exportEpub } from '../epub/export';
 import { importEpubBatch } from '../epub/import';

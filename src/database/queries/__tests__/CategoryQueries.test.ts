@@ -12,7 +12,11 @@ import {
   insertTestNovelCategory,
   clearAllTables,
 } from './testData';
-import { categorySchema, novelCategorySchema } from '@database/schema';
+import {
+  categorySchema,
+  novelCategorySchema,
+  novelSchema,
+} from '@database/schema';
 import { eq, sql } from 'drizzle-orm';
 
 import {
@@ -85,6 +89,56 @@ describe('CategoryQueries', () => {
           .filter(membership => membership.categoryId === 1)
           .map(membership => membership.novelId),
       ).toEqual(expect.arrayContaining([existingNovelId, restoredNovelId]));
+    });
+    it('restores memberships in bounded batches with remapping and conflict-ignore semantics', async () => {
+      const testDb = getTestDb();
+      const existingNovelId = await insertTestNovel(testDb, {
+        inLibrary: true,
+      });
+      const secondNovelId = await insertTestNovel(testDb, {
+        inLibrary: true,
+      });
+      const novelIds = [
+        ...Array.from({ length: 501 }, (_, index) => index + 1),
+        1,
+        501,
+        987654321,
+      ];
+      const novelIdMap = new Map([
+        [1, existingNovelId],
+        [2, secondNovelId],
+      ]);
+      const categoryId = await _restoreCategory(
+        {
+          id: 3,
+          name: 'Batch restored',
+          sort: 3,
+          novelIds,
+        },
+        novelIdMap,
+      );
+
+      const memberships = await testDb.drizzleDb
+        .select({ novelId: novelCategorySchema.novelId })
+        .from(novelCategorySchema)
+        .where(eq(novelCategorySchema.categoryId, categoryId))
+        .all();
+      const membershipIds = memberships.map(membership => membership.novelId);
+      const expectedMembershipIds = Array.from(
+        new Set(novelIds.map(id => novelIdMap.get(id) ?? id)),
+      ).sort((a, b) => a - b);
+
+      expect(membershipIds.sort((a, b) => a - b)).toEqual(
+        expectedMembershipIds,
+      );
+      expect(
+        await testDb.drizzleDb
+          .select({ id: novelSchema.id })
+          .from(novelSchema)
+          .where(eq(novelSchema.id, 987654321))
+          .get(),
+      ).toBeUndefined();
+      expect(membershipIds).toContain(987654321);
     });
 
     it('does not overwrite a custom category with a colliding backup ID', async () => {

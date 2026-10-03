@@ -809,6 +809,7 @@ describe('production migrations', () => {
         '20260719143427_long_moondragon',
         '20260727081855_calm_chimera',
         '20260811071655_parched_human_torch',
+        '20260922120323_demonic_rattler',
       ]);
     } finally {
       sqlite.close();
@@ -1206,6 +1207,69 @@ describe('production migrations', () => {
       expect(
         sqlite.executeSync('SELECT id FROM Category ORDER BY id').rows,
       ).toEqual([{ id: 1 }, { id: 2 }]);
+    } finally {
+      sqlite.close();
+    }
+  });
+  it('discards orphan chapters and preserves the AUTOINCREMENT sequence', async () => {
+    const sqlite = open({ name: ':memory:' });
+    sqlite.executeSync('PRAGMA foreign_keys = ON');
+    // Drizzle expects async aliases that op-sqlite's DB type does not declare.
+    const asyncSqlite = sqlite as unknown as {
+      executeAsync?: typeof sqlite.execute;
+      executeRawAsync?: typeof sqlite.executeRaw;
+    };
+    asyncSqlite.executeAsync ??= sqlite.execute;
+    asyncSqlite.executeRawAsync ??= sqlite.executeRaw;
+    try {
+      createSchema(sqlite);
+      sqlite.executeSync('ALTER TABLE Chapter ADD scanlator text');
+      sqlite.executeSync('ALTER TABLE Chapter ADD timeSpent integer DEFAULT 0');
+      sqlite.executeSync(
+        `INSERT INTO Novel (id, path, pluginId, name)
+         VALUES (1, '/novel', 'plugin', 'Novel')`,
+      );
+      sqlite.executeSync(`
+        INSERT INTO Chapter (id, novelId, path, name)
+        VALUES
+          (1, 1, '/valid', 'Valid'),
+          (100, 1, '/deleted', 'Deleted')
+      `);
+      sqlite.executeSync('DELETE FROM Chapter WHERE id = 100');
+      sqlite.executeSync(
+        `INSERT INTO Chapter (id, novelId, path, name)
+         VALUES (3, 999, '/orphan', 'Orphan')`,
+      );
+      recordAppliedMigrations(sqlite);
+
+      const drizzleDb = drizzle(sqlite, { schema });
+      await migrate(drizzleDb, {
+        migrations: {
+          '20260922120323_demonic_rattler':
+            migrations.migrations['20260922120323_demonic_rattler'],
+        },
+      });
+
+      expect(
+        sqlite.executeSync('SELECT id, novelId FROM Chapter').rows,
+      ).toEqual([{ id: 1, novelId: 1 }]);
+      expect(
+        sqlite.executeSync(
+          "SELECT seq FROM sqlite_sequence WHERE name = 'Chapter'",
+        ).rows,
+      ).toEqual([{ seq: 100 }]);
+
+      sqlite.executeSync(
+        `INSERT INTO Chapter (novelId, path, name)
+         VALUES (1, '/next', 'Next')`,
+      );
+      expect(
+        sqlite.executeSync('SELECT last_insert_rowid() AS id').rows,
+      ).toEqual([{ id: 101 }]);
+      expect(sqlite.executeRawSync('PRAGMA foreign_key_check;')).toEqual([]);
+      expect(sqlite.executeRawSync('PRAGMA integrity_check;')).toEqual([
+        ['ok'],
+      ]);
     } finally {
       sqlite.close();
     }
