@@ -459,6 +459,111 @@ describe('useChapter', () => {
     expect(result.current.chapterText).toBe('SANITIZED:initial body');
   });
 
+  describe('infinite scrolling', () => {
+    const thirdChapter = makeChapter(3, '1');
+
+    beforeEach(() => {
+      const following: Record<number, ReturnType<typeof makeChapter>> = {
+        [initialChapter.position]: nextChapter,
+        [nextChapter.position]: thirdChapter,
+      };
+      mockGetNextChapter.mockImplementation(
+        async (_novelId: number, position: number) => following[position],
+      );
+      mockFetchChapter.mockImplementation(
+        async (_pluginId: string, path: string) => `body of ${path}`,
+      );
+    });
+
+    it('appends the following chapters and makes them current without rebuilding the document', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).resolves.toEqual({
+        chapter: nextChapter,
+        html: `SANITIZED:body of ${nextChapter.path}`,
+      });
+
+      act(() => result.current.activateChapter(nextChapter.id));
+
+      expect(result.current.chapter).toEqual(nextChapter);
+      expect(result.current.documentChapter).toEqual(initialChapter);
+      expect(result.current.chapterText).toBe(
+        `SANITIZED:body of ${initialChapter.path}`,
+      );
+      // The header and footer navigation follow the chapter being read.
+      await waitFor(() =>
+        expect(result.current.nextChapter).toEqual(thirdChapter),
+      );
+
+      await expect(
+        result.current.loadChapterAfter(nextChapter.id),
+      ).resolves.toMatchObject({ chapter: thirdChapter });
+      await expect(
+        result.current.loadChapterAfter(thirdChapter.id),
+      ).resolves.toBeNull();
+    });
+
+    it('pulls in the next source page when the last loaded chapter ends its page', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      const nextPageChapter = makeChapter(4, '2');
+      mockGetNextChapter.mockResolvedValue(undefined);
+      mockGetChapterCount.mockResolvedValue(0);
+      mockFetchPage.mockImplementation(async () => {
+        mockGetNextChapter.mockResolvedValue(nextPageChapter);
+        return { chapters: [{ name: nextPageChapter.name }] };
+      });
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).resolves.toMatchObject({ chapter: nextPageChapter });
+      expect(mockFetchPage).toHaveBeenCalledWith(
+        novel.pluginId,
+        novel.path,
+        '2',
+      );
+    });
+
+    it('saves progress and marks read the chapter the reader reports, not the current one', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+
+      act(() => {
+        result.current.saveProgress(100, nextChapter.id);
+        // A late report from a document that has since been replaced.
+        result.current.saveProgress(100, 99);
+        result.current.activateChapter(99);
+      });
+
+      expect(store.state.updateChapterProgress).toHaveBeenCalledTimes(1);
+      expect(store.state.updateChapterProgress).toHaveBeenCalledWith(
+        nextChapter.id,
+        100,
+      );
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(nextChapter.id);
+      expect(mockParseChapterNumber).toHaveBeenCalledWith(
+        novel.name,
+        nextChapter.name,
+      );
+      expect(result.current.chapter).toEqual(initialChapter);
+    });
+  });
+
   it('handles volume and Page Up/Down keys in paged and scrolling modes', async () => {
     const store = createStore();
     mockUseNovelActions.mockReturnValue(store.state);

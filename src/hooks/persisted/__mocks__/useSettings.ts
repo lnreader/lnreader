@@ -68,6 +68,7 @@ export const initialChapterGeneralSettings = {
   TTSEnable: true,
   pageReaderInvertVolumeButtons: false,
   pageReaderDisableAnimation: false,
+  infiniteScroll: false,
 };
 
 export const initialChapterReaderSettings = {
