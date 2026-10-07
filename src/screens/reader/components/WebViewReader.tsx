@@ -553,10 +553,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             <body class="${
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
             } ${
-              chapterGeneralSettings.pageReaderDisableAnimation
-                ? 'no-animation'
-                : ''
-            }">
+        chapterGeneralSettings.pageReaderDisableAnimation ? 'no-animation' : ''
+      }">
               <div class="transition-chapter" style="transform: ${
                 isNextChapterScreenVisible
                   ? 'translateX(-100%)'
@@ -749,7 +747,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             case 'tts-queue': {
               cancelTtsTransition();
               const payload = event.data as
-                { queue?: unknown; startIndex?: unknown } | undefined;
+                | { queue?: unknown; startIndex?: unknown }
+                | undefined;
               const queue = Array.isArray(payload?.queue)
                 ? payload?.queue.filter(
                     (item): item is string =>
