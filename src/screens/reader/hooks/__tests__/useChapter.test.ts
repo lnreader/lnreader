@@ -535,6 +535,48 @@ describe('useChapter', () => {
       });
     });
 
+    it('rebuilds at the latest position after scrolling back', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(80, nextChapter.id);
+        result.current.saveProgress(30, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()?.chapter.progress).toBe(30);
+    });
+
+    it('keeps the position for rebuilds in incognito mode without saving it', async () => {
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: true });
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.saveProgress(100, initialChapter.id);
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(40, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()?.chapter).toEqual({
+        ...nextChapter,
+        progress: 40,
+      });
+      expect(store.state.updateChapterProgress).not.toHaveBeenCalled();
+      expect(store.state.markChapterRead).not.toHaveBeenCalled();
+    });
+
     it('pulls in the next source page when the last loaded chapter ends its page', async () => {
       const store = createStore();
       mockUseNovelActions.mockReturnValue(store.state);

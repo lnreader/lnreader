@@ -72,6 +72,12 @@ window.reader = new (function () {
       rawHTML: this.chapterElement.innerHTML,
     },
   ];
+  /**
+   * The segment of the document's own `#LNReader-chapter` element. Infinite
+   * scrolling can drop it from `segments`, but paged mode always lays out the
+   * current chapter in it.
+   */
+  this.hostSegment = this.segments[0];
   Object.defineProperty(this, 'rawHTML', {
     get: () => this.segments[0].rawHTML,
     set: value => {
@@ -98,16 +104,12 @@ window.reader = new (function () {
   this.post = obj => window.ReactNativeWebView.postMessage(JSON.stringify(obj));
 
   /** Document offset each chapter ends at, in scroll mode. */
-  this.chapterEnds = () => {
-    const ends = [this.paddingTop + this.segments[0].element.scrollHeight];
-    for (let i = 1; i < this.segments.length; i++) {
-      ends.push(
-        this.segments[i].element.getBoundingClientRect().bottom +
-          window.scrollY,
-      );
-    }
-    return ends;
-  };
+  this.chapterEnds = () =>
+    this.segments.map(segment =>
+      segment === this.hostSegment
+        ? this.paddingTop + segment.element.scrollHeight
+        : segment.element.getBoundingClientRect().bottom + window.scrollY,
+    );
 
   this.measureChapter = (ends = this.chapterEnds()) => {
     const index = Math.max(
@@ -188,6 +190,7 @@ window.reader = new (function () {
     onUserInteraction();
     if (!this.generalSettings.val.pageReader) {
       window.continuousScroll.update();
+      window.continuousScroll.trim();
       this.post({
         type: 'save',
         chapterId: this.chapter.id,
@@ -829,9 +832,12 @@ document.addEventListener('DOMContentLoaded', () => {
  * close, the app is asked for the chapter after it, which is appended below so
  * reading carries on without leaving the page. Whichever chapter reaches the
  * top of the screen becomes the current one for progress, history and the
- * header.
+ * header. Only the chapter before the current one is kept above it, so a long
+ * session does not keep growing the document.
  */
 window.continuousScroll = new (function () {
+  /** Chapters kept above the current one; older ones are dropped. */
+  const KEEP_BEHIND = 1;
   /** 'idle' | 'loading' | 'error' | 'end' */
   this.status = van.state('idle');
   this.errorMessage = '';
@@ -926,7 +932,7 @@ window.continuousScroll = new (function () {
     element.className = 'LNReader-chapter-continued';
     element.dataset.chapterId = chapter.id;
 
-    const segment = { chapter, element, rawHTML: html };
+    const segment = { chapter, element, divider, rawHTML: html };
     reader.renderChapterHTML(segment);
     const readerUI = document.getElementById('reader-ui');
     document.body.insertBefore(divider, readerUI);
@@ -962,29 +968,67 @@ window.continuousScroll = new (function () {
     this.update();
   };
 
-  /** Paged mode lays out a single chapter, so only the current one is kept. */
-  this.collapse = () => {
-    if (reader.segments.length < 2) {
+  /**
+   * Drops the chapters more than `KEEP_BEHIND` above the current one. Called
+   * once scrolling has settled, and the scroll position is corrected so the
+   * text on screen does not move.
+   */
+  this.trim = () => {
+    const excess = this.activeIndex - KEEP_BEHIND;
+    if (excess <= 0 || reader.generalSettings.val.pageReader) {
       return;
     }
-    const first = reader.segments[0];
-    const current = reader.segments[this.activeIndex];
-    if (current !== first) {
-      first.element.innerHTML = current.element.innerHTML;
-      first.chapter = current.chapter;
-      first.rawHTML = current.rawHTML;
-      first.appliedHTML = current.appliedHTML;
+    const anchor = reader.segments[this.activeIndex].element;
+    const anchorTop = anchor.getBoundingClientRect().top;
+    const dropped = reader.segments.splice(0, excess);
+    for (const segment of dropped) {
+      if (segment === reader.hostSegment) {
+        segment.element.innerHTML = '';
+        segment.appliedHTML = '';
+        segment.element.style.display = 'none';
+      } else {
+        segment.divider.remove();
+        segment.element.remove();
+      }
     }
+    this.activeIndex -= excess;
+    window.scrollTo({
+      top: window.scrollY + anchor.getBoundingClientRect().top - anchorTop,
+      behavior: 'instant',
+    });
+    reader.measureChapter();
+    reader.post({
+      type: 'chapters-dropped',
+      data: dropped.map(segment => segment.chapter.id),
+    });
+  };
+
+  /** Paged mode lays out the current chapter alone, in the host element. */
+  this.collapse = () => {
+    // A request still outstanding is answered in paged mode and ignored, so it
+    // must not block the next one once scroll mode is back.
+    this.status.val = 'idle';
+    const host = reader.hostSegment;
+    const current = reader.segments[this.activeIndex];
+    if (reader.segments.length === 1 && current === host) {
+      return;
+    }
+    if (current !== host) {
+      host.element.innerHTML = current.element.innerHTML;
+      host.chapter = current.chapter;
+      host.rawHTML = current.rawHTML;
+      host.appliedHTML = current.appliedHTML;
+    }
+    host.element.style.removeProperty('display');
     document
       .querySelectorAll(
         '.continuous-chapter-divider, .LNReader-chapter-continued',
       )
       .forEach(element => element.remove());
-    reader.segments = [first];
-    reader.chapter = first.chapter;
-    reader.chapterElement = first.element;
+    reader.segments = [host];
+    reader.chapter = host.chapter;
+    reader.chapterElement = host.element;
     this.activeIndex = 0;
-    this.status.val = 'idle';
     reader.refresh();
   };
 

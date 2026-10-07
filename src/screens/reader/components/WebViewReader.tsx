@@ -158,6 +158,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     activateChapter,
     loadChapterAfter,
     getRebuildTarget,
+    dropChapters,
     nextChapter,
     prevChapter,
     webViewRef,
@@ -839,6 +840,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             case 'continuous-next':
               if (typeof event.chapterId === 'number') {
                 void appendChapterAfter(event.chapterId);
+              }
+              break;
+            case 'chapters-dropped':
+              if (Array.isArray(event.data)) {
+                dropChapters(
+                  event.data.filter(
+                    (id): id is number => typeof id === 'number',
+                  ),
+                );
               }
               break;
             case 'text-action':
