@@ -488,7 +488,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         ? processedHtml
         : applyTextModifications(
             rebuildTarget.html,
+            // Latest settings are read from the ref on purpose so a settings change does not rebuild the reader document.
+            // eslint-disable-next-line react-hooks/refs
             readerSettingsRef.current.removeText,
+            // eslint-disable-next-line react-hooks/refs
             readerSettingsRef.current.replaceText,
           );
     return {
