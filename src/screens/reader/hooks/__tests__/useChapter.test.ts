@@ -509,6 +509,32 @@ describe('useChapter', () => {
       ).resolves.toBeNull();
     });
 
+    it('rebuilds the document from the chapter being read at its live progress', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.getRebuildTarget()).toEqual({
+        chapter: initialChapter,
+        html: `SANITIZED:body of ${initialChapter.path}`,
+      });
+
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.saveProgress(100, initialChapter.id);
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(40, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()).toEqual({
+        chapter: { ...nextChapter, progress: 40 },
+        html: `SANITIZED:body of ${nextChapter.path}`,
+      });
+    });
+
     it('pulls in the next source page when the last loaded chapter ends its page', async () => {
       const store = createStore();
       mockUseNovelActions.mockReturnValue(store.state);

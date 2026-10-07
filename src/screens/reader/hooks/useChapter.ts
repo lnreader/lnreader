@@ -115,6 +115,7 @@ export default function useChapter(
   const adjacentRequestIdRef = useRef(0);
   /** Every chapter in the reader document, by id. */
   const documentChaptersRef = useRef(new Map<number, ChapterInfo>());
+  const documentHtmlRef = useRef(new Map<number, string>());
 
   useEffect(() => {
     chapterRef.current = chapter;
@@ -391,6 +392,7 @@ export default function useChapter(
 
         const chap = dbChapter ?? requested;
         documentChaptersRef.current = new Map([[chap.id, chap]]);
+        documentHtmlRef.current = new Map([[chap.id, html]]);
         chapterRef.current = chap;
         setChapter(chap);
         setDocumentChapter(chap);
@@ -484,7 +486,15 @@ export default function useChapter(
       if (incognitoMode || !target) {
         return;
       }
-      updateChapterProgress(target.id, percentage > 100 ? 100 : percentage);
+      const progress = percentage > 100 ? 100 : percentage;
+      updateChapterProgress(target.id, progress);
+      if (progress > (target.progress ?? 0)) {
+        const updated = { ...target, progress };
+        documentChaptersRef.current.set(updated.id, updated);
+        if (chapterRef.current.id === updated.id) {
+          chapterRef.current = updated;
+        }
+      }
 
       // Progress is reported repeatedly while reading the end of a chapter;
       // marking it read (and pushing it to the tracker, which is a network
@@ -546,10 +556,22 @@ export default function useChapter(
       }
       const html = await loadChapterHtml(next);
       documentChapters.set(next.id, next);
+      documentHtmlRef.current.set(next.id, html);
       return { chapter: next, html };
     },
     [loadChapterHtml, loadNextPageChapter],
   );
+
+  /**
+   * What a rebuilt reader document must be made of: the chapter being read,
+   * at the progress reached so far, rather than the chapter it was first
+   * built for.
+   */
+  const getRebuildTarget = useCallback(() => {
+    const active = chapterRef.current;
+    const html = documentHtmlRef.current.get(active.id);
+    return html === undefined ? undefined : { chapter: active, html };
+  }, []);
 
   const hideHeader = useCallback(() => {
     const nextHidden = !hiddenRef.current;
@@ -644,6 +666,7 @@ export default function useChapter(
       saveProgress,
       activateChapter,
       loadChapterAfter,
+      getRebuildTarget,
       hideHeader,
       navigateChapter,
       navigateChapterSearch,
@@ -667,6 +690,7 @@ export default function useChapter(
       saveProgress,
       activateChapter,
       loadChapterAfter,
+      getRebuildTarget,
       hideHeader,
       navigateChapter,
       navigateChapterSearch,
