@@ -118,7 +118,10 @@ export default function useChapter(
   const documentHtmlRef = useRef(new Map<number, string>());
 
   useEffect(() => {
-    chapterRef.current = chapter;
+    // Progress saved since `chapter` was set lives only on the ref.
+    if (chapterRef.current.id !== chapter.id) {
+      chapterRef.current = chapter;
+    }
   }, [chapter]);
 
   useEffect(() => {
