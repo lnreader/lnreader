@@ -601,6 +601,22 @@ describe('useChapter', () => {
       );
     });
 
+    it('rejects when the next source page cannot be fetched so the reader can offer a retry', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetNextChapter.mockResolvedValue(undefined);
+      mockGetChapterCount.mockResolvedValue(0);
+      mockFetchPage.mockRejectedValue(new Error('offline'));
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).rejects.toThrow('offline');
+      expect(mockInsertChapters).not.toHaveBeenCalled();
+    });
+
     it('saves progress and marks read the chapter the reader reports, not the current one', async () => {
       const store = createStore();
       mockUseNovelActions.mockReturnValue(store.state);

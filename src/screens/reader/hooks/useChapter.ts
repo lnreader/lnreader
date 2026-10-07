@@ -258,25 +258,21 @@ export default function useChapter(
       direction: 'NEXT' | 'PREV',
       excludedScanlators: string[],
     ) => {
-      try {
-        const count = await getChapterCount(chap.novelId, page);
-        if (count === 0) {
-          const sourcePage = await fetchPage(novel.pluginId, novel.path, page);
-          await insertChapters(
-            chap.novelId,
-            sourcePage.chapters.map(ch => ({ ...ch, page })),
-          );
-        }
-        const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
-        return await query(
+      const count = await getChapterCount(chap.novelId, page);
+      if (count === 0) {
+        const sourcePage = await fetchPage(novel.pluginId, novel.path, page);
+        await insertChapters(
           chap.novelId,
-          chap.position!,
-          chap.page ?? '',
-          excludedScanlators,
+          sourcePage.chapters.map(ch => ({ ...ch, page })),
         );
-      } catch {
-        return undefined;
       }
+      const query = direction === 'NEXT' ? getNextChapter : getPrevChapter;
+      return query(
+        chap.novelId,
+        chap.position!,
+        chap.page ?? '',
+        excludedScanlators,
+      );
     },
     [novel.path, novel.pluginId],
   );
@@ -346,7 +342,9 @@ export default function useChapter(
 
         // Pull in the adjacent source pages if we are at a page boundary.
         if (!nextChap) {
-          nextChap = await loadNextPageChapter(chap, excludedScanlators);
+          nextChap = await loadNextPageChapter(chap, excludedScanlators).catch(
+            () => undefined,
+          );
           if (isStale()) {
             return;
           }
@@ -361,7 +359,7 @@ export default function useChapter(
             String(currentPage - 1),
             'PREV',
             excludedScanlators,
-          );
+          ).catch(() => undefined);
           if (isStale()) {
             return;
           }
