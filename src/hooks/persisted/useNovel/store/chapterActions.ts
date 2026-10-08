@@ -188,7 +188,9 @@ export const markPreviousChaptersUnreadAction = (
     runAsyncAction(deps.markPreviousChaptersUnread(chapterId, novel.id), deps);
     mutateChapters(chs =>
       chs.map(chapter =>
-        chapter.id <= chapterId ? { ...chapter, unread: true } : chapter,
+        chapter.id <= chapterId
+          ? { ...chapter, unread: true, progress: 0 }
+          : chapter,
       ),
     );
   }
