@@ -114,3 +114,6 @@ release-artifacts/
 !plugins/android/
 ios/
 !modules/**/ios/
+
+# Generated web reader bundle (scripts/build-reader.mjs)
+assets/reader/app/

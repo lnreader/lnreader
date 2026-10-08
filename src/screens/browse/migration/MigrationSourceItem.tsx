@@ -1,13 +1,24 @@
+import { Image, ListItem } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  clip,
+  fillMaxWidth,
+  Shapes,
+  size,
+} from '@expo/ui/jetpack-compose/modifiers';
+
+import { AppText, listItemColors } from '@components';
 import { PluginItem } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { TouchableRipple } from 'react-native-paper';
+import { getLocaleLanguageName } from '@utils/constants/languages';
 
 interface MigrationSourceCardProps {
   item: PluginItem;
   theme: ThemeColors;
   noOfNovels: number;
   onPress: () => void;
+  /** Highlighted while its novels show beside the list. */
+  selected?: boolean;
 }
 
 const MigrationSourceCard = ({
@@ -15,66 +26,46 @@ const MigrationSourceCard = ({
   theme,
   noOfNovels,
   onPress,
+  selected,
 }: MigrationSourceCardProps) => {
   const { name, iconUrl, lang } = item;
 
   return (
-    <TouchableRipple
-      style={styles.cardContainer}
-      onPress={onPress}
-      rippleColor={theme.rippleColor}
+    <ListItem
+      colors={{
+        ...listItemColors(theme),
+        containerColor: selected ? theme.secondaryContainer : 'transparent',
+      }}
+      modifiers={[fillMaxWidth(), clickable(onPress)]}
     >
-      <>
-        <Image source={{ uri: iconUrl }} style={styles.sourceIcon} />
-        <View style={styles.sourceDetailsContainer}>
-          <Text
-            style={[
-              {
-                color: theme.onSurface,
-              },
-              styles.fontSize14,
-            ]}
-          >
-            {name} {` (${noOfNovels || 0})`}
-          </Text>
-          <Text
-            style={[
-              {
-                color: theme.onSurfaceVariant,
-              },
-              styles.fontSize12,
-            ]}
-          >
-            {lang}
-          </Text>
-        </View>
-      </>
-    </TouchableRipple>
+      <ListItem.LeadingContent>
+        <Image
+          source={{ uri: iconUrl }}
+          contentScale="crop"
+          modifiers={[size(40, 40), clip(Shapes.RoundedCorner(10))]}
+        />
+      </ListItem.LeadingContent>
+      <ListItem.HeadlineContent>
+        <AppText variant="bodyLarge" maxLines={1}>
+          {name}
+        </AppText>
+      </ListItem.HeadlineContent>
+      <ListItem.SupportingContent>
+        <AppText
+          variant="bodySmall"
+          color={theme.onSurfaceVariant}
+          maxLines={1}
+        >
+          {getLocaleLanguageName(lang)}
+        </AppText>
+      </ListItem.SupportingContent>
+      <ListItem.TrailingContent>
+        <AppText variant="labelLarge" color={theme.onSurfaceVariant}>
+          {String(noOfNovels || 0)}
+        </AppText>
+      </ListItem.TrailingContent>
+    </ListItem>
   );
 };
 
 export default MigrationSourceCard;
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginVertical: 4,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-  },
-  sourceDetailsContainer: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginStart: 16,
-  },
-  sourceIcon: {
-    borderRadius: 4,
-    height: 40,
-    width: 40,
-  },
-  fontSize14: { fontSize: 14 },
-  fontSize12: { fontSize: 12 },
-});

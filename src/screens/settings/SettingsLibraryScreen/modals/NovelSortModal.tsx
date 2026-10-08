@@ -33,7 +33,6 @@ const NovelSortModal: React.FC<NovelSortModalProps> = ({
           <SortItem
             key={item.ASC}
             label={item.label}
-            theme={theme}
             status={
               sortOrder === item.ASC
                 ? 'asc'
@@ -46,6 +45,7 @@ const NovelSortModal: React.FC<NovelSortModalProps> = ({
                 sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
               })
             }
+            theme={theme}
           />
         ))}
       </Dialog.List>

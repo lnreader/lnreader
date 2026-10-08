@@ -1,7 +1,10 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { StyleSheet } from 'react-native';
-import { AnimatedFAB } from 'react-native-paper';
+import { AppHost, Fab } from '@components';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
+import ArrowUpwardIcon from '@expo/material-symbols/arrow_upward.xml';
+import PlayArrowIcon from '@expo/material-symbols/play_arrow.xml';
 
 interface NovelFloatingActionsProps {
   bottomInset: number;
@@ -24,46 +27,33 @@ const NovelFloatingActions = ({
   onScrollToTop,
   showContinue,
   showScrollToTop,
-  theme,
 }: NovelFloatingActionsProps) => {
-  const scrollToTopStyle = useMemo(
-    () => [
-      styles.scrollToTop,
-      { backgroundColor: theme.surface2, marginBottom: bottomInset },
-    ],
-    [bottomInset, theme.surface2],
-  );
-  const continueStyle = useMemo(
-    () => [
-      styles.continue,
-      { backgroundColor: theme.primary, marginBottom: bottomInset },
-    ],
-    [bottomInset, theme.primary],
-  );
-
   return (
     <>
       {showScrollToTop ? (
-        <AnimatedFAB
-          style={scrollToTopStyle}
-          color={theme.primary}
-          icon="arrow-up"
-          label=""
-          extended={false}
-          onPress={onScrollToTop}
-          visible
-        />
+        <AppHost
+          matchContents
+          style={[styles.scrollToTop, { marginBottom: bottomInset }]}
+        >
+          <Fab
+            icon={ArrowUpwardIcon}
+            label={getString('readerScreen.drawer.scrollToTop')}
+            onPress={onScrollToTop}
+          />
+        </AppHost>
       ) : null}
       {showContinue ? (
-        <AnimatedFAB
-          style={continueStyle}
-          extended={isContinueExtended && !loading}
-          color={theme.onPrimary}
-          uppercase={false}
-          label={continueLabel}
-          icon="play"
-          onPress={onContinue}
-        />
+        <AppHost
+          matchContents
+          style={[styles.continue, { marginBottom: bottomInset }]}
+        >
+          <Fab
+            extended={isContinueExtended && !loading}
+            label={continueLabel}
+            icon={PlayArrowIcon}
+            onPress={onContinue}
+          />
+        </AppHost>
       ) : null}
     </>
   );
@@ -79,7 +69,8 @@ const styles = StyleSheet.create({
     right: 0,
   },
   scrollToTop: {
-    bottom: 16,
+    bottom: 32,
+    left: 16,
     position: 'absolute',
   },
 });

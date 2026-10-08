@@ -1,12 +1,9 @@
 import React from 'react';
 
-import { StyleSheet } from 'react-native';
-
-import { useTheme } from '@hooks/persisted';
 import { Dialog, RadioButton } from '@components';
 import { getString, setLocale } from '@i18n/translations';
 import { useMMKVString } from 'react-native-mmkv';
-import { FlatList } from 'react-native-gesture-handler';
+import { useTheme } from '@hooks/persisted';
 
 interface LanguagePickerModalProps {
   visible: boolean;
@@ -83,11 +80,7 @@ const LanguagePickerModal: React.FC<LanguagePickerModalProps> = ({
   };
 
   return (
-    <Dialog.Root
-      visible={visible}
-      onDismiss={onDismiss}
-      surfaceStyle={styles.maxHeight}
-    >
+    <Dialog.Root visible={visible} onDismiss={onDismiss}>
       <Dialog.Header>
         <Dialog.Title>{getString('appearanceScreen.appLanguage')}</Dialog.Title>
         <Dialog.Description>
@@ -95,26 +88,18 @@ const LanguagePickerModal: React.FC<LanguagePickerModalProps> = ({
         </Dialog.Description>
       </Dialog.Header>
       <Dialog.ScrollArea>
-        <FlatList
-          data={languages}
-          keyExtractor={item => item.locale}
-          renderItem={({ item }) => (
-            <RadioButton
-              key={item.locale}
-              status={currentLocale === item.locale}
-              onPress={() => handleLanguageSelect(item.locale)}
-              label={item.nativeName}
-              theme={theme}
-            />
-          )}
-        />
+        {languages.map(item => (
+          <RadioButton
+            key={item.locale}
+            status={currentLocale === item.locale}
+            onPress={() => handleLanguageSelect(item.locale)}
+            label={item.nativeName}
+            theme={theme}
+          />
+        ))}
       </Dialog.ScrollArea>
     </Dialog.Root>
   );
 };
 
 export default LanguagePickerModal;
-
-const styles = StyleSheet.create({
-  maxHeight: { maxHeight: '60%' },
-});

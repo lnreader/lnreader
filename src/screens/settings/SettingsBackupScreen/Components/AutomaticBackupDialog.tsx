@@ -1,13 +1,11 @@
-import { FlatList, StyleSheet } from 'react-native';
-
 import { Dialog, RadioButton } from '@components';
-import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import type { StringMap } from '@i18n/types';
 import {
   AUTOMATIC_BACKUP_INTERVALS,
   type AutomaticBackupInterval,
 } from '@services/backgroundTasks';
+import { useTheme } from '@hooks/persisted';
 
 type AutomaticBackupLabel = Extract<
   keyof StringMap,
@@ -40,7 +38,6 @@ const AutomaticBackupDialog = ({
   onSelect,
 }: AutomaticBackupDialogProps) => {
   const theme = useTheme();
-
   return (
     <Dialog.Root visible={visible} onDismiss={onCancel}>
       <Dialog.Title>
@@ -50,19 +47,15 @@ const AutomaticBackupDialog = ({
         {getString('backupScreen.automaticBackupDescription')}
       </Dialog.Description>
       <Dialog.ScrollArea>
-        <FlatList
-          data={AUTOMATIC_BACKUP_INTERVALS}
-          keyExtractor={interval => interval.toString()}
-          renderItem={({ item }) => (
-            <RadioButton
-              label={getString(AUTOMATIC_BACKUP_LABELS[item])}
-              status={item === intervalHours}
-              onPress={() => onSelect(item)}
-              theme={theme}
-            />
-          )}
-          style={styles.scrollArea}
-        />
+        {AUTOMATIC_BACKUP_INTERVALS.map(item => (
+          <RadioButton
+            key={item.toString()}
+            label={getString(AUTOMATIC_BACKUP_LABELS[item])}
+            status={item === intervalHours}
+            onPress={() => onSelect(item)}
+            theme={theme}
+          />
+        ))}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onCancel}>
@@ -74,9 +67,3 @@ const AutomaticBackupDialog = ({
 };
 
 export default AutomaticBackupDialog;
-
-const styles = StyleSheet.create({
-  scrollArea: {
-    maxHeight: 480,
-  },
-});

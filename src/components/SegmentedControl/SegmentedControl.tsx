@@ -1,145 +1,100 @@
-import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  GestureResponderEvent,
-} from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+  SegmentedButton,
+  SingleChoiceSegmentedButtonRow,
+  MultiChoiceSegmentedButtonRow,
+} from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  type ModifierConfig,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
 
-export interface SegmentedControlOption<T extends string = string> {
-  value: T;
+export interface SegmentedControlOption<T> {
   label: string;
-  icon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
-}
-
-export interface SegmentedControlProps<T extends string = string> {
-  options: SegmentedControlOption<T>[];
   value: T;
-  onChange: (value: T, event: GestureResponderEvent) => void;
-  theme: ThemeColors;
-  showCheckIcon?: boolean;
-  showLabels?: boolean;
+  icon?: IconSource;
 }
 
-export function SegmentedControl<T extends string = string>({
+const segmentColors = (theme: ThemeColors) => ({
+  activeContainerColor: theme.secondaryContainer,
+  activeContentColor: theme.onSecondaryContainer,
+  activeBorderColor: theme.outline,
+  inactiveContainerColor: 'transparent',
+  inactiveContentColor: theme.onSurface,
+  inactiveBorderColor: theme.outline,
+});
+
+export interface SegmentedControlProps<T> {
+  options: readonly SegmentedControlOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
+  theme: ThemeColors;
+  modifiers?: ModifierConfig[];
+  /** Show each option's icon in place of its label. */
+  iconOnly?: boolean;
+}
+
+export function SegmentedControl<T extends string | number>({
   options,
   value,
   onChange,
   theme,
-  showCheckIcon = true,
-  showLabels = true,
+  modifiers,
+  iconOnly = false,
 }: SegmentedControlProps<T>) {
   return (
-    <View style={styles.container}>
-      {options.map((option, index) => {
-        const isSelected = value === option.value;
-        const isFirst = index === 0;
-        const isLast = index === options.length - 1;
-
-        const buttonStyles = [
-          styles.segment,
-          isFirst && styles.segmentFirst,
-          isLast && styles.segmentLast,
-          !isFirst && !isLast && styles.segmentMiddle,
-          {
-            backgroundColor: isSelected
-              ? theme.secondaryContainer
-              : 'transparent',
-            borderColor: theme.outline,
-          },
-        ];
-
-        const textColor = isSelected
-          ? theme.onSecondaryContainer
-          : theme.onSurface;
-
-        return (
-          <View key={option.value} style={buttonStyles}>
-            <Pressable
-              accessibilityLabel={option.label}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: isSelected }}
-              style={styles.segmentPressable}
-              onPress={e => onChange(option.value, e)}
-              android_ripple={{
-                color: theme.rippleColor,
-                borderless: false,
-              }}
-            >
-              {showCheckIcon && isSelected && (
-                <MaterialCommunityIcons
-                  name="check"
-                  size={18}
-                  color={textColor}
-                  style={styles.checkIcon}
-                />
-              )}
-              {option.icon && (!isSelected || !showCheckIcon) && (
-                <MaterialCommunityIcons
-                  name={option.icon}
-                  size={18}
-                  color={textColor}
-                  style={showLabels ? styles.icon : undefined}
-                />
-              )}
-              {showLabels ? (
-                <Text style={[styles.segmentText, { color: textColor }]}>
-                  {option.label}
-                </Text>
-              ) : null}
-            </Pressable>
-          </View>
-        );
-      })}
-    </View>
+    <SingleChoiceSegmentedButtonRow modifiers={modifiers ?? [fillMaxWidth()]}>
+      {options.map(option => (
+        <SegmentedButton
+          key={String(option.value)}
+          selected={option.value === value}
+          onClick={() => onChange(option.value)}
+          colors={segmentColors(theme)}
+        >
+          <SegmentedButton.Label>
+            {iconOnly && option.icon ? (
+              <AppIcon source={option.icon} size={18} label={option.label} />
+            ) : (
+              <AppText variant="labelLarge" maxLines={1}>
+                {option.label}
+              </AppText>
+            )}
+          </SegmentedButton.Label>
+        </SegmentedButton>
+      ))}
+    </SingleChoiceSegmentedButtonRow>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    height: 40,
-  },
-  segment: {
-    flex: 1,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    overflow: 'hidden',
-  },
-  segmentFirst: {
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
-  },
-  segmentMiddle: {
-    borderRightWidth: 1,
-  },
-  segmentLast: {
-    borderRightWidth: 1,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  segmentPressable: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  segmentText: {
-    fontSize: 14,
-    fontWeight: '500',
-    letterSpacing: 0.1,
-  },
-  checkIcon: {
-    marginRight: 8,
-  },
-  icon: {
-    marginRight: 8,
-  },
-});
+export function MultiSegmentedControl<T extends string | number>({
+  options,
+  values,
+  onToggle,
+  theme,
+}: {
+  options: readonly SegmentedControlOption<T>[];
+  values: readonly T[];
+  onToggle: (value: T, checked: boolean) => void;
+  theme: ThemeColors;
+}) {
+  return (
+    <MultiChoiceSegmentedButtonRow modifiers={[fillMaxWidth()]}>
+      {options.map(option => (
+        <SegmentedButton
+          key={String(option.value)}
+          checked={values.includes(option.value)}
+          onCheckedChange={checked => onToggle(option.value, checked)}
+          colors={segmentColors(theme)}
+        >
+          <SegmentedButton.Label>
+            <AppText variant="labelLarge" maxLines={1}>
+              {option.label}
+            </AppText>
+          </SegmentedButton.Label>
+        </SegmentedButton>
+      ))}
+    </MultiChoiceSegmentedButtonRow>
+  );
+}

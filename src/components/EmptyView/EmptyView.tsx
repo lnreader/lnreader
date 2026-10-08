@@ -1,15 +1,18 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import { fillMaxSize, padding } from '@expo/ui/jetpack-compose/modifiers';
 
 import { ThemeColors } from '../../theme/types';
-import { Button } from 'react-native-paper';
+import { type IconSource } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
+import Button from '../Button/Button';
 
 interface EmptyViewProps {
   icon?: string;
   description: string;
   theme: ThemeColors;
   actions?: {
-    iconName: string;
+    iconName: IconSource;
     title: string;
     onPress: () => void;
   }[];
@@ -21,54 +24,47 @@ const EmptyView: React.FC<EmptyViewProps> = ({
   theme,
   actions,
 }) => (
-  <View style={styles.container}>
-    {icon ? (
-      <Text style={[styles.icon, { color: theme.outline }]}>{icon}</Text>
-    ) : null}
-    <Text style={[styles.text, { color: theme.outline }]}>{description}</Text>
-    {actions?.length ? (
-      <View style={styles.actionsCtn}>
-        {actions.map(action => (
-          <View key={action.title} style={styles.buttonWrapper}>
+  <Box
+    contentAlignment="center"
+    modifiers={[fillMaxSize(), padding(16, 16, 16, 16)]}
+  >
+    <Column horizontalAlignment="center">
+      {icon ? (
+        <AppText
+          variant="displaySmall"
+          weight="700"
+          color={theme.outline}
+          align="center"
+        >
+          {icon}
+        </AppText>
+      ) : null}
+      <AppText
+        color={theme.outline}
+        align="center"
+        modifiers={[padding(0, 16, 0, 0)]}
+      >
+        {description}
+      </AppText>
+      {actions?.length ? (
+        <Row
+          horizontalArrangement={{ spacedBy: 8 }}
+          modifiers={[padding(0, 20, 0, 0)]}
+        >
+          {actions.map(action => (
             <Button
-              rippleColor={theme.rippleColor}
+              key={action.title}
               onPress={action.onPress}
               icon={action.iconName}
               textColor={theme.outline}
               mode="outlined"
-            >
-              {action.title}
-            </Button>
-          </View>
-        ))}
-      </View>
-    ) : null}
-  </View>
+              title={action.title}
+            />
+          ))}
+        </Row>
+      ) : null}
+    </Column>
+  </Box>
 );
 
 export default EmptyView;
-
-const styles = StyleSheet.create({
-  actionsCtn: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  buttonWrapper: {
-    flexDirection: 'row',
-    marginHorizontal: 4,
-  },
-  container: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  icon: {
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
-  text: {
-    marginTop: 16,
-    textAlign: 'center',
-  },
-});

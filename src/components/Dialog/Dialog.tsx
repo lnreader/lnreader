@@ -1,197 +1,235 @@
-import React, { PropsWithChildren } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
-  KeyboardAvoidingView,
-  Modal as NativeModal,
-  Platform,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextProps,
-  View,
-  ViewProps,
-  ViewStyle,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Color from 'color';
+  BasicAlertDialog,
+  Column,
+  HorizontalDivider,
+  Row,
+  Shape,
+  Surface,
+  TextButton,
+} from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  height,
+  onSizeChanged,
+  padding,
+  size,
+  testID as testIDModifier,
+  verticalScroll,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useTheme } from '@hooks/persisted/useTheme';
+import AppText from '../AppText/AppText';
+import ProgressIndicator from '../ProgressIndicator/ProgressIndicator';
 
-import { useTheme } from '@hooks/persisted';
-
-import Button from '../Button/Button';
-
-interface DialogRootProps extends PropsWithChildren {
+interface DialogRootProps {
   visible: boolean;
   onDismiss: () => void;
-  surfaceStyle?: StyleProp<ViewStyle>;
+  children?: ReactNode;
   testID?: string;
 }
 
-interface DialogSectionProps extends ViewProps {
-  children: React.ReactNode;
+interface DialogSectionProps {
+  children?: ReactNode;
+  testID?: string;
 }
 
-interface DialogTextProps extends TextProps {
-  children: React.ReactNode;
+interface DialogTextProps {
+  children: ReactNode;
 }
 
 type DialogActionTone = 'primary' | 'danger';
 
-interface DialogActionProps extends React.ComponentProps<typeof Button> {
+interface DialogActionProps {
+  title?: string;
+  children?: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
   tone?: DialogActionTone;
 }
+
+const DIALOG_PADDING = 24;
+/** Taller content scrolls inside the scroll area. */
+const MAX_SCROLL_AREA_HEIGHT = 420;
 
 const DialogRoot = ({
   children,
   visible,
   onDismiss,
-  surfaceStyle,
   testID = 'dialog',
 }: DialogRootProps) => {
   const theme = useTheme();
-  const backdropColor = Color(theme.scrim ?? '#000000')
-    .alpha(0.32)
-    .string();
-
+  if (!visible) {
+    return null;
+  }
   return (
-    <NativeModal
-      animationType="fade"
-      hardwareAccelerated
-      navigationBarTranslucent
-      onRequestClose={onDismiss}
-      statusBarTranslucent
-      transparent
-      visible={visible}
-    >
-      <View style={[styles.modal, { backgroundColor: backdropColor }]}>
-        <Pressable
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          onPress={onDismiss}
-          style={StyleSheet.absoluteFill}
-          testID={`${testID}-backdrop`}
-        />
-        <SafeAreaView pointerEvents="box-none" style={styles.safeArea}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            pointerEvents="box-none"
-            style={styles.keyboardAvoidingView}
-          >
-            <View
-              pointerEvents="box-none"
-              style={styles.viewport}
-              testID={`${testID}-viewport`}
-            >
-              <View
-                accessibilityViewIsModal
-                style={[
-                  styles.surface,
-                  {
-                    backgroundColor:
-                      theme.surfaceContainerHigh ?? theme.surface,
-                  },
-                  surfaceStyle,
-                ]}
-                testID={testID}
-              >
-                {children}
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </View>
-    </NativeModal>
+    <BasicAlertDialog onDismissRequest={onDismiss}>
+      <Surface
+        color={theme.surfaceContainerHigh}
+        contentColor={theme.onSurface}
+        shape={Shape.RoundedCorner({
+          cornerRadii: {
+            topStart: 28,
+            topEnd: 28,
+            bottomStart: 28,
+            bottomEnd: 28,
+          },
+        })}
+        modifiers={[fillMaxWidth(), testIDModifier(testID)]}
+      >
+        <Column
+          verticalArrangement={{ spacedBy: 16 }}
+          modifiers={[fillMaxWidth(), padding(0, DIALOG_PADDING, 0, 18)]}
+        >
+          {children}
+        </Column>
+      </Surface>
+    </BasicAlertDialog>
   );
 };
 
-const DialogHeader = ({ children, style, ...props }: DialogSectionProps) => (
-  <View style={[styles.header, style]} {...props}>
+const sectionTestID = (id?: string) => (id ? [testIDModifier(id)] : []);
+
+const DialogHeader = ({ children, testID }: DialogSectionProps) => (
+  <Column
+    verticalArrangement={{ spacedBy: 16 }}
+    modifiers={[fillMaxWidth(), ...sectionTestID(testID)]}
+  >
     {children}
-  </View>
+  </Column>
 );
 
-const DialogTitle = ({ children, style, ...props }: DialogTextProps) => {
-  const theme = useTheme();
-
-  return (
-    <Text
-      accessibilityRole="header"
-      style={[styles.title, { color: theme.onSurface }, style]}
-      {...props}
-    >
-      {children}
-    </Text>
-  );
-};
-
-const DialogDescription = ({ children, style, ...props }: DialogTextProps) => {
-  const theme = useTheme();
-
-  return (
-    <Text
-      style={[styles.description, { color: theme.onSurfaceVariant }, style]}
-      {...props}
-    >
-      {children}
-    </Text>
-  );
-};
-
-const DialogContent = ({ children, style, ...props }: DialogSectionProps) => (
-  <View style={[styles.content, style]} {...props}>
+const DialogTitle = ({ children }: DialogTextProps) => (
+  <AppText
+    variant="headlineSmall"
+    modifiers={[padding(DIALOG_PADDING, 0, DIALOG_PADDING, 0)]}
+  >
     {children}
-  </View>
+  </AppText>
 );
 
-const DialogList = ({ children, style, ...props }: DialogSectionProps) => (
-  <View style={[styles.list, style]} {...props}>
+const DialogDescription = ({ children }: DialogTextProps) => {
+  const theme = useTheme();
+  return (
+    <AppText
+      variant="bodyMedium"
+      color={theme.onSurfaceVariant}
+      modifiers={[padding(DIALOG_PADDING, 0, DIALOG_PADDING, 0)]}
+    >
+      {children}
+    </AppText>
+  );
+};
+
+const DialogContent = ({ children, testID }: DialogSectionProps) => (
+  <Column
+    modifiers={[
+      fillMaxWidth(),
+      padding(DIALOG_PADDING, 0, DIALOG_PADDING, 0),
+      ...sectionTestID(testID),
+    ]}
+  >
     {children}
-  </View>
+  </Column>
+);
+
+// List rows bring their own 16dp inset; this lines them up with the text.
+const DialogList = ({ children, testID }: DialogSectionProps) => (
+  <Column
+    modifiers={[fillMaxWidth(), padding(8, 0, 8, 0), ...sectionTestID(testID)]}
+  >
+    {children}
+  </Column>
 );
 
 const DialogScrollArea = ({
   children,
-  style,
-  testID = 'dialog-scroll-area',
-  ...props
-}: DialogSectionProps) => {
+  testID,
+  fixed = false,
+}: DialogSectionProps & {
+  /** Keep the full height for content that changes, so the dialog doesn't jump. */
+  fixed?: boolean;
+}) => {
   const theme = useTheme();
-  const dividerStyle = { backgroundColor: theme.outlineVariant };
-
+  // Compose has no max-height modifier here: measure the content, then cap.
+  const [contentHeight, setContentHeight] = useState<number>();
   return (
-    <View style={[styles.scrollArea, style]} testID={testID} {...props}>
-      <View
-        importantForAccessibility="no"
-        style={[styles.divider, dividerStyle]}
-        testID={`${testID}-top-divider`}
-      />
-      {children}
-      <View
-        importantForAccessibility="no"
-        style={[styles.divider, dividerStyle]}
-        testID={`${testID}-bottom-divider`}
-      />
-    </View>
+    <Column modifiers={[fillMaxWidth(), ...sectionTestID(testID)]}>
+      <HorizontalDivider color={theme.outlineVariant} />
+      <Column
+        modifiers={[
+          fillMaxWidth(),
+          ...(fixed
+            ? [height(MAX_SCROLL_AREA_HEIGHT)]
+            : contentHeight === undefined
+            ? []
+            : [height(Math.min(contentHeight, MAX_SCROLL_AREA_HEIGHT))]),
+          verticalScroll(),
+        ]}
+      >
+        <Column
+          modifiers={[
+            fillMaxWidth(),
+            padding(8, 0, 8, 0),
+            ...(fixed
+              ? []
+              : [onSizeChanged(measured => setContentHeight(measured.height))]),
+          ]}
+        >
+          {children}
+        </Column>
+      </Column>
+      <HorizontalDivider color={theme.outlineVariant} />
+    </Column>
   );
 };
 
-const DialogActions = ({ children, style, ...props }: DialogSectionProps) => (
-  <View style={[styles.actions, style]} {...props}>
+const DialogActions = ({ children, testID }: DialogSectionProps) => (
+  <Row
+    horizontalArrangement="end"
+    modifiers={[
+      fillMaxWidth(),
+      padding(DIALOG_PADDING - 12, 0, 12, 0),
+      ...sectionTestID(testID),
+    ]}
+  >
     {children}
-  </View>
+  </Row>
 );
 
 const DialogAction = ({
+  title,
+  children,
+  onPress,
+  disabled,
+  loading,
   tone = 'primary',
-  textColor,
-  ...props
 }: DialogActionProps) => {
   const theme = useTheme();
-
+  const color =
+    disabled || loading
+      ? theme.onSurfaceDisabled
+      : tone === 'danger'
+      ? theme.error
+      : theme.primary;
   return (
-    <Button
-      textColor={textColor ?? (tone === 'danger' ? theme.error : theme.primary)}
-      {...props}
-    />
+    <TextButton
+      onClick={onPress}
+      enabled={!disabled && !loading}
+      colors={{
+        containerColor: 'transparent',
+        contentColor: color,
+        disabledContentColor: theme.onSurfaceDisabled,
+      }}
+    >
+      {loading ? (
+        <ProgressIndicator circular modifiers={[size(18, 18)]} />
+      ) : (
+        <AppText variant="labelLarge" color={color}>
+          {title || children}
+        </AppText>
+      )}
+    </TextButton>
   );
 };
 
@@ -214,69 +252,3 @@ export type {
   DialogSectionProps,
   DialogTextProps,
 };
-
-const styles = StyleSheet.create({
-  modal: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  viewport: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  surface: {
-    borderCurve: 'continuous',
-    borderRadius: 28,
-    gap: 16,
-    maxHeight: '90%',
-    maxWidth: 560,
-    minWidth: 280,
-    padding: 24,
-    width: '100%',
-  },
-  header: {
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    letterSpacing: 0,
-    lineHeight: 32,
-  },
-  description: {
-    fontSize: 14,
-    letterSpacing: 0,
-    lineHeight: 20,
-  },
-  content: {
-    flexShrink: 1,
-    gap: 16,
-  },
-  list: {
-    flexShrink: 1,
-    marginHorizontal: -24,
-  },
-  scrollArea: {
-    flexShrink: 1,
-    marginHorizontal: -24,
-  },
-  divider: {
-    height: 1,
-    width: '100%',
-  },
-  actions: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    justifyContent: 'flex-end',
-    marginTop: 8,
-  },
-});

@@ -1,8 +1,14 @@
 import React, { memo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions } from 'react-native';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
 
 const SKELETON_ITEMS = Array.from({ length: 8 });
@@ -14,96 +20,58 @@ interface Props {
 const UpdatesSkeletonLoading: React.FC<Props> = ({ theme }) => {
   const { width } = useWindowDimensions();
   const textWidth = Math.max(80, width - 120);
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+  const [, backgroundColor, disableLoadingAnimations] = useLoadingColors(theme);
 
   const renderLoadingChapter = (_: unknown, index: number) => {
     return (
-      <View style={styles.chapterCtn} key={`updates-skeleton-${index}`}>
+      <Row
+        key={`updates-skeleton-${index}`}
+        verticalAlignment="center"
+        modifiers={[fillMaxWidth(), padding(0, 8, 0, 8)]}
+      >
         <ShimmerPlaceholder
-          style={styles.picture}
-          shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+          modifiers={[padding(16, 0, 16, 0)]}
+          shimmerColors={[backgroundColor]}
           height={42}
           width={42}
           stopAutoRun={disableLoadingAnimations}
         />
-        <View style={styles.textCtn}>
+        <Column modifiers={[weight(1)]}>
           <ShimmerPlaceholder
-            style={styles.textTop}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            modifiers={[padding(0, 5, 0, 2)]}
+            corner={6}
+            shimmerColors={[backgroundColor]}
             height={16}
             width={textWidth}
             stopAutoRun={disableLoadingAnimations}
           />
           <ShimmerPlaceholder
-            style={styles.textBottom}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            modifiers={[padding(0, 2, 0, 5)]}
+            corner={6}
+            shimmerColors={[backgroundColor]}
             height={12}
             width={textWidth}
             stopAutoRun={disableLoadingAnimations}
           />
-        </View>
-        <View style={styles.buttonCtn}>
+        </Column>
+        <Box contentAlignment="center" modifiers={[size(45.1, 45.1)]}>
           <ShimmerPlaceholder
-            style={styles.button}
-            shimmerColors={[backgroundColor, highlightColor, backgroundColor]}
+            corner={12.5}
+            shimmerColors={[backgroundColor]}
             height={25}
             width={25}
             stopAutoRun={disableLoadingAnimations}
           />
-        </View>
-      </View>
+        </Box>
+      </Row>
     );
   };
 
   return (
-    <Animated.View
-      entering={disableLoadingAnimations ? undefined : FadeIn.duration(500)}
-      style={styles.contentCtn}
-    >
+    <Column modifiers={[fillMaxWidth(), padding(0, 8, 0, 8)]}>
       {SKELETON_ITEMS.map(renderLoadingChapter)}
-    </Animated.View>
+    </Column>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 12.5,
-  },
-  buttonCtn: {
-    alignItems: 'center',
-    height: 45.1,
-    justifyContent: 'center',
-    width: 45.1,
-  },
-  chapterCtn: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginVertical: 8,
-  },
-  contentCtn: {
-    paddingVertical: 8,
-  },
-  picture: {
-    borderRadius: 4,
-    height: 42,
-    marginHorizontal: 16,
-    width: 42,
-  },
-  textBottom: {
-    borderRadius: 6,
-    marginBottom: 5,
-    marginTop: 2,
-  },
-  textTop: {
-    borderRadius: 6,
-    marginBottom: 2,
-    marginTop: 5,
-  },
-  textCtn: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-});
 
 export default memo(UpdatesSkeletonLoading);

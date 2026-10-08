@@ -1,13 +1,17 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  fillMaxWidth,
+  padding,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { ThemeColors } from '../../../theme/types';
-import { MaterialDesignIconName } from '@type/icon';
+import { AppIcon, AppText, type IconSource } from '@components';
+import { ThemeColors } from '@theme/types';
 
 interface Props {
   label: string;
-  icon?: MaterialDesignIconName;
+  icon?: IconSource;
   backgroundColor?: string;
   textColor?: string;
   theme: ThemeColors;
@@ -20,31 +24,23 @@ export const Banner: React.FC<Props> = ({
   backgroundColor = theme.primary,
   textColor = theme.onPrimary,
 }) => (
-  <View style={[{ backgroundColor }, styles.container]}>
-    {icon ? (
-      <MaterialCommunityIcons
-        name={icon}
-        color={textColor}
-        size={18}
-        style={styles.icon}
-      />
-    ) : null}
-    <Text style={[{ color: textColor }, styles.bannerText]}>{label}</Text>
-  </View>
+  <Row
+    verticalAlignment="center"
+    horizontalArrangement="center"
+    modifiers={[
+      fillMaxWidth(),
+      background(backgroundColor),
+      padding(0, 4, 0, 4),
+    ]}
+  >
+    {icon ? <AppIcon source={icon} size={18} tint={textColor} /> : null}
+    <AppText
+      variant="labelMedium"
+      weight="500"
+      color={textColor}
+      modifiers={[padding(icon ? 8 : 0, 0, 0, 0)]}
+    >
+      {label}
+    </AppText>
+  </Row>
 );
-
-const styles = StyleSheet.create({
-  bannerText: {
-    fontSize: 12,
-    fontWeight: 500,
-  },
-  container: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 4,
-  },
-  icon: {
-    marginRight: 8,
-  },
-});

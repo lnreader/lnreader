@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, SectionList, Text } from 'react-native';
+import { padding } from '@expo/ui/jetpack-compose/modifiers';
 
 import {
+  AppText,
+  ComposeSectionList,
   EmptyView,
   ErrorScreenV2,
-  SafeAreaView,
+  Screen,
   SearchbarV2,
 } from '@components';
 import HistoryCard from './components/HistoryCard/HistoryCard';
@@ -21,6 +23,8 @@ import HistorySkeletonLoading from './components/HistorySkeletonLoading';
 import RemoveHistoryDialog from './components/RemoveHistoryDialog';
 import { HistoryScreenProps } from '@navigators/types';
 import { formatDate } from '@utils/dateFormat';
+import DeleteSweepIcon from '@expo/material-symbols/delete_sweep.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
 
 const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const theme = useTheme();
@@ -118,35 +122,36 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   );
 
   return (
-    <SafeAreaView excludeBottom>
-      <SearchbarV2
-        searchText={searchText}
-        placeholder={getString('historyScreen.searchbar')}
-        leftIcon="magnify"
-        onChangeText={onChangeText}
-        clearSearchbar={clearSearchbar}
-        rightIcons={[
-          {
-            iconName: 'delete-sweep-outline',
-            onPress: openClearHistoryDialog,
-          },
-        ]}
-        theme={theme}
-      />
-      {isLoading ? (
-        <HistorySkeletonLoading theme={theme} />
-      ) : error ? (
-        <ErrorScreenV2 error={error} />
-      ) : (
-        <>
-          <SectionList
-            contentContainerStyle={styles.listContainer}
+    <Screen
+      topBar={
+        <SearchbarV2
+          searchText={searchText}
+          placeholder={getString('historyScreen.searchbar')}
+          leftIcon={SearchIcon}
+          onChangeText={onChangeText}
+          clearSearchbar={clearSearchbar}
+          rightIcons={[
+            {
+              iconName: DeleteSweepIcon,
+              onPress: openClearHistoryDialog,
+            },
+          ]}
+          theme={theme}
+        />
+      }
+      list={
+        isLoading || error ? undefined : (
+          <ComposeSectionList
             sections={groupHistoryByDate(displayedHistory)}
-            keyExtractor={(item, index) => 'history' + index}
+            // Rows of all sections share one list, so keys need the id too.
+            keyExtractor={(item, index) => 'history' + item.id + index}
             renderSectionHeader={({ section: { date } }) => (
-              <Text style={[styles.dateHeader, { color: theme.onSurface }]}>
+              <AppText
+                color={theme.onSurface}
+                modifiers={[padding(16, 8, 16, 8)]}
+              >
                 {formatDate(date, dateFormat, relativeTimestamps)}
-              </Text>
+              </AppText>
             )}
             renderItem={({ item }) => (
               <HistoryCard history={item} onRemove={setHistoryToRemove} />
@@ -159,30 +164,32 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
               />
             }
           />
-          <ClearHistoryDialog
-            visible={clearHistoryDialogVisible}
-            onSubmit={clearAllHistory}
-            onDismiss={closeClearHistoryDialog}
-          />
-          <RemoveHistoryDialog
-            visible={Boolean(historyToRemove)}
-            onSubmit={removeHistory}
-            onDismiss={() => setHistoryToRemove(undefined)}
-          />
-        </>
-      )}
-    </SafeAreaView>
+        )
+      }
+      overlays={
+        isLoading || error ? null : (
+          <>
+            <ClearHistoryDialog
+              visible={clearHistoryDialogVisible}
+              onSubmit={clearAllHistory}
+              onDismiss={closeClearHistoryDialog}
+            />
+            <RemoveHistoryDialog
+              visible={Boolean(historyToRemove)}
+              onSubmit={removeHistory}
+              onDismiss={() => setHistoryToRemove(undefined)}
+            />
+          </>
+        )
+      }
+    >
+      {isLoading ? (
+        <HistorySkeletonLoading theme={theme} />
+      ) : error ? (
+        <ErrorScreenV2 error={error} />
+      ) : null}
+    </Screen>
   );
 };
 
 export default HistoryScreen;
-
-const styles = StyleSheet.create({
-  dateHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  listContainer: {
-    flexGrow: 1,
-  },
-});

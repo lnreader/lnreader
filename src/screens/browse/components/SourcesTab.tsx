@@ -1,11 +1,23 @@
 import { memo, useCallback, useMemo } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, ListItem, Row } from '@expo/ui/jetpack-compose';
 import {
-  LegendList,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
+  clickable,
+  clip,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  size,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { EmptyView, IconButtonV2 } from '@components';
+import {
+  AppText,
+  Button,
+  ComposeList,
+  EmptyView,
+  IconButtonV2,
+  ScreenContent,
+  listItemColors,
+} from '@components';
 import {
   useBrowseSettings,
   useFilteredInstalledPlugins,
@@ -18,6 +30,8 @@ import { PluginItem } from '@plugins/types';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { getLocaleLanguageName } from '@utils/constants/languages';
+import ExtensionIcon from '@expo/material-symbols/extension.xml';
+import KeepIcon from '@expo/material-symbols/keep.xml';
 
 import DiscoverCard from '../discover/DiscoverCard';
 import { buildSourceEntries, SourceEntry } from '../utils/buildBrowseEntries';
@@ -47,59 +61,52 @@ const SourceRow = memo(
     plugin,
     theme,
   }: SourceRowProps) => (
-    <View style={styles.sourceRow}>
-      <Pressable
-        accessibilityLabel={`${getString('browse')} ${plugin.name}`}
-        accessibilityRole="button"
-        style={styles.sourceRowAction}
-        android_ripple={{ color: theme.rippleColor }}
-        onPress={() => onPress(plugin)}
-      />
-      <View pointerEvents="none" style={styles.sourceMainContent}>
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[fillMaxWidth(), clickable(() => onPress(plugin))]}
+    >
+      <ListItem.LeadingContent>
         <Image
           source={{ uri: plugin.iconUrl }}
-          style={[styles.icon, { backgroundColor: theme.surfaceVariant }]}
+          contentScale="crop"
+          modifiers={[size(40, 40), clip(Shapes.RoundedCorner(10))]}
         />
-        <View style={styles.details}>
-          <Text
-            numberOfLines={1}
-            style={[styles.name, { color: theme.onSurface }]}
-          >
-            {plugin.name}
-          </Text>
-          <Text
-            numberOfLines={1}
-            style={[styles.description, { color: theme.onSurfaceVariant }]}
-          >
-            {getLocaleLanguageName(plugin.lang)}
-          </Text>
-        </View>
-      </View>
-      <Pressable
-        accessibilityLabel={`${getString('browseScreen.latest')} ${
-          plugin.name
-        }`}
-        accessibilityRole="button"
-        style={styles.latestButton}
-        hitSlop={8}
-        onPress={() => onLatestPress(plugin)}
-      >
-        <Text style={[styles.latestText, { color: theme.primary }]}>
-          {getString('browseScreen.latest')}
-        </Text>
-      </Pressable>
-      <IconButtonV2
-        accessibilityLabel={
-          isPinned
-            ? getString('browseScreen.unpinSource', { name: plugin.name })
-            : getString('browseScreen.pinSource', { name: plugin.name })
-        }
-        name={isPinned ? 'pin' : 'pin-outline'}
-        color={isPinned ? theme.primary : theme.onSurfaceVariant}
-        onPress={() => onPinPress(plugin)}
-        theme={theme}
-      />
-    </View>
+      </ListItem.LeadingContent>
+      <ListItem.HeadlineContent>
+        <AppText variant="bodyLarge" maxLines={1}>
+          {plugin.name}
+        </AppText>
+      </ListItem.HeadlineContent>
+      <ListItem.SupportingContent>
+        <AppText
+          variant="bodySmall"
+          color={theme.onSurfaceVariant}
+          maxLines={1}
+        >
+          {getLocaleLanguageName(plugin.lang)}
+        </AppText>
+      </ListItem.SupportingContent>
+      <ListItem.TrailingContent>
+        <Row verticalAlignment="center">
+          <Button
+            mode="text"
+            title={getString('browseScreen.latest')}
+            onPress={() => onLatestPress(plugin)}
+          />
+          <IconButtonV2
+            name={KeepIcon}
+            accessibilityLabel={
+              isPinned
+                ? getString('browseScreen.unpinSource', { name: plugin.name })
+                : getString('browseScreen.pinSource', { name: plugin.name })
+            }
+            selected={isPinned}
+            onPress={() => onPinPress(plugin)}
+            theme={theme}
+          />
+        </Row>
+      </ListItem.TrailingContent>
+    </ListItem>
   ),
 );
 
@@ -160,14 +167,16 @@ export const SourcesTab = memo(
     ]);
 
     const renderItem = useCallback(
-      ({ item }: LegendListRenderItemProps<SourceEntry>) => {
+      (item: SourceEntry) => {
         if (item.type === 'header') {
           return (
-            <Text
-              style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}
+            <AppText
+              variant="titleSmall"
+              color={theme.primary}
+              modifiers={[padding(16, 16, 16, 4)]}
             >
               {item.title}
-            </Text>
+            </AppText>
           );
         }
 
@@ -191,19 +200,17 @@ export const SourcesTab = memo(
 
         if (item.type === 'empty') {
           return (
-            <View style={styles.inlineEmpty}>
-              <EmptyView
-                description={getString('browseScreen.noSources')}
-                actions={[
-                  {
-                    iconName: 'puzzle-outline',
-                    onPress: onOpenPlugins,
-                    title: getString('browseScreen.plugins'),
-                  },
-                ]}
-                theme={theme}
-              />
-            </View>
+            <EmptyView
+              description={getString('browseScreen.noSources')}
+              actions={[
+                {
+                  iconName: ExtensionIcon,
+                  onPress: onOpenPlugins,
+                  title: getString('browseScreen.plugins'),
+                },
+              ]}
+              theme={theme}
+            />
           );
         }
 
@@ -221,85 +228,25 @@ export const SourcesTab = memo(
       [navigation, onOpenPlugins, openLatest, openSource, theme, togglePin],
     );
 
-    return (
-      <LegendList
-        data={entries}
-        estimatedItemSize={64}
-        getItemType={item => item.type}
-        keyExtractor={item => item.key}
-        ListEmptyComponent={
+    if (!entries.length) {
+      return (
+        <ScreenContent>
           <EmptyView
             description={getString('browseScreen.noSearchResults')}
             theme={theme}
           />
-        }
-        contentContainerStyle={!entries.length ? styles.emptyList : undefined}
-        recycleItems
+        </ScreenContent>
+      );
+    }
+
+    return (
+      <ComposeList
+        data={entries}
+        estimatedItemSize={64}
+        keyExtractor={item => item.key}
+        contentPadding={{ bottom: 16 }}
         renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
       />
     );
   },
 );
-
-const styles = StyleSheet.create({
-  description: {
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  details: {
-    flex: 1,
-    marginStart: 16,
-  },
-  icon: {
-    borderRadius: 4,
-    height: 44,
-    width: 44,
-  },
-  emptyList: {
-    flexGrow: 1,
-  },
-  inlineEmpty: {
-    height: 240,
-  },
-  latestButton: {
-    borderRadius: 24,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  latestText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  name: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  sectionHeader: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  sourceRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 64,
-    overflow: 'hidden',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    position: 'relative',
-  },
-  sourceMainContent: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-  },
-  sourceRowAction: {
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-});

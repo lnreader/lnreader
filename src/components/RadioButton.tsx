@@ -1,7 +1,6 @@
 import { ThemeColors } from '@theme/types';
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { RadioButton as MaterialRadioButton } from 'react-native-paper';
+import React, { createContext, useContext } from 'react';
+import { RadioButton as RadioButtonItem } from './RadioButton/RadioButton';
 
 interface RadioButtonGroupProps {
   children?: React.ReactNode;
@@ -13,50 +12,33 @@ interface RadioButtonProps {
   value: string | number;
   label: string;
   theme: ThemeColors;
-  labelStyle?: StyleSheet.AbsoluteFillStyle;
 }
+
+const RadioButtonGroupContext = createContext<{
+  value: string;
+  onValueChange: (value: string) => void;
+} | null>(null);
 
 export const RadioButtonGroup = ({
   children,
   value,
   onValueChange,
 }: RadioButtonGroupProps) => (
-  <MaterialRadioButton.Group
-    onValueChange={onValueChange}
-    value={String(value)}
+  <RadioButtonGroupContext.Provider
+    value={{ value: String(value), onValueChange }}
   >
     {children}
-  </MaterialRadioButton.Group>
+  </RadioButtonGroupContext.Provider>
 );
 
-export const RadioButton = ({
-  value,
-  label,
-  theme,
-  labelStyle,
-}: RadioButtonProps) => (
-  <View style={styles.radioButtonContainer}>
-    <MaterialRadioButton
-      value={String(value)}
-      color={theme.primary}
-      uncheckedColor={theme.onSurfaceVariant}
+export const RadioButton = ({ value, label, theme }: RadioButtonProps) => {
+  const group = useContext(RadioButtonGroupContext);
+  return (
+    <RadioButtonItem
+      label={label}
+      status={group?.value === String(value)}
+      onPress={() => group?.onValueChange(String(value))}
+      theme={theme}
     />
-    <Text
-      style={[styles.radioButtonLabel, { color: theme.onSurface }, labelStyle]}
-    >
-      {label}
-    </Text>
-  </View>
-);
-
-const styles = StyleSheet.create({
-  radioButtonContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingVertical: 8,
-  },
-  radioButtonLabel: {
-    fontSize: 16,
-    marginStart: 16,
-  },
-});
+  );
+};

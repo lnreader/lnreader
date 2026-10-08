@@ -1,83 +1,51 @@
-import { useTheme } from '@hooks/persisted';
-import React from 'react';
-import {
-  Dimensions,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { MaterialDesignIconName } from '@type/icon';
-import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { Box, HorizontalFloatingToolbar } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
+import { useTheme } from '@hooks/persisted/useTheme';
+import IconButtonV2 from '../IconButtonV2/IconButtonV2';
+import { useScreenInsets } from '../Screen/insets';
+import { type IconSource } from '../AppIcon/AppIcon';
 
 type Action = {
-  icon: MaterialDesignIconName;
+  icon: IconSource;
   onPress: () => void;
 };
 
 interface ActionbarProps {
   active: boolean;
   actions: Action[];
-  viewStyle?: StyleProp<ViewStyle>;
 }
 
-export const Actionbar: React.FC<ActionbarProps> = ({
-  active,
-  actions,
-  viewStyle,
-}) => {
+export const Actionbar = ({ active, actions }: ActionbarProps) => {
   const theme = useTheme();
-
-  const { bottom } = useSafeAreaInsets();
+  const { bottom } = useScreenInsets();
 
   if (!active) {
     return null;
   }
   return (
-    <Animated.View
-      entering={SlideInDown.duration(150)}
-      exiting={SlideOutDown.duration(150)}
-      style={[
-        styles.actionbarContainer,
-        {
-          backgroundColor: theme.surface2,
-          minHeight: 80 + bottom,
-          paddingBottom: bottom,
-        },
-        viewStyle,
-      ]}
+    <Box
+      contentAlignment="center"
+      modifiers={[fillMaxWidth(), padding(16, 8, 16, 16 + bottom)]}
     >
-      {actions.map(({ icon, onPress }, id) => (
-        <Pressable
-          key={id}
-          android_ripple={{
-            radius: 50,
-            color: theme.rippleColor,
-            borderless: true,
-          }}
-          onPress={onPress}
-        >
-          <MaterialCommunityIcons
+      <HorizontalFloatingToolbar
+        variant="vibrant"
+        colors={{
+          toolbarContainerColor: theme.primaryContainer,
+          toolbarContentColor: theme.onPrimaryContainer,
+        }}
+      >
+        {actions.map(({ icon, onPress }, id) => (
+          <IconButtonV2
+            key={id}
             name={icon}
-            color={theme.onSurface}
-            size={24}
+            color={theme.onPrimaryContainer}
+            onPress={onPress}
+            theme={theme}
           />
-        </Pressable>
-      ))}
-    </Animated.View>
+        ))}
+      </HorizontalFloatingToolbar>
+    </Box>
   );
 };
 
-const styles = StyleSheet.create({
-  actionbarContainer: {
-    alignItems: 'center',
-    bottom: 0,
-    elevation: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    position: 'absolute',
-    width: Dimensions.get('window').width,
-  },
-});
+export default Actionbar;

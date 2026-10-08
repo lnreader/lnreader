@@ -1,12 +1,26 @@
 import { memo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { overlay, TextInput } from 'react-native-paper';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { Checkbox, Menu, SwitchItem } from '@components';
-import { PluginSetting } from '@plugins/types';
+import {
+  AppIcon,
+  AppText,
+  Checkbox,
+  Menu,
+  SwitchItem,
+  TextInput,
+} from '@components';
 import { getString } from '@i18n/translations';
+import { PluginSetting } from '@plugins/types';
 import { ThemeColors } from '@theme/types';
+import ArrowDropDownIcon from '@expo/material-symbols/arrow_drop_down.xml';
+import KeyboardArrowDownIcon from '@expo/material-symbols/keyboard_arrow_down.xml';
+import KeyboardArrowUpIcon from '@expo/material-symbols/keyboard_arrow_up.xml';
 
 import { PluginSettingValue } from '../hooks/usePluginSettings';
 
@@ -54,36 +68,28 @@ export const PluginSettingField = memo(
       );
 
       return (
-        <View style={styles.setting}>
+        <Box modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
           <Menu
-            fullWidth
             visible={expanded}
-            contentStyle={{ backgroundColor: theme.surfaceVariant }}
             anchor={
-              <Pressable
-                accessibilityLabel={getString(
-                  'browseScreen.editPluginSetting',
-                  { name: setting.label },
-                )}
-                accessibilityRole="button"
-                onPress={() => setExpanded(true)}
+              <Box
+                modifiers={[fillMaxWidth(), clickable(() => setExpanded(true))]}
               >
                 <TextInput
-                  editable={false}
                   label={setting.label}
-                  mode="outlined"
-                  pointerEvents="none"
-                  textColor={theme.onSurface}
                   value={selectedOption?.label ?? ''}
-                  theme={{
-                    colors: {
-                      background: overlay(2, theme.surface),
-                      outline: theme.outline,
-                      primary: theme.primary,
-                    },
-                  }}
+                  onChangeText={() => undefined}
+                  disabled
+                  trailing={
+                    <AppIcon
+                      source={ArrowDropDownIcon}
+                      label={getString('browseScreen.editPluginSetting', {
+                        name: setting.label,
+                      })}
+                    />
+                  }
                 />
-              </Pressable>
+              </Box>
             }
             onDismiss={() => setExpanded(false)}
           >
@@ -91,7 +97,6 @@ export const PluginSettingField = memo(
               <Menu.Item
                 key={option.value}
                 title={option.label}
-                titleStyle={{ color: theme.onSurface }}
                 onPress={() => {
                   onChange(settingKey, option.value);
                   setExpanded(false);
@@ -99,7 +104,7 @@ export const PluginSettingField = memo(
               />
             ))}
           </Menu>
-        </View>
+        </Box>
       );
     }
 
@@ -107,23 +112,26 @@ export const PluginSettingField = memo(
       const selectedValues = Array.isArray(value) ? value : [];
 
       return (
-        <View>
-          <Pressable
-            accessibilityLabel={getString('browseScreen.togglePluginSetting', {
-              name: setting.label,
-            })}
-            accessibilityRole="button"
-            style={styles.checkboxHeader}
-            android_ripple={{ color: theme.rippleColor }}
-            onPress={() => setExpanded(current => !current)}
+        <Column modifiers={[fillMaxWidth()]}>
+          <Row
+            verticalAlignment="center"
+            modifiers={[
+              fillMaxWidth(),
+              clickable(() => setExpanded(current => !current)),
+              padding(16, 12, 16, 12),
+            ]}
           >
-            <Text style={{ color: theme.onSurface }}>{setting.label}</Text>
-            <MaterialCommunityIcons
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              color={theme.onSurface}
-              size={24}
+            <AppText variant="bodyLarge" modifiers={[weight(1)]}>
+              {setting.label}
+            </AppText>
+            <AppIcon
+              source={expanded ? KeyboardArrowUpIcon : KeyboardArrowDownIcon}
+              tint={theme.onSurface}
+              label={getString('browseScreen.togglePluginSetting', {
+                name: setting.label,
+              })}
             />
-          </Pressable>
+          </Row>
           {expanded
             ? setting.options.map(option => (
                 <Checkbox
@@ -140,43 +148,23 @@ export const PluginSettingField = memo(
                 />
               ))
             : null}
-        </View>
+        </Column>
       );
     }
 
     return (
-      <TextInput
-        accessibilityLabel={setting.label}
-        label={setting.label}
-        mode="outlined"
-        style={styles.setting}
-        value={String(value ?? '')}
-        onChangeText={nextValue => onChangeText(settingKey, nextValue)}
-        onEndEditing={({ nativeEvent }) =>
-          onEndTextEditing(settingKey, nativeEvent.text)
-        }
-        textColor={theme.onSurface}
-        theme={{
-          colors: {
-            background: theme.surface,
-            outline: theme.outline,
-            primary: theme.primary,
-          },
-        }}
-      />
+      <Box modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
+        <TextInput
+          label={setting.label}
+          value={String(value ?? '')}
+          singleLine
+          onChangeText={nextValue => {
+            onChangeText(settingKey, nextValue);
+            // A Compose field reports no end of editing, so each change is saved.
+            onEndTextEditing(settingKey, nextValue);
+          }}
+        />
+      </Box>
     );
   },
 );
-
-const styles = StyleSheet.create({
-  checkboxHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 56,
-    paddingHorizontal: 16,
-  },
-  setting: {
-    marginTop: 12,
-  },
-});

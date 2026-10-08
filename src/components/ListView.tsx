@@ -1,95 +1,122 @@
-import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { memo } from 'react';
+import { Box, ListItem, Row, Surface } from '@expo/ui/jetpack-compose';
+import {
+  alpha,
+  background,
+  clip,
+  combinedClickable,
+  fillMaxSize,
+  fillMaxWidth,
+  Shapes,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import color from 'color';
+import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
-import { NovelItem } from '@plugins/types';
-import { NovelInfo } from '@database/types';
+import type { NovelInfo } from '@database/types';
+import type { ImageRequestInit, NovelItem } from '@plugins/types';
+import CheckIcon from '@expo/material-symbols/check.xml';
+import PlayArrowIcon from '@expo/material-symbols/play_arrow.xml';
+import AppIcon from './AppIcon/AppIcon';
+import AppText from './AppText/AppText';
+import IconButtonV2 from './IconButtonV2/IconButtonV2';
+import { listItemColors } from './List/listItemColors';
 import NovelCoverImage from './NovelCoverImage';
+import { CoverBadgeRow, type CoverBadges } from './NovelCoverBadges';
 
 interface ListViewProps {
   item: NovelItem | NovelInfo;
-  downloadBadge?: React.ReactNode;
-  unreadBadge?: React.ReactNode;
-  inLibraryBadge?: React.ReactNode;
-  theme: ThemeColors;
+  requestInit?: ImageRequestInit;
+  badges?: CoverBadges;
   onPress: () => void;
   isSelected?: boolean;
   onLongPress?: () => void;
-  continueReadingButton?: React.ReactNode;
+  onContinueReading?: () => void;
+  theme: ThemeColors;
 }
 
 const ListView = ({
   item,
-  downloadBadge,
-  unreadBadge,
-  inLibraryBadge,
-  theme,
+  requestInit,
+  badges,
   onPress,
   isSelected,
   onLongPress,
-  continueReadingButton,
+  onContinueReading,
+  theme,
 }: ListViewProps) => {
-  const fadedImage = { opacity: inLibraryBadge ? 0.5 : 1 };
+  const author = 'author' in item ? item.author : undefined;
   return (
-    <Pressable
-      android_ripple={{ color: theme.rippleColor }}
-      style={[
-        styles.listView,
-        isSelected && {
-          backgroundColor: color(theme.primary).alpha(0.12).string(),
-        },
+    <ListItem
+      colors={{
+        ...listItemColors(theme),
+        containerColor: isSelected ? theme.secondaryContainer : 'transparent',
+      }}
+      modifiers={[
+        fillMaxWidth(),
+        combinedClickable({ onClick: onPress, onLongClick: onLongPress }),
       ]}
-      onPress={onPress}
-      onLongPress={onLongPress}
     >
-      <NovelCoverImage
-        uri={item.cover}
-        theme={theme}
-        iconSize={20}
-        style={[styles.extensionIcon, fadedImage]}
-      />
-      <Text
-        style={[{ color: theme.onSurface }, styles.novelName]}
-        numberOfLines={1}
-      >
-        {item.name}
-      </Text>
-      <View style={styles.badgeContainer}>
-        {downloadBadge}
-        {unreadBadge}
-        {inLibraryBadge}
-      </View>
-      {continueReadingButton}
-    </Pressable>
+      <ListItem.LeadingContent>
+        <Box>
+          <NovelCoverImage
+            uri={item.cover}
+            requestInit={requestInit}
+            width={44}
+            height={64}
+            corner={8}
+            label={item.name}
+            dimmed={badges?.inLibrary}
+            theme={theme}
+          />
+          {isSelected ? (
+            <Box
+              contentAlignment="center"
+              modifiers={[
+                fillMaxSize(),
+                clip(Shapes.RoundedCorner(8)),
+                background(theme.primary),
+                alpha(0.85),
+              ]}
+            >
+              <AppIcon source={CheckIcon} tint={theme.onPrimary} />
+            </Box>
+          ) : null}
+        </Box>
+      </ListItem.LeadingContent>
+      <ListItem.HeadlineContent>
+        <AppText variant="bodyLarge" maxLines={2}>
+          {item.name}
+        </AppText>
+      </ListItem.HeadlineContent>
+      {author ? (
+        <ListItem.SupportingContent>
+          <AppText
+            variant="bodyMedium"
+            color={theme.onSurfaceVariant}
+            maxLines={1}
+          >
+            {author}
+          </AppText>
+        </ListItem.SupportingContent>
+      ) : null}
+      <ListItem.TrailingContent>
+        <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 4 }}>
+          <CoverBadgeRow badges={badges} />
+          {onContinueReading ? (
+            <Surface color="transparent">
+              <IconButtonV2
+                name={PlayArrowIcon}
+                accessibilityLabel={getString('novelScreen.continueReading')}
+                variant="tonal"
+                onPress={onContinueReading}
+                theme={theme}
+              />
+            </Surface>
+          ) : null}
+        </Row>
+      </ListItem.TrailingContent>
+    </ListItem>
   );
 };
 
-export default ListView;
-
-const styles = StyleSheet.create({
-  badgeContainer: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  extensionIcon: {
-    borderRadius: 4,
-    height: 40,
-    width: 40,
-  },
-  listView: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  novelName: {
-    flex: 1,
-    flexWrap: 'wrap',
-    fontSize: 15,
-    marginStart: 16,
-    paddingEnd: 8,
-  },
-});
+export default memo(ListView);

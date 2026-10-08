@@ -1,9 +1,11 @@
 import React, { RefObject } from 'react';
-import { Pressable, Share, View, Text, StyleSheet } from 'react-native';
+import { Share, StyleSheet } from 'react-native';
+import { Box } from '@expo/ui/jetpack-compose';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import * as Linking from 'expo-linking';
 
+import { AppHost, Menu as DropdownMenu } from '@components';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { showToast } from '@utils/showToast';
@@ -15,88 +17,56 @@ interface MenuProps {
   setMenuVisible: (value: boolean) => void;
 }
 
-const Menu: React.FC<MenuProps> = ({
-  theme,
-  currentUrl,
-  webView,
-  setMenuVisible,
-}) => {
+const Menu: React.FC<MenuProps> = ({ currentUrl, webView, setMenuVisible }) => {
   const { top } = useSafeAreaInsets();
 
   return (
-    <Pressable onPress={() => setMenuVisible(false)} style={styles.container}>
-      <View style={[styles.menuContainer, { top }]}>
-        <Pressable
-          style={[styles.menuButton, { backgroundColor: theme.surface2 }]}
+    <AppHost matchContents style={[styles.menuContainer, { top: top + 56 }]}>
+      <DropdownMenu
+        visible
+        onDismiss={() => setMenuVisible(false)}
+        anchor={<Box />}
+      >
+        <DropdownMenu.Item
           onPress={() => {
             setMenuVisible(false);
             webView.current?.reload();
           }}
-        >
-          <Text style={{ color: theme.onSurface }}>
-            {getString('webview.refresh')}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.menuButton, { backgroundColor: theme.surface2 }]}
+          title={getString('webview.refresh')}
+        />
+        <DropdownMenu.Item
           onPress={() => {
             setMenuVisible(false);
             Share.share({ message: currentUrl });
           }}
-        >
-          <Text style={{ color: theme.onSurface }}>
-            {getString('webview.share')}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.menuButton, { backgroundColor: theme.surface2 }]}
+          title={getString('webview.share')}
+        />
+        <DropdownMenu.Item
           onPress={() => {
             setMenuVisible(false);
             Linking.openURL(currentUrl);
           }}
-        >
-          <Text style={{ color: theme.onSurface }}>
-            {getString('webview.openInBrowser')}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.menuButton, { backgroundColor: theme.surface2 }]}
+          title={getString('webview.openInBrowser')}
+        />
+        <DropdownMenu.Item
           onPress={() => {
             setMenuVisible(false);
             webView.current?.clearCache?.(true);
             webView.current?.reload();
             showToast(getString('webview.dataDeleted'));
           }}
-        >
-          <Text style={{ color: theme.onSurface }}>
-            {getString('webview.clearData')}
-          </Text>
-        </Pressable>
-      </View>
-    </Pressable>
+          title={getString('webview.clearData')}
+        />
+      </DropdownMenu>
+    </AppHost>
   );
 };
 
 export default Menu;
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    bottom: 0,
-    justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  menuButton: {
-    padding: 15,
-  },
   menuContainer: {
     position: 'absolute',
-    right: 0,
+    right: 8,
   },
 });

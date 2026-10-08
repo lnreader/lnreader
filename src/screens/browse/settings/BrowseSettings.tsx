@@ -1,5 +1,7 @@
-import { FlatList, StyleSheet } from 'react-native';
-import { Appbar, List, SwitchItem } from '@components';
+import { FlowRow } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
+
+import { Chip, SwitchItem, List } from '@components';
 
 import {
   useBrowseSettings,
@@ -12,6 +14,7 @@ import { getLocaleLanguageName, languages } from '@utils/constants/languages';
 import { BrowseSettingsScreenProp } from '@navigators/types/index';
 import { useBoolean } from '@hooks';
 import ConcurrentSearchesModal from '@screens/browse/settings/modals/ConcurrentSearchesModal';
+import SettingsPage from '@screens/settings/components/SettingsPage';
 
 const BrowseSettings = ({ navigation }: BrowseSettingsScreenProp) => {
   const theme = useTheme();
@@ -29,80 +32,73 @@ const BrowseSettings = ({ navigation }: BrowseSettingsScreenProp) => {
   const globalSearchConcurrencyModal = useBoolean();
 
   return (
-    <>
-      <Appbar
-        title={getString('browseSettings')}
-        handleGoBack={goBack}
-        theme={theme}
-      />
-      <ConcurrentSearchesModal
-        globalSearchConcurrency={globalSearchConcurrency ?? 1}
-        modalVisible={globalSearchConcurrencyModal.value}
-        hideModal={globalSearchConcurrencyModal.setFalse}
-        theme={theme}
-      />
-      <FlatList
-        contentContainerStyle={styles.container}
-        ListHeaderComponent={
-          <>
-            <List.SubHeader theme={theme}>
-              {getString('browseScreen.globalSearch')}
-            </List.SubHeader>
-            <List.Item
-              title={getString('browseSettingsScreen.concurrentSearches')}
-              description={(globalSearchConcurrency ?? 1).toString()}
-              onPress={globalSearchConcurrencyModal.setTrue}
+    <SettingsPage
+      title={getString('browseSettings')}
+      onBack={goBack}
+      overlays={
+        <ConcurrentSearchesModal
+          globalSearchConcurrency={globalSearchConcurrency ?? 1}
+          modalVisible={globalSearchConcurrencyModal.value}
+          hideModal={globalSearchConcurrencyModal.setFalse}
+          theme={theme}
+        />
+      }
+    >
+      <List.Section>
+        <List.SubHeader theme={theme}>
+          {getString('browseScreen.globalSearch')}
+        </List.SubHeader>
+        <List.Item
+          title={getString('browseSettingsScreen.concurrentSearches')}
+          description={(globalSearchConcurrency ?? 1).toString()}
+          onPress={globalSearchConcurrencyModal.setTrue}
+          theme={theme}
+        />
+      </List.Section>
+      <List.Divider theme={theme} />
+      <List.Section>
+        <List.SubHeader theme={theme}>
+          {getString('browseScreen.discover')}
+        </List.SubHeader>
+        <SwitchItem
+          label={`${getString('common.show')} AniList`}
+          value={showAniList}
+          onPress={() => setBrowseSettings({ showAniList: !showAniList })}
+          theme={theme}
+        />
+        <SwitchItem
+          label={`${getString('common.show')} MyAnimeList`}
+          value={showMyAnimeList}
+          onPress={() =>
+            setBrowseSettings({ showMyAnimeList: !showMyAnimeList })
+          }
+          theme={theme}
+        />
+      </List.Section>
+      <List.Divider theme={theme} />
+      <List.Section>
+        <List.SubHeader theme={theme}>
+          {getString('browseSettingsScreen.languages')}
+        </List.SubHeader>
+        <FlowRow
+          horizontalArrangement={{ spacedBy: 8 }}
+          verticalArrangement={{ spacedBy: 8 }}
+          modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
+        >
+          {languages.map(item => (
+            <Chip
+              key={item}
+              kind="filter"
+              label={getLocaleLanguageName(item)}
+              selected={languagesFilter.includes(item)}
+              onPress={() => toggleLanguageFilter(item)}
               theme={theme}
             />
-            <List.Divider theme={theme} />
-            <List.SubHeader theme={theme}>
-              {getString('browseScreen.discover')}
-            </List.SubHeader>
-            <SwitchItem
-              label={`${getString('common.show')} AniList`}
-              value={showAniList}
-              onPress={() => setBrowseSettings({ showAniList: !showAniList })}
-              theme={theme}
-              style={styles.item}
-            />
-            <SwitchItem
-              label={`${getString('common.show')} MyAnimeList`}
-              value={showMyAnimeList}
-              onPress={() =>
-                setBrowseSettings({ showMyAnimeList: !showMyAnimeList })
-              }
-              theme={theme}
-              style={styles.item}
-            />
-            <List.Divider theme={theme} />
-            <List.SubHeader theme={theme}>
-              {getString('browseSettingsScreen.languages')}
-            </List.SubHeader>
-          </>
-        }
-        keyExtractor={item => item}
-        data={languages}
-        renderItem={({ item }) => (
-          <SwitchItem
-            label={getLocaleLanguageName(item)}
-            value={languagesFilter.includes(item)}
-            onPress={() => toggleLanguageFilter(item)}
-            theme={theme}
-            style={styles.item}
-          />
-        )}
-      />
-    </>
+          ))}
+        </FlowRow>
+      </List.Section>
+    </SettingsPage>
   );
 };
 
 export default BrowseSettings;
-
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: 40,
-  },
-  item: {
-    paddingHorizontal: 16,
-  },
-});

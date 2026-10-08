@@ -1,259 +1,164 @@
 import { useTheme } from '@hooks/persisted';
 import * as React from 'react';
-import { StyleProp, ViewStyle, StyleSheet, View } from 'react-native';
-import Animated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clip,
+  fillMaxWidth,
+  height,
+  padding,
+  Shapes,
+  size,
+  weight,
+  width,
+  type ModifierConfig,
+} from '@expo/ui/jetpack-compose/modifiers';
 import useLoadingColors from '@utils/useLoadingColors';
-import { LinearGradient } from 'expo-linear-gradient';
-
-const duration = 1000;
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+import { useShimmerModifier } from './ShimmerPlaceholder';
 
 function useSetupLoadingAnimations() {
-  const translateX = useSharedValue(-100);
   const theme = useTheme();
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+  const [, backgroundColor, disableLoadingAnimations] = useLoadingColors(theme);
+  const shimmer = useShimmerModifier(disableLoadingAnimations);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: (translateX.value + '%') as `${number}%`,
-        },
-      ],
-    };
-  });
-
-  const LGC = React.useMemo(
-    () =>
-      disableLoadingAnimations ? null : (
-        <AnimatedLinearGradient
-          start={[0, 0]}
-          end={[1, 0]}
-          locations={[0, 0.3, 0.7, 1]}
-          style={[styles.LG, animatedStyle]}
-          colors={[
-            'transparent',
-            highlightColor,
-            highlightColor,
-            'transparent',
-          ]}
-        />
-      ),
-    [animatedStyle, disableLoadingAnimations, highlightColor],
-  );
-
-  React.useEffect(() => {
-    cancelAnimation(translateX);
-    translateX.value = -100;
-    if (!disableLoadingAnimations) {
-      translateX.value = withRepeat(withTiming(200, { duration }), -1, false);
-    }
-    return () => cancelAnimation(translateX);
-  }, [disableLoadingAnimations, translateX]);
-
-  return [LGC, backgroundColor] as const;
+  return [shimmer, backgroundColor] as const;
 }
 
+const Bone = ({
+  shimmer,
+  color,
+  corner = 4,
+  modifiers,
+}: {
+  shimmer: ModifierConfig;
+  color: string;
+  corner?: number;
+  modifiers: ModifierConfig[];
+}) => (
+  <Box
+    modifiers={[
+      ...modifiers,
+      shimmer,
+      clip(Shapes.RoundedCorner(corner)),
+      background(color),
+    ]}
+  />
+);
+
 const ChapterSkeleton = React.memo(function ChapterSkeletonItem({
-  lgc,
-  backgroundStyle,
+  shimmer,
+  color,
   img,
 }: {
-  lgc: React.JSX.Element | null;
-  backgroundStyle: StyleProp<ViewStyle>;
+  shimmer: ModifierConfig;
+  color: string;
   img?: boolean;
 }) {
   return (
-    <View style={[styles.chapter, styles.h40]}>
+    <Row
+      verticalAlignment="center"
+      modifiers={[fillMaxWidth(), padding(16, 8, 16, 8), height(56)]}
+    >
       {img ? (
-        <View style={[styles.default, styles.img, backgroundStyle]}>{lgc}</View>
-      ) : (
-        <></>
-      )}
-      <View style={[styles.flex, styles.chapterText]}>
-        <View style={[styles.default, styles.h20, backgroundStyle]}>{lgc}</View>
-        <View style={[styles.default, styles.h15, backgroundStyle]}>{lgc}</View>
-      </View>
-      <View style={[styles.default, styles.circle, backgroundStyle]}>
-        {lgc}
-      </View>
-    </View>
+        <Bone
+          shimmer={shimmer}
+          color={color}
+          modifiers={[padding(0, 0, 20, 0), size(40, 40)]}
+        />
+      ) : null}
+      <Column verticalArrangement={{ spacedBy: 5 }} modifiers={[weight(1)]}>
+        <Bone
+          shimmer={shimmer}
+          color={color}
+          modifiers={[fillMaxWidth(), height(20)]}
+        />
+        <Bone
+          shimmer={shimmer}
+          color={color}
+          modifiers={[fillMaxWidth(), height(15)]}
+        />
+      </Column>
+      <Box modifiers={[padding(20, 0, 0, 0)]}>
+        <Bone
+          shimmer={shimmer}
+          color={color}
+          corner={20}
+          modifiers={[size(30, 30)]}
+        />
+      </Box>
+    </Row>
   );
 });
 
 function VerticalBarSkeleton() {
-  const [LGC, backgroundColor] = useSetupLoadingAnimations();
+  const [shimmer, backgroundColor] = useSetupLoadingAnimations();
   return (
-    <View
-      style={[
-        { backgroundColor: backgroundColor },
-        styles.verticalBar,
-        styles.default,
-        styles.h24,
-      ]}
-    >
-      {LGC}
-    </View>
+    <Box modifiers={[fillMaxWidth(), padding(16, 16, 16, 16)]}>
+      <Bone
+        shimmer={shimmer}
+        color={backgroundColor}
+        modifiers={[fillMaxWidth(), height(24)]}
+      />
+    </Box>
   );
 }
 
 function NovelMetaSkeleton() {
-  const [LGC, backgroundColor] = useSetupLoadingAnimations();
+  const [shimmer, backgroundColor] = useSetupLoadingAnimations();
 
-  const Chips = React.useMemo(
-    () => (
-      <View
-        style={[
-          styles.default,
-          styles.chip,
-          {
-            backgroundColor: backgroundColor,
-          },
-        ]}
-      >
-        {LGC}
-      </View>
-    ),
-    [LGC, backgroundColor],
+  const chip = (
+    <Bone
+      shimmer={shimmer}
+      color={backgroundColor}
+      corner={8}
+      modifiers={[width(80), height(30)]}
+    />
   );
 
   return (
-    <View style={[styles.novelInformationText, styles.h62]}>
-      <View style={[styles.flex, styles.h20]}>
-        <View
-          style={[
-            styles.default,
-            styles.h20,
-            {
-              backgroundColor: backgroundColor,
-            },
-          ]}
-        >
-          {LGC}
-        </View>
-        <View
-          style={[
-            styles.default,
-            styles.h20,
-            {
-              backgroundColor: backgroundColor,
-            },
-          ]}
-        >
-          {LGC}
-        </View>
-        <View style={[styles.metaGap, styles.row, styles.flex]}>
-          {Chips}
-          {Chips}
-          {Chips}
-          {Chips}
-        </View>
-      </View>
-    </View>
+    <Column
+      verticalArrangement={{ spacedBy: 5 }}
+      modifiers={[fillMaxWidth(), padding(16, 13, 16, 2.5), height(110)]}
+    >
+      <Bone
+        shimmer={shimmer}
+        color={backgroundColor}
+        modifiers={[fillMaxWidth(), height(20)]}
+      />
+      <Bone
+        shimmer={shimmer}
+        color={backgroundColor}
+        modifiers={[fillMaxWidth(), height(20)]}
+      />
+      <Row
+        horizontalArrangement={{ spacedBy: 8 }}
+        modifiers={[padding(0, 17, 0, 0)]}
+      >
+        {chip}
+        {chip}
+        {chip}
+        {chip}
+      </Row>
+    </Column>
   );
 }
 
 const ChapterListSkeleton = ({ img }: { img?: boolean }) => {
-  const [LGC, backgroundColor] = useSetupLoadingAnimations();
+  const [shimmer, backgroundColor] = useSetupLoadingAnimations();
   const skeletonItems = React.useMemo(() => Array.from({ length: 7 }), []);
-  const backgroundStyle = React.useMemo(
-    () => ({ backgroundColor }),
-    [backgroundColor],
-  );
 
   return (
-    <>
+    <Column modifiers={[fillMaxWidth()]}>
       {skeletonItems.map((_, i) => (
         <ChapterSkeleton
           key={i}
-          lgc={LGC}
-          backgroundStyle={backgroundStyle}
+          shimmer={shimmer}
+          color={backgroundColor}
           img={img}
         />
       ))}
-    </>
+    </Column>
   );
 };
 
 export { ChapterListSkeleton, NovelMetaSkeleton, VerticalBarSkeleton };
-
-const styles = StyleSheet.create({
-  LG: {
-    height: 40,
-    position: 'absolute',
-    width: '60%',
-  },
-  chapter: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  chapterText: {
-    height: 40,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  chip: {
-    borderRadius: 8,
-    height: 30,
-    marginRight: 8,
-    width: 80,
-  },
-  circle: {
-    alignSelf: 'center',
-    borderRadius: 20,
-    height: 30,
-    marginLeft: 20,
-    width: 30,
-  },
-  default: {
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  flex: { flex: 1 },
-  h15: {
-    height: 15,
-  },
-  h20: {
-    height: 20,
-    marginBottom: 5,
-  },
-  h24: {
-    height: 24,
-  },
-  h40: {
-    height: 40,
-  },
-  h62: {
-    height: 110,
-  },
-  img: {
-    alignSelf: 'center',
-    height: 40,
-    marginRight: 20,
-    width: 40,
-  },
-  metaGap: {
-    marginTop: 22,
-  },
-  novelInformationText: {
-    height: 62,
-    marginBottom: 2.5,
-    marginHorizontal: 16,
-    marginTop: 8,
-    paddingTop: 5,
-  },
-  row: { flexDirection: 'row' },
-  verticalBar: {
-    borderRadius: 4,
-    marginHorizontal: 16,
-    marginVertical: 16,
-  },
-});

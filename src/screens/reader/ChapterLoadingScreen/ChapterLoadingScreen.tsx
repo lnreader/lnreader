@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import color from 'color';
 
+import { AppHost } from '@components';
 import SkeletonLines from '../components/SkeletonLines';
 import { useChapterReaderSettings } from '@hooks/persisted';
 
@@ -33,23 +34,23 @@ const ChapterLoadingScreen = () => {
   }, [backgroundColor]);
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    // Laid over the reader page, which keeps loading underneath.
+    <AppHost style={[styles.container, { backgroundColor }]}>
       <SkeletonLines
         containerMargin={padding}
         containerHeight={'100%'}
-        containerWidth={'100%'}
         color={skeletonColor}
         highlightColor={highlightColor}
         textSize={textSize}
         lineHeight={lineHeight}
       />
-    </View>
+    </AppHost>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...StyleSheet.absoluteFill,
   },
 });
 

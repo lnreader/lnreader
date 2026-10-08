@@ -1,18 +1,24 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+import { Image, ListItem, Row } from '@expo/ui/jetpack-compose';
 import {
-  Image,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  LegendList,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
+  clickable,
+  clip,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { Button, EmptyView, IconButtonV2 } from '@components';
+import {
+  AppText,
+  Button,
+  ComposeList,
+  EmptyView,
+  IconButtonV2,
+  ScreenContent,
+  listItemColors,
+} from '@components';
 import {
   useFilteredAvailablePlugins,
   useInstalledPlugins,
@@ -24,6 +30,11 @@ import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 import { showToast } from '@utils/showToast';
+import DownloadIcon from '@expo/material-symbols/download.xml';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import SettingsIcon from '@expo/material-symbols/settings.xml';
+import SourceEnvironmentIcon from '@expo/material-symbols/source_environment.xml';
+import TuneIcon from '@expo/material-symbols/tune.xml';
 import {
   buildPluginEntries,
   PluginEntry,
@@ -61,87 +72,90 @@ const PluginRow = memo(
     const isInstalled = status !== 'available';
 
     return (
-      <View style={styles.pluginRow}>
-        <Pressable
-          accessibilityLabel={
-            isInstalled
-              ? getString('browseScreen.openPluginDetails', {
-                  name: plugin.name,
-                })
-              : undefined
-          }
-          accessibilityRole={isInstalled ? 'button' : undefined}
-          disabled={!isInstalled}
-          style={styles.pluginRowAction}
-          android_ripple={
-            isInstalled ? { color: theme.rippleColor } : undefined
-          }
-          onPress={() => onOpenDetails(plugin)}
-        />
-        <View pointerEvents="none" style={styles.pluginMainContent}>
+      <ListItem
+        colors={listItemColors(theme)}
+        modifiers={
+          isInstalled
+            ? [fillMaxWidth(), clickable(() => onOpenDetails(plugin))]
+            : [fillMaxWidth()]
+        }
+      >
+        <ListItem.LeadingContent>
           <Image
             source={{ uri: plugin.iconUrl }}
-            style={[styles.icon, { backgroundColor: theme.surfaceVariant }]}
-          />
-          <View style={styles.details}>
-            <Text
-              numberOfLines={1}
-              style={[styles.name, { color: theme.onSurface }]}
-            >
-              {plugin.name}
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={[styles.description, { color: theme.onSurfaceVariant }]}
-            >
-              {`${getLocaleLanguageName(plugin.lang)} · ${plugin.version}`}
-            </Text>
-          </View>
-        </View>
-        {status === 'available' ? (
-          <IconButtonV2
-            accessibilityLabel={getString('browseScreen.openWebsite', {
-              name: plugin.name,
-            })}
-            name="earth"
-            color={theme.onSurfaceVariant}
-            onPress={() => onOpenWebsite(plugin)}
-            theme={theme}
-          />
-        ) : (
-          <IconButtonV2
-            accessibilityLabel={getString('browseScreen.openPluginSettings', {
-              name: plugin.name,
-            })}
-            name="cog-outline"
-            color={theme.onSurfaceVariant}
-            onPress={() => onOpenDetails(plugin)}
-            theme={theme}
-          />
-        )}
-        {status !== 'installed' ? (
-          <IconButtonV2
-            accessibilityLabel={
-              status === 'available'
-                ? getString('browseScreen.installPlugin', {
+            contentScale="crop"
+            contentDescription={
+              isInstalled
+                ? getString('browseScreen.openPluginDetails', {
                     name: plugin.name,
                   })
-                : getString('browseScreen.updatePlugin', {
-                    name: plugin.name,
-                  })
+                : undefined
             }
-            name="download-outline"
-            color={theme.onSurface}
-            disabled={disabled}
-            onPress={
-              status === 'available'
-                ? () => onInstall(plugin)
-                : () => onUpdate(plugin)
-            }
-            theme={theme}
+            modifiers={[size(40, 40), clip(Shapes.RoundedCorner(10))]}
           />
-        ) : null}
-      </View>
+        </ListItem.LeadingContent>
+        <ListItem.HeadlineContent>
+          <AppText variant="bodyLarge" maxLines={1}>
+            {plugin.name}
+          </AppText>
+        </ListItem.HeadlineContent>
+        <ListItem.SupportingContent>
+          <AppText
+            variant="bodySmall"
+            color={theme.onSurfaceVariant}
+            maxLines={1}
+          >
+            {`${getLocaleLanguageName(plugin.lang)} · ${plugin.version}`}
+          </AppText>
+        </ListItem.SupportingContent>
+        <ListItem.TrailingContent>
+          <Row verticalAlignment="center">
+            {status === 'available' ? (
+              <IconButtonV2
+                name={PublicIcon}
+                accessibilityLabel={getString('browseScreen.openWebsite', {
+                  name: plugin.name,
+                })}
+                onPress={() => onOpenWebsite(plugin)}
+                theme={theme}
+              />
+            ) : (
+              <IconButtonV2
+                name={SettingsIcon}
+                accessibilityLabel={getString(
+                  'browseScreen.openPluginSettings',
+                  {
+                    name: plugin.name,
+                  },
+                )}
+                onPress={() => onOpenDetails(plugin)}
+                theme={theme}
+              />
+            )}
+            {status !== 'installed' ? (
+              <IconButtonV2
+                name={DownloadIcon}
+                accessibilityLabel={
+                  status === 'available'
+                    ? getString('browseScreen.installPlugin', {
+                        name: plugin.name,
+                      })
+                    : getString('browseScreen.updatePlugin', {
+                        name: plugin.name,
+                      })
+                }
+                disabled={disabled}
+                onPress={
+                  status === 'available'
+                    ? () => onInstall(plugin)
+                    : () => onUpdate(plugin)
+                }
+                theme={theme}
+              />
+            ) : null}
+          </Row>
+        </ListItem.TrailingContent>
+      </ListItem>
     );
   },
 );
@@ -253,34 +267,28 @@ export const PluginsTab = memo(
     );
 
     const renderItem = useCallback(
-      ({ item }: LegendListRenderItemProps<PluginEntry>) => {
+      (item: PluginEntry) => {
         if (item.type === 'header') {
           return (
-            <View
-              style={[
-                styles.headerRow,
-                item.action === 'updateAll' && styles.updateHeaderRow,
-              ]}
+            <Row
+              verticalAlignment="center"
+              modifiers={[fillMaxWidth(), padding(16, 16, 12, 4)]}
             >
-              <Text
-                style={[
-                  styles.sectionHeader,
-                  { color: theme.onSurfaceVariant },
-                ]}
+              <AppText
+                variant="titleSmall"
+                color={theme.primary}
+                modifiers={[weight(1)]}
               >
                 {item.title}
-              </Text>
+              </AppText>
               {item.action === 'updateAll' ? (
                 <Button
-                  compact
-                  contentStyle={styles.updateAllButtonContent}
                   mode="contained-tonal"
                   onPress={updateAll}
-                  style={styles.updateAllButton}
                   title={getString('browseScreen.updateAll')}
                 />
               ) : null}
-            </View>
+            </Row>
           );
         }
 
@@ -319,13 +327,9 @@ export const PluginsTab = memo(
       }
     }, [refreshPlugins]);
 
-    return (
-      <LegendList
-        data={entries}
-        estimatedItemSize={64}
-        getItemType={item => item.type}
-        keyExtractor={item => item.key}
-        ListEmptyComponent={
+    if (!entries.length) {
+      return (
+        <ScreenContent>
           <EmptyView
             description={
               searchText.trim()
@@ -337,12 +341,12 @@ export const PluginsTab = memo(
                 ? undefined
                 : [
                     {
-                      iconName: 'source-repository',
+                      iconName: SourceEnvironmentIcon,
                       onPress: openRepositories,
                       title: getString('browseScreen.repositories'),
                     },
                     {
-                      iconName: 'tune',
+                      iconName: TuneIcon,
                       onPress: openBrowseSettings,
                       title: getString('browseSettings'),
                     },
@@ -350,89 +354,21 @@ export const PluginsTab = memo(
             }
             theme={theme}
           />
-        }
-        contentContainerStyle={!entries.length ? styles.emptyList : undefined}
-        recycleItems
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[theme.onPrimary]}
-            progressBackgroundColor={theme.primary}
-          />
-        }
+        </ScreenContent>
+      );
+    }
+
+    return (
+      <ComposeList
+        data={entries}
+        extraData={pendingPluginIds}
+        estimatedItemSize={64}
+        keyExtractor={item => item.key}
+        contentPadding={{ bottom: 16 }}
+        refreshing={refreshing}
+        onRefresh={refresh}
         renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
       />
     );
   },
 );
-
-const styles = StyleSheet.create({
-  description: {
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  emptyList: {
-    flexGrow: 1,
-  },
-  details: {
-    flex: 1,
-    marginStart: 16,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'space-between',
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
-  icon: {
-    borderRadius: 4,
-    height: 44,
-    width: 44,
-  },
-  name: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  pluginRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 64,
-    overflow: 'hidden',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    position: 'relative',
-  },
-  pluginMainContent: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-  },
-  pluginRowAction: {
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  sectionHeader: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    paddingVertical: 10,
-  },
-  updateAllButton: {
-    borderRadius: 24,
-  },
-  updateAllButtonContent: {
-    minHeight: 40,
-    paddingHorizontal: 8,
-  },
-  updateHeaderRow: {
-    minHeight: 64,
-    paddingVertical: 8,
-  },
-});

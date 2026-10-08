@@ -1,16 +1,32 @@
-import React, { memo, useRef, useState } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
-
-import IconButtonV2 from '../IconButtonV2/IconButtonV2';
-import { ThemeColors } from '../../theme/types';
-import Menu from '../Menu';
-import { MaterialDesignIconName } from '@type/icon';
+import React, { memo } from 'react';
+import {
+  BasicTextField,
+  Box,
+  Row,
+  Surface,
+  Shape,
+} from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  height,
+  padding,
+  testID,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { getString } from '@i18n/translations';
-import { Pressable } from 'react-native-gesture-handler';
+import { ThemeColors } from '../../theme/types';
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import CloseIcon from '@expo/material-symbols/close.xml';
+import { useScreenInsets } from '../Screen/insets';
+import IconButtonV2 from '../IconButtonV2/IconButtonV2';
+import AppText from '../AppText/AppText';
+import { OverflowMenu } from '../Menu';
+import { useSyncedTextState } from '../../hooks/common/useSyncedTextState';
+import { type IconSource } from '../AppIcon/AppIcon';
 
 export interface RightIcon {
   accessibilityLabel?: string;
-  iconName: MaterialDesignIconName;
+  iconName: IconSource;
   color?: string;
   onPress: () => void;
 }
@@ -25,13 +41,15 @@ interface SearcbarProps {
   placeholder: string;
   onChangeText?: (text: string) => void;
   onSubmitEditing?: () => void;
-  leftIcon: MaterialDesignIconName;
+  leftIcon: IconSource;
   rightIcons?: readonly RightIcon[];
   menuButtons?: MenuButton[];
   handleBackAction?: () => void;
   clearSearchbar: () => void;
   onLeftIconPress?: () => void;
   theme: ThemeColors;
+  /** Compose top bars draw under the status bar, so the bar pads itself. */
+  insetTop?: boolean;
 }
 
 const Searchbar: React.FC<SearcbarProps> = ({
@@ -46,143 +64,108 @@ const Searchbar: React.FC<SearcbarProps> = ({
   clearSearchbar,
   onLeftIconPress,
   theme,
+  insetTop = true,
 }) => {
-  const searchbarRef = useRef<TextInput>(null);
-  const focusSearchbar = () => searchbarRef.current?.focus();
-  const [extraMenu, showExtraMenu] = useState(false);
-
-  const marginTop = 8;
+  const { top, left, right } = useScreenInsets();
+  const text = useSyncedTextState(searchText);
 
   return (
-    <View
-      style={[
-        styles.searchbarContainer,
-        {
-          marginTop,
-          backgroundColor: theme.surface2,
-        },
+    <Box
+      modifiers={[
+        fillMaxWidth(),
+        padding(16 + left, 8 + (insetTop ? top : 0), 16 + right, 8),
       ]}
     >
-      <Pressable
-        accessible={false}
-        onPress={focusSearchbar}
-        android_ripple={{ color: theme.rippleColor }}
-        style={styles.searchbar}
+      <Surface
+        color={theme.surfaceContainerHigh}
+        contentColor={theme.onSurface}
+        shape={Shape.Pill({})}
+        modifiers={[fillMaxWidth(), height(56)]}
       >
-        <IconButtonV2
-          accessibilityLabel={
-            handleBackAction
-              ? getString('common.back')
-              : getString('common.search')
-          }
-          name={handleBackAction ? 'arrow-left' : leftIcon}
-          color={theme.onSurface}
-          onPress={() => {
-            if (handleBackAction) {
-              handleBackAction();
-            } else if (onLeftIconPress) {
-              onLeftIconPress();
-            }
-          }}
-          theme={theme}
-        />
-
-        <TextInput
-          accessibilityLabel={placeholder}
-          ref={searchbarRef}
-          style={[styles.textInput, { color: theme.onSurface }]}
-          placeholder={placeholder}
-          placeholderTextColor={theme.onSurfaceVariant}
-          onChangeText={onChangeText}
-          onSubmitEditing={onSubmitEditing}
-          value={searchText}
-        />
-        {searchText !== '' ? (
+        <Row
+          verticalAlignment="center"
+          modifiers={[fillMaxWidth(), height(56), padding(4, 0, 4, 0)]}
+        >
           <IconButtonV2
-            accessibilityLabel={getString('common.clear')}
-            name="close"
+            accessibilityLabel={
+              handleBackAction
+                ? getString('common.back')
+                : getString('common.search')
+            }
+            name={handleBackAction ? ArrowBackIcon : leftIcon}
             color={theme.onSurface}
-            onPress={clearSearchbar}
-            theme={theme}
-          />
-        ) : null}
-        {rightIcons?.map((icon, index) => (
-          <IconButtonV2
-            accessibilityLabel={icon.accessibilityLabel}
-            key={index}
-            name={icon.iconName}
-            color={icon.color || theme.onSurface}
-            onPress={icon.onPress}
-            theme={theme}
-          />
-        ))}
-        {menuButtons?.length ? (
-          <Menu
-            visible={extraMenu}
-            onDismiss={() => showExtraMenu(false)}
-            anchor={
-              <IconButtonV2
-                accessibilityLabel={getString('common.moreOptions')}
-                name="dots-vertical"
-                color={theme.onSurface}
-                onPress={() => showExtraMenu(true)}
-                theme={theme}
-              />
-            }
-            contentStyle={{
-              backgroundColor: theme.surface2,
+            onPress={() => {
+              if (handleBackAction) {
+                handleBackAction();
+              } else if (onLeftIconPress) {
+                onLeftIconPress();
+              }
             }}
+            theme={theme}
+          />
+          <BasicTextField
+            value={text}
+            singleLine
+            cursorColor={theme.primary}
+            textStyle={{
+              color: theme.onSurface,
+              fontSize: 16,
+            }}
+            keyboardOptions={{ imeAction: 'search' }}
+            keyboardActions={{ onSearch: () => onSubmitEditing?.() }}
+            onValueChange={value => onChangeText?.(value)}
+            modifiers={[
+              weight(1),
+              padding(4, 0, 4, 0),
+              testID('search-bar-input'),
+            ]}
           >
-            {menuButtons?.map((button, index) => (
-              <Menu.Item
-                key={index}
-                title={button.title}
-                style={{ backgroundColor: theme.surface2 }}
-                titleStyle={{
-                  color: theme.onSurface,
-                }}
-                onPress={() => {
-                  showExtraMenu(false);
-                  setTimeout(() => {
-                    button.onPress();
-                  }, 0);
-                }}
-              />
-            ))}
-          </Menu>
-        ) : null}
-      </Pressable>
-    </View>
+            <BasicTextField.DecorationBox>
+              <Box>
+                <BasicTextField.Placeholder>
+                  <AppText
+                    variant="bodyLarge"
+                    color={theme.onSurfaceVariant}
+                    maxLines={1}
+                  >
+                    {placeholder}
+                  </AppText>
+                </BasicTextField.Placeholder>
+                <BasicTextField.InnerTextField />
+              </Box>
+            </BasicTextField.DecorationBox>
+          </BasicTextField>
+          {searchText !== '' ? (
+            <IconButtonV2
+              accessibilityLabel={getString('common.clear')}
+              name={CloseIcon}
+              color={theme.onSurface}
+              onPress={clearSearchbar}
+              theme={theme}
+            />
+          ) : null}
+          {rightIcons?.map((icon, index) => (
+            <IconButtonV2
+              accessibilityLabel={icon.accessibilityLabel}
+              key={index}
+              name={icon.iconName}
+              color={icon.color || theme.onSurface}
+              onPress={icon.onPress}
+              theme={theme}
+            />
+          ))}
+          {menuButtons?.length ? (
+            <OverflowMenu
+              actions={menuButtons.map(button => ({
+                label: button.title,
+                onPress: button.onPress,
+              }))}
+            />
+          ) : null}
+        </Row>
+      </Surface>
+    </Box>
   );
 };
 
 export default memo(Searchbar);
-
-const styles = StyleSheet.create({
-  icon: {
-    marginHorizontal: 8,
-  },
-  searchIconContainer: {
-    borderRadius: 50,
-    overflow: 'hidden',
-  },
-  searchbar: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 8,
-  },
-  searchbarContainer: {
-    borderRadius: 28,
-    marginBottom: 12,
-    marginHorizontal: 16,
-    minHeight: 56,
-    overflow: 'hidden',
-    zIndex: 1,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    marginHorizontal: 8,
-  },
-});

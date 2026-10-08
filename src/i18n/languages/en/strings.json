@@ -219,6 +219,7 @@
     "language": "Language",
     "lastUsed": "Last used",
     "latest": "Latest",
+    "popular": "Popular",
     "listEmpty": "Enable languages from settings",
     "migration": {
       "cover": "Cover",
@@ -354,7 +355,12 @@
     "custom_code": "Custom Code",
     "textToReplace": "Text to replace",
     "replaceWith": "Replace with",
-    "replaceText": "Replace text"
+    "replaceText": "Replace text",
+    "copy": "Copy",
+    "play": "Play",
+    "stop": "Stop",
+    "previous": "Previous",
+    "next": "Next"
   },
   "webview": {
     "refresh": "Refresh",
@@ -532,7 +538,8 @@
     "downloadOnlyDesc": "Filters all novels in your library",
     "downloadQueue": "Download queue",
     "incognitoMode": "Incognito mode",
-    "incognitoModeDesc": "Pauses reading history"
+    "incognitoModeDesc": "Pauses reading history",
+    "taskQueue": "Task queue"
   },
   "novelScreen": {
     "addToLibaray": "Add to library",
@@ -658,6 +665,8 @@
       "bionicReadingDescription": "Bold the start of each word to help your eyes track faster",
       "tapToScroll": "Tap to scroll",
       "tapToScrollDescription": "Tap the top or bottom of the screen to scroll through the chapter",
+      "tapToTurnPages": "Tap to turn pages",
+      "tapToTurnPagesDescription": "Tap the left or right side of the screen to turn pages",
       "color": "Color",
       "display": "Display",
       "fontStyle": "Font style",
@@ -666,8 +675,8 @@
       "lineHeight": "Line height",
       "navigation": "Navigation",
       "padding": "Padding",
-      "pageReader": "Paged reading (Experimental)",
-      "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
+      "pageReader": "Paged reading",
+      "pageReaderDescription": "Split the chapter into pages instead of scrolling",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
       "disablePageTransitions": "Disable page transition animation",
@@ -691,7 +700,9 @@
       "verticalSeekbarDescription": "Show a slider on the side to jump to any point in the chapter",
       "keepScreenOn": "Keep screen on",
       "volumeButtonsScroll": "Volume button scrolling",
-      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume"
+      "volumeButtonsScrollDescription": "Use the volume buttons to scroll instead of adjusting volume",
+      "volumeButtonsTurnPages": "Volume buttons turn pages",
+      "volumeButtonsTurnPagesDescription": "Use the volume buttons to turn pages instead of adjusting volume"
     },
     "drawer": {
       "scrollToBottom": "Scroll to bottom",
@@ -703,12 +714,15 @@
     "nextChapter": "Next: %{name}",
     "noNextChapter": "There's no next chapter",
     "noPreviousChapter": "There's no previous chapter",
+    "previousChapter": "Previous: %{name}",
     "searchMinLength": "Enter at least %{count} characters to search",
     "searchPlaceholder": "Search chapter"
   },
   "readerSettings": {
     "autoScrollInterval": "Scroll interval (seconds)",
     "autoScrollOffset": "Scroll offset (screen heights)",
+    "autoScrollSmooth": "Smooth scrolling",
+    "autoScrollSmoothDesc": "Glide at a steady speed instead of jumping each interval",
     "backgroundColor": "Background color",
     "backgroundColorModal": "Background color",
     "clearCustomCSS": "Reset your custom CSS?",
@@ -730,7 +744,33 @@
     "textColorModal": "Text color",
     "title": "Reader",
     "verticalSeekbarDesc": "Use vertical seekbar",
-    "volumeButtonOffset": "Volume button scroll offset (screen heights)"
+    "volumeButtonOffset": "Volume button scroll offset (screen heights)",
+    "paragraphSpacing": "Paragraph spacing",
+    "textIndent": "First-line indent",
+    "chapterTitles": "Chapter titles",
+    "chapterTitlesDesc": "Show the chapter name where each chapter starts",
+    "pages": "Pages",
+    "scroll": "Scroll",
+    "columns": "Pages side by side",
+    "columnsDesc": "Auto shows two pages on wide landscape screens",
+    "columnsAuto": "Auto",
+    "columnsOne": "One",
+    "columnsTwo": "Two",
+    "pageAnimation": "Page turn",
+    "animationPush": "Push",
+    "animationSlide": "Slide",
+    "animationCurl": "Curl",
+    "continuousChapters": "Continuous chapters",
+    "continuousChaptersDesc": "Chapters flow into each other without stopping",
+    "disabledInPagedMode": "Disabled because page mode is on",
+    "chapterPosition": "Chapter %{current} of %{total}",
+    "pageOf": "%{page} / %{pages}",
+    "readAloud": "Read aloud",
+    "ttsMinimize": "Minimize read-aloud controls",
+    "ttsMove": "Drag onto a paragraph to read aloud from it",
+    "stopReading": "Stop reading",
+    "previousSentence": "Previous sentence",
+    "nextSentence": "Next sentence"
   },
   "sourceScreen": {
     "noResultsFound": "No results found"

@@ -1,161 +1,131 @@
-import { useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LegendList } from '@legendapp/list/react-native';
+import React, { useMemo } from 'react';
+import { Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { NavigationProp } from '@react-navigation/native';
 
-import { getString } from '@i18n/translations';
-
-import { translateNovelStatus } from '@utils/translateEnum';
-
-import {
-  buildGenreTree,
-  type GenreTreeNode,
-} from '@screens/GenreStatsScreen/utils';
-import { useGenreTaxonomy } from '@hooks/persisted/useGenreTaxonomy';
-import { GenreSection } from '@screens/GenreStatsScreen/components';
-import {
-  getDonutPalette,
-  ChapterBar,
-  DonutChartWithLegend,
-} from './components';
-
-import type { ThemeColors } from '@theme/types';
+import { AppText, Button, RNContent } from '@components';
 import type { NovelWithGenres } from '@database/queries/StatsQueries';
-import type { LibraryStats } from '@database/types';
-import type { MoreStackParamList } from '@navigators/types';
+import { LibraryStats } from '@database/types';
+import { useGenreTaxonomy } from '@hooks/persisted/useGenreTaxonomy';
+import { getString } from '@i18n/translations';
+import { MoreStackParamList } from '@navigators/types';
+import { buildGenreTree } from '@screens/GenreStatsScreen/utils';
+import {
+  GenreSection,
+  type StatsNovel,
+} from '@screens/GenreStatsScreen/components';
+import { ThemeColors } from '@theme/types';
+import { translateNovelStatus } from '@utils/translateEnum';
+import TuneIcon from '@expo/material-symbols/tune.xml';
+import { ChapterBar, DistributionCard, StatsCard } from './components';
+import { StatsList, useCardRows } from './components/StatsCard';
 
 interface OverviewTabProps {
   allNovels: NovelWithGenres[];
   stats: LibraryStats;
   theme: ThemeColors;
-  onNovelPress: (novel: {
-    id: number;
-    name: string;
-    path: string;
-    cover: string | null;
-    pluginId: string;
-  }) => void;
+  onNovelPress: (novel: StatsNovel) => void;
   navigation: NavigationProp<MoreStackParamList>;
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
   allNovels,
   stats,
-  theme,
   onNovelPress,
   navigation,
 }) => {
   const { taxonomy } = useGenreTaxonomy();
-  const tree = useMemo(
-    () => buildGenreTree(allNovels, taxonomy),
-    [allNovels, taxonomy],
-  );
-  const globalMax = Math.max(
-    ...tree.flatMap(n => [n.count, ...(n.children?.map(c => c.count) ?? [])]),
-    1,
-  );
+  const cardRows = useCardRows();
 
-  const statusColors = getDonutPalette(Object.keys(stats.status || {}), theme);
+  const rows = useMemo(() => {
+    const byId = new Map(allNovels.map(novel => [novel.id, novel]));
+    const novelsFor = (ids: readonly number[]) =>
+      ids
+        .map(id => byId.get(id))
+        .filter((novel): novel is NovelWithGenres => novel !== undefined)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    const tree = buildGenreTree(allNovels, taxonomy);
+    const max = Math.max(
+      1,
+      ...tree.flatMap(node => [
+        node.count,
+        ...(node.children?.map(child => child.count) ?? []),
+      ]),
+    );
+    return [
+      ...cardRows([
+        {
+          key: 'chapters',
+          render: () => (
+            <StatsCard>
+              <RNContent>
+                <ChapterBar
+                  read={stats.chaptersRead ?? 0}
+                  total={stats.chaptersCount ?? 0}
+                  downloaded={stats.chaptersDownloaded ?? 0}
+                />
+              </RNContent>
+            </StatsCard>
+          ),
+        },
+        {
+          key: 'status',
+          render: () => (
+            <DistributionCard
+              title={getString('statsScreen.statusDistribution')}
+              centerLabel={getString('statsScreen.novels')}
+              entries={Object.entries(stats.status ?? {}).map(
+                ([key, value]) => ({ key, value }),
+              )}
+              getLabel={translateNovelStatus}
+            />
+          ),
+        },
+      ]),
+      ...(tree.length
+        ? [
+            {
+              key: 'genres-header',
+              render: () => (
+                <Row
+                  verticalAlignment="center"
+                  modifiers={[fillMaxWidth(), padding(0, 12, 0, 0)]}
+                >
+                  <AppText variant="titleMedium" modifiers={[weight(1)]}>
+                    {getString('statsScreen.genreDistribution')}
+                  </AppText>
+                  <Button
+                    mode="text"
+                    icon={TuneIcon}
+                    title={getString('statsScreen.customizeGenres')}
+                    onPress={() =>
+                      navigation.navigate('SettingsStack', {
+                        screen: 'GenreTaxonomy',
+                      })
+                    }
+                  />
+                </Row>
+              ),
+            },
+          ]
+        : []),
+      ...tree.map(node => ({
+        key: `genre-${node.name}`,
+        render: () => (
+          <GenreSection
+            node={node}
+            globalMax={max}
+            novels={novelsFor(node.novelIds)}
+            onNovelPress={onNovelPress}
+          />
+        ),
+      })),
+    ];
+  }, [allNovels, cardRows, navigation, onNovelPress, stats, taxonomy]);
 
-  const renderOverviewItem = useCallback(
-    ({ item }: { item: GenreTreeNode }) => (
-      <GenreSection
-        node={item}
-        globalMax={globalMax}
-        novels={allNovels}
-        theme={theme}
-        onNovelPress={onNovelPress}
-      />
-    ),
-    [globalMax, allNovels, theme, onNovelPress],
-  );
-
-  const overviewListHeader = useCallback(
-    () => (
-      <View style={styles.overviewHeader}>
-        <ChapterBar
-          read={stats.chaptersRead ?? 0}
-          total={stats.chaptersCount ?? 0}
-          downloaded={stats.chaptersDownloaded ?? 0}
-        />
-        <DonutChartWithLegend
-          title={getString('statsScreen.statusDistribution')}
-          entries={Object.entries(stats.status || {})
-            .filter(([_, v]) => v > 0)
-            .map(([k, v]) => ({ key: k, value: v }))}
-          colors={statusColors}
-          theme={theme}
-          centerLabel={getString('statsScreen.novels')}
-          getLabel={key => translateNovelStatus(key)}
-        />
-        {tree.length > 0 && (
-          <View style={styles.genreSectionHeader}>
-            <Text style={[styles.header, { color: theme.onSurface }]}>
-              {getString('statsScreen.genreDistribution')}
-            </Text>
-            <Pressable
-              onPress={() =>
-                navigation.navigate('SettingsStack', {
-                  screen: 'GenreTaxonomy',
-                })
-              }
-              accessibilityRole="button"
-              accessibilityLabel={getString('genreStats.editTaxonomy')}
-              hitSlop={12}
-              style={styles.customizeButton}
-            >
-              <Text style={[styles.customizeText, { color: theme.primary }]}>
-                {getString('statsScreen.customizeGenres')}
-              </Text>
-            </Pressable>
-          </View>
-        )}
-      </View>
-    ),
-    [stats, theme, statusColors, tree.length, navigation],
-  );
-
-  return (
-    <LegendList
-      contentContainerStyle={styles.listContent}
-      data={tree}
-      estimatedItemSize={64}
-      keyExtractor={item => item.name}
-      getItemType={() => 'genre'}
-      ListHeaderComponent={overviewListHeader}
-      renderItem={renderOverviewItem}
-      recycleItems
-      showsVerticalScrollIndicator={false}
-      experimental_adaptiveRender={{}}
-    />
-  );
+  return <StatsList rows={rows} />;
 };
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  overviewHeader: {
-    paddingHorizontal: 16,
-  },
-  genreSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  header: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingVertical: 12,
-  },
-  customizeButton: {
-    minHeight: 40,
-    justifyContent: 'center',
-  },
-  customizeText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-});

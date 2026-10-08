@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
+import { Row } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, weight } from '@expo/ui/jetpack-compose/modifiers';
 
-import { IconButton } from 'react-native-paper';
 import { ThemeColors } from '@theme/types';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { getString } from '@i18n/translations';
-import { Dialog } from '@components';
+import { Dialog, IconButtonV2, TextInput } from '@components';
+import ChevronLeftIcon from '@expo/material-symbols/chevron_left.xml';
+import ChevronRightIcon from '@expo/material-symbols/chevron_right.xml';
+import KeyboardDoubleArrowLeftIcon from '@expo/material-symbols/keyboard_double_arrow_left.xml';
+import KeyboardDoubleArrowRightIcon from '@expo/material-symbols/keyboard_double_arrow_right.xml';
 
 interface DownloadCustomChapterModalProps {
   theme: ThemeColors;
@@ -53,51 +57,51 @@ const DownloadCustomChapterModal = ({
         {getString('novelScreen.download.customAmount')}
       </Dialog.Title>
       <Dialog.Content>
-        <View style={styles.row}>
-          <IconButton
-            icon="chevron-double-left"
-            animated
-            size={24}
-            iconColor={theme.primary}
+        <Row
+          verticalAlignment="center"
+          horizontalArrangement="center"
+          modifiers={[fillMaxWidth()]}
+        >
+          <IconButtonV2
+            name={KeyboardDoubleArrowLeftIcon}
+            color={theme.primary}
             onPress={() => {
               if (text > 9) {
                 setText(prevState => prevState - 10);
               }
             }}
+            theme={theme}
           />
-          <IconButton
-            icon="chevron-left"
-            animated
-            size={24}
-            iconColor={theme.primary}
+          <IconButtonV2
+            name={ChevronLeftIcon}
+            color={theme.primary}
             onPress={() => {
               if (text > 0) {
                 setText(prevState => prevState - 1);
               }
             }}
+            theme={theme}
           />
           <TextInput
             value={text.toString()}
-            style={[{ color: theme.onSurface }, styles.marginHorizontal]}
-            keyboardType="numeric"
+            keyboardType="number"
             onChangeText={onChangeText}
-            onSubmitEditing={onSubmit}
+            onSubmit={onSubmit}
+            modifiers={[weight(1)]}
           />
-          <IconButton
-            icon="chevron-right"
-            animated
-            size={24}
-            iconColor={theme.primary}
+          <IconButtonV2
+            name={ChevronRightIcon}
+            color={theme.primary}
             onPress={() => setText(prevState => prevState + 1)}
+            theme={theme}
           />
-          <IconButton
-            icon="chevron-double-right"
-            animated
-            size={24}
-            iconColor={theme.primary}
+          <IconButtonV2
+            name={KeyboardDoubleArrowRightIcon}
+            color={theme.primary}
             onPress={() => setText(prevState => prevState + 10)}
+            theme={theme}
           />
-        </View>
+        </Row>
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.Action title={getString('common.cancel')} onPress={onDismiss} />
@@ -111,8 +115,3 @@ const DownloadCustomChapterModal = ({
 };
 
 export default DownloadCustomChapterModal;
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'center' },
-  marginHorizontal: { marginHorizontal: 4 },
-});

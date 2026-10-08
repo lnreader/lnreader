@@ -5,6 +5,7 @@ import {
 } from '@screens/library/hooks/useLibrary';
 import { useLibrarySettings } from '@hooks/persisted';
 import SetCategoriesModal from '@screens/novel/components/SetCategoriesModal';
+import OverlayHost from '../OverlayHost/OverlayHost';
 
 // type Library = Category & { novels: LibraryNovelInfo[] };
 
@@ -36,13 +37,15 @@ export function LibraryContextProvider({
         {children}
       </LibraryContext.Provider>
       {pendingLibraryAddition ? (
-        <SetCategoriesModal
-          novelIds={EMPTY_NOVEL_IDS}
-          initialCategoryIds={pendingLibraryAddition.initialCategoryIds}
-          closeModal={cancelPendingLibraryAddition}
-          onSubmit={confirmPendingLibraryAddition}
-          visible
-        />
+        <OverlayHost>
+          <SetCategoriesModal
+            novelIds={EMPTY_NOVEL_IDS}
+            initialCategoryIds={pendingLibraryAddition.initialCategoryIds}
+            closeModal={cancelPendingLibraryAddition}
+            onSubmit={confirmPendingLibraryAddition}
+            visible
+          />
+        </OverlayHost>
       ) : null}
     </>
   );

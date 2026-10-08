@@ -1,84 +1,49 @@
-import React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  Text,
-  ViewStyle,
-  StyleProp,
-} from 'react-native';
+import { ListItem } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, toggleable } from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
 import Switch from './Switch';
-import { ThemeColors } from '../../theme/types';
+import { Leading, listItemColors, Texts } from '../List/List';
+import { type IconSource } from '../AppIcon/AppIcon';
 
 interface SwitchItemProps {
   value: boolean;
   label: string;
-  description?: string;
-  descriptionNumberOfLines?: number;
+  description?: string | null;
+  icon?: IconSource;
+  disabled?: boolean;
   onPress: () => void;
-  onLongPress?: () => void;
   theme: ThemeColors;
-  style?: StyleProp<ViewStyle>;
 }
 
-const SwitchItem: React.FC<SwitchItemProps> = ({
+const SwitchItem = ({
   label,
   description,
-  descriptionNumberOfLines,
-  onPress,
-  onLongPress,
-  theme,
+  icon,
+  disabled,
   value,
-  style,
-}) => (
-  <Pressable
-    accessibilityLabel={label}
-    accessibilityRole="switch"
-    accessibilityState={{ checked: value }}
-    android_ripple={{ color: theme.rippleColor }}
-    style={[styles.container, style]}
-    onPress={onPress}
-    onLongPress={onLongPress}
-  >
-    <View style={styles.labelContainer}>
-      <Text style={[{ color: theme.onSurface }, styles.label]}>{label}</Text>
-      {description ? (
-        <Text numberOfLines={descriptionNumberOfLines} style={[styles.description, { color: theme.onSurfaceVariant }]}>
-          {description}
-        </Text>
-      ) : null}
-    </View>
-    <Switch
-      accessible={false}
-      value={value}
-      onValueChange={onPress}
-      style={styles.switch}
-    />
-  </Pressable>
-);
+  onPress,
+  theme,
+}: SwitchItemProps) => {
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[
+        fillMaxWidth(),
+        toggleable(value, () => !disabled && onPress(), { role: 'switch' }),
+      ]}
+    >
+      <Leading icon={icon} />
+      <Texts
+        title={label}
+        description={description}
+        disabled={disabled}
+        theme={theme}
+      />
+      <ListItem.TrailingContent>
+        <Switch value={value} disabled={disabled} onValueChange={onPress} />
+      </ListItem.TrailingContent>
+    </ListItem>
+  );
+};
 
 export default SwitchItem;
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  label: {
-    fontSize: 16,
-  },
-  labelContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  switch: {
-    marginStart: 8,
-  },
-});

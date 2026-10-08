@@ -189,6 +189,8 @@ export interface ChapterGeneralSettings {
   autoScroll: boolean;
   autoScrollInterval: number;
   autoScrollOffset: number | null;
+  /** Glide instead of jumping by the offset each interval. */
+  autoScrollSmooth: boolean;
   verticalSeekbar: boolean;
   removeExtraParagraphSpacing: boolean;
   bionicReading: boolean;
@@ -196,7 +198,13 @@ export interface ChapterGeneralSettings {
   TTSEnable: boolean;
   pageReaderInvertVolumeButtons: boolean;
   pageReaderDisableAnimation: boolean;
+  /** Unless `pageReaderDisableAnimation`. */
+  pageAnimation: PageAnimation;
+  continuousChapters: boolean;
 }
+
+export type PageAnimation = 'push' | 'slide' | 'curl';
+export type ReaderColumns = 'auto' | 1 | 2;
 
 export interface ReaderTheme {
   backgroundColor: string;
@@ -214,6 +222,12 @@ export interface ChapterReaderSettings {
   customCSS: string;
   customJS: string;
   customThemes: ReaderTheme[];
+  /** em */
+  paragraphSpacing: number;
+  /** em */
+  textIndent: number;
+  columns: ReaderColumns;
+  showChapterTitle: boolean;
   tts?: {
     /** Android only: the selected engine, or the system default when absent. */
     engine?: TtsEngine;
@@ -316,6 +330,7 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   autoScroll: false,
   autoScrollInterval: 10,
   autoScrollOffset: null,
+  autoScrollSmooth: false,
   verticalSeekbar: true,
   removeExtraParagraphSpacing: false,
   bionicReading: false,
@@ -323,6 +338,8 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   TTSEnable: true,
   pageReaderInvertVolumeButtons: false,
   pageReaderDisableAnimation: false,
+  pageAnimation: 'push',
+  continuousChapters: true,
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
@@ -336,6 +353,10 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   customCSS: '',
   customJS: '',
   customThemes: [],
+  paragraphSpacing: 1,
+  textIndent: 0,
+  columns: 'auto',
+  showChapterTitle: false,
   tts: {
     rate: 1,
     pitch: 1,

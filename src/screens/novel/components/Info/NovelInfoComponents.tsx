@@ -1,25 +1,52 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
-import { ImageBackground, type ImageSource } from 'expo-image';
-import color from 'color';
-import { IconButton, Portal } from 'react-native-paper';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Chip, NovelCoverImage } from '../../../../components';
-import { isMissingNovelCover } from '../../../../components/NovelCoverImage';
+import React, { memo, useMemo, useState } from 'react';
+import {
+  BasicAlertDialog,
+  Box,
+  Column,
+  Image,
+  RNHostView,
+  Row,
+} from '@expo/ui/jetpack-compose';
+import {
+  alpha,
+  background,
+  clickable,
+  clip,
+  combinedClickable,
+  fillMaxWidth,
+  height,
+  horizontalScroll,
+  matchParentSize,
+  onSizeChanged,
+  padding,
+  Shapes,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { View, useWindowDimensions } from 'react-native';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { AppText, Chip, IconButtonV2, NovelCoverImage } from '@components';
 import { ThemeColors } from '@theme/types';
-import { getString } from '@i18n/translations';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCoverSource } from '@utils/coverCache';
 import { parseGenres } from '../../utils/genres';
+import EditIcon from '@expo/material-symbols/edit.xml';
+import SaveIcon from '@expo/material-symbols/save.xml';
+
+/** A cover and the headers its source needs. */
+export interface CoverSource {
+  uri?: string;
+  headers?: Record<string, string>;
+}
 
 interface CoverImageProps {
   children: React.ReactNode;
-  source: ImageSource;
+  source: CoverSource;
   theme: ThemeColors;
   hideBackdrop: boolean;
+  /** Room for a top bar drawn over the backdrop. */
+  topPadding?: number;
 }
 
 interface NovelThumbnailProps {
-  source: ImageSource;
+  source: CoverSource;
   theme: ThemeColors;
   setCustomNovelCover: () => void | Promise<void>;
   saveNovelCover: () => void | Promise<void>;
@@ -32,73 +59,85 @@ interface NovelTitleProps {
   onPress: () => void;
 }
 
+const THUMBNAIL_WIDTH = 116;
+const THUMBNAIL_HEIGHT = 174;
+
 const NovelInfoContainer = ({ children }: { children: React.ReactNode }) => (
-  <View style={styles.novelInfoContainer}>{children}</View>
+  <Row
+    horizontalArrangement={{ spacedBy: 16 }}
+    modifiers={[fillMaxWidth(), padding(16, 16, 16, 16)]}
+  >
+    {children}
+  </Row>
 );
 
+// Compose has no gradient brush here, so the fade is drawn with SVG.
+const BackdropFade = ({ color }: { color: string }) => {
+  const [size, setSize] = useState<{ width: number; height: number }>();
+  return (
+    <Box modifiers={[matchParentSize(), onSizeChanged(setSize)]}>
+      {size ? (
+        <RNHostView matchContents>
+          <View style={size}>
+            <Svg width={size.width} height={size.height}>
+              <Defs>
+                <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor={color} stopOpacity={0} />
+                  <Stop offset="1" stopColor={color} stopOpacity={1} />
+                </LinearGradient>
+              </Defs>
+              <Rect width="100%" height="100%" fill="url(#fade)" />
+            </Svg>
+          </View>
+        </RNHostView>
+      ) : null}
+    </Box>
+  );
+};
+
 const CoverImage = memo(
-  ({ children, source, theme, hideBackdrop }: CoverImageProps) => {
-    const [failedUri, setFailedUri] = useState<string>();
-    const overlayBg = useMemo(
-      () => color(theme.background).alpha(0.7).string(),
-      [theme.background],
+  ({
+    children,
+    source,
+    theme,
+    hideBackdrop,
+    topPadding = 0,
+  }: CoverImageProps) => {
+    const requestInit = useMemo(
+      () => (source.headers ? { headers: source.headers } : undefined),
+      [source.headers],
     );
-    const overlayStyle = useMemo(
-      () => [{ backgroundColor: overlayBg }, styles.flex1],
-      [overlayBg],
-    );
-    const gradientColors = useMemo(
-      () => ['rgba(0,0,0,0)', theme.background] as const,
-      [theme.background],
-    );
-
-    if (hideBackdrop) {
-      return <View>{children}</View>;
-    }
-
-    const showPlaceholder =
-      isMissingNovelCover(source.uri) || failedUri === source.uri;
+    const cover = useCoverSource(source.uri, requestInit);
     const content = (
-      <View style={overlayStyle}>
-        {!showPlaceholder ? (
-          <LinearGradient
-            colors={gradientColors}
-            locations={GRADIENT_LOCATIONS}
-            style={styles.linearGradient}
-          >
-            {children}
-          </LinearGradient>
-        ) : (
-          children
-        )}
-      </View>
+      <Column modifiers={[fillMaxWidth(), padding(0, topPadding, 0, 0)]}>
+        {children}
+      </Column>
     );
 
-    if (showPlaceholder) {
-      return (
-        <View
-          style={[styles.coverImage, { backgroundColor: theme.background }]}
-        >
-          {content}
-        </View>
-      );
+    if (hideBackdrop || cover.status !== 'ready') {
+      return <Box modifiers={[fillMaxWidth()]}>{content}</Box>;
     }
 
     return (
-      <ImageBackground
-        cachePolicy="memory-disk"
-        contentFit="cover"
-        onError={() => setFailedUri(source.uri)}
-        source={source}
-        style={styles.coverImage}
-      >
+      <Box modifiers={[fillMaxWidth()]}>
+        <Image
+          source={{ uri: cover.uri }}
+          contentScale="crop"
+          modifiers={[matchParentSize()]}
+        />
+        <Box
+          modifiers={[
+            matchParentSize(),
+            alpha(0.7),
+            background(theme.background),
+          ]}
+        />
+        <BackdropFade color={theme.background} />
         {content}
-      </ImageBackground>
+      </Box>
     );
   },
 );
-
-const GRADIENT_LOCATIONS = [0, 1] as const;
 
 const NovelThumbnail = ({
   source,
@@ -107,57 +146,58 @@ const NovelThumbnail = ({
   saveNovelCover,
 }: NovelThumbnailProps) => {
   const [expanded, setExpanded] = useState(false);
-  const { top, right } = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const requestInit = useMemo(
+    () => (source.headers ? { headers: source.headers } : undefined),
+    [source.headers],
+  );
+  const cover = useCoverSource(source.uri, requestInit);
 
   return (
-    <Pressable
-      onPress={() => setExpanded(!expanded)}
-      style={styles.novelThumbnailContainer}
-    >
-      {!expanded ? (
-        <NovelCoverImage
-          uri={source.uri}
-          theme={theme}
-          iconSize={36}
-          style={styles.novelThumbnail}
-        />
-      ) : (
-        <Portal>
-          <IconButton
-            icon="content-save"
-            style={[
-              styles.absoluteIcon,
-              styles.zIndex,
-              { top: top + 6, right: right + 6 },
-            ]}
-            iconColor={theme.onBackground}
-            onPress={saveNovelCover}
-          />
-          <IconButton
-            icon="pencil-outline"
-            style={[
-              styles.absoluteIcon,
-              styles.zIndex,
-              { top: top + 6, right: right + 60 },
-            ]}
-            iconColor={theme.onBackground}
-            onPress={setCustomNovelCover}
-          />
-          <Pressable
-            style={[styles.expandedOverlay]}
-            onPress={() => setExpanded(false)}
-          >
-            <NovelCoverImage
-              uri={source.uri}
-              theme={theme}
-              iconSize={64}
-              contentFit="contain"
-              style={styles.flex1}
-            />
-          </Pressable>
-        </Portal>
-      )}
-    </Pressable>
+    <Box modifiers={[clickable(() => setExpanded(!expanded))]}>
+      <NovelCoverImage
+        uri={source.uri}
+        requestInit={requestInit}
+        width={THUMBNAIL_WIDTH}
+        height={THUMBNAIL_HEIGHT}
+        theme={theme}
+      />
+      {expanded ? (
+        <BasicAlertDialog onDismissRequest={() => setExpanded(false)}>
+          <Column horizontalAlignment="center">
+            <Row horizontalArrangement="end" modifiers={[fillMaxWidth()]}>
+              <IconButtonV2
+                name={EditIcon}
+                onPress={setCustomNovelCover}
+                theme={theme}
+              />
+              <IconButtonV2
+                name={SaveIcon}
+                onPress={saveNovelCover}
+                theme={theme}
+              />
+            </Row>
+            {cover.status === 'ready' ? (
+              <Box
+                modifiers={[
+                  clip(Shapes.RoundedCorner(20)),
+                  clickable(() => setExpanded(false)),
+                ]}
+              >
+                <Image
+                  source={{ uri: cover.uri }}
+                  contentScale="fit"
+                  modifiers={[
+                    fillMaxWidth(),
+                    height(Math.round(windowHeight * 0.6)),
+                  ]}
+                />
+              </Box>
+            ) : null}
+          </Column>
+        </BasicAlertDialog>
+      ) : null}
+    </Box>
   );
 };
 
@@ -167,14 +207,17 @@ const NovelTitle = ({
   onLongPress,
   onPress,
 }: NovelTitleProps) => (
-  <Text
-    onLongPress={onLongPress}
-    onPress={onPress}
-    style={[{ color: theme.onBackground }, styles.novelTitle]}
-    numberOfLines={4}
+  <AppText
+    variant="titleLarge"
+    weight="700"
+    color={theme.onBackground}
+    maxLines={4}
+    modifiers={[
+      combinedClickable({ onClick: onPress, onLongClick: onLongPress }),
+    ]}
   >
     {children}
-  </Text>
+  </AppText>
 );
 
 const NovelInfo = ({
@@ -182,93 +225,13 @@ const NovelInfo = ({
   children,
 }: {
   theme: ThemeColors;
-  children: React.ReactNode;
+  children: string;
 }) => (
-  <Text
-    style={[{ color: theme.onSurfaceVariant }, styles.novelInfo]}
-    numberOfLines={1}
-  >
-    {children}
-  </Text>
+  <AppText variant="bodyMedium" color={theme.onSurfaceVariant} maxLines={1}>
+    {/* Scraped metadata often carries stray newlines and spaces. */}
+    {children.replace(/\s+/g, ' ').trim()}
+  </AppText>
 );
-
-const FollowButton = ({
-  theme,
-  onPress,
-  followed,
-}: {
-  theme: ThemeColors;
-  onPress: () => void;
-  followed: boolean;
-}) => (
-  <View style={styles.followButtonContainer}>
-    <Pressable
-      android_ripple={{
-        color: theme.rippleColor,
-        borderless: false,
-      }}
-      onPress={onPress}
-      style={styles.followButtonPressable}
-    >
-      <IconButton
-        icon={followed ? 'heart' : 'heart-outline'}
-        iconColor={followed ? theme.primary : theme.outline}
-        size={24}
-        style={styles.iconButton}
-      />
-      <Text
-        style={[
-          { color: followed ? theme.primary : theme.outline },
-          styles.followButtonText,
-        ]}
-      >
-        {followed
-          ? getString('novelScreen.inLibaray')
-          : getString('novelScreen.addToLibaray')}
-      </Text>
-    </Pressable>
-  </View>
-);
-
-const TrackerButton = ({
-  theme,
-  isTracked,
-  onPress,
-}: {
-  theme: ThemeColors;
-  onPress: () => void;
-  isTracked: boolean;
-}) => (
-  <View style={styles.followButtonContainer}>
-    <Pressable
-      android_ripple={{
-        color: theme.rippleColor,
-        borderless: false,
-      }}
-      onPress={onPress}
-      style={styles.followButtonPressable}
-    >
-      <IconButton
-        icon={isTracked ? 'check' : 'sync'}
-        iconColor={isTracked ? theme.primary : theme.outline}
-        size={24}
-        style={styles.iconButton}
-      />
-      <Text
-        style={[
-          { color: isTracked ? theme.primary : theme.outline },
-          styles.followButtonText,
-        ]}
-      >
-        {isTracked
-          ? getString('novelScreen.tracked')
-          : getString('novelScreen.tracking')}
-      </Text>
-    </Pressable>
-  </View>
-);
-
-const genreKeyExtractor = (_item: string, index: number) => 'genre' + index;
 
 interface NovelGenresProps {
   theme: ThemeColors;
@@ -277,20 +240,16 @@ interface NovelGenresProps {
 
 const NovelGenres = memo(({ theme, genres }: NovelGenresProps) => {
   const data = useMemo(() => parseGenres(genres), [genres]);
-  const renderGenre = useCallback(
-    ({ item }: { item: string }) => <Chip label={item} theme={theme} />,
-    [theme],
-  );
 
   return (
-    <FlatList
-      contentContainerStyle={styles.genreContainer}
-      horizontal
-      data={data}
-      keyExtractor={genreKeyExtractor}
-      renderItem={renderGenre}
-      showsHorizontalScrollIndicator={false}
-    />
+    <Row
+      horizontalArrangement={{ spacedBy: 8 }}
+      modifiers={[fillMaxWidth(), horizontalScroll(), padding(16, 4, 16, 8)]}
+    >
+      {data.map((item, index) => (
+        <Chip key={'genre' + index} kind="assist" label={item} theme={theme} />
+      ))}
+    </Row>
   );
 });
 
@@ -300,82 +259,5 @@ export {
   NovelThumbnail,
   NovelTitle,
   NovelInfo,
-  FollowButton,
-  TrackerButton,
   NovelGenres,
 };
-
-const styles = StyleSheet.create({
-  flex1: {
-    flex: 1,
-  },
-  coverImage: {},
-  absoluteIcon: {
-    position: 'absolute',
-  },
-  expandedOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-  },
-  followButtonContainer: {
-    borderRadius: 4,
-    overflow: 'hidden',
-    flex: 1,
-  },
-  followButtonPressable: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 8,
-  },
-  followButtonText: {
-    fontSize: 12,
-  },
-  iconButton: {
-    margin: 0,
-  },
-  genreChip: {
-    borderRadius: 50,
-    flex: 1,
-    fontSize: 12,
-    justifyContent: 'center',
-    marginHorizontal: 2,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    textTransform: 'capitalize',
-  },
-  genreContainer: {
-    paddingBottom: 4,
-    paddingHorizontal: 16,
-  },
-  linearGradient: {
-    flex: 1,
-  },
-  novelInfo: {
-    fontSize: 14,
-  },
-  novelInfoContainer: {
-    flexDirection: 'row',
-    margin: 16,
-    marginBottom: 0,
-    marginTop: 28,
-    paddingTop: 90,
-  },
-  novelThumbnail: {
-    borderRadius: 6,
-    height: 150,
-    width: 100,
-  },
-  novelThumbnailContainer: {
-    height: 150,
-    marginHorizontal: 4,
-    width: 100,
-  },
-  novelTitle: {
-    fontSize: 20,
-  },
-  zIndex: { zIndex: 10 },
-});

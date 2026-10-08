@@ -1,6 +1,13 @@
 import React, { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clip,
+  combinedClickable,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { NovelInfo } from '@database/types';
 import { useNavigation } from '@react-navigation/native';
@@ -10,10 +17,16 @@ import { getString } from '@i18n/translations';
 import SetCategoryModal from '../SetCategoriesModal';
 import { NovelScreenProps } from '@navigators/types';
 import { useTrackedNovel, useTracker } from '@hooks/persisted';
-import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
-import { MaterialDesignIconName } from '@type/icon';
 import { useNovelAction } from '@screens/novel/NovelContext';
 import { useLibraryContext } from '@components/Context/LibraryContext';
+import { AppIcon, AppText, type IconSource } from '@components';
+import CheckIcon from '@expo/material-symbols/check.xml';
+import FavoriteIcon from '@expo/material-symbols/favorite.xml';
+import PublicIcon from '@expo/material-symbols/public.xml';
+import SwapVertIcon from '@expo/material-symbols/swap_vert.xml';
+import SyncIcon from '@expo/material-symbols/sync.xml';
+// @expo/material-symbols only ships outlined icons.
+import FavoriteFilledIcon from '../../../../../assets/icons/favorite_fill.xml';
 
 const NButton = ({
   onPress,
@@ -25,34 +38,32 @@ const NButton = ({
 }: {
   onPress: () => void;
   onLongPress?: () => void;
-  icon: MaterialDesignIconName;
+  icon: IconSource;
   label: string;
   color?: string;
   theme: ThemeColors;
 }) => {
   return (
-    <Animated.View
-      entering={ZoomIn.duration(150)}
-      exiting={ZoomOut.duration(150)}
-      collapsable={false}
-      style={styles.buttonContainer}
+    <Column
+      horizontalAlignment="center"
+      verticalArrangement={{ spacedBy: 4 }}
+      modifiers={[
+        weight(1),
+        clip(Shapes.RoundedCorner(16)),
+        combinedClickable({ onClick: onPress, onLongClick: onLongPress }),
+        padding(4, 8, 4, 8),
+      ]}
     >
-      <Pressable
-        android_ripple={{ color: theme.rippleColor }}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        style={styles.button}
+      <AppIcon source={icon} tint={color ?? theme.outline} />
+      <AppText
+        variant="labelMedium"
+        color={color ?? theme.outline}
+        maxLines={1}
+        align="center"
       >
-        <MaterialCommunityIcons
-          name={icon}
-          color={color ?? theme.outline}
-          size={24}
-        />
-        <Text style={[styles.buttonLabel, { color: color ?? theme.outline }]}>
-          {label}
-        </Text>
-      </Pressable>
-    </Animated.View>
+        {label}
+      </AppText>
+    </Column>
   );
 };
 const Button = memo(NButton);
@@ -108,12 +119,12 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
 
   return (
     <>
-      <View style={styles.buttonGroupContainer}>
+      <Row modifiers={[fillMaxWidth(), padding(8, 0, 8, 4)]}>
         <Button
           theme={theme}
           onPress={handleFollowNovel}
           onLongPress={showSetCategoryModal}
-          icon={inLibrary ? 'heart' : 'heart-outline'}
+          icon={inLibrary ? FavoriteFilledIcon : FavoriteIcon}
           label={getString(
             inLibrary ? 'novelScreen.inLibaray' : 'novelScreen.addToLibaray',
           )}
@@ -124,7 +135,7 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           <Button
             theme={theme}
             onPress={handleTrackerSheet}
-            icon={trackedNovel ? 'check' : 'sync'}
+            icon={trackedNovel ? CheckIcon : SyncIcon}
             label={
               trackedNovel
                 ? getString('novelScreen.tracked')
@@ -137,7 +148,7 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           <Button
             theme={theme}
             onPress={handleMigrateNovel}
-            icon="swap-vertical-variant"
+            icon={SwapVertIcon}
             label={getString('novelScreen.migrate')}
           />
         ) : null}
@@ -145,11 +156,11 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           <Button
             theme={theme}
             onPress={handleOpenWebView}
-            icon="earth"
+            icon={PublicIcon}
             label={'WebView'}
           />
         ) : null}
-      </View>
+      </Row>
       {novel.id !== 'NO_ID' && setCategoryModalVisible ? (
         <SetCategoryModal
           novelIds={[novel.id]}
@@ -163,28 +174,3 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
 };
 
 export default memo(NovelScreenButtonGroup);
-
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  buttonContainer: {
-    borderRadius: 50,
-    flex: 1,
-    marginHorizontal: 4,
-    overflow: 'hidden',
-  },
-  buttonGroupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginHorizontal: 16,
-    paddingTop: 8,
-  },
-  buttonLabel: {
-    fontSize: 12,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-});

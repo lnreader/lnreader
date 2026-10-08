@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, FlatListProps } from 'react-native';
-import { ProgressBar } from 'react-native-paper';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 import { useFilteredInstalledPlugins, useTheme } from '@hooks/persisted';
 
 import EmptyView from '@components/EmptyView';
@@ -8,7 +8,14 @@ import MigrationNovelList from './MigrationNovelList';
 
 import { getPlugin } from '@plugins/pluginManager';
 import { useLibraryNovels } from '@screens/library/hooks/useLibrary';
-import { Appbar, SafeAreaView } from '@components';
+import {
+  Appbar,
+  AppText,
+  ComposeList,
+  ProgressIndicator,
+  Screen,
+  useScreenInsets,
+} from '@components';
 import GlobalSearchSkeletonLoading from '../loadingAnimation/GlobalSearchSkeletonLoading';
 import { MigrateNovelScreenProps } from '@navigators/types';
 import { NovelItem } from '@plugins/types';
@@ -25,6 +32,7 @@ export interface SourceSearchResult {
 const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
   const { novel } = route.params;
   const theme = useTheme();
+  const { bottom } = useScreenInsets();
 
   const isMounted = React.useRef(true);
 
@@ -90,23 +98,22 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
       isMounted.current = false;
     };
   }, []);
-
-  const colorError = {
-    color: theme.isDark ? '#F2B8B5' : '#B3261E',
-  };
-
-  const renderItem: FlatListProps<SourceSearchResult>['renderItem'] = ({
-    item,
-  }) => (
-    <>
-      <View style={styles.padding}>
-        <Text style={{ color: theme.onSurface }}>{item.name}</Text>
-        <Text style={[{ color: theme.onSurfaceVariant }, styles.fontSize]}>
+  const renderItem = (item: SourceSearchResult) => (
+    <Column modifiers={[fillMaxWidth()]}>
+      <Column modifiers={[padding(16, 16, 16, 8)]}>
+        <AppText variant="bodyLarge">{item.name}</AppText>
+        <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
           {item.lang}
-        </Text>
-      </View>
+        </AppText>
+      </Column>
       {item.error ? (
-        <Text style={[styles.error, colorError]}>{item.error}</Text>
+        <AppText
+          variant="bodyMedium"
+          color={theme.error}
+          modifiers={[padding(16, 16, 16, 16)]}
+        >
+          {item.error}
+        </AppText>
       ) : item.loading ? (
         <GlobalSearchSkeletonLoading theme={theme} />
       ) : (
@@ -118,49 +125,47 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
           navigation={navigation}
         />
       )}
-    </>
+    </Column>
   );
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={novel.name}
-        handleGoBack={navigation.goBack}
-        theme={theme}
-      />
-      {progress > 0 ? (
-        <ProgressBar
-          color={theme.primary}
-          progress={Math.round(1000 * progress) / 1000}
-        />
-      ) : null}
-      <FlatList
-        contentContainerStyle={styles.flexGrow}
-        data={searchResults}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        extraData={filteredInstalledPlugins}
-        ListEmptyComponent={
-          <EmptyView
-            icon="__φ(．．)"
-            description={`Search a novel in your pinned plugins ${
-              filteredInstalledPlugins.length === 0 ? '(No plugins pinned)' : ''
-            }`}
+    <Screen
+      topBar={
+        <Column modifiers={[fillMaxWidth()]}>
+          <Appbar
+            title={novel.name}
+            handleGoBack={navigation.goBack}
+            theme={theme}
           />
-        }
-      />
-    </SafeAreaView>
+          {progress > 0 ? (
+            <ProgressIndicator
+              progress={Math.round(1000 * progress) / 1000}
+              modifiers={[fillMaxWidth()]}
+            />
+          ) : null}
+        </Column>
+      }
+      list={
+        searchResults.length ? (
+          <ComposeList
+            contentPadding={{ bottom: bottom + 16 }}
+            data={searchResults}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+          />
+        ) : undefined
+      }
+    >
+      {searchResults.length ? null : (
+        <EmptyView
+          icon="__φ(．．)"
+          description={`Search a novel in your pinned plugins ${
+            filteredInstalledPlugins.length === 0 ? '(No plugins pinned)' : ''
+          }`}
+        />
+      )}
+    </Screen>
   );
 };
 
 export default MigrationNovels;
-
-const styles = StyleSheet.create({
-  error: {
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-  },
-  flexGrow: { flexGrow: 1, padding: 4 },
-  padding: { padding: 8, paddingVertical: 16 },
-  fontSize: { fontSize: 12 },
-});

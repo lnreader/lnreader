@@ -1,19 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { FAB, ProgressBar } from 'react-native-paper';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
 import {
-  SlideInRight,
-  SlideOutRight,
-  createAnimatedComponent,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+  fillMaxWidth,
+  imePadding,
+  padding,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { getStringAsync } from 'expo-clipboard';
 import { useFocusEffect } from '@react-navigation/native';
-import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 import {
   EmptyView,
-  SafeAreaView,
+  Fab,
+  ProgressIndicator,
+  Screen,
   SearchbarV2,
   SelectableChip,
 } from '@components/index';
@@ -27,8 +26,10 @@ import { navigationRef } from '@navigators/ShareIntentHandler';
 import { resolveSharedUrl } from '@services/share/resolveSharedUrl';
 import { showToast } from '@utils/showToast';
 import { useGlobalSearch } from './hooks/useGlobalSearch';
-
-const AnimatedFAB = createAnimatedComponent(FAB);
+import ContentPasteIcon from '@expo/material-symbols/content_paste.xml';
+import FilterListIcon from '@expo/material-symbols/filter_list.xml';
+import MenuBookIcon from '@expo/material-symbols/menu_book.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
 
 interface Props {
   route?: {
@@ -50,14 +51,6 @@ const GlobalSearchScreen = (props: Props) => {
   const [clipboardNovel, setClipboardNovel] = useState<
     { pluginId: string; path: string } | undefined
   >();
-  // Edge-to-edge: the IME overlays the screen, so the FAB must float above it.
-  // Shared values track the keyboard frame-by-frame, so the FAB moves with it.
-  const { height: keyboardHeight } = useReanimatedKeyboardAnimation();
-  const fabPositionStyle = useAnimatedStyle(() => ({
-    // The library reports the keyboard height as a negative value (the
-    // translateY convention), so negate it for bottom positioning.
-    bottom: Math.max(16, -keyboardHeight.value),
-  }));
 
   // Only a URL matching an installed source is offered from the clipboard.
   useFocusEffect(
@@ -118,93 +111,81 @@ const GlobalSearchScreen = (props: Props) => {
   const openNovelOffer =
     searchUrlResult?.kind === 'novel'
       ? {
-          icon: 'book-open-page-variant',
+          icon: MenuBookIcon,
           label: getString('globalSearch.openNovel'),
           onPress: handleSubmit,
         }
       : searchText === '' && clipboardNovel
       ? {
-          icon: 'content-paste',
+          icon: ContentPasteIcon,
           label: getString('globalSearch.openCopiedNovel'),
           onPress: () => openNovel(clipboardNovel),
         }
       : null;
 
   return (
-    <SafeAreaView>
-      <SearchbarV2
-        searchText={searchText}
-        placeholder={getString('browseScreen.globalSearch')}
-        leftIcon="magnify"
-        onChangeText={onChangeText}
-        onSubmitEditing={handleSubmit}
-        clearSearchbar={clearSearchbar}
-        theme={theme}
-      />
-      {progress ? (
-        <ProgressBar
-          color={theme.primary}
-          progress={Math.round(1000 * progress) / 1000}
-        />
-      ) : null}
-      {progress > 0 ? (
-        <View style={styles.filterContainer}>
-          <SelectableChip
-            label="Has results"
-            selected={hasResultsOnly}
-            icon="filter-variant"
-            showCheckIcon={false}
-            theme={theme}
-            onPress={() => setHasResultsOnly(!hasResultsOnly)}
-            mode="outlined"
-          />
-        </View>
-      ) : null}
-      <GlobalSearchResultsList
-        searchResults={searchResults}
-        ListEmptyComponent={
-          <EmptyView
-            icon="__φ(．．)"
-            description={`${getString('globalSearch.searchIn')} ${getString(
-              'globalSearch.allSources',
-            )}`}
+    <Screen
+      topBar={
+        <Column modifiers={[fillMaxWidth()]}>
+          <SearchbarV2
+            searchText={searchText}
+            placeholder={getString('browseScreen.globalSearch')}
+            leftIcon={SearchIcon}
+            onChangeText={onChangeText}
+            onSubmitEditing={handleSubmit}
+            clearSearchbar={clearSearchbar}
             theme={theme}
           />
-        }
-      />
-      {openNovelOffer ? (
-        <AnimatedFAB
-          entering={SlideInRight.duration(250)}
-          exiting={SlideOutRight.duration(250)}
-          style={[
-            styles.openNovelFabContainer,
-            fabPositionStyle,
-            { backgroundColor: theme.primary },
-          ]}
-          testID="open-novel-button"
-          icon={openNovelOffer.icon}
-          label={openNovelOffer.label}
-          uppercase={false}
-          color={theme.onPrimary}
-          onPress={openNovelOffer.onPress}
+          {progress ? (
+            <ProgressIndicator
+              progress={Math.round(1000 * progress) / 1000}
+              modifiers={[fillMaxWidth()]}
+            />
+          ) : null}
+          {progress > 0 ? (
+            <Row modifiers={[fillMaxWidth(), padding(8, 16, 8, 0)]}>
+              <SelectableChip
+                label="Has results"
+                selected={hasResultsOnly}
+                icon={FilterListIcon}
+                showCheckIcon={false}
+                theme={theme}
+                onPress={() => setHasResultsOnly(!hasResultsOnly)}
+                mode="outlined"
+              />
+            </Row>
+          ) : null}
+        </Column>
+      }
+      list={
+        <GlobalSearchResultsList
+          searchResults={searchResults}
+          ListEmptyComponent={
+            <EmptyView
+              icon="__φ(．．)"
+              description={`${getString('globalSearch.searchIn')} ${getString(
+                'globalSearch.allSources',
+              )}`}
+              theme={theme}
+            />
+          }
         />
-      ) : null}
-    </SafeAreaView>
+      }
+      floatingAction={
+        openNovelOffer ? (
+          // Edge-to-edge: the IME overlays the screen, so the FAB must float above it.
+          <Box modifiers={[imePadding()]}>
+            <Fab
+              extended
+              icon={openNovelOffer.icon}
+              label={openNovelOffer.label}
+              onPress={openNovelOffer.onPress}
+            />
+          </Box>
+        ) : undefined
+      }
+    />
   );
 };
 
 export default GlobalSearchScreen;
-
-const styles = StyleSheet.create({
-  openNovelFabContainer: {
-    position: 'absolute',
-    right: 0,
-    bottom: 16,
-    margin: 16,
-  },
-  filterContainer: {
-    paddingHorizontal: 8,
-    paddingTop: 16,
-    flexDirection: 'row',
-  },
-});

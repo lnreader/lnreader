@@ -1,18 +1,13 @@
 import React from 'react';
-import { StyleSheet, ActivityIndicator } from 'react-native';
+import { Box, LoadingIndicator } from '@expo/ui/jetpack-compose';
+import { fillMaxSize } from '@expo/ui/jetpack-compose/modifiers';
 
 import { ThemeColors } from '../../theme/types';
 
 const LoadingScreen: React.FC<{ theme: ThemeColors }> = ({ theme }) => (
-  <ActivityIndicator size={50} color={theme.primary} style={styles.indicator} />
+  <Box contentAlignment="center" modifiers={[fillMaxSize()]}>
+    <LoadingIndicator color={theme.primary} />
+  </Box>
 );
 
 export default LoadingScreen;
-
-const styles = StyleSheet.create({
-  indicator: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-});

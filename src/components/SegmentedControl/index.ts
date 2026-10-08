@@ -1,4 +1,4 @@
-export { SegmentedControl } from './SegmentedControl';
+export { SegmentedControl, MultiSegmentedControl } from './SegmentedControl';
 export type {
   SegmentedControlOption,
   SegmentedControlProps,

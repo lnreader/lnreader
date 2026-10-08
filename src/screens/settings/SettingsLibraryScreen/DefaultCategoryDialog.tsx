@@ -1,12 +1,11 @@
 import React from 'react';
-import { FlatList, StyleSheet } from 'react-native';
 
 import { Dialog, RadioButton } from '@components';
 
 import { getString } from '@i18n/translations';
-import { useTheme } from '@hooks/persisted';
 
 import { Category } from '@database/types';
+import { useTheme } from '@hooks/persisted';
 
 interface DefaultCategoryDialogProps {
   visible: boolean;
@@ -28,7 +27,6 @@ const DefaultCategoryDialog: React.FC<DefaultCategoryDialogProps> = ({
   setDefaultCategory,
 }) => {
   const theme = useTheme();
-
   return (
     <Dialog.Root visible={visible} onDismiss={hideDialog}>
       <Dialog.Title>{getString('categories.defaultCategory')}</Dialog.Title>
@@ -39,20 +37,15 @@ const DefaultCategoryDialog: React.FC<DefaultCategoryDialogProps> = ({
           onPress={setPromptForCategoryOnAdd}
           theme={theme}
         />
-        <FlatList
-          style={styles.scrollArea}
-          initialNumToRender={10}
-          data={categories}
-          keyExtractor={category => category.id.toString()}
-          renderItem={({ item }) => (
-            <RadioButton
-              status={!promptForCategoryOnAdd && item.id === defaultCategoryId}
-              label={item.name}
-              onPress={() => setDefaultCategory(item.id)}
-              theme={theme}
-            />
-          )}
-        />
+        {categories.map(item => (
+          <RadioButton
+            key={item.id.toString()}
+            status={!promptForCategoryOnAdd && item.id === defaultCategoryId}
+            label={item.name}
+            onPress={() => setDefaultCategory(item.id)}
+            theme={theme}
+          />
+        ))}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={hideDialog}>
@@ -64,9 +57,3 @@ const DefaultCategoryDialog: React.FC<DefaultCategoryDialogProps> = ({
 };
 
 export default DefaultCategoryDialog;
-
-const styles = StyleSheet.create({
-  scrollArea: {
-    maxHeight: 480,
-  },
-});

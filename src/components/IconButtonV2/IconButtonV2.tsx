@@ -1,73 +1,107 @@
-import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import Color from 'color';
+import {
+  FilledIconButton,
+  FilledTonalIconButton,
+  IconButton,
+  OutlinedIconButton,
+} from '@expo/ui/jetpack-compose';
+import { type ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
 
-import { ThemeColors } from '../../theme/types';
-import { MaterialDesignIconName } from '@type/icon';
-import { Pressable } from 'react-native-gesture-handler';
-import { PressableEvent } from 'react-native-gesture-handler/lib/typescript/components/Pressable/PressableProps';
+export type IconButtonVariant = 'standard' | 'filled' | 'tonal' | 'outlined';
 
 type Props = {
   accessibilityLabel?: string;
-  name: MaterialDesignIconName;
+  name: IconSource;
   color?: string;
   size?: number;
   disabled?: boolean;
-  padding?: number;
-  onPress?: (event: PressableEvent) => void;
-  onPressIn?: (event: PressableEvent) => void;
+  onPress: () => void;
+  variant?: IconButtonVariant;
+  selected?: boolean;
+  modifiers?: ModifierConfig[];
   theme: ThemeColors;
-  style?: ViewStyle;
 };
 
-const IconButton: React.FC<Props> = ({
+const IconButtonV2 = ({
   accessibilityLabel,
   name,
-  color,
+  color: tint,
   size = 24,
-  padding = 8,
-  onPress,
-  onPressIn,
   disabled,
+  onPress,
+  variant = 'standard',
+  selected,
+  modifiers,
   theme,
-  style,
-}) => (
-  <View style={[styles.container, style]}>
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      style={[styles.pressable, { padding }]}
-      onPress={onPress}
-      onPressIn={onPressIn}
-      disabled={disabled}
-      android_ripple={
-        onPress || onPressIn
-          ? { color: Color(theme.primary).alpha(0.12).string() }
-          : undefined
-      }
-    >
-      <MaterialCommunityIcons
-        name={name}
-        size={size}
-        color={
-          disabled
-            ? Color(theme.onSurface).alpha(0.38).string()
-            : color || theme.onSurface
-        }
-      />
-    </Pressable>
-  </View>
-);
+}: Props) => {
+  const glyph = (
+    <AppIcon source={name} label={accessibilityLabel} size={size} />
+  );
+  const common = { onClick: onPress, enabled: !disabled, modifiers };
+  const disabledContentColor = theme.onSurfaceDisabled;
 
-export default React.memo(IconButton);
+  switch (variant) {
+    case 'filled':
+      return (
+        <FilledIconButton
+          {...common}
+          colors={{
+            containerColor: theme.primary,
+            contentColor: theme.onPrimary,
+            disabledContainerColor: theme.surfaceDisabled,
+            disabledContentColor,
+          }}
+        >
+          {glyph}
+        </FilledIconButton>
+      );
+    case 'tonal':
+      return (
+        <FilledTonalIconButton
+          {...common}
+          colors={{
+            containerColor: selected
+              ? theme.primaryContainer
+              : theme.secondaryContainer,
+            contentColor: selected
+              ? theme.onPrimaryContainer
+              : theme.onSecondaryContainer,
+            disabledContainerColor: theme.surfaceDisabled,
+            disabledContentColor,
+          }}
+        >
+          {glyph}
+        </FilledTonalIconButton>
+      );
+    case 'outlined':
+      return (
+        <OutlinedIconButton
+          {...common}
+          colors={{
+            containerColor: 'transparent',
+            contentColor: tint ?? theme.onSurfaceVariant,
+            disabledContentColor,
+          }}
+        >
+          {glyph}
+        </OutlinedIconButton>
+      );
+    default:
+      return (
+        <IconButton
+          {...common}
+          colors={{
+            containerColor: 'transparent',
+            contentColor:
+              tint ?? (selected ? theme.primary : theme.onSurfaceVariant),
+            disabledContentColor,
+          }}
+        >
+          {glyph}
+        </IconButton>
+      );
+  }
+};
 
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 50,
-    overflow: 'hidden',
-  },
-  pressable: {
-    padding: 8,
-  },
-});
+export default IconButtonV2;

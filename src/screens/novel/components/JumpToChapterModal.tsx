@@ -1,9 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Column, HorizontalDivider } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { getString } from '@i18n/translations';
-import { Dialog, SwitchItem } from '@components';
+import {
+  AppText,
+  Dialog,
+  SwitchItem,
+  TextInput,
+  type ComposeListHandle,
+} from '@components';
 
-import { HelperText, Text, TextInput } from 'react-native-paper';
 import { useTheme } from '@hooks/persisted';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { NovelScreenProps } from '@navigators/types';
@@ -11,26 +21,59 @@ import {
   getNovelChaptersByNumber,
   getNovelChaptersByName,
 } from '@database/queries/ChapterQueries';
-import {
-  LegendList,
-  LegendListRef,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
 import { useNovelAction, useNovelValue } from '../NovelContext';
 import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/store-helper/bootstrapService';
 
 interface JumpToChapterModalProps {
   hideModal: () => void;
   modalVisible: boolean;
-  navigation: NovelScreenProps['navigation'];
+  navigation?: NovelScreenProps['navigation'];
+  /** Opens a chapter in place of navigating to the reader. */
+  onOpenChapter?: (chapter: ChapterInfo) => void;
   novel: NovelInfo;
-  chapterListRef: React.RefObject<LegendListRef | null>;
+  chapterListRef: React.RefObject<ComposeListHandle | null>;
 }
+
+const ChapterResult = ({
+  item,
+  disabled,
+  onPress,
+}: {
+  item: ChapterInfo;
+  disabled: boolean;
+  onPress: () => void;
+}) => {
+  const theme = useTheme();
+  return (
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        ...(disabled ? [] : [clickable(onPress)]),
+        padding(16, 12, 16, 12),
+      ]}
+    >
+      <AppText maxLines={1} color={theme.onSurface}>
+        {item.name}
+      </AppText>
+      {item?.releaseTime ? (
+        <AppText
+          maxLines={1}
+          variant="bodySmall"
+          color={theme.onSurfaceVariant}
+          modifiers={[padding(0, 2, 0, 0)]}
+        >
+          {item.releaseTime}
+        </AppText>
+      ) : null}
+    </Column>
+  );
+};
 
 const JumpToChapterModal = ({
   hideModal,
   modalVisible,
   navigation,
+  onOpenChapter,
   novel,
   chapterListRef,
 }: JumpToChapterModalProps) => {
@@ -54,7 +97,6 @@ const JumpToChapterModal = ({
   const [error, setError] = useState('');
   const [result, setResult] = useState<ChapterInfo[]>([]);
   const [searching, setSearching] = useState(false);
-  const inputTheme = useMemo(() => ({ colors: theme }), [theme]);
 
   const onDismiss = () => {
     requestIdRef.current += 1;
@@ -69,7 +111,11 @@ const JumpToChapterModal = ({
 
   const navigateToChapter = (chap: ChapterInfo) => {
     onDismiss();
-    navigation.navigate('Chapter', {
+    if (onOpenChapter) {
+      onOpenChapter(chap);
+      return;
+    }
+    navigation?.navigate('Chapter', {
       novel: novel,
       chapter: chap,
     });
@@ -79,9 +125,8 @@ const JumpToChapterModal = ({
     const loadedIndex = loadedChapters.findIndex(c => c.id === chap.id);
     if (loadedIndex >= 0) {
       onDismiss();
-      chapterListRef.current?.scrollToIndex({
+      chapterListRef.current?.scrollToIndex(loadedIndex, {
         animated: true,
-        index: loadedIndex,
         viewPosition: 0.5,
       });
       return;
@@ -115,9 +160,8 @@ const JumpToChapterModal = ({
           }
 
           onDismiss();
-          chapterListRef.current?.scrollToIndex({
+          chapterListRef.current?.scrollToIndex(resolvedIndex, {
             animated: true,
-            index: resolvedIndex,
             viewPosition: 0.5,
           });
           resolve();
@@ -164,29 +208,14 @@ const JumpToChapterModal = ({
     }
   };
 
-  const renderItem = ({ item }: LegendListRenderItemProps<ChapterInfo>) => {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        android_ripple={{ color: theme.rippleColor }}
-        disabled={searching}
-        onPress={() => void executeFunction(item)}
-        style={styles.listElementContainer}
-      >
-        <Text numberOfLines={1} style={{ color: theme.onSurface }}>
-          {item.name}
-        </Text>
-        {item?.releaseTime ? (
-          <Text
-            numberOfLines={1}
-            style={[{ color: theme.onSurfaceVariant }, styles.dateCtn]}
-          >
-            {item.releaseTime}
-          </Text>
-        ) : null}
-      </Pressable>
-    );
-  };
+  const renderItem = (item: ChapterInfo) => (
+    <ChapterResult
+      key={`chapter_${item.id}`}
+      item={item}
+      disabled={searching}
+      onPress={() => void executeFunction(item)}
+    />
+  );
 
   const onSubmit = async () => {
     if (searching) {
@@ -290,11 +319,6 @@ const JumpToChapterModal = ({
   const hasKnownMax = maxNumber >= minNumber;
   const inputPlaceholder =
     !mode && hasKnownMax ? `${minNumber}–${maxNumber}` : undefined;
-  const listExtraData = useMemo(
-    () => ({ openChapter, searching }),
-    [openChapter, searching],
-  );
-
   return (
     <Dialog.Root visible={modalVisible} onDismiss={onDismiss}>
       <Dialog.Header>
@@ -305,70 +329,46 @@ const JumpToChapterModal = ({
           {getString('novelScreen.jumpToChapterModal.description')}
         </Dialog.Description>
       </Dialog.Header>
-      <Dialog.ScrollArea>
-        <LegendList
-          contentContainerStyle={styles.listContentCtn}
-          data={result}
-          estimatedItemSize={64}
-          extraData={listExtraData}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={item => `chapter_${item.id}`}
-          ListHeaderComponent={
-            <View>
-              <SwitchItem
-                description={getString(
-                  'novelScreen.jumpToChapterModal.searchByNameDescription',
-                )}
-                label={getString('novelScreen.jumpToChapterModal.searchByName')}
-                value={mode}
-                theme={theme}
-                onPress={toggleMode}
-              />
-              <View style={styles.inputContainer}>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  error={Boolean(error)}
-                  label={getString(
-                    mode
-                      ? 'novelScreen.jumpToChapterModal.chapterName'
-                      : 'novelScreen.jumpToChapterModal.chapterNumber',
-                  )}
-                  mode="outlined"
-                  onChangeText={onChangeText}
-                  onSubmitEditing={() => void onSubmit()}
-                  placeholder={inputPlaceholder}
-                  returnKeyType="search"
-                  theme={inputTheme}
-                  value={text}
-                  keyboardType={mode ? 'default' : 'number-pad'}
-                />
-                {error ? <HelperText type="error">{error}</HelperText> : null}
-              </View>
-              <SwitchItem
-                description={getString(
-                  'novelScreen.jumpToChapterModal.openChapterDescription',
-                )}
-                label={getString('novelScreen.jumpToChapterModal.openChapter')}
-                value={openChapter}
-                theme={theme}
-                onPress={() => setOpenChapter(current => !current)}
-              />
-              {result.length > 0 ? (
-                <View
-                  importantForAccessibility="no"
-                  style={[
-                    styles.resultDivider,
-                    { backgroundColor: theme.outlineVariant },
-                  ]}
-                />
-              ) : null}
-            </View>
-          }
-          recycleItems
-          renderItem={renderItem}
-          style={styles.list}
+      <Dialog.ScrollArea fixed>
+        <SwitchItem
+          description={getString(
+            'novelScreen.jumpToChapterModal.searchByNameDescription',
+          )}
+          label={getString('novelScreen.jumpToChapterModal.searchByName')}
+          value={mode}
+          onPress={toggleMode}
+          theme={theme}
         />
+        <Column modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}>
+          <TextInput
+            error={error || null}
+            label={getString(
+              mode
+                ? 'novelScreen.jumpToChapterModal.chapterName'
+                : 'novelScreen.jumpToChapterModal.chapterNumber',
+            )}
+            outlined
+            onChangeText={onChangeText}
+            onSubmit={() => void onSubmit()}
+            placeholder={inputPlaceholder}
+            imeAction="search"
+            value={text}
+            keyboardType={mode ? 'text' : 'number'}
+          />
+        </Column>
+        <SwitchItem
+          description={getString(
+            'novelScreen.jumpToChapterModal.openChapterDescription',
+          )}
+          label={getString('novelScreen.jumpToChapterModal.openChapter')}
+          value={openChapter}
+          onPress={() => setOpenChapter(current => !current)}
+          theme={theme}
+        />
+        {result.length > 0 ? (
+          <HorizontalDivider color={theme.outlineVariant} />
+        ) : null}
+        {result.map(renderItem)}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss} title={getString('common.cancel')} />
@@ -384,29 +384,3 @@ const JumpToChapterModal = ({
 };
 
 export default JumpToChapterModal;
-
-const styles = StyleSheet.create({
-  dateCtn: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  inputContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  list: {
-    flexGrow: 0,
-    flexShrink: 1,
-  },
-  listContentCtn: {
-    paddingBottom: 8,
-  },
-  listElementContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  resultDivider: {
-    height: 1,
-    width: '100%',
-  },
-});

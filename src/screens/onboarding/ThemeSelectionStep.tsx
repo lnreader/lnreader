@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Column, FlowRow } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 import {
   useMMKVBoolean,
   useMMKVNumber,
   useMMKVString,
 } from 'react-native-mmkv';
-import { SegmentedControl } from '@components';
+import { SegmentedControl, SwitchItem } from '@components';
 import type { SegmentedControlOption } from '@components/SegmentedControl';
 import { ThemePicker } from '@components/ThemePicker/ThemePicker';
 import { ThemeColors } from '@theme/types';
@@ -17,8 +18,6 @@ import {
   toDynamicThemeColors,
 } from '@theme/dynamic';
 import { getString } from '@i18n/translations';
-import { LegendList } from '@legendapp/list/react-native';
-import Switch from '@components/Switch/Switch';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -35,18 +34,12 @@ const AmoledToggle: React.FC<AmoledToggleProps> = ({ theme }) => {
   if (!theme.isDark) return null;
 
   return (
-    <Pressable
-      style={[
-        styles.amoledContainer,
-        { backgroundColor: theme.surfaceVariant },
-      ]}
+    <SwitchItem
+      label={getString('appearanceScreen.pureBlackDarkMode')}
+      value={isAmoledBlack}
       onPress={toggle}
-    >
-      <Text style={[styles.amoledLabel, { color: theme.onSurface }]}>
-        {getString('appearanceScreen.pureBlackDarkMode')}
-      </Text>
-      <Switch value={isAmoledBlack} onValueChange={toggle} />
-    </Pressable>
+      theme={theme}
+    />
   );
 };
 
@@ -96,77 +89,31 @@ export default function ThemeSelectionStep() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Segmented Control */}
-      <View style={styles.segmentedControlContainer}>
-        <SegmentedControl
-          options={themeModeOptions}
-          value={currentMode}
-          onChange={handleModeChange}
-          theme={theme}
-        />
-      </View>
-      {/* Theme List */}
-      <LegendList
-        numColumns={3}
-        showsHorizontalScrollIndicator={false}
-        data={availableThemes}
-        extraData={theme}
-        keyExtractor={item => 'theme-' + item.id}
-        renderItem={({ item }) => (
-          <View>
-            <ThemePicker
-              currentTheme={theme}
-              theme={item}
-              onPress={() => handleThemeSelect(item)}
-            />
-          </View>
-        )}
+    <Column
+      verticalArrangement={{ spacedBy: 24 }}
+      modifiers={[fillMaxWidth(), padding(16, 0, 16, 0)]}
+    >
+      <SegmentedControl
+        options={themeModeOptions}
+        value={currentMode}
+        onChange={handleModeChange}
+        theme={theme}
       />
-      {/* AMOLED Toggle */}
+      <FlowRow
+        horizontalArrangement={{ spacedBy: 12 }}
+        verticalArrangement={{ spacedBy: 12 }}
+        modifiers={[fillMaxWidth()]}
+      >
+        {availableThemes.map(item => (
+          <ThemePicker
+            key={'theme-' + item.id}
+            currentTheme={theme}
+            theme={item}
+            onPress={() => handleThemeSelect(item)}
+          />
+        ))}
+      </FlowRow>
       <AmoledToggle theme={theme} />
-    </View>
+    </Column>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  segmentedControlContainer: {
-    marginBottom: 24,
-  },
-  amoledContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-    marginTop: 'auto',
-  },
-  amoledLabel: {
-    fontSize: 16,
-    fontWeight: '400',
-  },
-  toggle: {
-    width: 52,
-    height: 32,
-    borderRadius: 16,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  toggleThumb: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  toggleThumbActive: {
-    alignSelf: 'flex-end',
-  },
-});

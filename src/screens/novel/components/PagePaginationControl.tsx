@@ -1,10 +1,17 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { IconButton } from 'react-native-paper';
-import color from 'color';
+import { Row } from '@expo/ui/jetpack-compose';
+import {
+  alpha,
+  fillMaxWidth,
+  height,
+  padding,
+  weight,
+  defaultMinSize,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
-import { Row } from '@components/Common';
-import { borderColor } from '@theme/colors';
+import { AppIcon, AppText, OutlinedBox } from '@components';
+import ChevronLeftIcon from '@expo/material-symbols/chevron_left.xml';
+import ChevronRightIcon from '@expo/material-symbols/chevron_right.xml';
 
 interface PagePaginationControlProps {
   pages: string[];
@@ -83,174 +90,99 @@ const PagePaginationControl: React.FC<PagePaginationControlProps> = ({
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Pressable
-        style={[
-          styles.button,
-          styles.navButton,
-          {
-            borderColor: borderColor,
-            backgroundColor: theme.surface,
-          },
-          !canGoPrevious && styles.disabledButton,
-        ]}
-        onPress={handlePrevious}
-        disabled={!canGoPrevious}
-        android_ripple={{ color: theme.rippleColor }}
-      >
-        <IconButton
-          icon="chevron-left"
-          iconColor={canGoPrevious ? theme.onSurface : theme.onSurfaceDisabled}
-          size={20}
-          style={styles.iconButton}
-        />
-      </Pressable>
+  const navButton = (
+    icon: typeof ChevronLeftIcon,
+    enabled: boolean,
+    onPress: () => void,
+  ) => (
+    <OutlinedBox
+      shape={8}
+      outlineWidth={1}
+      outlineColor={theme.outlineVariant}
+      color={theme.surface}
+      contentAlignment="center"
+      onPress={enabled ? onPress : undefined}
+      modifiers={[
+        height(40),
+        defaultMinSize({ minWidth: 40 }),
+        ...(enabled ? [] : [alpha(0.5)]),
+      ]}
+    >
+      <AppIcon
+        source={icon}
+        size={20}
+        tint={enabled ? theme.onSurface : theme.onSurfaceDisabled}
+      />
+    </OutlinedBox>
+  );
 
-      <Row style={styles.pageNumbersRow}>
+  return (
+    <Row
+      verticalAlignment="center"
+      horizontalArrangement={{ spacedBy: 8 }}
+      modifiers={[fillMaxWidth(), padding(16, 0, 16, 16)]}
+    >
+      {navButton(ChevronLeftIcon, canGoPrevious, handlePrevious)}
+
+      <Row
+        verticalAlignment="center"
+        horizontalArrangement="spaceEvenly"
+        modifiers={[weight(1)]}
+      >
         {pageIndices.map((pageIndex, index) => {
           if (pageIndex === 'ellipsis') {
             return (
-              <Pressable
+              <OutlinedBox
                 key={`ellipsis-${index}`}
-                style={[
-                  styles.button,
-                  styles.ellipsisButton,
-                  {
-                    borderColor: borderColor,
-                    backgroundColor: theme.surface,
-                  },
-                ]}
+                shape={8}
+                outlineWidth={1}
+                outlineColor={theme.outlineVariant}
+                color={theme.surface}
+                contentAlignment="center"
                 onPress={onOpenDrawer}
-                android_ripple={{ color: theme.rippleColor }}
+                modifiers={[height(40), defaultMinSize({ minWidth: 40 })]}
               >
-                <Text style={[styles.ellipsisText, { color: theme.onSurface }]}>
+                <AppText
+                  variant="titleMedium"
+                  color={theme.onSurface}
+                  modifiers={[padding(12, 0, 12, 0)]}
+                >
                   ...
-                </Text>
-              </Pressable>
+                </AppText>
+              </OutlinedBox>
             );
           }
 
           const isActive = pageIndex === currentPageIndex;
           const pageName = pages[pageIndex];
           return (
-            <Pressable
+            <OutlinedBox
               key={`page-${pageIndex}`}
-              style={[
-                styles.button,
-                {
-                  backgroundColor: isActive ? theme.primary : theme.surface,
-                },
-                isActive ? styles.activeButton : styles.inactiveButton,
-              ]}
+              shape={8}
+              outlineWidth={1}
+              outlineColor={isActive ? theme.primary : theme.outlineVariant}
+              color={isActive ? theme.primary : theme.surface}
+              contentAlignment="center"
               onPress={() => handlePagePress(pageIndex)}
-              android_ripple={{
-                color: isActive
-                  ? color(theme.onPrimary).alpha(0.2).string()
-                  : theme.rippleColor,
-              }}
+              modifiers={[height(40), defaultMinSize({ minWidth: 40 })]}
             >
-              <Text
-                style={[
-                  styles.pageText,
-                  {
-                    color: isActive ? theme.onPrimary : theme.onSurface,
-                  },
-                  isActive ? styles.activePageText : styles.inactivePageText,
-                ]}
-                numberOfLines={1}
+              <AppText
+                variant="bodyLarge"
+                weight={isActive ? '600' : '400'}
+                color={isActive ? theme.onPrimary : theme.onSurface}
+                maxLines={1}
+                modifiers={[padding(12, 0, 12, 0)]}
               >
                 {pageName}
-              </Text>
-            </Pressable>
+              </AppText>
+            </OutlinedBox>
           );
         })}
       </Row>
 
-      <Pressable
-        style={[
-          styles.button,
-          styles.navButton,
-          {
-            borderColor: borderColor,
-            backgroundColor: theme.surface,
-          },
-          !canGoNext && styles.disabledButton,
-        ]}
-        onPress={handleNext}
-        disabled={!canGoNext}
-        android_ripple={{ color: theme.rippleColor }}
-      >
-        <IconButton
-          icon="chevron-right"
-          iconColor={canGoNext ? theme.onSurface : theme.onSurfaceDisabled}
-          size={20}
-          style={styles.iconButton}
-        />
-      </Pressable>
-    </View>
+      {navButton(ChevronRightIcon, canGoNext, handleNext)}
+    </Row>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: 'center',
-    minWidth: 40,
-    paddingHorizontal: 12,
-  },
-  container: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  ellipsisButton: {
-    borderStyle: 'dashed',
-  },
-  ellipsisText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  iconButton: {
-    margin: 0,
-  },
-  navButton: {
-    paddingHorizontal: 0,
-  },
-  pageNumbersRow: {
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    flex: 1,
-    flexDirection: 'row',
-    flexShrink: 1,
-    gap: 8,
-  },
-  pageText: {
-    fontSize: 15,
-    letterSpacing: 0.15,
-    maxWidth: 80,
-  },
-  activeButton: {
-    borderColor: 'transparent',
-  },
-  inactiveButton: {
-    borderColor: borderColor,
-  },
-  activePageText: {
-    fontWeight: '600',
-  },
-  inactivePageText: {
-    fontWeight: '400',
-  },
-});
 
 export default PagePaginationControl;

@@ -1,70 +1,48 @@
-import React, { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  horizontalScroll,
+  padding,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { SelectableChip } from '@components/index';
+import { AppText, SelectableChip } from '@components/index';
 import { getString } from '@i18n/translations';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-
-import { Font, readerFonts } from '@utils/constants/readerConstants';
-import { FlatList } from 'react-native-gesture-handler';
-
-interface FontChipProps {
-  item: Font;
-}
+import { readerFonts } from '@utils/constants/readerConstants';
 
 const ReaderFontPicker = () => {
   const theme = useTheme();
   const { fontFamily, setChapterReaderSettings } = useChapterReaderSettings();
 
-  const isSelected = useCallback(
-    (item: Font) => item.fontFamily === fontFamily,
-    [fontFamily],
-  );
-
-  const FontChipItem = useCallback(
-    ({ item }: FontChipProps) => {
-      return (
-        <SelectableChip
-          key={item.fontFamily}
-          label={item.name}
-          selected={isSelected(item)}
-          theme={theme}
-          onPress={() =>
-            setChapterReaderSettings({ fontFamily: item.fontFamily })
-          }
-          customFontFamily={item.fontFamily}
-        />
-      );
-    },
-    [isSelected, setChapterReaderSettings, theme],
-  );
-
   return (
-    <View style={styles.row}>
-      <Text style={[{ color: theme.onSurfaceVariant }, styles.title]}>
+    <Column modifiers={[fillMaxWidth(), padding(0, 8, 0, 8)]}>
+      <AppText
+        variant="bodyMedium"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(16, 0, 16, 8)]}
+      >
         {getString('readerScreen.bottomSheet.fontStyle')}
-      </Text>
-      <FlatList
-        data={readerFonts}
-        renderItem={FontChipItem}
-        keyExtractor={(item, index) => 'font' + index}
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-      />
-    </View>
+      </AppText>
+      <Row
+        horizontalArrangement={{ spacedBy: 8 }}
+        modifiers={[fillMaxWidth(), horizontalScroll(), padding(16, 0, 16, 0)]}
+      >
+        {readerFonts.map(item => (
+          <SelectableChip
+            key={item.fontFamily || 'original'}
+            label={item.name}
+            selected={item.fontFamily === fontFamily}
+            theme={theme}
+            onPress={() =>
+              setChapterReaderSettings({ fontFamily: item.fontFamily })
+            }
+            customFontFamily={item.fontFamily || undefined}
+          />
+        ))}
+      </Row>
+    </Column>
   );
 };
 
 export default React.memo(ReaderFontPicker);
-const styles = StyleSheet.create({
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  title: {
-    marginEnd: 16,
-  },
-});

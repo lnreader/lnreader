@@ -1,96 +1,18 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { getString } from '@i18n/translations';
-import { Appbar } from 'react-native-paper';
-import { Menu as DefaultMenu } from '@components';
-import { ThemeColors } from '@theme/types';
-import Animated, {
+import {
+  runOnJS,
   SharedValue,
-  SlideOutUp,
-  interpolateColor,
-  useAnimatedStyle,
+  useAnimatedReaction,
 } from 'react-native-reanimated';
+import Color from 'color';
+import { getString } from '@i18n/translations';
+import { Appbar, IconButtonV2, OverflowMenu } from '@components';
+import { ThemeColors } from '@theme/types';
 import ExportNovelAsEpubButton from './ExportNovelAsEpubButton';
 import { NovelInfo } from '@database/types';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { MaterialDesignIconName } from '@type/icon';
-
-const NovelAppbarAction = memo(
-  ({
-    icon,
-    onPress,
-    theme,
-    style,
-    size = 24,
-  }: {
-    icon: MaterialDesignIconName;
-    onPress: () => void;
-    theme: ThemeColors;
-    style?: StyleProp<ViewStyle>;
-    size?: number;
-  }) => {
-    const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
-    return (
-      <Appbar.Action
-        theme={appbarTheme}
-        icon={icon}
-        onPress={onPress}
-        style={style}
-        size={size}
-      />
-    );
-  },
-);
-
-const Menu = React.memo(
-  ({
-    visible,
-    onDismiss,
-    anchor,
-    items,
-    theme,
-  }: {
-    visible: boolean;
-    onDismiss: () => void;
-    anchor: React.ReactNode;
-    theme: ThemeColors;
-    items: { label: string; onPress: () => void }[];
-  }) => {
-    const contentStyle = useMemo(
-      () => ({ backgroundColor: theme.surface2 }),
-      [theme.surface2],
-    );
-    const itemStyle = useMemo(
-      () => ({ backgroundColor: theme.surface2 }),
-      [theme.surface2],
-    );
-    const titleStyle = useMemo(
-      () => ({ color: theme.onSurface }),
-      [theme.onSurface],
-    );
-
-    return (
-      <DefaultMenu
-        visible={visible}
-        onDismiss={onDismiss}
-        anchor={anchor}
-        contentStyle={contentStyle}
-      >
-        {items.map((item, index) => (
-          <DefaultMenu.Item
-            key={index + item.label}
-            title={item.label}
-            style={itemStyle}
-            titleStyle={titleStyle}
-            onPress={() => {
-              onDismiss();
-              item.onPress();
-            }}
-          />
-        ))}
-      </DefaultMenu>
-    );
-  },
-);
+import DownloadIcon from '@expo/material-symbols/download.xml';
+import FileExportIcon from '@expo/material-symbols/file_export.xml';
+import ManageSearchIcon from '@expo/material-symbols/manage_search.xml';
 
 const NovelAppbar = ({
   novel,
@@ -125,28 +47,25 @@ const NovelAppbar = ({
   headerOpacity: SharedValue<number>;
   hideActions?: boolean;
 }) => {
-  const headerOpacityStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      headerOpacity.value,
-      [0, 1],
-      ['transparent', theme.surface2 || theme.surface],
-    );
-    return {
-      backgroundColor,
-    };
-  });
-
-  const [downloadMenu, showDownloadMenu] = useState(false);
-  const [extraMenu, showExtraMenu] = useState(false);
-
-  const appbarTheme = useMemo(() => ({ colors: theme }), [theme]);
+  // The Compose bar cannot read a shared value; it fades in tenths.
+  const [opacity, setOpacity] = useState(0);
+  useAnimatedReaction(
+    () => Math.round(headerOpacity.value * 10) / 10,
+    (current, previous) => {
+      if (current !== previous) {
+        runOnJS(setOpacity)(current);
+      }
+    },
+    [headerOpacity],
+  );
 
   const renderExportIcon = useCallback(
     (onPress: () => void) => (
-      <NovelAppbarAction
-        theme={theme}
-        icon="file-export-outline"
+      <IconButtonV2
+        name={FileExportIcon}
+        accessibilityLabel={getString('novelScreen.exportEpubModal.title')}
         onPress={onPress}
+        theme={theme}
       />
     ),
     [theme],
@@ -228,83 +147,45 @@ const NovelAppbar = ({
     showEditInfoModal,
   ]);
 
-  const openDlMenu = useCallback(() => showDownloadMenu(true), []);
-  const closeDlMenu = useCallback(() => showDownloadMenu(false), []);
-  const openExtraMenu = useCallback(() => showExtraMenu(true), []);
-  const closeExtraMenu = useCallback(() => showExtraMenu(false), []);
-
   const openJumpToChapter = useCallback(
     () => showJumpToChapterModal(true),
     [showJumpToChapterModal],
   );
 
-  const headerTheme = useMemo(
-    () => ({ colors: { ...theme, surface: 'transparent' } }),
-    [theme],
-  );
-
   return (
-    <Animated.View
-      exiting={SlideOutUp.duration(250)}
-      style={headerOpacityStyle}
+    <Appbar
+      handleGoBack={goBack}
+      title={opacity > 0 ? novel?.name ?? '' : ''}
+      titleColor={Color(theme.onSurface).alpha(opacity).string()}
+      theme={theme}
+      containerColor={Color(theme.surfaceContainer).alpha(opacity).string()}
     >
-      <Appbar.Header theme={headerTheme}>
-        <Appbar.BackAction onPress={goBack} />
-
-        {hideActions ? null : (
-          <View style={styles.row}>
-            <ExportNovelAsEpubButton
-              novel={novel}
-              renderIcon={renderExportIcon}
+      {hideActions ? null : (
+        <>
+          <ExportNovelAsEpubButton
+            novel={novel}
+            renderIcon={renderExportIcon}
+          />
+          <IconButtonV2
+            name={ManageSearchIcon}
+            accessibilityLabel={getString(
+              'novelScreen.jumpToChapterModal.jumpToChapter',
+            )}
+            onPress={openJumpToChapter}
+            theme={theme}
+          />
+          {!isLocal ? (
+            <OverflowMenu
+              icon={DownloadIcon}
+              label={getString('common.downloads')}
+              actions={downloadMenuItems}
             />
-            <NovelAppbarAction
-              theme={theme}
-              icon="book-search-outline"
-              onPress={openJumpToChapter}
-            />
-            {!isLocal ? (
-              <Menu
-                theme={theme}
-                visible={downloadMenu}
-                onDismiss={closeDlMenu}
-                anchor={
-                  <Appbar.Action
-                    theme={appbarTheme}
-                    icon="download-outline"
-                    onPress={openDlMenu}
-                    size={26}
-                  />
-                }
-                items={downloadMenuItems}
-              />
-            ) : null}
-            <Menu
-              visible={extraMenu}
-              onDismiss={closeExtraMenu}
-              anchor={
-                <Appbar.Action
-                  theme={appbarTheme}
-                  icon="dots-vertical"
-                  onPress={openExtraMenu}
-                  size={24}
-                />
-              }
-              theme={theme}
-              items={extraMenuItems}
-            />
-          </View>
-        )}
-      </Appbar.Header>
-    </Animated.View>
+          ) : null}
+          <OverflowMenu actions={extraMenuItems} />
+        </>
+      )}
+    </Appbar>
   );
 };
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    position: 'absolute',
-    end: 0,
-  },
-});
 
 export default memo(NovelAppbar);

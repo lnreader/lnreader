@@ -31,6 +31,13 @@ const lastReadChapter = {
 } as History;
 const renderCover = (element: ReactElement) =>
   render(element, { wrapper: Fragment });
+// The cover card is a button too; the shortcut is the innermost match.
+const continueButton = () =>
+  screen
+    .getAllByRole('button', {
+      name: getString('novelScreen.continueReading'),
+    })
+    .at(-1)!;
 
 const Cover = ({
   displayMode,
@@ -47,6 +54,7 @@ const Cover = ({
     <NovelCoverLayoutProvider
       value={{
         coverHeight: 160,
+        coverWidth: 106,
         displayMode,
         numColumns: displayMode === DisplayModes.List ? 1 : 3,
         showDownloadBadges: false,
@@ -78,6 +86,7 @@ const LibraryItem = ({
     <NovelCoverLayoutProvider
       value={{
         coverHeight: 160,
+        coverWidth: 106,
         displayMode: DisplayModes.Comfortable,
         numColumns: 3,
         showDownloadBadges: false,
@@ -111,12 +120,7 @@ describe('NovelCover continue reading', () => {
     displayMode => {
       renderCover(<Cover displayMode={displayMode} />);
 
-      fireEvent.press(
-        screen.getByRole('button', {
-          name: getString('novelScreen.continueReading'),
-        }),
-        { stopPropagation: jest.fn() },
-      );
+      fireEvent.press(continueButton(), { stopPropagation: jest.fn() });
 
       expect(onContinueReading).toHaveBeenCalledTimes(1);
       expect(onPress).not.toHaveBeenCalled();
@@ -154,12 +158,7 @@ describe('NovelCover continue reading', () => {
     ).toBeNull();
 
     rerender(<LibraryItem showContinueReadingButton />);
-    fireEvent.press(
-      screen.getByRole('button', {
-        name: getString('novelScreen.continueReading'),
-      }),
-      { stopPropagation: jest.fn() },
-    );
+    fireEvent.press(continueButton(), { stopPropagation: jest.fn() });
     expect(onContinueReading).toHaveBeenCalledWith(novel, lastReadChapter);
   });
 });

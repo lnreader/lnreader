@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
 
-import { Appbar, List, SafeAreaView } from '@components';
+import { List, SwitchItem } from '@components';
+import SettingsPage from '@screens/settings/components/SettingsPage';
 import { useBoolean } from '@hooks';
 import {
   useAppSettings,
@@ -18,7 +18,6 @@ import {
   displayModesList,
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
-import { Portal } from 'react-native-paper';
 import {
   configureAutomaticLibraryUpdates,
   type AutomaticLibraryUpdateInterval,
@@ -27,7 +26,6 @@ import { showToast } from '@utils/showToast';
 
 import AutomaticUpdatesDialog from './AutomaticUpdatesDialog';
 import DefaultChapterSortModal from '../components/DefaultChapterSortModal';
-import SettingSwitch from '../components/SettingSwitch';
 import DefaultCategoryDialog from './DefaultCategoryDialog';
 import GlobalUpdateCategoriesDialog from './GlobalUpdateCategoriesDialog';
 import SmartUpdateDialog from './SmartUpdateDialog';
@@ -248,226 +246,218 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
     .join(', ');
 
   return (
-    <SafeAreaView excludeTop>
-      <Appbar
-        title={getString('library')}
-        handleGoBack={navigation.goBack}
-        theme={theme}
-      />
-      <ScrollView contentContainerStyle={styles.paddingBottom}>
-        <List.Section>
-          <List.SubHeader theme={theme}>
-            {getString('common.display')}
-          </List.SubHeader>
-          <List.Item
-            title={getString('generalSettingsScreen.displayMode')}
-            description={displayModesList[displayMode].label}
-            onPress={displayModal.setTrue}
+    <SettingsPage
+      title={getString('library')}
+      onBack={navigation.goBack}
+      overlays={
+        <>
+          <DisplayModeModal
+            displayMode={displayMode}
+            displayModalVisible={displayModal.value}
+            hideDisplayModal={displayModal.setFalse}
             theme={theme}
           />
-          <List.Item
-            title={getString('generalSettingsScreen.itemsPerRowLibrary')}
-            description={`${novelsPerRow} ${getString(
-              'generalSettingsScreen.itemsPerRow',
-            )}`}
-            onPress={gridSizeModal.setTrue}
+          <DefaultChapterSortModal
+            defaultChapterSort={defaultChapterSort}
+            displayModalVisible={defaultChapterSortModal.value}
+            hideDisplayModal={defaultChapterSortModal.setFalse}
+            setAppSettings={setAppSettings}
             theme={theme}
           />
-          <List.Item
-            title={getString('generalSettingsScreen.novelBadges')}
-            description={badgeDescription}
-            onPress={novelBadgesModal.setTrue}
+          <GridSizeModal
+            novelsPerRow={novelsPerRow}
+            gridSizeModalVisible={gridSizeModal.value}
+            hideGridSizeModal={gridSizeModal.setFalse}
             theme={theme}
           />
-          <SettingSwitch
-            label={getString('generalSettingsScreen.showContinueReadingButton')}
-            value={showContinueReadingButton}
-            onPress={() =>
-              setLibrarySettings({
-                showContinueReadingButton: !showContinueReadingButton,
-              })
-            }
+          <NovelBadgesModal
+            novelBadgesModalVisible={novelBadgesModal.value}
+            hideNovelBadgesModal={novelBadgesModal.setFalse}
             theme={theme}
           />
-          <List.Item
-            title={getString('generalSettingsScreen.novelSort')}
-            description={`${getString(sortOrderLabel)} ${sortOrderParts[1]}`}
-            onPress={novelSortModal.setTrue}
+          <NovelSortModal
+            novelSortModalVisible={novelSortModal.value}
+            hideNovelSortModal={novelSortModal.setFalse}
             theme={theme}
           />
-          <List.SubHeader theme={theme}>{getString('library')}</List.SubHeader>
-          <List.Item
-            title={getString('categories.header')}
-            description={`${categories.length} ${getString(
-              'common.categories',
-            ).toLowerCase()}`}
-            onPress={() => navigation.navigate('Categories')}
-            theme={theme}
+          <AutomaticUpdatesDialog
+            intervalHours={automaticLibraryUpdateIntervalHours}
+            visible={automaticUpdatesDialog.value}
+            onCancel={automaticUpdatesDialog.setFalse}
+            onSelect={setAutomaticUpdateInterval}
           />
-          <List.Item
-            title={getString('categories.defaultCategory')}
-            description={
-              promptForCategoryOnAdd
-                ? getString('categories.alwaysAsk')
-                : selectedDefaultCategory?.name ?? appDefaultCategory?.name
-            }
-            onPress={defaultCategoryDialog.setTrue}
-            theme={theme}
+          <DefaultCategoryDialog
+            categories={selectableCategories}
+            defaultCategoryId={selectedDefaultCategory?.id ?? 1}
+            promptForCategoryOnAdd={promptForCategoryOnAdd}
+            setPromptForCategoryOnAdd={setPromptForCategoryOnAdd}
+            visible={defaultCategoryDialog.value}
+            hideDialog={defaultCategoryDialog.setFalse}
+            setDefaultCategory={setDefaultCategory}
           />
-          <SettingSwitch
-            label={getString('generalSettingsScreen.updateLibrary')}
-            description={getString('generalSettingsScreen.updateLibraryDesc')}
-            value={updateLibraryOnLaunch}
-            onPress={() =>
-              setAppSettings({ updateLibraryOnLaunch: !updateLibraryOnLaunch })
-            }
-            theme={theme}
+          <GlobalUpdateCategoriesDialog
+            categories={globalUpdateCategories}
+            excludedCategoryIds={draftExcludedCategoryIds}
+            includedCategoryIds={draftIncludedCategoryIds}
+            visible={globalUpdateCategoriesDialog.value}
+            onCancel={globalUpdateCategoriesDialog.setFalse}
+            onChange={updateDraftCategoryFilters}
+            onSave={saveGlobalUpdateCategories}
           />
-          <SettingSwitch
-            label={getString('generalSettingsScreen.useFAB')}
-            description={getString('generalSettingsScreen.useFABDescription')}
-            value={useLibraryFAB}
-            onPress={() => setAppSettings({ useLibraryFAB: !useLibraryFAB })}
-            theme={theme}
+          <SmartUpdateDialog
+            filters={draftSmartUpdateFilters}
+            visible={smartUpdateDialog.value}
+            onCancel={smartUpdateDialog.setFalse}
+            onChange={setDraftSmartUpdateFilters}
+            onSave={saveSmartUpdateFilters}
           />
-          <List.Item
-            title={getString('generalSettingsScreen.chapterSort')}
-            description={`${getString('generalSettingsScreen.bySource')} ${
-              defaultChapterSort === 'positionAsc'
-                ? getString('generalSettingsScreen.asc')
-                : getString('generalSettingsScreen.desc')
-            }`}
-            onPress={defaultChapterSortModal.setTrue}
-            theme={theme}
-          />
-          <List.SubHeader theme={theme}>
-            {getString('generalSettingsScreen.globalUpdate')}
-          </List.SubHeader>
-          <List.Item
-            title={getString('generalSettingsScreen.automaticUpdates')}
-            description={getString(
-              AUTOMATIC_UPDATE_LABELS[automaticLibraryUpdateIntervalHours],
-            )}
-            onPress={automaticUpdatesDialog.setTrue}
-            theme={theme}
-          />
-          <List.Item
-            title={getString('generalSettingsScreen.globalUpdateCategories')}
-            description={`${getString(
-              'generalSettingsScreen.globalUpdateInclude',
-              { categories: includedCategoriesDescription },
-            )}\n${getString('generalSettingsScreen.globalUpdateExclude', {
-              categories: excludedCategoriesDescription,
-            })}`}
-            onPress={showGlobalUpdateCategoriesDialog}
-            theme={theme}
-          />
-          <List.Item
-            title={getString('generalSettingsScreen.smartUpdate')}
-            description={smartUpdateDescription || getString('common.none')}
-            onPress={showSmartUpdateDialog}
-            theme={theme}
-          />
-          <SettingSwitch
-            label={getString('generalSettingsScreen.refreshMetadata')}
-            description={getString(
-              'generalSettingsScreen.refreshMetadataDescription',
-            )}
-            value={refreshNovelMetadata}
-            onPress={() =>
-              setAppSettings({ refreshNovelMetadata: !refreshNovelMetadata })
-            }
-            theme={theme}
-          />
-          <SettingSwitch
-            label={getString('generalSettingsScreen.updateTime')}
-            value={showLastUpdateTime}
-            onPress={() => setShowLastUpdateTime(!showLastUpdateTime)}
-            theme={theme}
-          />
-          <List.SubHeader theme={theme}>
-            {getString('generalSettingsScreen.autoDownload')}
-          </List.SubHeader>
-          <SettingSwitch
-            label={getString('generalSettingsScreen.downloadNewChapters')}
-            value={downloadNewChapters}
-            onPress={() =>
-              setAppSettings({ downloadNewChapters: !downloadNewChapters })
-            }
-            theme={theme}
-          />
-        </List.Section>
-      </ScrollView>
-      <DisplayModeModal
-        displayMode={displayMode}
-        displayModalVisible={displayModal.value}
-        hideDisplayModal={displayModal.setFalse}
-        theme={theme}
-      />
-      <DefaultChapterSortModal
-        defaultChapterSort={defaultChapterSort}
-        displayModalVisible={defaultChapterSortModal.value}
-        hideDisplayModal={defaultChapterSortModal.setFalse}
-        setAppSettings={setAppSettings}
-        theme={theme}
-      />
-      <GridSizeModal
-        novelsPerRow={novelsPerRow}
-        gridSizeModalVisible={gridSizeModal.value}
-        hideGridSizeModal={gridSizeModal.setFalse}
-        theme={theme}
-      />
-      <NovelBadgesModal
-        novelBadgesModalVisible={novelBadgesModal.value}
-        hideNovelBadgesModal={novelBadgesModal.setFalse}
-        theme={theme}
-      />
-      <NovelSortModal
-        novelSortModalVisible={novelSortModal.value}
-        hideNovelSortModal={novelSortModal.setFalse}
-        theme={theme}
-      />
-      <Portal>
-        <AutomaticUpdatesDialog
-          intervalHours={automaticLibraryUpdateIntervalHours}
-          visible={automaticUpdatesDialog.value}
-          onCancel={automaticUpdatesDialog.setFalse}
-          onSelect={setAutomaticUpdateInterval}
+        </>
+      }
+    >
+      <List.Section>
+        <List.SubHeader theme={theme}>
+          {getString('common.display')}
+        </List.SubHeader>
+        <List.Item
+          title={getString('generalSettingsScreen.displayMode')}
+          description={displayModesList[displayMode].label}
+          onPress={displayModal.setTrue}
+          theme={theme}
         />
-        <DefaultCategoryDialog
-          categories={selectableCategories}
-          defaultCategoryId={selectedDefaultCategory?.id ?? 1}
-          promptForCategoryOnAdd={promptForCategoryOnAdd}
-          setPromptForCategoryOnAdd={setPromptForCategoryOnAdd}
-          visible={defaultCategoryDialog.value}
-          hideDialog={defaultCategoryDialog.setFalse}
-          setDefaultCategory={setDefaultCategory}
+        <List.Item
+          title={getString('generalSettingsScreen.itemsPerRowLibrary')}
+          description={`${novelsPerRow} ${getString(
+            'generalSettingsScreen.itemsPerRow',
+          )}`}
+          onPress={gridSizeModal.setTrue}
+          theme={theme}
         />
-        <GlobalUpdateCategoriesDialog
-          categories={globalUpdateCategories}
-          excludedCategoryIds={draftExcludedCategoryIds}
-          includedCategoryIds={draftIncludedCategoryIds}
-          visible={globalUpdateCategoriesDialog.value}
-          onCancel={globalUpdateCategoriesDialog.setFalse}
-          onChange={updateDraftCategoryFilters}
-          onSave={saveGlobalUpdateCategories}
+        <List.Item
+          title={getString('generalSettingsScreen.novelBadges')}
+          description={badgeDescription}
+          onPress={novelBadgesModal.setTrue}
+          theme={theme}
         />
-        <SmartUpdateDialog
-          filters={draftSmartUpdateFilters}
-          visible={smartUpdateDialog.value}
-          onCancel={smartUpdateDialog.setFalse}
-          onChange={setDraftSmartUpdateFilters}
-          onSave={saveSmartUpdateFilters}
+        <SwitchItem
+          label={getString('generalSettingsScreen.showContinueReadingButton')}
+          value={showContinueReadingButton}
+          onPress={() =>
+            setLibrarySettings({
+              showContinueReadingButton: !showContinueReadingButton,
+            })
+          }
+          theme={theme}
         />
-      </Portal>
-    </SafeAreaView>
+        <List.Item
+          title={getString('generalSettingsScreen.novelSort')}
+          description={`${getString(sortOrderLabel)} ${sortOrderParts[1]}`}
+          onPress={novelSortModal.setTrue}
+          theme={theme}
+        />
+        <List.SubHeader theme={theme}>{getString('library')}</List.SubHeader>
+        <List.Item
+          title={getString('categories.header')}
+          description={`${categories.length} ${getString(
+            'common.categories',
+          ).toLowerCase()}`}
+          onPress={() => navigation.navigate('Categories')}
+          theme={theme}
+        />
+        <List.Item
+          title={getString('categories.defaultCategory')}
+          description={
+            promptForCategoryOnAdd
+              ? getString('categories.alwaysAsk')
+              : selectedDefaultCategory?.name ?? appDefaultCategory?.name
+          }
+          onPress={defaultCategoryDialog.setTrue}
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('generalSettingsScreen.updateLibrary')}
+          description={getString('generalSettingsScreen.updateLibraryDesc')}
+          value={updateLibraryOnLaunch}
+          onPress={() =>
+            setAppSettings({ updateLibraryOnLaunch: !updateLibraryOnLaunch })
+          }
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('generalSettingsScreen.useFAB')}
+          description={getString('generalSettingsScreen.useFABDescription')}
+          value={useLibraryFAB}
+          onPress={() => setAppSettings({ useLibraryFAB: !useLibraryFAB })}
+          theme={theme}
+        />
+        <List.Item
+          title={getString('generalSettingsScreen.chapterSort')}
+          description={`${getString('generalSettingsScreen.bySource')} ${
+            defaultChapterSort === 'positionAsc'
+              ? getString('generalSettingsScreen.asc')
+              : getString('generalSettingsScreen.desc')
+          }`}
+          onPress={defaultChapterSortModal.setTrue}
+          theme={theme}
+        />
+        <List.SubHeader theme={theme}>
+          {getString('generalSettingsScreen.globalUpdate')}
+        </List.SubHeader>
+        <List.Item
+          title={getString('generalSettingsScreen.automaticUpdates')}
+          description={getString(
+            AUTOMATIC_UPDATE_LABELS[automaticLibraryUpdateIntervalHours],
+          )}
+          onPress={automaticUpdatesDialog.setTrue}
+          theme={theme}
+        />
+        <List.Item
+          title={getString('generalSettingsScreen.globalUpdateCategories')}
+          description={`${getString(
+            'generalSettingsScreen.globalUpdateInclude',
+            { categories: includedCategoriesDescription },
+          )}\n${getString('generalSettingsScreen.globalUpdateExclude', {
+            categories: excludedCategoriesDescription,
+          })}`}
+          onPress={showGlobalUpdateCategoriesDialog}
+          theme={theme}
+        />
+        <List.Item
+          title={getString('generalSettingsScreen.smartUpdate')}
+          description={smartUpdateDescription || getString('common.none')}
+          onPress={showSmartUpdateDialog}
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('generalSettingsScreen.refreshMetadata')}
+          description={getString(
+            'generalSettingsScreen.refreshMetadataDescription',
+          )}
+          value={refreshNovelMetadata}
+          onPress={() =>
+            setAppSettings({ refreshNovelMetadata: !refreshNovelMetadata })
+          }
+          theme={theme}
+        />
+        <SwitchItem
+          label={getString('generalSettingsScreen.updateTime')}
+          value={showLastUpdateTime}
+          onPress={() => setShowLastUpdateTime(!showLastUpdateTime)}
+          theme={theme}
+        />
+        <List.SubHeader theme={theme}>
+          {getString('generalSettingsScreen.autoDownload')}
+        </List.SubHeader>
+        <SwitchItem
+          label={getString('generalSettingsScreen.downloadNewChapters')}
+          value={downloadNewChapters}
+          onPress={() =>
+            setAppSettings({ downloadNewChapters: !downloadNewChapters })
+          }
+          theme={theme}
+        />
+      </List.Section>
+    </SettingsPage>
   );
 };
 
 export default SettingsLibraryScreen;
-
-const styles = StyleSheet.create({
-  paddingBottom: {
-    paddingBottom: 24,
-  },
-});

@@ -35,7 +35,6 @@ const FontPickerModal: React.FC<FontPickerModalProps> = ({
               setChapterReaderSettings({ fontFamily: item.fontFamily })
             }
             label={item.name}
-            labelStyle={{ fontFamily: item.fontFamily }}
             theme={theme}
           />
         ))}

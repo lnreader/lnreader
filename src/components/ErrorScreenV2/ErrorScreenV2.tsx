@@ -1,14 +1,22 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { useTheme } from '@hooks/persisted';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  clip,
+  fillMaxSize,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { useTheme } from '@hooks/persisted/useTheme';
 import { getErrorMessage } from '@utils/error';
-import { MaterialDesignIconName } from '@type/icon';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
 
 interface ErrorScreenProps {
   error: unknown;
   actions?: {
-    iconName: MaterialDesignIconName;
+    iconName: IconSource;
     title: string;
     onPress: () => void;
   }[];
@@ -18,66 +26,41 @@ const ErrorScreen: React.FC<ErrorScreenProps> = ({ error, actions }) => {
   const theme = useTheme();
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.icon, { color: theme.outline }]}>ಥ_ಥ</Text>
-      <Text style={[styles.error, { color: theme.outline }]}>
-        {getErrorMessage(error)}
-      </Text>
-      {actions?.length ? (
-        <View style={styles.actionsCtn}>
-          {actions.map(action => (
-            <View key={action.title} style={styles.buttonWrapper}>
-              <Pressable
-                android_ripple={{ color: theme.rippleColor }}
-                onPress={action.onPress}
-                style={styles.buttonCtn}
+    <Box contentAlignment="center" modifiers={[fillMaxSize()]}>
+      <Column horizontalAlignment="center">
+        <AppText variant="displaySmall" color={theme.outline} align="center">
+          ಥ_ಥ
+        </AppText>
+        <AppText
+          color={theme.outline}
+          align="center"
+          modifiers={[padding(16, 16, 16, 0)]}
+        >
+          {getErrorMessage(error)}
+        </AppText>
+        {actions?.length ? (
+          <Row modifiers={[padding(0, 20, 0, 0)]}>
+            {actions.map(action => (
+              <Column
+                key={action.title}
+                horizontalAlignment="center"
+                modifiers={[
+                  weight(1),
+                  padding(4, 0, 4, 0),
+                  clip(Shapes.RoundedCorner(50)),
+                  clickable(action.onPress),
+                  padding(0, 8, 0, 8),
+                ]}
               >
-                <MaterialCommunityIcons
-                  name={action.iconName}
-                  size={24}
-                  color={theme.outline}
-                />
-                <Text style={{ color: theme.outline }}>{action.title}</Text>
-              </Pressable>
-            </View>
-          ))}
-        </View>
-      ) : null}
-    </View>
+                <AppIcon source={action.iconName} tint={theme.outline} />
+                <AppText color={theme.outline}>{action.title}</AppText>
+              </Column>
+            ))}
+          </Row>
+        ) : null}
+      </Column>
+    </Box>
   );
 };
 
 export default ErrorScreen;
-
-const styles = StyleSheet.create({
-  actionsCtn: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  buttonCtn: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  buttonWrapper: {
-    borderRadius: 50,
-    flexDirection: 'row',
-    flex: 1 / 3,
-    marginHorizontal: 4,
-    overflow: 'hidden',
-  },
-  container: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  error: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-    textAlign: 'center',
-  },
-  icon: {
-    fontSize: 44,
-  },
-});

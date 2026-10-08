@@ -50,7 +50,6 @@ const LibraryNovelItem = memo(function LibraryNovelItem_({
   return (
     <NovelCover
       item={item}
-      theme={theme}
       isSelected={isSelected}
       hasSelection={hasSelection}
       onLongPress={handleLongPress}
@@ -62,6 +61,7 @@ const LibraryNovelItem = memo(function LibraryNovelItem_({
       }
       libraryStatus={false}
       imageRequestInit={imageRequestInit}
+      theme={theme}
     />
   );
 });

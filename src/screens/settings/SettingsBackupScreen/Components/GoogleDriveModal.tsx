@@ -1,10 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ThemeColors } from '@theme/types';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Column, Image, Row } from '@expo/ui/jetpack-compose';
+import {
+  clip,
+  combinedClickable,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  size,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
-import { Button, Dialog, EmptyView } from '@components';
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import { Button, Dialog, EmptyView, TextInput } from '@components';
 import * as Clipboard from 'expo-clipboard';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
@@ -46,17 +53,20 @@ function Authorized({
     <>
       <Button
         title={getString('common.backup')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={() => setBackupModal(BackupModal.CREATE_BACKUP)}
       />
       <Button
         title={getString('common.restore')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={() => setBackupModal(BackupModal.RESTORE_BACKUP)}
       />
       <Button
         title={getString('common.signOut')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={signOut}
       />
     </>
@@ -87,7 +97,8 @@ function UnAuthorized({
   return (
     <Button
       title={getString('common.signIn')}
-      style={[styles.btnOutline, { borderColor: theme.outline }]}
+      mode="outlined"
+      modifiers={[fillMaxWidth()]}
       onPress={signIn}
     />
   );
@@ -129,10 +140,7 @@ function CreateBackup({
         value={backupName}
         placeholder={getString('backupScreen.backupName')}
         onChangeText={setBackupName}
-        mode="outlined"
-        underlineColor={theme.outline}
-        theme={{ colors: { ...theme } }}
-        placeholderTextColor={theme.onSurfaceDisabled}
+        singleLine
         disabled={fetching}
       />
       <BackupOptionsList
@@ -140,7 +148,14 @@ function CreateBackup({
         options={options}
         theme={theme}
       />
-      <View style={styles.footerContainer}>
+      <Row
+        horizontalArrangement="end"
+        modifiers={[fillMaxWidth(), padding(0, 24, 0, 0)]}
+      >
+        <Button
+          title={getString('common.cancel')}
+          onPress={() => setBackupModal(BackupModal.AUTHORIZED)}
+        />
         <Button
           disabled={
             backupName.trim().length === 0 ||
@@ -161,11 +176,7 @@ function CreateBackup({
             });
           }}
         />
-        <Button
-          title={getString('common.cancel')}
-          onPress={() => setBackupModal(BackupModal.AUTHORIZED)}
-        />
-      </View>
+      </Row>
     </>
   );
 }
@@ -201,42 +212,38 @@ function RestoreBackup({
 
   return (
     <>
-      <Dialog.ScrollArea>
-        <FlatList
-          contentContainerStyle={styles.backupList}
-          data={backupList}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <Button
-              mode="outlined"
-              style={styles.btnOutline}
-              onPress={() => {
-                closeModal();
-                backgroundTasks.enqueue({
-                  name: 'DRIVE_RESTORE',
-                  data: item,
-                });
-              }}
-            >
-              <Text style={{ color: theme.primary }}>
-                {item.name?.replace(/\.backup$/, ' ')}
-              </Text>
-              <Text style={[{ color: theme.secondary }, styles.fontSize]}>
-                {'(' +
-                  formatDate(item.createdTime, dateFormat, relativeTimestamps) +
-                  ')'}
-              </Text>
-            </Button>
-          )}
-          ListEmptyComponent={emptyComponent}
-        />
+      <Dialog.ScrollArea fixed>
+        {backupList.length
+          ? backupList.map(item => (
+              <Button
+                key={item.id}
+                mode="outlined"
+                modifiers={[fillMaxWidth()]}
+                title={`${item.name?.replace(/\.backup$/, ' ')} (${formatDate(
+                  item.createdTime,
+                  dateFormat,
+                  relativeTimestamps,
+                )})`}
+                onPress={() => {
+                  closeModal();
+                  backgroundTasks.enqueue({
+                    name: 'DRIVE_RESTORE',
+                    data: item,
+                  });
+                }}
+              />
+            ))
+          : emptyComponent()}
       </Dialog.ScrollArea>
-      <View style={styles.footerContainer}>
+      <Row
+        horizontalArrangement="end"
+        modifiers={[fillMaxWidth(), padding(0, 24, 0, 0)]}
+      >
         <Button
           title={getString('common.cancel')}
           onPress={() => setBackupModal(BackupModal.AUTHORIZED)}
         />
-      </View>
+      </Row>
     </>
   );
 }
@@ -310,70 +317,40 @@ export default function GoogleDriveModal({
 
   return (
     <Dialog.Root visible={visible} onDismiss={closeModal}>
-      <Dialog.Header style={styles.titleContainer}>
-        <Dialog.Title>
-          {getString('backupScreen.drive.googleDriveBackup')}
-        </Dialog.Title>
-        <TouchableOpacity
-          onLongPress={() => {
-            if (user?.user.email) {
-              Clipboard.setStringAsync(user.user.email).then(success => {
-                if (success) {
-                  showToast(
-                    getString('common.copiedToClipboard', {
-                      name: user.user.email,
-                    }),
-                  );
-                }
-              });
-            }
-          }}
-        >
-          {user ? (
-            <Image
-              source={{ uri: user?.user.photo || '' }}
-              style={styles.avatar}
-            />
-          ) : null}
-        </TouchableOpacity>
-      </Dialog.Header>
+      <Row verticalAlignment="center" modifiers={[fillMaxWidth()]}>
+        <Column modifiers={[weight(1)]}>
+          <Dialog.Title>
+            {getString('backupScreen.drive.googleDriveBackup')}
+          </Dialog.Title>
+        </Column>
+        {user ? (
+          <Image
+            source={{ uri: user?.user.photo || '' }}
+            modifiers={[
+              padding(0, 0, 24, 0),
+              size(40, 40),
+              clip(Shapes.Circle),
+              combinedClickable({
+                onClick: () => undefined,
+                onLongClick: () => {
+                  if (user?.user.email) {
+                    Clipboard.setStringAsync(user.user.email).then(success => {
+                      if (success) {
+                        showToast(
+                          getString('common.copiedToClipboard', {
+                            name: user.user.email,
+                          }),
+                        );
+                      }
+                    });
+                  }
+                },
+              }),
+            ]}
+          />
+        ) : null}
+      </Row>
       <Dialog.Content>{renderModal()}</Dialog.Content>
     </Dialog.Root>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    borderRadius: 40,
-    height: 40,
-    width: 40,
-  },
-  backupList: {
-    flexGrow: 1,
-    paddingBottom: 8,
-    paddingHorizontal: 4,
-  },
-  btnOutline: {
-    borderWidth: 1,
-    marginVertical: 4,
-  },
-  error: {
-    fontSize: 16,
-    marginTop: 8,
-  },
-  footerContainer: {
-    flexDirection: 'row-reverse',
-    marginTop: 24,
-  },
-  loadingContent: {
-    borderRadius: 16,
-    width: '100%',
-  },
-  titleContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    textAlignVertical: 'center',
-  },
-  fontSize: { fontSize: 12 },
-});

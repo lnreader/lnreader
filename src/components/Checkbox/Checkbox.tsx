@@ -1,94 +1,72 @@
-import React from 'react';
 import {
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle,
-} from 'react-native';
-import { Checkbox as PaperCheckbox } from 'react-native-paper';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-
-import { ThemeColors } from '../../theme/types';
+  Box,
+  ListItem,
+  TriStateCheckbox as ComposeTriStateCheckbox,
+} from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  size,
+  toggleable,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { ThemeColors } from '@theme/types';
+import ArrowDownwardIcon from '@expo/material-symbols/arrow_downward.xml';
+import ArrowUpwardIcon from '@expo/material-symbols/arrow_upward.xml';
+import AppIcon from '../AppIcon/AppIcon';
+import { listItemColors, Texts } from '../List/List';
 
 interface CheckboxProps {
   label: string;
   status: boolean | 'indeterminate';
   onPress?: () => void;
   disabled?: boolean;
-  theme: ThemeColors;
-  viewStyle?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
   description?: string;
-  descriptionStyle?: StyleProp<TextStyle>;
+  theme: ThemeColors;
 }
 
-export const Checkbox: React.FC<CheckboxProps> = ({
+export const Checkbox = ({
   label,
   status,
-  theme,
   disabled,
   onPress,
-  viewStyle,
-  labelStyle,
   description,
-  descriptionStyle,
-}) => (
-  <Pressable
-    accessibilityHint={description}
-    accessibilityLabel={label}
-    accessibilityRole="checkbox"
-    accessibilityState={{
-      checked: status === 'indeterminate' ? 'mixed' : status,
-      disabled,
-    }}
-    android_ripple={{ color: theme.rippleColor }}
-    style={[styles.pressable, viewStyle]}
-    onPress={onPress}
-    disabled={disabled}
-  >
-    <PaperCheckbox
-      status={
-        status === 'indeterminate'
-          ? 'indeterminate'
-          : status
-          ? 'checked'
-          : 'unchecked'
-      }
-      onPress={onPress}
-      color={theme.primary}
-      theme={{
-        colors: { disabled: theme.onSurfaceVariant },
-      }}
-      uncheckedColor={theme.onSurfaceVariant}
-      disabled={disabled}
-    />
-    <View style={styles.textContainer}>
-      <Text
-        style={[styles.defaultLabel, { color: theme.onSurface }, labelStyle]}
-      >
-        {label}
-      </Text>
-      {description ? (
-        <Text
-          style={[
-            styles.description,
-            {
-              color: disabled
-                ? theme.onSurfaceDisabled
-                : theme.onSurfaceVariant,
-            },
-            descriptionStyle,
-          ]}
-        >
-          {description}
-        </Text>
-      ) : null}
-    </View>
-  </Pressable>
-);
+  theme,
+}: CheckboxProps) => {
+  const press = () => !disabled && onPress?.();
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[
+        fillMaxWidth(),
+        toggleable(status === true, press, { role: 'checkbox' }),
+      ]}
+    >
+      <ListItem.LeadingContent>
+        <ComposeTriStateCheckbox
+          state={
+            status === 'indeterminate' ? 'indeterminate' : status ? 'on' : 'off'
+          }
+          enabled={!disabled}
+          onClick={press}
+          colors={{
+            checkedColor: theme.primary,
+            uncheckedColor: theme.onSurfaceVariant,
+            checkmarkColor: theme.onPrimary,
+            disabledCheckedColor: theme.onSurfaceDisabled,
+            disabledUncheckedColor: theme.onSurfaceDisabled,
+            disabledIndeterminateColor: theme.onSurfaceDisabled,
+          }}
+        />
+      </ListItem.LeadingContent>
+      <Texts
+        title={label}
+        description={description}
+        disabled={disabled}
+        theme={theme}
+      />
+    </ListItem>
+  );
+};
 
 interface SortItemProps {
   label: string;
@@ -96,49 +74,24 @@ interface SortItemProps {
   onPress: () => void;
   theme: ThemeColors;
 }
-export const SortItem = ({ label, status, onPress, theme }: SortItemProps) => (
-  <Pressable
-    android_ripple={{ color: theme.rippleColor }}
-    style={[styles.pressable, styles.sortItem]}
-    onPress={onPress}
-  >
-    {status ? (
-      <MaterialCommunityIcons
-        name={status === 'asc' ? 'arrow-up' : 'arrow-down'}
-        color={theme.primary}
-        size={21}
-        style={styles.icon}
-      />
-    ) : null}
-    <Text style={{ color: theme.onSurface }}>{label}</Text>
-  </Pressable>
-);
 
-const styles = StyleSheet.create({
-  defaultLabel: {
-    flexShrink: 1,
-  },
-  description: {
-    flexShrink: 1,
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  icon: {
-    alignSelf: 'center',
-    start: 24,
-    position: 'absolute',
-  },
-  pressable: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-  sortItem: { paddingVertical: 16, paddingStart: 64 },
-  textContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    marginStart: 12,
-  },
-});
+export const SortItem = ({ label, status, onPress, theme }: SortItemProps) => {
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[fillMaxWidth(), clickable(onPress)]}
+    >
+      <ListItem.LeadingContent>
+        <Box modifiers={[size(24, 24)]}>
+          {status ? (
+            <AppIcon
+              source={status === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon}
+              tint={theme.primary}
+            />
+          ) : null}
+        </Box>
+      </ListItem.LeadingContent>
+      <Texts title={label} theme={theme} />
+    </ListItem>
+  );
+};

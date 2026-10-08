@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Pressable, View, StyleSheet, Text, ScrollView } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { Dialog, List, Slider } from '@components';
+import { Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clickable,
+  clip,
+  fillMaxWidth,
+  horizontalScroll,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import { AppText, Chip, Dialog, List, Slider, SwitchItem } from '@components';
 import { getLocales } from 'expo-localization';
 import { Tts, TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import {
@@ -10,8 +19,57 @@ import {
   useChapterReaderSettings,
 } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { Chip } from 'react-native-paper';
-import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
+import ChevronRightIcon from '@expo/material-symbols/chevron_right.xml';
+import TextToSpeechIcon from '@expo/material-symbols/text_to_speech.xml';
+import SettingsVoiceIcon from '@expo/material-symbols/settings_voice.xml';
+import VoiceChatIcon from '@expo/material-symbols/voice_chat.xml';
+import ArrowForwardIcon from '@expo/material-symbols/arrow_forward.xml';
+import UpgradeIcon from '@expo/material-symbols/upgrade.xml';
+
+interface PickerItemProps {
+  title: string;
+  subtitle?: string;
+  selected: boolean;
+  onPress: () => void;
+}
+
+const PickerItem = ({
+  title,
+  subtitle,
+  selected,
+  onPress,
+}: PickerItemProps) => {
+  const theme = useTheme();
+  return (
+    <Row
+      verticalAlignment="center"
+      modifiers={[
+        fillMaxWidth(),
+        padding(0, 0, 0, 4),
+        clip(Shapes.RoundedCorner(4)),
+        ...(selected ? [background(theme.surfaceVariant)] : []),
+        clickable(onPress),
+        padding(12, 12, 12, 12),
+      ]}
+    >
+      <Column modifiers={[weight(1)]}>
+        <AppText variant="bodyLarge" color={theme.onSurface}>
+          {title}
+        </AppText>
+        {subtitle ? (
+          <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
+            {subtitle}
+          </AppText>
+        ) : null}
+      </Column>
+      {selected ? (
+        <AppText variant="bodyLarge" color={theme.primary}>
+          ✓
+        </AppText>
+      ) : null}
+    </Row>
+  );
+};
 
 interface VoicePickerModalProps {
   visible: boolean;
@@ -82,21 +140,20 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
   };
 
   return (
-    <Dialog.Root
-      visible={visible}
-      onDismiss={handleDismiss}
-      surfaceStyle={styles.modalContent}
-    >
+    <Dialog.Root visible={visible} onDismiss={handleDismiss}>
       <Dialog.Title>Select Voice</Dialog.Title>
       <Dialog.Content>
-        <View style={styles.languageFilterContainer}>
-          <Text style={[styles.filterLabel, { color: theme.onSurfaceVariant }]}>
+        <Column modifiers={[fillMaxWidth(), padding(0, 0, 0, 16)]}>
+          <AppText
+            variant="bodySmall"
+            color={theme.onSurfaceVariant}
+            modifiers={[padding(0, 0, 0, 8)]}
+          >
             Filter by language:
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.languageChipsScroll}
+          </AppText>
+          <Row
+            horizontalArrangement={{ spacedBy: 8 }}
+            modifiers={[fillMaxWidth(), horizontalScroll()]}
           >
             {availableLanguages.map(lang => {
               const isSelected = selectedLanguages.includes(lang);
@@ -110,93 +167,44 @@ const VoicePickerModal: React.FC<VoicePickerModalProps> = ({
                   key={lang}
                   selected={isActive}
                   onPress={() => toggleLanguage(lang)}
-                  style={[
-                    styles.languageChip,
-                    isActive && { backgroundColor: theme.primary },
-                  ]}
-                  textStyle={[
-                    styles.languageChipText,
-                    { color: isActive ? theme.onPrimary : theme.onSurface },
-                  ]}
-                >
-                  {lang.toUpperCase()}
-                  {isSystemLang && ' (System)'}
-                </Chip>
+                  label={lang.toUpperCase() + (isSystemLang ? ' (System)' : '')}
+                  theme={theme}
+                />
               );
             })}
-          </ScrollView>
-        </View>
+          </Row>
+        </Column>
       </Dialog.Content>
       <Dialog.ScrollArea>
-        <ScrollView style={styles.voiceList}>
-          <Pressable
-            style={[
-              styles.voiceItem,
-              !currentVoice && { backgroundColor: theme.surfaceVariant },
-            ]}
-            onPress={() => {
-              onSelect(undefined);
-              handleDismiss();
-            }}
+        <PickerItem
+          title="System default"
+          selected={!currentVoice}
+          onPress={() => {
+            onSelect(undefined);
+            handleDismiss();
+          }}
+        />
+        {filteredVoices.length === 0 ? (
+          <AppText
+            color={theme.onSurfaceVariant}
+            modifiers={[padding(20, 20, 20, 20)]}
           >
-            <View style={styles.voiceItemContent}>
-              <Text style={[styles.voiceItemText, { color: theme.onSurface }]}>
-                System default
-              </Text>
-            </View>
-            {!currentVoice ? (
-              <Text style={[styles.checkIcon, { color: theme.primary }]}>
-                ✓
-              </Text>
-            ) : null}
-          </Pressable>
-          {filteredVoices.length === 0 ? (
-            <Text
-              style={[styles.noVoicesText, { color: theme.onSurfaceVariant }]}
-            >
-              No voices available for selected languages
-            </Text>
-          ) : (
-            filteredVoices.map((voice: TtsVoice, index: number) => (
-              <Pressable
-                key={voice.identifier || index}
-                style={[
-                  styles.voiceItem,
-                  currentVoice?.identifier === voice.identifier && {
-                    backgroundColor: theme.surfaceVariant,
-                  },
-                ]}
-                onPress={() => {
-                  onSelect(voice);
-                  handleDismiss();
-                }}
-              >
-                <View style={styles.voiceItemContent}>
-                  <Text
-                    style={[styles.voiceItemText, { color: theme.onSurface }]}
-                  >
-                    {voice.name}
-                  </Text>
-                  {voice.language ? (
-                    <Text
-                      style={[
-                        styles.voiceItemLanguage,
-                        { color: theme.onSurfaceVariant },
-                      ]}
-                    >
-                      {voice.language}
-                    </Text>
-                  ) : null}
-                </View>
-                {currentVoice?.identifier === voice.identifier ? (
-                  <Text style={[styles.checkIcon, { color: theme.primary }]}>
-                    ✓
-                  </Text>
-                ) : null}
-              </Pressable>
-            ))
-          )}
-        </ScrollView>
+            No voices available for selected languages
+          </AppText>
+        ) : (
+          filteredVoices.map((voice: TtsVoice, index: number) => (
+            <PickerItem
+              key={voice.identifier || index}
+              title={voice.name}
+              subtitle={voice.language || undefined}
+              selected={currentVoice?.identifier === voice.identifier}
+              onPress={() => {
+                onSelect(voice);
+                handleDismiss();
+              }}
+            />
+          ))
+        )}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={handleDismiss}>Cancel</Dialog.Action>
@@ -220,67 +228,29 @@ const EnginePickerModal: React.FC<EnginePickerModalProps> = ({
   onSelect,
   currentEngine,
 }) => {
-  const theme = useTheme();
-
   return (
-    <Dialog.Root
-      visible={visible}
-      onDismiss={onDismiss}
-      surfaceStyle={styles.modalContent}
-    >
+    <Dialog.Root visible={visible} onDismiss={onDismiss}>
       <Dialog.Title>Select Engine</Dialog.Title>
       <Dialog.ScrollArea>
-        <ScrollView style={styles.voiceList}>
-          <Pressable
-            style={[
-              styles.voiceItem,
-              !currentEngine && { backgroundColor: theme.surfaceVariant },
-            ]}
+        <PickerItem
+          title="System default"
+          selected={!currentEngine}
+          onPress={() => {
+            onSelect(undefined);
+            onDismiss();
+          }}
+        />
+        {engines.map(engine => (
+          <PickerItem
+            key={engine.name}
+            title={engine.label}
+            selected={currentEngine?.name === engine.name}
             onPress={() => {
-              onSelect(undefined);
+              onSelect(engine);
               onDismiss();
             }}
-          >
-            <View style={styles.voiceItemContent}>
-              <Text style={[styles.voiceItemText, { color: theme.onSurface }]}>
-                System default
-              </Text>
-            </View>
-            {!currentEngine ? (
-              <Text style={[styles.checkIcon, { color: theme.primary }]}>
-                ✓
-              </Text>
-            ) : null}
-          </Pressable>
-          {engines.map(engine => (
-            <Pressable
-              key={engine.name}
-              style={[
-                styles.voiceItem,
-                currentEngine?.name === engine.name && {
-                  backgroundColor: theme.surfaceVariant,
-                },
-              ]}
-              onPress={() => {
-                onSelect(engine);
-                onDismiss();
-              }}
-            >
-              <View style={styles.voiceItemContent}>
-                <Text
-                  style={[styles.voiceItemText, { color: theme.onSurface }]}
-                >
-                  {engine.label}
-                </Text>
-              </View>
-              {currentEngine?.name === engine.name ? (
-                <Text style={[styles.checkIcon, { color: theme.primary }]}>
-                  ✓
-                </Text>
-              ) : null}
-            </Pressable>
-          ))}
-        </ScrollView>
+          />
+        ))}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss}>Cancel</Dialog.Action>
@@ -335,113 +305,112 @@ const TTSTab: React.FC = () => {
 
   return (
     <>
-      <BottomSheetScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <View style={styles.section}>
-          <List.SubHeader theme={theme}>Text to Speech</List.SubHeader>
+      <Column modifiers={[fillMaxWidth(), padding(0, 8, 0, 48)]}>
+        <List.SubHeader theme={theme}>Text to Speech</List.SubHeader>
 
-          <ReaderSheetPreferenceItem
-            label="Enable TTS"
-            value={TTSEnable}
-            onPress={() => setChapterGeneralSettings({ TTSEnable: !TTSEnable })}
-            theme={theme}
-          />
+        <SwitchItem
+          label="Enable TTS"
+          icon={TextToSpeechIcon}
+          value={TTSEnable}
+          onPress={() => setChapterGeneralSettings({ TTSEnable: !TTSEnable })}
+          theme={theme}
+        />
 
-          {TTSEnable ? (
-            <>
-              {engines.length > 0 ? (
-                <List.Item
-                  title="Engine"
-                  description={tts?.engine?.label || 'System default'}
-                  onPress={() => setEngineModalVisible(true)}
-                  right="chevron-right"
-                  theme={theme}
-                />
-              ) : null}
-
+        {TTSEnable ? (
+          <>
+            {engines.length > 0 ? (
               <List.Item
-                title="Voice"
-                description={tts?.voice?.name || 'System default'}
-                onPress={() => setVoiceModalVisible(true)}
-                right="chevron-right"
+                title="Engine"
+                icon={SettingsVoiceIcon}
+                description={tts?.engine?.label || 'System default'}
+                onPress={() => setEngineModalVisible(true)}
+                right={ChevronRightIcon}
                 theme={theme}
               />
+            ) : null}
 
-              <View style={styles.sliderSection}>
-                <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Speed: {tts?.rate?.toFixed(1) || '1.0'}x
-                </Text>
-                <Slider
-                  value={tts?.rate || 1}
-                  min={0.1}
-                  max={5}
-                  step={0.1}
-                  showValueIndicator
-                  formatValue={value => `${value.toFixed(1)}x`}
-                  accessibilityLabel="Text to speech speed"
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, rate: value } })
-                  }
-                />
-              </View>
+            <List.Item
+              title="Voice"
+              icon={VoiceChatIcon}
+              description={tts?.voice?.name || 'System default'}
+              onPress={() => setVoiceModalVisible(true)}
+              right={ChevronRightIcon}
+              theme={theme}
+            />
 
-              <View style={styles.sliderSection}>
-                <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Pitch: {tts?.pitch?.toFixed(1) || '1.0'}
-                </Text>
-                <Slider
-                  value={tts?.pitch || 1}
-                  min={0.1}
-                  max={5}
-                  step={0.1}
-                  showValueIndicator
-                  formatValue={value => value.toFixed(1)}
-                  accessibilityLabel="Text to speech pitch"
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, pitch: value } })
-                  }
-                />
-              </View>
-
-              <ReaderSheetPreferenceItem
-                description={getString(
-                  'readerScreen.bottomSheet.ttsAutoPageAdvanceDescription',
-                )}
-                label="Auto Page Advance"
-                value={tts?.autoPageAdvance === true}
-                onPress={() =>
-                  setChapterReaderSettings({
-                    tts: {
-                      ...tts,
-                      autoPageAdvance: !(tts?.autoPageAdvance === true),
-                    },
-                  })
+            <Column modifiers={[fillMaxWidth(), padding(16, 12, 16, 12)]}>
+              <AppText
+                variant="bodyLarge"
+                color={theme.onSurface}
+                modifiers={[padding(0, 0, 0, 8)]}
+              >
+                Speed: {tts?.rate?.toFixed(1) || '1.0'}x
+              </AppText>
+              <Slider
+                value={tts?.rate || 1}
+                min={0.1}
+                max={5}
+                step={0.1}
+                onSlidingComplete={value =>
+                  setChapterReaderSettings({ tts: { ...tts, rate: value } })
                 }
-                theme={theme}
               />
+            </Column>
 
-              <ReaderSheetPreferenceItem
-                description={getString(
-                  'readerScreen.bottomSheet.ttsScrollToTopDescription',
-                )}
-                label="Scroll to Top"
-                value={tts?.scrollToTop !== false}
-                onPress={() =>
-                  setChapterReaderSettings({
-                    tts: { ...tts, scrollToTop: !(tts?.scrollToTop !== false) },
-                  })
+            <Column modifiers={[fillMaxWidth(), padding(16, 12, 16, 12)]}>
+              <AppText
+                variant="bodyLarge"
+                color={theme.onSurface}
+                modifiers={[padding(0, 0, 0, 8)]}
+              >
+                Pitch: {tts?.pitch?.toFixed(1) || '1.0'}
+              </AppText>
+              <Slider
+                value={tts?.pitch || 1}
+                min={0.1}
+                max={5}
+                step={0.1}
+                onSlidingComplete={value =>
+                  setChapterReaderSettings({ tts: { ...tts, pitch: value } })
                 }
-                theme={theme}
               />
-            </>
-          ) : null}
-        </View>
+            </Column>
 
-        <View style={styles.bottomSpacing} />
-      </BottomSheetScrollView>
+            <SwitchItem
+              description={getString(
+                'readerScreen.bottomSheet.ttsAutoPageAdvanceDescription',
+              )}
+              label="Auto Page Advance"
+              icon={ArrowForwardIcon}
+              value={tts?.autoPageAdvance === true}
+              onPress={() =>
+                setChapterReaderSettings({
+                  tts: {
+                    ...tts,
+                    autoPageAdvance: !(tts?.autoPageAdvance === true),
+                  },
+                })
+              }
+              theme={theme}
+            />
+
+            <SwitchItem
+              description={getString(
+                'readerScreen.bottomSheet.ttsScrollToTopDescription',
+              )}
+              label="Scroll to Top"
+              icon={UpgradeIcon}
+              value={tts?.scrollToTop !== false}
+              onPress={() =>
+                setChapterReaderSettings({
+                  tts: { ...tts, scrollToTop: !(tts?.scrollToTop !== false) },
+                })
+              }
+              theme={theme}
+            />
+          </>
+        ) : null}
+      </Column>
 
       <EnginePickerModal
         visible={engineModalVisible}
@@ -462,77 +431,3 @@ const TTSTab: React.FC = () => {
 };
 
 export default React.memo(TTSTab);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 24,
-  },
-  section: {
-    marginVertical: 8,
-  },
-  sliderSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  sliderLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  bottomSpacing: {
-    height: 24,
-  },
-  modalContent: {
-    maxHeight: '80%',
-  },
-  languageFilterContainer: {
-    marginBottom: 16,
-  },
-  filterLabel: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  languageChipsScroll: {
-    flexGrow: 0,
-  },
-  languageChip: {
-    marginEnd: 8,
-    marginBottom: 8,
-  },
-  voiceList: {
-    maxHeight: 350,
-    marginTop: 8,
-  },
-  voiceItem: {
-    borderCurve: 'continuous',
-    borderRadius: 4,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    marginBottom: 4,
-  },
-  voiceItemContent: {
-    flex: 1,
-  },
-  voiceItemText: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  voiceItemLanguage: {
-    fontSize: 12,
-  },
-  noVoicesText: {
-    textAlign: 'center',
-    padding: 20,
-    fontSize: 14,
-  },
-  languageChipText: {
-    fontSize: 12,
-  },
-  checkIcon: {
-    fontSize: 16,
-  },
-});

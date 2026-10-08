@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { TextInput } from 'react-native-paper';
 
-import { Dialog } from '@components';
-import { useTheme } from '@hooks/persisted';
+import { Dialog, TextInput } from '@components';
 import { getString } from '@i18n/translations';
 import { TrackChaptersDialogProps } from './types';
 
@@ -14,7 +12,6 @@ type SetTrackChaptersDialogContentProps = Omit<
 const SetTrackChaptersDialogContent: React.FC<
   SetTrackChaptersDialogContentProps
 > = ({ trackItem, onDismiss, onUpdateChapters }) => {
-  const theme = useTheme();
   const [chapters, setChapters] = useState(String(trackItem.progress ?? 0));
 
   const handleSave = () => {
@@ -32,17 +29,8 @@ const SetTrackChaptersDialogContent: React.FC<
         <TextInput
           value={chapters}
           onChangeText={handleChangeText}
-          mode="outlined"
-          keyboardType="numeric"
-          theme={{
-            colors: {
-              primary: theme.primary,
-              placeholder: theme.outline,
-              text: theme.onSurface,
-              background: 'transparent',
-            },
-          }}
-          underlineColor={theme.outline}
+          outlined
+          keyboardType="number"
         />
       </Dialog.Content>
       <Dialog.Actions>

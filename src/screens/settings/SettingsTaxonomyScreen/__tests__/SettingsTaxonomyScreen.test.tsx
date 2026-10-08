@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@test-utils';
 
 import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
 
@@ -10,26 +10,12 @@ jest.mock('@react-navigation/native', () => ({
   },
 }));
 
-jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({ bottom: 0, right: 0 }),
-}));
-
 let mockTaxonomy: { parent: string; children: string[] }[] = [];
 const mockSetTaxonomy = jest.fn(
   (next: { parent: string; children: string[] }[]) => {
     mockTaxonomy = next;
   },
 );
-
-jest.mock('@hooks/persisted', () => ({
-  useTheme: () => ({
-    background: '#111',
-    rippleColor: '#222',
-    onSurface: '#333',
-    onSurfaceVariant: '#444',
-    primary: '#555',
-  }),
-}));
 
 jest.mock('@hooks/persisted/useGenreTaxonomy', () => ({
   useGenreTaxonomy: () => ({
@@ -46,86 +32,13 @@ jest.mock('@i18n/translations', () => ({
   getString: (key: string) => key,
 }));
 
-jest.mock('react-native-paper', () => {
-  const React = require('react');
-  const { Pressable, Text, TextInput } = require('react-native');
-  const MockTextInput = (props: any) =>
-    React.createElement(
-      React.Fragment,
-      null,
-      React.createElement(TextInput, { ...props, testID: props.label }),
-      props.right,
-    );
-  MockTextInput.Icon = ({ icon, onPress, disabled }: any) =>
-    React.createElement(
-      Pressable,
-      { testID: `icon-${icon}`, onPress, disabled },
-      React.createElement(Text, null, icon),
-    );
-
-  return {
-    TextInput: MockTextInput,
-    FAB: ({ label, onPress }: any) =>
-      React.createElement(
-        Pressable,
-        { onPress },
-        React.createElement(Text, null, label),
-      ),
-    IconButton: ({ icon, onPress, disabled }: any) =>
-      React.createElement(
-        Pressable,
-        { testID: `icon-${icon}`, onPress, disabled },
-        React.createElement(Text, null, icon),
-      ),
-  };
-});
-
-jest.mock('@components', () => {
-  const React = require('react');
-  const { Pressable, Text } = require('react-native');
-
-  const PassThrough = ({ children }: any) =>
-    React.createElement(React.Fragment, null, children);
-
-  const Dialog: any = () => null;
-  Dialog.Root = PassThrough;
-  Dialog.Header = PassThrough;
-  Dialog.Title = PassThrough;
-  Dialog.Content = PassThrough;
-  Dialog.Actions = PassThrough;
-  Dialog.Action = ({ children, onPress }: any) =>
-    React.createElement(
-      Pressable,
-      { onPress },
-      React.createElement(Text, null, children),
-    );
-
-  const List: any = () => null;
-  List.Section = PassThrough;
-  List.SubHeader = () => null;
-  List.Item = ({ title, onPress }: any) =>
-    React.createElement(
-      Pressable,
-      { onPress },
-      React.createElement(Text, null, title),
-    );
-
-  return {
-    SafeAreaView: ({ children }: any) =>
-      React.createElement(React.Fragment, null, children),
-    Appbar: () => null,
-    Dialog,
-    List,
-  };
-});
-
-jest.mock(
-  '@components/ConfirmationDialog/ConfirmationDialog',
-  () => () => null,
-);
-
 const renderScreen = () =>
-  render(<SettingsTaxonomyScreen navigation={{} as any} route={{} as any} />);
+  render(
+    <SettingsTaxonomyScreen
+      navigation={{ goBack: jest.fn() } as never}
+      route={{} as never}
+    />,
+  );
 
 describe('SettingsTaxonomyScreen', () => {
   beforeEach(() => {
@@ -139,10 +52,7 @@ describe('SettingsTaxonomyScreen', () => {
   it('refuses a parent that normalizes to an existing parent', () => {
     renderScreen();
     fireEvent.press(screen.getByText('genreStats.newGroup'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.parentNamePlaceholder'),
-      'fantasy',
-    );
+    fireEvent.changeText(screen.getByTestId('taxonomy-group-name'), 'fantasy');
     fireEvent.press(screen.getByText('common.ok'));
     expect(mockSetTaxonomy).not.toHaveBeenCalled();
   });
@@ -150,10 +60,7 @@ describe('SettingsTaxonomyScreen', () => {
   it('adds a parent with a distinct normalized name', () => {
     renderScreen();
     fireEvent.press(screen.getByText('genreStats.newGroup'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.parentNamePlaceholder'),
-      'Comedy',
-    );
+    fireEvent.changeText(screen.getByTestId('taxonomy-group-name'), 'Comedy');
     fireEvent.press(screen.getByText('common.ok'));
     expect(mockSetTaxonomy).toHaveBeenCalledWith([
       { parent: 'Fantasy', children: ['Sci-Fi'] },
@@ -164,17 +71,14 @@ describe('SettingsTaxonomyScreen', () => {
   it('stays in the dialog to add subgenres right after adding a parent', () => {
     renderScreen();
     fireEvent.press(screen.getByText('genreStats.newGroup'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.parentNamePlaceholder'),
-      'Comedy',
-    );
+    fireEvent.changeText(screen.getByTestId('taxonomy-group-name'), 'Comedy');
     fireEvent.press(screen.getByText('common.ok'));
     // Dialog switched to edit mode for the new parent: child input is live
     fireEvent.changeText(
-      screen.getByTestId('genreStats.childNamePlaceholder'),
+      screen.getByTestId('taxonomy-genre-name'),
       'Slice of Life',
     );
-    fireEvent.press(screen.getByTestId('icon-plus'));
+    fireEvent.press(screen.getByLabelText('common.add'));
     expect(mockSetTaxonomy).toHaveBeenLastCalledWith([
       { parent: 'Fantasy', children: ['Sci-Fi'] },
       { parent: 'Comedy', children: ['Slice of Life'] },
@@ -188,10 +92,7 @@ describe('SettingsTaxonomyScreen', () => {
     ];
     renderScreen();
     fireEvent.press(screen.getByText('Fantasy'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.parentNamePlaceholder'),
-      'romance',
-    );
+    fireEvent.changeText(screen.getByTestId('taxonomy-group-name'), 'romance');
     fireEvent.press(screen.getByText('common.ok'));
     expect(mockSetTaxonomy).not.toHaveBeenCalled();
   });
@@ -199,22 +100,16 @@ describe('SettingsTaxonomyScreen', () => {
   it('refuses a child that normalizes to an existing child', () => {
     renderScreen();
     fireEvent.press(screen.getByText('Fantasy'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.childNamePlaceholder'),
-      'SCIFI',
-    );
-    fireEvent.press(screen.getByTestId('icon-plus'));
+    fireEvent.changeText(screen.getByTestId('taxonomy-genre-name'), 'SCIFI');
+    fireEvent.press(screen.getByLabelText('common.add'));
     expect(mockSetTaxonomy).not.toHaveBeenCalled();
   });
 
   it('adds a child with a distinct normalized name', () => {
     renderScreen();
     fireEvent.press(screen.getByText('Fantasy'));
-    fireEvent.changeText(
-      screen.getByTestId('genreStats.childNamePlaceholder'),
-      'Harem',
-    );
-    fireEvent.press(screen.getByTestId('icon-plus'));
+    fireEvent.changeText(screen.getByTestId('taxonomy-genre-name'), 'Harem');
+    fireEvent.press(screen.getByLabelText('common.add'));
     expect(mockSetTaxonomy).toHaveBeenCalledWith([
       { parent: 'Fantasy', children: ['Sci-Fi', 'Harem'] },
     ]);

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { RefreshControl, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { EmptyView } from '@components/index';
 import NovelList, { NovelListRenderItem } from '@components/NovelList';
@@ -8,12 +8,14 @@ import LibraryNovelItem from './LibraryNovelItem';
 import { History, NovelInfo } from '@database/types';
 
 import { getString } from '@i18n/translations';
-import { useTheme } from '@hooks/persisted';
 import { LibraryScreenProps } from '@navigators/types';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { getPlugin } from '@plugins/pluginManager';
 import { useSelectionContext } from '../SelectionContext';
 import { ImageRequestInit } from '@plugins/types';
+import ExploreIcon from '@expo/material-symbols/explore.xml';
+import UploadFileIcon from '@expo/material-symbols/upload_file.xml';
+import { useTheme } from '@hooks/persisted';
 
 interface Props {
   categoryId: number;
@@ -23,6 +25,9 @@ interface Props {
   showContinueReadingButton: boolean;
   navigation: LibraryScreenProps['navigation'];
   pickAndImport: () => void;
+  header?: React.ReactElement | null;
+  availableWidth?: number;
+  topPadding?: number;
 }
 
 export const LibraryView: React.FC<Props> = ({
@@ -33,6 +38,9 @@ export const LibraryView: React.FC<Props> = ({
   novels,
   historyByNovelId,
   showContinueReadingButton,
+  header,
+  availableWidth,
+  topPadding,
 }) => {
   const theme = useTheme();
   const { selectedIdsSet, hasSelection, toggleSelection } =
@@ -120,12 +128,12 @@ export const LibraryView: React.FC<Props> = ({
         actions={[
           categoryId !== 2
             ? {
-                iconName: 'compass-outline',
+                iconName: ExploreIcon,
                 title: getString('browse'),
                 onPress: () => navigation.navigate('Browse'),
               }
             : {
-                iconName: 'book-arrow-up-outline',
+                iconName: UploadFileIcon,
                 title: getString('advancedSettingsScreen.importEpub'),
                 onPress: pickAndImport,
               },
@@ -135,18 +143,6 @@ export const LibraryView: React.FC<Props> = ({
     [theme, categoryId, navigation, pickAndImport],
   );
 
-  const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={false}
-        onRefresh={onRefresh}
-        colors={[theme.onPrimary]}
-        progressBackgroundColor={theme.primary}
-      />
-    ),
-    [onRefresh, theme.onPrimary, theme.primary],
-  );
-
   return (
     <View style={styles.flex}>
       <NovelList
@@ -154,7 +150,12 @@ export const LibraryView: React.FC<Props> = ({
         extraData={extraData}
         renderItem={renderItem as NovelListRenderItem}
         ListEmptyComponent={listEmptyComponent}
-        refreshControl={refreshControl}
+        ListHeaderComponent={header}
+        availableWidth={availableWidth}
+        topPadding={topPadding}
+        refreshing={false}
+        onRefresh={onRefresh}
+        bottomPadding={96}
       />
     </View>
   );

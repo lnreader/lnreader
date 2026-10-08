@@ -2,6 +2,8 @@
 const baseModuleNameMapper = {
   '^@components$': '<rootDir>/src/components/index',
   '^@components/(.*)$': '<rootDir>/src/components/$1',
+  // Compose views are device-only; tests render RN stand-ins with the same semantics.
+  '^@expo/ui/jetpack-compose$': '<rootDir>/test/mocks/expo-ui-compose.tsx',
   '^@database/(.*)$': '<rootDir>/src/database/$1',
   '^@hooks$': '<rootDir>/src/hooks/index',
   '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
@@ -66,7 +68,10 @@ module.exports = {
       ],
       testPathIgnorePatterns: ['/node_modules/', '<rootDir>/src/database/'],
       moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-      transform: baseTransform,
+      transform: {
+        ...baseTransform,
+        '^.+\\.xml$': '<rootDir>/test/mocks/materialSymbolTransformer.js',
+      },
       transformIgnorePatterns: baseTransformIgnorePatterns,
       moduleNameMapper: baseModuleNameMapper,
       setupFiles: ['<rootDir>/test/mocks/index.js'],

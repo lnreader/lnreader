@@ -1,10 +1,11 @@
-import { Button, Dialog } from '@components';
+import { AppText, Button, Dialog, TextInput } from '@components';
 import { useBoolean } from '@hooks/index';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { TextInput as RNTextInput, StyleSheet, View } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import React, { useCallback, useMemo } from 'react';
+import { Column } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
+import AddIcon from '@expo/material-symbols/add.xml';
 import { RemoveItem, ReplaceItem } from '../Components/ListItems';
 
 type ReplaceItemModalProps = {
@@ -24,9 +25,6 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
     [replaceText],
   );
 
-  const textRef = useRef<RNTextInput>(null);
-  const replaceTextRef = useRef<RNTextInput>(null);
-
   const [text, setText] = React.useState('');
   const [replacementText, setReplacementText] = React.useState('');
   const [editing, setEditing] = React.useState<string>();
@@ -34,8 +32,6 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
 
   const resetForm = useCallback(() => {
     setError(undefined);
-    textRef.current?.clear();
-    replaceTextRef.current?.clear();
     setText('');
     setReplacementText('');
     setEditing(undefined);
@@ -103,11 +99,9 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
     [modal, showReplace],
   );
 
-  const colorTheme = useMemo(() => ({ colors: theme }), [theme]);
-
   return (
     <>
-      <View>
+      <Column modifiers={[fillMaxWidth()]}>
         {showReplace
           ? replaceArray.map(item => (
               <ReplaceItem
@@ -127,16 +121,17 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
               />
             ))}
         <Button
-          icon="plus"
+          icon={AddIcon}
           mode="outlined"
           onPress={modal.setTrue}
-          style={styles.addButton}
-        >
-          {showReplace
-            ? getString('customCodeSettings.addReplaceRule')
-            : getString('customCodeSettings.addRemoveRule')}
-        </Button>
-      </View>
+          modifiers={[fillMaxWidth(), padding(16, 4, 16, 4)]}
+          title={
+            showReplace
+              ? getString('customCodeSettings.addReplaceRule')
+              : getString('customCodeSettings.addRemoveRule')
+          }
+        />
+      </Column>
       <Dialog.Root visible={modal.value} onDismiss={closeModal}>
         <Dialog.Header>
           <Dialog.Title>
@@ -144,37 +139,31 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
           </Dialog.Title>
         </Dialog.Header>
         <Dialog.Content>
-          <TextInput
-            ref={textRef}
-            label={getString(
-              showReplace
-                ? 'common.textToReplace'
-                : 'customCodeSettings.removeText',
-            )}
-            theme={colorTheme}
-            value={text}
-            onChangeText={setText}
-            autoCorrect={false}
-            mode="outlined"
-            style={showReplace ? styles.pairedTextfield : styles.hintTextfield}
-            error={Boolean(error?.[0])}
-          />
-          {showReplace ? (
+          <Column verticalArrangement={{ spacedBy: 12 }}>
             <TextInput
-              ref={replaceTextRef}
-              label={getString('common.replaceWith')}
-              theme={colorTheme}
-              value={replacementText}
-              onChangeText={setReplacementText}
-              autoCorrect={false}
-              mode="outlined"
-              style={styles.hintTextfield}
-              error={Boolean(error?.[1])}
+              label={getString(
+                showReplace
+                  ? 'common.textToReplace'
+                  : 'customCodeSettings.removeText',
+              )}
+              value={text}
+              onChangeText={setText}
+              singleLine
+              error={error?.[0] || null}
             />
-          ) : null}
-          <Text style={[styles.regexHint, { color: theme.onSurfaceVariant }]}>
-            {getString('customCodeSettings.regexHint')}
-          </Text>
+            {showReplace ? (
+              <TextInput
+                label={getString('common.replaceWith')}
+                value={replacementText}
+                onChangeText={setReplacementText}
+                singleLine
+                error={error?.[1] || null}
+              />
+            ) : null}
+            <AppText variant="bodySmall" color={theme.onSurfaceVariant}>
+              {getString('customCodeSettings.regexHint')}
+            </AppText>
+          </Column>
         </Dialog.Content>
         <Dialog.Actions>
           <Dialog.Action onPress={closeModal}>
@@ -190,22 +179,3 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
 };
 
 export default ReplaceItemModal;
-
-const styles = StyleSheet.create({
-  addButton: {
-    marginBottom: 16,
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  pairedTextfield: {
-    marginBottom: 2,
-  },
-  hintTextfield: {
-    marginBottom: 4,
-  },
-  regexHint: {
-    fontSize: 12,
-    lineHeight: 16,
-    marginBottom: 16,
-  },
-});

@@ -1,10 +1,19 @@
-import { IconButtonV2 } from '@components';
+import { AppIcon, AppText, IconButtonV2 } from '@components';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import Icon from '@react-native-vector-icons/material-design-icons';
-import { memo, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { memo } from 'react';
+import { Box, Card, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clip,
+  fillMaxWidth,
+  padding,
+  Shapes,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
+import ArrowForwardIcon from '@expo/material-symbols/arrow_forward.xml';
+import DeleteIcon from '@expo/material-symbols/delete.xml';
+import EditIcon from '@expo/material-symbols/edit.xml';
 
 type RuleCardProps = {
   label: string;
@@ -18,91 +27,81 @@ type RuleCardProps = {
 const RuleCard = memo(
   ({ label, match, replacement, onDelete, onEdit, tone }: RuleCardProps) => {
     const theme = useTheme();
-    const colorTheme = useMemo(() => ({ colors: theme }), [theme]);
     const isReplace = tone === 'replace';
 
     return (
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.secondaryContainer },
-        ]}
+      <Card
+        colors={{
+          containerColor: theme.secondaryContainer,
+          contentColor: theme.onSurface,
+        }}
+        modifiers={[fillMaxWidth(), padding(16, 4, 16, 4)]}
       >
-        <View style={styles.cardContent}>
-          <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor: isReplace
-                  ? theme.primaryContainer
-                  : theme.errorContainer,
-              },
+        <Row
+          verticalAlignment="center"
+          horizontalArrangement={{ spacedBy: 12 }}
+          modifiers={[fillMaxWidth(), padding(16, 8, 4, 8)]}
+        >
+          <Box
+            modifiers={[
+              clip(Shapes.RoundedCorner(8)),
+              background(
+                isReplace ? theme.primaryContainer : theme.errorContainer,
+              ),
+              padding(8, 2, 8, 2),
             ]}
           >
-            <Text
-              style={[
-                styles.badgeText,
-                {
-                  color: isReplace
-                    ? theme.onPrimaryContainer
-                    : theme.onErrorContainer,
-                },
-              ]}
-              theme={colorTheme}
+            <AppText
+              variant="labelMedium"
+              weight="700"
+              color={
+                isReplace ? theme.onPrimaryContainer : theme.onErrorContainer
+              }
             >
               {label}
-            </Text>
-          </View>
-          <View style={styles.ruleContent}>
-            <Text
-              numberOfLines={2}
-              style={[styles.ruleText, { color: theme.onSurface }]}
-              theme={colorTheme}
-            >
+            </AppText>
+          </Box>
+          <Row
+            verticalAlignment="center"
+            horizontalArrangement={{ spacedBy: 6 }}
+            modifiers={[weight(1)]}
+          >
+            <AppText variant="bodyMedium" maxLines={2} modifiers={[weight(1)]}>
               {match}
-            </Text>
+            </AppText>
             {replacement !== undefined ? (
               <>
-                <Icon
-                  accessible={false}
-                  name="arrow-right"
+                <AppIcon
+                  source={ArrowForwardIcon}
                   size={20}
-                  color={theme.onSurfaceVariant}
+                  tint={theme.onSurfaceVariant}
                 />
-                <Text
-                  numberOfLines={2}
-                  style={[
-                    styles.ruleText,
-                    styles.replacementText,
-                    { color: theme.onSurface },
-                  ]}
-                  theme={colorTheme}
+                <AppText
+                  variant="bodyMedium"
+                  maxLines={2}
+                  modifiers={[weight(1)]}
                 >
                   {replacement}
-                </Text>
+                </AppText>
               </>
             ) : null}
-          </View>
-        </View>
-        <View style={styles.actions}>
+          </Row>
           <IconButtonV2
             accessibilityLabel={getString('common.edit')}
-            name="pencil-outline"
+            name={EditIcon}
             color={theme.onSurface}
             onPress={onEdit}
-            padding={12}
             theme={theme}
           />
           <IconButtonV2
             accessibilityLabel={getString('common.delete')}
             color={theme.onSurface}
-            name="delete-outline"
+            name={DeleteIcon}
             onPress={onDelete}
-            padding={12}
             theme={theme}
           />
-        </View>
-      </View>
+        </Row>
+      </Card>
     );
   },
 );
@@ -155,50 +154,3 @@ export const RemoveItem = memo(
 );
 
 RemoveItem.displayName = 'RemoveItem';
-
-const styles = StyleSheet.create({
-  actions: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 4,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  card: {
-    borderCurve: 'continuous',
-    borderRadius: 12,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-    marginBottom: 8,
-    marginHorizontal: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  cardContent: {
-    minHeight: 48,
-  },
-  replacementText: {
-    textAlign: 'right',
-  },
-  ruleContent: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  ruleText: {
-    flex: 1,
-    fontFamily: 'monospace',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});

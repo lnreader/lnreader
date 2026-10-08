@@ -104,6 +104,20 @@ jest.mock('@components', () => {
 
   return {
     Appbar: PassThrough,
+    AppText: ({ children }: { children: ReactNode }) =>
+      ReactModule.createElement(Text, null, children),
+    ComposeList: ({ data, renderItem }: any) =>
+      ReactModule.createElement(
+        View,
+        null,
+        ...data.map((item: any, index: number) =>
+          ReactModule.createElement(
+            ReactModule.Fragment,
+            { key: item.id },
+            renderItem(item, index),
+          ),
+        ),
+      ),
     ConfirmationDialog: ({
       cancelLabel,
       confirmLabel,
@@ -140,6 +154,12 @@ jest.mock('@components', () => {
           )
         : null,
     EmptyView: () => null,
+    Fab: ({ label, onPress }: { label: string; onPress: () => void }) =>
+      ReactModule.createElement(
+        Pressable,
+        { onPress },
+        ReactModule.createElement(Text, null, label),
+      ),
     IconButtonV2: ({ accessibilityLabel, color, onPress }: any) =>
       ReactModule.createElement(
         Pressable,
@@ -152,27 +172,16 @@ jest.mock('@components', () => {
         ReactModule.createElement(Text, null, accessibilityLabel),
       ),
     Menu,
-    SafeAreaView: PassThrough,
-  };
-});
-
-jest.mock('react-native-paper', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { Pressable, Text, View } =
-    jest.requireActual<typeof import('react-native')>('react-native');
-  const Action = ({ onPress }: { onPress: () => void }) =>
-    ReactModule.createElement(Pressable, { onPress });
-
-  return {
-    Appbar: { Action },
-    FAB: ({ label, onPress }: { label: string; onPress: () => void }) =>
+    ProgressIndicator: () => ReactModule.createElement(View),
+    Screen: ({ topBar, list, floatingAction, overlays }: any) =>
       ReactModule.createElement(
-        Pressable,
-        { onPress },
-        ReactModule.createElement(Text, null, label),
+        View,
+        null,
+        topBar,
+        list,
+        floatingAction,
+        overlays,
       ),
-    ProgressBar: () => ReactModule.createElement(View),
-    overlay: () => '#ffffff',
   };
 });
 

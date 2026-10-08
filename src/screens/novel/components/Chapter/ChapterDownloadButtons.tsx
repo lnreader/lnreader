@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
+import { Box } from '@expo/ui/jetpack-compose';
+import { size } from '@expo/ui/jetpack-compose/modifiers';
 import { ThemeColors } from '@theme/types';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
-import { overlay } from 'react-native-paper';
 import { getString } from '@i18n/translations';
 import { useBoolean } from '@hooks/index';
-import { IconButtonV2, Menu } from '@components';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { AppIcon, IconButtonV2, Menu, ProgressIndicator } from '@components';
+import ArrowCircleDownIcon from '@expo/material-symbols/arrow_circle_down.xml';
+import BookmarkIcon from '@expo/material-symbols/bookmark.xml';
+import CheckCircleIcon from '@expo/material-symbols/check_circle.xml';
 
 interface DownloadButtonProps {
   isDownloaded: boolean;
@@ -29,15 +31,6 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
     setFalse: hideDeleteChapterMenu,
   } = useBoolean();
 
-  const menuContentStyle = useMemo(
-    () => ({ backgroundColor: overlay(2, theme.surface) }),
-    [theme.surface],
-  );
-  const menuTitleStyle = useMemo(
-    () => ({ color: theme.onSurface }),
-    [theme.onSurface],
-  );
-
   if (isDownloading) {
     return <ChapterDownloadingButton theme={theme} />;
   }
@@ -49,7 +42,6 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
         anchor={
           <DeleteChapterButton theme={theme} onPress={showDeleteChapterMenu} />
         }
-        contentStyle={menuContentStyle}
       >
         <Menu.Item
           onPress={() => {
@@ -57,7 +49,6 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
             hideDeleteChapterMenu();
           }}
           title={getString('common.delete')}
-          titleStyle={menuTitleStyle}
         />
       </Menu>
     );
@@ -71,44 +62,22 @@ interface theme {
 type buttonPropType = theme & {
   onPress: () => void;
 };
-export const ChapterDownloadingButton: React.FC<theme> = ({ theme }) => (
-  <View style={styles.container}>
-    <ActivityIndicator
-      color={theme.outline}
-      size={25}
-      style={styles.activityIndicator}
-    />
-  </View>
-);
-
-const DownloadIcon: React.FC<theme> = ({ theme }) => (
-  <MaterialCommunityIcons
-    name="arrow-down-circle-outline"
-    size={25}
-    color={theme.outline}
-  />
+export const ChapterDownloadingButton: React.FC<theme> = () => (
+  <Box contentAlignment="center" modifiers={[size(40, 40)]}>
+    <ProgressIndicator circular modifiers={[size(22, 22)]} />
+  </Box>
 );
 
 export const DownloadChapterButton: React.FC<buttonPropType> = ({
   theme,
   onPress,
 }) => (
-  <View style={styles.container}>
-    <Pressable
-      style={styles.pressable}
-      onPress={onPress}
-      android_ripple={{ color: theme.rippleColor }}
-    >
-      <DownloadIcon theme={theme} />
-    </Pressable>
-  </View>
-);
-
-const DeleteIcon: React.FC<theme> = ({ theme }) => (
-  <MaterialCommunityIcons
-    name="check-circle"
-    size={25}
-    color={theme.onSurface}
+  <IconButtonV2
+    name={ArrowCircleDownIcon}
+    accessibilityLabel={getString('libraryScreen.bottomSheet.display.download')}
+    color={theme.outline}
+    onPress={onPress}
+    theme={theme}
   />
 );
 
@@ -116,43 +85,17 @@ export const DeleteChapterButton: React.FC<buttonPropType> = ({
   theme,
   onPress,
 }) => (
-  <View style={styles.container}>
-    <Pressable
-      style={styles.pressable}
-      onPress={onPress}
-      android_ripple={{ color: theme.rippleColor }}
-    >
-      <DeleteIcon theme={theme} />
-    </Pressable>
-  </View>
-);
-
-export const ChapterBookmarkButton: React.FC<theme> = ({ theme }) => (
   <IconButtonV2
-    name="bookmark"
+    name={CheckCircleIcon}
+    accessibilityLabel={getString('common.delete')}
+    color={theme.onSurface}
+    onPress={onPress}
     theme={theme}
-    color={theme.primary}
-    size={18}
-    style={styles.iconButtonLeft}
   />
 );
 
-const styles = StyleSheet.create({
-  activityIndicator: { margin: 3.5, padding: 5 },
-  container: {
-    borderRadius: 50,
-    width: 40,
-    height: 40,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pressable: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconButton: { margin: 2 },
-  iconButtonLeft: { marginLeft: 2 },
-});
+export const ChapterBookmarkButton: React.FC<theme> = ({ theme }) => (
+  <Box contentAlignment="center" modifiers={[size(40, 40)]}>
+    <AppIcon source={BookmarkIcon} tint={theme.primary} size={18} />
+  </Box>
+);

@@ -1,13 +1,11 @@
-import { FlatList, StyleSheet } from 'react-native';
-
 import { Dialog, RadioButton } from '@components';
-import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import type { StringMap } from '@i18n/types';
 import {
   AUTOMATIC_LIBRARY_UPDATE_INTERVALS,
   type AutomaticLibraryUpdateInterval,
 } from '@services/backgroundTasks';
+import { useTheme } from '@hooks/persisted';
 
 type AutomaticUpdateLabel = Extract<
   keyof StringMap,
@@ -40,7 +38,6 @@ const AutomaticUpdatesDialog = ({
   onSelect,
 }: AutomaticUpdatesDialogProps) => {
   const theme = useTheme();
-
   return (
     <Dialog.Root visible={visible} onDismiss={onCancel}>
       <Dialog.Title>
@@ -50,19 +47,15 @@ const AutomaticUpdatesDialog = ({
         {getString('generalSettingsScreen.automaticUpdatesDescription')}
       </Dialog.Description>
       <Dialog.ScrollArea>
-        <FlatList
-          data={AUTOMATIC_LIBRARY_UPDATE_INTERVALS}
-          keyExtractor={interval => interval.toString()}
-          renderItem={({ item }) => (
-            <RadioButton
-              label={getString(INTERVAL_LABELS[item])}
-              status={item === intervalHours}
-              onPress={() => onSelect(item)}
-              theme={theme}
-            />
-          )}
-          style={styles.scrollArea}
-        />
+        {AUTOMATIC_LIBRARY_UPDATE_INTERVALS.map(item => (
+          <RadioButton
+            key={item.toString()}
+            label={getString(INTERVAL_LABELS[item])}
+            status={item === intervalHours}
+            onPress={() => onSelect(item)}
+            theme={theme}
+          />
+        ))}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onCancel}>
@@ -74,9 +67,3 @@ const AutomaticUpdatesDialog = ({
 };
 
 export default AutomaticUpdatesDialog;
-
-const styles = StyleSheet.create({
-  scrollArea: {
-    maxHeight: 480,
-  },
-});

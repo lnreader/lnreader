@@ -1,30 +1,71 @@
-import React, { ReactNode, useCallback } from 'react';
+import { type ReactNode } from 'react';
 import {
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
-import MaterialIcon from '@react-native-vector-icons/material-design-icons';
-
-import { List as PaperList, Divider as PaperDivider } from 'react-native-paper';
+  Column,
+  HorizontalDivider,
+  ListItem,
+  Row,
+} from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  size,
+} from '@expo/ui/jetpack-compose/modifiers';
+import type { ColorInstance } from 'color';
 import { ThemeColors } from '../../theme/types';
-import { ColorInstance } from 'color';
+import OutlinedBox from '../OutlinedBox/OutlinedBox';
+import InfoIcon from '@expo/material-symbols/info.xml';
+import AppIcon, { type IconSource } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
+import { listItemColors } from './listItemColors';
 
-interface ListItemProps {
+export interface RowBaseProps {
   title: string;
   description?: string | null;
-  icon?: string;
-  onPress?: () => void;
-  theme: ThemeColors;
+  icon?: IconSource;
   disabled?: boolean;
-  right?: string;
+  theme: ThemeColors;
 }
 
+export const Leading = ({ icon }: { icon?: IconSource }) =>
+  icon ? (
+    <ListItem.LeadingContent>
+      <AppIcon source={icon} />
+    </ListItem.LeadingContent>
+  ) : null;
+
+export const Texts = ({
+  title,
+  description,
+  disabled,
+  theme,
+}: Pick<RowBaseProps, 'title' | 'description' | 'disabled' | 'theme'>) => {
+  return (
+    <>
+      <ListItem.HeadlineContent>
+        <AppText
+          variant="bodyLarge"
+          color={disabled ? theme.onSurfaceDisabled : theme.onSurface}
+        >
+          {title}
+        </AppText>
+      </ListItem.HeadlineContent>
+      {description ? (
+        <ListItem.SupportingContent>
+          <AppText
+            variant="bodyMedium"
+            color={disabled ? theme.onSurfaceDisabled : theme.onSurfaceVariant}
+          >
+            {description}
+          </AppText>
+        </ListItem.SupportingContent>
+      ) : null}
+    </>
+  );
+};
+
 const Section = ({ children }: { children: ReactNode }) => (
-  <PaperList.Section style={styles.listSection}>{children}</PaperList.Section>
+  <Column modifiers={[fillMaxWidth()]}>{children}</Column>
 );
 
 const SubHeader = ({
@@ -33,96 +74,102 @@ const SubHeader = ({
 }: {
   children: ReactNode;
   theme: ThemeColors;
-}) => (
-  <PaperList.Subheader style={{ color: theme.primary }}>
-    {children}
-  </PaperList.Subheader>
-);
-
-const Item: React.FC<ListItemProps> = ({
-  title,
-  description,
-  icon,
-  onPress,
-  theme,
-  disabled,
-  right,
 }) => {
-  const left = useCallback(() => {
-    if (icon) {
-      return (
-        <PaperList.Icon
-          color={theme.primary}
-          icon={icon}
-          style={styles.iconCtn}
-        />
-      );
-    }
-  }, [icon, theme.primary]);
-  const rightIcon = useCallback(() => {
-    if (right) {
-      return (
-        <PaperList.Icon
-          color={theme.primary}
-          icon={right}
-          style={styles.iconCtn}
-        />
-      );
-    }
-  }, [right, theme.primary]);
   return (
-    <PaperList.Item
-      title={title}
-      titleStyle={{
-        color: disabled ? theme.onSurfaceDisabled : theme.onSurface,
-      }}
-      description={description}
-      descriptionStyle={[
-        styles.description,
-        {
-          color: disabled ? theme.onSurfaceDisabled : theme.onSurfaceVariant,
-        },
-      ]}
-      left={left}
-      right={rightIcon}
-      disabled={disabled}
-      onPress={onPress}
-      rippleColor={theme.rippleColor}
-      style={styles.listItemCtn}
+    <AppText
+      variant="labelLarge"
+      color={theme.primary}
+      modifiers={[padding(16, 20, 16, 4)]}
+    >
+      {children}
+    </AppText>
+  );
+};
+
+const Divider = ({ theme }: { theme: ThemeColors }) => {
+  return (
+    <HorizontalDivider
+      color={theme.outlineVariant}
+      modifiers={[padding(16, 4, 16, 4)]}
     />
   );
 };
 
-const Divider = ({ theme }: { theme: ThemeColors }) => (
-  <PaperDivider
-    style={[styles.divider, { backgroundColor: theme.outlineVariant }]}
-  />
-);
+interface ListItemProps extends RowBaseProps {
+  onPress?: () => void;
+  /** An icon, or text such as the current value. */
+  right?: IconSource | string;
+  trailing?: ReactNode;
+}
 
-const InfoItem = ({
+const Item = ({
   title,
+  description,
+  icon,
+  disabled,
+  onPress,
+  right,
+  trailing,
   theme,
-  style,
-}: {
-  title: string;
-  icon?: string;
-  theme: ThemeColors;
-  style?: StyleProp<ViewStyle>;
-}) => (
-  <View style={[styles.infoCtn, style]}>
-    <MaterialIcon
-      size={20}
-      color={theme.primary}
-      name={'information-outline'}
-    />
-    <Text style={[styles.infoMsg, { color: theme.onSurfaceVariant }]}>
-      {title}
-    </Text>
-  </View>
-);
+}: ListItemProps) => {
+  const end =
+    trailing ??
+    (right === undefined || typeof right === 'string' ? (
+      right
+    ) : (
+      <AppIcon source={right} tint={theme.primary} />
+    ));
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={
+        onPress && !disabled
+          ? [fillMaxWidth(), clickable(onPress)]
+          : [fillMaxWidth()]
+      }
+    >
+      <Leading icon={icon} />
+      <Texts
+        title={title}
+        description={description}
+        disabled={disabled}
+        theme={theme}
+      />
+      {end !== undefined ? (
+        <ListItem.TrailingContent>
+          {typeof end === 'string' ? (
+            <AppText variant="labelLarge" color={theme.onSurfaceVariant}>
+              {end}
+            </AppText>
+          ) : (
+            end
+          )}
+        </ListItem.TrailingContent>
+      ) : null}
+    </ListItem>
+  );
+};
 
-const Icon = ({ icon, theme }: { icon: string; theme: ThemeColors }) => (
-  <PaperList.Icon color={theme.primary} icon={icon} style={styles.margin0} />
+const InfoItem = ({ title, theme }: { title: string; theme: ThemeColors }) => {
+  return (
+    <Row
+      verticalAlignment="top"
+      modifiers={[fillMaxWidth(), padding(16, 12, 16, 12)]}
+    >
+      <AppIcon source={InfoIcon} size={20} tint={theme.onSurfaceVariant} />
+      <AppText
+        variant="bodySmall"
+        color={theme.onSurfaceVariant}
+        modifiers={[padding(12, 0, 0, 0)]}
+      >
+        {title}
+      </AppText>
+    </Row>
+  );
+};
+
+const Icon = ({ icon, theme }: { icon: IconSource; theme: ThemeColors }) => (
+  <AppIcon source={icon} tint={theme.primary} />
 );
 
 interface ColorItemProps {
@@ -132,30 +179,27 @@ interface ColorItemProps {
   onPress: () => void;
 }
 
-const ColorItem = ({ title, color, theme, onPress }: ColorItemProps) => (
-  <Pressable
-    style={styles.pressable}
-    android_ripple={{ color: theme.rippleColor }}
-    onPress={onPress}
-  >
-    <View>
-      <Text style={[{ color: theme.onSurface }, styles.fontSize16]}>
-        {title}
-      </Text>
-      <Text style={{ color: theme.onSurfaceVariant }}>
-        {color.rgb().toString().toUpperCase()}
-      </Text>
-    </View>
-    <View
-      style={[
-        {
-          backgroundColor: color.hex(),
-        },
-        styles.descriptionView,
-      ]}
+const ColorItem = ({ title, color, theme, onPress }: ColorItemProps) => {
+  return (
+    <Item
+      theme={theme}
+      title={title}
+      description={color.rgb().toString().toUpperCase()}
+      onPress={onPress}
+      trailing={
+        <OutlinedBox
+          shape="circle"
+          outlineWidth={1}
+          outlineColor={theme.outline}
+          color={color.hex()}
+          modifiers={[size(28, 28)]}
+        />
+      }
     />
-  </Pressable>
-);
+  );
+};
+
+export { listItemColors };
 
 export default {
   Section,
@@ -166,47 +210,3 @@ export default {
   Icon,
   ColorItem,
 };
-
-const styles = StyleSheet.create({
-  margin0: { margin: 0 },
-  fontSize16: {
-    fontSize: 16,
-  },
-  descriptionView: {
-    height: 24,
-    width: 24,
-    borderRadius: 50,
-    marginEnd: 16,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  divider: {
-    height: 1,
-  },
-  iconCtn: {
-    paddingStart: 16,
-  },
-  infoCtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  infoMsg: {
-    fontSize: 12,
-    marginTop: 12,
-  },
-  listItemCtn: {
-    paddingVertical: 12,
-  },
-  listSection: {
-    flex: 1,
-    marginVertical: 0,
-  },
-  pressable: {
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-});

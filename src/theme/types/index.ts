@@ -39,8 +39,22 @@ export interface MD3ThemeType {
 export interface ThemeColors extends MD3ThemeType {
   rippleColor?: string;
   surfaceContainerLow?: string;
+  surfaceContainer?: string;
   surfaceContainerHigh?: string;
+  surfaceContainerHighest?: string;
   surface2?: string;
   overlay3?: string;
   surfaceReader?: string;
 }
+
+/** A theme with the surfaces the app derives for it (see useTheme). */
+export type AppThemeColors = ThemeColors &
+  Required<
+    Pick<
+      ThemeColors,
+      | 'surfaceContainerLow'
+      | 'surfaceContainer'
+      | 'surfaceContainerHigh'
+      | 'surfaceContainerHighest'
+    >
+  >;

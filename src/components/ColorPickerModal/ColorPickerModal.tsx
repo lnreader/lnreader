@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlowRow } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
-import { TextInput } from 'react-native-paper';
-import { Dialog } from '@components';
+import { Dialog } from '../Dialog/Dialog';
 import { ThemeColors } from '../../theme/types';
 import { getString } from '@i18n/translations';
+import AppText from '../AppText/AppText';
+import TextInput from '../TextInput';
+import { ColorSwatch } from '../ColorPreferenceItem/ColorPreferenceItem';
 
 interface ColorPickerModalProps {
   visible: boolean;
@@ -80,43 +83,47 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
     <Dialog.Root visible={visible} onDismiss={onDismiss}>
       <Dialog.Title>{title}</Dialog.Title>
       {showAccentColors ? (
-        <Dialog.ScrollArea>
-          <FlatList
-            contentContainerStyle={styles.colorList}
-            data={accentColors}
-            numColumns={4}
-            keyExtractor={item => item}
-            renderItem={({ item }) => (
-              <View style={[styles.item, { backgroundColor: item }]}>
-                <Pressable
-                  style={styles.flex}
-                  android_ripple={{
-                    color: 'rgba(0,0,0,0.12)',
-                  }}
-                  onPress={() => {
-                    onSubmit(item);
-                    closeModal();
-                  }}
-                />
-              </View>
-            )}
-          />
-        </Dialog.ScrollArea>
+        <Dialog.Content>
+          <FlowRow
+            horizontalArrangement={{ spacedBy: 12 }}
+            verticalArrangement={{ spacedBy: 12 }}
+            modifiers={[fillMaxWidth()]}
+          >
+            {accentColors.map(item => (
+              <ColorSwatch
+                key={item}
+                color={item}
+                diameter={40}
+                selected={item.toLowerCase() === color.toLowerCase()}
+                onPress={() => {
+                  onSubmit(item);
+                  closeModal();
+                }}
+                theme={theme}
+              />
+            ))}
+          </FlowRow>
+        </Dialog.Content>
       ) : null}
       <Dialog.Content>
         <TextInput
           value={text}
-          defaultValue={typeof color === 'string' ? color : ''}
           placeholder="Hex Color Code (E.g. #3399FF)"
           onChangeText={onChangeText}
-          onSubmitEditing={onSubmitEditing}
-          mode="outlined"
-          theme={{ colors: { ...theme } }}
-          underlineColor={theme.outline}
-          dense
-          error={Boolean(error)}
+          onSubmit={onSubmitEditing}
+          keyboardType="ascii"
+          singleLine
+          error={error}
         />
-        <Text style={styles.errorText}>{error}</Text>
+        {error ? (
+          <AppText
+            variant="bodySmall"
+            color={theme.error}
+            modifiers={[padding(0, 8, 0, 0)]}
+          >
+            {error}
+          </AppText>
+        ) : null}
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.Action title={getString('common.reset')} onPress={onReset} />
@@ -130,24 +137,3 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
 };
 
 export default ColorPickerModal;
-
-const styles = StyleSheet.create({
-  errorText: {
-    color: '#FF0033',
-    paddingTop: 8,
-  },
-  item: {
-    borderRadius: 4,
-    overflow: 'hidden',
-
-    flex: 1 / 4,
-    height: 40,
-    marginHorizontal: 4,
-    marginVertical: 4,
-  },
-  flex: { flex: 1 },
-  colorList: {
-    paddingHorizontal: 20,
-    paddingVertical: 4,
-  },
-});

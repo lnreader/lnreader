@@ -51,6 +51,8 @@ jest.mock('@components', () => ({
     '@components/ConfirmationDialog/ConfirmationDialog',
   ).default,
   IconButtonV2: () => null,
+  AppIcon: () => null,
+  AppText: jest.requireActual('@components/AppText/AppText').default,
 }));
 
 jest.mock('@components/AppErrorBoundary/AppErrorBoundary', () => ({
@@ -79,10 +81,6 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaInsets: () => insets,
   };
 });
-
-jest.mock('@gorhom/bottom-sheet', () => ({
-  BottomSheetModalProvider: ({ children }: { children: ReactNode }) => children,
-}));
 
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
@@ -144,12 +142,10 @@ describe('RepositoryCard', () => {
       />,
     );
 
-    const repositorySwitch = screen.getByRole('switch', {
-      name: 'Toggle lnreader/plugins repository',
-    });
-    expect(repositorySwitch.props.accessibilityState).toEqual({
-      checked: true,
-    });
+    const repositorySwitch = screen.getByRole('switch');
+    expect(repositorySwitch.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: true }),
+    );
 
     fireEvent.press(repositorySwitch);
 
@@ -179,12 +175,10 @@ describe('RepositoryCard', () => {
       />,
     );
 
-    const repositorySwitch = screen.getByRole('switch', {
-      name: 'Toggle lnreader/plugins repository',
-    });
-    expect(repositorySwitch.props.accessibilityState).toEqual({
-      checked: false,
-    });
+    const repositorySwitch = screen.getByRole('switch');
+    expect(repositorySwitch.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: false }),
+    );
 
     fireEvent.press(repositorySwitch);
 

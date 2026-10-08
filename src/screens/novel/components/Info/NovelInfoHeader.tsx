@@ -1,10 +1,13 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { memo, useCallback, useMemo } from 'react';
+import { Box, Column, Row } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import * as Clipboard from 'expo-clipboard';
-
-import { IconButton } from 'react-native-paper';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { showToast } from '@utils/showToast';
 
@@ -16,8 +19,16 @@ import {
   NovelTitle,
   NovelGenres,
 } from './NovelInfoComponents';
-import { Row } from '@components/Common';
 import ReadButton from './ReadButton';
+import {
+  NovelMetaSkeleton,
+  VerticalBarSkeleton,
+} from '@components/Skeleton/Skeleton';
+import {
+  ButtonGroupSkeleton,
+  ChapterCountSkeleton,
+  NovelDetailsSkeleton,
+} from './NovelInfoSkeletons';
 import NovelSummary from '../NovelSummary/NovelSummary';
 import NovelScreenButtonGroup from '../NovelScreenButtonGroup/NovelScreenButtonGroup';
 import { getString } from '@i18n/translations';
@@ -25,7 +36,6 @@ import { filterColor } from '@theme/colors';
 import { ChapterInfo, NovelInfo as NovelData } from '@database/types';
 import { ThemeColors } from '@theme/types';
 import { NovelScreenProps } from '@navigators/types';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { UseBooleanReturnType } from '@hooks';
 import { useAppSettings } from '@hooks/persisted';
 import { NovelStatus, PluginItem } from '@plugins/types';
@@ -33,19 +43,28 @@ import { translateNovelStatus } from '@utils/translateEnum';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import { AVAILABLE_PLUGINS } from '@hooks/persisted/usePlugins';
 import { getPlugin } from '@plugins/pluginManager';
-
 import {
-  NovelMetaSkeleton,
-  VerticalBarSkeleton,
-} from '@components/Skeleton/Skeleton';
+  AppIcon,
+  AppText,
+  IconButtonV2,
+  useScreenInsets,
+  type IconSource,
+} from '@components';
 import { ChapterFilterKey } from '@database/constants';
 import { useNovelAction } from '@screens/novel/NovelContext';
 import { useNavigation } from '@react-navigation/native';
-import {
-  ButtonGroupSkeleton,
-  ChapterCountSkeleton,
-  NovelDetailsSkeleton,
-} from './NovelInfoSkeletons';
+import CancelIcon from '@expo/material-symbols/cancel.xml';
+import CopyrightIcon from '@expo/material-symbols/copyright.xml';
+import DoneAllIcon from '@expo/material-symbols/done_all.xml';
+import FilterListIcon from '@expo/material-symbols/filter_list.xml';
+import HelpIcon from '@expo/material-symbols/help.xml';
+import InkPenIcon from '@expo/material-symbols/ink_pen.xml';
+import MenuBookIcon from '@expo/material-symbols/menu_book.xml';
+import PaletteIcon from '@expo/material-symbols/palette.xml';
+import PauseCircleIcon from '@expo/material-symbols/pause_circle.xml';
+import ScheduleIcon from '@expo/material-symbols/schedule.xml';
+import BedtimeIcon from '@expo/material-symbols/bedtime.xml';
+import BookIcon from '@expo/material-symbols/book.xml';
 
 interface NovelInfoHeaderProps {
   hasDownloadedChapters: boolean;
@@ -57,28 +76,30 @@ interface NovelInfoHeaderProps {
   lastRead?: ChapterInfo;
   navigateToChapter: (chapter: ChapterInfo) => void;
   novel: NovelData | (Omit<NovelData, 'id'> & { id: 'NO_ID' });
-  novelBottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  openNovelBottomSheet: () => void;
   setCustomNovelCover: () => Promise<void>;
   saveNovelCover: () => Promise<void>;
   theme: ThemeColors;
   totalChapters?: number;
-  trackerSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  openTrackerSheet: () => void;
+  /** Phones draw the top bar over the backdrop. */
+  underTopBar?: boolean;
 }
 
-const STATUS_ICON_MAP = {
-  [NovelStatus.Ongoing]: 'clock-outline',
-  [NovelStatus.Completed]: 'check-all',
-  [NovelStatus.OnHiatus]: 'pause-circle-outline',
-  [NovelStatus.Cancelled]: 'cancel',
-  [NovelStatus.Licensed]: 'copyright',
-  [NovelStatus.PublishingFinished]: 'book-check-outline',
-  [NovelStatus.Unknown]: 'help-circle-outline',
-  [NovelStatus.STUB]: 'book-off-outline',
-  [NovelStatus.Inactive]: 'sleep',
-} as const;
+const STATUS_ICON_MAP: Record<string, IconSource> = {
+  [NovelStatus.Ongoing]: ScheduleIcon,
+  [NovelStatus.Completed]: DoneAllIcon,
+  [NovelStatus.OnHiatus]: PauseCircleIcon,
+  [NovelStatus.Cancelled]: CancelIcon,
+  [NovelStatus.Licensed]: CopyrightIcon,
+  [NovelStatus.PublishingFinished]: MenuBookIcon,
+  [NovelStatus.Unknown]: HelpIcon,
+  [NovelStatus.STUB]: BookIcon,
+  [NovelStatus.Inactive]: BedtimeIcon,
+};
 
 const getStatusIcon = (status?: string) =>
-  STATUS_ICON_MAP[status as keyof typeof STATUS_ICON_MAP] ?? 'help';
+  (status && STATUS_ICON_MAP[status]) || HelpIcon;
 
 const showNotAvailable = () => {
   showToast('Not available while loading');
@@ -94,13 +115,15 @@ const NovelInfoHeader = ({
   lastRead,
   navigateToChapter,
   novel,
-  novelBottomSheetRef,
+  openNovelBottomSheet,
   setCustomNovelCover,
   saveNovelCover,
   theme,
   totalChapters,
-  trackerSheetRef,
+  openTrackerSheet,
+  underTopBar = false,
 }: NovelInfoHeaderProps) => {
+  const { top } = useScreenInsets();
   const { hideBackdrop = false } = useAppSettings();
   const navigation = useNavigation<NovelScreenProps['navigation']>();
   const followNovel = useNovelAction('followNovel');
@@ -166,27 +189,21 @@ const NovelInfoHeader = ({
     deleteDownloadSnackbar,
   ]);
 
-  const handleTrackerSheet = useCallback(
-    () => trackerSheetRef.current?.present(),
-    [trackerSheetRef],
-  );
-
-  const handleOpenBottomSheet = useCallback(
-    () => novelBottomSheetRef.current?.present(),
-    [novelBottomSheetRef],
-  );
-
-  const ripple = useMemo(
-    () => ({ color: theme.rippleColor }),
-    [theme.rippleColor],
+  const detail = (icon: IconSource, text: string) => (
+    <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 6 }}>
+      <AppIcon source={icon} size={14} tint={theme.onSurfaceVariant} />
+      <NovelInfo theme={theme}>{text}</NovelInfo>
+    </Row>
   );
 
   return (
-    <>
+    <Column modifiers={[fillMaxWidth()]}>
       <CoverImage
         source={coverSource}
         theme={theme}
-        hideBackdrop={hideBackdrop}
+        // The tablet pane sits on its own surface, with no backdrop.
+        hideBackdrop={hideBackdrop || !underTopBar}
+        topPadding={underTopBar ? top + 64 : 0}
       >
         <NovelInfoContainer>
           <NovelThumbnail
@@ -197,157 +214,98 @@ const NovelInfoHeader = ({
             }
             saveNovelCover={isLoading ? showNotAvailable : saveNovelCover}
           />
-          <View style={styles.novelDetails}>
-            <Row style={styles.infoRow}>
-              <NovelTitle
-                theme={theme}
-                onPress={handleTitlePress}
-                onLongPress={handleTitleLongPress}
-              >
-                {novel.name}
-              </NovelTitle>
-            </Row>
+          <Column verticalArrangement={{ spacedBy: 8 }} modifiers={[weight(1)]}>
+            <NovelTitle
+              theme={theme}
+              onPress={handleTitlePress}
+              onLongPress={handleTitleLongPress}
+            >
+              {novel.name}
+            </NovelTitle>
             {isLoading && novel.id === 'NO_ID' ? (
               <NovelDetailsSkeleton theme={theme} />
             ) : (
               <>
-                {novel.id !== 'NO_ID' && novel.author ? (
-                  <Row style={styles.infoRow}>
-                    <MaterialCommunityIcons
-                      name="fountain-pen-tip"
-                      size={14}
-                      color={theme.onSurfaceVariant}
-                      style={styles.marginRight}
-                    />
-                    <NovelInfo theme={theme}>{novel.author}</NovelInfo>
-                  </Row>
-                ) : null}
-                {novel.id !== 'NO_ID' && novel.artist ? (
-                  <Row style={styles.infoRow}>
-                    <MaterialCommunityIcons
-                      name="palette-outline"
-                      size={14}
-                      color={theme.onSurfaceVariant}
-                      style={styles.marginRight}
-                    />
-                    <NovelInfo theme={theme}>{novel.artist}</NovelInfo>
-                  </Row>
-                ) : null}
-                <Row style={styles.infoRow}>
-                  <MaterialCommunityIcons
-                    name={getStatusIcon(novelStatus)}
-                    size={14}
-                    color={theme.onSurfaceVariant}
-                    style={styles.marginRight}
-                  />
-                  <NovelInfo theme={theme}>
-                    {(novelStatus
-                      ? translateNovelStatus(novelStatus)
-                      : getString('novelScreen.unknownStatus')) +
-                      ' • ' +
-                      pluginName}
-                  </NovelInfo>
-                </Row>
+                {novel.id !== 'NO_ID' && novel.author
+                  ? detail(InkPenIcon, novel.author)
+                  : null}
+                {novel.id !== 'NO_ID' && novel.artist
+                  ? detail(PaletteIcon, novel.artist)
+                  : null}
+                {detail(
+                  getStatusIcon(novelStatus),
+                  (novelStatus
+                    ? translateNovelStatus(novelStatus)
+                    : getString('novelScreen.unknownStatus')) +
+                    ' • ' +
+                    pluginName,
+                )}
               </>
             )}
-          </View>
+          </Column>
         </NovelInfoContainer>
       </CoverImage>
-      <>
-        {isLoading && novel.id === 'NO_ID' ? (
-          <ButtonGroupSkeleton theme={theme} />
-        ) : (
-          <NovelScreenButtonGroup
-            novel={novel}
-            handleFollowNovel={handleFollowNovel}
-            handleTrackerSheet={handleTrackerSheet}
+      {isLoading && novel.id === 'NO_ID' ? (
+        <ButtonGroupSkeleton theme={theme} />
+      ) : (
+        <NovelScreenButtonGroup
+          novel={novel}
+          handleFollowNovel={handleFollowNovel}
+          handleTrackerSheet={openTrackerSheet}
+          theme={theme}
+        />
+      )}
+      {isLoading && (!novel.genres || !novel.summary) ? (
+        <NovelMetaSkeleton />
+      ) : (
+        <>
+          <NovelSummary
+            summary={novel.summary || getString('novelScreen.noSummary')}
+            isExpanded={!novel.inLibrary}
             theme={theme}
           />
-        )}
-        {isLoading && (!novel.genres || !novel.summary) ? (
-          <NovelMetaSkeleton />
-        ) : (
-          <>
-            <NovelSummary
-              summary={novel.summary || getString('novelScreen.noSummary')}
-              isExpanded={!novel.inLibrary}
-              theme={theme}
-            />
-            {novel.genres ? (
-              <NovelGenres theme={theme} genres={novel.genres} />
-            ) : null}
-          </>
-        )}
-        <ReadButton
-          navigateToChapter={navigateToChapter}
-          firstUnreadChapter={firstUnreadChapter}
-          lastRead={lastRead}
-        />
-        {isLoading && (!novel.genres || !novel.summary) ? (
-          <VerticalBarSkeleton />
-        ) : (
-          <View style={styles.bottomsheetContainer}>
-            <Pressable
-              style={styles.bottomsheet}
-              onPress={handleOpenBottomSheet}
-              android_ripple={ripple}
-            >
-              <View style={styles.flex}>
-                {fetching && totalChapters === undefined ? (
-                  <ChapterCountSkeleton theme={theme} />
-                ) : (
-                  <Text style={[{ color: theme.onSurface }, styles.chapters]}>
-                    {`${totalChapters ?? 0} ${getString(
-                      'novelScreen.chapters',
-                    )}`}
-                  </Text>
-                )}
-              </View>
-              <IconButton
-                icon="filter-variant"
-                iconColor={
-                  filter.length > 0
-                    ? filterColor(theme.isDark)
-                    : theme.onSurface
-                }
-                size={24}
-                onPress={handleOpenBottomSheet}
-              />
-            </Pressable>
-          </View>
-        )}
-      </>
-    </>
+          {novel.genres ? (
+            <NovelGenres theme={theme} genres={novel.genres} />
+          ) : null}
+        </>
+      )}
+      <ReadButton
+        navigateToChapter={navigateToChapter}
+        firstUnreadChapter={firstUnreadChapter}
+        lastRead={lastRead}
+      />
+      {isLoading && (!novel.genres || !novel.summary) ? (
+        <VerticalBarSkeleton />
+      ) : (
+        <Row
+          verticalAlignment="center"
+          modifiers={[
+            fillMaxWidth(),
+            clickable(openNovelBottomSheet),
+            padding(16, 4, 4, 4),
+          ]}
+        >
+          <Box modifiers={[weight(1)]}>
+            {fetching && totalChapters === undefined ? (
+              <ChapterCountSkeleton theme={theme} />
+            ) : (
+              <AppText variant="titleMedium" color={theme.onSurface}>
+                {`${totalChapters ?? 0} ${getString('novelScreen.chapters')}`}
+              </AppText>
+            )}
+          </Box>
+          <IconButtonV2
+            name={FilterListIcon}
+            color={
+              filter.length > 0 ? filterColor(theme.isDark) : theme.onSurface
+            }
+            onPress={openNovelBottomSheet}
+            theme={theme}
+          />
+        </Row>
+      )}
+    </Column>
   );
 };
 
 export default memo(NovelInfoHeader);
-
-const styles = StyleSheet.create({
-  bottomsheet: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingRight: 12,
-    paddingVertical: 8,
-  },
-  bottomsheetContainer: {
-    gap: 12,
-  },
-  chapters: {
-    fontSize: 14,
-    paddingHorizontal: 16,
-  },
-  flex: { flex: 1 },
-  marginRight: { marginRight: 4 },
-  novelDetails: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    paddingBottom: 16,
-    paddingLeft: 12,
-  },
-  infoRow: {
-    marginBottom: 8,
-  },
-});

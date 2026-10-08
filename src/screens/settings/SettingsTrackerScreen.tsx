@@ -1,9 +1,23 @@
-import { useCallback, useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
-import { Provider, List as PaperList } from 'react-native-paper';
+import { useState, type ReactNode } from 'react';
+import { Image, ListItem } from '@expo/ui/jetpack-compose';
+import {
+  clickable,
+  clip,
+  fillMaxWidth,
+  Shapes,
+  size,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { getTracker, useTheme, useTracker } from '@hooks/persisted';
-import { Appbar, ConfirmationDialog, List, SafeAreaView } from '@components';
+import {
+  AppIcon,
+  AppText,
+  ConfirmationDialog,
+  List,
+  listItemColors,
+} from '@components';
+import SettingsPage from './components/SettingsPage';
+import CheckIcon from '@expo/material-symbols/check.xml';
 import { TrackerSettingsScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
 import TrackerLoginDialog from './components/TrackerLoginDialog';
@@ -16,59 +30,62 @@ interface TrackerCheckIconProps {
   checked: boolean;
 }
 
-const TrackerCheckIcon = ({
-  theme,
-  checked,
-  ...props
-}: TrackerCheckIconProps) => {
+const TrackerCheckIcon = ({ theme, checked }: TrackerCheckIconProps) => {
   if (!checked) {
     return null;
   }
-  return (
-    <PaperList.Icon
-      {...props}
-      color={theme.primary}
-      icon="check"
-      style={styles.iconStyle}
-    />
-  );
+  return <AppIcon source={CheckIcon} tint={theme.primary} />;
 };
 
+const TrackerLogo = ({ source }: { source: number }) => (
+  <Image
+    source={source}
+    contentScale="fit"
+    modifiers={[size(32, 32), clip(Shapes.RoundedCorner(4))]}
+  />
+);
+
 const AniListLogo = () => (
-  <View style={styles.logoContainer}>
-    <Image
-      source={require('../../../assets/anilist.png')}
-      style={styles.trackerLogo}
-    />
-  </View>
+  <TrackerLogo source={require('../../../assets/anilist.png')} />
 );
 
 const MyAnimeListLogo = () => (
-  <View style={styles.logoContainer}>
-    <Image
-      source={require('../../../assets/mal.png')}
-      style={styles.trackerLogo}
-    />
-  </View>
+  <TrackerLogo source={require('../../../assets/mal.png')} />
 );
 
 const MangaUpdatesLogo = () => (
-  <View style={styles.logoContainer}>
-    <Image
-      source={require('../../../assets/mangaupdates.png')}
-      style={styles.trackerLogo}
-    />
-  </View>
+  <TrackerLogo source={require('../../../assets/mangaupdates.png')} />
 );
 
 const KitsuLogo = () => (
-  <View style={styles.logoContainer}>
-    <Image
-      source={require('../../../assets/kitsu.png')}
-      style={styles.trackerLogo}
-    />
-  </View>
+  <TrackerLogo source={require('../../../assets/kitsu.png')} />
 );
+
+const TrackerItem = ({
+  title,
+  left,
+  right,
+  onPress,
+}: {
+  title: string;
+  left: ReactNode;
+  right: ReactNode;
+  onPress: () => void;
+}) => {
+  const theme = useTheme();
+  return (
+    <ListItem
+      colors={listItemColors(theme)}
+      modifiers={[fillMaxWidth(), clickable(onPress)]}
+    >
+      <ListItem.LeadingContent>{left}</ListItem.LeadingContent>
+      <ListItem.HeadlineContent>
+        <AppText variant="bodyLarge">{title}</AppText>
+      </ListItem.HeadlineContent>
+      <ListItem.TrailingContent>{right}</ListItem.TrailingContent>
+    </ListItem>
+  );
+};
 
 const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
   const theme = useTheme();
@@ -121,199 +138,14 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
     }
   };
 
-  const renderAniListRight = useCallback(
-    (props: any) => (
-      <TrackerCheckIcon
-        {...props}
-        theme={theme}
-        checked={isTrackerAuthenticated('AniList')}
-      />
-    ),
-    [theme, isTrackerAuthenticated],
-  );
-
-  const renderMyAnimeListRight = useCallback(
-    (props: any) => (
-      <TrackerCheckIcon
-        {...props}
-        theme={theme}
-        checked={isTrackerAuthenticated('MyAnimeList')}
-      />
-    ),
-    [theme, isTrackerAuthenticated],
-  );
-
-  const renderMangaUpdatesRight = useCallback(
-    (props: any) => (
-      <TrackerCheckIcon
-        {...props}
-        theme={theme}
-        checked={isTrackerAuthenticated('MangaUpdates')}
-      />
-    ),
-    [theme, isTrackerAuthenticated],
-  );
-
-  const renderKitsuRight = useCallback(
-    (props: any) => (
-      <TrackerCheckIcon
-        {...props}
-        theme={theme}
-        checked={isTrackerAuthenticated('Kitsu')}
-      />
-    ),
-    [theme, isTrackerAuthenticated],
-  );
-
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   return (
-    <SafeAreaView excludeTop>
-      <Provider>
-        <Appbar
-          title={getString('tracking')}
-          handleGoBack={() => navigation.goBack()}
-          theme={theme}
-        />
-        <View
-          style={[
-            { backgroundColor: theme.background },
-            styles.flex1,
-            styles.screenPadding,
-          ]}
-        >
-          <List.Section>
-            <List.SubHeader theme={theme}>
-              {getString('trackingScreen.services')}
-            </List.SubHeader>
-            <PaperList.Item
-              title="AniList"
-              titleStyle={{ color: theme.onSurface }}
-              left={AniListLogo}
-              right={renderAniListRight}
-              onPress={async () => {
-                if (isTrackerAuthenticated('AniList')) {
-                  showModal('AniList');
-                } else {
-                  const auth = await getTracker('AniList').authenticate();
-                  if (auth) {
-                    setTracker('AniList', auth);
-                  }
-                }
-              }}
-              rippleColor={theme.rippleColor}
-              style={styles.listItem}
-            />
-            <PaperList.Item
-              title="MyAnimeList"
-              titleStyle={{ color: theme.onSurface }}
-              left={MyAnimeListLogo}
-              right={renderMyAnimeListRight}
-              onPress={async () => {
-                if (isTrackerAuthenticated('MyAnimeList')) {
-                  showModal('MyAnimeList');
-                } else {
-                  const auth = await getTracker('MyAnimeList').authenticate();
-                  if (auth) {
-                    setTracker('MyAnimeList', auth);
-                  }
-                }
-              }}
-              rippleColor={theme.rippleColor}
-              style={styles.listItem}
-            />
-            <PaperList.Item
-              title="MangaUpdates"
-              titleStyle={{ color: theme.onSurface }}
-              left={MangaUpdatesLogo}
-              right={renderMangaUpdatesRight}
-              onPress={() => {
-                if (isTrackerAuthenticated('MangaUpdates')) {
-                  showModal('MangaUpdates');
-                } else {
-                  showCredentialLogin('MangaUpdates');
-                }
-              }}
-              rippleColor={theme.rippleColor}
-              style={styles.listItem}
-            />
-            <PaperList.Item
-              title="Kitsu"
-              titleStyle={{ color: theme.onSurface }}
-              left={KitsuLogo}
-              right={renderKitsuRight}
-              onPress={() => {
-                if (isTrackerAuthenticated('Kitsu')) {
-                  showModal('Kitsu');
-                } else {
-                  showCredentialLogin('Kitsu');
-                }
-              }}
-              rippleColor={theme.rippleColor}
-              style={styles.listItem}
-            />
-            <List.InfoItem
-              title={getString('trackingScreen.info')}
-              theme={theme}
-            />
-            {(isTrackerAuthenticated('MyAnimeList') &&
-              getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
-              getTrackerAuth('MyAnimeList')!.auth.expiresAt < new Date(now)) ||
-            (isTrackerAuthenticated('Kitsu') &&
-              getTrackerAuth('Kitsu')?.auth?.expiresAt &&
-              getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now)) ? (
-              <>
-                <List.SubHeader theme={theme}>
-                  {getString('common.settings')}
-                </List.SubHeader>
-                {isTrackerAuthenticated('MyAnimeList') &&
-                  getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
-                  getTrackerAuth('MyAnimeList')!.auth.expiresAt <
-                    new Date(now) && (
-                    <List.Item
-                      title={
-                        getString('trackingScreen.revalidate') + ' MyAnimeList'
-                      }
-                      onPress={async () => {
-                        const trackerAuth = getTrackerAuth('MyAnimeList');
-                        const revalidate =
-                          getTracker('MyAnimeList')?.revalidate;
-                        if (revalidate && trackerAuth) {
-                          const auth = await revalidate(trackerAuth.auth);
-                          setTracker('MyAnimeList', auth);
-                        }
-                      }}
-                      theme={theme}
-                    />
-                  )}
-                {isTrackerAuthenticated('Kitsu') &&
-                  getTrackerAuth('Kitsu')?.auth?.expiresAt &&
-                  getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now) && (
-                    <List.Item
-                      title={getString('trackingScreen.revalidate') + ' Kitsu'}
-                      onPress={async () => {
-                        const trackerAuth = getTrackerAuth('Kitsu');
-                        const revalidate = getTracker('Kitsu')?.revalidate;
-                        if (revalidate && trackerAuth) {
-                          try {
-                            const auth = await revalidate(trackerAuth.auth);
-                            setTracker('Kitsu', auth);
-                            showToast('Successfully refreshed Kitsu session');
-                          } catch {
-                            showToast(
-                              'Failed to refresh Kitsu session. Please log in again.',
-                            );
-                            removeTracker('Kitsu');
-                          }
-                        }
-                      }}
-                      theme={theme}
-                    />
-                  )}
-              </>
-            ) : null}
-          </List.Section>
-
+    <SettingsPage
+      title={getString('tracking')}
+      onBack={() => navigation.goBack()}
+      overlays={
+        <>
           <ConfirmationDialog
             title={getString('common.logout')}
             message={getString('trackingScreen.logOutMessage', {
@@ -337,35 +169,145 @@ const TrackerScreen = ({ navigation }: TrackerSettingsScreenProps) => {
               credentialLoginTracker === 'Kitsu' ? 'Email' : 'Username'
             }
           />
-        </View>
-      </Provider>
-    </SafeAreaView>
+        </>
+      }
+    >
+      <List.Section>
+        <List.SubHeader theme={theme}>
+          {getString('trackingScreen.services')}
+        </List.SubHeader>
+        <TrackerItem
+          title="AniList"
+          left={<AniListLogo />}
+          right={
+            <TrackerCheckIcon
+              theme={theme}
+              checked={isTrackerAuthenticated('AniList')}
+            />
+          }
+          onPress={async () => {
+            if (isTrackerAuthenticated('AniList')) {
+              showModal('AniList');
+            } else {
+              const auth = await getTracker('AniList').authenticate();
+              if (auth) {
+                setTracker('AniList', auth);
+              }
+            }
+          }}
+        />
+        <TrackerItem
+          title="MyAnimeList"
+          left={<MyAnimeListLogo />}
+          right={
+            <TrackerCheckIcon
+              theme={theme}
+              checked={isTrackerAuthenticated('MyAnimeList')}
+            />
+          }
+          onPress={async () => {
+            if (isTrackerAuthenticated('MyAnimeList')) {
+              showModal('MyAnimeList');
+            } else {
+              const auth = await getTracker('MyAnimeList').authenticate();
+              if (auth) {
+                setTracker('MyAnimeList', auth);
+              }
+            }
+          }}
+        />
+        <TrackerItem
+          title="MangaUpdates"
+          left={<MangaUpdatesLogo />}
+          right={
+            <TrackerCheckIcon
+              theme={theme}
+              checked={isTrackerAuthenticated('MangaUpdates')}
+            />
+          }
+          onPress={() => {
+            if (isTrackerAuthenticated('MangaUpdates')) {
+              showModal('MangaUpdates');
+            } else {
+              showCredentialLogin('MangaUpdates');
+            }
+          }}
+        />
+        <TrackerItem
+          title="Kitsu"
+          left={<KitsuLogo />}
+          right={
+            <TrackerCheckIcon
+              theme={theme}
+              checked={isTrackerAuthenticated('Kitsu')}
+            />
+          }
+          onPress={() => {
+            if (isTrackerAuthenticated('Kitsu')) {
+              showModal('Kitsu');
+            } else {
+              showCredentialLogin('Kitsu');
+            }
+          }}
+        />
+        <List.InfoItem title={getString('trackingScreen.info')} theme={theme} />
+        {(isTrackerAuthenticated('MyAnimeList') &&
+          getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
+          getTrackerAuth('MyAnimeList')!.auth.expiresAt < new Date(now)) ||
+        (isTrackerAuthenticated('Kitsu') &&
+          getTrackerAuth('Kitsu')?.auth?.expiresAt &&
+          getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now)) ? (
+          <>
+            <List.SubHeader theme={theme}>
+              {getString('common.settings')}
+            </List.SubHeader>
+            {isTrackerAuthenticated('MyAnimeList') &&
+              getTrackerAuth('MyAnimeList')?.auth?.expiresAt &&
+              getTrackerAuth('MyAnimeList')!.auth.expiresAt < new Date(now) && (
+                <List.Item
+                  title={
+                    getString('trackingScreen.revalidate') + ' MyAnimeList'
+                  }
+                  onPress={async () => {
+                    const trackerAuth = getTrackerAuth('MyAnimeList');
+                    const revalidate = getTracker('MyAnimeList')?.revalidate;
+                    if (revalidate && trackerAuth) {
+                      const auth = await revalidate(trackerAuth.auth);
+                      setTracker('MyAnimeList', auth);
+                    }
+                  }}
+                  theme={theme}
+                />
+              )}
+            {isTrackerAuthenticated('Kitsu') &&
+              getTrackerAuth('Kitsu')?.auth?.expiresAt &&
+              getTrackerAuth('Kitsu')!.auth.expiresAt < new Date(now) && (
+                <List.Item
+                  title={getString('trackingScreen.revalidate') + ' Kitsu'}
+                  onPress={async () => {
+                    const trackerAuth = getTrackerAuth('Kitsu');
+                    const revalidate = getTracker('Kitsu')?.revalidate;
+                    if (revalidate && trackerAuth) {
+                      try {
+                        const auth = await revalidate(trackerAuth.auth);
+                        setTracker('Kitsu', auth);
+                        showToast('Successfully refreshed Kitsu session');
+                      } catch {
+                        showToast(
+                          'Failed to refresh Kitsu session. Please log in again.',
+                        );
+                        removeTracker('Kitsu');
+                      }
+                    }
+                  }}
+                  theme={theme}
+                />
+              )}
+          </>
+        ) : null}
+      </List.Section>
+    </SettingsPage>
   );
 };
 
 export default TrackerScreen;
-
-const styles = StyleSheet.create({
-  flex1: {
-    flex: 1,
-  },
-  screenPadding: {
-    paddingVertical: 8,
-  },
-  logoContainer: {
-    paddingLeft: 16,
-    justifyContent: 'center',
-  },
-  trackerLogo: {
-    width: 32,
-    height: 32,
-    resizeMode: 'contain',
-    borderRadius: 4,
-  },
-  listItem: {
-    paddingVertical: 12,
-  },
-  iconStyle: {
-    margin: 0,
-  },
-});

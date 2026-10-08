@@ -1,48 +1,20 @@
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import { Box, Row } from '@expo/ui/jetpack-compose';
+import {
+  fillMaxWidth,
+  height,
+  padding,
+  weight,
+} from '@expo/ui/jetpack-compose/modifiers';
 
-import { Row } from '@components/Common';
+import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
-
 const useShimmer = (theme: ThemeColors) => {
-  const translateX = useSharedValue(-100);
   const [highlightColor, backgroundColor, disableLoadingAnimations] =
     useLoadingColors(theme);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: (translateX.value + '%') as `${number}%`,
-      },
-    ],
-  }));
-
-  useEffect(() => {
-    cancelAnimation(translateX);
-    translateX.value = -100;
-    if (!disableLoadingAnimations) {
-      translateX.value = withRepeat(
-        withTiming(200, { duration: 1000 }),
-        -1,
-        false,
-      );
-    }
-    return () => cancelAnimation(translateX);
-  }, [disableLoadingAnimations, translateX]);
-
   return {
-    animatedStyle,
     highlightColor,
     backgroundColor,
     disableLoadingAnimations,
@@ -53,60 +25,29 @@ export const ChapterCountSkeleton = ({ theme }: { theme: ThemeColors }) => {
   const shimmer = useShimmer(theme);
 
   return (
-    <View
-      style={[
-        styles.chapterCountSkeleton,
-        { backgroundColor: shimmer.backgroundColor },
-      ]}
-    >
-      {!shimmer.disableLoadingAnimations ? (
-        <AnimatedLinearGradient
-          start={[0, 0]}
-          end={[1, 0]}
-          locations={[0, 0.3, 0.7, 1]}
-          style={[styles.chapterCountGradient, shimmer.animatedStyle]}
-          colors={[
-            'transparent',
-            shimmer.highlightColor,
-            shimmer.highlightColor,
-            'transparent',
-          ]}
-        />
-      ) : null}
-    </View>
+    <ShimmerPlaceholder
+      shimmerColors={[shimmer.backgroundColor]}
+      stopAutoRun={shimmer.disableLoadingAnimations}
+      width={120}
+      height={14}
+      modifiers={[padding(16, 0, 16, 0)]}
+    />
   );
 };
 
 export const NovelDetailsSkeleton = ({ theme }: { theme: ThemeColors }) => {
   const shimmer = useShimmer(theme);
-  const gradient = !shimmer.disableLoadingAnimations ? (
-    <AnimatedLinearGradient
-      start={[0, 0]}
-      end={[1, 0]}
-      locations={[0, 0.3, 0.7, 1]}
-      style={[styles.infoSkeletonGradient, shimmer.animatedStyle]}
-      colors={[
-        'transparent',
-        shimmer.highlightColor,
-        shimmer.highlightColor,
-        'transparent',
-      ]}
-    />
-  ) : null;
 
   return (
     <>
-      {[styles.w130, styles.w180].map((widthStyle, index) => (
-        <Row key={index} style={styles.infoRow}>
-          <View
-            style={[
-              styles.infoSkeletonBar,
-              widthStyle,
-              { backgroundColor: shimmer.backgroundColor },
-            ]}
-          >
-            {gradient}
-          </View>
+      {[130, 180].map((width, index) => (
+        <Row key={index} modifiers={[padding(0, 0, 0, 8)]}>
+          <ShimmerPlaceholder
+            shimmerColors={[shimmer.backgroundColor]}
+            stopAutoRun={shimmer.disableLoadingAnimations}
+            width={width}
+            height={14}
+          />
         </Row>
       ))}
     </>
@@ -115,85 +56,23 @@ export const NovelDetailsSkeleton = ({ theme }: { theme: ThemeColors }) => {
 
 export const ButtonGroupSkeleton = ({ theme }: { theme: ThemeColors }) => {
   const shimmer = useShimmer(theme);
-  const gradient = !shimmer.disableLoadingAnimations ? (
-    <AnimatedLinearGradient
-      start={[0, 0]}
-      end={[1, 0]}
-      locations={[0, 0.3, 0.7, 1]}
-      style={[styles.buttonSkeletonGradient, shimmer.animatedStyle]}
-      colors={[
-        'transparent',
-        shimmer.highlightColor,
-        shimmer.highlightColor,
-        'transparent',
-      ]}
-    />
-  ) : null;
 
   return (
-    <View style={styles.buttonGroupSkeletonContainer}>
+    <Row
+      horizontalArrangement={{ spacedBy: 8 }}
+      modifiers={[fillMaxWidth(), padding(16, 8, 16, 0)]}
+    >
       {[0, 1].map(index => (
-        <View
-          key={index}
-          style={[
-            styles.buttonSkeleton,
-            { backgroundColor: shimmer.backgroundColor },
-          ]}
-        >
-          {gradient}
-        </View>
+        <Box key={index} modifiers={[weight(1), height(52)]}>
+          <ShimmerPlaceholder
+            shimmerColors={[shimmer.backgroundColor]}
+            stopAutoRun={shimmer.disableLoadingAnimations}
+            height={52}
+            corner={8}
+            modifiers={[fillMaxWidth()]}
+          />
+        </Box>
       ))}
-    </View>
+    </Row>
   );
 };
-
-const styles = StyleSheet.create({
-  buttonGroupSkeletonContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginHorizontal: 16,
-    paddingTop: 8,
-  },
-  buttonSkeleton: {
-    borderRadius: 8,
-    flex: 1,
-    height: 52,
-    overflow: 'hidden',
-  },
-  buttonSkeletonGradient: {
-    height: 60,
-    position: 'absolute',
-    width: '60%',
-  },
-  chapterCountGradient: {
-    height: 20,
-    position: 'absolute',
-    width: '60%',
-  },
-  chapterCountSkeleton: {
-    borderRadius: 4,
-    height: 14,
-    marginHorizontal: 16,
-    overflow: 'hidden',
-    width: 120,
-  },
-  infoRow: {
-    marginBottom: 8,
-  },
-  infoSkeletonBar: {
-    borderRadius: 4,
-    height: 14,
-    overflow: 'hidden',
-  },
-  infoSkeletonGradient: {
-    height: 20,
-    position: 'absolute',
-    width: '60%',
-  },
-  w130: {
-    width: 130,
-  },
-  w180: {
-    width: 180,
-  },
-});

@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
@@ -19,7 +20,10 @@ import LibrarySettings from '@screens/settings/SettingsLibraryScreen/SettingsLib
 import StatsScreen from '@screens/StatsScreen/StatsScreen';
 import GenreTaxonomyScreen from '@screens/settings/SettingsTaxonomyScreen/SettingsTaxonomyScreen';
 import { MoreStackParamList, SettingsStackParamList } from './types';
-import { useTheme } from '@hooks/persisted';
+import { useTheme } from '@hooks/persisted/useTheme';
+import { SettingsListDetailLayout } from '@screens/settings/SettingsCategories';
+import { useRailLayout } from './destinations';
+import { TopLevelScreenProvider, useIsTopLevelScreen } from '@components';
 
 const Stack = createNativeStackNavigator<
   MoreStackParamList & SettingsStackParamList
@@ -27,6 +31,8 @@ const Stack = createNativeStackNavigator<
 
 const SettingsStack = () => {
   const theme = useTheme();
+  // The settings root is top-level when the settings are a rail destination.
+  const topLevel = useIsTopLevelScreen();
 
   return (
     <Stack.Navigator
@@ -35,6 +41,23 @@ const SettingsStack = () => {
         contentStyle: { backgroundColor: theme.background },
         headerShown: false,
       }}
+      screenLayout={({ route, navigation, children }) => (
+        <TopLevelScreenProvider
+          value={topLevel && navigation.getState().routes[0]?.key === route.key}
+        >
+          {children}
+        </TopLevelScreenProvider>
+      )}
+      layout={({ state, navigation, children }) => (
+        <SettingsListDetailLayout
+          state={state}
+          // Picking a category swaps the detail page instead of stacking.
+          onSelect={route => navigation.dispatch(StackActions.replace(route))}
+          onBack={() => navigation.getParent()?.goBack()}
+        >
+          {children}
+        </SettingsListDetailLayout>
+      )}
     >
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="GeneralSettings" component={GeneralSettings} />
@@ -48,15 +71,18 @@ const SettingsStack = () => {
         component={RespositorySettings}
       />
       <Stack.Screen name="LibrarySettings" component={LibrarySettings} />
-<Stack.Screen name="CustomCode" component={SettingsCustomCode} />
+      <Stack.Screen name="CustomCode" component={SettingsCustomCode} />
       <Stack.Screen name="CodeSnippets" component={CodeSnippetsScreen} />
       <Stack.Screen name="GenreTaxonomy" component={GenreTaxonomyScreen} />
+      {/* Opened from the tablet category list, beside it like the other pages. */}
+      <Stack.Screen name="About" component={About} />
     </Stack.Navigator>
   );
 };
 
 const MoreStack = () => {
   const theme = useTheme();
+  const { extended } = useRailLayout();
 
   return (
     <Stack.Navigator
@@ -65,6 +91,15 @@ const MoreStack = () => {
         contentStyle: { backgroundColor: theme.background },
         headerShown: false,
       }}
+      // On a tall rail these screens are destinations of their own: the one a
+      // rail tap opens shows no back arrow.
+      screenLayout={({ route, navigation, children }) => (
+        <TopLevelScreenProvider
+          value={extended && navigation.getState().routes[0]?.key === route.key}
+        >
+          {children}
+        </TopLevelScreenProvider>
+      )}
     >
       <Stack.Screen name="SettingsStack" component={SettingsStack} />
       <Stack.Screen name="About" component={About} />

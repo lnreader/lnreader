@@ -1,12 +1,12 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
-import { Portal } from 'react-native-paper';
+import React, { useCallback, useState } from 'react';
+import { ToastAndroid } from 'react-native';
+import { Box } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { useTracker, useTrackedNovel } from '@hooks/persisted';
 import { TrackerName, UserListStatus } from '@services/Trackers';
 import { NovelInfo } from '@database/types';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { TrackerMetadata } from '@hooks/persisted/useTracker';
 import { getStatusLabel, getTrackerIcon } from './constants';
 import { AddTrackingCard, TrackedItemCard } from './TrackerCards';
@@ -16,15 +16,19 @@ import SetTrackScoreDialog from './SetTrackScoreDialog';
 import SetTrackChaptersDialog from './SetTrackChaptersDialog';
 
 interface TrackSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  visible: boolean;
+  onDismiss: () => void;
   novel: NovelInfo;
 }
 
-const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
+const TrackSheet: React.FC<TrackSheetProps> = ({
+  visible,
+  onDismiss,
+  novel,
+}) => {
   const { getAuthenticatedTrackers } = useTracker();
   const {
     getTrackedNovel,
-    isTrackedOn,
     trackNovelOn,
     untrackNovelFrom,
     updateTrackedNovel,
@@ -40,9 +44,7 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
   const [trackChaptersDialog, setTrackChaptersDialog] = useState(false);
   const [trackScoreDialog, setTrackScoreDialog] = useState(false);
 
-  const closeBottomSheet = useCallback(() => {
-    bottomSheetRef.current?.close();
-  }, [bottomSheetRef]);
+  const closeBottomSheet = onDismiss;
 
   const handleSetSearchTrackDialog = useCallback(
     (tracker: TrackerMetadata) => {
@@ -143,18 +145,6 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
     [untrackNovelFrom],
   );
 
-  const snapPoints = useMemo(() => {
-    const trackerCount = authenticatedTrackers.length;
-    if (trackerCount === 0) return [130];
-
-    // Base height + (number of trackers * card height)
-    // Card height ~130px for add card, ~180px for tracked card
-    const hasAnyTracked = authenticatedTrackers.some(t => isTrackedOn(t.name));
-    const cardHeight = hasAnyTracked ? 180 : 130;
-    const totalHeight = 50 + trackerCount * cardHeight;
-
-    return [Math.min(totalHeight, 600)]; // Cap at 600px
-  }, [authenticatedTrackers, isTrackedOn]);
   const activeTrackedNovel = activeTracker
     ? getTrackedNovel(activeTracker.name)
     : undefined;
@@ -165,94 +155,84 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
 
   return (
     <>
-      <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={snapPoints}>
-        <ScrollView style={styles.contentContainer}>
-          {authenticatedTrackers.map(tracker => {
-            const trackerIcon = getTrackerIcon(tracker.name);
-            const trackedNovel = getTrackedNovel(tracker.name);
+      <BottomSheet visible={visible} onDismiss={onDismiss}>
+        {authenticatedTrackers.map(tracker => {
+          const trackerIcon = getTrackerIcon(tracker.name);
+          const trackedNovel = getTrackedNovel(tracker.name);
 
-            if (!trackerIcon) return null;
+          if (!trackerIcon) return null;
 
-            return (
-              <View key={tracker.name} style={styles.trackerCardContainer}>
-                {!trackedNovel ? (
-                  <AddTrackingCard
-                    icon={trackerIcon}
-                    onPress={() => handleSetSearchTrackDialog(tracker)}
-                  />
-                ) : (
-                  <TrackedItemCard
-                    onUntrack={() => handleUntrack(tracker.name)}
-                    tracker={tracker}
-                    icon={trackerIcon}
-                    trackItem={trackedNovel}
-                    onSetStatus={() => handleSetStatusDialog(tracker)}
-                    onSetChapters={() => handleSetChaptersDialog(tracker)}
-                    onSetScore={() => handleSetScoreDialog(tracker)}
-                    getStatus={getStatusLabel}
-                  />
-                )}
-              </View>
-            );
-          })}
-        </ScrollView>
+          return (
+            <Box
+              key={tracker.name}
+              modifiers={[fillMaxWidth(), padding(0, 0, 0, 8)]}
+            >
+              {!trackedNovel ? (
+                <AddTrackingCard
+                  icon={trackerIcon}
+                  onPress={() => handleSetSearchTrackDialog(tracker)}
+                />
+              ) : (
+                <TrackedItemCard
+                  onUntrack={() => handleUntrack(tracker.name)}
+                  tracker={tracker}
+                  icon={trackerIcon}
+                  trackItem={trackedNovel}
+                  onSetStatus={() => handleSetStatusDialog(tracker)}
+                  onSetChapters={() => handleSetChaptersDialog(tracker)}
+                  onSetScore={() => handleSetScoreDialog(tracker)}
+                  getStatus={getStatusLabel}
+                />
+              )}
+            </Box>
+          );
+        })}
       </BottomSheet>
-      <Portal>
-        {activeTracker ? (
-          <>
-            {activeTrackedNovel ? (
-              <>
-                {trackStatusDialog ? (
-                  <SetTrackStatusDialog
-                    tracker={activeTracker}
-                    trackItem={activeTrackedNovel}
-                    visible
-                    onDismiss={handleDismissStatusDialog}
-                    onUpdateStatus={updateTrackStatus}
-                  />
-                ) : null}
-                {trackChaptersDialog ? (
-                  <SetTrackChaptersDialog
-                    tracker={activeTracker}
-                    trackItem={activeTrackedNovel}
-                    visible
-                    onDismiss={handleDismissChaptersDialog}
-                    onUpdateChapters={updateTrackChapters}
-                  />
-                ) : null}
-                {trackScoreDialog ? (
-                  <SetTrackScoreDialog
-                    tracker={activeTracker}
-                    trackItem={activeTrackedNovel}
-                    visible
-                    onDismiss={handleDismissScoreDialog}
-                    onUpdateScore={updateTrackScore}
-                  />
-                ) : null}
-              </>
-            ) : trackSearchDialog ? (
-              <TrackSearchDialog
-                tracker={activeTracker}
-                onTrackNovel={trackNovelOn}
-                visible
-                onDismiss={handleDismissSearchDialog}
-                novelName={novel.name}
-              />
-            ) : null}
-          </>
-        ) : null}
-      </Portal>
+      {activeTracker ? (
+        <>
+          {activeTrackedNovel ? (
+            <>
+              {trackStatusDialog ? (
+                <SetTrackStatusDialog
+                  tracker={activeTracker}
+                  trackItem={activeTrackedNovel}
+                  visible
+                  onDismiss={handleDismissStatusDialog}
+                  onUpdateStatus={updateTrackStatus}
+                />
+              ) : null}
+              {trackChaptersDialog ? (
+                <SetTrackChaptersDialog
+                  tracker={activeTracker}
+                  trackItem={activeTrackedNovel}
+                  visible
+                  onDismiss={handleDismissChaptersDialog}
+                  onUpdateChapters={updateTrackChapters}
+                />
+              ) : null}
+              {trackScoreDialog ? (
+                <SetTrackScoreDialog
+                  tracker={activeTracker}
+                  trackItem={activeTrackedNovel}
+                  visible
+                  onDismiss={handleDismissScoreDialog}
+                  onUpdateScore={updateTrackScore}
+                />
+              ) : null}
+            </>
+          ) : trackSearchDialog ? (
+            <TrackSearchDialog
+              tracker={activeTracker}
+              onTrackNovel={trackNovelOn}
+              visible
+              onDismiss={handleDismissSearchDialog}
+              novelName={novel.name}
+            />
+          ) : null}
+        </>
+      ) : null}
     </>
   );
 };
 
 export default TrackSheet;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  trackerCardContainer: {
-    marginBottom: 8,
-  },
-});

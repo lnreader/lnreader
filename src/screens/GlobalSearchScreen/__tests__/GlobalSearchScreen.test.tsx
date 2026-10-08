@@ -39,12 +39,26 @@ const mockNavigate = mockNavigationRef.navigate as jest.Mock;
 
 jest.mock('@components/index', () => {
   const { createElement } = require('react');
-  const { Text, View, TextInput } = require('react-native');
+  const { Pressable, Text, View, TextInput } = require('react-native');
   return {
     EmptyView: ({ description }: { description: string }) =>
       createElement(Text, null, description),
-    SafeAreaView: ({ children }: { children: ReactNode }) =>
-      createElement(View, null, children),
+    Fab: ({ label, onPress }: { label: string; onPress: () => void }) =>
+      createElement(
+        Pressable,
+        { testID: 'open-novel-button', onPress },
+        createElement(Text, null, label),
+      ),
+    ProgressIndicator: () => null,
+    Screen: ({
+      topBar,
+      list,
+      floatingAction,
+    }: {
+      topBar: ReactNode;
+      list: ReactNode;
+      floatingAction: ReactNode;
+    }) => createElement(View, null, topBar, list, floatingAction),
     SearchbarV2: ({
       searchText,
       onChangeText,
@@ -61,30 +75,6 @@ jest.mock('@components/index', () => {
         onSubmitEditing,
       }),
     SelectableChip: () => null,
-  };
-});
-
-jest.mock('react-native-paper', () => {
-  const { createElement, Fragment } = require('react');
-  const { Pressable, Text } = require('react-native');
-  return {
-    Provider: ({ children }: { children: ReactNode }) =>
-      createElement(Fragment, null, children),
-    ProgressBar: () => null,
-    FAB: ({
-      label,
-      onPress,
-      testID,
-    }: {
-      label: string;
-      onPress: () => void;
-      testID?: string;
-    }) =>
-      createElement(
-        Pressable,
-        { testID, onPress },
-        createElement(Text, null, label),
-      ),
   };
 });
 
@@ -147,10 +137,6 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaInsets: () => insets,
   };
 });
-
-jest.mock('@gorhom/bottom-sheet', () => ({
-  BottomSheetModalProvider: ({ children }: { children: ReactNode }) => children,
-}));
 
 jest.mock('@screens/novel/NovelContext', () => ({
   NovelContextProvider: ({ children }: { children: ReactNode }) => children,

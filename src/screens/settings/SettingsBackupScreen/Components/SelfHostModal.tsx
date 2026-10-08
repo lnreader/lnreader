@@ -1,14 +1,13 @@
 import { list } from '@api/remote';
-import { Button, Dialog, EmptyView } from '@components';
+import { Row } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, padding } from '@expo/ui/jetpack-compose/modifiers';
+import { AppText, Button, Dialog, EmptyView, TextInput } from '@components';
 import { useSelfHost } from '@hooks/persisted/useSelfHost';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { fetchTimeout } from '@utils/fetch/fetch';
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
-import { TextInput } from 'react-native-paper';
 import {
   DEFAULT_BACKUP_OPTIONS,
   hasSelectedBackupOption,
@@ -51,17 +50,21 @@ function CreateBackup({
         value={backupName}
         placeholder={getString('backupScreen.backupName')}
         onChangeText={setBackupName}
-        mode="outlined"
-        underlineColor={theme.outline}
-        theme={{ colors: { ...theme } }}
-        placeholderTextColor={theme.onSurfaceDisabled}
+        singleLine
       />
       <BackupOptionsList
         onChange={setOptions}
         options={options}
         theme={theme}
       />
-      <View style={styles.footerContainer}>
+      <Row
+        horizontalArrangement="end"
+        modifiers={[fillMaxWidth(), padding(0, 24, 0, 0)]}
+      >
+        <Button
+          title={getString('common.cancel')}
+          onPress={() => setBackupModal(BackupModal.CONNECTED)}
+        />
         <Button
           disabled={
             backupName.trim().length === 0 || !hasSelectedBackupOption(options)
@@ -79,11 +82,7 @@ function CreateBackup({
             });
           }}
         />
-        <Button
-          title={getString('common.cancel')}
-          onPress={() => setBackupModal(BackupModal.CONNECTED)}
-        />
-      </View>
+      </Row>
     </>
   );
 }
@@ -117,40 +116,37 @@ function RestoreBackup({
 
   return (
     <>
-      <Dialog.ScrollArea>
-        <FlatList
-          contentContainerStyle={styles.backupList}
-          data={backupList}
-          keyExtractor={(item, index) => item + '_' + index}
-          renderItem={({ item }) => (
-            <Button
-              mode="outlined"
-              style={styles.btnOutline}
-              onPress={() => {
-                closeModal();
-                backgroundTasks.enqueue({
-                  name: 'SELF_HOST_RESTORE',
-                  data: {
-                    host,
-                    backupFolder: item,
-                  },
-                });
-              }}
-            >
-              <Text style={{ color: theme.primary }}>
-                {item.replace(/\.backup$/, ' ')}
-              </Text>
-            </Button>
-          )}
-          ListEmptyComponent={emptyComponent}
-        />
+      <Dialog.ScrollArea fixed>
+        {backupList.length
+          ? backupList.map((item, index) => (
+              <Button
+                key={item + '_' + index}
+                mode="outlined"
+                modifiers={[fillMaxWidth()]}
+                title={item.replace(/\.backup$/, ' ')}
+                onPress={() => {
+                  closeModal();
+                  backgroundTasks.enqueue({
+                    name: 'SELF_HOST_RESTORE',
+                    data: {
+                      host,
+                      backupFolder: item,
+                    },
+                  });
+                }}
+              />
+            ))
+          : emptyComponent()}
       </Dialog.ScrollArea>
-      <View style={styles.footerContainer}>
+      <Row
+        horizontalArrangement="end"
+        modifiers={[fillMaxWidth(), padding(0, 24, 0, 0)]}
+      >
         <Button
           title={getString('common.cancel')}
           onPress={() => setBackupModal(BackupModal.CONNECTED)}
         />
-      </View>
+      </Row>
     </>
   );
 }
@@ -179,16 +175,22 @@ function SetHost({
         value={host}
         placeholder={getString('backupScreen.remote.host')}
         onChangeText={setHost}
-        mode="outlined"
-        underlineColor={theme.outline}
-        theme={{ colors: { ...theme } }}
-        placeholderTextColor={theme.onSurfaceDisabled}
+        singleLine
         disabled={fetching}
       />
       {error ? (
-        <Text style={[styles.error, { color: theme.error }]}>{error}</Text>
+        <AppText
+          variant="bodyLarge"
+          color={theme.error}
+          modifiers={[padding(0, 8, 0, 0)]}
+        >
+          {error}
+        </AppText>
       ) : null}
-      <View style={styles.footerContainer}>
+      <Row
+        horizontalArrangement="end"
+        modifiers={[fillMaxWidth(), padding(0, 24, 0, 0)]}
+      >
         <Button
           disabled={host.trim().length === 0 || fetching}
           title={getString('common.ok')}
@@ -212,7 +214,7 @@ function SetHost({
               });
           }}
         />
-      </View>
+      </Row>
     </>
   );
 }
@@ -228,17 +230,20 @@ function Connected({
     <>
       <Button
         title={getString('common.backup')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={() => setBackupModal(BackupModal.CREATE_BACKUP)}
       />
       <Button
         title={getString('common.restore')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={() => setBackupModal(BackupModal.RESTORE_BACKUP)}
       />
       <Button
         title={getString('common.cancel')}
-        style={[styles.btnOutline, { borderColor: theme.outline }]}
+        mode="outlined"
+        modifiers={[fillMaxWidth()]}
         onPress={() => setBackupModal(BackupModal.SET_HOST)}
       />
     </>
@@ -294,32 +299,3 @@ export default function SelfHostModal({
     </Dialog.Root>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    borderRadius: 40,
-    height: 40,
-    width: 40,
-  },
-  backupList: {
-    flexGrow: 1,
-    paddingBottom: 8,
-    paddingHorizontal: 4,
-  },
-  btnOutline: {
-    borderWidth: 1,
-    marginVertical: 4,
-  },
-  error: {
-    fontSize: 16,
-    marginTop: 8,
-  },
-  footerContainer: {
-    flexDirection: 'row-reverse',
-    marginTop: 24,
-  },
-  loadingContent: {
-    borderRadius: 16,
-    width: '100%',
-  },
-});

@@ -1,13 +1,34 @@
 import React, { useCallback } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { Box, Column, Image, Row } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clickable,
+  clip,
+  fillMaxWidth,
+  height,
+  padding,
+  Shapes,
+  size,
+  weight,
+  width,
+} from '@expo/ui/jetpack-compose/modifiers';
 
 import { useTheme } from '@hooks/persisted';
+import { AppText, IconButtonV2 } from '@components';
+import CloseIcon from '@expo/material-symbols/close.xml';
 import {
   getAniListScoreFormatting,
   getKitsuScoreFormatting,
 } from './constants';
 import { AddTrackingCardProps, TrackedItemCardProps } from './types';
+
+// Compose images take a bundled asset id; tracker icons are all `require`d.
+const TrackerIcon = ({ icon }: { icon: AddTrackingCardProps['icon'] }) => (
+  <Image
+    source={icon as number}
+    modifiers={[size(40, 40), clip(Shapes.RoundedCorner(8))]}
+  />
+);
 
 export const AddTrackingCard: React.FC<AddTrackingCardProps> = ({
   onPress,
@@ -16,23 +37,24 @@ export const AddTrackingCard: React.FC<AddTrackingCardProps> = ({
   const theme = useTheme();
 
   return (
-    <View style={styles.addCardContainer}>
-      <Image source={icon} style={styles.trackerIcon} />
-      <View style={styles.addCardPressableContainer}>
-        <Pressable
-          style={styles.rippleContainer}
-          android_ripple={{
-            color: theme.rippleColor,
-            borderless: true,
-          }}
-          onPress={onPress}
-        >
-          <Text style={[{ color: theme.primary }, styles.addTrackingText]}>
-            Add Tracking
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+    <Row
+      verticalAlignment="center"
+      modifiers={[fillMaxWidth(), padding(16, 16, 16, 16)]}
+    >
+      <TrackerIcon icon={icon} />
+      <Box
+        contentAlignment="center"
+        modifiers={[
+          weight(1),
+          padding(16, 0, 16, 0),
+          clip(Shapes.RoundedCorner(4)),
+          clickable(onPress),
+          padding(0, 8, 0, 8),
+        ]}
+      >
+        <AppText color={theme.primary}>Add Tracking</AppText>
+      </Box>
+    </Row>
   );
 };
 
@@ -47,7 +69,7 @@ export const TrackedItemCard: React.FC<TrackedItemCardProps> = ({
   icon,
 }) => {
   const theme = useTheme();
-  const borderColor = 'rgba(0, 0, 0, 0.12)';
+  const borderColor = theme.outlineVariant;
 
   const renderScore = useCallback(() => {
     if (trackItem.score === 0) {
@@ -81,120 +103,55 @@ export const TrackedItemCard: React.FC<TrackedItemCardProps> = ({
     return `${trackItem.progress}/${total}`;
   }, [trackItem.progress, trackItem.totalChapters]);
 
+  const cell = (text: string | number | undefined, onPress: () => void) => (
+    <Box
+      contentAlignment="center"
+      modifiers={[weight(1), height(50), clickable(onPress)]}
+    >
+      <AppText color={theme.onSurfaceVariant}>{text}</AppText>
+    </Box>
+  );
+  const divider = (
+    <Box modifiers={[width(1), height(50), background(borderColor)]} />
+  );
+
   return (
-    <View style={[{ backgroundColor: theme.surface }, styles.cardContainer]}>
-      <View style={[styles.titleContainer, { borderBottomColor: borderColor }]}>
-        <Image source={icon} style={styles.trackerIcon} />
-        <View style={styles.listItemContainer}>
-          <Text
-            style={[{ color: theme.onSurfaceVariant }, styles.listItem]}
-            numberOfLines={2}
-          >
-            {trackItem.title}
-          </Text>
-          <IconButton
-            icon="close"
-            iconColor={theme.onSurfaceVariant}
-            size={21}
-            onPress={onUntrack}
-          />
-        </View>
-      </View>
-      <View style={styles.trackedItemRow}>
-        <Pressable
-          style={[{ borderRightColor: borderColor }, styles.listItemLeft]}
-          android_ripple={{ color: theme.rippleColor }}
-          onPress={onSetStatus}
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        padding(8, 8, 8, 8),
+        clip(Shapes.RoundedCorner(8)),
+        background(theme.surface),
+      ]}
+    >
+      <Row
+        verticalAlignment="center"
+        modifiers={[fillMaxWidth(), padding(4, 4, 4, 4)]}
+      >
+        <TrackerIcon icon={icon} />
+        <AppText
+          color={theme.onSurfaceVariant}
+          maxLines={2}
+          modifiers={[weight(1), padding(8, 0, 0, 0)]}
         >
-          <Text style={[{ color: theme.onSurfaceVariant }, styles.listItem]}>
-            {getStatus(trackItem.status)}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={styles.flex1}
-          android_ripple={{ color: theme.rippleColor }}
-          onPress={onSetChapters}
-        >
-          <Text style={[{ color: theme.onSurfaceVariant }, styles.listItem]}>
-            {renderChapters()}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[{ borderLeftColor: borderColor }, styles.listItemRight]}
-          android_ripple={{ color: theme.rippleColor }}
-          onPress={onSetScore}
-        >
-          <Text style={[{ color: theme.onSurfaceVariant }, styles.listItem]}>
-            {renderScore()}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+          {trackItem.title}
+        </AppText>
+        <IconButtonV2
+          name={CloseIcon}
+          color={theme.onSurfaceVariant}
+          size={21}
+          onPress={onUntrack}
+          theme={theme}
+        />
+      </Row>
+      <Box modifiers={[fillMaxWidth(), height(1), background(borderColor)]} />
+      <Row modifiers={[fillMaxWidth()]}>
+        {cell(getStatus(trackItem.status), onSetStatus)}
+        {divider}
+        {cell(renderChapters(), onSetChapters)}
+        {divider}
+        {cell(renderScore(), onSetScore)}
+      </Row>
+    </Column>
   );
 };
-
-const styles = StyleSheet.create({
-  addCardContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    margin: 16,
-  },
-  addCardPressableContainer: {
-    borderRadius: 4,
-    flex: 1,
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    overflow: 'hidden',
-  },
-  addTrackingText: {
-    textAlignVertical: 'center',
-  },
-  cardContainer: {
-    borderRadius: 8,
-    margin: 8,
-  },
-  flex1: {
-    flex: 1,
-  },
-  listItem: {
-    flex: 1,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-  },
-  listItemContainer: {
-    alignItems: 'center',
-    borderTopRightRadius: 4,
-    flex: 1,
-    flexDirection: 'row',
-  },
-  listItemLeft: {
-    borderBottomLeftRadius: 4,
-    borderRightWidth: 1,
-    flex: 1,
-  },
-  listItemRight: {
-    borderBottomRightRadius: 4,
-    borderLeftWidth: 1,
-    flex: 1,
-  },
-  rippleContainer: {
-    alignItems: 'center',
-    flex: 1,
-    paddingVertical: 8,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    padding: 4,
-  },
-  trackedItemRow: {
-    flexDirection: 'row',
-    height: 50,
-  },
-  trackerIcon: {
-    borderRadius: 8,
-    height: 40,
-    width: 40,
-  },
-});

@@ -1,10 +1,8 @@
-import { FlatList, StyleSheet } from 'react-native';
-
 import NativeDoh, { DohProviderId } from '@modules/native-doh';
 import { Dialog, RadioButton } from '@components';
-import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
+import { useTheme } from '@hooks/persisted';
 
 export const DOH_PROVIDERS: readonly {
   id: DohProviderId;
@@ -39,7 +37,6 @@ const DohProviderDialog = ({
   onSelect,
 }: DohProviderDialogProps) => {
   const theme = useTheme();
-
   const selectProvider = (nextProvider: DohProviderId) => {
     NativeDoh?.setProvider(nextProvider);
     onSelect(nextProvider);
@@ -56,19 +53,15 @@ const DohProviderDialog = ({
         {getString('advancedSettingsScreen.dnsOverHttpsDescription')}
       </Dialog.Description>
       <Dialog.ScrollArea>
-        <FlatList
-          data={DOH_PROVIDERS}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <RadioButton
-              label={item.label}
-              status={provider === item.id}
-              onPress={() => selectProvider(item.id)}
-              theme={theme}
-            />
-          )}
-          style={styles.list}
-        />
+        {DOH_PROVIDERS.map(item => (
+          <RadioButton
+            key={item.id.toString()}
+            label={item.label}
+            status={provider === item.id}
+            onPress={() => selectProvider(item.id)}
+            theme={theme}
+          />
+        ))}
       </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss}>
@@ -80,9 +73,3 @@ const DohProviderDialog = ({
 };
 
 export default DohProviderDialog;
-
-const styles = StyleSheet.create({
-  list: {
-    maxHeight: 480,
-  },
-});

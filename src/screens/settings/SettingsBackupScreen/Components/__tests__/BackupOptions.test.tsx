@@ -78,9 +78,10 @@ describe('BackupOptionsList', () => {
   });
 
   it('disables downloaded files when library data is not selected', () => {
+    const onChange = jest.fn();
     render(
       <BackupOptionsList
-        onChange={() => {}}
+        onChange={onChange}
         options={{
           ...allSelected,
           library: false,
@@ -90,10 +91,12 @@ describe('BackupOptionsList', () => {
       />,
     );
 
-    expect(
+    fireEvent.press(
       screen.getByRole('checkbox', {
         name: 'backupScreen.options.downloadedFiles',
       }),
-    ).toBeDisabled();
+    );
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

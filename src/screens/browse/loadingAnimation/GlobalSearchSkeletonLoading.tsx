@@ -1,52 +1,42 @@
 import React, { memo } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { Box, LazyRow } from '@expo/ui/jetpack-compose';
+import {
+  background,
+  clip,
+  fillMaxWidth,
+  height,
+  Shapes,
+  width,
+} from '@expo/ui/jetpack-compose/modifiers';
+
+import { COVER_ASPECT } from '@components';
+import { GLOBAL_SEARCH_COVER_WIDTH } from '@components/NovelCoverLayoutContext';
 import { ThemeColors } from '@theme/types';
-import LoadingNovel from './LoadingNovel';
-import useLoadingColors from '@utils/useLoadingColors';
-import { DisplayModes } from '@screens/library/constants/constants';
 
 interface Props {
   theme: ThemeColors;
 }
 
-const GlobalSearchSkeletonLoading: React.FC<Props> = ({ theme }) => {
-  const { width } = useWindowDimensions();
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+const SKELETON_ITEMS = [0, 1, 2, 3, 4, 5];
 
-  return (
-    <View style={[styles.container, styles.row]}>
-      {SKELETON_ITEMS.map((_, index) => {
-        return (
-          <LoadingNovel
-            key={index}
-            availableWidth={width}
-            backgroundColor={backgroundColor}
-            disableLoadingAnimations={disableLoadingAnimations}
-            highlightColor={highlightColor}
-            pictureHeight={153.1}
-            pictureWidth={100}
-            displayMode={DisplayModes.Comfortable}
-          />
-        );
-      })}
-    </View>
-  );
-};
-
-const SKELETON_ITEMS = Array.from({ length: 4 });
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 6,
-    marginHorizontal: 4,
-    marginTop: 6,
-    overflow: 'hidden',
-  },
-  row: {
-    flexDirection: 'row',
-    paddingHorizontal: 3,
-  },
-});
+const GlobalSearchSkeletonLoading: React.FC<Props> = ({ theme }) => (
+  <LazyRow
+    horizontalArrangement={{ spacedBy: 12 }}
+    contentPadding={{ start: 16, end: 16 }}
+    modifiers={[fillMaxWidth()]}
+  >
+    {SKELETON_ITEMS.map(index => (
+      <Box
+        key={index}
+        modifiers={[
+          width(GLOBAL_SEARCH_COVER_WIDTH),
+          height(Math.round(GLOBAL_SEARCH_COVER_WIDTH * COVER_ASPECT)),
+          clip(Shapes.RoundedCorner(12)),
+          background(theme.surfaceContainerHigh ?? theme.surfaceVariant),
+        ]}
+      />
+    ))}
+  </LazyRow>
+);
 
 export default memo(GlobalSearchSkeletonLoading);
