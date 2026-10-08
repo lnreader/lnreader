@@ -80,6 +80,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
   } = useLibrarySettings();
   const {
     automaticLibraryUpdateIntervalHours = 0,
+    autoDownloadWhileReading = false,
     defaultChapterSort,
     downloadNewChapters,
     refreshNovelMetadata,
@@ -393,6 +394,19 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
             value={downloadNewChapters}
             onPress={() =>
               setAppSettings({ downloadNewChapters: !downloadNewChapters })
+            }
+            theme={theme}
+          />
+          <SettingSwitch
+            label={getString('generalSettingsScreen.autoDownloadWhileReading')}
+            description={getString(
+              'generalSettingsScreen.autoDownloadWhileReadingDescription',
+            )}
+            value={autoDownloadWhileReading}
+            onPress={() =>
+              setAppSettings({
+                autoDownloadWhileReading: !autoDownloadWhileReading,
+              })
             }
             theme={theme}
           />

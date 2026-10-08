@@ -822,6 +822,47 @@ export const getNextChapter = async (
     .get();
 };
 
+/**
+ * The next `limit` chapters after the given position that are unread and not
+ * already downloaded — the candidates for "download ahead while reading".
+ *
+ * Mirrors `getNextChapter`'s page/position ordering so a chapter queued here is
+ * the same one the reader would navigate to next.
+ */
+export const getNextUndownloadedUnreadChapters = async (
+  novelId: number,
+  chapterPosition: number,
+  page: string,
+  limit: number,
+  excludedScanlators?: string[],
+): Promise<ChapterInfo[]> => {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const conditions = [
+    eq(chapterSchema.novelId, novelId),
+    or(
+      and(
+        eq(chapterSchema.page, castInt(page)),
+        gt(chapterSchema.position, castInt(chapterPosition)),
+      ),
+      gt(chapterSchema.page, castInt(page)),
+    ),
+    eq(chapterSchema.unread, true),
+    eq(chapterSchema.isDownloaded, false),
+    scanlatorFilterToSQL(excludedScanlators),
+  ].filter(Boolean) as any[];
+
+  return dbManager
+    .select()
+    .from(chapterSchema)
+    .where(and(...conditions))
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
+    .limit(limit)
+    .all();
+};
+
 const getReadDownloadedChapters = async () =>
   dbManager
     .select({
