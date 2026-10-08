@@ -406,6 +406,8 @@
   "generalSettings": "General",
   "generalSettingsScreen": {
     "asc": "(Ascending)",
+    "autoDeleteReadChapters": "Delete after reading",
+    "autoDeleteReadChaptersDescription": "Remove a chapter's downloaded content as soon as you finish reading it",
     "autoDownload": "Auto-download",
     "automaticUpdates": "Automatic updates",
     "automaticUpdatesDaily": "Daily",
