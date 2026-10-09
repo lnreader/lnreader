@@ -1,9 +1,6 @@
 import { NOVEL_STORAGE, PLUGIN_STORAGE } from '@utils/Storages';
 import type { BackupOptions } from './options';
 import { ZipBackupName } from './types';
-import NativeFile from '@modules/native-file';
-import type { RestoredNovelMapping } from '@database/types';
-
 export type BackupFileSection = {
   archiveName: ZipBackupName;
   storagePath: string;
@@ -11,6 +8,7 @@ export type BackupFileSection = {
 
 export const getSelectedBackupFileSections = (
   options: BackupOptions,
+  formatVersion: 2 | 3 = 3,
 ): BackupFileSection[] => {
   const sections: BackupFileSection[] = [];
 
@@ -20,7 +18,7 @@ export const getSelectedBackupFileSections = (
       storagePath: PLUGIN_STORAGE,
     });
   }
-  if (options.downloadedFiles) {
+  if (formatVersion === 2 && options.downloadedFiles) {
     sections.push({
       archiveName: ZipBackupName.NOVEL_FILES,
       storagePath: NOVEL_STORAGE,
@@ -28,79 +26,4 @@ export const getSelectedBackupFileSections = (
   }
 
   return sections;
-};
-
-export const getNovelFilesRestorePath = (cacheDirPath: string) =>
-  `${cacheDirPath}/RestoredNovelFiles`;
-
-export const getLegacyFilesRestorePath = (cacheDirPath: string) =>
-  `${cacheDirPath}/RestoredLegacyFiles`;
-
-const moveDirectoryContents = async (source: string, destination: string) => {
-  if (!(await NativeFile.exists(source))) {
-    return;
-  }
-  await NativeFile.mkdir(destination);
-  for (const item of await NativeFile.readDir(source)) {
-    const destinationPath = `${destination}/${item.name}`;
-    if (item.isDirectory) {
-      await moveDirectoryContents(item.path, destinationPath);
-    } else {
-      await NativeFile.moveFile(item.path, destinationPath);
-    }
-  }
-};
-
-export const restoreNovelFiles = async (
-  stagingPath: string,
-  novelMappings: RestoredNovelMapping[],
-) => {
-  for (const mapping of novelMappings) {
-    const sourceNovelPath = `${stagingPath}/${mapping.pluginId}/${mapping.backupNovelId}`;
-    if (!(await NativeFile.exists(sourceNovelPath))) {
-      continue;
-    }
-
-    const destinationNovelPath = `${NOVEL_STORAGE}/${mapping.pluginId}/${mapping.restoredNovelId}`;
-    await NativeFile.mkdir(destinationNovelPath);
-    const chapterIds = new Map(
-      mapping.chapters.map(chapter => [
-        String(chapter.backupChapterId),
-        chapter.restoredChapterId,
-      ]),
-    );
-
-    for (const item of await NativeFile.readDir(sourceNovelPath)) {
-      if (!item.isDirectory) {
-        await NativeFile.moveFile(
-          item.path,
-          `${destinationNovelPath}/${item.name}`,
-        );
-        continue;
-      }
-
-      const restoredChapterId = chapterIds.get(item.name);
-      if (restoredChapterId !== undefined) {
-        await moveDirectoryContents(
-          item.path,
-          `${destinationNovelPath}/${restoredChapterId}`,
-        );
-      }
-    }
-  }
-
-  if (await NativeFile.exists(stagingPath)) {
-    await NativeFile.unlink(stagingPath);
-  }
-};
-
-export const restoreLegacyFiles = async (
-  stagingPath: string,
-  novelMappings: RestoredNovelMapping[],
-) => {
-  await moveDirectoryContents(`${stagingPath}/Plugins`, PLUGIN_STORAGE);
-  await restoreNovelFiles(`${stagingPath}/Novels`, novelMappings);
-  if (await NativeFile.exists(stagingPath)) {
-    await NativeFile.unlink(stagingPath);
-  }
 };

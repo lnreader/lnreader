@@ -269,16 +269,23 @@ export const _restoreCategory = async (
       categoryId = restoredCategory.id;
     }
 
-    // Insert novel-category associations
     if (category.novelIds && category.novelIds.length > 0) {
-      for (const backupNovelId of category.novelIds) {
-        const novelId = novelIdMap?.get(backupNovelId) ?? backupNovelId;
+      const membershipBatchSize = 500;
+      for (
+        let batchStart = 0;
+        batchStart < category.novelIds.length;
+        batchStart += membershipBatchSize
+      ) {
+        const memberships = category.novelIds
+          .slice(batchStart, batchStart + membershipBatchSize)
+          .map(backupNovelId => ({
+            categoryId,
+            novelId: novelIdMap?.get(backupNovelId) ?? backupNovelId,
+          }));
+
         await tx
           .insert(novelCategorySchema)
-          .values({
-            categoryId,
-            novelId: novelId,
-          })
+          .values(memberships)
           .onConflictDoNothing()
           .run();
       }
