@@ -10,26 +10,25 @@ const onScrollRatio = (() => {
   const callbacks = [];
   let queued = false;
 
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (queued) {
-        return;
+  const scheduleUpdate = () => {
+    if (queued) {
+      return;
+    }
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      const ratio = Math.min(
+        1,
+        (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
+      );
+      for (const callback of callbacks) {
+        callback(ratio);
       }
-      queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        const ratio = Math.min(
-          1,
-          (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
-        );
-        for (const callback of callbacks) {
-          callback(ratio);
-        }
-      });
-    },
-    { passive: true },
-  );
+    });
+  };
+
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('reader-position-restored', scheduleUpdate);
 
   return callback => callbacks.push(callback);
 })();
