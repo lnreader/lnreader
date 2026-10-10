@@ -87,6 +87,30 @@ describe('CategoryQueries', () => {
       ).toEqual(expect.arrayContaining([existingNovelId, restoredNovelId]));
     });
 
+    it('adds every mapped membership once across insert batches', async () => {
+      const testDb = getTestDb();
+      const novelIds: number[] = [];
+      for (let i = 0; i < 520; i++) {
+        novelIds.push(await insertTestNovel(testDb, { inLibrary: true }));
+      }
+      const backupIds = novelIds.map(id => id + 10000);
+      const novelIdMap = new Map(backupIds.map((id, i) => [id, novelIds[i]]));
+      const categoryId = await insertTestCategory(testDb, { name: 'Big' });
+      await insertTestNovelCategory(testDb, novelIds[510], categoryId);
+
+      await _restoreCategory(
+        { id: 42, name: 'Big', sort: 3, novelIds: backupIds },
+        novelIdMap,
+      );
+
+      const memberships = (await getAllNovelCategories()).filter(
+        membership => membership.categoryId === categoryId,
+      );
+      expect(memberships.map(m => m.novelId).sort((a, b) => a - b)).toEqual(
+        novelIds,
+      );
+    });
+
     it('does not overwrite a custom category with a colliding backup ID', async () => {
       const testDb = getTestDb();
       const existingCategoryId = await insertTestCategory(testDb, {

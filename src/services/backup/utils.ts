@@ -4,8 +4,9 @@ import { LAST_UPDATE_TIME } from '@hooks/persisted/useUpdates';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import { version } from '../../../package.json';
 import {
-  _restoreNovelAndChapters,
+  _restoreNovelsAndChapters,
   getAllNovels,
+  type RestoreNovelResult,
 } from '@database/queries/NovelQueries';
 import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
 import {
@@ -39,6 +40,18 @@ import { INSTALLED_PLUGINS_KEY } from '@plugins/pluginManager';
 import type { PluginItem } from '@plugins/types';
 
 const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
+
+// Restored novels are written in groups so each transaction commit (and the
+// live queries it wakes) covers many novels instead of one.
+const RESTORE_BATCH_MAX_NOVELS = 50;
+const RESTORE_BATCH_MAX_CHAPTERS = 5000;
+// Cover copies run on native threads, so a few can overlap.
+const RESTORE_COVER_CONCURRENCY = 8;
+
+type PendingRestoreNovel = {
+  backupNovel: BackupNovel;
+  hasStoredCover: boolean;
+};
 
 const stripUriSuffix = (uri: string) => uri.split(/[?#]/, 1)[0];
 
@@ -293,41 +306,113 @@ export const restoreData = async (
       const items = (await NativeFile.readDir(novelDirPath)).filter(
         item => !item.isDirectory,
       );
-      for (const [index, item] of items.entries()) {
+      let pendingNovels: PendingRestoreNovel[] = [];
+      let pendingChapterCount = 0;
+
+      const restorePendingNovels = async () => {
+        const batch = pendingNovels;
+        pendingNovels = [];
+        pendingChapterCount = 0;
+        let results: RestoreNovelResult[];
+        try {
+          results = await _restoreNovelsAndChapters(
+            batch.map(({ backupNovel }) => backupNovel),
+          );
+        } catch {
+          failedCount += batch.length;
+          return;
+        }
+
+        const restoredNovels: {
+          backupNovel: BackupNovel;
+          hasStoredCover: boolean;
+          novelMapping: RestoredNovelMapping;
+        }[] = [];
+        for (const [index, pending] of batch.entries()) {
+          const novelMapping = results[index].mapping;
+          if (!novelMapping) {
+            failedCount++;
+            continue;
+          }
+          novelMappings.push(novelMapping);
+          novelIdMap.set(pending.backupNovel.id, novelMapping.restoredNovelId);
+          restoredNovels.push({ ...pending, novelMapping });
+        }
+
+        const restoreCover = async ({
+          backupNovel,
+          hasStoredCover,
+          novelMapping,
+        }: (typeof restoredNovels)[number]) => {
+          try {
+            if (hasStoredCover) {
+              const coverBackupPath = coversDirPath + '/' + backupNovel.id;
+              if (await NativeFile.exists(coverBackupPath)) {
+                const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
+                await NativeFile.mkdir(parentDirectory(coverPath));
+                await NativeFile.copyFile(coverBackupPath, coverPath);
+              }
+            }
+            novelCount++;
+          } catch {
+            failedCount++;
+          }
+        };
+        for (
+          let start = 0;
+          start < restoredNovels.length;
+          start += RESTORE_COVER_CONCURRENCY
+        ) {
+          await Promise.all(
+            restoredNovels
+              .slice(start, start + RESTORE_COVER_CONCURRENCY)
+              .map(restoreCover),
+          );
+        }
+      };
+
+      const reportProgress = (completed: number) => {
         updateRestoreProgress(
           setMeta,
           getString('backupScreen.restoringNovelsProgress', {
-            current: index + 1,
+            current: completed,
             total: items.length,
           }),
         );
+      };
+
+      if (items.length > 0) {
+        reportProgress(0);
+      }
+      for (const [index, item] of items.entries()) {
         try {
           const fileContent = await NativeFile.readFile(item.path);
           const backupNovel = JSON.parse(fileContent) as BackupNovel;
           pluginIds.add(backupNovel.pluginId);
 
-          const hasStoredCover =
-            backupNovel.cover && !backupNovel.cover.startsWith('http');
+          const hasStoredCover = Boolean(
+            backupNovel.cover && !backupNovel.cover.startsWith('http'),
+          );
           if (hasStoredCover) {
             backupNovel.cover = APP_STORAGE_URI + backupNovel.cover;
           }
 
-          const novelMapping = await _restoreNovelAndChapters(backupNovel);
-          novelMappings.push(novelMapping);
-          novelIdMap.set(backupNovel.id, novelMapping.restoredNovelId);
-
-          if (hasStoredCover) {
-            const coverBackupPath = coversDirPath + '/' + backupNovel.id;
-            if (await NativeFile.exists(coverBackupPath)) {
-              const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
-              await NativeFile.mkdir(parentDirectory(coverPath));
-              await NativeFile.copyFile(coverBackupPath, coverPath);
-            }
-          }
-          novelCount++;
+          pendingNovels.push({ backupNovel, hasStoredCover });
+          pendingChapterCount += backupNovel.chapters?.length ?? 0;
         } catch {
           failedCount++;
         }
+        if (
+          pendingNovels.length >= RESTORE_BATCH_MAX_NOVELS ||
+          pendingChapterCount >= RESTORE_BATCH_MAX_CHAPTERS
+        ) {
+          await restorePendingNovels();
+          reportProgress(index + 1);
+        }
+      }
+      await restorePendingNovels();
+      if (items.length > 0) {
+        reportProgress(items.length);
       }
     } catch {
       failedSectionCount++;
