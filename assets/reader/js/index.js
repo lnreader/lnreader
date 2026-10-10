@@ -19,9 +19,12 @@ const onScrollRatio = (() => {
       queued = true;
       requestAnimationFrame(() => {
         queued = false;
+        // Settles which chapter is current first: the ratio is relative to it.
+        continuousScroll.update();
         const ratio = Math.min(
           1,
-          (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
+          (window.scrollY + reader.layoutHeight - reader.chapterTop) /
+            reader.chapterHeight,
         );
         for (const callback of callbacks) {
           callback(ratio);
@@ -34,25 +37,62 @@ const onScrollRatio = (() => {
   return callback => callbacks.push(callback);
 })();
 
+/** Where infinite scrolling stands, shown below the last loaded chapter. */
+const ContinuousScrollStatus = () => {
+  switch (continuousScroll.status.val) {
+    case 'end':
+      return div(div({ class: 'info-text' }, reader.strings.noNextChapter));
+    case 'error':
+      return div(
+        div(
+          { class: 'info-text' },
+          [reader.strings.nextChapterLoadFailed, continuousScroll.errorMessage]
+            .filter(Boolean)
+            .join(': '),
+        ),
+        button(
+          {
+            class: 'next-button',
+            onclick: e => {
+              e.stopPropagation();
+              continuousScroll.retry();
+            },
+          },
+          reader.strings.retry,
+        ),
+      );
+    default:
+      return div(
+        div({ class: 'info-text' }, reader.strings.loadingNextChapter),
+      );
+  }
+};
+
 const ChapterEnding = () => {
   return () =>
     reader.generalSettings.val.pageReader
       ? div()
-      : div(div({ class: 'info-text' }, reader.strings.finished), () =>
-          // Reading `adjacentVersion` subscribes this binding to the adjacent
-          // chapters being pushed in after the chapter itself was rendered.
-          reader.adjacentVersion.val >= 0 && reader.nextChapter
-            ? button(
-                {
-                  class: 'next-button',
-                  onclick: e => {
-                    e.stopPropagation();
-                    reader.post({ type: 'next' });
+      : reader.generalSettings.val.infiniteScroll
+      ? ContinuousScrollStatus()
+      : div(() =>
+          div(
+            div({ class: 'info-text' }, reader.strings.finished),
+            // Reading `adjacentVersion` subscribes this binding to the adjacent
+            // chapters (and the chapter's strings) being pushed in after the
+            // chapter itself was rendered.
+            reader.adjacentVersion.val >= 0 && reader.nextChapter
+              ? button(
+                  {
+                    class: 'next-button',
+                    onclick: e => {
+                      e.stopPropagation();
+                      reader.post({ type: 'next' });
+                    },
                   },
-                },
-                reader.strings.nextChapter,
-              )
-            : div({ class: 'info-text' }, reader.strings.noNextChapter),
+                  reader.strings.nextChapter,
+                )
+              : div({ class: 'info-text' }, reader.strings.noNextChapter),
+          ),
         );
 };
 
@@ -64,7 +104,9 @@ const Scrollbar = () => {
   const percentage = van.state(0);
   const update = ratio => {
     if (ratio === undefined) {
-      ratio = (window.scrollY + reader.layoutHeight) / reader.chapterHeight;
+      ratio =
+        (window.scrollY + reader.layoutHeight - reader.chapterTop) /
+        reader.chapterHeight;
     }
     if (ratio > 1) {
       ratio = 1;
@@ -78,7 +120,14 @@ const Scrollbar = () => {
     percentage.val = parseInt(ratio * 100);
     if (lock) {
       window.scrollTo({
-        top: reader.chapterHeight * ratio - reader.layoutHeight,
+        // Kept inside the current chapter: the top of the screen crossing into
+        // the previous one would make that one current.
+        top: Math.max(
+          reader.chapterTop,
+          reader.chapterTop +
+            reader.chapterHeight * ratio -
+            reader.layoutHeight,
+        ),
         behavior: 'instant',
       });
     }

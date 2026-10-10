@@ -18,6 +18,7 @@ const NavigationTab: React.FC = () => {
     pageReader = false,
     pageReaderInvertVolumeButtons = false,
     pageReaderDisableAnimation = false,
+    infiniteScroll = false,
     autoScroll = false,
     autoScrollInterval = 10,
     autoScrollOffset = null,
@@ -121,6 +122,19 @@ const NavigationTab: React.FC = () => {
           onPress={() => setChapterGeneralSettings({ pageReader: !pageReader })}
           theme={theme}
         />
+        {!pageReader && (
+          <SettingSwitch
+            label={getString('readerScreen.bottomSheet.infiniteScroll')}
+            description={getString(
+              'readerScreen.bottomSheet.infiniteScrollDescription',
+            )}
+            value={infiniteScroll}
+            onPress={() =>
+              setChapterGeneralSettings({ infiniteScroll: !infiniteScroll })
+            }
+            theme={theme}
+          />
+        )}
         {pageReader && (
           <>
             <SettingSwitch

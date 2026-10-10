@@ -63,9 +63,19 @@ body {
   font-family: var(--readerSettings-fontFamily);
 }
 
-#LNReader-chapter {
+#LNReader-chapter,
+.LNReader-chapter-continued {
   padding-left: var(--readerSettings-padding);
   padding-right: var(--readerSettings-padding);
+}
+
+.continuous-chapter-divider {
+  margin: 48px var(--readerSettings-padding) 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--theme-outline);
+  text-align: center;
+  font-weight: bold;
+  user-select: none;
 }
 
 hr {
@@ -88,7 +98,7 @@ img {
   max-width: 100%;
 }
 
-div:has(> table):not(#LNReader-chapter) {
+div:has(> table):not(#LNReader-chapter, .LNReader-chapter-continued) {
   overflow: auto;
 }
 

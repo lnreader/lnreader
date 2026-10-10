@@ -428,6 +428,195 @@ describe('useChapter', () => {
     expect(result.current.chapterText).toBe('SANITIZED:next body');
   });
 
+  describe('infinite scrolling', () => {
+    const thirdChapter = makeChapter(3, '1');
+
+    beforeEach(() => {
+      const following: Record<number, ReturnType<typeof makeChapter>> = {
+        [initialChapter.position]: nextChapter,
+        [nextChapter.position]: thirdChapter,
+      };
+      mockGetNextChapter.mockImplementation(
+        async (_novelId: number, position: number) => following[position],
+      );
+      mockFetchChapter.mockImplementation(
+        async (_pluginId: string, path: string) => `body of ${path}`,
+      );
+    });
+
+    it('appends the following chapters and makes them current without rebuilding the document', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).resolves.toEqual({
+        chapter: nextChapter,
+        html: `SANITIZED:body of ${nextChapter.path}`,
+      });
+
+      act(() => result.current.activateChapter(nextChapter.id));
+
+      expect(result.current.chapter).toEqual(nextChapter);
+      expect(result.current.documentChapter).toEqual(initialChapter);
+      expect(result.current.chapterText).toBe(
+        `SANITIZED:body of ${initialChapter.path}`,
+      );
+      // The header and footer navigation follow the chapter being read.
+      await waitFor(() =>
+        expect(result.current.nextChapter).toEqual(thirdChapter),
+      );
+
+      await expect(
+        result.current.loadChapterAfter(nextChapter.id),
+      ).resolves.toMatchObject({ chapter: thirdChapter });
+      await expect(
+        result.current.loadChapterAfter(thirdChapter.id),
+      ).resolves.toBeNull();
+    });
+
+    it('rebuilds the document from the chapter being read at its live progress', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.getRebuildTarget()).toEqual({
+        chapter: initialChapter,
+        html: `SANITIZED:body of ${initialChapter.path}`,
+      });
+
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.saveProgress(100, initialChapter.id);
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(40, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()).toEqual({
+        chapter: { ...nextChapter, progress: 40 },
+        html: `SANITIZED:body of ${nextChapter.path}`,
+      });
+    });
+
+    it('rebuilds at the latest position after scrolling back', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(80, nextChapter.id);
+        result.current.saveProgress(30, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()?.chapter.progress).toBe(30);
+    });
+
+    it('keeps the position for rebuilds in incognito mode without saving it', async () => {
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: true });
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+      act(() => {
+        result.current.saveProgress(100, initialChapter.id);
+        result.current.activateChapter(nextChapter.id);
+        result.current.saveProgress(40, nextChapter.id);
+      });
+
+      expect(result.current.getRebuildTarget()?.chapter).toEqual({
+        ...nextChapter,
+        progress: 40,
+      });
+      expect(store.state.updateChapterProgress).not.toHaveBeenCalled();
+      expect(store.state.markChapterRead).not.toHaveBeenCalled();
+    });
+
+    it('pulls in the next source page when the last loaded chapter ends its page', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      const nextPageChapter = makeChapter(4, '2');
+      mockGetNextChapter.mockResolvedValue(undefined);
+      mockGetChapterCount.mockResolvedValue(0);
+      mockFetchPage.mockImplementation(async () => {
+        mockGetNextChapter.mockResolvedValue(nextPageChapter);
+        return { chapters: [{ name: nextPageChapter.name }] };
+      });
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).resolves.toMatchObject({ chapter: nextPageChapter });
+      expect(mockFetchPage).toHaveBeenCalledWith(
+        novel.pluginId,
+        novel.path,
+        '2',
+      );
+    });
+
+    it('rejects when the next source page cannot be fetched so the reader can offer a retry', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetNextChapter.mockResolvedValue(undefined);
+      mockGetChapterCount.mockResolvedValue(0);
+      mockFetchPage.mockRejectedValue(new Error('offline'));
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(
+        result.current.loadChapterAfter(initialChapter.id),
+      ).rejects.toThrow('offline');
+      expect(mockInsertChapters).not.toHaveBeenCalled();
+    });
+
+    it('saves progress and marks read the chapter the reader reports, not the current one', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await act(async () => {
+        await result.current.loadChapterAfter(initialChapter.id);
+      });
+
+      act(() => {
+        result.current.saveProgress(100, nextChapter.id);
+        // A late report from a document that has since been replaced.
+        result.current.saveProgress(100, 99);
+        result.current.activateChapter(99);
+      });
+
+      expect(store.state.updateChapterProgress).toHaveBeenCalledTimes(1);
+      expect(store.state.updateChapterProgress).toHaveBeenCalledWith(
+        nextChapter.id,
+        100,
+      );
+      expect(store.state.markChapterRead).toHaveBeenCalledWith(nextChapter.id);
+      expect(mockParseChapterNumber).toHaveBeenCalledWith(
+        novel.name,
+        nextChapter.name,
+      );
+      expect(result.current.chapter).toEqual(initialChapter);
+    });
+  });
+
   it('injects scripts supporting paged and normal modes when volume buttons are pressed', async () => {
     const store = createStore();
     mockUseNovelActions.mockReturnValue(store.state);
