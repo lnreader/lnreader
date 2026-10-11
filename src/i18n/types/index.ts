@@ -350,6 +350,8 @@ export interface StringMap {
   'generalSettings': 'string';
   'generalSettingsScreen.asc': 'string';
   'generalSettingsScreen.autoDownload': 'string';
+  'generalSettingsScreen.autoDownloadWhileReading': 'string';
+  'generalSettingsScreen.autoDownloadWhileReadingDescription': 'string';
   'generalSettingsScreen.automaticUpdates': 'string';
   'generalSettingsScreen.automaticUpdatesDaily': 'string';
   'generalSettingsScreen.automaticUpdatesDescription': 'string';

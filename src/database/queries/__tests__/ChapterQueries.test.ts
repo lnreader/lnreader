@@ -20,6 +20,7 @@ import {
   getNovelChapters,
   getAllNovelChaptersForBackup,
   getUnreadNovelChapters,
+  getNextUndownloadedUnreadChapters,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
   getChapter,
@@ -802,6 +803,136 @@ describe('ChapterQueries', () => {
       const result = await getUnreadNovelChapters(novelId);
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getNextUndownloadedUnreadChapters', () => {
+    const seed = async (
+      overrides: {
+        path: string;
+        page?: string;
+        position?: number;
+        unread?: boolean;
+        isDownloaded?: boolean;
+      }[],
+    ) => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      for (const override of overrides) {
+        await insertTestChapter(testDb, novelId, {
+          page: '1',
+          position: 0,
+          unread: true,
+          isDownloaded: false,
+          ...override,
+        });
+      }
+      return novelId;
+    };
+
+    it('returns the following unread, undownloaded chapters in order', async () => {
+      const novelId = await seed([
+        { path: '/c/1', position: 0 },
+        { path: '/c/2', position: 1 },
+        { path: '/c/3', position: 2 },
+      ]);
+
+      const result = await getNextUndownloadedUnreadChapters(
+        novelId,
+        0,
+        '1',
+        2,
+      );
+
+      expect(result.map(c => c.path)).toEqual(['/c/2', '/c/3']);
+    });
+
+    it('respects the limit', async () => {
+      const novelId = await seed([
+        { path: '/c/1', position: 0 },
+        { path: '/c/2', position: 1 },
+        { path: '/c/3', position: 2 },
+      ]);
+
+      const result = await getNextUndownloadedUnreadChapters(
+        novelId,
+        0,
+        '1',
+        1,
+      );
+
+      expect(result.map(c => c.path)).toEqual(['/c/2']);
+    });
+
+    it('skips chapters that are already read or already downloaded', async () => {
+      const novelId = await seed([
+        { path: '/c/1', position: 0 },
+        { path: '/c/2', position: 1, unread: false },
+        { path: '/c/3', position: 2, isDownloaded: true },
+        { path: '/c/4', position: 3 },
+      ]);
+
+      const result = await getNextUndownloadedUnreadChapters(
+        novelId,
+        0,
+        '1',
+        5,
+      );
+
+      expect(result.map(c => c.path)).toEqual(['/c/4']);
+    });
+
+    it('carries on into later pages', async () => {
+      const novelId = await seed([
+        { path: '/c/1', page: '1', position: 0 },
+        { path: '/c/2', page: '1', position: 1 },
+        { path: '/c/3', page: '2', position: 0 },
+      ]);
+
+      const result = await getNextUndownloadedUnreadChapters(
+        novelId,
+        1,
+        '1',
+        5,
+      );
+
+      expect(result.map(c => c.path)).toEqual(['/c/3']);
+    });
+
+    it('excludes chapters from other novels', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        path: '/c/1',
+        position: 0,
+        unread: true,
+      });
+      await insertTestChapter(testDb, otherNovelId, {
+        path: '/c/2',
+        position: 1,
+        unread: true,
+      });
+
+      const result = await getNextUndownloadedUnreadChapters(
+        novelId,
+        0,
+        '1',
+        5,
+      );
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('returns nothing for a non-positive limit', async () => {
+      const novelId = await seed([
+        { path: '/c/1', position: 0 },
+        { path: '/c/2', position: 1 },
+      ]);
+
+      await expect(
+        getNextUndownloadedUnreadChapters(novelId, 0, '1', 0),
+      ).resolves.toEqual([]);
     });
   });
 
