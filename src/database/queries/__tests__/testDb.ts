@@ -30,7 +30,7 @@ const MIGRATION_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS category_sort_idx ON Category (sort)`,
   `CREATE TABLE IF NOT EXISTS Chapter (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	novelId integer NOT NULL,
+	novelId integer NOT NULL REFERENCES Novel(id) ON DELETE CASCADE,
 	path text NOT NULL,
 	name text NOT NULL,
 	releaseTime text,
@@ -70,6 +70,17 @@ const MIGRATION_STATEMENTS = [
 )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS novel_path_plugin_unique ON Novel (path, pluginId)`,
   `CREATE INDEX IF NOT EXISTS NovelIndex ON Novel (pluginId, path, id, inLibrary)`,
+  `CREATE TABLE IF NOT EXISTS RestoreChapterMapping (
+	restoreRunId text NOT NULL,
+	backupNovelId integer NOT NULL,
+	backupChapterId integer NOT NULL,
+	restoredNovelId integer NOT NULL REFERENCES Novel(id) ON DELETE CASCADE,
+	restoredChapterId integer NOT NULL REFERENCES Chapter(id) ON DELETE CASCADE
+)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS restore_chapter_mapping_unique
+	ON RestoreChapterMapping (restoreRunId, backupNovelId, backupChapterId)`,
+  `CREATE INDEX IF NOT EXISTS restore_chapter_mapping_novel_index
+	ON RestoreChapterMapping (restoreRunId, backupNovelId)`,
   `CREATE TABLE IF NOT EXISTS NovelCategory (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	novelId integer NOT NULL,

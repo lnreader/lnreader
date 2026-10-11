@@ -28,19 +28,22 @@ import okhttp3.JavaNetCookieJar
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.UUID
 import java.io.PushbackInputStream
+import java.util.UUID
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.coroutineContext
 
 class NativeFileModule : Module() {
-    private val BUFFER_SIZE = 4096
+    private val BUFFER_SIZE = 64 * 1024
     private val okHttpClient = OkHttpClientProvider.createClient()
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var pendingDocumentPromise: Promise? = null
@@ -108,60 +111,67 @@ class NativeFileModule : Module() {
             ?: throw Exception("ENOENT: could not open an input stream for '$filepath'")
     }
 
-    private val writeAccessByAPILevel: String
-        get() = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) "w" else "rwt"
-
     private fun getOutputStream(filepath: String): OutputStream {
         val uri = getFileUri(filepath)
         return reactContext?.contentResolver?.openOutputStream(uri, writeAccessByAPILevel)
             ?: throw Exception("ENOENT: could not open an output stream for '$filepath'")
     }
+    private val writeAccessByAPILevel: String
+        get() = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) "w" else "rwt"
 
-    private suspend fun copyFileContent(
-        filepath: String,
-        destPath: String,
-        onDone: (() -> Unit)? = null,
-    ): Long {
-        try {
-            val inputStream = getInputStream(filepath)
-            var copiedBytes = 0L
-            try {
-                val outputStream = getOutputStream(destPath)
-                try {
-                    val buffer = ByteArray(BUFFER_SIZE)
-                    var length: Int
-                    while (inputStream.read(buffer).also { length = it } > 0) {
-                        coroutineContext.ensureActive()
-                        outputStream.write(buffer, 0, length)
-                        copiedBytes += length
-                    }
-                    outputStream.flush()
-                } finally {
-                    outputStream.close()
-                }
-            } finally {
-                inputStream.close()
-            }
-            if (onDone != null) {
-                onDone()
-            }
-            return copiedBytes
-        } catch (e: IOException) {
-            throw Exception("Failed to copy file from '$filepath' to '$destPath': ${e.message}")
+
+    private fun localFileOrNull(filepath: String): File? {
+        val uri = Uri.parse(filepath)
+        return when {
+            uri.scheme == null -> File(filepath)
+            uri.scheme.equals(ContentResolver.SCHEME_FILE, ignoreCase = true) ->
+                uri.path?.let(::File)
+            else -> null
         }
     }
-
     private fun contentResolver(): ContentResolver =
         reactContext?.contentResolver
             ?: throw IOException("React context is unavailable")
 
-    private suspend fun copyToOutputStream(sourcePath: String, outputStream: OutputStream): Long {
+
+    private suspend fun copyLocalFile(sourceFile: File, destinationFile: File): Long {
+        if (sourceFile.isDirectory) {
+            throw IOException("Invalid file, folder found!")
+        }
+
+        val sourceSize = sourceFile.length()
         var copiedBytes = 0L
-        getInputStream(sourcePath).use { inputStream ->
-            outputStream.use { output ->
+        FileInputStream(sourceFile).channel.use { sourceChannel ->
+            FileOutputStream(destinationFile).channel.use { destinationChannel ->
+                while (copiedBytes < sourceSize) {
+                    coroutineContext.ensureActive()
+                    val bytesToTransfer = minOf(BUFFER_SIZE.toLong(), sourceSize - copiedBytes)
+                    val transferredBytes =
+                        sourceChannel.transferTo(copiedBytes, bytesToTransfer, destinationChannel)
+                    if (transferredBytes <= 0) {
+                        throw IOException("Could not copy the complete local file")
+                    }
+                    copiedBytes += transferredBytes
+                }
+            }
+        }
+
+        if (destinationFile.length() != copiedBytes) {
+            throw IOException("Copied file size does not match the source file")
+        }
+        return copiedBytes
+    }
+
+    private suspend fun copyStreams(
+        inputStream: InputStream,
+        outputStream: OutputStream,
+    ): Long {
+        var copiedBytes = 0L
+        BufferedInputStream(inputStream, BUFFER_SIZE).use { input ->
+            BufferedOutputStream(outputStream, BUFFER_SIZE).use { output ->
                 val buffer = ByteArray(BUFFER_SIZE)
                 var length: Int
-                while (inputStream.read(buffer).also { length = it } > 0) {
+                while (input.read(buffer).also { length = it } > 0) {
                     coroutineContext.ensureActive()
                     output.write(buffer, 0, length)
                     copiedBytes += length
@@ -171,6 +181,44 @@ class NativeFileModule : Module() {
         }
         return copiedBytes
     }
+
+    private suspend fun copyFileContent(
+        filepath: String,
+        destPath: String,
+        onDone: (() -> Unit)? = null,
+    ): Long {
+        try {
+            val sourceFile = localFileOrNull(filepath)
+            val destinationFile = localFileOrNull(destPath)
+            val copiedBytes = if (sourceFile != null && destinationFile != null) {
+                try {
+                    copyLocalFile(sourceFile, destinationFile)
+                } catch (_: IOException) {
+                    FileInputStream(sourceFile).use { inputStream ->
+                        FileOutputStream(destinationFile).use { outputStream ->
+                            copyStreams(inputStream, outputStream)
+                        }
+                    }
+                }
+            } else {
+                getInputStream(filepath).use { inputStream ->
+                    getOutputStream(destPath).use { outputStream ->
+                        copyStreams(inputStream, outputStream)
+                    }
+                }
+            }
+            if (sourceFile != null && sourceFile.length() != copiedBytes) {
+                throw IOException("Copied file size does not match the source file")
+            }
+            onDone?.invoke()
+            return copiedBytes
+        } catch (e: IOException) {
+            throw Exception("Failed to copy file from '$filepath' to '$destPath': ${e.message}")
+        }
+    }
+
+    private suspend fun copyToOutputStream(sourcePath: String, outputStream: OutputStream): Long =
+        copyStreams(getInputStream(sourcePath), outputStream)
 
     private fun resolveDirectoryFile(directoryUri: String): File {
         val uri = Uri.parse(directoryUri)
@@ -479,7 +527,28 @@ class NativeFileModule : Module() {
         AsyncFunction("moveFile") { filepath: String, destPath: String, promise: Promise ->
             coroutineScope.launch {
                 try {
-                    val inFile = File(filepath)
+                    val sourceFile = localFileOrNull(filepath)
+                    val destinationFile = localFileOrNull(destPath)
+                    val renamed = if (
+                        sourceFile != null &&
+                        destinationFile != null &&
+                        sourceFile.isFile &&
+                        !destinationFile.exists()
+                    ) {
+                        try {
+                            sourceFile.renameTo(destinationFile)
+                        } catch (_: SecurityException) {
+                            false
+                        }
+                    } else {
+                        false
+                    }
+                    if (renamed) {
+                        promise.resolve(null)
+                        return@launch
+                    }
+
+                    val inFile = sourceFile ?: File(filepath)
                     copyFileContent(filepath, destPath) {
                         if (!inFile.delete()) {
                             throw IOException("Failed to delete source file '$filepath'")

@@ -10,7 +10,10 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
 import { exists, getBackups, makeDir } from '@api/drive';
 import { DriveFile } from '@api/drive/types';
-import { backgroundTasks } from '@services/backgroundTasks';
+import {
+  backgroundTasks,
+  type BackgroundTask,
+} from '@services/backgroundTasks';
 import { useAppSettings } from '@hooks/persisted';
 import { formatDate } from '@utils/dateFormat';
 import {
@@ -19,6 +22,11 @@ import {
   type BackupOptions,
 } from '@services/backup/options';
 import { BackupOptionsList } from './BackupOptions';
+
+type RestoreTask = Extract<
+  BackgroundTask,
+  { name: 'LOCAL_RESTORE' | 'DRIVE_RESTORE' | 'SELF_HOST_RESTORE' }
+>;
 
 enum BackupModal {
   UNAUTHORIZED,
@@ -174,10 +182,12 @@ function RestoreBackup({
   theme,
   setBackupModal,
   closeModal,
+  onRestoreSelected,
 }: {
   theme: ThemeColors;
   setBackupModal: (backupModal: BackupModal) => void;
   closeModal: () => void;
+  onRestoreSelected: (task: RestoreTask) => void;
 }) {
   const [backupList, setBackupList] = useState<DriveFile[]>([]);
   const { dateFormat = 'default', relativeTimestamps = true } =
@@ -212,10 +222,7 @@ function RestoreBackup({
               style={styles.btnOutline}
               onPress={() => {
                 closeModal();
-                backgroundTasks.enqueue({
-                  name: 'DRIVE_RESTORE',
-                  data: item,
-                });
+                onRestoreSelected({ name: 'DRIVE_RESTORE', data: item });
               }}
             >
               <Text style={{ color: theme.primary }}>
@@ -245,12 +252,14 @@ interface GoogleDriveModalProps {
   visible: boolean;
   theme: ThemeColors;
   closeModal: () => void;
+  onRestoreSelected: (task: RestoreTask) => void;
 }
 
 export default function GoogleDriveModal({
   visible,
   theme,
   closeModal,
+  onRestoreSelected,
 }: GoogleDriveModalProps) {
   const [backupModal, setBackupModal] = useState(BackupModal.UNAUTHORIZED);
   const [user, setUser] = useState<User | null | undefined>(null);
@@ -303,6 +312,7 @@ export default function GoogleDriveModal({
             theme={theme}
             setBackupModal={setBackupModal}
             closeModal={closeModal}
+            onRestoreSelected={onRestoreSelected}
           />
         );
     }

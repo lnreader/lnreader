@@ -122,12 +122,18 @@ export const testModules = {
       'removeNovelsFromLibrary',
       'getCachedNovels',
       'deleteCachedNovels',
-      'restoreLibrary',
       'updateNovelInfo',
       'pickCustomNovelCover',
       'updateNovelCategoryById',
       'updateNovelCategories',
+    ],
+  },
+  NovelRestoreQueries: {
+    description: 'Novel restore operations',
+    functions: [
+      'restoreLibrary',
       '_restoreNovelAndChapters',
+      '_restoreNovelsAndChapters',
     ],
   },
   RepositoryQueries: {
