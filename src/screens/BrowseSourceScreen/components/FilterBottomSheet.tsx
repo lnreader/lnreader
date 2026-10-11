@@ -13,6 +13,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 
 import { useTheme } from '@hooks/persisted';
 import {
+  FilterOption,
   FilterTypes,
   FilterToValues,
   Filters,
@@ -26,16 +27,54 @@ import { getValueFor } from './filterUtils';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import Switch from '@components/Switch/Switch';
+import { useFilterSuggestions } from '../useFilterSuggestions';
 
 const insertOrRemoveIntoArray = (array: string[], val: string): string[] =>
   array.indexOf(val) > -1 ? array.filter(ele => ele !== val) : [...array, val];
 
 type SelectedFilters = FilterToValues<Filters>;
 
+interface FilterSuggestionListProps {
+  theme: ThemeColors;
+  suggestions: FilterOption[];
+  onSelect: (option: FilterOption) => void;
+}
+
+const FilterSuggestionList: React.FC<FilterSuggestionListProps> = ({
+  theme,
+  suggestions,
+  onSelect,
+}) => (
+  <View
+    style={[
+      styles.suggestionsContainer,
+      {
+        backgroundColor: theme.surfaceVariant,
+        borderColor: theme.outlineVariant,
+      },
+    ]}
+  >
+    {suggestions.map(option => (
+      <Pressable
+        key={option.value}
+        // onPressIn runs before the input blurs and hides the list.
+        onPressIn={() => onSelect(option)}
+        android_ripple={{ color: theme.rippleColor }}
+        style={styles.suggestionItem}
+      >
+        <Text numberOfLines={1} style={{ color: theme.onSurfaceVariant }}>
+          {option.label}
+        </Text>
+      </Pressable>
+    ))}
+  </View>
+);
+
 interface FilterItemProps {
   theme: ThemeColors;
   filter: Filters[string];
   filterKey: keyof Filters;
+  pluginId: string;
   selectedFilters: SelectedFilters;
   setSelectedFilters: React.Dispatch<React.SetStateAction<SelectedFilters>>;
 }
@@ -44,6 +83,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
   theme,
   filter,
   filterKey,
+  pluginId,
   selectedFilters,
   setSelectedFilters,
 }) => {
@@ -53,39 +93,67 @@ const FilterItem: React.FC<FilterItemProps> = ({
     setFalse: closeCard,
   } = useBoolean();
   const { width: screenWidth } = useWindowDimensions();
+
+  const isAutocomplete = 'autocomplete' in filter && !!filter.autocomplete;
+  const field = useFilterSuggestions(
+    pluginId,
+    filterKey,
+    isAutocomplete
+      ? String(getValueFor<FilterTypes>(filter, selectedFilters[filterKey]))
+      : '',
+    option => {
+      setSelectedFilters(prevState => ({
+        ...prevState,
+        [filterKey]: { value: option.value, type: FilterTypes.TextInput },
+      }));
+    },
+  );
+
   if (filter.type === FilterTypes.TextInput) {
     const value = getValueFor<(typeof filter)['type']>(
       filter,
       selectedFilters[filterKey],
     );
+
     return (
       <View style={styles.textContainer}>
-        <TextInput
-          style={[styles.flex, { width: screenWidth - 48 }]}
-          mode="outlined"
-          label={
-            <Text
-              style={[
-                {
-                  color: theme.onSurface,
-                  backgroundColor: overlay(2, theme.surface),
-                },
-              ]}
-            >
-              {` ${filter.label} `}
-            </Text>
-          }
-          defaultValue={value}
-          theme={{ colors: { background: 'transparent' } }}
-          outlineColor={theme.onSurface}
-          textColor={theme.onSurface}
-          onChangeText={text =>
-            setSelectedFilters(prevState => ({
-              ...prevState,
-              [filterKey]: { value: text, type: FilterTypes.TextInput },
-            }))
-          }
-        />
+        <View style={{ width: screenWidth - 48, position: 'relative' }}>
+          <TextInput
+            style={styles.flex}
+            mode="outlined"
+            label={
+              <Text
+                style={[
+                  {
+                    color: theme.onSurface,
+                    backgroundColor: overlay(2, theme.surface),
+                  },
+                ]}
+              >
+                {` ${filter.label} `}
+              </Text>
+            }
+            theme={{ colors: { background: 'transparent' } }}
+            outlineColor={theme.onSurface}
+            textColor={theme.onSurface}
+            onChangeText={text =>
+              setSelectedFilters(prevState => ({
+                ...prevState,
+                [filterKey]: { value: text, type: FilterTypes.TextInput },
+              }))
+            }
+            {...(isAutocomplete
+              ? { value, onFocus: field.onFocus, onBlur: field.onBlur }
+              : { defaultValue: value })}
+          />
+          {field.isVisible ? (
+            <FilterSuggestionList
+              theme={theme}
+              suggestions={field.suggestions}
+              onSelect={field.select}
+            />
+          ) : null}
+        </View>
       </View>
     );
   }
@@ -330,6 +398,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
 interface BottomSheetProps {
   filterSheetRef: React.RefObject<BottomSheetModalMethods | null>;
   filters: Filters;
+  pluginId: string;
   setFilters: (filters?: SelectedFilters) => void;
   clearFilters: (filters: Filters) => void;
 }
@@ -337,6 +406,7 @@ interface BottomSheetProps {
 const FilterBottomSheet: React.FC<BottomSheetProps> = ({
   filters,
   filterSheetRef,
+  pluginId,
   clearFilters,
   setFilters,
 }) => {
@@ -375,11 +445,13 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             filters && (Object.entries(filters) as [string, Filters[string]][])
           }
           keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }: { item: [string, Filters[string]] }) => (
             <FilterItem
               theme={theme}
               filter={item[1]}
               filterKey={item[0]}
+              pluginId={pluginId}
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
             />
@@ -443,6 +515,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 8,
     paddingHorizontal: 24,
+  },
+  suggestionItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    elevation: 4,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    borderWidth: 1,
+    borderTopWidth: 0,
   },
   switchContainer: {
     alignItems: 'center',
