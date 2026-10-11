@@ -185,7 +185,11 @@ export const markAllChaptersUnread = async (novelId: number): Promise<void> => {
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: true })
+      // `progress` has to be reset alongside the flag: the novel screen's
+      // per-chapter "mark unread" already does this (see
+      // `markChaptersUnreadAndResetProgressAction`), so leaving it here made
+      // the library action leave every chapter showing a stale read position.
+      .set({ unread: true, progress: 0 })
       .where(eq(chapterSchema.novelId, novelId))
       .run();
   });
@@ -547,6 +551,36 @@ export const getAllUndownloadedAndUnreadChapters = async (
     )
     .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
     .all();
+
+/**
+ * Of `paths`, the chapters an automatic update is allowed to download.
+ *
+ * Restricting to unread, not-yet-downloaded chapters is what keeps a global
+ * update from re-fetching chapters the user has already been through. It also
+ * stops `autoDeleteReadChapters` from fighting itself: once a read chapter's
+ * content is intentionally deleted it must never be pulled back down.
+ */
+export const getUndownloadedUnreadChaptersByPaths = async (
+  novelId: number,
+  paths: string[],
+): Promise<ChapterInfo[]> => {
+  if (!paths.length) {
+    return [];
+  }
+
+  return dbManager
+    .select()
+    .from(chapterSchema)
+    .where(
+      and(
+        eq(chapterSchema.novelId, novelId),
+        inArray(chapterSchema.path, paths),
+        eq(chapterSchema.unread, true),
+        eq(chapterSchema.isDownloaded, false),
+      ),
+    )
+    .all();
+};
 
 export const getChapter = async (chapterId: number) =>
   dbManager
