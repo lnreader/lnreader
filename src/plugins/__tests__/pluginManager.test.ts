@@ -73,6 +73,28 @@ describe('fetchPlugins', () => {
     expect(fetchSpy).toHaveBeenCalledWith(repositoryUrl);
     fetchSpy.mockRestore();
   });
+
+  it('drops listings whose id would escape the plugin directory', async () => {
+    const plugin = { id: 'available', name: 'Available plugin' } as PluginItem;
+    jest
+      .mocked(getEnabledRepositoriesFromDb)
+      .mockResolvedValueOnce([
+        { id: 1, url: 'https://example.com/plugins.min.json', enabled: true },
+      ]);
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      json: async () => [
+        plugin,
+        { id: '../../../escaped', name: 'Traversal' },
+        { id: '..', name: 'Dot dot' },
+        { id: 'back\\slash', name: 'Backslash' },
+        { id: '', name: 'Empty' },
+      ],
+    } as Response);
+
+    await expect(fetchPlugins()).resolves.toEqual([plugin]);
+
+    fetchSpy.mockRestore();
+  });
 });
 
 describe('reloadInstalledPlugins', () => {
@@ -181,5 +203,43 @@ describe('installPlugin', () => {
       'Directory could not be created',
     );
     expect(getPlugin('write-failure')).toBeUndefined();
+  });
+
+  it('writes nothing when the listed id would escape the plugin directory', async () => {
+    const plugin = {
+      id: '../../../../escaped',
+      name: 'Traversal',
+      url: 'https://example.com/traversal.js',
+    } as PluginItem;
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    fetchSpy.mockClear();
+    jest.mocked(NativeFile.mkdir).mockClear();
+    jest.mocked(NativeFile.writeFile).mockClear();
+
+    await expect(installPlugin(plugin)).resolves.toBeUndefined();
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(NativeFile.mkdir).not.toHaveBeenCalled();
+    expect(NativeFile.writeFile).not.toHaveBeenCalled();
+  });
+
+  // the listing and the bundle carry separate ids, and the directory is built from the bundle's
+  it('writes nothing when the bundle reports an escaping id', async () => {
+    const plugin = {
+      id: 'honest',
+      name: 'Honest listing',
+      url: 'https://example.com/honest.js',
+    } as PluginItem;
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      text: async () => pluginCode('../../../../escaped'),
+    } as Response);
+    jest.mocked(NativeFile.mkdir).mockClear();
+    jest.mocked(NativeFile.writeFile).mockClear();
+
+    await expect(installPlugin(plugin)).resolves.toBeUndefined();
+
+    expect(NativeFile.mkdir).not.toHaveBeenCalled();
+    expect(NativeFile.writeFile).not.toHaveBeenCalled();
+    expect(getPlugin('honest')).toBeUndefined();
   });
 });

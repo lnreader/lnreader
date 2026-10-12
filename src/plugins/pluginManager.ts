@@ -123,14 +123,24 @@ const migrateLegacyPluginFiles = async (pluginId: string) => {
   }
 };
 
+// A plugin id becomes a directory name under PLUGIN_STORAGE and NOVEL_STORAGE,
+// and both the repository listing and the bundle's own exported id come from
+// whoever hosts the plugin, so a separator or a dot entry would let a plugin
+// write outside its own folder.
+const isSafePluginId = (id: string) =>
+  !!id && id !== '.' && id !== '..' && !/[/\\\0]/.test(id);
+
 const installPlugin = async (
   _plugin: PluginItem,
 ): Promise<Plugin | undefined> => {
+  if (!isSafePluginId(_plugin.id)) {
+    return undefined;
+  }
   const rawCode = await fetch(_plugin.url, {
     headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
   }).then(res => res.text());
   const plugin = initPlugin(_plugin.id, rawCode);
-  if (!plugin) {
+  if (!plugin || !isSafePluginId(plugin.id)) {
     return undefined;
   }
   let currentPlugin = plugins[plugin.id];
@@ -191,7 +201,9 @@ const fetchPlugins = async (): Promise<PluginItem[]> => {
     }
   });
 
-  return uniqBy(reverse(allPlugins), 'id');
+  return uniqBy(reverse(allPlugins), 'id').filter(plugin =>
+    isSafePluginId(plugin.id),
+  );
 };
 
 const getPlugin = (pluginId: string) => {
