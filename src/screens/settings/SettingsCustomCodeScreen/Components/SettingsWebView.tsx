@@ -287,7 +287,6 @@ const SettingsWebView = () => {
                             <script src="${assetsUriPrefix}/js/core.js"></script>
                             <script src="${assetsUriPrefix}/js/index.js"></script>
                             <script>
-                            ${customJS}
                               async function fn(){
                                   let novelName = "${novel.name}";
                                   let chapterName = "${chapter.name}";
@@ -295,6 +294,8 @@ const SettingsWebView = () => {
                                   let chapterId =${chapter.id};
                                   let novelId =${chapter.novelId};
                                   let html = document.getElementById("LNReader-chapter").innerHTML;
+                                  ${customJS}
+                                  document.getElementById("LNReader-chapter").innerHTML = html;
                                 }
                                 document.addEventListener("DOMContentLoaded", fn);
                             </script>
