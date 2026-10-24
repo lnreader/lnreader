@@ -14,11 +14,14 @@ export enum BackupEntryName {
   PLUGIN_METADATA = 'Plugins.json',
   COVERS = 'Covers',
   NOVEL_AND_CHAPTERS = 'NovelAndChapters',
+  NOVEL_FILES = 'NovelFiles',
 }
 
 export type BackupManifest = {
   appVersion: string;
-  formatVersion: 2;
+  formatVersion: 2 | 3;
+  novelDataFormat?: 1 | 2;
+  novelCount?: number;
   sections: BackupOptions;
 };
 
@@ -27,5 +30,6 @@ export type ResolvedBackupManifest =
   | {
       appVersion?: string;
       formatVersion: 1;
+      novelDataFormat?: 1 | 2;
       sections: BackupOptions;
     };

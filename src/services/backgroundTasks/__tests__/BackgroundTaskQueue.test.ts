@@ -45,6 +45,8 @@ jest.mock('@i18n/translations', () => ({
       ? 'Download'
       : key === 'common.preparing'
       ? 'Preparing'
+      : key === 'backupScreen.restoreMayBePartial'
+      ? 'Changes already restored will remain if you pause, cancel, or the restore fails.'
       : 'Completed',
 }));
 
@@ -81,7 +83,7 @@ describe('BackgroundTaskQueue completion notifications', () => {
     );
   });
 
-  it('localizes failure text before handing it to the native notification', async () => {
+  it('appends the partial-restore warning to restore failure notifications', async () => {
     jest
       .mocked(executeBackgroundTask)
       .mockRejectedValueOnce(new Error('Invalid backup'));
@@ -91,7 +93,31 @@ describe('BackgroundTaskQueue completion notifications', () => {
     ).rejects.toThrow('Invalid backup');
     expect(NativeBackgroundTasks.fail).toHaveBeenCalledWith(
       'restore-2',
-      'Failed: Invalid backup',
+      'Failed: Invalid backup\nChanges already restored will remain if you pause, cancel, or the restore fails.',
+      false,
+    );
+  });
+
+  it('leaves unrelated task failure notifications unchanged', async () => {
+    const downloadTask = {
+      name: 'DOWNLOAD_CHAPTER' as const,
+      data: {
+        novelName: 'Example Novel',
+        novelId: 42,
+        pluginId: 'source-a',
+        chapters: [{ chapterId: 1, chapterName: 'Chapter 1' }],
+      },
+    };
+    jest
+      .mocked(executeBackgroundTask)
+      .mockRejectedValueOnce(new Error('Network unavailable'));
+
+    await expect(
+      new BackgroundTaskQueue().run('download-1', downloadTask),
+    ).rejects.toThrow('Network unavailable');
+    expect(NativeBackgroundTasks.fail).toHaveBeenCalledWith(
+      'download-1',
+      'Failed: Network unavailable',
       false,
     );
   });

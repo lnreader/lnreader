@@ -468,14 +468,24 @@ export const getNovelChapters = async (
  * a paginated UI query because doing so silently produces incomplete backups.
  */
 export const getAllNovelChaptersForBackup = async (
-  novelId: number,
-): Promise<ChapterInfo[]> =>
-  dbManager
+  novelIds: number | number[],
+): Promise<ChapterInfo[]> => {
+  const ids = Array.isArray(novelIds) ? novelIds : [novelIds];
+  if (ids.length === 0) {
+    return [];
+  }
+
+  return dbManager
     .select()
     .from(chapterSchema)
-    .where(eq(chapterSchema.novelId, novelId))
-    .orderBy(asc(chapterSchema.id))
+    .where(
+      Array.isArray(novelIds)
+        ? inArray(chapterSchema.novelId, ids)
+        : eq(chapterSchema.novelId, ids[0]),
+    )
+    .orderBy(asc(chapterSchema.novelId), asc(chapterSchema.id))
     .all();
+};
 
 export const getNovelChaptersSync = (
   novelId: number,
