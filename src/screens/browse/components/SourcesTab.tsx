@@ -21,6 +21,7 @@ import { getLocaleLanguageName } from '@utils/constants/languages';
 
 import DiscoverCard from '../discover/DiscoverCard';
 import { buildSourceEntries, SourceEntry } from '../utils/buildBrowseEntries';
+import { PluginIssueIndicator } from './PluginIssueIndicator';
 
 interface SourcesTabProps {
   navigation: BrowseScreenProps['navigation'];
@@ -74,6 +75,11 @@ const SourceRow = memo(
             {getLocaleLanguageName(plugin.lang)}
           </Text>
         </View>
+        <PluginIssueIndicator
+          pluginId={plugin.id}
+          pluginName={plugin.name}
+          theme={theme}
+        />
       </View>
       <Pressable
         accessibilityLabel={`${getString('browseScreen.latest')} ${

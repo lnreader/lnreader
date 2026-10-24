@@ -29,6 +29,7 @@ import {
   PluginEntry,
   PluginStatus,
 } from '../utils/buildBrowseEntries';
+import { PluginIssueIndicator } from './PluginIssueIndicator';
 
 interface PluginsTabProps {
   navigation: BrowseScreenProps['navigation'];
@@ -97,6 +98,11 @@ const PluginRow = memo(
               {`${getLocaleLanguageName(plugin.lang)} · ${plugin.version}`}
             </Text>
           </View>
+          <PluginIssueIndicator
+            pluginId={plugin.id}
+            pluginName={plugin.name}
+            theme={theme}
+          />
         </View>
         {status === 'available' ? (
           <IconButtonV2
