@@ -496,6 +496,112 @@ describe('ChapterQueries', () => {
       expect(chapters[0].chapterNumber).toBe(1);
       expect(chapters[0].chapterNumber).not.toBeNull();
     });
+
+    describe('library update (touchUpdatedTime)', () => {
+      const ISO = '2024-03-05T10:20:30.000Z';
+      const touch = { touchUpdatedTime: true };
+
+      it('fills an empty releaseTime without marking the chapter updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: '',
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('keeps the stored releaseTime when the incoming one is empty', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: ISO,
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: '' }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('does not mark position/page/chapterNumber changes as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 7,
+          position: 5,
+          page: '3',
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', chapterNumber: 1 }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.position).toBe(0);
+        expect(chapter.page).toBe('1');
+        expect(chapter.chapterNumber).toBe(1);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('marks only new and renamed chapters as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 1,
+          position: 0,
+        });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/2',
+          name: 'Chapter 2 🔒',
+          chapterNumber: 2,
+          position: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [
+            { path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO },
+            { path: '/chapter/2', name: 'Chapter 2' },
+            { path: '/chapter/3', name: 'Chapter 3' },
+          ],
+          touch,
+        );
+
+        const chapters = await getNovelChapters(novelId);
+        const updated = Object.fromEntries(
+          chapters.map(c => [c.path, c.updatedTime]),
+        );
+        expect(updated['/chapter/1']).toBeNull();
+        expect(updated['/chapter/2']).not.toBeNull();
+        expect(updated['/chapter/3']).not.toBeNull();
+      });
+    });
   });
 
   describe('deleteChapter', () => {
