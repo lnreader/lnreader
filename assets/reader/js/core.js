@@ -57,7 +57,31 @@ window.reader = new (function () {
     this.adjacentVersion.val++;
   };
   this.autoSaveInterval = autoSaveInterval;
-  this.rawHTML = this.chapterElement.innerHTML;
+
+  /**
+   * The chapters in the document, in reading order. Only infinite scrolling
+   * ever appends to it; `chapter` and `chapterElement` always point at the
+   * one being read.
+   */
+  this.segments = [
+    {
+      chapter,
+      element: this.chapterElement,
+      rawHTML: this.chapterElement.innerHTML,
+    },
+  ];
+  /**
+   * The segment of the document's own `#LNReader-chapter` element. Infinite
+   * scrolling can drop it from `segments`, but paged mode always lays out the
+   * current chapter in it.
+   */
+  this.hostSegment = this.segments[0];
+  Object.defineProperty(this, 'rawHTML', {
+    get: () => this.segments[0].rawHTML,
+    set: value => {
+      this.segments[0].rawHTML = value;
+    },
+  });
 
   //layout props
   this.paddingTop = parseInt(
@@ -66,6 +90,8 @@ window.reader = new (function () {
     ),
     10,
   );
+  /** Document offset the current chapter starts at, in scroll mode. */
+  this.chapterTop = 0;
   this.chapterHeight = this.chapterElement.scrollHeight + this.paddingTop;
   this.layoutHeight = window.innerHeight;
   this.layoutWidth = window.innerWidth;
@@ -74,6 +100,26 @@ window.reader = new (function () {
   this.chapterEndingVisible = van.state(false);
 
   this.post = obj => window.ReactNativeWebView.postMessage(JSON.stringify(obj));
+
+  /** Document offset each chapter ends at, in scroll mode. */
+  this.chapterEnds = () =>
+    this.segments.map(segment =>
+      segment === this.hostSegment
+        ? this.paddingTop + segment.element.scrollHeight
+        : segment.element.getBoundingClientRect().bottom + window.scrollY,
+    );
+
+  this.measureChapter = (ends = this.chapterEnds()) => {
+    const index = Math.max(
+      0,
+      this.segments.findIndex(
+        segment => segment.element === this.chapterElement,
+      ),
+    );
+    this.chapterTop = index > 0 ? ends[index - 1] : 0;
+    this.chapterHeight = ends[index] - this.chapterTop;
+  };
+
   this.refresh = () => {
     this.layoutHeight = window.innerHeight;
     this.layoutWidth = window.innerWidth;
@@ -84,7 +130,7 @@ window.reader = new (function () {
     if (this.generalSettings.val.pageReader) {
       this.chapterWidth = this.chapterElement.scrollWidth;
     } else {
-      this.chapterHeight = this.chapterElement.scrollHeight + this.paddingTop;
+      this.measureChapter();
     }
   };
 
@@ -141,10 +187,15 @@ window.reader = new (function () {
   document.onscrollend = () => {
     onUserInteraction();
     if (!this.generalSettings.val.pageReader) {
+      window.continuousScroll.update();
+      window.continuousScroll.trim();
       this.post({
         type: 'save',
+        chapterId: this.chapter.id,
         data: parseInt(
-          ((window.scrollY + this.layoutHeight) / this.chapterHeight) * 100,
+          ((window.scrollY + this.layoutHeight - this.chapterTop) /
+            this.chapterHeight) *
+            100,
           10,
         ),
       });
@@ -627,6 +678,7 @@ window.pageReader = pageReader = new (function () {
       reader.chapter.progress = newProgress;
       reader.post({
         type: 'save',
+        chapterId: reader.chapter.id,
         data: newProgress,
       });
     }
@@ -681,8 +733,10 @@ window.pageReader = pageReader = new (function () {
     if (reader.generalSettings.val.pageReader) {
       const ratio = Math.min(
         0.99,
-        (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
+        (window.scrollY + reader.layoutHeight - reader.chapterTop) /
+          reader.chapterHeight,
       );
+      window.continuousScroll.collapse();
       document.body.classList.add('page-reader');
       requestAnimationFrame(() => this.repaginate(ratio));
     } else {
@@ -720,6 +774,224 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/**
+ * Infinite scrolling. When the end of the last chapter in the document comes
+ * close, the app is asked for the chapter after it, which is appended below so
+ * reading carries on without leaving the page. Whichever chapter reaches the
+ * top of the screen becomes the current one for progress, history and the
+ * header. Only the chapter before the current one is kept above it, so a long
+ * session does not keep growing the document.
+ */
+window.continuousScroll = new (function () {
+  /** Chapters kept above the current one; older ones are dropped. */
+  const KEEP_BEHIND = 1;
+  /** 'idle' | 'loading' | 'error' | 'end' */
+  this.status = van.state('idle');
+  this.errorMessage = '';
+  this.activeIndex = 0;
+
+  const enabled = () =>
+    Boolean(reader.generalSettings.val.infiniteScroll) &&
+    !reader.generalSettings.val.pageReader;
+
+  const activate = index => {
+    if (index === this.activeIndex) {
+      return;
+    }
+    // Scrolling down past the end of a chapter means it has been read; the
+    // scroll that crossed it may never have reported its last screen.
+    for (let i = this.activeIndex; i < index; i++) {
+      reader.post({
+        type: 'save',
+        chapterId: reader.segments[i].chapter.id,
+        data: 100,
+      });
+    }
+    this.activeIndex = index;
+    const segment = reader.segments[index];
+    reader.chapter = segment.chapter;
+    reader.chapterElement = segment.element;
+    if (tts.started) {
+      tts.reset();
+    }
+    window.readerSearch?.clear(false);
+    reader.post({ type: 'chapter-change', chapterId: segment.chapter.id });
+  };
+
+  this.update = () => {
+    if (reader.generalSettings.val.pageReader) {
+      return;
+    }
+    const loadNext = enabled() && this.status.val === 'idle';
+    if (reader.segments.length < 2 && !loadNext) {
+      return;
+    }
+    const ends = reader.chapterEnds();
+    if (reader.segments.length > 1) {
+      const atBottom =
+        window.scrollY + reader.layoutHeight >=
+        document.documentElement.scrollHeight - 1;
+      let index = reader.segments.length - 1;
+      // A chapter shorter than the screen never reaches the top of it, so the
+      // last one is current once the page cannot scroll any further.
+      if (!atBottom) {
+        while (index > 0 && ends[index - 1] > window.scrollY + 1) {
+          index--;
+        }
+      }
+      activate(index);
+      reader.measureChapter(ends);
+    }
+
+    if (!loadNext) {
+      return;
+    }
+    // Requested while about two screens are still left to read, so the next
+    // chapter is usually in place before the reader gets there.
+    if (window.scrollY + reader.layoutHeight * 3 < ends[ends.length - 1]) {
+      return;
+    }
+    this.status.val = 'loading';
+    reader.post({
+      type: 'continuous-next',
+      chapterId: reader.segments[reader.segments.length - 1].chapter.id,
+    });
+  };
+
+  /**
+   * Whether an answer from the app is for the request still outstanding. The
+   * document can change in the meantime, for example by switching to paged
+   * mode, which keeps only the current chapter.
+   */
+  const isAwaited = afterChapterId =>
+    this.status.val === 'loading' &&
+    !reader.generalSettings.val.pageReader &&
+    reader.segments[reader.segments.length - 1].chapter.id === afterChapterId;
+
+  this.append = ({ afterChapterId, chapter, html }) => {
+    if (!isAwaited(afterChapterId)) {
+      return;
+    }
+    const divider = document.createElement('div');
+    divider.className = 'continuous-chapter-divider';
+    divider.textContent = chapter.name;
+    const element = document.createElement('div');
+    element.className = 'LNReader-chapter-continued';
+    element.dataset.chapterId = chapter.id;
+
+    const segment = { chapter, element, divider, rawHTML: html };
+    reader.renderChapterHTML(segment);
+    const readerUI = document.getElementById('reader-ui');
+    document.body.insertBefore(divider, readerUI);
+    document.body.insertBefore(element, readerUI);
+    try {
+      window.fn?.(element);
+    } catch (e) {
+      console.error(e);
+    }
+    reader.attachChapterGestures(element);
+    reader.segments.push(segment);
+
+    this.status.val = 'idle';
+    // A short chapter can leave the end close enough to need the next one.
+    requestAnimationFrame(() => this.update());
+  };
+
+  this.end = afterChapterId => {
+    if (isAwaited(afterChapterId)) {
+      this.status.val = 'end';
+    }
+  };
+
+  this.fail = (afterChapterId, message) => {
+    if (isAwaited(afterChapterId)) {
+      this.errorMessage = message || '';
+      this.status.val = 'error';
+    }
+  };
+
+  this.retry = () => {
+    this.status.val = 'idle';
+    this.update();
+  };
+
+  /**
+   * Drops the chapters more than `KEEP_BEHIND` above the current one. Called
+   * once scrolling has settled, and the scroll position is corrected so the
+   * text on screen does not move.
+   */
+  this.trim = () => {
+    const excess = this.activeIndex - KEEP_BEHIND;
+    if (excess <= 0 || reader.generalSettings.val.pageReader) {
+      return;
+    }
+    const anchor = reader.segments[this.activeIndex].element;
+    const anchorTop = anchor.getBoundingClientRect().top;
+    const dropped = reader.segments.splice(0, excess);
+    for (const segment of dropped) {
+      if (segment === reader.hostSegment) {
+        segment.element.innerHTML = '';
+        segment.appliedHTML = '';
+        segment.element.style.display = 'none';
+      } else {
+        segment.divider.remove();
+        segment.element.remove();
+      }
+    }
+    this.activeIndex -= excess;
+    window.scrollTo({
+      top: window.scrollY + anchor.getBoundingClientRect().top - anchorTop,
+      behavior: 'instant',
+    });
+    reader.measureChapter();
+    reader.post({
+      type: 'chapters-dropped',
+      data: dropped.map(segment => segment.chapter.id),
+    });
+  };
+
+  /** Paged mode lays out the current chapter alone, in the host element. */
+  this.collapse = () => {
+    // A request still outstanding is answered in paged mode and ignored, so it
+    // must not block the next one once scroll mode is back.
+    this.status.val = 'idle';
+    const host = reader.hostSegment;
+    const current = reader.segments[this.activeIndex];
+    if (reader.segments.length === 1 && current === host) {
+      return;
+    }
+    if (current !== host) {
+      host.element.innerHTML = current.element.innerHTML;
+      host.chapter = current.chapter;
+      host.rawHTML = current.rawHTML;
+      host.appliedHTML = current.appliedHTML;
+    }
+    host.element.style.removeProperty('display');
+    document
+      .querySelectorAll(
+        '.continuous-chapter-divider, .LNReader-chapter-continued',
+      )
+      .forEach(element => element.remove());
+    reader.segments = [host];
+    reader.chapter = host.chapter;
+    reader.chapterElement = host.element;
+    this.activeIndex = 0;
+    reader.refresh();
+  };
+
+  van.derive(() => {
+    // Turned on at the end of a chapter there is nothing left to scroll, which
+    // is otherwise what asks for the next chapter.
+    if (reader.generalSettings.val.infiniteScroll) {
+      requestAnimationFrame(() => this.update());
+    }
+  });
+
+  // The document can be rebuilt (for example after a theme change) while a
+  // later chapter is current, so tell the app which chapter this one shows.
+  reader.post({ type: 'chapter-change', chapterId: reader.chapter.id });
+})();
+
 /** Scroll offset the reading position was restored to, in scroll mode. */
 let restoredScrollTop = null;
 let positionRestored = false;
@@ -731,6 +1003,7 @@ function calculatePages(behavior = 'instant') {
     pageReader.repaginate(reader.chapter.progress / 100);
   } else {
     restoredScrollTop =
+      reader.chapterTop +
       (reader.chapterHeight * reader.chapter.progress) / 100 -
       reader.layoutHeight;
     window.scrollTo({ top: restoredScrollTop, behavior });
@@ -808,6 +1081,9 @@ const restoreReadingPosition = () => {
     setTimeout(() => {
       positionRestored = true;
       calculatePages();
+      // A chapter that fits on one screen never scrolls, which is otherwise
+      // what asks for the next chapter.
+      window.continuousScroll.update();
       // Deliberately not awaited before restoring: `document.fonts.ready` does
       // not resolve until the document has finished loading, which is what this
       // is trying to avoid waiting for.
@@ -908,12 +1184,12 @@ window.addEventListener('load', () => {
   this.initialX = null;
   this.initialY = null;
 
-  reader.chapterElement.addEventListener('touchstart', e => {
+  const onTouchStart = e => {
     this.initialX = e.changedTouches[0].screenX;
     this.initialY = e.changedTouches[0].screenY;
-  });
+  };
 
-  reader.chapterElement.addEventListener('touchmove', e => {
+  const onTouchMove = e => {
     if (reader.generalSettings.val.pageReader) {
       const diffX =
         (e.changedTouches[0].screenX - this.initialX) / reader.layoutWidth;
@@ -921,9 +1197,9 @@ window.addEventListener('load', () => {
       reader.chapterElement.style.transform =
         'translateX(-' + (pageReader.page.val - diffX) * 100 + '%)';
     }
-  });
+  };
 
-  reader.chapterElement.addEventListener('touchend', e => {
+  const onTouchEnd = e => {
     const diffX = e.changedTouches[0].screenX - this.initialX;
     const diffY = e.changedTouches[0].screenY - this.initialY;
     if (reader.generalSettings.val.pageReader) {
@@ -973,24 +1249,25 @@ window.addEventListener('load', () => {
         reader.post({ type: 'prev' });
       }
     }
-  });
+  };
+
+  reader.attachChapterGestures = element => {
+    element.addEventListener('touchstart', onTouchStart);
+    element.addEventListener('touchmove', onTouchMove);
+    element.addEventListener('touchend', onTouchEnd);
+  };
+  reader.attachChapterGestures(reader.chapterElement);
 })();
 
 // text options
 (function () {
-  // What the chapter element currently holds. The document is delivered with
-  // the untransformed chapter already parsed, so writing the same markup back
-  // would re-parse and re-layout the whole chapter (and restart image loads)
-  // for nothing - which is exactly what happens when neither transform is on.
-  let appliedHTML = reader.rawHTML;
-
-  van.derive(() => {
-    let html = reader.rawHTML;
-    if (reader.generalSettings.val.bionicReading) {
-      html = textVide.textVide(reader.rawHTML);
+  const transformHTML = (rawHTML, settings) => {
+    let html = rawHTML;
+    if (settings.bionicReading) {
+      html = textVide.textVide(rawHTML);
     }
 
-    if (reader.generalSettings.val.removeExtraParagraphSpacing) {
+    if (settings.removeExtraParagraphSpacing) {
       html = html
         .replace(/(?:&nbsp;\s*|[\u200b]\s*)+(?=<\/?p[> ])/g, '')
         .replace(/<br>\s*<br>\s*(?:<br>\s*)+/g, '<br><br>') //force max 2 consecutive <br>, chaining regex
@@ -1011,12 +1288,41 @@ window.addEventListener('load', () => {
           '',
         );
     }
-    if (html === appliedHTML) {
+    return html;
+  };
+
+  /**
+   * Writes a chapter's transformed markup into its element. `appliedHTML` is
+   * what the element currently holds: the document is delivered with the
+   * untransformed chapter already parsed, so writing the same markup back
+   * would re-parse and re-layout the whole chapter (and restart image loads)
+   * for nothing - which is exactly what happens when neither transform is on.
+   */
+  reader.renderChapterHTML = (
+    segment,
+    settings = reader.generalSettings.val,
+  ) => {
+    const html = transformHTML(segment.rawHTML, settings);
+    if (html === segment.appliedHTML) {
+      return false;
+    }
+    segment.element.innerHTML = html;
+    segment.appliedHTML = html;
+    return true;
+  };
+
+  reader.segments[0].appliedHTML = reader.segments[0].rawHTML;
+
+  van.derive(() => {
+    const settings = reader.generalSettings.val;
+    let changed = false;
+    for (const segment of reader.segments) {
+      changed = reader.renderChapterHTML(segment, settings) || changed;
+    }
+    if (!changed) {
       return;
     }
 
-    reader.chapterElement.innerHTML = html;
-    appliedHTML = html;
     reader.refresh();
     schedulePageCalculation();
 

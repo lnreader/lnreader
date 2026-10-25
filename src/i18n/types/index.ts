@@ -566,6 +566,8 @@ export interface StringMap {
   'readerScreen.bottomSheet.padding': 'string';
   'readerScreen.bottomSheet.pageReader': 'string';
   'readerScreen.bottomSheet.pageReaderDescription': 'string';
+  'readerScreen.bottomSheet.infiniteScroll': 'string';
+  'readerScreen.bottomSheet.infiniteScrollDescription': 'string';
   'readerScreen.bottomSheet.invertVolumeButtons': 'string';
   'readerScreen.bottomSheet.invertVolumeButtonsDescription': 'string';
   'readerScreen.bottomSheet.disablePageTransitions': 'string';
@@ -595,7 +597,9 @@ export interface StringMap {
   'readerScreen.drawer.scrollToTop': 'string';
   'readerScreen.emptyChapterMessage': 'string';
   'readerScreen.finished': 'string';
+  'readerScreen.loadingNextChapter': 'string';
   'readerScreen.nextChapter': 'string';
+  'readerScreen.nextChapterLoadFailed': 'string';
   'readerScreen.noNextChapter': 'string';
   'readerScreen.noPreviousChapter': 'string';
   'readerScreen.searchMinLength': 'string';

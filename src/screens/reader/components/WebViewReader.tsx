@@ -37,10 +37,12 @@ import {
   isChapterRefreshUrl,
   isPluginIssueReportUrl,
 } from '../utils/sanitizeChapterText';
+import { applyTextModifications } from '@utils/customCode';
 
 export type WebViewPostEvent = {
   type: string;
   data?: unknown;
+  chapterId?: number;
   autoStartTTS?: boolean;
   index?: number;
   total?: number;
@@ -95,6 +97,7 @@ const toNativeTtsSettings = (
  * rebuilding the HTML would reload the WebView and lose the reading position.
  */
 const buildAdjacentChapterScript = (
+  chapterName?: string,
   nextChapter?: ChapterInfo,
   prevChapter?: ChapterInfo,
 ) => `
@@ -102,6 +105,12 @@ const buildAdjacentChapterScript = (
     nextChapter,
     prevChapter,
     strings: {
+      // Infinite scrolling changes the chapter being read without rebuilding
+      // the document the original string was baked into.
+      ...(chapterName && {
+        finished:
+          getString('readerScreen.finished') + ': ' + chapterName.trim(),
+      }),
       nextChapter: getString('readerScreen.nextChapter', {
         name: nextChapter?.name,
       }),
@@ -133,9 +142,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const {
     novel,
     chapter,
+    documentChapter,
     chapterText: html,
     navigateChapter,
     saveProgress,
+    activateChapter,
+    loadChapterAfter,
+    getRebuildTarget,
+    dropChapters,
     nextChapter,
     prevChapter,
     webViewRef,
@@ -149,7 +163,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       ...initialChapterReaderSettings,
       ...getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS),
     }), // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
+    [documentChapter.id],
   );
 
   const chapterGeneralSettings = useMemo(
@@ -159,7 +173,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     }),
     // needed to preserve settings during chapter change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
+    [documentChapter.id],
   );
 
   const [batteryLevel] = useState(lastKnownBatteryLevel);
@@ -233,12 +247,16 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   }, [chapter.id, runTtsCommand]);
 
   useEffect(() => {
-    const script = buildAdjacentChapterScript(nextChapter, prevChapter);
+    const script = buildAdjacentChapterScript(
+      chapter.name,
+      nextChapter,
+      prevChapter,
+    );
     // Kept for onLoadEnd: an update that lands before the document is ready is
     // dropped by the WebView, so it is replayed once the page has loaded.
     adjacentChapterScriptRef.current = script;
     webViewRef.current?.injectJavaScript(script);
-  }, [nextChapter, prevChapter, webViewRef]);
+  }, [chapter.name, nextChapter, prevChapter, webViewRef]);
 
   useEffect(() => {
     const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
@@ -315,8 +333,21 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const source = useMemo(() => {
     // eslint-disable-next-line react-hooks/refs
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
+    const rebuildTarget = getRebuildTarget();
+    const sourceChapter = rebuildTarget?.chapter ?? documentChapter;
+    const sourceHtml =
+      !rebuildTarget || rebuildTarget.chapter.id === documentChapter.id
+        ? processedHtml
+        : applyTextModifications(
+            rebuildTarget.html,
+            // Latest settings are read from the ref on purpose so a settings change does not rebuild the reader document.
+            // eslint-disable-next-line react-hooks/refs
+            readerSettingsRef.current.removeText,
+            // eslint-disable-next-line react-hooks/refs
+            readerSettingsRef.current.replaceText,
+          );
     return {
-      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
+      baseUrl: !sourceChapter.isDownloaded ? plugin?.site : undefined,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
       body: plugin?.imageRequestInit?.body,
@@ -383,9 +414,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   : 'translateX(0%)'
               };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
-              ">${chapter.name}</div>
+              ">${sourceChapter.name}</div>
               <div id="LNReader-chapter">
-                ${processedHtml}
+                ${sourceHtml}
               </div>
               <div id="reader-ui"></div>
               </body>
@@ -399,7 +430,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   readerSettings: initialReaderSettings,
                   chapterGeneralSettings,
                   novel,
-                  chapter,
+                  chapter: sourceChapter,
                   batteryLevel,
                   autoSaveInterval: 2222,
                   DEBUG: __DEV__,
@@ -407,8 +438,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                     finished:
                       getString('readerScreen.finished') +
                       ': ' +
-                      chapter.name.trim(),
+                      sourceChapter.name.trim(),
                     noNextChapter: getString('readerScreen.noNextChapter'),
+                    loadingNextChapter: getString(
+                      'readerScreen.loadingNextChapter',
+                    ),
+                    nextChapterLoadFailed: getString(
+                      'readerScreen.nextChapterLoadFailed',
+                    ),
+                    retry: getString('common.retry'),
                     removeText: getString('common.remove'),
                     replaceText: getString('customCodeSettings.replace'),
                   },
@@ -424,19 +462,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/textRemover.js"></script>
               <script src="${pluginCustomJS}"></script>
               <script id="ln-custom-js">
-              function fn(){
-                let html = document.querySelector('#LNReader-chapter').innerHTML;
+              function fn(lnTarget = document.querySelector('#LNReader-chapter')){
+                let html = lnTarget.innerHTML;
                 ${customJS}
-                document.querySelector('#LNReader-chapter').innerHTML = html;
+                lnTarget.innerHTML = html;
               }
-              document.addEventListener('DOMContentLoaded', fn);
+              document.addEventListener('DOMContentLoaded', () => fn());
               </script>
           </html>
           `,
     };
   }, [
     batteryLevel,
-    chapter,
+    documentChapter,
+    getRebuildTarget,
     chapterGeneralSettings,
     processedHtml,
     customJS,
@@ -449,6 +488,43 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     readerDir,
     theme,
   ]);
+
+  const sourceRef = useRef(source);
+  useEffect(() => {
+    sourceRef.current = source;
+  }, [source]);
+
+  /**
+   * Answers infinite scrolling's request for the chapter after `chapterId`.
+   * The answer is dropped if the document was rebuilt in the meantime.
+   */
+  const appendChapterAfter = async (chapterId: number) => {
+    const requestSource = sourceRef.current;
+    const inject = (call: string, ...args: unknown[]) => {
+      if (sourceRef.current === requestSource) {
+        webViewRef.current?.injectJavaScript(
+          `window.continuousScroll?.${call}(${args
+            .map(arg => JSON.stringify(arg))
+            .join(', ')}); true;`,
+        );
+      }
+    };
+    try {
+      const next = await loadChapterAfter(chapterId);
+      if (!next) {
+        inject('end', chapterId);
+        return;
+      }
+      const { removeText, replaceText } = readerSettingsRef.current;
+      inject('append', {
+        afterChapterId: chapterId,
+        chapter: next.chapter,
+        html: applyTextModifications(next.html, removeText, replaceText),
+      });
+    } catch (e) {
+      inject('fail', chapterId, e instanceof Error ? e.message : String(e));
+    }
+  };
 
   return (
     <>
@@ -583,7 +659,26 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               break;
             case 'save':
               if (event.data && typeof event.data === 'number') {
-                saveProgress(event.data);
+                saveProgress(event.data, event.chapterId);
+              }
+              break;
+            case 'chapter-change':
+              if (typeof event.chapterId === 'number') {
+                activateChapter(event.chapterId);
+              }
+              break;
+            case 'continuous-next':
+              if (typeof event.chapterId === 'number') {
+                void appendChapterAfter(event.chapterId);
+              }
+              break;
+            case 'chapters-dropped':
+              if (Array.isArray(event.data)) {
+                dropChapters(
+                  event.data.filter(
+                    (id): id is number => typeof id === 'number',
+                  ),
+                );
               }
               break;
             case 'text-action':
