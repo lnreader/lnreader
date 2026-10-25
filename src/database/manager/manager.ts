@@ -1,5 +1,9 @@
 import type { drizzleDb } from '@database/db';
-import type { SQLBatchTuple, Scalar } from '@op-engineering/op-sqlite';
+import type {
+  SQLBatchTuple,
+  Scalar,
+  Transaction,
+} from '@op-engineering/op-sqlite';
 import { IDbManager } from './manager.d';
 import { DbTaskQueue } from './queue';
 import { Schema } from '../schema';
@@ -130,6 +134,21 @@ class DbManager implements IDbManager {
           this.db.$client?.flushPendingReactiveQueries();
           return result;
         }),
+    });
+  }
+
+  public async writeRaw<T>(fn: (tx: Transaction) => Promise<T>): Promise<T> {
+    return await this.queue.enqueue({
+      id: 'write',
+      run: async () => {
+        let result!: T;
+        // Drizzle's op-sqlite transaction issues COMMIT without awaiting an
+        // async body; op-sqlite's own transaction awaits it before COMMIT.
+        await this.db.$client.transaction(async (tx: Transaction) => {
+          result = await fn(tx);
+        });
+        return result;
+      },
     });
   }
 }
