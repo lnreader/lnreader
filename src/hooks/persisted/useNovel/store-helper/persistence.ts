@@ -45,6 +45,13 @@ const isValidNovelSettings = (value: unknown): value is NovelSettings => {
   if (!value.filter.every(filter => typeof filter === 'string')) return false;
   if (value.sort !== undefined && typeof value.sort !== 'string') return false;
   if (
+    value.chapterTextFilters !== undefined &&
+    (!Array.isArray(value.chapterTextFilters) ||
+      !value.chapterTextFilters.every(text => typeof text === 'string'))
+  ) {
+    return false;
+  }
+  if (
     value.showChapterTitles !== undefined &&
     typeof value.showChapterTitles !== 'boolean'
   ) {

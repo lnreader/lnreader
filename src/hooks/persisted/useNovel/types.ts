@@ -17,6 +17,7 @@ export interface NovelSettingsWithoutSort {
   showChapterTitles: boolean;
   sort?: ChapterOrderKey;
   excludedScanlators?: string[];
+  chapterTextFilters?: string[];
 }
 export interface NovelSettings extends NovelSettingsWithoutSort {
   sort: ChapterOrderKey;

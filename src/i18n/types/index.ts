@@ -546,6 +546,9 @@ export interface StringMap {
   'novelScreen.unknownStatus': 'string';
   'novelScreen.updatedToast': 'string';
   'readerScreen.bottomSheet.alignCenter': 'string';
+  'readerScreen.bottomSheet.chapterTextFilters': 'string';
+  'readerScreen.bottomSheet.chapterTextFiltersDescription': 'string';
+  'readerScreen.bottomSheet.filterText': 'string';
   'readerScreen.bottomSheet.alignJustify': 'string';
   'readerScreen.bottomSheet.alignLeft': 'string';
   'readerScreen.bottomSheet.alignRight': 'string';
