@@ -1,5 +1,6 @@
 import { getString } from '@i18n/translations';
 import sanitizeHtml from 'sanitize-html';
+import { sanitizeChapter, type SanitizeOptions } from './sanitizer';
 
 const PLUGIN_ISSUE_REPORT_URL =
   'https://github.com/lnreader/lnreader-plugins/issues/new';
@@ -106,8 +107,14 @@ export const sanitizeChapterText = (
   novelName: string,
   chapterName: string,
   html: string,
+  options?: SanitizeOptions,
 ): string => {
-  const text = sanitizeHtml(html, sanitizeOptions);
+  // 1. Pre-clean: strip invisible honeypots, deduplicate clone paragraphs,
+  // and coalesce fragmented inline spans while style and DOM structure are intact.
+  const { cleanHtml } = sanitizeChapter(html, options);
+
+  // 2. Next, sanitize HTML tags with the existing allowedTags/allowedAttributes whitelist
+  const text = sanitizeHtml(cleanHtml, sanitizeOptions);
 
   return (
     text ||

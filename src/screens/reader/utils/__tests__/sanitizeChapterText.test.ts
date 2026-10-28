@@ -80,6 +80,47 @@ describe('sanitizeChapterText', () => {
     );
     expect(result).toContain(CHAPTER_REFRESH_URL);
   });
+
+  it('strips elements with display:none and honeypot classes', () => {
+    const raw = `
+      <p>Sunny entered the stone pavilion.</p>
+      <p style="display:none">Hidden honeypot paragraph</p>
+      <div style="font-size:0px">Zero font size trap</div>
+      <p class="tts-trap">Screen scraper honeypot</p>
+      <p>The shadows danced around the pillars.</p>
+    `;
+
+    const result = sanitizeChapterText('plugin.test', 'Novel', 'Ch 1', raw);
+    expect(result).toContain('Sunny entered the stone pavilion.');
+    expect(result).toContain('The shadows danced around the pillars.');
+    expect(result).not.toContain('Hidden honeypot paragraph');
+    expect(result).not.toContain('Zero font size trap');
+    expect(result).not.toContain('Screen scraper honeypot');
+  });
+
+  it('deduplicates adjacent clone paragraphs (fixes TTS double-reading)', () => {
+    const raw = `
+      <p>He drew his blade quietly from the sheath.</p>
+      <p>He drew his blade quietly from the sheath.</p>
+      <p>The monster snarled in the darkness.</p>
+    `;
+
+    const result = sanitizeChapterText('plugin.test', 'Novel', 'Ch 1', raw);
+    const count = (result.match(/He drew his blade quietly/g) || []).length;
+    expect(count).toBe(1);
+    expect(result).toContain('The monster snarled in the darkness.');
+  });
+
+  it('unwraps fragmented spans and strips zero-width spaces for TTS', () => {
+    const raw = `
+      <p><span>T\u200Bh\u200Be</span> <span>flame</span> <span>b\uFEFFurned</span> <span>brightly.</span></p>
+    `;
+
+    const result = sanitizeChapterText('plugin.test', 'Novel', 'Ch 1', raw);
+    expect(result).not.toContain('\u200B');
+    expect(result).not.toContain('\uFEFF');
+    expect(result).toContain('The flame burned brightly.');
+  });
 });
 
 describe('isPluginIssueReportUrl', () => {
