@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 import { getString } from '@i18n/translations';
 import {
   SimpleCodeEditor,
@@ -63,6 +64,7 @@ const CodeInput = ({
   scrollSink,
 }: CodeInputProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const codeFieldStyle = React.useMemo(
     () => ({
       color: theme.onBackground,
@@ -109,7 +111,7 @@ const CodeInput = ({
             maxHeight: error ? 35 : 0,
             padding: error ? 8 : 0,
             transitionProperty: ['maxHeight', 'padding'],
-            transitionDuration: '150ms',
+            transitionDuration: reduceAppAnimations ? '0ms' : '150ms',
           },
         ]}
       >

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View, Appearance } from 'react-native';
+import { ScrollView, StyleSheet, View, Appearance, Alert } from 'react-native';
 
 import { ThemePicker } from '@components/ThemePicker/ThemePicker';
 import type { SegmentedControlOption } from '@components/SegmentedControl';
@@ -9,6 +9,7 @@ import LanguagePickerModal from './LanguagePickerModal';
 import DateFormatModal from './DateFormatModal';
 
 import { useAppSettings, useTheme } from '@hooks/persisted';
+import { useEPaperOptimizations } from '@hooks/persisted/useEPaperOptimizations';
 import {
   useMMKVBoolean,
   useMMKVNumber,
@@ -17,7 +18,7 @@ import {
 import { Appbar, List, SafeAreaView, SegmentedControl } from '@components';
 import { AppearanceSettingsScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
-import { darkThemes, lightThemes } from '@theme/md3';
+import { darkThemes, lightThemes, E_PAPER_THEME_ID } from '@theme/md3';
 import {
   DYNAMIC_THEME_ID,
   getSystemDynamicTheme,
@@ -51,6 +52,11 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
     relativeTimestamps = true,
     setAppSettings,
   } = useAppSettings();
+  const {
+    ePaperOptimizations,
+    applyEPaperOptimizations,
+    disableEPaperOptimizations,
+  } = useEPaperOptimizations();
 
   const colorScheme = Appearance.getColorScheme() ?? 'light';
   const actualThemeMode: Exclude<ThemeMode, 'system'> =
@@ -160,9 +166,52 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
     setThemeMode(mode);
   };
 
-  const handleThemeSelect = (selectedTheme: ThemeColors) => {
+  const selectTheme = (selectedTheme: ThemeColors) => {
     setThemeId(selectedTheme.id);
     setCustomAccentColor(undefined);
+  };
+
+  const handleThemeSelect = (selectedTheme: ThemeColors) => {
+    if (selectedTheme.id === E_PAPER_THEME_ID) {
+      selectTheme(selectedTheme);
+      if (!ePaperOptimizations) {
+        Alert.alert(
+          getString('appearanceScreen.ePaperApplyTitle'),
+          getString('appearanceScreen.ePaperApplyDescription'),
+          [
+            { text: getString('appearanceScreen.ePaperThemeOnly') },
+            {
+              text: getString('appearanceScreen.ePaperApply'),
+              onPress: applyEPaperOptimizations,
+            },
+          ],
+        );
+      }
+      return;
+    }
+
+    if (theme.id === E_PAPER_THEME_ID && ePaperOptimizations) {
+      Alert.alert(
+        getString('appearanceScreen.ePaperLeaveTitle'),
+        getString('appearanceScreen.ePaperLeaveDescription'),
+        [
+          {
+            text: getString('appearanceScreen.ePaperKeep'),
+            onPress: () => selectTheme(selectedTheme),
+          },
+          {
+            text: getString('appearanceScreen.ePaperRestore'),
+            onPress: () => {
+              disableEPaperOptimizations();
+              selectTheme(selectedTheme);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    selectTheme(selectedTheme);
   };
 
   return (

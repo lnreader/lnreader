@@ -54,6 +54,14 @@
     },
     "appLanguageDefault": "Default",
     "appTheme": "App theme",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "Dark Theme",
     "dateFormat": "Date format",
     "dateFormatDefault": "Default (%{date})",
@@ -82,7 +90,8 @@
       "turquoise": "Turquoise",
       "yotsuba": "Yotsuba",
       "catppuccin": "Catppuccin",
-      "yinyang": "Yin & Yang"
+      "yinyang": "Yin & Yang",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -420,6 +429,8 @@
     "desc": "(Descending)",
     "disableLoadingAnimations": "Disable loading animations",
     "disableLoadingAnimationsDesc": "May improve performance on slower devices",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "Disable haptic feedback",
     "disableHapticFeedbackDescription": "Turn off vibrations for touch interactions.",
     "chapterDownloadCooldown": "Chapter download cooldown",
@@ -670,8 +681,8 @@
       "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
-      "disablePageTransitions": "Disable page transition animation",
-      "disablePageTransitionsDescription": "Turn pages instantly without slide animation",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "Remove extra spacing",
       "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "Scroll amount (screen height by default)",
@@ -782,6 +793,7 @@
   "onboardingScreen": {
     "welcome": "Welcome",
     "pickATheme": "Pick a theme",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "Light",
     "dark": "Dark",
     "system": "System",

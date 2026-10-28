@@ -35,6 +35,7 @@ jest.mock('@i18n/translations', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTracker: () => ({ tracker: undefined }),
   useTrackedNovel: () => ({ trackedNovel: undefined }),
   useTheme: () =>

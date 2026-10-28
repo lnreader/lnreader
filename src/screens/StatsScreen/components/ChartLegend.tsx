@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ThemeColors } from '@theme/types';
 import Animated from 'react-native-reanimated';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 
 export interface ChartLegendEntry {
   key: string;
@@ -23,6 +24,7 @@ const ChartLegend: React.FC<ChartLegendProps> = ({
   onEntryPress,
   theme,
 }) => {
+  const { reduceAppAnimations = false } = useAppSettings();
   const total = entries.reduce((sum, entry) => sum + entry.value, 0);
 
   return (
@@ -45,7 +47,7 @@ const ChartLegend: React.FC<ChartLegendProps> = ({
                   height: isHighlighted ? 16 : 12,
                   marginLeft: isHighlighted ? 0 : 2,
                   marginRight: isHighlighted ? 6 : 8,
-                  transitionDuration: '150ms',
+                  transitionDuration: reduceAppAnimations ? '0ms' : '150ms',
                   transitionProperty: 'all',
                   borderColor: theme.onSurface,
                 },

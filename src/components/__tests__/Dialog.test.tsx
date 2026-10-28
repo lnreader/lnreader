@@ -5,18 +5,22 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { Modal } from 'react-native';
 
 import { Dialog } from '../Dialog';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const mockUseTheme = jest.fn();
+const mockUseAppSettings = jest.fn();
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => mockUseAppSettings(),
   useTheme: () => mockUseTheme(),
 }));
 
 describe('Dialog', () => {
   beforeEach(() => {
+    mockUseAppSettings.mockReturnValue({ reduceAppAnimations: false });
     mockUseTheme.mockReturnValue({
       error: '#ba1a1a',
       onSurface: '#1d1b20',
@@ -28,6 +32,18 @@ describe('Dialog', () => {
       surfaceContainerHigh: '#ece6f0',
       surface2: '#f7f2fa',
     });
+  });
+
+  it('disables the modal fade when interface motion is off', () => {
+    mockUseAppSettings.mockReturnValue({ reduceAppAnimations: true });
+
+    render(
+      <Dialog.Root visible onDismiss={() => {}}>
+        <Dialog.Title>Dialog title</Dialog.Title>
+      </Dialog.Root>,
+    );
+
+    expect(screen.UNSAFE_getByType(Modal).props.animationType).toBe('none');
   });
 
   it('renders composed dialog sections', () => {

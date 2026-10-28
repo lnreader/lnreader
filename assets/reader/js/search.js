@@ -328,7 +328,10 @@ window.readerSearch = new (function () {
     }
 
     requestAnimationFrame(() => {
-      match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      match.scrollIntoView({
+        block: 'center',
+        behavior: reader.scrollBehavior(),
+      });
     });
   };
 

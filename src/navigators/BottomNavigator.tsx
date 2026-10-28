@@ -27,6 +27,7 @@ const BottomNavigator = () => {
     showHistoryTab = true,
     showUpdatesTab = true,
     showLabelsInNav = false,
+    reduceAppAnimations = false,
   } = useAppSettings();
 
   const filteredInstalledPlugins = useFilteredInstalledPlugins();
@@ -80,6 +81,9 @@ const BottomNavigator = () => {
       screenOptions={() => ({
         headerShown: false,
         animation: 'fade',
+        transitionSpec: reduceAppAnimations
+          ? { animation: 'timing', config: { duration: 0 } }
+          : undefined,
         lazy: true,
         tabBarBadgeStyle: {
           backgroundColor: theme.error,

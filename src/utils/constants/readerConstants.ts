@@ -2,6 +2,7 @@ import { ReaderTheme } from '@hooks/persisted/useSettings';
 
 export const presetReaderThemes: ReaderTheme[] = [
   { backgroundColor: '#f5f5fa', textColor: '#111111' },
+  { backgroundColor: '#FFFFFF', textColor: '#000000' },
   { backgroundColor: '#F7DFC6', textColor: '#593100' },
   { backgroundColor: '#dce5e2', textColor: '#000000' },
   { backgroundColor: '#292832', textColor: '#CCCCCC' },

@@ -12,7 +12,11 @@ import {
   ReaderStackParamList,
 } from './types';
 import { NovelContextProvider } from '@screens/novel/NovelContext';
-import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useChapterReaderSettings,
+  useTheme,
+} from '@hooks/persisted';
 
 const Stack = createNativeStackNavigator<ReaderStackParamList>();
 
@@ -20,6 +24,7 @@ const Stack = createNativeStackNavigator<ReaderStackParamList>();
 const ReaderStack = ({ route }) => {
   const params = useRef(route?.params);
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   // The reader has a background of its own, so the screen is given the same one
   // to keep the app background from showing while the chapter is pushed.
   const { theme: readerBackground } = useChapterReaderSettings();
@@ -34,6 +39,7 @@ const ReaderStack = ({ route }) => {
     >
       <Stack.Navigator
         screenOptions={{
+          animation: reduceAppAnimations ? 'none' : undefined,
           contentStyle: { backgroundColor: theme.background },
           headerShown: false,
         }}
