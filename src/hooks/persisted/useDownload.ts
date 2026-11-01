@@ -8,9 +8,50 @@ import {
 } from '@services/backgroundTasks';
 import { useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
+import { getNextUndownloadedUnreadChapters } from '@database/queries/ChapterQueries';
 
 export const DOWNLOAD_QUEUE = 'DOWNLOAD';
 export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
+
+/**
+ * Queues the chapters following `chapter` for download, so reading stays
+ * uninterrupted when the source is slow or the device is offline.
+ *
+ * Exported as a plain function rather than part of the hook below: it is called
+ * from the reader, and taking the `useMMKVObject` subscription there would make
+ * the reader re-render on every task-queue progress tick.
+ */
+export const downloadChaptersAhead = async (
+  novel: NovelInfo,
+  chapter: Pick<ChapterInfo, 'position' | 'page'>,
+  count: number,
+  excludedScanlators?: string[],
+) => {
+  const chapters = await getNextUndownloadedUnreadChapters(
+    novel.id,
+    chapter.position!,
+    chapter.page ?? '',
+    count,
+    excludedScanlators,
+  );
+
+  if (!chapters.length) {
+    return;
+  }
+
+  backgroundTasks.enqueue({
+    name: 'DOWNLOAD_CHAPTER',
+    data: {
+      novelName: novel.name,
+      novelId: novel.id,
+      pluginId: novel.pluginId,
+      chapters: chapters.map(({ id, name }) => ({
+        chapterId: id,
+        chapterName: name,
+      })),
+    },
+  });
+};
 
 export default function useDownload() {
   const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
