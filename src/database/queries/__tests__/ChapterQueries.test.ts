@@ -20,6 +20,7 @@ import {
   getNovelChapters,
   getAllNovelChaptersForBackup,
   getUnreadNovelChapters,
+  getUndownloadedUnreadChaptersByPaths,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
   getChapter,
@@ -290,6 +291,31 @@ describe('ChapterQueries', () => {
 
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.unread === true)).toBe(true);
+    });
+
+    it('should reset the reading progress of every chapter in the novel', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { unread: false, progress: 80 });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+      });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, otherNovelId, {
+        unread: false,
+        progress: 100,
+      });
+
+      await markAllChaptersUnread(novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.progress === 0)).toBe(true);
+
+      // Other novels must be left untouched.
+      const otherChapters = await getNovelChapters(otherNovelId);
+      expect(otherChapters[0].progress).toBe(100);
     });
   });
 
@@ -802,6 +828,122 @@ describe('ChapterQueries', () => {
       const result = await getUnreadNovelChapters(novelId);
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getUndownloadedUnreadChaptersByPaths', () => {
+    it('returns unread chapters that are not downloaded yet', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const first = await insertTestChapter(testDb, novelId, {
+        path: '/chapter/1',
+        unread: true,
+        isDownloaded: false,
+      });
+      const second = await insertTestChapter(testDb, novelId, {
+        path: '/chapter/2',
+        unread: true,
+        isDownloaded: false,
+      });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/1',
+        '/chapter/2',
+      ]);
+
+      expect(result.map(c => c.id)).toEqual([first, second]);
+    });
+
+    it('never returns a chapter the user has already read', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const eligible = await insertTestChapter(testDb, novelId, {
+        path: '/chapter/1',
+        unread: true,
+        isDownloaded: false,
+      });
+      await insertTestChapter(testDb, novelId, {
+        path: '/chapter/2',
+        unread: false,
+        isDownloaded: false,
+      });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/1',
+        '/chapter/2',
+      ]);
+
+      expect(result.map(c => c.id)).toEqual([eligible]);
+    });
+
+    it('never returns a chapter whose content is already downloaded', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        path: '/chapter/1',
+        unread: true,
+        isDownloaded: true,
+      });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/1',
+      ]);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('does not return a read chapter that was deleted from disk', async () => {
+      // The `autoDeleteReadChapters` case: the content is intentionally gone
+      // and an update must not pull it back down.
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        path: '/chapter/1',
+        unread: false,
+        isDownloaded: false,
+      });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/1',
+      ]);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('ignores paths that belong to another novel', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { path: '/chapter/1' });
+      await insertTestChapter(testDb, otherNovelId, { path: '/chapter/2' });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/1',
+        '/chapter/2',
+      ]);
+
+      expect(result.map(c => c.path)).toEqual(['/chapter/1']);
+    });
+
+    it('ignores paths that do not exist', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+
+      const result = await getUndownloadedUnreadChaptersByPaths(novelId, [
+        '/chapter/missing',
+      ]);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('returns an empty array without querying for an empty path list', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { unread: true });
+
+      await expect(
+        getUndownloadedUnreadChaptersByPaths(novelId, []),
+      ).resolves.toEqual([]);
     });
   });
 
