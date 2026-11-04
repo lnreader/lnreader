@@ -499,6 +499,7 @@ internal object TtsPlaybackStore {
     }
 
     private fun fail(message: String) {
+        freezeDurationTimer()
         state = TtsPlaybackState.ERROR
         errorListeners.emit(message)
         emitState()

@@ -25,4 +25,10 @@ describe('background TTS queue', () => {
   it('normalizes whitespace and surrounding quotes', () => {
     expect(normalizeTtsText('  “Hello   world.” ')).toBe('Hello world.');
   });
+
+  it('preserves word boundaries across line breaks', () => {
+    expect(
+      buildTtsQueueFromHtml('<p>Hello<br>world</p><p>One<br><br>more line</p>'),
+    ).toEqual(['Hello world', 'One more line']);
+  });
 });

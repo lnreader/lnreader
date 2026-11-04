@@ -1,12 +1,16 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   NativeEventEmitter,
   NativeModules,
-  Pressable,
   StatusBar,
   StyleSheet,
-  Text,
-  View,
 } from 'react-native';
 import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
@@ -42,6 +46,7 @@ import {
 } from '../utils/sanitizeChapterText';
 import { buildTtsQueueFromHtml } from '../utils/ttsQueue';
 import { applyTextModifications } from '@utils/customCode';
+import TtsSleepTimerDialog from './TtsSleepTimerDialog';
 
 export type WebViewPostEvent = {
   type: string;
@@ -175,6 +180,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const autoStartTTSRef = useRef<boolean>(false);
   const ttsChapterTransitionRef = useRef(false);
   const ttsTransitionInFlightRef = useRef(false);
+  const ttsTransitionGenerationRef = useRef(0);
+  const mountedRef = useRef(true);
   const activeChapterIdRef = useRef(chapter.id);
   const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
   const {
@@ -190,14 +197,27 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     updateSettings: updateTtsSettings,
   } = useTtsSession();
 
-  const [sleepTimerDialogVisible, setSleepTimerDialogVisible] = useState(false);
-  const [sleepTimerMode, setSleepTimerMode] = useState<'duration' | 'chapters'>(
-    'duration',
+  const cancelTtsTransition = useCallback(() => {
+    ttsTransitionGenerationRef.current += 1;
+    ttsTransitionInFlightRef.current = false;
+    ttsChapterTransitionRef.current = false;
+    autoStartTTSRef.current = false;
+  }, []);
+
+  const stopTts = useCallback(() => {
+    cancelTtsTransition();
+    runTtsCommand('stop');
+  }, [cancelTtsTransition, runTtsCommand]);
+
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+      cancelTtsTransition();
+    },
+    [cancelTtsTransition],
   );
-  const [sleepTimerHours, setSleepTimerHours] = useState('0');
-  const [sleepTimerMinutes, setSleepTimerMinutes] = useState('30');
-  const [sleepTimerChapters, setSleepTimerChapters] = useState('1');
-  const [sleepTimerValidation, setSleepTimerValidation] = useState('');
+
+  const [sleepTimerDialogVisible, setSleepTimerDialogVisible] = useState(false);
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
 
@@ -227,6 +247,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   useEffect(() => {
     isTTSReadingRef.current = ttsState === 'playing';
+    if (ttsState === 'idle' || ttsState === 'error') {
+      cancelTtsTransition();
+    }
     webViewRef.current?.injectJavaScript(`
       window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
       true;
@@ -234,7 +257,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     if (ttsState === 'completed') {
       webViewRef.current?.injectJavaScript('window.tts?.complete?.(); true;');
     }
-  }, [isTTSReadingRef, ttsState, webViewRef]);
+  }, [cancelTtsTransition, isTTSReadingRef, ttsState, webViewRef]);
 
   useEffect(() => {
     webViewRef.current?.injectJavaScript(`
@@ -244,19 +267,34 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   }, [sleepTimer, webViewRef]);
 
   useEffect(() => {
-    if (ttsState !== 'loading' || ttsTransitionInFlightRef.current) {
+    if (ttsState !== 'loading') {
       return;
     }
+    if (readerSettingsRef.current.tts?.autoPageAdvance !== true) {
+      stopTts();
+      return;
+    }
+    if (ttsTransitionInFlightRef.current) return;
+
     ttsTransitionInFlightRef.current = true;
+    const transitionGeneration = ++ttsTransitionGenerationRef.current;
     const timerExpiredAtBoundary = sleepTimer.expired;
+    const isTransitionActive = () =>
+      mountedRef.current &&
+      transitionGeneration === ttsTransitionGenerationRef.current &&
+      readerSettingsRef.current.tts?.autoPageAdvance === true;
 
     void (async () => {
       try {
         ttsChapterTransitionRef.current = true;
-        const loaded = await navigateChapter('NEXT');
+        const loaded = await navigateChapter('NEXT', isTransitionActive);
+        if (!isTransitionActive()) {
+          ttsChapterTransitionRef.current = false;
+          return;
+        }
         if (!loaded) {
           ttsChapterTransitionRef.current = false;
-          runTtsCommand('stop');
+          stopTts();
           return;
         }
 
@@ -268,7 +306,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         );
         const queue = buildTtsQueueFromHtml(backgroundHtml);
         if (queue.length === 0) {
-          runTtsCommand('stop');
+          stopTts();
           return;
         }
 
@@ -286,19 +324,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           {
             autoplay: !timerExpiredAtBoundary,
             expectContinuation: shouldContinue,
+            canContinue: isTransitionActive,
           },
         );
         if (!queueLoaded) {
-          runTtsCommand('stop');
+          stopTts();
           return;
         }
         if (timerExpiredAtBoundary) {
           cancelSleepTimer();
         }
       } catch {
-        runTtsCommand('stop');
+        stopTts();
       } finally {
-        ttsTransitionInFlightRef.current = false;
+        if (transitionGeneration === ttsTransitionGenerationRef.current) {
+          ttsTransitionInFlightRef.current = false;
+        }
       }
     })();
   }, [
@@ -307,10 +348,19 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     navigateChapter,
     novel?.cover,
     novel?.name,
-    runTtsCommand,
     sleepTimer.expired,
+    stopTts,
     ttsState,
   ]);
+
+  useEffect(() => {
+    if (
+      readerSettings.tts?.autoPageAdvance !== true &&
+      ttsTransitionInFlightRef.current
+    ) {
+      stopTts();
+    }
+  }, [readerSettings.tts?.autoPageAdvance, stopTts]);
 
   useEffect(() => {
     if (ttsProgress.total > 0) {
@@ -550,49 +600,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     theme,
   ]);
 
-  const handleSleepTimerStart = () => {
-    if (sleepTimerMode === 'duration') {
-      const hours = Number(sleepTimerHours);
-      const minutes = Number(sleepTimerMinutes);
-      const totalMinutes = hours * 60 + minutes;
-      if (
-        !Number.isInteger(hours) ||
-        !Number.isInteger(minutes) ||
-        hours < 0 ||
-        hours > 23 ||
-        minutes < 0 ||
-        minutes > 59 ||
-        totalMinutes < 1
-      ) {
-        setSleepTimerValidation(
-          getString('readerScreen.ttsSleepTimer.invalidDuration'),
-        );
-        return;
-      }
-      setSleepTimer({
-        mode: 'duration',
-        durationSeconds: totalMinutes * 60,
-      });
-    } else {
-      const chapters = Number(sleepTimerChapters);
-      if (!Number.isInteger(chapters) || chapters < 1 || chapters > 999) {
-        setSleepTimerValidation(
-          getString('readerScreen.ttsSleepTimer.invalidChapters'),
-        );
-        return;
-      }
-      setSleepTimer({ mode: 'chapters', chapterCount: chapters });
-    }
-    setSleepTimerValidation('');
-    setSleepTimerDialogVisible(false);
-  };
-
-  const handleSleepTimerCancel = () => {
-    cancelSleepTimer();
-    setSleepTimerValidation('');
-    setSleepTimerDialogVisible(false);
-  };
-
   return (
     <>
       <WebView
@@ -665,6 +672,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
           switch (event.type) {
             case 'tts-queue': {
+              cancelTtsTransition();
               const payload = event.data as
                 | { queue?: unknown; startIndex?: unknown }
                 | undefined;
@@ -705,8 +713,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 case 'play':
                 case 'previous':
                 case 'replay':
-                case 'stop':
                   runTtsCommand(data.command);
+                  break;
+                case 'stop':
+                  stopTts();
                   break;
                 case 'seekTo':
                   if (typeof data.index === 'number') {
@@ -717,7 +727,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               break;
             }
             case 'tts-sleep-timer':
-              setSleepTimerValidation('');
               setSleepTimerDialogVisible(true);
               break;
             case 'hide':
@@ -727,6 +736,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               refetch();
               break;
             case 'next':
+              cancelTtsTransition();
               nextChapterScreenVisible.current = true;
               if (event.autoStartTTS) {
                 autoStartTTSRef.current = true;
@@ -734,6 +744,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               navigateChapter('NEXT');
               break;
             case 'prev':
+              cancelTtsTransition();
               if (event.autoStartTTS) {
                 autoStartTTSRef.current = true;
               }
@@ -811,144 +822,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           <Dialog.Action onPress={handleReplaceSave}>Save</Dialog.Action>
         </Dialog.Actions>
       </Dialog.Root>
-      <Dialog.Root
-        visible={sleepTimerDialogVisible}
+      <TtsSleepTimerDialog
+        autoPageAdvance={readerSettings.tts?.autoPageAdvance === true}
+        onCancel={cancelSleepTimer}
         onDismiss={() => setSleepTimerDialogVisible(false)}
-      >
-        <Dialog.Header>
-          <Dialog.Title>
-            {getString('readerScreen.ttsSleepTimer.title')}
-          </Dialog.Title>
-        </Dialog.Header>
-        <Dialog.Content>
-          <View style={styles.timerModeRow}>
-            {(['duration', 'chapters'] as const).map(mode => {
-              const selected = sleepTimerMode === mode;
-              return (
-                <Pressable
-                  key={mode}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => {
-                    setSleepTimerMode(mode);
-                    setSleepTimerValidation('');
-                  }}
-                  style={[
-                    styles.timerModeButton,
-                    {
-                      backgroundColor: selected
-                        ? theme.primaryContainer
-                        : theme.surfaceVariant,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: selected
-                        ? theme.onPrimaryContainer
-                        : theme.onSurfaceVariant,
-                    }}
-                  >
-                    {getString(
-                      mode === 'duration'
-                        ? 'readerScreen.ttsSleepTimer.duration'
-                        : 'readerScreen.ttsSleepTimer.chapters',
-                    )}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          {sleepTimerMode === 'duration' ? (
-            <View style={styles.timerInputRow}>
-              <TextInput
-                label={getString('readerScreen.ttsSleepTimer.hours')}
-                value={sleepTimerHours}
-                onChangeText={setSleepTimerHours}
-                keyboardType="number-pad"
-                mode="outlined"
-                style={styles.timerInput}
-              />
-              <TextInput
-                label={getString('readerScreen.ttsSleepTimer.minutes')}
-                value={sleepTimerMinutes}
-                onChangeText={setSleepTimerMinutes}
-                keyboardType="number-pad"
-                mode="outlined"
-                style={styles.timerInput}
-              />
-            </View>
-          ) : (
-            <>
-              <TextInput
-                label={getString('readerScreen.ttsSleepTimer.chapterCount')}
-                value={sleepTimerChapters}
-                onChangeText={setSleepTimerChapters}
-                keyboardType="number-pad"
-                mode="outlined"
-              />
-              {readerSettings.tts?.autoPageAdvance !== true ? (
-                <Text
-                  style={[styles.timerHint, { color: theme.onSurfaceVariant }]}
-                >
-                  {getString('readerScreen.ttsSleepTimer.autoAdvanceRequired')}
-                </Text>
-              ) : null}
-            </>
-          )}
-          {sleepTimerValidation ? (
-            <Text style={[styles.timerError, { color: theme.error }]}>
-              {sleepTimerValidation}
-            </Text>
-          ) : null}
-        </Dialog.Content>
-        <Dialog.Actions>
-          {sleepTimer.active ? (
-            <Dialog.Action onPress={handleSleepTimerCancel}>
-              {getString('readerScreen.ttsSleepTimer.cancelTimer')}
-            </Dialog.Action>
-          ) : null}
-          <Dialog.Action onPress={() => setSleepTimerDialogVisible(false)}>
-            {getString('common.cancel')}
-          </Dialog.Action>
-          <Dialog.Action onPress={handleSleepTimerStart}>
-            {getString('readerScreen.ttsSleepTimer.start')}
-          </Dialog.Action>
-        </Dialog.Actions>
-      </Dialog.Root>
+        onStart={setSleepTimer}
+        timer={sleepTimer}
+        visible={sleepTimerDialogVisible}
+      />
     </>
   );
 };
 
 const styles = StyleSheet.create({
   textInput: { marginBottom: 16 },
-  timerModeRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  timerModeButton: {
-    alignItems: 'center',
-    borderRadius: 20,
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  timerInputRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  timerInput: {
-    flex: 1,
-  },
-  timerHint: {
-    fontSize: 12,
-    marginTop: 8,
-  },
-  timerError: {
-    fontSize: 12,
-    marginTop: 8,
-  },
 });
 
 export default memo(WebViewReader);

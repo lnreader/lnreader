@@ -83,7 +83,11 @@ export const useTtsSession = () => {
       startIndex: number,
       metadata: TtsMetadata,
       settings: TtsSettings,
-      options: { autoplay: boolean; expectContinuation: boolean },
+      options: {
+        autoplay: boolean;
+        expectContinuation: boolean;
+        canContinue?: () => boolean;
+      },
     ) => {
       if (queue.length === 0) {
         setError('No readable paragraphs were found in this chapter.');
@@ -97,6 +101,10 @@ export const useTtsSession = () => {
           settings,
           { expectContinuation: options.expectContinuation },
         );
+        if (options.canContinue?.() === false) {
+          await session.stop();
+          return;
+        }
         if (options.autoplay) {
           await session.play();
         }

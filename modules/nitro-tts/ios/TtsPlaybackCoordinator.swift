@@ -296,6 +296,8 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   }
 
   private func fail(_ message: String) {
+    sleepTimer?.invalidate()
+    sleepTimer = nil
     state = .error
     errorListeners.emit(message)
     emitState()

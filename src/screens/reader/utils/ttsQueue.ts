@@ -56,7 +56,9 @@ const collectReadableText = (
   queue: string[],
 ) => {
   if (isReadable(element)) {
-    const text = normalizeTtsText($(element).text());
+    const readable = $(element).clone();
+    readable.find('br').replaceWith(' ');
+    const text = normalizeTtsText(readable.text());
     if (text) queue.push(text);
     return;
   }

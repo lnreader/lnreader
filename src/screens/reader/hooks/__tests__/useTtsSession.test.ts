@@ -57,25 +57,27 @@ describe('useTtsSession', () => {
     );
   });
 
-  it('maps sleep timer controls to the native session', async () => {
+  it('stops a queue whose chapter transition was cancelled while loading', async () => {
     const { result } = renderHook(useTtsSession);
     const session = await getNativeSession();
 
-    act(() => {
-      result.current.setSleepTimer({
-        mode: 'duration',
-        durationSeconds: 4800,
-      });
-      result.current.cancelSleepTimer();
+    await act(async () => {
+      await result.current.loadQueue(
+        ['Next chapter'],
+        0,
+        { novelName: 'Novel', chapterName: 'Next' },
+        { rate: 1, pitch: 1 },
+        {
+          autoplay: true,
+          expectContinuation: true,
+          canContinue: () => false,
+        },
+      );
     });
 
-    await waitFor(() => {
-      expect(session.setSleepTimer).toHaveBeenCalledWith({
-        mode: 'duration',
-        durationSeconds: 4800,
-      });
-      expect(session.cancelSleepTimer).toHaveBeenCalledTimes(1);
-    });
+    expect(session.load).toHaveBeenCalledTimes(1);
+    expect(session.stop).toHaveBeenCalledTimes(1);
+    expect(session.play).not.toHaveBeenCalled();
   });
 
   it('maps reader controls to native paragraph commands', async () => {
