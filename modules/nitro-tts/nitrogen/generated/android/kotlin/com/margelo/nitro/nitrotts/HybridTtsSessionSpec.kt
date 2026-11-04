@@ -31,7 +31,7 @@ abstract class HybridTtsSessionSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun load(paragraphs: Array<TtsParagraph>, initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings): Promise<Unit>
+  abstract fun load(paragraphs: Array<TtsParagraph>, initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings, options: TtsLoadOptions): Promise<Unit>
   
   @DoNotStrip
   @Keep
@@ -65,6 +65,14 @@ abstract class HybridTtsSessionSpec: HybridObject() {
   @Keep
   abstract fun updateSettings(settings: TtsSettings): Promise<Unit>
   
+  @DoNotStrip
+  @Keep
+  abstract fun setSleepTimer(config: TtsSleepTimerConfig): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun cancelSleepTimer(): Promise<Unit>
+  
   abstract fun addOnStateChangedListener(listener: (state: TtsPlaybackState) -> Unit): ListenerSubscription
   
   @DoNotStrip
@@ -89,6 +97,15 @@ abstract class HybridTtsSessionSpec: HybridObject() {
   @Keep
   private fun addOnErrorListener_cxx(listener: Func_void_std__string): ListenerSubscription {
     val __result = addOnErrorListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnSleepTimerChangedListener(listener: (state: TtsSleepTimerState) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnSleepTimerChangedListener_cxx(listener: Func_void_TtsSleepTimerState): ListenerSubscription {
+    val __result = addOnSleepTimerChangedListener(listener)
     return __result
   }
 

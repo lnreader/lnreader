@@ -2,8 +2,11 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   NativeEventEmitter,
   NativeModules,
+  Pressable,
   StatusBar,
   StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
@@ -37,6 +40,8 @@ import {
   isChapterRefreshUrl,
   isPluginIssueReportUrl,
 } from '../utils/sanitizeChapterText';
+import { buildTtsQueueFromHtml } from '../utils/ttsQueue';
+import { applyTextModifications } from '@utils/customCode';
 
 export type WebViewPostEvent = {
   type: string;
@@ -168,16 +173,31 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
+  const ttsChapterTransitionRef = useRef(false);
+  const ttsTransitionInFlightRef = useRef(false);
   const activeChapterIdRef = useRef(chapter.id);
   const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
   const {
     command: runTtsCommand,
+    cancelSleepTimer,
+    loadQueue,
     loadAndPlay,
     progress: ttsProgress,
     seekTo: seekTts,
     state: ttsState,
+    setSleepTimer,
+    sleepTimer,
     updateSettings: updateTtsSettings,
   } = useTtsSession();
+
+  const [sleepTimerDialogVisible, setSleepTimerDialogVisible] = useState(false);
+  const [sleepTimerMode, setSleepTimerMode] = useState<'duration' | 'chapters'>(
+    'duration',
+  );
+  const [sleepTimerHours, setSleepTimerHours] = useState('0');
+  const [sleepTimerMinutes, setSleepTimerMinutes] = useState('30');
+  const [sleepTimerChapters, setSleepTimerChapters] = useState('1');
+  const [sleepTimerValidation, setSleepTimerValidation] = useState('');
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
 
@@ -217,6 +237,82 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   }, [isTTSReadingRef, ttsState, webViewRef]);
 
   useEffect(() => {
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
+      true;
+    `);
+  }, [sleepTimer, webViewRef]);
+
+  useEffect(() => {
+    if (ttsState !== 'loading' || ttsTransitionInFlightRef.current) {
+      return;
+    }
+    ttsTransitionInFlightRef.current = true;
+    const timerExpiredAtBoundary = sleepTimer.expired;
+
+    void (async () => {
+      try {
+        ttsChapterTransitionRef.current = true;
+        const loaded = await navigateChapter('NEXT');
+        if (!loaded) {
+          ttsChapterTransitionRef.current = false;
+          runTtsCommand('stop');
+          return;
+        }
+
+        const settings = readerSettingsRef.current;
+        const backgroundHtml = applyTextModifications(
+          loaded.html,
+          settings.removeText,
+          settings.replaceText,
+        );
+        const queue = buildTtsQueueFromHtml(backgroundHtml);
+        if (queue.length === 0) {
+          runTtsCommand('stop');
+          return;
+        }
+
+        const shouldContinue =
+          settings.tts?.autoPageAdvance === true && !timerExpiredAtBoundary;
+        const queueLoaded = await loadQueue(
+          queue,
+          0,
+          {
+            novelName: novel?.name || 'Unknown',
+            chapterName: loaded.chapter.name,
+            coverUri: novel?.cover || undefined,
+          },
+          toNativeTtsSettings(settings.tts),
+          {
+            autoplay: !timerExpiredAtBoundary,
+            expectContinuation: shouldContinue,
+          },
+        );
+        if (!queueLoaded) {
+          runTtsCommand('stop');
+          return;
+        }
+        if (timerExpiredAtBoundary) {
+          cancelSleepTimer();
+        }
+      } catch {
+        runTtsCommand('stop');
+      } finally {
+        ttsTransitionInFlightRef.current = false;
+      }
+    })();
+  }, [
+    cancelSleepTimer,
+    loadQueue,
+    navigateChapter,
+    novel?.cover,
+    novel?.name,
+    runTtsCommand,
+    sleepTimer.expired,
+    ttsState,
+  ]);
+
+  useEffect(() => {
     if (ttsProgress.total > 0) {
       webViewRef.current?.injectJavaScript(`
         window.tts?.setActiveIndex?.(${ttsProgress.index});
@@ -228,7 +324,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   useEffect(() => {
     if (activeChapterIdRef.current !== chapter.id) {
       activeChapterIdRef.current = chapter.id;
-      runTtsCommand('stop');
+      if (ttsChapterTransitionRef.current) {
+        ttsChapterTransitionRef.current = false;
+      } else {
+        runTtsCommand('stop');
+      }
     }
   }, [chapter.id, runTtsCommand]);
 
@@ -450,6 +550,49 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     theme,
   ]);
 
+  const handleSleepTimerStart = () => {
+    if (sleepTimerMode === 'duration') {
+      const hours = Number(sleepTimerHours);
+      const minutes = Number(sleepTimerMinutes);
+      const totalMinutes = hours * 60 + minutes;
+      if (
+        !Number.isInteger(hours) ||
+        !Number.isInteger(minutes) ||
+        hours < 0 ||
+        hours > 23 ||
+        minutes < 0 ||
+        minutes > 59 ||
+        totalMinutes < 1
+      ) {
+        setSleepTimerValidation(
+          getString('readerScreen.ttsSleepTimer.invalidDuration'),
+        );
+        return;
+      }
+      setSleepTimer({
+        mode: 'duration',
+        durationSeconds: totalMinutes * 60,
+      });
+    } else {
+      const chapters = Number(sleepTimerChapters);
+      if (!Number.isInteger(chapters) || chapters < 1 || chapters > 999) {
+        setSleepTimerValidation(
+          getString('readerScreen.ttsSleepTimer.invalidChapters'),
+        );
+        return;
+      }
+      setSleepTimer({ mode: 'chapters', chapterCount: chapters });
+    }
+    setSleepTimerValidation('');
+    setSleepTimerDialogVisible(false);
+  };
+
+  const handleSleepTimerCancel = () => {
+    cancelSleepTimer();
+    setSleepTimerValidation('');
+    setSleepTimerDialogVisible(false);
+  };
+
   return (
     <>
       <WebView
@@ -482,6 +625,16 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           webViewRef.current?.injectJavaScript(
             adjacentChapterScriptRef.current,
           );
+          webViewRef.current?.injectJavaScript(`
+            window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
+            window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
+            ${
+              ttsProgress.total > 0
+                ? `window.tts?.setActiveIndex?.(${ttsProgress.index});`
+                : ''
+            }
+            true;
+          `);
 
           const searchText = searchTextRef.current.trim();
           if (searchText) {
@@ -534,6 +687,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   coverUri: novel?.cover || undefined,
                 },
                 toNativeTtsSettings(readerSettingsRef.current.tts),
+                readerSettingsRef.current.tts?.autoPageAdvance === true,
               );
               break;
             }
@@ -562,6 +716,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               }
               break;
             }
+            case 'tts-sleep-timer':
+              setSleepTimerValidation('');
+              setSleepTimerDialogVisible(true);
+              break;
             case 'hide':
               onPress();
               break;
@@ -653,12 +811,144 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           <Dialog.Action onPress={handleReplaceSave}>Save</Dialog.Action>
         </Dialog.Actions>
       </Dialog.Root>
+      <Dialog.Root
+        visible={sleepTimerDialogVisible}
+        onDismiss={() => setSleepTimerDialogVisible(false)}
+      >
+        <Dialog.Header>
+          <Dialog.Title>
+            {getString('readerScreen.ttsSleepTimer.title')}
+          </Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Content>
+          <View style={styles.timerModeRow}>
+            {(['duration', 'chapters'] as const).map(mode => {
+              const selected = sleepTimerMode === mode;
+              return (
+                <Pressable
+                  key={mode}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    setSleepTimerMode(mode);
+                    setSleepTimerValidation('');
+                  }}
+                  style={[
+                    styles.timerModeButton,
+                    {
+                      backgroundColor: selected
+                        ? theme.primaryContainer
+                        : theme.surfaceVariant,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      color: selected
+                        ? theme.onPrimaryContainer
+                        : theme.onSurfaceVariant,
+                    }}
+                  >
+                    {getString(
+                      mode === 'duration'
+                        ? 'readerScreen.ttsSleepTimer.duration'
+                        : 'readerScreen.ttsSleepTimer.chapters',
+                    )}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          {sleepTimerMode === 'duration' ? (
+            <View style={styles.timerInputRow}>
+              <TextInput
+                label={getString('readerScreen.ttsSleepTimer.hours')}
+                value={sleepTimerHours}
+                onChangeText={setSleepTimerHours}
+                keyboardType="number-pad"
+                mode="outlined"
+                style={styles.timerInput}
+              />
+              <TextInput
+                label={getString('readerScreen.ttsSleepTimer.minutes')}
+                value={sleepTimerMinutes}
+                onChangeText={setSleepTimerMinutes}
+                keyboardType="number-pad"
+                mode="outlined"
+                style={styles.timerInput}
+              />
+            </View>
+          ) : (
+            <>
+              <TextInput
+                label={getString('readerScreen.ttsSleepTimer.chapterCount')}
+                value={sleepTimerChapters}
+                onChangeText={setSleepTimerChapters}
+                keyboardType="number-pad"
+                mode="outlined"
+              />
+              {readerSettings.tts?.autoPageAdvance !== true ? (
+                <Text
+                  style={[styles.timerHint, { color: theme.onSurfaceVariant }]}
+                >
+                  {getString('readerScreen.ttsSleepTimer.autoAdvanceRequired')}
+                </Text>
+              ) : null}
+            </>
+          )}
+          {sleepTimerValidation ? (
+            <Text style={[styles.timerError, { color: theme.error }]}>
+              {sleepTimerValidation}
+            </Text>
+          ) : null}
+        </Dialog.Content>
+        <Dialog.Actions>
+          {sleepTimer.active ? (
+            <Dialog.Action onPress={handleSleepTimerCancel}>
+              {getString('readerScreen.ttsSleepTimer.cancelTimer')}
+            </Dialog.Action>
+          ) : null}
+          <Dialog.Action onPress={() => setSleepTimerDialogVisible(false)}>
+            {getString('common.cancel')}
+          </Dialog.Action>
+          <Dialog.Action onPress={handleSleepTimerStart}>
+            {getString('readerScreen.ttsSleepTimer.start')}
+          </Dialog.Action>
+        </Dialog.Actions>
+      </Dialog.Root>
     </>
   );
 };
 
 const styles = StyleSheet.create({
   textInput: { marginBottom: 16 },
+  timerModeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  timerModeButton: {
+    alignItems: 'center',
+    borderRadius: 20,
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  timerInputRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timerInput: {
+    flex: 1,
+  },
+  timerHint: {
+    fontSize: 12,
+    marginTop: 8,
+  },
+  timerError: {
+    fontSize: 12,
+    marginTop: 8,
+  },
 });
 
 export default memo(WebViewReader);

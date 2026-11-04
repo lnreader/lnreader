@@ -49,11 +49,33 @@ describe('useTtsSession', () => {
         rate: 1.2,
         pitch: 0.9,
       },
+      { expectContinuation: false },
     );
     expect(session.play).toHaveBeenCalledTimes(1);
     expect(session.load.mock.invocationCallOrder[0]).toBeLessThan(
       session.play.mock.invocationCallOrder[0],
     );
+  });
+
+  it('maps sleep timer controls to the native session', async () => {
+    const { result } = renderHook(useTtsSession);
+    const session = await getNativeSession();
+
+    act(() => {
+      result.current.setSleepTimer({
+        mode: 'duration',
+        durationSeconds: 4800,
+      });
+      result.current.cancelSleepTimer();
+    });
+
+    await waitFor(() => {
+      expect(session.setSleepTimer).toHaveBeenCalledWith({
+        mode: 'duration',
+        durationSeconds: 4800,
+      });
+      expect(session.cancelSleepTimer).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('maps reader controls to native paragraph commands', async () => {
@@ -86,6 +108,7 @@ describe('useTtsSession', () => {
       session.addOnStateChangedListener.mock.results[0].value,
       session.addOnProgressChangedListener.mock.results[0].value,
       session.addOnErrorListener.mock.results[0].value,
+      session.addOnSleepTimerChangedListener.mock.results[0].value,
     ];
     unmount();
 

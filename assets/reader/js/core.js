@@ -189,6 +189,7 @@ window.tts = new (function () {
   this.totalElements = 0;
   this.allReadableElements = []; // Store all readable elements at start
   this.textQueue = []; // Flat list of normalized text for native fallback
+  this.sleepTimerState = { active: false, expired: false };
 
   this.readable = element => {
     const ele = element ?? this.currentElement;
@@ -425,6 +426,29 @@ window.tts = new (function () {
     const playPauseButton = document.getElementById('TTS-PlayPause');
     if (playPauseButton) {
       playPauseButton.innerHTML = this.reading ? pauseIcon : resumeIcon;
+    }
+  };
+
+  this.setSleepTimerState = timerState => {
+    this.sleepTimerState = timerState ?? { active: false, expired: false };
+    const button = document.getElementById('TTS-SleepTimer');
+    const status = document.getElementById('TTS-TimerStatus');
+    button?.classList?.toggle('active', this.sleepTimerState.active === true);
+    if (!status) return;
+    if (this.sleepTimerState.mode === 'duration') {
+      const total = Math.max(0, this.sleepTimerState.remainingSeconds ?? 0);
+      const hours = Math.floor(total / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const seconds = Math.floor(total % 60);
+      status.textContent = hours
+        ? `${hours}:${String(minutes).padStart(2, '0')}:${String(
+            seconds,
+          ).padStart(2, '0')}`
+        : `${minutes}:${String(seconds).padStart(2, '0')}`;
+    } else if (this.sleepTimerState.mode === 'chapters') {
+      status.textContent = `${this.sleepTimerState.remainingChapters ?? 0}ch`;
+    } else {
+      status.textContent = '';
     }
   };
 

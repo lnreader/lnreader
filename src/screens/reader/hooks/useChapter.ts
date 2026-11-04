@@ -367,12 +367,14 @@ export default function useChapter(
         setLoading(false);
 
         void resolveAdjacentChapters(chap, loadId);
+        return { chapter: chap, html };
       } catch (e: any) {
         if (isStale()) {
           return;
         }
         setError(e.message);
         setLoading(false);
+        return undefined;
       }
     },
     [loadChapterHtml, resolveAdjacentChapters],
@@ -474,18 +476,19 @@ export default function useChapter(
   }, [setImmersiveMode, showStatusAndNavBar, webViewRef]);
 
   const navigateChapter = useCallback(
-    (position: 'NEXT' | 'PREV') => {
+    async (position: 'NEXT' | 'PREV') => {
       const [next, prev] = adjacentChapterRef.current;
       const navChapter = position === 'NEXT' ? next : prev;
 
       if (navChapter) {
-        getChapter(navChapter);
+        return await getChapter(navChapter);
       } else {
         showToast(
           position === 'NEXT'
             ? getString('readerScreen.noNextChapter')
             : getString('readerScreen.noPreviousChapter'),
         );
+        return undefined;
       }
     },
     [getChapter],
