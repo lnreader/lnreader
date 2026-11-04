@@ -600,6 +600,17 @@ export interface StringMap {
   'readerScreen.noPreviousChapter': 'string';
   'readerScreen.searchMinLength': 'string';
   'readerScreen.searchPlaceholder': 'string';
+  'readerScreen.ttsSleepTimer.title': 'string';
+  'readerScreen.ttsSleepTimer.duration': 'string';
+  'readerScreen.ttsSleepTimer.chapters': 'string';
+  'readerScreen.ttsSleepTimer.hours': 'string';
+  'readerScreen.ttsSleepTimer.minutes': 'string';
+  'readerScreen.ttsSleepTimer.chapterCount': 'string';
+  'readerScreen.ttsSleepTimer.start': 'string';
+  'readerScreen.ttsSleepTimer.cancelTimer': 'string';
+  'readerScreen.ttsSleepTimer.invalidDuration': 'string';
+  'readerScreen.ttsSleepTimer.invalidChapters': 'string';
+  'readerScreen.ttsSleepTimer.autoAdvanceRequired': 'string';
   'readerSettings.autoScrollInterval': 'string';
   'readerSettings.autoScrollOffset': 'string';
   'readerSettings.backgroundColor': 'string';

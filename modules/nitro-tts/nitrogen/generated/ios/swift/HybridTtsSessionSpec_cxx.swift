@@ -125,9 +125,9 @@ open class HybridTtsSessionSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func load(paragraphs: bridge.std__vector_TtsParagraph_, initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func load(paragraphs: bridge.std__vector_TtsParagraph_, initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings, options: TtsLoadOptions) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
-      let __result = try self.__implementation.load(paragraphs: paragraphs.map({ __item in __item }), initialIndex: initialIndex, metadata: metadata, settings: settings)
+      let __result = try self.__implementation.load(paragraphs: paragraphs.map({ __item in __item }), initialIndex: initialIndex, metadata: metadata, settings: settings, options: options)
       let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
         let __promise = bridge.create_std__shared_ptr_Promise_void__()
         let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
@@ -296,6 +296,44 @@ open class HybridTtsSessionSpec_cxx {
   }
   
   @inline(__always)
+  public final func setSleepTimer(config: TtsSleepTimerConfig) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.setSleepTimer(config: config)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func cancelSleepTimer() -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.cancelSleepTimer()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func addOnStateChangedListener(listener: bridge.Func_void_TtsPlaybackState) -> bridge.Result_ListenerSubscription_ {
     do {
       let __result = try self.__implementation.addOnStateChangedListener(listener: { () -> (TtsPlaybackState) -> Void in
@@ -336,6 +374,23 @@ open class HybridTtsSessionSpec_cxx {
         let __wrappedFunction = bridge.wrap_Func_void_std__string(listener)
         return { (__message: String) -> Void in
           __wrappedFunction.call(std.string(__message))
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnSleepTimerChangedListener(listener: bridge.Func_void_TtsSleepTimerState) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnSleepTimerChangedListener(listener: { () -> (TtsSleepTimerState) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_TtsSleepTimerState(listener)
+        return { (__state: TtsSleepTimerState) -> Void in
+          __wrappedFunction.call(__state)
         }
       }())
       let __resultCpp = __result

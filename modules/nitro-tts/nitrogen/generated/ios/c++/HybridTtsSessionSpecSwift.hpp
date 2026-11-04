@@ -18,12 +18,20 @@ namespace margelo::nitro::nitrotts { struct TtsParagraph; }
 namespace margelo::nitro::nitrotts { struct TtsMetadata; }
 // Forward declaration of `TtsSettings` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsSettings; }
+// Forward declaration of `TtsLoadOptions` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsLoadOptions; }
+// Forward declaration of `TtsSleepTimerConfig` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerConfig; }
+// Forward declaration of `TtsSleepTimerMode` to properly resolve imports.
+namespace margelo::nitro::nitrotts { enum class TtsSleepTimerMode; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
 // Forward declaration of `TtsPlaybackState` to properly resolve imports.
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsSleepTimerState` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerState; }
 
 #include <NitroModules/Promise.hpp>
 #include "TtsParagraph.hpp"
@@ -32,10 +40,14 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include "TtsMetadata.hpp"
 #include <optional>
 #include "TtsSettings.hpp"
+#include "TtsLoadOptions.hpp"
+#include "TtsSleepTimerConfig.hpp"
+#include "TtsSleepTimerMode.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
+#include "TtsSleepTimerState.hpp"
 
 #include "NitroTts-Swift-Cxx-Umbrella.hpp"
 
@@ -87,8 +99,8 @@ namespace margelo::nitro::nitrotts {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<void>> load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings) override {
-      auto __result = _swiftPart.load(paragraphs, std::forward<decltype(initialIndex)>(initialIndex), std::forward<decltype(metadata)>(metadata), std::forward<decltype(settings)>(settings));
+    inline std::shared_ptr<Promise<void>> load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings, const TtsLoadOptions& options) override {
+      auto __result = _swiftPart.load(paragraphs, std::forward<decltype(initialIndex)>(initialIndex), std::forward<decltype(metadata)>(metadata), std::forward<decltype(settings)>(settings), std::forward<decltype(options)>(options));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
@@ -159,6 +171,22 @@ namespace margelo::nitro::nitrotts {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::shared_ptr<Promise<void>> setSleepTimer(const TtsSleepTimerConfig& config) override {
+      auto __result = _swiftPart.setSleepTimer(std::forward<decltype(config)>(config));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> cancelSleepTimer() override {
+      auto __result = _swiftPart.cancelSleepTimer();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline ListenerSubscription addOnStateChangedListener(const std::function<void(TtsPlaybackState /* state */)>& listener) override {
       auto __result = _swiftPart.addOnStateChangedListener(listener);
       if (__result.hasError()) [[unlikely]] {
@@ -177,6 +205,14 @@ namespace margelo::nitro::nitrotts {
     }
     inline ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) override {
       auto __result = _swiftPart.addOnErrorListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnSleepTimerChangedListener(const std::function<void(const TtsSleepTimerState& /* state */)>& listener) override {
+      auto __result = _swiftPart.addOnSleepTimerChangedListener(listener);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

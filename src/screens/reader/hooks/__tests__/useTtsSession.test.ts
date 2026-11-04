@@ -49,11 +49,35 @@ describe('useTtsSession', () => {
         rate: 1.2,
         pitch: 0.9,
       },
+      { expectContinuation: false },
     );
     expect(session.play).toHaveBeenCalledTimes(1);
     expect(session.load.mock.invocationCallOrder[0]).toBeLessThan(
       session.play.mock.invocationCallOrder[0],
     );
+  });
+
+  it('stops a queue whose chapter transition was cancelled while loading', async () => {
+    const { result } = renderHook(useTtsSession);
+    const session = await getNativeSession();
+
+    await act(async () => {
+      await result.current.loadQueue(
+        ['Next chapter'],
+        0,
+        { novelName: 'Novel', chapterName: 'Next' },
+        { rate: 1, pitch: 1 },
+        {
+          autoplay: true,
+          expectContinuation: true,
+          canContinue: () => false,
+        },
+      );
+    });
+
+    expect(session.load).toHaveBeenCalledTimes(1);
+    expect(session.stop).toHaveBeenCalledTimes(1);
+    expect(session.play).not.toHaveBeenCalled();
   });
 
   it('maps reader controls to native paragraph commands', async () => {
@@ -86,6 +110,7 @@ describe('useTtsSession', () => {
       session.addOnStateChangedListener.mock.results[0].value,
       session.addOnProgressChangedListener.mock.results[0].value,
       session.addOnErrorListener.mock.results[0].value,
+      session.addOnSleepTimerChangedListener.mock.results[0].value,
     ];
     unmount();
 

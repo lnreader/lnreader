@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
@@ -20,6 +21,7 @@ internal object TtsPlaybackStore {
     private val progressListeners = TtsListenerRegistry<TtsProgress>()
     private val errorListeners = TtsListenerRegistry<String>()
     private val snapshotListeners = TtsListenerRegistry<TtsPlaybackSnapshot>()
+    private val sleepTimerListeners = TtsListenerRegistry<TtsSleepTimerState>()
     private val pendingInitialization = mutableListOf<(Result<Unit>) -> Unit>()
 
     private var applicationContext: Context? = null
@@ -32,11 +34,32 @@ internal object TtsPlaybackStore {
     private var settings = TtsSettings(null, null, 1.0, 1.0)
     private var state = TtsPlaybackState.IDLE
     private var generation = 0L
+    private var expectContinuation = false
+
+    private var sleepTimerMode: TtsSleepTimerMode? = null
+    private var remainingDurationMs = 0L
+    private var remainingChapters = 0
+    private var durationStartedAtMs: Long? = null
+    private var sleepTimerExpired = false
 
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var hasAudioFocus = false
     private var resumeOnFocusGain = false
+
+    private val sleepTimerTick = object : Runnable {
+        override fun run() {
+            if (sleepTimerMode != TtsSleepTimerMode.DURATION || state != TtsPlaybackState.PLAYING) {
+                return
+            }
+            if (currentRemainingDurationMs() <= 0L) {
+                expireDurationTimer()
+                return
+            }
+            emitSleepTimer()
+            ownerHandler.postDelayed(this, TIMER_TICK_MS)
+        }
+    }
 
     fun prepare(context: Context, completion: (Result<Unit>) -> Unit) {
         runOnOwner {
@@ -151,6 +174,7 @@ internal object TtsPlaybackStore {
         initialIndex: Int,
         nextMetadata: TtsMetadata,
         nextSettings: TtsSettings,
+        options: TtsLoadOptions,
     ) {
         requireReady()
         require(nextParagraphs.isNotEmpty()) { "The TTS queue cannot be empty." }
@@ -162,6 +186,7 @@ internal object TtsPlaybackStore {
         currentIndex = initialIndex.coerceIn(paragraphs.indices)
         metadata = nextMetadata
         settings = nextSettings
+        expectContinuation = options.expectContinuation
         state = TtsPlaybackState.PAUSED
         emitProgress()
         emitState()
@@ -194,9 +219,11 @@ internal object TtsPlaybackStore {
         paragraphs = emptyList()
         currentIndex = 0
         metadata = null
+        expectContinuation = false
         state = TtsPlaybackState.IDLE
         resumeOnFocusGain = false
         abandonAudioFocus()
+        clearSleepTimer(emit = true)
         emitState()
         applicationContext?.let { TtsPlaybackService.stop(it) }
     }
@@ -206,6 +233,7 @@ internal object TtsPlaybackStore {
         if (state != TtsPlaybackState.PLAYING) {
             return
         }
+        freezeDurationTimer()
         generation += 1
         engine?.stop()
         state = TtsPlaybackState.PAUSED
@@ -322,6 +350,38 @@ internal object TtsPlaybackStore {
         }
     }
 
+    fun setSleepTimer(config: TtsSleepTimerConfig) {
+        ownerHandler.removeCallbacks(sleepTimerTick)
+        sleepTimerExpired = false
+        durationStartedAtMs = null
+        when (config.mode) {
+            TtsSleepTimerMode.DURATION -> {
+                val seconds = config.durationSeconds?.toLong()
+                    ?: throw IllegalArgumentException("A duration timer requires durationSeconds.")
+                require(seconds in 60..86_340) { "Duration must be between 1 minute and 23 hours 59 minutes." }
+                sleepTimerMode = TtsSleepTimerMode.DURATION
+                remainingDurationMs = seconds * 1_000L
+                remainingChapters = 0
+                if (state == TtsPlaybackState.PLAYING) {
+                    startDurationTimer()
+                }
+            }
+            TtsSleepTimerMode.CHAPTERS -> {
+                val chapters = config.chapterCount?.toInt()
+                    ?: throw IllegalArgumentException("A chapter timer requires chapterCount.")
+                require(chapters in 1..999) { "Chapter count must be between 1 and 999." }
+                sleepTimerMode = TtsSleepTimerMode.CHAPTERS
+                remainingChapters = chapters
+                remainingDurationMs = 0L
+            }
+        }
+        emitSleepTimer()
+    }
+
+    fun cancelSleepTimer() {
+        clearSleepTimer(emit = true)
+    }
+
     fun addStateListener(listener: (TtsPlaybackState) -> Unit): () -> Unit {
         runOnOwner { listener(state) }
         return stateListeners.add(listener)
@@ -341,8 +401,13 @@ internal object TtsPlaybackStore {
         return snapshotListeners.add(listener)
     }
 
+    fun addSleepTimerListener(listener: (TtsSleepTimerState) -> Unit): () -> Unit {
+        runOnOwner { listener(sleepTimerState()) }
+        return sleepTimerListeners.add(listener)
+    }
+
     fun snapshot(): TtsPlaybackSnapshot {
-        return TtsPlaybackSnapshot(state, metadata, currentProgress())
+        return TtsPlaybackSnapshot(state, metadata, currentProgress(), sleepTimerState())
     }
 
     private fun speakCurrent() {
@@ -383,6 +448,7 @@ internal object TtsPlaybackStore {
         }
 
         state = TtsPlaybackState.PLAYING
+        startDurationTimer()
         resumeOnFocusGain = false
         emitProgress()
         emitState()
@@ -416,12 +482,24 @@ internal object TtsPlaybackStore {
     }
 
     private fun completeQueue() {
-        state = TtsPlaybackState.COMPLETED
+        freezeDurationTimer()
+        val chapterTimerExpired = completeChapterTimer()
+        if (expectContinuation) {
+            state = TtsPlaybackState.LOADING
+        } else {
+            state = TtsPlaybackState.COMPLETED
+            if (!chapterTimerExpired) {
+                clearSleepTimer(emit = true)
+            }
+        }
         emitState()
-        applicationContext?.let { TtsPlaybackService.stop(it) }
+        if (!expectContinuation) {
+            applicationContext?.let { TtsPlaybackService.stop(it) }
+        }
     }
 
     private fun fail(message: String) {
+        freezeDurationTimer()
         state = TtsPlaybackState.ERROR
         errorListeners.emit(message)
         emitState()
@@ -430,6 +508,81 @@ internal object TtsPlaybackStore {
     private fun emitState() {
         stateListeners.emit(state)
         snapshotListeners.emit(snapshot())
+    }
+
+    private fun emitSleepTimer() {
+        val timerState = sleepTimerState()
+        sleepTimerListeners.emit(timerState)
+        snapshotListeners.emit(snapshot())
+    }
+
+    private fun startDurationTimer() {
+        if (sleepTimerMode != TtsSleepTimerMode.DURATION || durationStartedAtMs != null) {
+            return
+        }
+        durationStartedAtMs = SystemClock.elapsedRealtime()
+        ownerHandler.removeCallbacks(sleepTimerTick)
+        ownerHandler.postDelayed(sleepTimerTick, TIMER_TICK_MS)
+    }
+
+    private fun freezeDurationTimer() {
+        if (sleepTimerMode != TtsSleepTimerMode.DURATION) return
+        remainingDurationMs = currentRemainingDurationMs()
+        durationStartedAtMs = null
+        ownerHandler.removeCallbacks(sleepTimerTick)
+        emitSleepTimer()
+    }
+
+    private fun currentRemainingDurationMs(): Long {
+        val startedAt = durationStartedAtMs ?: return remainingDurationMs
+        return (remainingDurationMs - (SystemClock.elapsedRealtime() - startedAt)).coerceAtLeast(0L)
+    }
+
+    private fun expireDurationTimer() {
+        remainingDurationMs = 0L
+        durationStartedAtMs = null
+        ownerHandler.removeCallbacks(sleepTimerTick)
+        sleepTimerExpired = true
+        sleepTimerMode = null
+        pauseEngine()
+        emitSleepTimer()
+    }
+
+    private fun completeChapterTimer(): Boolean {
+        if (sleepTimerMode != TtsSleepTimerMode.CHAPTERS) return false
+        remainingChapters = (remainingChapters - 1).coerceAtLeast(0)
+        if (remainingChapters == 0) {
+            sleepTimerMode = null
+            sleepTimerExpired = true
+            emitSleepTimer()
+            return true
+        }
+        emitSleepTimer()
+        return false
+    }
+
+    private fun clearSleepTimer(emit: Boolean) {
+        ownerHandler.removeCallbacks(sleepTimerTick)
+        sleepTimerMode = null
+        remainingDurationMs = 0L
+        remainingChapters = 0
+        durationStartedAtMs = null
+        sleepTimerExpired = false
+        if (emit) emitSleepTimer()
+    }
+
+    private fun sleepTimerState(): TtsSleepTimerState {
+        val mode = sleepTimerMode
+        val remainingSeconds = if (mode == TtsSleepTimerMode.DURATION) {
+            ((currentRemainingDurationMs() + 999L) / 1_000L).toDouble()
+        } else null
+        return TtsSleepTimerState(
+            active = mode != null,
+            expired = sleepTimerExpired,
+            mode = mode,
+            remainingSeconds = remainingSeconds,
+            remainingChapters = if (mode == TtsSleepTimerMode.CHAPTERS) remainingChapters.toDouble() else null,
+        )
     }
 
     private fun emitProgress() {
@@ -500,4 +653,6 @@ internal object TtsPlaybackStore {
             }
         }
     }
+
+    private const val TIMER_TICK_MS = 1_000L
 }

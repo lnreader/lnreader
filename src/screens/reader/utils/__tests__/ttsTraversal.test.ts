@@ -31,6 +31,20 @@ class TestElement {
 type TtsTraversal = {
   getAllReadableElements(element: TestElement): TestElement[];
   normalizeText(text: string): string;
+  next(): void;
+  pause(): void;
+  previous(): void;
+  resume(): void;
+  setActiveIndex(index: number): void;
+  setPlaybackState(state: string): void;
+  started: boolean;
+  textQueue: string[];
+  totalElements: number;
+};
+
+type TtsPostEvent = {
+  type: string;
+  data?: { command?: string };
 };
 
 const text = (value: string): TestNode => ({
@@ -41,7 +55,10 @@ const text = (value: string): TestNode => ({
 const element = (name: string, ...children: TestNode[]) =>
   new TestElement(name.toUpperCase(), children);
 
-const loadTtsTraversal = (chapterElement: TestElement): TtsTraversal => {
+const loadTtsTraversal = (
+  chapterElement: TestElement,
+  postedEvents: TtsPostEvent[] = [],
+): TtsTraversal => {
   const core = readFileSync(
     join(process.cwd(), 'assets/reader/js/core.js'),
     'utf8',
@@ -55,10 +72,18 @@ const loadTtsTraversal = (chapterElement: TestElement): TtsTraversal => {
   }
 
   const context: {
-    reader: { chapterElement: TestElement };
+    document: { getElementById(): null };
+    reader: {
+      chapterElement: TestElement;
+      post(event: TtsPostEvent): void;
+    };
     window: { tts?: TtsTraversal };
   } = {
-    reader: { chapterElement },
+    document: { getElementById: () => null },
+    reader: {
+      chapterElement,
+      post: event => postedEvents.push(event),
+    },
     window: {},
   };
 
@@ -183,5 +208,49 @@ describe('reader TTS traversal', () => {
       'First paragraph',
       'Second paragraph',
     ]);
+  });
+
+  it('reattaches reader controls to an active native session', () => {
+    const chapter = element(
+      'div',
+      element('p', text('First paragraph')),
+      element('p', text('Second paragraph')),
+    );
+    const postedEvents: TtsPostEvent[] = [];
+    const tts = loadTtsTraversal(chapter, postedEvents);
+
+    tts.setPlaybackState('playing');
+
+    expect(tts.started).toBe(true);
+    expect(tts.totalElements).toBe(2);
+    expect(tts.textQueue).toEqual(['First paragraph', 'Second paragraph']);
+
+    tts.pause();
+    tts.next();
+    tts.previous();
+    tts.setPlaybackState('paused');
+    tts.resume();
+
+    expect(postedEvents).toEqual([
+      { type: 'tts-command', data: { command: 'pause' } },
+      { type: 'tts-command', data: { command: 'next' } },
+      { type: 'tts-command', data: { command: 'previous' } },
+      { type: 'tts-command', data: { command: 'play' } },
+    ]);
+    expect(postedEvents).not.toContainEqual(
+      expect.objectContaining({ type: 'tts-queue' }),
+    );
+  });
+
+  it('does not reattach from stale progress after the native session stops', () => {
+    const tts = loadTtsTraversal(
+      element('div', element('p', text('First paragraph'))),
+    );
+
+    tts.setActiveIndex(0);
+
+    expect(tts.started).toBe(false);
+    expect(tts.totalElements).toBe(0);
+    expect(tts.textQueue).toEqual([]);
   });
 });

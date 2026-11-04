@@ -4,4 +4,5 @@ internal data class TtsPlaybackSnapshot(
     val state: TtsPlaybackState,
     val metadata: TtsMetadata?,
     val progress: TtsProgress?,
+    val sleepTimer: TtsSleepTimerState,
 )

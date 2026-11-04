@@ -7,14 +7,16 @@ final class HybridTtsSession: HybridTtsSessionSpec {
     paragraphs: [TtsParagraph],
     initialIndex: Double,
     metadata: TtsMetadata,
-    settings: TtsSettings
+    settings: TtsSettings,
+    options: TtsLoadOptions
   ) throws -> Promise<Void> {
     return MainQueuePromise.run {
       try self.coordinator.load(
         paragraphs: paragraphs,
         initialIndex: Int(initialIndex),
         metadata: metadata,
-        settings: settings
+        settings: settings,
+        options: options
       )
     }
   }
@@ -55,6 +57,14 @@ final class HybridTtsSession: HybridTtsSessionSpec {
     }
   }
 
+  func setSleepTimer(config: TtsSleepTimerConfig) throws -> Promise<Void> {
+    return MainQueuePromise.run { try self.coordinator.setSleepTimer(config) }
+  }
+
+  func cancelSleepTimer() throws -> Promise<Void> {
+    return MainQueuePromise.run(coordinator.cancelSleepTimer)
+  }
+
   func addOnStateChangedListener(
     listener: @escaping (TtsPlaybackState) -> Void
   ) throws -> ListenerSubscription {
@@ -71,5 +81,11 @@ final class HybridTtsSession: HybridTtsSessionSpec {
     listener: @escaping (String) -> Void
   ) throws -> ListenerSubscription {
     return ListenerSubscription(remove: coordinator.addErrorListener(listener))
+  }
+
+  func addOnSleepTimerChangedListener(
+    listener: @escaping (TtsSleepTimerState) -> Void
+  ) throws -> ListenerSubscription {
+    return ListenerSubscription(remove: coordinator.addSleepTimerListener(listener))
   }
 }

@@ -428,6 +428,37 @@ describe('useChapter', () => {
     expect(result.current.chapterText).toBe('SANITIZED:next body');
   });
 
+  it('does not publish a chapter when a pending navigation is cancelled', async () => {
+    const store = createStore();
+    const deferredNext = createDeferred<string>();
+    mockUseNovelActions.mockReturnValue(store.state);
+    mockGetNextChapter.mockImplementation(
+      async (_novelId: number, position: number) =>
+        position === initialChapter.position ? nextChapter : undefined,
+    );
+    mockFetchChapter.mockImplementation(
+      async (_pluginId: string, path: string) =>
+        path === nextChapter.path ? deferredNext.promise : 'initial body',
+    );
+
+    const { result } = renderHook(() => useFlatChapter(initialChapter));
+    await waitFor(() =>
+      expect(result.current.nextChapter).toEqual(nextChapter),
+    );
+
+    let active = true;
+    const navigation = result.current.navigateChapter('NEXT', () => active);
+    active = false;
+
+    await act(async () => {
+      deferredNext.resolve('next body');
+      await navigation;
+    });
+
+    expect(result.current.chapter.id).toBe(initialChapter.id);
+    expect(result.current.chapterText).toBe('SANITIZED:initial body');
+  });
+
   it('injects scripts supporting paged and normal modes when volume buttons are pressed', async () => {
     const store = createStore();
     mockUseNovelActions.mockReturnValue(store.state);
