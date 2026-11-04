@@ -1,6 +1,7 @@
- 
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
+import { browserFetch, isCloudflareResponse } from '@services/browserFetch';
+import { base64ToBytes } from '@utils/base64';
 import { parse as parseProto } from 'protobufjs';
 
 type FetchInit = {
@@ -45,7 +46,13 @@ export const fetchApi = async (
   init?: FetchInit,
 ): Promise<Response> => {
   init = makeInit(init);
-  return await fetch(url, init);
+  const response = await fetch(url, init);
+
+  if (!(await isCloudflareResponse(response))) {
+    return response;
+  }
+
+  return browserFetch(url, init);
 };
 
 const FILE_READER_PREFIX_LENGTH = 'data:application/octet-stream;base64,'
@@ -78,9 +85,8 @@ export const fetchText = async (
   init?: FetchInit,
   encoding?: string,
 ): Promise<string> => {
-  init = makeInit(init);
   try {
-    const res = await fetch(url, init);
+    const res = await fetchApi(url, init);
     if (!res.ok) {
       throw new Error();
     }
@@ -98,28 +104,6 @@ export const fetchText = async (
     return '';
   }
 };
-
-function base64ToBytesArr(str: string) {
-  const abc = [
-    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-  ]; // base64 alphabet
-  const result = [];
-
-  for (let i = 0; i < str.length / 4; i++) {
-    const chunk = [...str.slice(4 * i, 4 * i + 4)];
-    const bin = chunk
-      .map(x => abc.indexOf(x).toString(2).padStart(6, '0'))
-      .join('');
-    const bytes = bin.match(/.{1,8}/g)?.map(x => +('0b' + x)) || [];
-    result.push(
-      ...bytes.slice(
-        0,
-        3 - Number(str[4 * i + 2] === '=') - Number(str[4 * i + 3] === '='),
-      ),
-    );
-  }
-  return result;
-}
 
 interface ProtoRequestInit {
   // merged .proto file
@@ -170,10 +154,8 @@ export const fetchProto = async function (
       return new Promise((resolve, reject) => {
         const fr = new FileReader();
         fr.onloadend = () => {
-          const payload = new Uint8Array(
-            base64ToBytesArr(
-              fr.result?.slice(FILE_READER_PREFIX_LENGTH) as string,
-            ),
+          const payload = base64ToBytes(
+            fr.result?.slice(FILE_READER_PREFIX_LENGTH) as string,
           );
           const length = Number(
             BigInt(payload[1] << 24) |

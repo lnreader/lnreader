@@ -15,6 +15,7 @@ import AppErrorBoundary, {
   ErrorFallback,
 } from '@components/AppErrorBoundary/AppErrorBoundary';
 import CrashRecoveryGate from '@components/AppErrorBoundary/CrashRecoveryGate';
+import BrowserFetchProvider from '@services/browserFetch/BrowserFetchProvider';
 
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -97,7 +98,9 @@ const Application = () => {
             <ThemedPaperProvider>
               <BottomSheetModalProvider>
                 <StatusBar translucent={true} backgroundColor="transparent" />
-                <Main />
+                <BrowserFetchProvider>
+                  <Main />
+                </BrowserFetchProvider>
               </BottomSheetModalProvider>
             </ThemedPaperProvider>
           </SafeAreaProvider>
