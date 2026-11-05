@@ -1,6 +1,10 @@
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import NativeFile from '@modules/native-file';
-import { browserFetch, isCloudflareResponse } from '@services/browserFetch';
+import {
+  browserFetch,
+  isBrowserResponse,
+  isCloudflareResponse,
+} from '@services/browserFetch';
 import { base64ToBytes } from '@utils/base64';
 import { parse as parseProto } from 'protobufjs';
 
@@ -89,6 +93,9 @@ export const fetchText = async (
     const res = await fetchApi(url, init);
     if (!res.ok) {
       throw new Error();
+    }
+    if (isBrowserResponse(res)) {
+      return await res.text();
     }
     const blob = await res.blob();
     return await new Promise((resolve, reject) => {

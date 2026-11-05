@@ -208,6 +208,13 @@ const prepareSolveRequest = (
   };
 };
 
+const browserResponses = new WeakSet<Response>();
+
+// The body of a browser response is text the WebView already decoded with the
+// page's charset, so callers must not decode it again with another encoding.
+export const isBrowserResponse = (response: Response) =>
+  browserResponses.has(response);
+
 const toResponse = (result: BrowserFetchResult) => {
   const headers = new Headers();
   Object.entries(result.headers).forEach(([key, value]) => {
@@ -226,6 +233,7 @@ const toResponse = (result: BrowserFetchResult) => {
     Object.defineProperty(response, 'url', { value: result.url });
   }
 
+  browserResponses.add(response);
   return response;
 };
 

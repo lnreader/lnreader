@@ -58,12 +58,14 @@ export const buildDocumentResponseScript = (
   requestId: string,
   status: number,
   statusText: string,
+  maxResponseLength: number,
 ) => {
   const payload = serialize({
     messageType: BROWSER_FETCH_MESSAGE_TYPE,
     requestId,
     status,
     statusText,
+    maxResponseLength,
   });
 
   return `
@@ -94,13 +96,24 @@ export const buildDocumentResponseScript = (
     var body = textOnly
       ? (document.body ? document.body.innerText : document.documentElement.innerText)
       : document.documentElement.outerHTML;
+    body = body || "";
+
+    if (body.length > payload.maxResponseLength) {
+      send({
+        error:
+          "Browser response exceeded the maximum allowed size of " +
+          payload.maxResponseLength +
+          " characters.",
+      });
+      return;
+    }
 
     send({
       status: payload.status,
       statusText: payload.statusText,
       url: location.href,
       headers: { "content-type": contentType },
-      body: body || "",
+      body: body,
     });
   } catch (error) {
     send({ error: String((error && error.message) || error) });

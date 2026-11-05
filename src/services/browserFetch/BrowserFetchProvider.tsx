@@ -164,6 +164,7 @@ const BrowserFetchProvider = ({ children }: PropsWithChildren) => {
                 requestId,
                 pending.httpStatus,
                 pending.httpStatusText,
+                pending.request.request.maxResponseLength,
               )
             : buildBrowserFetchScript(requestId, pending.request.request),
         );

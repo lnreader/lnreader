@@ -2,7 +2,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 
 import { setBrowserFetchTransport } from '@services/browserFetch';
 import type { BrowserFetchTransport } from '@services/browserFetch/types';
-import { fetchApi } from '../fetch';
+import { fetchApi, fetchText } from '../fetch';
 
 jest.mock('@hooks/persisted/useUserAgent', () => ({
   getUserAgent: () => 'LNReader test',
@@ -107,5 +107,43 @@ describe('fetchApi', () => {
 
     expect(result).toBe(response);
     expect(solve).not.toHaveBeenCalled();
+  });
+});
+
+describe('fetchText', () => {
+  const originalFetch = global.fetch;
+  let cleanup: (() => void) | undefined;
+
+  afterEach(() => {
+    cleanup?.();
+    cleanup = undefined;
+    global.fetch = originalFetch;
+  });
+
+  it('returns browser fallback text without decoding it again', async () => {
+    setupCookies();
+    const body = '<p>第一章 开始</p>';
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response('', {
+        status: 403,
+        headers: { 'cf-mitigated': 'challenge' },
+      }),
+    ) as unknown as typeof fetch;
+    cleanup = setBrowserFetchTransport({
+      solve: jest.fn(async () => ({
+        type: 'response' as const,
+        result: {
+          status: 200,
+          statusText: 'OK',
+          url: 'https://example.com/chapter',
+          headers: { 'content-type': 'text/html' },
+          body,
+        },
+      })),
+    } as unknown as BrowserFetchTransport);
+
+    await expect(
+      fetchText('https://example.com/chapter', undefined, 'gbk'),
+    ).resolves.toBe(body);
   });
 });
