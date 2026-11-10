@@ -1,4 +1,4 @@
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
 import {
   backgroundTasks,
   QueuedBackgroundTask,
@@ -11,7 +11,7 @@ const countImports = (tasks: QueuedBackgroundTask[]) =>
   tasks.filter(t => t.task.name === 'IMPORT_EPUB').length;
 
 export default function useImport() {
-  const { refetchLibrary } = useLibraryContext();
+  const { refetchLibrary } = useLibraryActions();
   const importCount = useBackgroundTasks(countImports);
   const previousImportCount = useRef(importCount);
 
