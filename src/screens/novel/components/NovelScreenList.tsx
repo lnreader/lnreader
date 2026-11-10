@@ -173,7 +173,7 @@ const NovelScreenList = ({
 
   const scrollHandler = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffset.value = event.nativeEvent.contentOffset.y;
+      scrollOffset.set(event.nativeEvent.contentOffset.y);
     },
     [scrollOffset],
   );

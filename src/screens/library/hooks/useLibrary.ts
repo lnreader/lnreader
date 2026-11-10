@@ -133,11 +133,13 @@ export const useLibrary = (): UseLibraryReturnType => {
         hasErrorRef.current = true;
         setError(loadError);
       }
-    } finally {
-      if (requestId === loadRequestIdRef.current) {
-        hasLoadedRef.current = true;
-        setIsLoading(false);
-      }
+    }
+
+    // Not a `finally`: React Compiler skips any function containing one, which
+    // left this hook's return value (the library context value) unmemoized.
+    if (requestId === loadRequestIdRef.current) {
+      hasLoadedRef.current = true;
+      setIsLoading(false);
     }
   }, [downloadedOnlyMode, filter, refreshCategories, searchText, sortOrder]);
 
