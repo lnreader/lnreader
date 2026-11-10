@@ -1,30 +1,26 @@
 import { useLibraryContext } from '@components/Context/LibraryContext';
 import {
-  BACKGROUND_TASKS_STORE_KEY,
   backgroundTasks,
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { DocumentPickerResult } from 'expo-document-picker';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useMMKVObject } from 'react-native-mmkv';
+import { useCallback, useEffect, useRef } from 'react';
+import { useBackgroundTasks } from './useBackgroundTasks';
+
+const countImports = (tasks: QueuedBackgroundTask[]) =>
+  tasks.filter(t => t.task.name === 'IMPORT_EPUB').length;
 
 export default function useImport() {
   const { refetchLibrary } = useLibraryContext();
-  const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
-    BACKGROUND_TASKS_STORE_KEY,
-  );
-  const importQueue = useMemo(
-    () => queue?.filter(t => t.task.name === 'IMPORT_EPUB') || [],
-    [queue],
-  );
-  const previousImportCount = useRef(importQueue.length);
+  const importCount = useBackgroundTasks(countImports);
+  const previousImportCount = useRef(importCount);
 
   useEffect(() => {
-    if (previousImportCount.current > importQueue.length) {
+    if (previousImportCount.current > importCount) {
       void refetchLibrary();
     }
-    previousImportCount.current = importQueue.length;
-  }, [importQueue.length, refetchLibrary]);
+    previousImportCount.current = importCount;
+  }, [importCount, refetchLibrary]);
 
   const importNovel = useCallback((pickedNovel: DocumentPickerResult) => {
     if (pickedNovel.canceled) return;
@@ -45,7 +41,6 @@ export default function useImport() {
   const cancelImport = () => backgroundTasks.cancelByType('IMPORT_EPUB');
 
   return {
-    importQueue,
     importNovel,
     resumeImport,
     pauseImport,

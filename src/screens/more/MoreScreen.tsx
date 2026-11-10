@@ -8,17 +8,14 @@ import { MoreHeader } from './components/MoreHeader';
 import { useLibrarySettings, useTheme } from '@hooks/persisted';
 import { MoreStackScreenProps } from '@navigators/types';
 import Switch from '@components/Switch/Switch';
-import { useMMKVObject } from 'react-native-mmkv';
-import {
-  BACKGROUND_TASKS_STORE_KEY,
-  QueuedBackgroundTask,
-} from '@services/backgroundTasks';
+import { QueuedBackgroundTask } from '@services/backgroundTasks';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+
+const countTasks = (tasks: QueuedBackgroundTask[]) => tasks.length;
 
 const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
   const theme = useTheme();
-  const [taskQueue] = useMMKVObject<QueuedBackgroundTask[]>(
-    BACKGROUND_TASKS_STORE_KEY,
-  );
+  const taskCount = useBackgroundTasks(countTasks);
   const {
     incognitoMode = false,
     downloadedOnlyMode = false,
@@ -124,11 +121,7 @@ const MoreScreen = ({ navigation }: MoreStackScreenProps) => {
           <List.Divider theme={theme} />
           <List.Item
             title={'Task Queue'}
-            description={
-              taskQueue && taskQueue.length > 0
-                ? taskQueue.length + ' remaining'
-                : ''
-            }
+            description={taskCount > 0 ? taskCount + ' remaining' : ''}
             icon="progress-download"
             onPress={() =>
               navigation.navigate('MoreStack', {

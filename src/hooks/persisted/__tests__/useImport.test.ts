@@ -6,8 +6,10 @@ import { QueuedBackgroundTask } from '@services/backgroundTasks';
 
 let mockQueue: QueuedBackgroundTask[] = [];
 
-jest.mock('react-native-mmkv', () => ({
-  useMMKVObject: () => [mockQueue],
+jest.mock('@hooks/persisted/useBackgroundTasks', () => ({
+  useBackgroundTasks: (selector: (tasks: unknown[]) => unknown) =>
+    selector(mockQueue),
+  useBackgroundTaskQueue: () => mockQueue,
 }));
 
 jest.mock('@components/Context/LibraryContext', () => ({
@@ -15,7 +17,6 @@ jest.mock('@components/Context/LibraryContext', () => ({
 }));
 
 jest.mock('@services/backgroundTasks', () => ({
-  BACKGROUND_TASKS_STORE_KEY: 'tasks',
   backgroundTasks: {
     enqueue: jest.fn(),
     resumeAll: jest.fn(),

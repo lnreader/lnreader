@@ -42,8 +42,12 @@ jest.mock('@database/manager/liveQuery', () => ({
 }));
 
 jest.mock('@services/backgroundTasks', () => ({
-  BACKGROUND_TASKS_STORE_KEY: 'backgroundTasks',
   getDownloadProgressKey: jest.fn(() => ''),
+}));
+
+jest.mock('@hooks/persisted/useBackgroundTasks', () => ({
+  useBackgroundTasks: (selector: (tasks: unknown[]) => unknown) => selector([]),
+  useBackgroundTaskQueue: () => [],
 }));
 
 jest.mock('react-native-mmkv', () => ({
@@ -51,7 +55,6 @@ jest.mock('react-native-mmkv', () => ({
     getString: jest.fn(),
     set: jest.fn(),
   }),
-  useMMKVObject: () => [undefined],
 }));
 
 const mockGetLibraryNovelsQuery = getLibraryNovelsQuery as jest.MockedFunction<

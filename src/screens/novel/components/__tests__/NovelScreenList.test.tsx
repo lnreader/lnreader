@@ -21,7 +21,6 @@ jest.mock('@hooks/persisted', () => ({
     refreshNovelMetadata: false,
   }),
   useDownload: () => ({
-    downloadQueue: mockDownloadQueue,
     downloadingChapterIds: mockDownloadingChapterIds,
     downloadingNovelIds: mockDownloadingNovelIds,
     downloadChapter: mockDownloadChapter,
@@ -31,6 +30,12 @@ jest.mock('@hooks/persisted', () => ({
     onPrimary: '#fff',
     surface2: '#222',
   }),
+}));
+
+jest.mock('@hooks/persisted/useBackgroundTasks', () => ({
+  useBackgroundTasks: (selector: (tasks: unknown[]) => unknown) =>
+    selector(mockDownloadQueue),
+  useBackgroundTaskQueue: () => mockDownloadQueue,
 }));
 
 jest.mock('@hooks/index', () => ({
