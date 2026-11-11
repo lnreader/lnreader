@@ -28,12 +28,15 @@ export const getBottomSheetLayout = ({
   };
 };
 
+// Snap points describe the visible content height; the sheet also extends
+// behind the navigation bar, so the bottom inset is added on top.
 export const normalizeBottomSheetSnapPoints = (
   snapPoints: number[] | undefined,
   maxHeight: number,
+  bottomInset: number,
 ) =>
   snapPoints
     ? [...snapPoints]
         .sort((a, b) => a - b)
-        .map(point => Math.min(point, maxHeight))
+        .map(point => Math.min(point, maxHeight) + bottomInset)
     : undefined;
