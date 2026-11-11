@@ -1,7 +1,7 @@
 import { LayoutRectangle } from 'react-native';
 import { EdgeInsets } from 'react-native-safe-area-context';
 
-export const HORIZONTAL_MARGIN = 16;
+const HORIZONTAL_MARGIN = 16;
 const VERTICAL_MARGIN = 8;
 const ANCHOR_GAP = 4;
 
@@ -11,6 +11,11 @@ interface MenuPositionInput {
   menu: { height: number; width: number };
   screen: { height: number; width: number };
 }
+
+export const getAvailableMenuWidth = (
+  screenWidth: number,
+  insets: EdgeInsets,
+) => screenWidth - insets.left - insets.right - HORIZONTAL_MARGIN * 2;
 
 // The menu modal is drawn edge-to-edge (translucent status and navigation
 // bars), so the system bar insets must be excluded from the usable area.

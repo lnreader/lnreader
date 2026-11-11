@@ -1,4 +1,4 @@
-import { getMenuPosition } from '../layout';
+import { getAvailableMenuWidth, getMenuPosition } from '../layout';
 
 const screen = { height: 800, width: 400 };
 const noInsets = { bottom: 0, left: 0, right: 0, top: 0 };
@@ -46,5 +46,26 @@ describe('getMenuPosition', () => {
     expect(getMenuPosition({ anchor, insets, menu: menuSize, screen })).toEqual(
       expected,
     );
+  });
+
+  it('fits a full-width menu beside a side navigation bar', () => {
+    const landscape = { height: 400, width: 800 };
+    const insets = { ...noInsets, right: 48 };
+    const anchor = { height: 56, width: 752, x: 24, y: 100 };
+    const width = Math.min(
+      anchor.width,
+      getAvailableMenuWidth(landscape.width, insets),
+    );
+
+    const { left } = getMenuPosition({
+      anchor,
+      insets,
+      menu: { height: 120, width },
+      screen: landscape,
+    });
+
+    expect(width).toBe(720);
+    expect(left).toBe(16);
+    expect(left + width).toBeLessThanOrEqual(landscape.width - insets.right);
   });
 });

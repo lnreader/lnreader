@@ -20,7 +20,7 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HORIZONTAL_MARGIN, getMenuPosition } from './layout';
+import { getAvailableMenuWidth, getMenuPosition } from './layout';
 
 const MAX_MENU_WIDTH = 280;
 const MAX_MENU_HEIGHT_RATIO = 0.6;
@@ -85,9 +85,10 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
       screen: { height: screenHeight, width: screenWidth },
     });
 
-    const maxWidth = fullWidth
-      ? anchorLayout.width
-      : Math.min(MAX_MENU_WIDTH, screenWidth - HORIZONTAL_MARGIN * 2);
+    const maxWidth = Math.min(
+      fullWidth ? anchorLayout.width : MAX_MENU_WIDTH,
+      getAvailableMenuWidth(screenWidth, insets),
+    );
 
     return {
       left,
