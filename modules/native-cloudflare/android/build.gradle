@@ -1,0 +1,15 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.nativecloudflare'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.nativecloudflare"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}
