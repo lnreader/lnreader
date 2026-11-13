@@ -32,11 +32,12 @@ jest.mock('../../NovelContext', () => ({
 const novel = { id: 1, name: 'Novel', pluginId: 'p', isLocal: false } as any;
 const ch = (id: number) => ({ id, name: `Chapter ${id}` } as any);
 
-const setup = (chapters: any[] = []) =>
+const setup = (chapters: any[] = [], excludedScanlators?: string[]) =>
   renderHook(() =>
     useNovelScreenActions({
       chapters,
       clearSelection: jest.fn(),
+      excludedScanlators,
       novel,
       selectedIds: [],
       selectedChapters: [],
@@ -52,7 +53,7 @@ describe('downloadAvailableChapters', () => {
 
     await setup([ch(1), ch(2), ch(3)]).downloadAvailableChapters(2);
 
-    expect(mockGetUnread).toHaveBeenCalledWith(1, 2);
+    expect(mockGetUnread).toHaveBeenCalledWith(1, 2, undefined);
     expect(mockDownloadChapters).toHaveBeenCalledWith(novel, [
       ch(284),
       ch(285),
@@ -65,6 +66,14 @@ describe('downloadAvailableChapters', () => {
     await setup([]).downloadAvailableChapters(5);
 
     expect(mockDownloadChapters).toHaveBeenCalledWith(novel, [ch(10), ch(11)]);
+  });
+
+  it('keeps hidden scanlator groups excluded', async () => {
+    mockGetUnread.mockResolvedValue([ch(3)]);
+
+    await setup([], ['Group A']).downloadAvailableChapters(1);
+
+    expect(mockGetUnread).toHaveBeenCalledWith(1, 1, ['Group A']);
   });
 
   it('downloads nothing when there are no unread chapters left', async () => {

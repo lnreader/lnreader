@@ -984,6 +984,28 @@ describe('ChapterQueries', () => {
 
       expect(result.map(chapter => chapter.position)).toEqual([2, 5]);
     });
+
+    it('applies excluded scanlators before the limit', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        position: 1,
+        unread: true,
+        scanlator: 'Hidden',
+      });
+      await insertTestChapter(testDb, novelId, {
+        position: 2,
+        unread: true,
+        scanlator: 'Shown',
+      });
+      await insertTestChapter(testDb, novelId, { position: 3, unread: true });
+
+      const result = await getAllUndownloadedAndUnreadChapters(novelId, 1, [
+        'Hidden',
+      ]);
+
+      expect(result.map(chapter => chapter.position)).toEqual([2]);
+    });
   });
 
   describe('getChapter', () => {
