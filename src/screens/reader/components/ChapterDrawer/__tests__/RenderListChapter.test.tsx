@@ -59,6 +59,25 @@ describe('RenderListChapter', () => {
     });
   });
 
+  it('formats an ISO release time and keeps non-date text as-is', () => {
+    const { rerender } = renderChapter({
+      ...chapter,
+      releaseTime: '2024-03-05T10:20:30.000Z',
+    });
+    expect(screen.queryByText('2024-03-05T10:20:30.000Z')).toBeNull();
+
+    rerender(
+      <RenderListChapter
+        item={{ ...chapter, releaseTime: 'Free since yesterday' }}
+        styles={styles}
+        theme={theme}
+        chapterId={2}
+        onPress={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('Free since yesterday')).toBeTruthy();
+  });
+
   it('keeps the current-chapter color regardless of read state', () => {
     renderChapter({ ...chapter, unread: false }, chapter.id);
 

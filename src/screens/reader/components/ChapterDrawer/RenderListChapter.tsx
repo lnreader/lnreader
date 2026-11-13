@@ -3,6 +3,7 @@ import { View, Pressable, TextStyle, StyleProp, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 import { ChapterInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
+import { DateFormat, formatDate } from '@utils/dateFormat';
 
 type Styles = {
   chapterCtn: StyleProp<ViewStyle>;
@@ -18,6 +19,8 @@ type Props = {
   chapterId: number;
   /** Takes the chapter so the caller can pass a stable handler. */
   onPress: (chapter: ChapterInfo) => void;
+  dateFormat?: DateFormat;
+  relativeTimestamps?: boolean;
 };
 
 /**
@@ -31,6 +34,8 @@ const RenderListChapter = ({
   theme,
   onPress,
   chapterId,
+  dateFormat = 'default',
+  relativeTimestamps = true,
 }: Props) => {
   const isCurrentChapter = item.id === chapterId;
 
@@ -76,7 +81,7 @@ const RenderListChapter = ({
               },
             ]}
           >
-            {item.releaseTime}
+            {formatDate(item.releaseTime, dateFormat, relativeTimestamps)}
           </Text>
         ) : null}
       </Pressable>

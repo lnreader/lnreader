@@ -81,6 +81,53 @@ export const insertChapters = async (
       scanlator: scanlatorStr,
     };
   });
+
+  // Existing chapters only reach the Updates tab when renamed (e.g. a plugin
+  // drops its "🔒" locked marker once the chapter becomes free). Metadata
+  // changes (release time, position, page, number) never touch updatedTime.
+  let renamedPaths: string[] = [];
+  if (options?.touchUpdatedTime) {
+    const storedNames = new Map(
+      (
+        await dbManager
+          .select({ path: chapterSchema.path, name: chapterSchema.name })
+          .from(chapterSchema)
+          .where(eq(chapterSchema.novelId, novelId))
+          .all()
+      ).map(c => [c.path, c.name]),
+    );
+    renamedPaths = rows
+      .filter(
+        r => storedNames.has(r.path) && storedNames.get(r.path) !== r.name,
+      )
+      .map(r => r.path);
+  }
+
+  // Mark renames before the upsert: if the process dies in between, the next
+  // update still sees the old name and marks it again.
+  if (renamedPaths.length) {
+    await dbManager.write(async tx => {
+      for (let i = 0; i < renamedPaths.length; i += CHAPTER_ID_BATCH_SIZE) {
+        await tx
+          .update(chapterSchema)
+          .set({ updatedTime: nowSql })
+          .where(
+            and(
+              eq(chapterSchema.novelId, novelId),
+              inArray(
+                chapterSchema.path,
+                renamedPaths.slice(i, i + CHAPTER_ID_BATCH_SIZE),
+              ),
+            ),
+          )
+          .run();
+      }
+    });
+  }
+
+  // An empty incoming releaseTime keeps the stored one (best-effort dates).
+  const releaseTimeSql = sql`COALESCE(NULLIF(excluded.releaseTime, ''), ${chapterSchema.releaseTime})`;
+
   await dbManager.batch(rows, (tx, ph) =>
     tx
       .insert(chapterSchema)
@@ -97,20 +144,21 @@ export const insertChapters = async (
       })
       .onConflictDoUpdate({
         target: [chapterSchema.novelId, chapterSchema.path],
+        // updatedTime must stay out of this SET: naming it fires the per-row
+        // update_novel_stats_on_update trigger even when the value is unchanged.
         set: {
           page: sql`excluded.page`,
           position: sql`excluded.position`,
           name: sql`excluded.name`,
-          releaseTime: sql`excluded.releaseTime`,
+          releaseTime: releaseTimeSql,
           chapterNumber: sql`excluded.chapterNumber`,
           scanlator: sql`excluded.scanlator`,
-          ...(options?.touchUpdatedTime ? { updatedTime: nowSql } : {}),
         },
         where: sql`NOT (
           ${chapterSchema.page} IS excluded.page
           AND ${chapterSchema.position} IS excluded.position
           AND ${chapterSchema.name} IS excluded.name
-          AND ${chapterSchema.releaseTime} IS excluded.releaseTime
+          AND ${chapterSchema.releaseTime} IS ${releaseTimeSql}
           AND ${chapterSchema.chapterNumber} IS excluded.chapterNumber
           AND ${chapterSchema.scanlator} IS excluded.scanlator
         )`,
