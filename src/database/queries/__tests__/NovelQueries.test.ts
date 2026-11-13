@@ -39,6 +39,7 @@ import {
   updateNovelCategories,
   _restoreNovelsAndChapters,
 } from '../NovelQueries';
+import { getCategoriesWithCount } from '../CategoryQueries';
 
 const mockGetLibraryDefaultCategoryId = jest.fn<number | undefined, []>();
 
@@ -512,6 +513,13 @@ describe('NovelQueries', () => {
     const rowsWithoutIds = <T extends Record<string, unknown>>(rows: T[]) =>
       rows.map(({ id: _id, novelId: _novelId, ...row }) => row);
 
+    const triggersBeforeRestore = [
+      'add_category',
+      'update_novel_stats',
+      'update_novel_stats_on_delete',
+      'update_novel_stats_on_update',
+    ];
+
     const restoreOne = async (novel: BackupNovel) => {
       const [result] = await _restoreNovelsAndChapters([novel]);
       if (!result.mapping) throw result.error;
@@ -669,7 +677,7 @@ describe('NovelQueries', () => {
       );
     });
 
-    it('replaces the chapters of an existing novel like the delete trigger would', async () => {
+    it('replaces the chapters of an existing novel like the delete trigger would, clearing lastReadAt as the unchanged restore does', async () => {
       const testDb = getTestDb();
       const novelId = await insertTestNovel(testDb, {
         path: '/restored/novel',
@@ -722,6 +730,42 @@ describe('NovelQueries', () => {
       expect((await getNovelById(novelId))?.totalChapters).toBe(1);
     });
 
+    it('rolls back a novel whose insert fails midway through its chapter batches', async () => {
+      const testDb = getTestDb();
+      const broken = backupNovel(
+        { id: 2, path: '/broken/novel', name: 'Broken' },
+        450,
+      );
+      broken.chapters[250].path = broken.chapters[10].path;
+
+      const results = await _restoreNovelsAndChapters([
+        broken,
+        backupNovel({ id: 3, path: '/third/novel', name: 'Third' }, 120),
+      ]);
+
+      expect(results[0].error).toBeDefined();
+      expect(results[1].mapping?.chapters).toHaveLength(120);
+      const novels = await testDb.drizzleDb.select().from(novelSchema).all();
+      expect(novels.map(n => n.name)).toEqual(['Third']);
+      expect(novels[0].totalChapters).toBe(120);
+      expect(
+        await testDb.drizzleDb.select().from(chapterSchema).all(),
+      ).toHaveLength(120);
+    });
+
+    it('skips the chapter id mappings when they are not asked for', async () => {
+      const testDb = getTestDb();
+
+      const [result] = await _restoreNovelsAndChapters([backupNovel({}, 3)], {
+        withChapterMappings: false,
+      });
+
+      expect(result.mapping?.chapters).toEqual([]);
+      expect(
+        await testDb.drizzleDb.select().from(chapterSchema).all(),
+      ).toHaveLength(3);
+    });
+
     it('rolls back only the novels that fail', async () => {
       const testDb = getTestDb();
       const broken = backupNovel(
@@ -747,6 +791,106 @@ describe('NovelQueries', () => {
         'Restored Novel',
         'Third',
       ]);
+    });
+
+    it.each<[string | null, (string | null)[]]>([
+      [null, [null, null]],
+      [null, [null, '2024-01-02', '2024-01-01', '2024-01-02 00:00:00']],
+      [null, ['not a date', '2024-01-01']],
+      [null, ['2024-01-01', 'not a date', '2023-01-01']],
+      ['2024-06-01', ['2024-01-01', null, '2025-01-01', '2025-01-01 00:00:00']],
+      ['2024-06-01', ['not a date', null]],
+      ['not a date', ['2024-01-01']],
+      ['2024-06-01T00:00:00.000Z', ['2024-06-01', '2024-06-02T10:00:00.000Z']],
+    ])(
+      'leaves the novel statistics the insert trigger would (lastUpdatedAt %p, chapters %p)',
+      async (lastUpdatedAt, updatedTimes) => {
+        const { sqlite } = getTestDb();
+        const chapters = updatedTimes.map((updatedTime, i) =>
+          backupChapter(i + 1, {
+            updatedTime,
+            unread: i % 2 === 0,
+            isDownloaded: i % 3 === 0,
+          }),
+        );
+
+        // Reference: the same chapters inserted one by one with the trigger on.
+        sqlite.executeSync(
+          "INSERT INTO Novel (path, pluginId, name, lastUpdatedAt) VALUES ('/reference', 'reference', 'Reference', ?)",
+          [lastUpdatedAt],
+        );
+        const referenceId = (
+          sqlite.executeSync("SELECT id FROM Novel WHERE path = '/reference'")
+            .rows[0] as { id: number }
+        ).id;
+        for (const chapter of chapters) {
+          sqlite.executeSync(
+            'INSERT INTO Chapter (novelId, path, name, unread, isDownloaded, updatedTime) VALUES (?, ?, ?, ?, ?, ?)',
+            [
+              referenceId,
+              chapter.path,
+              chapter.name,
+              chapter.unread ? 1 : 0,
+              chapter.isDownloaded ? 1 : 0,
+              chapter.updatedTime,
+            ],
+          );
+        }
+        const stats = (id: number) =>
+          sqlite.executeSync(
+            'SELECT totalChapters, chaptersUnread, chaptersDownloaded, lastUpdatedAt FROM Novel WHERE id = ?',
+            [id],
+          ).rows[0];
+
+        const mapping = await restoreOne(
+          backupNovel({ lastUpdatedAt, chapters } as Partial<BackupNovel>),
+        );
+
+        expect(stats(mapping.restoredNovelId)).toEqual(stats(referenceId));
+      },
+    );
+
+    const restoreTriggers = async () =>
+      (
+        getTestDb().sqlite.executeSync(
+          "SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name",
+        ).rows as { name: string }[]
+      ).map(row => row.name);
+
+    it.each([0, 3, 10, 30, 60, 120, 250])(
+      'is not cut short by a category count read after %i microtask turns',
+      async turns => {
+        const testDb = getTestDb();
+        const novels = Array.from({ length: 20 }, (_, i) =>
+          backupNovel({ id: i + 1, path: `/batch/novel-${i + 1}` }, 5),
+        );
+
+        const restore = _restoreNovelsAndChapters(novels);
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        await getCategoriesWithCount([1]);
+        const results = await restore;
+
+        expect(results.filter(result => result.mapping)).toHaveLength(20);
+        expect(
+          await testDb.drizzleDb.select().from(chapterSchema).all(),
+        ).toHaveLength(100);
+        expect(await restoreTriggers()).toEqual(triggersBeforeRestore);
+      },
+    );
+
+    it('puts the suspended triggers back when the batch transaction is lost', async () => {
+      const testDb = getTestDb();
+      const novels = Array.from({ length: 20 }, (_, i) =>
+        backupNovel({ id: i + 1, path: `/batch/novel-${i + 1}` }, 5),
+      );
+
+      const restore = _restoreNovelsAndChapters(novels);
+      for (let turn = 0; turn < 10; turn++) await Promise.resolve();
+      // Something outside the write queue ends the open transaction.
+      testDb.sqlite.executeSync('COMMIT');
+
+      await expect(restore).rejects.toThrow();
+      expect(await restoreTriggers()).toEqual(triggersBeforeRestore);
     });
   });
 
