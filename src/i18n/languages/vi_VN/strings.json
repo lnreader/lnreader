@@ -746,6 +746,8 @@
     "statusDistribution": "Trạng thái",
     "title": "Thống kê",
     "readingTime": "Thời gian đọc",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "chương trong thư viện",
     "customizeGenres": "Tùy chỉnh",
     "titlesInLibrary": "Tiêu đề",
