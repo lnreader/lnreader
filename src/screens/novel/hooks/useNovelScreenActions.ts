@@ -22,6 +22,7 @@ type SelectionAction = {
 interface UseNovelScreenActionsOptions {
   chapters: ChapterInfo[];
   clearSelection: () => void;
+  excludedScanlators?: string[];
   novel?: NovelInfo;
   selectedIds: number[];
   selectedChapters: ChapterInfo[];
@@ -30,6 +31,7 @@ interface UseNovelScreenActionsOptions {
 export const useNovelScreenActions = ({
   chapters,
   clearSelection,
+  excludedScanlators,
   novel,
   selectedIds,
   selectedChapters,
@@ -56,16 +58,23 @@ export const useNovelScreenActions = ({
       } else if (amount === 'unread') {
         availableChapters = await getAllUndownloadedAndUnreadChapters(novel.id);
       } else if (isNumber(amount)) {
-        availableChapters = availableChapters
-          .filter(chapter => !chapter.isDownloaded)
-          .slice(0, amount);
+        // Read from the database in reading order rather than from the list on
+        // screen, which may be sorted descending or hold only some pages.
+        // Read chapters are skipped, so "next N" continues after the user's
+        // progress even when earlier chapters were deleted. Hidden scanlator
+        // groups stay excluded, as they are in the list.
+        availableChapters = await getAllUndownloadedAndUnreadChapters(
+          novel.id,
+          amount,
+          excludedScanlators,
+        );
       }
 
       if (availableChapters.length > 0) {
         downloadChapters(novel, availableChapters);
       }
     },
-    [chapters, downloadChapters, novel],
+    [chapters, downloadChapters, excludedScanlators, novel],
   );
 
   const deleteDownloadedChapters = useCallback(() => {

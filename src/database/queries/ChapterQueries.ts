@@ -582,8 +582,10 @@ export const getAllUndownloadedChapters = async (
  */
 export const getAllUndownloadedAndUnreadChapters = async (
   novelId: number,
-): Promise<ChapterInfo[]> =>
-  dbManager
+  limit?: number,
+  excludedScanlators?: string[],
+): Promise<ChapterInfo[]> => {
+  const query = dbManager
     .select()
     .from(chapterSchema)
     .where(
@@ -591,10 +593,13 @@ export const getAllUndownloadedAndUnreadChapters = async (
         eq(chapterSchema.novelId, novelId),
         eq(chapterSchema.isDownloaded, false),
         eq(chapterSchema.unread, true),
+        scanlatorFilterToSQL(excludedScanlators),
       ),
     )
-    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
-    .all();
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position));
+
+  return limit === undefined ? query.all() : query.limit(limit).all();
+};
 
 export const getChapter = async (chapterId: number) =>
   dbManager
