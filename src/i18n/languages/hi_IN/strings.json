@@ -746,6 +746,8 @@
     "statusDistribution": "Status distribution",
     "title": "Statistics",
     "readingTime": "Reading time",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "chapters in library",
     "customizeGenres": "Customize",
     "titlesInLibrary": "Titles in library",
