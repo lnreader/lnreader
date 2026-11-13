@@ -972,6 +972,18 @@ describe('ChapterQueries', () => {
 
       expect(result.map(chapter => chapter.position)).toEqual([2, 5]);
     });
+
+    it('returns only the first `limit` chapters in reading order', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { position: 5, unread: true });
+      await insertTestChapter(testDb, novelId, { position: 2, unread: true });
+      await insertTestChapter(testDb, novelId, { position: 9, unread: true });
+
+      const result = await getAllUndownloadedAndUnreadChapters(novelId, 2);
+
+      expect(result.map(chapter => chapter.position)).toEqual([2, 5]);
+    });
   });
 
   describe('getChapter', () => {
