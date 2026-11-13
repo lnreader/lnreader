@@ -734,6 +734,7 @@ function calculatePages(behavior = 'instant') {
       (reader.chapterHeight * reader.chapter.progress) / 100 -
       reader.layoutHeight;
     window.scrollTo({ top: restoredScrollTop, behavior });
+    window.dispatchEvent(new Event('reader-position-restored'));
   }
 }
 
