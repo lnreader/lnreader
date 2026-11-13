@@ -129,30 +129,32 @@ export default function useChapter(
   const volumeUpDelta = pageReaderInvertVolumeButtons ? 1 : -1;
   const volumeDownDelta = pageReaderInvertVolumeButtons ? -1 : 1;
 
-  useEventListener(NativeVolumeButtonListener, 'VolumeUp', () => {
+  const turnPage = (pageDelta: number, scrollDirection: number) => {
     webViewRef.current?.injectJavaScript(`(()=>{
       const isPaged = ${Boolean(pageReader)};
       if (isPaged && window.pageReader) {
         window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
-          volumeUpDelta >= 0 ? '+' : '-'
+          pageDelta >= 0 ? '+' : '-'
         } 1);
       } else {
-        window.scrollBy({top: -${volumeButtonOffset}, behavior: 'smooth'});
+        window.scrollBy({top: ${
+          volumeButtonOffset * scrollDirection
+        }, behavior: window.reader?.scrollBehavior?.() ?? 'smooth'});
       }
     })()`);
-  });
+  };
 
+  useEventListener(NativeVolumeButtonListener, 'VolumeUp', () => {
+    turnPage(volumeUpDelta, -1);
+  });
   useEventListener(NativeVolumeButtonListener, 'VolumeDown', () => {
-    webViewRef.current?.injectJavaScript(`(()=>{
-      const isPaged = ${Boolean(pageReader)};
-      if (isPaged && window.pageReader) {
-        window.pageReader.movePage((window.pageReader.page?.val ?? 0) ${
-          volumeDownDelta >= 0 ? '+' : '-'
-        } 1);
-      } else {
-        window.scrollBy({top: ${volumeButtonOffset}, behavior: 'smooth'});
-      }
-    })()`);
+    turnPage(volumeDownDelta, 1);
+  });
+  useEventListener(NativeVolumeButtonListener, 'PageUp', () => {
+    turnPage(-1, -1);
+  });
+  useEventListener(NativeVolumeButtonListener, 'PageDown', () => {
+    turnPage(1, 1);
   });
 
   useEffect(() => {
@@ -412,7 +414,7 @@ export default function useChapter(
         window.scrollBy({top:${defaultTo(
           autoScrollOffset,
           Dimensions.get('window').height,
-        )},behavior:'smooth'})
+        )},behavior:window.reader?.scrollBehavior?.() ?? 'smooth'})
       })()`);
     }, autoScrollInterval * 1000);
 

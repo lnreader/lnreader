@@ -3,7 +3,7 @@ import { useWindowDimensions } from 'react-native';
 import { TabView, type TabBarProps } from 'react-native-tab-view';
 
 import { useSearch } from '@hooks';
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
 import { SafeAreaView, SearchbarV2, TopTabBar } from '@components';
@@ -23,6 +23,7 @@ const routes: BrowseRoute[] = [
 
 const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const { searchText, setSearchText, clearSearchbar } = useSearch();
   const layout = useWindowDimensions();
 
@@ -143,6 +144,7 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
         menuButtons={menuButtons}
       />
       <TabView<BrowseRoute>
+        animationEnabled={!reduceAppAnimations}
         navigationState={navigationState}
         initialLayout={initialLayout}
         renderScene={renderScene}

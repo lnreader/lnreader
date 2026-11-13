@@ -14,6 +14,7 @@ jest.mock('@i18n/translations', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTheme: () => ({
     onSurface: '#1d1b20',
     onSurfaceVariant: '#49454f',

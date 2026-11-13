@@ -24,6 +24,8 @@ import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
 import { useRozeniteSqlitePlugin } from '@rozenite/sqlite-plugin';
 import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
+import { useAppSettings } from '@hooks/persisted';
 
 enableFreeze(true);
 const sqliteAdapters = __DEV__ && opSqliteAdapter ? [opSqliteAdapter] : [];
@@ -50,6 +52,7 @@ const ThemedRootView = ({ children }: PropsWithChildren) => {
 
 const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const paperTheme = useMemo(() => {
     const baseTheme = theme.isDark ? MD3DarkTheme : MD3LightTheme;
 
@@ -59,13 +62,15 @@ const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
         ...baseTheme.colors,
         ...theme,
       },
+      animation: { ...baseTheme.animation, scale: reduceAppAnimations ? 0 : 1 },
     };
-  }, [theme]);
+  }, [theme, reduceAppAnimations]);
 
   return <PaperProvider theme={paperTheme}>{children}</PaperProvider>;
 };
 
 const Application = () => {
+  const { reduceAppAnimations = false } = useAppSettings();
   useRozeniteSqlitePlugin({ adapters: sqliteAdapters });
   const { success: databaseReady, error: databaseError } = useInitDatabase();
   const { ready: servicesReady, error: servicesError } =
@@ -91,6 +96,9 @@ const Application = () => {
 
   return (
     <ThemedRootView>
+      <ReducedMotionConfig
+        mode={reduceAppAnimations ? ReduceMotion.Always : ReduceMotion.System}
+      />
       <KeyboardProvider>
         <AppErrorBoundary>
           <SafeAreaProvider>

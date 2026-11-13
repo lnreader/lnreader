@@ -108,6 +108,19 @@ const NavigationTab: React.FC = () => {
           }
           theme={theme}
         />
+        <SettingSwitch
+          label={getString('readerScreen.bottomSheet.disableReaderAnimations')}
+          description={getString(
+            'readerScreen.bottomSheet.disableReaderAnimationsDescription',
+          )}
+          value={pageReaderDisableAnimation}
+          onPress={() =>
+            setChapterGeneralSettings({
+              pageReaderDisableAnimation: !pageReaderDisableAnimation,
+            })
+          }
+          theme={theme}
+        />
       </View>
 
       <View style={styles.section}>
@@ -132,21 +145,6 @@ const NavigationTab: React.FC = () => {
               onPress={() =>
                 setChapterGeneralSettings({
                   pageReaderInvertVolumeButtons: !pageReaderInvertVolumeButtons,
-                })
-              }
-              theme={theme}
-            />
-            <SettingSwitch
-              label={getString(
-                'readerScreen.bottomSheet.disablePageTransitions',
-              )}
-              description={getString(
-                'readerScreen.bottomSheet.disablePageTransitionsDescription',
-              )}
-              value={pageReaderDisableAnimation}
-              onPress={() =>
-                setChapterGeneralSettings({
-                  pageReaderDisableAnimation: !pageReaderDisableAnimation,
                 })
               }
               theme={theme}

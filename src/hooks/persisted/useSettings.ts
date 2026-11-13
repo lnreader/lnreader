@@ -56,6 +56,20 @@ export interface AppSettings {
   showLabelsInNav: boolean;
   useFabForContinueReading: boolean;
   disableLoadingAnimations: boolean;
+  reduceAppAnimations: boolean;
+  ePaperOptimizations: boolean;
+  ePaperPreviousSettings?: {
+    disableLoadingAnimations: boolean;
+    reduceAppAnimations: boolean;
+    readerTheme: ReaderTheme;
+    readerGeneral: Pick<
+      ChapterGeneralSettings,
+      | 'pageReader'
+      | 'useVolumeButtons'
+      | 'pageReaderDisableAnimation'
+      | 'autoScroll'
+    >;
+  };
   dateFormat?: DateFormat;
   relativeTimestamps?: boolean;
 
@@ -261,6 +275,8 @@ const initialAppSettings: AppSettings = {
   showLabelsInNav: true,
   useFabForContinueReading: false,
   disableLoadingAnimations: false,
+  reduceAppAnimations: false,
+  ePaperOptimizations: false,
   dateFormat: 'default',
   relativeTimestamps: true,
 

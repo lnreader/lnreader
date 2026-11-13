@@ -12,7 +12,11 @@ import {
 
 import { Appbar, SafeAreaView, TopTabBar } from '@components/index';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useChapterReaderSettings,
+  useTheme,
+} from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -58,6 +62,7 @@ const SettingsReaderScreen = () => {
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [tabIndex, setTabIndex] = useState(0);
 
+  const { reduceAppAnimations = false } = useAppSettings();
   const readerSettings = useChapterReaderSettings();
   const BOTTOM_SHEET_HEIGHT = screenHeight * 0.7;
   const readerBackgroundColor = readerSettings.theme;
@@ -158,6 +163,7 @@ const SettingsReaderScreen = () => {
             initialLayout={{ width: screenWidth }}
             lazy
             lazyPreloadDistance={0}
+            animationEnabled={!reduceAppAnimations}
             swipeEnabled={false}
           />
         </View>

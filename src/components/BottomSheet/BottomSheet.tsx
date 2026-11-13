@@ -5,11 +5,12 @@ import {
   BottomSheetModalProps,
 } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ReduceMotion } from 'react-native-reanimated';
 import { useBackHandler } from '@hooks/index';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import BottomSheetBackdrop from './BottomSheetBackdrop';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 import { getBottomSheetLayout, normalizeBottomSheetSnapPoints } from './layout';
 
 interface BottomSheetProps
@@ -48,6 +49,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   const { bottom, top } = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const { horizontalInset, maxHeight, topMargin } = getBottomSheetLayout({
     bottom,
     height,
@@ -75,6 +77,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
+      overrideReduceMotion={
+        reduceAppAnimations ? ReduceMotion.Always : undefined
+      }
       backdropComponent={renderBackdrop}
       handleComponent={null}
       backgroundStyle={[

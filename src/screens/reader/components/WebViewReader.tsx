@@ -322,7 +322,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       body: plugin?.imageRequestInit?.body,
       html: `
         <!DOCTYPE html>
-          <html dir="${readerDir}">
+          <html dir="${readerDir}" class="${
+        chapterGeneralSettings.pageReaderDisableAnimation ? 'no-animation' : ''
+      }">
             <head>
               <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
               <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">

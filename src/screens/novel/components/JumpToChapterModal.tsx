@@ -4,7 +4,7 @@ import { getString } from '@i18n/translations';
 import { Dialog, SwitchItem } from '@components';
 
 import { HelperText, Text, TextInput } from 'react-native-paper';
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { NovelScreenProps } from '@navigators/types';
 import {
@@ -47,6 +47,7 @@ const JumpToChapterModal = ({
 
   const maxNumber = batchInformation.totalChapters ?? -1;
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const [mode, setMode] = useState(false);
   const [openChapter, setOpenChapter] = useState(false);
 
@@ -80,7 +81,7 @@ const JumpToChapterModal = ({
     if (loadedIndex >= 0) {
       onDismiss();
       chapterListRef.current?.scrollToIndex({
-        animated: true,
+        animated: !reduceAppAnimations,
         index: loadedIndex,
         viewPosition: 0.5,
       });
@@ -116,7 +117,7 @@ const JumpToChapterModal = ({
 
           onDismiss();
           chapterListRef.current?.scrollToIndex({
-            animated: true,
+            animated: !reduceAppAnimations,
             index: resolvedIndex,
             viewPosition: 0.5,
           });
