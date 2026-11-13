@@ -29,6 +29,7 @@ export const useTtsSession = () => {
   const sessionPromiseRef = useRef<Promise<TtsSession> | null>(null);
   const subscriptionsRef = useRef<{ remove(): void }[]>([]);
   const mountedRef = useRef(true);
+  const loadGenerationRef = useRef(0);
   const [state, setState] = useState<TtsPlaybackState>('idle');
   const [progress, setProgress] = useState<TtsProgress>(initialProgress);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +94,9 @@ export const useTtsSession = () => {
         setError('No readable paragraphs were found in this chapter.');
         return false;
       }
-      return await run(async session => {
+      const loadGeneration = ++loadGenerationRef.current;
+      let completed = false;
+      const succeeded = await run(async session => {
         await session.load(
           queue.map((text, index) => ({ id: String(index), text })),
           startIndex,
@@ -101,6 +104,9 @@ export const useTtsSession = () => {
           settings,
           { expectContinuation: options.expectContinuation },
         );
+        if (loadGeneration !== loadGenerationRef.current) {
+          return;
+        }
         if (options.canContinue?.() === false) {
           await session.stop();
           return;
@@ -108,7 +114,9 @@ export const useTtsSession = () => {
         if (options.autoplay) {
           await session.play();
         }
+        completed = true;
       });
+      return succeeded && completed;
     },
     [run],
   );

@@ -327,6 +327,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             canContinue: isTransitionActive,
           },
         );
+        if (!isTransitionActive()) {
+          return;
+        }
         if (!queueLoaded) {
           stopTts();
           return;
