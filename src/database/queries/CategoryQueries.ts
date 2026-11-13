@@ -65,34 +65,29 @@ export const getCategoriesWithCount = async (
       .all();
   }
 
-  // Use subquery to count novels per category
-  const result = await dbManager.transaction(async tx => {
-    const subquery = tx
-      .select({
-        categoryId: novelCategorySchema.categoryId,
-        novelsCount: count(novelCategorySchema.novelId).as('novelsCount'),
-      })
-      .from(novelCategorySchema)
-      .where(inArray(novelCategorySchema.novelId, novelIds))
-      .groupBy(novelCategorySchema.categoryId)
-      .as('NC');
+  // A plain read: a Drizzle transaction here would run outside the write
+  // queue and COMMIT whatever write transaction is open on the connection.
+  const subquery = dbManager
+    .select({
+      categoryId: novelCategorySchema.categoryId,
+      novelsCount: count(novelCategorySchema.novelId).as('novelsCount'),
+    })
+    .from(novelCategorySchema)
+    .where(inArray(novelCategorySchema.novelId, novelIds))
+    .groupBy(novelCategorySchema.categoryId)
+    .as('NC');
 
-    const r = await tx
-      .select({
-        id: categorySchema.id,
-        name: categorySchema.name,
-        sort: categorySchema.sort,
-        novelsCount: sql<number>`COALESCE(${subquery.novelsCount}, 0)`,
-      })
-      .from(categorySchema)
-      .leftJoin(subquery, eq(categorySchema.id, subquery.categoryId))
-      .where(ne(categorySchema.id, 2))
-      .orderBy(categorySchema.sort);
-
-    return r;
-  });
-
-  return result;
+  return await dbManager
+    .select({
+      id: categorySchema.id,
+      name: categorySchema.name,
+      sort: categorySchema.sort,
+      novelsCount: sql<number>`COALESCE(${subquery.novelsCount}, 0)`,
+    })
+    .from(categorySchema)
+    .leftJoin(subquery, eq(categorySchema.id, subquery.categoryId))
+    .where(ne(categorySchema.id, 2))
+    .orderBy(categorySchema.sort);
 };
 
 /**

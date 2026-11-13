@@ -146,6 +146,9 @@ class DbManager implements IDbManager {
         // async body; op-sqlite's own transaction awaits it before COMMIT.
         await this.db.$client.transaction(async (tx: Transaction) => {
           result = await fn(tx);
+          // op-sqlite's implicit commit is not awaited, so a failed COMMIT
+          // (disk full, I/O error) would be lost; committing here surfaces it.
+          await tx.commit();
         });
         return result;
       },
