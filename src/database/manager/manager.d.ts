@@ -292,8 +292,12 @@ export interface IDbManager {
 
   /**
    * Runs raw SQL in one SQLite transaction that commits only after `fn`
-   * resolves and rolls back if it throws. Use for hot bulk-write paths where
-   * building every statement through Drizzle is too slow.
+   * resolves, rolls back if it throws, and rejects if the COMMIT itself
+   * fails. Use for hot bulk-write paths where building every statement
+   * through Drizzle is too slow.
+   *
+   * The transaction is held on the shared connection across awaits, so any
+   * statement issued outside the write queue while `fn` runs joins it.
    */
   writeRaw<T>(fn: (tx: Transaction) => Promise<T>): Promise<T>;
 }
