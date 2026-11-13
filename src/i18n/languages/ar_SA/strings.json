@@ -746,6 +746,8 @@
     "statusDistribution": "توزيع الحالات",
     "title": "الإحصائيات",
     "readingTime": "Reading time",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "chapters in library",
     "customizeGenres": "Customize",
     "titlesInLibrary": "العناوين في المكتبة",
