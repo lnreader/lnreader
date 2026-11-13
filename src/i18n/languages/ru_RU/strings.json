@@ -746,6 +746,8 @@
     "statusDistribution": "Распределение по статусам",
     "title": "Статистика",
     "readingTime": "Время чтения",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "глав в библиотеке",
     "customizeGenres": "Настроить",
     "titlesInLibrary": "Названия в библиотеке",
