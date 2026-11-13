@@ -746,6 +746,8 @@
     "statusDistribution": "Rozložení statusu",
     "title": "Statistiky",
     "readingTime": "Reading time",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "chapters in library",
     "customizeGenres": "Customize",
     "titlesInLibrary": "Názvy v knihovně",
