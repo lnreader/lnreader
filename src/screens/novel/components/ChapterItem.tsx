@@ -32,7 +32,7 @@ interface ChapterItemProps {
 const ChapterItem: React.FC<ChapterItemProps> = ({
   chapter,
   isDownloading,
-  isBookmarked,
+  isBookmarked: isBookmarkedProp,
   isSelected,
   isLocal,
   variant = 'default',
@@ -51,7 +51,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     chapter;
   const isGrouped = variant === 'grouped';
 
-  isBookmarked ??= bookmark ?? false;
+  const isBookmarked = isBookmarkedProp ?? bookmark ?? false;
 
   const handlePress = useCallback(
     () => onSelectPress(chapter),

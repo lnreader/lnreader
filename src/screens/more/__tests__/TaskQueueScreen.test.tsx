@@ -41,8 +41,10 @@ const mockTaskQueue = [
   },
 ];
 
-jest.mock('react-native-mmkv', () => ({
-  useMMKVObject: () => [mockTaskQueue],
+jest.mock('@hooks/persisted/useBackgroundTasks', () => ({
+  useBackgroundTasks: (selector: (tasks: unknown[]) => unknown) =>
+    selector(mockTaskQueue),
+  useBackgroundTaskQueue: () => mockTaskQueue,
 }));
 
 jest.mock('@hooks/persisted', () => ({
@@ -58,7 +60,6 @@ jest.mock('@hooks/persisted', () => ({
 }));
 
 jest.mock('@services/backgroundTasks', () => ({
-  BACKGROUND_TASKS_STORE_KEY: 'background-tasks',
   backgroundTasks: {
     cancel: jest.fn().mockResolvedValue(undefined),
     cancelAll: jest.fn(),

@@ -35,6 +35,7 @@ import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -104,23 +105,16 @@ const NovelScreenList = ({
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  const {
-    downloadQueue,
-    downloadingChapterIds,
-    downloadingNovelIds,
-    downloadChapter,
-  } = useDownload();
+  const { downloadingChapterIds, downloadingNovelIds, downloadChapter } =
+    useDownload();
 
   // Reconcile as chapters complete and once more when the queue settles so
   // downloaded state remains accurate after success, failure, or cancellation.
   const isNovelDownloading =
     novel.id !== 'NO_ID' && downloadingNovelIds.has(novel.id);
-  const novelDownloadProgressKey = useMemo(
-    () =>
-      novel.id === 'NO_ID'
-        ? ''
-        : getDownloadProgressKey(downloadQueue, novel.id),
-    [downloadQueue, novel.id],
+  const novelId = novel.id;
+  const novelDownloadProgressKey = useBackgroundTasks(tasks =>
+    novelId === 'NO_ID' ? '' : getDownloadProgressKey(tasks, novelId),
   );
   useDownloadReconciliation(
     isNovelDownloading,
@@ -173,7 +167,7 @@ const NovelScreenList = ({
 
   const scrollHandler = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffset.value = event.nativeEvent.contentOffset.y;
+      scrollOffset.set(event.nativeEvent.contentOffset.y);
     },
     [scrollOffset],
   );

@@ -15,7 +15,7 @@ const mockGetCategoriesWithCount = jest.fn();
 const mockRefetchLibrary = jest.fn();
 
 jest.mock('@components/Context/LibraryContext', () => ({
-  useLibraryContext: () => ({
+  useLibraryActions: () => ({
     refetchLibrary: mockRefetchLibrary,
   }),
 }));

@@ -102,12 +102,14 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
       ? anchorLayout.width
       : Math.min(MAX_MENU_WIDTH, screenWidth - HORIZONTAL_MARGIN * 2);
 
-    return {
+    const position = {
       left: leftPos,
       top: topPos,
       shadowColor: theme.isDark ? '#000' : theme.shadow,
-      [fullWidth ? 'width' : 'maxWidth']: maxWidth,
     };
+    return fullWidth
+      ? { ...position, width: maxWidth }
+      : { ...position, maxWidth };
   }, [
     anchorLayout.height,
     anchorLayout.width,
