@@ -746,6 +746,8 @@
     "statusDistribution": "স্থিতিৰ বিতৰণ",
     "title": "পৰিসংখ্যা",
     "readingTime": "Reading time",
+    "noNovelReadingTime": "No reading time recorded for novels.",
+    "noCategoryReadingTime": "No reading time recorded for categories.",
     "chaptersInLibrary": "chapters in library",
     "customizeGenres": "Customize",
     "titlesInLibrary": "গ্ৰন্থাগাৰত শিৰোনামসমূহ",
