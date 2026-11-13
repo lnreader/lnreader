@@ -19,10 +19,9 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getAvailableMenuWidth, getMenuPosition } from './layout';
 
-const HORIZONTAL_MARGIN = 16;
-const VERTICAL_MARGIN = 8;
-const ANCHOR_GAP = 4;
 const MAX_MENU_WIDTH = 280;
 const MAX_MENU_HEIGHT_RATIO = 0.6;
 const ENTER_DURATION = 150;
@@ -53,6 +52,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   fullWidth,
 }) => {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const anchorRef = useRef<View>(null);
 
@@ -78,42 +78,28 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
 
   const menuPosition = useMemo(() => {
     if (!menuLayout) return { opacity: 0 };
-    const leftPos = Math.max(
-      HORIZONTAL_MARGIN,
-      Math.min(
-        anchorLayout.x,
-        screenWidth - menuLayout.width - HORIZONTAL_MARGIN,
-      ),
+    const { left, top } = getMenuPosition({
+      anchor: anchorLayout,
+      insets,
+      menu: menuLayout,
+      screen: { height: screenHeight, width: screenWidth },
+    });
+
+    const maxWidth = Math.min(
+      fullWidth ? anchorLayout.width : MAX_MENU_WIDTH,
+      getAvailableMenuWidth(screenWidth, insets),
     );
-
-    let topPos = anchorLayout.y + anchorLayout.height + ANCHOR_GAP;
-
-    const showAbove =
-      topPos + menuLayout.height > screenHeight - VERTICAL_MARGIN;
-    if (showAbove) {
-      topPos = anchorLayout.y - menuLayout.height - ANCHOR_GAP;
-    }
-    topPos = Math.max(
-      VERTICAL_MARGIN,
-      Math.min(topPos, screenHeight - menuLayout.height - VERTICAL_MARGIN),
-    );
-
-    const maxWidth = fullWidth
-      ? anchorLayout.width
-      : Math.min(MAX_MENU_WIDTH, screenWidth - HORIZONTAL_MARGIN * 2);
 
     return {
-      left: leftPos,
-      top: topPos,
+      left,
+      top,
       shadowColor: theme.isDark ? '#000' : theme.shadow,
       [fullWidth ? 'width' : 'maxWidth']: maxWidth,
     };
   }, [
-    anchorLayout.height,
-    anchorLayout.width,
-    anchorLayout.x,
-    anchorLayout.y,
+    anchorLayout,
     fullWidth,
+    insets,
     menuLayout,
     screenHeight,
     screenWidth,

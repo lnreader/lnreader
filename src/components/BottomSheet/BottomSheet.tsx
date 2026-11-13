@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBackHandler } from '@hooks/index';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import BottomSheetBackdrop from './BottomSheetBackdrop';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useTheme } from '@hooks/persisted';
 import { getBottomSheetLayout, normalizeBottomSheetSnapPoints } from './layout';
 
@@ -19,6 +19,7 @@ interface BottomSheetProps
     | 'backgroundStyle'
     | 'backdropComponent'
     | 'bottomInset'
+    | 'children'
     | 'containerStyle'
     | 'enableDynamicSizing'
     | 'enableOverDrag'
@@ -33,6 +34,7 @@ interface BottomSheetProps
     | 'topInset'
   > {
   bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  children: React.ReactNode;
   onChange?: (index: number) => void;
   snapPoints?: number[];
 }
@@ -69,8 +71,8 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   });
 
   const safeSnapPoints = useMemo(() => {
-    return normalizeBottomSheetSnapPoints(snapPoints, maxHeight);
-  }, [maxHeight, snapPoints]);
+    return normalizeBottomSheetSnapPoints(snapPoints, maxHeight, bottom);
+  }, [bottom, maxHeight, snapPoints]);
 
   return (
     <BottomSheetModal
@@ -83,10 +85,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           backgroundColor: theme.surfaceContainerLow ?? theme.surface,
         },
       ]}
-      containerStyle={{
-        paddingBottom: bottom,
-        paddingHorizontal: horizontalInset,
-      }}
+      containerStyle={{ paddingHorizontal: horizontalInset }}
       onChange={index => {
         onChange?.(index);
         indexRef.current = index;
@@ -98,7 +97,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       snapPoints={safeSnapPoints}
       {...otherProps}
     >
-      {children}
+      {/* The sheet is drawn behind the navigation bar, so content is padded
+          above it; container padding doesn't move gorhom's sheet body. */}
+      <View style={[styles.content, { paddingBottom: bottom }]}>
+        {children}
+      </View>
     </BottomSheetModal>
   );
 };
@@ -106,6 +109,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 export default React.memo(BottomSheet);
 
 const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
   modal: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
