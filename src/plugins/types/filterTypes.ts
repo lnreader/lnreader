@@ -31,6 +31,12 @@ type OptionsOf<T extends FilterTypes> = T extends WithOptions
   ? { options: readonly FilterOption[] }
   : object;
 
+type WithAutocomplete = FilterTypes.TextInput;
+
+type AutocompleteOf<T extends FilterTypes> = T extends WithAutocomplete
+  ? { autocomplete?: boolean }
+  : object;
+
 export type ValueOfFilter<T extends FilterTypes> = FilterValueMap[T];
 
 export type Filter<T extends FilterTypes = FilterTypes> = T extends FilterTypes
@@ -38,7 +44,8 @@ export type Filter<T extends FilterTypes = FilterTypes> = T extends FilterTypes
       label: string;
       type: T;
       value: FilterValueMap[T];
-    } & OptionsOf<T>
+    } & OptionsOf<T> &
+      AutocompleteOf<T>
   : never;
 
 export type Filters = Record<string, Filter<FilterTypes>>;

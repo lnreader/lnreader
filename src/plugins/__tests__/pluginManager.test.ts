@@ -8,6 +8,7 @@ import {
   installPlugin,
   INSTALLED_PLUGINS_KEY,
   reloadInstalledPlugins,
+  getFilterSuggestions,
 } from '../pluginManager';
 import type { PluginItem } from '../types';
 
@@ -181,5 +182,33 @@ describe('installPlugin', () => {
       'Directory could not be created',
     );
     expect(getPlugin('write-failure')).toBeUndefined();
+  });
+});
+
+describe('getFilterSuggestions', () => {
+  it('returns no suggestions for a plugin without the optional method', async () => {
+    jest
+      .mocked(NativeFile.readFile)
+      .mockResolvedValue(pluginCode('no-suggestions'));
+
+    await expect(
+      getFilterSuggestions('no-suggestions', 'genres', 'abc'),
+    ).resolves.toEqual([]);
+  });
+
+  it('delegates to the plugin method when present', async () => {
+    jest.mocked(NativeFile.readFile).mockResolvedValue(`exports.default = {
+      id: 'suggestions',
+      name: 'Suggestions',
+      version: '1.0.0',
+      site: 'https://example.com',
+      getFilterSuggestions: async (filterKey, query) => [
+        { label: filterKey + ':' + query, value: query },
+      ]
+    };`);
+
+    await expect(
+      getFilterSuggestions('suggestions', 'genres', 'abc'),
+    ).resolves.toEqual([{ label: 'genres:abc', value: 'abc' }]);
   });
 });
