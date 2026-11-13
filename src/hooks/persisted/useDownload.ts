@@ -8,9 +8,64 @@ import {
 } from '@services/backgroundTasks';
 import { useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
+import { getFollowingChapters } from '@database/queries/ChapterQueries';
+import { getMMKVObject } from '@utils/mmkv/mmkv';
 
 export const DOWNLOAD_QUEUE = 'DOWNLOAD';
 export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
+
+/**
+ * Queues the chapters following `chapter` for download, so reading stays
+ * uninterrupted when the source is slow or the device is offline.
+ *
+ * Exported as a plain function rather than part of the hook below: it is called
+ * from the reader, and taking the `useMMKVObject` subscription there would make
+ * the reader re-render on every task-queue progress tick.
+ */
+export const downloadChaptersAhead = async (
+  novel: NovelInfo,
+  chapter: Pick<ChapterInfo, 'position' | 'page'>,
+  count: number,
+  excludedScanlators?: string[],
+) => {
+  const following = await getFollowingChapters(
+    novel.id,
+    chapter.position!,
+    chapter.page ?? '',
+    count,
+    excludedScanlators,
+  );
+
+  // Reading moves faster than downloading on a slow source, so consecutive
+  // calls overlap; skip chapters an earlier call has already queued.
+  const queuedIds = new Set(
+    (getMMKVObject<QueuedBackgroundTask[]>(BACKGROUND_TASKS_STORE_KEY) ?? [])
+      .filter(item => item.task?.name === 'DOWNLOAD_CHAPTER')
+      .flatMap(item =>
+        (item.task as DownloadChapterTask).data.chapters.map(c => c.chapterId),
+      ),
+  );
+  const chapters = following.filter(
+    c => !c.isDownloaded && !queuedIds.has(c.id),
+  );
+
+  if (!chapters.length) {
+    return;
+  }
+
+  backgroundTasks.enqueue({
+    name: 'DOWNLOAD_CHAPTER',
+    data: {
+      novelName: novel.name,
+      novelId: novel.id,
+      pluginId: novel.pluginId,
+      chapters: chapters.map(({ id, name }) => ({
+        chapterId: id,
+        chapterName: name,
+      })),
+    },
+  });
+};
 
 export default function useDownload() {
   const [queue] = useMMKVObject<QueuedBackgroundTask[]>(

@@ -407,6 +407,8 @@
   "generalSettingsScreen": {
     "asc": "(Ascending)",
     "autoDownload": "Auto-download",
+    "autoDownloadWhileReading": "Download next chapters while reading",
+    "autoDownloadWhileReadingDescription": "Queue the next few chapters for download so reading continues offline",
     "automaticUpdates": "Automatic updates",
     "automaticUpdatesDaily": "Daily",
     "automaticUpdatesDescription": "Runs when a network connection is available. Android may delay background work to save battery.",
