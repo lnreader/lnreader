@@ -871,13 +871,13 @@ export const getNextChapter = async (
 };
 
 /**
- * The next `limit` chapters after the given position that are unread and not
- * already downloaded — the candidates for "download ahead while reading".
+ * The next `limit` chapters after the given position, in the order the reader
+ * navigates them. Read state is deliberately ignored: a chapter read online but
+ * never downloaded is still opened next, so it must be available offline.
  *
- * Mirrors `getNextChapter`'s page/position ordering so a chapter queued here is
- * the same one the reader would navigate to next.
+ * Mirrors `getNextChapter`'s page/position ordering.
  */
-export const getNextUndownloadedUnreadChapters = async (
+export const getFollowingChapters = async (
   novelId: number,
   chapterPosition: number,
   page: string,
@@ -897,8 +897,6 @@ export const getNextUndownloadedUnreadChapters = async (
       ),
       gt(chapterSchema.page, castInt(page)),
     ),
-    eq(chapterSchema.unread, true),
-    eq(chapterSchema.isDownloaded, false),
     scanlatorFilterToSQL(excludedScanlators),
   ].filter(Boolean) as any[];
 

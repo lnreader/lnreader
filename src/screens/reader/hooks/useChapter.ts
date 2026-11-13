@@ -48,7 +48,10 @@ type AdjacentChapters = [
 /** Stable identity so resetting the adjacent chapters never renders twice. */
 const NO_ADJACENT_CHAPTERS: AdjacentChapters = [undefined, undefined];
 
-/** Chapters queued ahead of the one being read when auto-download is on. */
+/**
+ * Kept small on purpose: this downloads over the user's connection, so it
+ * covers a short offline stretch without silently pulling a whole novel.
+ */
 const DOWNLOAD_AHEAD_COUNT = 3;
 
 export default function useChapter(
@@ -308,14 +311,17 @@ export default function useChapter(
         publish([nextChap, prevChap]);
         prefetchChapter(nextChap);
 
-        if (autoDownloadWhileReading && !incognitoMode) {
-          void downloadChaptersAhead(
-            novel,
-            chap,
-            DOWNLOAD_AHEAD_COUNT,
-            excludedScanlators,
-          );
-        }
+        const queueDownloadAhead = () => {
+          if (autoDownloadWhileReading && !incognitoMode) {
+            downloadChaptersAhead(
+              novel,
+              chap,
+              DOWNLOAD_AHEAD_COUNT,
+              excludedScanlators,
+            ).catch(() => {});
+          }
+        };
+        queueDownloadAhead();
 
         const totalPages = novel.totalPages ?? 0;
         const currentPage = Number(chap.page);
@@ -334,6 +340,8 @@ export default function useChapter(
           if (nextChap) {
             publish([nextChap, prevChap]);
             prefetchChapter(nextChap);
+            // The first pass ran before this page existed in the database.
+            queueDownloadAhead();
           }
         }
         if (!prevChap && currentPage > 1) {

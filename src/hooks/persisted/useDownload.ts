@@ -8,7 +8,8 @@ import {
 } from '@services/backgroundTasks';
 import { useMemo } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
-import { getNextUndownloadedUnreadChapters } from '@database/queries/ChapterQueries';
+import { getFollowingChapters } from '@database/queries/ChapterQueries';
+import { getMMKVObject } from '@utils/mmkv/mmkv';
 
 export const DOWNLOAD_QUEUE = 'DOWNLOAD';
 export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
@@ -27,12 +28,25 @@ export const downloadChaptersAhead = async (
   count: number,
   excludedScanlators?: string[],
 ) => {
-  const chapters = await getNextUndownloadedUnreadChapters(
+  const following = await getFollowingChapters(
     novel.id,
     chapter.position!,
     chapter.page ?? '',
     count,
     excludedScanlators,
+  );
+
+  // Reading moves faster than downloading on a slow source, so consecutive
+  // calls overlap; skip chapters an earlier call has already queued.
+  const queuedIds = new Set(
+    (getMMKVObject<QueuedBackgroundTask[]>(BACKGROUND_TASKS_STORE_KEY) ?? [])
+      .filter(item => item.task?.name === 'DOWNLOAD_CHAPTER')
+      .flatMap(item =>
+        (item.task as DownloadChapterTask).data.chapters.map(c => c.chapterId),
+      ),
+  );
+  const chapters = following.filter(
+    c => !c.isDownloaded && !queuedIds.has(c.id),
   );
 
   if (!chapters.length) {

@@ -20,7 +20,7 @@ import {
   getNovelChapters,
   getAllNovelChaptersForBackup,
   getUnreadNovelChapters,
-  getNextUndownloadedUnreadChapters,
+  getFollowingChapters,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
   getChapter,
@@ -912,7 +912,7 @@ describe('ChapterQueries', () => {
     });
   });
 
-  describe('getNextUndownloadedUnreadChapters', () => {
+  describe('getFollowingChapters', () => {
     const seed = async (
       overrides: {
         path: string;
@@ -936,19 +936,14 @@ describe('ChapterQueries', () => {
       return novelId;
     };
 
-    it('returns the following unread, undownloaded chapters in order', async () => {
+    it('returns the following chapters in order', async () => {
       const novelId = await seed([
         { path: '/c/1', position: 0 },
         { path: '/c/2', position: 1 },
         { path: '/c/3', position: 2 },
       ]);
 
-      const result = await getNextUndownloadedUnreadChapters(
-        novelId,
-        0,
-        '1',
-        2,
-      );
+      const result = await getFollowingChapters(novelId, 0, '1', 2);
 
       expect(result.map(c => c.path)).toEqual(['/c/2', '/c/3']);
     });
@@ -960,17 +955,12 @@ describe('ChapterQueries', () => {
         { path: '/c/3', position: 2 },
       ]);
 
-      const result = await getNextUndownloadedUnreadChapters(
-        novelId,
-        0,
-        '1',
-        1,
-      );
+      const result = await getFollowingChapters(novelId, 0, '1', 1);
 
       expect(result.map(c => c.path)).toEqual(['/c/2']);
     });
 
-    it('skips chapters that are already read or already downloaded', async () => {
+    it('includes read and downloaded chapters so the window follows navigation order', async () => {
       const novelId = await seed([
         { path: '/c/1', position: 0 },
         { path: '/c/2', position: 1, unread: false },
@@ -978,14 +968,9 @@ describe('ChapterQueries', () => {
         { path: '/c/4', position: 3 },
       ]);
 
-      const result = await getNextUndownloadedUnreadChapters(
-        novelId,
-        0,
-        '1',
-        5,
-      );
+      const result = await getFollowingChapters(novelId, 0, '1', 5);
 
-      expect(result.map(c => c.path)).toEqual(['/c/4']);
+      expect(result.map(c => c.path)).toEqual(['/c/2', '/c/3', '/c/4']);
     });
 
     it('carries on into later pages', async () => {
@@ -995,12 +980,7 @@ describe('ChapterQueries', () => {
         { path: '/c/3', page: '2', position: 0 },
       ]);
 
-      const result = await getNextUndownloadedUnreadChapters(
-        novelId,
-        1,
-        '1',
-        5,
-      );
+      const result = await getFollowingChapters(novelId, 1, '1', 5);
 
       expect(result.map(c => c.path)).toEqual(['/c/3']);
     });
@@ -1020,12 +1000,7 @@ describe('ChapterQueries', () => {
         unread: true,
       });
 
-      const result = await getNextUndownloadedUnreadChapters(
-        novelId,
-        0,
-        '1',
-        5,
-      );
+      const result = await getFollowingChapters(novelId, 0, '1', 5);
 
       expect(result).toHaveLength(0);
     });
@@ -1036,9 +1011,9 @@ describe('ChapterQueries', () => {
         { path: '/c/2', position: 1 },
       ]);
 
-      await expect(
-        getNextUndownloadedUnreadChapters(novelId, 0, '1', 0),
-      ).resolves.toEqual([]);
+      await expect(getFollowingChapters(novelId, 0, '1', 0)).resolves.toEqual(
+        [],
+      );
     });
   });
 

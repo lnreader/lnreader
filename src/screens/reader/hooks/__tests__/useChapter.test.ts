@@ -198,6 +198,7 @@ describe('useChapter', () => {
       showStatusAndNavBar: jest.fn(),
     });
 
+    mockDownloadChaptersAhead.mockResolvedValue(undefined);
     mockGetDbChapter.mockResolvedValue(initialChapter);
     mockGetChapterCount.mockResolvedValue(1);
     mockGetNextChapter.mockResolvedValue(undefined);
@@ -369,6 +370,43 @@ describe('useChapter', () => {
         3,
         [],
       );
+    });
+
+    it('queues again once the next source page has been inserted', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+      // Last chapter of the stored page: the first lookup finds nothing, the
+      // lookup after the next page is loaded finds the new first chapter.
+      mockGetNextChapter
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(makeChapter(3, '2'));
+
+      await renderLoaded(initialChapter);
+
+      await waitFor(() =>
+        expect(mockDownloadChaptersAhead).toHaveBeenCalledTimes(2),
+      );
+    });
+
+    it('survives a failing download-ahead query', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+      mockDownloadChaptersAhead.mockRejectedValue(new Error('db failed'));
+      mockGetNextChapter.mockResolvedValue(nextChapter);
+
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await waitFor(() => expect(mockDownloadChaptersAhead).toHaveBeenCalled());
+      expect(result.current.error).toBeUndefined();
     });
 
     it('does not queue anything when the setting is disabled', async () => {
