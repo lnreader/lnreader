@@ -201,6 +201,12 @@ window.tts = new (function () {
     if (!ele.hasChildNodes()) {
       return false;
     }
+    if (
+      ele.getAttribute &&
+      (ele.getAttribute('aria-hidden') === 'true' || ele.hasAttribute('hidden'))
+    ) {
+      return false;
+    }
     for (let i = 0; i < ele.childNodes.length; i++) {
       if (!this.readableNodeNames.includes(ele.childNodes.item(i).nodeName)) {
         return false;
@@ -212,6 +218,7 @@ window.tts = new (function () {
   this.normalizeText = text => {
     if (!text) return '';
     const normalized = text
+      .replace(/[\u200B\uFEFF\u00AD\u2060\u180E]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
       .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
@@ -342,6 +349,12 @@ window.tts = new (function () {
     const elements = [];
     const traverse = el => {
       if (!el) return;
+      if (
+        el.getAttribute &&
+        (el.getAttribute('aria-hidden') === 'true' || el.hasAttribute('hidden'))
+      ) {
+        return; // Do not read this element or its descendants
+      }
       if (this.readable(el)) {
         elements.push(el);
         // innerText already includes readable descendants, so descending any
