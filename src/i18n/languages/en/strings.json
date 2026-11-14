@@ -238,6 +238,26 @@
     "noPlugins": "No plugins found. Add a repository or enable more languages in Browse Settings.",
     "noSearchResults": "No matching results",
     "noSources": "No sources installed. Install a plugin to start browsing novels.",
+    "issueIndex": {
+      "title": "Reported issues",
+      "empty": "No indexed reports.",
+      "unavailable": "Indexed reports are unavailable.",
+      "cached": "Reports could not be refreshed. Showing cached data.",
+      "indicator": "Reported issues for %{name}: %{category}",
+      "openIssue": "Open issue #%{issueNumber}",
+      "openIssueWithTitle": "Open issue #%{issueNumber}: %{title}",
+      "openFailed": "Could not open issue #%{issueNumber}.",
+      "refresh": "Refresh plugins and reports",
+      "categories": {
+        "domainChanged": "Domain Changed",
+        "cantLoadNovels": "Can't Load Novels",
+        "missingImages": "Missing Images",
+        "missingChapter": "Missing Chapter",
+        "wrongContent": "Wrong Content",
+        "wrongFormatting": "Wrong Formatting",
+        "other": "Other"
+      }
+    },
     "openPluginDetails": "Open details for %{name}",
     "openPluginSettings": "Open settings for %{name}",
     "openWebsite": "Open the website for %{name}",

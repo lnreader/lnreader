@@ -9,6 +9,7 @@ import {
   updatePlugin as updatePluginSource,
   INSTALLED_PLUGINS_KEY,
 } from '@plugins/pluginManager';
+import { refreshPluginIssueIndex } from '@plugins/issueIndex';
 import { PluginItem } from '@plugins/types';
 import { getString } from '@i18n/translations';
 import { languagesMapping } from '@utils/constants/languages';
@@ -119,29 +120,34 @@ export const usePluginActions = () => {
 
   const refreshPlugins = useCallback(
     async ({ clearUnavailableUpdates = false }: RefreshPluginsOptions = {}) => {
-      legacyFilteredPluginKeys.forEach(key => MMKVStorage.remove(key));
+      const issueIndexRefresh = refreshPluginIssueIndex();
+      try {
+        legacyFilteredPluginKeys.forEach(key => MMKVStorage.remove(key));
 
-      const installedPlugins = readPluginList(INSTALLED_PLUGINS);
-      const storedLastUsedPlugin = getMMKVObject<unknown>(LAST_USED_PLUGIN);
-      const lastUsedPluginId = getLastUsedPluginId(storedLastUsedPlugin);
-      if (lastUsedPluginId && typeof storedLastUsedPlugin !== 'string') {
-        setMMKVObject(LAST_USED_PLUGIN, lastUsedPluginId);
-      }
-      const fetchedPlugins = await fetchPlugins();
-      const updatedInstalledPlugins = reconcileInstalledPluginUpdates(
-        installedPlugins,
-        fetchedPlugins,
-        clearUnavailableUpdates,
-      );
+        const installedPlugins = readPluginList(INSTALLED_PLUGINS);
+        const storedLastUsedPlugin = getMMKVObject<unknown>(LAST_USED_PLUGIN);
+        const lastUsedPluginId = getLastUsedPluginId(storedLastUsedPlugin);
+        if (lastUsedPluginId && typeof storedLastUsedPlugin !== 'string') {
+          setMMKVObject(LAST_USED_PLUGIN, lastUsedPluginId);
+        }
+        const fetchedPlugins = await fetchPlugins();
+        const updatedInstalledPlugins = reconcileInstalledPluginUpdates(
+          installedPlugins,
+          fetchedPlugins,
+          clearUnavailableUpdates,
+        );
 
-      if (
-        updatedInstalledPlugins.some(
-          (plugin, index) => plugin !== installedPlugins[index],
-        )
-      ) {
-        setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
+        if (
+          updatedInstalledPlugins.some(
+            (plugin, index) => plugin !== installedPlugins[index],
+          )
+        ) {
+          setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
+        }
+        setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
+      } finally {
+        await issueIndexRefresh;
       }
-      setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
     },
     [],
   );
