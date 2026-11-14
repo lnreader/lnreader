@@ -3,6 +3,11 @@ import { useNovelScreenActions } from '../useNovelScreenActions';
 
 const mockDeleteChapters = jest.fn();
 const mockGetDownloaded = jest.fn();
+const mockShowToast = jest.fn();
+
+jest.mock('@utils/showToast', () => ({
+  showToast: (...args: unknown[]) => mockShowToast(...args),
+}));
 
 jest.mock('@database/queries/ChapterQueries', () => ({
   getAllUndownloadedAndUnreadChapters: jest.fn(),
@@ -63,6 +68,16 @@ describe('deleteDownloadedChapters', () => {
     setup().deleteDownloadedChapters();
     await flush();
 
+    expect(mockDeleteChapters).not.toHaveBeenCalled();
+  });
+
+  it('tells the user when the lookup fails instead of failing silently', async () => {
+    mockGetDownloaded.mockRejectedValue(new Error('db failed'));
+
+    setup().deleteDownloadedChapters();
+    await flush();
+
+    expect(mockShowToast).toHaveBeenCalledWith('db failed');
     expect(mockDeleteChapters).not.toHaveBeenCalled();
   });
 

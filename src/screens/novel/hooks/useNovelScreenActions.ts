@@ -11,6 +11,8 @@ import {
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useDownload } from '@hooks/persisted';
 import { resolveUrl } from '@services/plugin/fetch';
+import { getErrorMessage } from '@utils/error';
+import { showToast } from '@utils/showToast';
 import { MaterialDesignIconName } from '@type/icon';
 
 import { useNovelActions } from '../NovelContext';
@@ -76,11 +78,13 @@ export const useNovelScreenActions = ({
 
     // The list on screen only holds the chapters loaded so far, so asking the
     // database is the only way to delete every download of a long novel.
-    void getNovelDownloadedChapters(novel.id).then(downloaded => {
-      if (downloaded.length > 0) {
-        deleteChapters(downloaded.map(chapter => chapter.id));
-      }
-    });
+    getNovelDownloadedChapters(novel.id)
+      .then(downloaded => {
+        if (downloaded.length > 0) {
+          deleteChapters(downloaded.map(chapter => chapter.id));
+        }
+      })
+      .catch(error => showToast(getErrorMessage(error)));
   }, [deleteChapters, novel]);
 
   const shareNovel = useCallback(() => {
