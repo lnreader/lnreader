@@ -6,6 +6,7 @@ import {
   getAllUndownloadedAndUnreadChapters,
   getAllUndownloadedChapters,
   getChaptersByIds,
+  getNovelDownloadedChapters,
 } from '@database/queries/ChapterQueries';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useDownload } from '@hooks/persisted';
@@ -69,12 +70,18 @@ export const useNovelScreenActions = ({
   );
 
   const deleteDownloadedChapters = useCallback(() => {
-    deleteChapters(
-      chapters
-        .filter(chapter => chapter.isDownloaded)
-        .map(chapter => chapter.id),
-    );
-  }, [chapters, deleteChapters]);
+    if (!novel) {
+      return;
+    }
+
+    // The list on screen only holds the chapters loaded so far, so asking the
+    // database is the only way to delete every download of a long novel.
+    void getNovelDownloadedChapters(novel.id).then(downloaded => {
+      if (downloaded.length > 0) {
+        deleteChapters(downloaded.map(chapter => chapter.id));
+      }
+    });
+  }, [deleteChapters, novel]);
 
   const shareNovel = useCallback(() => {
     if (novel) {
