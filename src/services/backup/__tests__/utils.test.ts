@@ -669,7 +669,7 @@ describe('selective backup data', () => {
       expect(copiedWhenWriteStarted[1]).toBeLessThan(200);
     });
 
-    it('copies one cover when two backup novels restore into the same novel', async () => {
+    describe('backup novels that restore into the same novel', () => {
       const duplicate = (id: number) =>
         JSON.stringify({
           id,
@@ -679,33 +679,61 @@ describe('selective backup data', () => {
           cover: `/Novels/source/${id}/cover.png`,
           chapters: [],
         });
-      mockBackup({ '1.json': duplicate(1), '2.json': duplicate(2) });
-      const exists = jest.mocked(NativeFile.exists).getMockImplementation()!;
-      jest
-        .mocked(NativeFile.exists)
-        .mockImplementation(
-          async path => path.startsWith('/cache/Covers/') || exists(path),
-        );
-      jest
-        .mocked(_restoreNovelsAndChapters)
-        .mockImplementationOnce(async novels =>
-          novels.map(novel => ({
-            mapping: {
-              pluginId: novel.pluginId,
-              backupNovelId: novel.id,
-              restoredNovelId: 500,
-              chapters: [],
-            },
-          })),
-        );
-      jest.mocked(NativeFile.copyFile).mockClear();
+      const restoreDuplicates = async (coversInBackup: string[]) => {
+        mockBackup({ '1.json': duplicate(1), '2.json': duplicate(2) });
+        const exists = jest.mocked(NativeFile.exists).getMockImplementation()!;
+        jest
+          .mocked(NativeFile.exists)
+          .mockImplementation(
+            async path => coversInBackup.includes(path) || exists(path),
+          );
+        jest
+          .mocked(_restoreNovelsAndChapters)
+          .mockImplementationOnce(async novels =>
+            novels.map(novel => ({
+              mapping: {
+                pluginId: novel.pluginId,
+                backupNovelId: novel.id,
+                restoredNovelId: 500,
+                chapters: [],
+              },
+            })),
+          );
+        let copying = 0;
+        let mostCopying = 0;
+        jest.mocked(NativeFile.copyFile).mockClear();
+        jest.mocked(NativeFile.copyFile).mockImplementation(async () => {
+          mostCopying = Math.max(mostCopying, ++copying);
+          await new Promise(resolve => setTimeout(resolve, 2));
+          copying--;
+        });
+        const result = await restoreData('/cache');
+        return { result, mostCopying };
+      };
+      const destination = '/storage/Novels/source/500/cover.png';
 
-      const result = await restoreData('/cache');
+      it('copies the covers in backup order so the last one wins', async () => {
+        const { result, mostCopying } = await restoreDuplicates([
+          '/cache/Covers/1',
+          '/cache/Covers/2',
+        ]);
 
-      expect(result).toMatchObject({ novelCount: 2, failedNovelCount: 0 });
-      expect(jest.mocked(NativeFile.copyFile).mock.calls).toEqual([
-        ['/cache/Covers/2', '/storage/Novels/source/500/cover.png'],
-      ]);
+        expect(result).toMatchObject({ novelCount: 2, failedNovelCount: 0 });
+        expect(jest.mocked(NativeFile.copyFile).mock.calls).toEqual([
+          ['/cache/Covers/1', destination],
+          ['/cache/Covers/2', destination],
+        ]);
+        expect(mostCopying).toBe(1);
+      });
+
+      it('keeps an earlier cover when the last one is missing from the backup', async () => {
+        const { result } = await restoreDuplicates(['/cache/Covers/1']);
+
+        expect(result).toMatchObject({ novelCount: 2, failedNovelCount: 0 });
+        expect(jest.mocked(NativeFile.copyFile).mock.calls).toEqual([
+          ['/cache/Covers/1', destination],
+        ]);
+      });
     });
 
     it('asks for chapter id mappings only when downloaded files will be restored', async () => {

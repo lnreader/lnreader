@@ -434,17 +434,26 @@ export const restoreData = async (
           }
         };
         // Backup novels that share a path and plugin restore into one novel
-        // and one cover file. Only the last one, whose row won, copies its
-        // cover, so no two concurrent copies write the same destination.
-        const coverJobs = [
-          ...new Map(
-            restoredNovels.map(restored => [
-              restored.novelMapping.restoredNovelId,
-              restored,
-            ]),
-          ).values(),
-        ];
-        novelCount += restoredNovels.length - coverJobs.length;
+        // and one cover file. Their copies run one after another in backup
+        // order, as the sequential restore did, so the last cover that exists
+        // in the backup wins and no two copies write the same destination at
+        // once. Different novels copy concurrently.
+        const coverGroups = new Map<number, typeof restoredNovels>();
+        for (const restored of restoredNovels) {
+          const id = restored.novelMapping.restoredNovelId;
+          const group = coverGroups.get(id);
+          if (group) {
+            group.push(restored);
+          } else {
+            coverGroups.set(id, [restored]);
+          }
+        }
+        const coverJobs = [...coverGroups.values()];
+        const restoreCoverGroup = async (group: typeof restoredNovels) => {
+          for (const restored of group) {
+            await restoreCover(restored);
+          }
+        };
         // Covers copy while the next batch is written. Each batch's copies
         // start after the previous batch's, so the concurrency limit holds
         // and a cover is never written by two batches at once.
@@ -459,7 +468,7 @@ export const restoreData = async (
             await Promise.all(
               coverJobs
                 .slice(start, start + RESTORE_COVER_CONCURRENCY)
-                .map(restoreCover),
+                .map(restoreCoverGroup),
             );
           }
         })();
