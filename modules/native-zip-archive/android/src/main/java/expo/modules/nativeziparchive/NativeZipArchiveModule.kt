@@ -26,16 +26,35 @@ class NativeZipArchiveModule : Module() {
     }
   }
 
+  private fun ensureParentDirectory(file: File, createdDirectories: MutableSet<String>) {
+    val parent = file.parentFile ?: return
+    val parentPath = parent.absolutePath
+    if (parentPath !in createdDirectories && (parent.exists() || parent.mkdirs())) {
+      createdDirectories.add(parentPath)
+    }
+  }
+  private fun resolveZipEntry(destination: File, entryName: String): File {
+    val canonicalDestination = destination.canonicalFile
+    val outputFile = File(destination, entryName).canonicalFile
+    val destinationPath =
+      canonicalDestination.path.let { if (it.endsWith(File.separator)) it else it + File.separator }
+    require(outputFile.path.startsWith(destinationPath)) {
+      "ZIP entry is outside the destination directory: $entryName"
+    }
+    return outputFile
+  }
+
   override fun definition() = ModuleDefinition {
     Name("NativeZipArchive")
 
     AsyncFunction("unzip") { sourceFilePath: String, distDirPath: String, promise: Promise ->
       Thread {
         try {
+          val createdDirectories = mutableSetOf<String>()
           ZipFile(sourceFilePath).use { zis ->
             zis.entries().asSequence().filterNot { it.isDirectory }.forEach { zipEntry ->
-              val newFile = File(distDirPath, zipEntry.name)
-              newFile.parentFile?.mkdirs()
+              val newFile = resolveZipEntry(File(distDirPath), zipEntry.name)
+              ensureParentDirectory(newFile, createdDirectories)
               zis.getInputStream(zipEntry).use { inputStream ->
                 FileOutputStream(newFile).use { fos -> inputStream.copyTo(fos, COPY_BUFFER_SIZE) }
               }
@@ -69,12 +88,13 @@ class NativeZipArchiveModule : Module() {
           headers.forEach { (key, value) ->
             connection.setRequestProperty(key, value)
           }
+          val createdDirectories = mutableSetOf<String>()
           ZipInputStream(connection.inputStream).use { zis ->
             generateSequence { zis.nextEntry }
               .filterNot { it.isDirectory }
               .forEach { zipEntry ->
-                val newFile = File(distDirPath, zipEntry.name)
-                newFile.parentFile?.mkdirs()
+                val newFile = resolveZipEntry(File(distDirPath), zipEntry.name)
+                ensureParentDirectory(newFile, createdDirectories)
                 FileOutputStream(newFile).use { fos -> zis.copyTo(fos, COPY_BUFFER_SIZE) }
               }
           }

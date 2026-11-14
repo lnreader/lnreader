@@ -1,5 +1,5 @@
 import {
-  _restoreNovelAndChapters,
+  _restoreNovelsAndChapters,
   getAllNovels,
 } from '@database/queries/NovelQueries';
 import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
@@ -14,7 +14,7 @@ import { prepareBackupData, restoreData } from '../utils';
 import type { BackupOptions } from '../options';
 
 jest.mock('@database/queries/NovelQueries', () => ({
-  _restoreNovelAndChapters: jest.fn(),
+  _restoreNovelsAndChapters: jest.fn(),
   getAllNovels: jest.fn(),
 }));
 
@@ -50,7 +50,8 @@ jest.mock('@utils/mmkv/mmkv', () => ({
 }));
 
 jest.mock('@i18n/translations', () => ({
-  getString: (key: string) => key,
+  getString: (key: string, params?: object) =>
+    params ? `${key} ${JSON.stringify(params)}` : key,
 }));
 
 jest.mock('@plugins/pluginManager', () => ({
@@ -79,15 +80,19 @@ describe('selective backup data', () => {
     jest.mocked(getAllNovelChaptersForBackup).mockResolvedValue([]);
     jest.mocked(getCategoriesFromDb).mockResolvedValue([]);
     jest.mocked(getAllNovelCategories).mockResolvedValue([]);
-    jest.mocked(_restoreNovelAndChapters).mockImplementation(async novel => ({
-      pluginId: novel.pluginId,
-      backupNovelId: novel.id,
-      restoredNovelId: novel.id,
-      chapters: novel.chapters.map(chapter => ({
-        backupChapterId: chapter.id,
-        restoredChapterId: chapter.id,
+    jest.mocked(_restoreNovelsAndChapters).mockImplementation(async novels =>
+      novels.map(novel => ({
+        mapping: {
+          pluginId: novel.pluginId,
+          backupNovelId: novel.id,
+          restoredNovelId: novel.id,
+          chapters: novel.chapters.map(chapter => ({
+            backupChapterId: chapter.id,
+            restoredChapterId: chapter.id,
+          })),
+        },
       })),
-    }));
+    );
   });
 
   it('writes the selected sections to the v2 manifest', async () => {
@@ -135,7 +140,7 @@ describe('selective backup data', () => {
         sections: pluginOnlyOptions,
       },
     });
-    expect(_restoreNovelAndChapters).not.toHaveBeenCalled();
+    expect(_restoreNovelsAndChapters).not.toHaveBeenCalled();
     expect(_restoreCategory).not.toHaveBeenCalled();
     expect(MMKVStorage.set).toHaveBeenCalledWith('INSTALL_PLUGINS', '[]');
   });
@@ -325,17 +330,426 @@ describe('selective backup data', () => {
       '/cache/Covers/1',
       '/storage/Novels/source/1/cover.png',
     );
-    expect(_restoreNovelAndChapters).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        id: 1,
-        cover: 'file:///storage/Novels/source/1/cover.png?123',
-      }),
+    expect(_restoreNovelsAndChapters).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          id: 1,
+          cover: 'file:///storage/Novels/source/1/cover.png?123',
+        }),
+        expect.objectContaining({ id: 2, cover: null }),
+      ],
+      { withChapterMappings: false },
     );
-    expect(_restoreNovelAndChapters).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ id: 2, cover: null }),
-    );
+  });
+
+  describe('library restore batching', () => {
+    const libraryOnly: BackupOptions = {
+      library: true,
+      settings: false,
+      plugins: false,
+      downloadedFiles: false,
+    };
+
+    beforeEach(() => {
+      jest.mocked(_restoreNovelsAndChapters).mockClear();
+    });
+
+    const novelFile = (id: number, chapterCount = 1) =>
+      JSON.stringify({
+        id,
+        name: `Novel ${id}`,
+        path: `/novel-${id}`,
+        pluginId: 'source',
+        cover: null,
+        chapters: Array.from({ length: chapterCount }, (_, i) => ({
+          id: id * 10000 + i,
+          path: `/novel-${id}/chapter-${i}`,
+        })),
+      });
+
+    const mockBackup = (
+      files: Record<string, string>,
+      categories: object[] = [],
+    ) => {
+      jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+        if (path.endsWith('/Version.json')) {
+          return JSON.stringify({
+            appVersion: '2.1.4',
+            formatVersion: 2,
+            sections: libraryOnly,
+          });
+        }
+        if (path.endsWith('/Category.json')) {
+          return JSON.stringify(categories);
+        }
+        const name = path.split('/').pop()!;
+        if (name in files) return files[name];
+        throw new Error(`missing ${path}`);
+      });
+      jest
+        .mocked(NativeFile.exists)
+        .mockImplementation(async path =>
+          ['/cache/NovelAndChapters', '/cache/Category.json'].includes(path),
+        );
+      jest.mocked(NativeFile.readDir).mockResolvedValue(
+        Object.keys(files).map(name => ({
+          name,
+          path: `/cache/NovelAndChapters/${name}`,
+          isDirectory: false,
+        })),
+      );
+    };
+
+    it('writes novels in bounded batches and keeps backup order', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 450; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+
+      const result = await restoreData('/cache');
+
+      const batches = jest
+        .mocked(_restoreNovelsAndChapters)
+        .mock.calls.map(([novels]) => novels.map(novel => novel.id));
+      expect(batches.map(batch => batch.length)).toEqual([200, 200, 50]);
+      expect(batches.flat()).toEqual(
+        Array.from({ length: 450 }, (_, i) => i + 1),
+      );
+      expect(result.novelCount).toBe(450);
+      expect(result.novelMappings.map(m => m.backupNovelId)).toEqual(
+        batches.flat(),
+      );
+    });
+
+    it('starts a new batch once the chapter budget is reached', async () => {
+      mockBackup({
+        '1.json': novelFile(1, 16000),
+        '2.json': novelFile(2, 6000),
+        '3.json': novelFile(3, 10),
+      });
+
+      await restoreData('/cache');
+
+      expect(
+        jest
+          .mocked(_restoreNovelsAndChapters)
+          .mock.calls.map(([novels]) => novels.map(novel => novel.id)),
+      ).toEqual([[1, 2], [3]]);
+    });
+
+    it('counts unreadable and failed novels and skips their categories', async () => {
+      mockBackup(
+        {
+          '1.json': novelFile(1),
+          '2.json': '{"id": 2, "chapt',
+          '3.json': novelFile(3),
+          '4.json': novelFile(4),
+        },
+        [{ id: 7, name: 'Favourites', sort: 1, novelIds: [1, 2, 3, 4] }],
+      );
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementationOnce(async novels =>
+          novels.map(novel =>
+            novel.id === 3
+              ? { error: new Error('constraint failed') }
+              : {
+                  mapping: {
+                    pluginId: novel.pluginId,
+                    backupNovelId: novel.id,
+                    restoredNovelId: novel.id + 100,
+                    chapters: [],
+                  },
+                },
+          ),
+        );
+
+      const result = await restoreData('/cache');
+
+      expect(result).toMatchObject({
+        novelCount: 2,
+        failedNovelCount: 2,
+        categoryCount: 1,
+        failedSectionCount: 0,
+      });
+      expect(result.novelMappings.map(m => m.backupNovelId)).toEqual([1, 4]);
+      expect(_restoreCategory).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 7, novelIds: [1, 4] }),
+        new Map([
+          [1, 101],
+          [4, 104],
+        ]),
+      );
+    });
+
+    const novelProgress = async () => {
+      const texts: string[] = [];
+      await restoreData('/cache', transformer => {
+        texts.push(transformer({} as never).progressText ?? '');
+      });
+      return texts.filter(text =>
+        text.startsWith('backupScreen.restoringNovelsProgress'),
+      );
+    };
+
+    it('reports the completed count after the last batch is written', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 450; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+
+      const texts = await novelProgress();
+
+      expect(texts[texts.length - 1]).toBe(
+        'backupScreen.restoringNovelsProgress {"current":450,"total":450}',
+      );
+    });
+
+    it('reports every batch boundary even when batches finish instantly', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 450; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+
+      const texts = await novelProgress();
+
+      expect(texts).toEqual(
+        [0, 200, 400, 450].map(
+          current =>
+            `backupScreen.restoringNovelsProgress {"current":${current},"total":450}`,
+        ),
+      );
+    });
+
+    it('reports the full count once when it falls on a batch boundary', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 400; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+
+      const texts = await novelProgress();
+
+      expect(texts).toEqual(
+        [0, 200, 400].map(
+          current =>
+            `backupScreen.restoringNovelsProgress {"current":${current},"total":400}`,
+        ),
+      );
+    });
+
+    it('keeps backup order when files finish reading out of order', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 450; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+      const readFile = jest
+        .mocked(NativeFile.readFile)
+        .getMockImplementation()!;
+      jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+        const id = Number(path.split('/').pop()!.replace('.json', ''));
+        if (id % 3 === 1) {
+          await new Promise(resolve => setTimeout(resolve, 3));
+        }
+        return readFile(path);
+      });
+
+      const result = await restoreData('/cache');
+
+      const batches = jest
+        .mocked(_restoreNovelsAndChapters)
+        .mock.calls.map(([novels]) => novels.map(novel => novel.id));
+      expect(batches.map(batch => batch.length)).toEqual([200, 200, 50]);
+      expect(batches.flat()).toEqual(
+        Array.from({ length: 450 }, (_, i) => i + 1),
+      );
+      expect(result.novelMappings.map(m => m.backupNovelId)).toEqual(
+        batches.flat(),
+      );
+    });
+
+    it('reads ahead of a slow write only within its bounds', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 1000; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+      const readFile = jest
+        .mocked(NativeFile.readFile)
+        .getMockImplementation()!;
+      let novelFilesRead = 0;
+      jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+        if (path.includes('/NovelAndChapters/')) novelFilesRead++;
+        return readFile(path);
+      });
+      const restore = jest
+        .mocked(_restoreNovelsAndChapters)
+        .getMockImplementation()!;
+      const readWhenWritten: number[] = [];
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementation(async novels => {
+          await new Promise(resolve => setTimeout(resolve, 20));
+          readWhenWritten.push(novelFilesRead);
+          return restore(novels);
+        });
+
+      const result = await restoreData('/cache');
+
+      expect(result.novelCount).toBe(1000);
+      // The first write holds novels 1-200; reading continued meanwhile, but
+      // never further than one batch past the novels already consumed.
+      expect(readWhenWritten[0]).toBeGreaterThan(200);
+      expect(readWhenWritten[0]).toBeLessThanOrEqual(200 + 200 + 4);
+    });
+
+    it('stops reading novel files once the restore is aborted', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 1000; id++) files[`${id}.json`] = novelFile(id);
+      mockBackup(files);
+      const readFile = jest
+        .mocked(NativeFile.readFile)
+        .getMockImplementation()!;
+      let novelFilesRead = 0;
+      jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+        if (path.includes('/NovelAndChapters/')) novelFilesRead++;
+        return readFile(path);
+      });
+      let updates = 0;
+
+      // A progress updater that throws is how a cancelled task stops.
+      const result = await restoreData('/cache', () => {
+        if (++updates === 3) throw new Error('cancelled');
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+
+      expect(result.failedSectionCount).toBe(1);
+      expect(novelFilesRead).toBeLessThan(1000);
+      expect(jest.mocked(_restoreNovelsAndChapters).mock.calls.length).toBe(1);
+    });
+
+    it('copies covers eight at a time while later batches are written', async () => {
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 450; id++) {
+        files[`${id}.json`] = JSON.stringify({
+          id,
+          name: `Novel ${id}`,
+          path: `/novel-${id}`,
+          pluginId: 'source',
+          cover: `/Novels/source/${id}/cover.png`,
+          chapters: [],
+        });
+      }
+      mockBackup(files);
+      const exists = jest.mocked(NativeFile.exists).getMockImplementation()!;
+      jest
+        .mocked(NativeFile.exists)
+        .mockImplementation(
+          async path => path.startsWith('/cache/Covers/') || exists(path),
+        );
+      let copying = 0;
+      let mostCopying = 0;
+      let copied = 0;
+      jest.mocked(NativeFile.copyFile).mockClear();
+      jest.mocked(NativeFile.copyFile).mockImplementation(async () => {
+        mostCopying = Math.max(mostCopying, ++copying);
+        await new Promise(resolve => setTimeout(resolve, 2));
+        copying--;
+        copied++;
+      });
+      const restore = jest
+        .mocked(_restoreNovelsAndChapters)
+        .getMockImplementation()!;
+      const copiedWhenWriteStarted: number[] = [];
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementation(async (...args) => {
+          copiedWhenWriteStarted.push(copied);
+          return restore(...args);
+        });
+
+      const result = await restoreData('/cache');
+
+      expect(result).toMatchObject({ novelCount: 450, failedNovelCount: 0 });
+      expect(copied).toBe(450);
+      expect(mostCopying).toBe(8);
+      // The second write did not wait for the first batch's 200 covers.
+      expect(copiedWhenWriteStarted[1]).toBeLessThan(200);
+    });
+
+    it('copies one cover when two backup novels restore into the same novel', async () => {
+      const duplicate = (id: number) =>
+        JSON.stringify({
+          id,
+          name: `Novel ${id}`,
+          path: '/same-novel',
+          pluginId: 'source',
+          cover: `/Novels/source/${id}/cover.png`,
+          chapters: [],
+        });
+      mockBackup({ '1.json': duplicate(1), '2.json': duplicate(2) });
+      const exists = jest.mocked(NativeFile.exists).getMockImplementation()!;
+      jest
+        .mocked(NativeFile.exists)
+        .mockImplementation(
+          async path => path.startsWith('/cache/Covers/') || exists(path),
+        );
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementationOnce(async novels =>
+          novels.map(novel => ({
+            mapping: {
+              pluginId: novel.pluginId,
+              backupNovelId: novel.id,
+              restoredNovelId: 500,
+              chapters: [],
+            },
+          })),
+        );
+      jest.mocked(NativeFile.copyFile).mockClear();
+
+      const result = await restoreData('/cache');
+
+      expect(result).toMatchObject({ novelCount: 2, failedNovelCount: 0 });
+      expect(jest.mocked(NativeFile.copyFile).mock.calls).toEqual([
+        ['/cache/Covers/2', '/storage/Novels/source/500/cover.png'],
+      ]);
+    });
+
+    it('asks for chapter id mappings only when downloaded files will be restored', async () => {
+      const mappingsRequested = async (sections: BackupOptions | undefined) => {
+        mockBackup({ '1.json': novelFile(1) });
+        const readFile = jest
+          .mocked(NativeFile.readFile)
+          .getMockImplementation()!;
+        jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+          if (!path.endsWith('/Version.json')) return readFile(path);
+          return JSON.stringify(
+            sections
+              ? { appVersion: '2.1.4', formatVersion: 2, sections }
+              : { version: '2.0.0' },
+          );
+        });
+        jest.mocked(_restoreNovelsAndChapters).mockClear();
+        await restoreData('/cache');
+        return jest.mocked(_restoreNovelsAndChapters).mock.calls[0][1];
+      };
+
+      expect(await mappingsRequested(libraryOnly)).toEqual({
+        withChapterMappings: false,
+      });
+      expect(
+        await mappingsRequested({ ...libraryOnly, downloadedFiles: true }),
+      ).toEqual({ withChapterMappings: true });
+      // Legacy backups always carry downloaded files.
+      expect(await mappingsRequested(undefined)).toEqual({
+        withChapterMappings: true,
+      });
+    });
+
+    it('counts every novel in a batch whose transaction fails', async () => {
+      mockBackup({ '1.json': novelFile(1), '2.json': novelFile(2) });
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockRejectedValueOnce(new Error('disk I/O error'));
+
+      const result = await restoreData('/cache');
+
+      expect(result).toMatchObject({ novelCount: 0, failedNovelCount: 2 });
+      expect(result.novelMappings).toEqual([]);
+    });
   });
 
   it('omits the installed-plugin registry when plugin files are excluded', async () => {

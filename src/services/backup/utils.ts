@@ -4,8 +4,9 @@ import { LAST_UPDATE_TIME } from '@hooks/persisted/useUpdates';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import { version } from '../../../package.json';
 import {
-  _restoreNovelAndChapters,
+  _restoreNovelsAndChapters,
   getAllNovels,
+  type RestoreNovelResult,
 } from '@database/queries/NovelQueries';
 import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
 import {
@@ -39,6 +40,86 @@ import { INSTALLED_PLUGINS_KEY } from '@plugins/pluginManager';
 import type { PluginItem } from '@plugins/types';
 
 const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
+
+// Restored novels are written in groups so each transaction commit (and the
+// live queries it wakes) covers many novels instead of one.
+const RESTORE_BATCH_MAX_NOVELS = 200;
+const RESTORE_BATCH_MAX_CHAPTERS = 20000;
+// Cover copies run on native threads, so a few can overlap.
+const RESTORE_COVER_CONCURRENCY = 8;
+// Novel files are read and parsed ahead of the database writes, which spend
+// most of their time waiting on SQLite. The bounds cap what is held in memory.
+const RESTORE_READ_CONCURRENCY = 4;
+const RESTORE_READ_AHEAD_MAX_NOVELS = RESTORE_BATCH_MAX_NOVELS;
+const RESTORE_READ_AHEAD_MAX_CHAPTERS = RESTORE_BATCH_MAX_CHAPTERS;
+
+type PendingRestoreNovel = {
+  backupNovel: BackupNovel;
+  hasStoredCover: boolean;
+};
+
+// `parsed` tells whether the file got far enough to name its plugin.
+type LoadedRestoreNovel = {
+  parsed: boolean;
+  pluginId?: string;
+  pending?: PendingRestoreNovel;
+};
+
+/**
+ * Loads `items` ahead of the consumer and hands them out in their original
+ * order. `load` must not reject.
+ */
+const createReadAhead = <T, R>(
+  items: T[],
+  load: (item: T) => Promise<R>,
+  weigh: (result: R) => number,
+) => {
+  const results: (Promise<R> | undefined)[] = [];
+  let started = 0;
+  let consumed = 0;
+  let inFlight = 0;
+  let bufferedWeight = 0;
+  let stopped = false;
+
+  const start = () => {
+    inFlight++;
+    const index = started++;
+    results[index] = load(items[index]).then(result => {
+      inFlight--;
+      bufferedWeight += weigh(result);
+      pump();
+      return result;
+    });
+  };
+  const pump = () => {
+    while (
+      !stopped &&
+      started < items.length &&
+      inFlight < RESTORE_READ_CONCURRENCY &&
+      started - consumed < RESTORE_READ_AHEAD_MAX_NOVELS &&
+      bufferedWeight < RESTORE_READ_AHEAD_MAX_CHAPTERS
+    ) {
+      start();
+    }
+  };
+
+  return {
+    next: async (): Promise<R> => {
+      pump();
+      if (started === consumed) {
+        start();
+      }
+      const result = await results[consumed]!;
+      results[consumed++] = undefined;
+      bufferedWeight -= weigh(result);
+      pump();
+      return result;
+    },
+    stop: () => {
+      stopped = true;
+    },
+  };
+};
 
 const stripUriSuffix = (uri: string) => uri.split(/[?#]/, 1)[0];
 
@@ -293,41 +374,169 @@ export const restoreData = async (
       const items = (await NativeFile.readDir(novelDirPath)).filter(
         item => !item.isDirectory,
       );
-      for (const [index, item] of items.entries()) {
+      // Chapter ids are only looked up when downloaded chapter files will be
+      // moved to them afterwards.
+      const withChapterMappings =
+        manifest.formatVersion === 1 || manifest.sections.downloadedFiles;
+      let pendingNovels: PendingRestoreNovel[] = [];
+      let pendingChapterCount = 0;
+
+      let coverCopies = Promise.resolve();
+
+      const restorePendingNovels = async () => {
+        const batch = pendingNovels;
+        pendingNovels = [];
+        pendingChapterCount = 0;
+        let results: RestoreNovelResult[];
+        try {
+          results = await _restoreNovelsAndChapters(
+            batch.map(({ backupNovel }) => backupNovel),
+            { withChapterMappings },
+          );
+        } catch {
+          failedCount += batch.length;
+          return;
+        }
+
+        const restoredNovels: {
+          backupNovel: BackupNovel;
+          hasStoredCover: boolean;
+          novelMapping: RestoredNovelMapping;
+        }[] = [];
+        for (const [index, pending] of batch.entries()) {
+          const novelMapping = results[index].mapping;
+          if (!novelMapping) {
+            failedCount++;
+            continue;
+          }
+          novelMappings.push(novelMapping);
+          novelIdMap.set(pending.backupNovel.id, novelMapping.restoredNovelId);
+          restoredNovels.push({ ...pending, novelMapping });
+        }
+
+        const restoreCover = async ({
+          backupNovel,
+          hasStoredCover,
+          novelMapping,
+        }: (typeof restoredNovels)[number]) => {
+          try {
+            if (hasStoredCover) {
+              const coverBackupPath = coversDirPath + '/' + backupNovel.id;
+              if (await NativeFile.exists(coverBackupPath)) {
+                const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
+                await NativeFile.mkdir(parentDirectory(coverPath));
+                await NativeFile.copyFile(coverBackupPath, coverPath);
+              }
+            }
+            novelCount++;
+          } catch {
+            failedCount++;
+          }
+        };
+        // Backup novels that share a path and plugin restore into one novel
+        // and one cover file. Only the last one, whose row won, copies its
+        // cover, so no two concurrent copies write the same destination.
+        const coverJobs = [
+          ...new Map(
+            restoredNovels.map(restored => [
+              restored.novelMapping.restoredNovelId,
+              restored,
+            ]),
+          ).values(),
+        ];
+        novelCount += restoredNovels.length - coverJobs.length;
+        // Covers copy while the next batch is written. Each batch's copies
+        // start after the previous batch's, so the concurrency limit holds
+        // and a cover is never written by two batches at once.
+        const previousCoverCopies = coverCopies;
+        coverCopies = (async () => {
+          await previousCoverCopies;
+          for (
+            let start = 0;
+            start < coverJobs.length;
+            start += RESTORE_COVER_CONCURRENCY
+          ) {
+            await Promise.all(
+              coverJobs
+                .slice(start, start + RESTORE_COVER_CONCURRENCY)
+                .map(restoreCover),
+            );
+          }
+        })();
+      };
+
+      let reportedCount = -1;
+      const reportProgress = (completed: number) => {
+        if (completed === reportedCount) {
+          return;
+        }
+        reportedCount = completed;
         updateRestoreProgress(
           setMeta,
           getString('backupScreen.restoringNovelsProgress', {
-            current: index + 1,
+            current: completed,
             total: items.length,
           }),
         );
+      };
+
+      if (items.length > 0) {
+        reportProgress(0);
+      }
+      const loadNovel = async (item: {
+        path: string;
+      }): Promise<LoadedRestoreNovel> => {
+        const loaded: LoadedRestoreNovel = { parsed: false };
         try {
           const fileContent = await NativeFile.readFile(item.path);
           const backupNovel = JSON.parse(fileContent) as BackupNovel;
-          pluginIds.add(backupNovel.pluginId);
+          loaded.pluginId = backupNovel.pluginId;
+          loaded.parsed = true;
 
-          const hasStoredCover =
-            backupNovel.cover && !backupNovel.cover.startsWith('http');
+          const hasStoredCover = Boolean(
+            backupNovel.cover && !backupNovel.cover.startsWith('http'),
+          );
           if (hasStoredCover) {
             backupNovel.cover = APP_STORAGE_URI + backupNovel.cover;
           }
-
-          const novelMapping = await _restoreNovelAndChapters(backupNovel);
-          novelMappings.push(novelMapping);
-          novelIdMap.set(backupNovel.id, novelMapping.restoredNovelId);
-
-          if (hasStoredCover) {
-            const coverBackupPath = coversDirPath + '/' + backupNovel.id;
-            if (await NativeFile.exists(coverBackupPath)) {
-              const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
-              await NativeFile.mkdir(parentDirectory(coverPath));
-              await NativeFile.copyFile(coverBackupPath, coverPath);
-            }
-          }
-          novelCount++;
+          loaded.pending = { backupNovel, hasStoredCover };
         } catch {
-          failedCount++;
+          // Counted as a failed novel by the consumer.
         }
+        return loaded;
+      };
+      const readAhead = createReadAhead(
+        items,
+        loadNovel,
+        loaded => loaded.pending?.backupNovel.chapters?.length ?? 0,
+      );
+      try {
+        for (let index = 0; index < items.length; index++) {
+          const { parsed, pluginId, pending } = await readAhead.next();
+          if (parsed) {
+            pluginIds.add(pluginId as string);
+          }
+          if (pending) {
+            pendingNovels.push(pending);
+            pendingChapterCount += pending.backupNovel.chapters?.length ?? 0;
+          } else {
+            failedCount++;
+          }
+          if (
+            pendingNovels.length >= RESTORE_BATCH_MAX_NOVELS ||
+            pendingChapterCount >= RESTORE_BATCH_MAX_CHAPTERS
+          ) {
+            await restorePendingNovels();
+            reportProgress(index + 1);
+          }
+        }
+        await restorePendingNovels();
+      } finally {
+        readAhead.stop();
+        await coverCopies;
+      }
+      if (items.length > 0) {
+        reportProgress(items.length);
       }
     } catch {
       failedSectionCount++;

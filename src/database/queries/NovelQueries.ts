@@ -1,5 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
-import { eq, and, sql, inArray, ne } from 'drizzle-orm';
+import { eq, and, sql, inArray, ne, getColumns, is, SQL } from 'drizzle-orm';
+import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';
+import type { Scalar, Transaction } from '@op-engineering/op-sqlite';
 
 import { fetchNovel } from '@services/plugin/fetch';
 import { insertChapters } from './ChapterQueries';
@@ -27,6 +29,10 @@ import type { TransactionParameter } from '@database/manager/manager.d';
 import { getLibraryDefaultCategoryId } from '@hooks/persisted/useSettings';
 import NativeFile from '@modules/native-file';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
+import {
+  createNovelTriggerQueryDelete,
+  createNovelTriggerQueryInsert,
+} from '@database/queryStrings/triggers';
 
 const getBuiltInDefaultCategory = async (tx: TransactionParameter) => {
   const defaultCategory = await tx
@@ -475,88 +481,313 @@ export const updateNovelCategories = async (
   });
 };
 
-/**
- * Restores novel and chapters from a backup object.
- */
-export const _restoreNovelAndChapters = async (
+type RestoreColumns = { keys: string[]; columns: SQLiteColumn[] };
+
+const getRestoreColumns = (table: SQLiteTable): RestoreColumns => {
+  const entries = Object.entries(getColumns(table)).filter(
+    ([key]) => key !== 'id',
+  );
+  // toDriverValue only reproduces Drizzle's handling of literal defaults.
+  for (const [key, column] of entries) {
+    if (column.defaultFn || column.onUpdateFn || is(column.default, SQL)) {
+      throw new Error(
+        `Restore cannot encode column "${key}": only literal defaults are supported`,
+      );
+    }
+  }
+  return {
+    keys: entries.map(([key]) => key),
+    columns: entries.map(([, column]) => column),
+  };
+};
+
+const novelRestoreColumns = getRestoreColumns(novelSchema);
+const chapterRestoreColumns = getRestoreColumns(chapterSchema);
+const chapterNovelIdIndex = chapterRestoreColumns.keys.indexOf('novelId');
+const chapterIsDownloadedIndex =
+  chapterRestoreColumns.keys.indexOf('isDownloaded');
+const chapterUnreadIndex = chapterRestoreColumns.keys.indexOf('unread');
+const chapterUpdatedTimeIndex =
+  chapterRestoreColumns.keys.indexOf('updatedTime');
+
+const quoteColumns = ({ columns }: RestoreColumns) =>
+  columns.map(column => `"${column.name}"`).join(', ');
+
+const rowPlaceholders = (columnCount: number) =>
+  `(${new Array(columnCount).fill('?').join(', ')})`;
+
+// Encodes a backup value the way Drizzle's insert builder does: a missing
+// value falls back to the column default (else NULL) and booleans become 0/1.
+const toDriverValue = (column: SQLiteColumn, value: unknown): Scalar => {
+  const resolved = value === undefined ? column.default ?? null : value;
+  return resolved === null
+    ? null
+    : (column.mapToDriverValue(resolved) as Scalar);
+};
+
+const NOVEL_UPSERT_PREFIX = `INSERT INTO Novel (${quoteColumns(
+  novelRestoreColumns,
+)}) VALUES ${rowPlaceholders(
+  novelRestoreColumns.keys.length,
+)} ON CONFLICT ("path", "pluginId") DO UPDATE SET `;
+
+const CHAPTER_INSERT_BATCH_SIZE = 100;
+const chapterInsertPrefix = `INSERT INTO Chapter (${quoteColumns(
+  chapterRestoreColumns,
+)}) VALUES `;
+const chapterInsertSql = (rowCount: number) =>
+  chapterInsertPrefix +
+  new Array(rowCount)
+    .fill(rowPlaceholders(chapterRestoreColumns.keys.length))
+    .join(', ');
+const fullChapterBatchSql = chapterInsertSql(CHAPTER_INSERT_BATCH_SIZE);
+
+// The chapter insert trigger rewrites the novel row once per inserted chapter.
+// It is suspended during restore, and these statements apply what it would
+// have left behind after a novel's chapters were inserted in id order.
+const NOVEL_STATS_AFTER_INSERT =
+  'UPDATE Novel SET totalChapters = totalChapters + ?, chaptersDownloaded = chaptersDownloaded + ?, chaptersUnread = chaptersUnread + ?';
+// The trigger keeps the first chapter that carries the latest valid date; a
+// value without a valid date can only be taken while lastUpdatedAt is NULL,
+// and then it blocks every later comparison.
+const NOVEL_STATS_AFTER_INSERT_WITH_DATES = `${NOVEL_STATS_AFTER_INSERT},
+  lastUpdatedAt = CASE
+    WHEN lastUpdatedAt IS NOT NULL AND julianday(lastUpdatedAt) IS NULL
+      THEN lastUpdatedAt
+    WHEN lastUpdatedAt IS NOT NULL THEN COALESCE(
+      (SELECT updatedTime FROM Chapter
+        WHERE novelId = Novel.id AND updatedTime IS NOT NULL
+          AND julianday(updatedTime) > julianday(Novel.lastUpdatedAt)
+        ORDER BY julianday(updatedTime) DESC, id ASC LIMIT 1),
+      lastUpdatedAt)
+    ELSE (
+      SELECT CASE
+        WHEN julianday(firstDated.updatedTime) IS NULL
+          THEN firstDated.updatedTime
+        ELSE (SELECT updatedTime FROM Chapter
+          WHERE novelId = Novel.id AND id >= firstDated.id
+            AND julianday(updatedTime) IS NOT NULL
+          ORDER BY julianday(updatedTime) DESC, id ASC LIMIT 1)
+      END
+      FROM (SELECT id, updatedTime FROM Chapter
+        WHERE novelId = Novel.id AND updatedTime IS NOT NULL
+        ORDER BY id ASC LIMIT 1) AS firstDated)
+  END`;
+
+const restoreNovelAndChapters = async (
+  tx: Transaction,
   backupNovel: BackupNovel,
+  withChapterMappings: boolean,
 ): Promise<RestoredNovelMapping> => {
   const { chapters, id: backupNovelId, ...novel } = backupNovel;
-  return dbManager.write(async tx => {
-    // Match novels by their stable source identity, not the database-local ID.
-    const restoredNovel = await tx
-      .insert(novelSchema)
-      .values({
-        ...novel,
-        totalChapters: 0,
-        chaptersDownloaded: 0,
-        chaptersUnread: 0,
-      })
-      .onConflictDoUpdate({
-        target: [novelSchema.path, novelSchema.pluginId],
-        set: {
-          ...novel,
-          totalChapters: 0,
-          chaptersDownloaded: 0,
-          chaptersUnread: 0,
-        },
-      })
-      .returning({ id: novelSchema.id })
-      .get();
+  const novelValues: Record<string, unknown> = {
+    ...novel,
+    totalChapters: 0,
+    chaptersDownloaded: 0,
+    chaptersUnread: 0,
+  };
 
-    if (novel.cover?.startsWith(`file://${NOVEL_STORAGE}/`)) {
-      const cacheSuffix = novel.cover.match(/[?#].*$/)?.[0] ?? '';
-      await tx
-        .update(novelSchema)
-        .set({
-          cover: `file://${NOVEL_STORAGE}/${novel.pluginId}/${restoredNovel.id}/cover.png${cacheSuffix}`,
-        })
-        .where(eq(novelSchema.id, restoredNovel.id))
-        .run();
-    }
+  // Match novels by their stable source identity, not the database-local ID.
+  // Like Drizzle's onConflictDoUpdate, only keys present in the backup are
+  // overwritten on conflict.
+  const updatedColumns = novelRestoreColumns.columns
+    .filter((_, i) => novelValues[novelRestoreColumns.keys[i]] !== undefined)
+    .map(column => `"${column.name}" = excluded."${column.name}"`)
+    .join(', ');
+  await tx.execute(
+    NOVEL_UPSERT_PREFIX + updatedColumns,
+    novelRestoreColumns.columns.map((column, i) =>
+      toDriverValue(column, novelValues[novelRestoreColumns.keys[i]]),
+    ),
+  );
+  const restoredNovel = (
+    await tx.execute('SELECT id FROM Novel WHERE path = ? AND pluginId = ?', [
+      toDriverValue(novelSchema.path, novel.path),
+      toDriverValue(novelSchema.pluginId, novel.pluginId),
+    ])
+  ).rows[0] as { id: number };
 
-    await tx
-      .delete(chapterSchema)
-      .where(eq(chapterSchema.novelId, restoredNovel.id))
-      .run();
+  if (novel.cover?.startsWith(`file://${NOVEL_STORAGE}/`)) {
+    const cacheSuffix = novel.cover.match(/[?#].*$/)?.[0] ?? '';
+    await tx.execute('UPDATE Novel SET cover = ? WHERE id = ?', [
+      `file://${NOVEL_STORAGE}/${novel.pluginId}/${restoredNovel.id}/cover.png${cacheSuffix}`,
+      restoredNovel.id,
+    ]);
+  }
 
-    const chapterMappings: RestoredNovelMapping['chapters'] = [];
+  const { rowsAffected } = await tx.execute(
+    'DELETE FROM Chapter WHERE novelId = ?',
+    [restoredNovel.id],
+  );
+  if (rowsAffected > 0) {
+    // The chapter delete trigger is suspended during restore; this is the
+    // state it leaves behind once a novel has no chapters.
+    await tx.execute(
+      'UPDATE Novel SET chaptersDownloaded = 0, chaptersUnread = 0, totalChapters = 0, lastReadAt = NULL, lastUpdatedAt = NULL WHERE id = ?',
+      [restoredNovel.id],
+    );
+  }
 
-    // Restore chapters in batches
-    if (chapters.length > 0) {
-      const BATCH_SIZE = 100;
-      for (let i = 0; i < chapters.length; i += BATCH_SIZE) {
-        const batch = chapters.slice(i, i + BATCH_SIZE);
-        const restoredChapters = await tx
-          .insert(chapterSchema)
-          .values(
-            batch.map(({ id: _chapterId, novelId: _novelId, ...chapter }) => ({
-              ...chapter,
-              novelId: restoredNovel.id,
-            })),
-          )
-          .returning({ id: chapterSchema.id, path: chapterSchema.path })
-          .all();
-        const restoredIdsByPath = new Map(
-          restoredChapters.map(chapter => [chapter.path, chapter.id]),
-        );
-        for (const chapter of batch) {
-          const restoredChapterId = restoredIdsByPath.get(chapter.path);
-          if (restoredChapterId !== undefined) {
-            chapterMappings.push({
-              backupChapterId: chapter.id,
-              restoredChapterId,
-            });
-          }
+  const { keys, columns } = chapterRestoreColumns;
+  let downloadedCount = 0;
+  let unreadCount = 0;
+  let hasUpdatedTime = false;
+  // SQLite runs each insert on its own thread, so the next statement's
+  // parameters are built while the previous one executes. Statements run in
+  // the order they are issued; a failure is rethrown once both have settled,
+  // which keeps the caller's savepoint rollback behind every statement.
+  let insertError: unknown;
+  let hasInsertError = false;
+  let previousInsert: Promise<void> | undefined;
+  for (let i = 0; i < chapters.length; i += CHAPTER_INSERT_BATCH_SIZE) {
+    const batch = chapters.slice(i, i + CHAPTER_INSERT_BATCH_SIZE);
+    const params: Scalar[] = [];
+    for (const chapter of batch) {
+      const values = chapter as unknown as Record<string, unknown>;
+      for (let c = 0; c < keys.length; c++) {
+        if (c === chapterNovelIdIndex) {
+          params.push(restoredNovel.id);
+          continue;
         }
+        const value = toDriverValue(columns[c], values[keys[c]]);
+        if (c === chapterIsDownloadedIndex) {
+          if (value === 1) downloadedCount++;
+        } else if (c === chapterUnreadIndex) {
+          if (value === 1) unreadCount++;
+        } else if (c === chapterUpdatedTimeIndex) {
+          if (value !== null) hasUpdatedTime = true;
+        }
+        params.push(value);
       }
     }
+    const insert = tx
+      .execute(
+        batch.length === CHAPTER_INSERT_BATCH_SIZE
+          ? fullChapterBatchSql
+          : chapterInsertSql(batch.length),
+        params,
+      )
+      .then(
+        () => {},
+        error => {
+          if (!hasInsertError) {
+            hasInsertError = true;
+            insertError = error;
+          }
+        },
+      );
+    await previousInsert;
+    previousInsert = insert;
+    if (hasInsertError) {
+      break;
+    }
+  }
+  await previousInsert;
+  if (hasInsertError) {
+    throw insertError;
+  }
 
-    return {
-      pluginId: novel.pluginId,
-      backupNovelId,
-      restoredNovelId: restoredNovel.id,
-      chapters: chapterMappings,
-    };
-  });
+  if (chapters.length > 0) {
+    await tx.execute(
+      (hasUpdatedTime
+        ? NOVEL_STATS_AFTER_INSERT_WITH_DATES
+        : NOVEL_STATS_AFTER_INSERT) + ' WHERE id = ?',
+      [chapters.length, downloadedCount, unreadCount, restoredNovel.id],
+    );
+  }
+
+  const chapterMappings: RestoredNovelMapping['chapters'] = [];
+  if (withChapterMappings && chapters.length > 0) {
+    const restoredChapters = (
+      await tx.execute('SELECT id, path FROM Chapter WHERE novelId = ?', [
+        restoredNovel.id,
+      ])
+    ).rows as { id: number; path: string }[];
+    const restoredIdsByPath = new Map(
+      restoredChapters.map(chapter => [chapter.path, chapter.id]),
+    );
+    for (const chapter of chapters) {
+      const restoredChapterId = restoredIdsByPath.get(chapter.path);
+      if (restoredChapterId !== undefined) {
+        chapterMappings.push({
+          backupChapterId: chapter.id,
+          restoredChapterId,
+        });
+      }
+    }
+  }
+
+  return {
+    pluginId: novel.pluginId,
+    backupNovelId,
+    restoredNovelId: restoredNovel.id,
+    chapters: chapterMappings,
+  };
 };
+
+export type RestoreNovelResult =
+  | { mapping: RestoredNovelMapping; error?: undefined }
+  | { mapping?: undefined; error: unknown };
+
+/**
+ * Restores novels and their chapters from backup objects in one transaction.
+ * Each novel is isolated in a savepoint, so a failing novel is rolled back
+ * without affecting the others. Results are returned in input order.
+ *
+ * Chapter id mappings are only needed to move downloaded chapter files, and
+ * reading them back costs one row per chapter; pass `withChapterMappings:
+ * false` to leave `mapping.chapters` empty.
+ */
+export const _restoreNovelsAndChapters = async (
+  backupNovels: BackupNovel[],
+  { withChapterMappings = true }: { withChapterMappings?: boolean } = {},
+): Promise<RestoreNovelResult[]> => {
+  if (!backupNovels.length) return [];
+
+  try {
+    return await writeRestoreBatch(backupNovels, withChapterMappings);
+  } catch (error) {
+    // A rollback normally brings the suspended trigger back with it. If the
+    // transaction was instead ended from outside (a statement issued on the
+    // connection outside the write queue), the DROP may have been committed.
+    await dbManager
+      .write(async tx => {
+        await tx.run(sql.raw(createNovelTriggerQueryDelete));
+        await tx.run(sql.raw(createNovelTriggerQueryInsert));
+      })
+      .catch(() => {});
+    throw error;
+  }
+};
+
+const writeRestoreBatch = (
+  backupNovels: BackupNovel[],
+  withChapterMappings: boolean,
+): Promise<RestoreNovelResult[]> =>
+  dbManager.writeRaw(async tx => {
+    // The delete trigger recounts a novel's chapters once per deleted row,
+    // which is quadratic when a restore replaces a large chapter list, and
+    // the insert trigger rewrites the novel row once per inserted chapter.
+    await tx.execute('DROP TRIGGER IF EXISTS update_novel_stats_on_delete');
+    await tx.execute('DROP TRIGGER IF EXISTS update_novel_stats');
+    const results: RestoreNovelResult[] = [];
+    for (const backupNovel of backupNovels) {
+      await tx.execute('SAVEPOINT restore_novel');
+      try {
+        const mapping = await restoreNovelAndChapters(
+          tx,
+          backupNovel,
+          withChapterMappings,
+        );
+        await tx.execute('RELEASE restore_novel');
+        results.push({ mapping });
+      } catch (error) {
+        await tx.execute('ROLLBACK TO restore_novel');
+        await tx.execute('RELEASE restore_novel');
+        results.push({ error });
+      }
+    }
+    await tx.execute(createNovelTriggerQueryDelete);
+    await tx.execute(createNovelTriggerQueryInsert);
+    return results;
+  });
