@@ -9,6 +9,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private let stateListeners = TtsListenerRegistry<TtsPlaybackState>()
   private let progressListeners = TtsListenerRegistry<TtsProgress>()
   private let errorListeners = TtsListenerRegistry<String>()
+  private let sleepTimerListeners = TtsListenerRegistry<TtsSleepTimerState>()
   private let nowPlaying = TtsNowPlayingController()
 
   private var paragraphs: [TtsParagraph] = []
@@ -17,6 +18,12 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private var settings = TtsSettings(engineName: nil, voiceIdentifier: nil, rate: 1, pitch: 1)
   private var state: TtsPlaybackState = .idle
   private var activeUtterance: AVSpeechUtterance?
+  private var expectContinuation = false
+  private var sleepTimerMode: TtsSleepTimerMode?
+  private var remainingSeconds = 0
+  private var remainingChapters = 0
+  private var sleepTimerExpired = false
+  private var sleepTimer: Timer?
 
   private lazy var remoteCommands = TtsRemoteCommandController(
     onPlay: { [weak self] in self?.play() },
@@ -36,7 +43,8 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     paragraphs nextParagraphs: [TtsParagraph],
     initialIndex: Int,
     metadata nextMetadata: TtsMetadata,
-    settings nextSettings: TtsSettings
+    settings nextSettings: TtsSettings,
+    options: TtsLoadOptions
   ) throws {
     precondition(Thread.isMainThread)
     let readableParagraphs = nextParagraphs.filter { !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -49,6 +57,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     currentIndex = min(max(initialIndex, 0), readableParagraphs.count - 1)
     metadata = nextMetadata
     settings = nextSettings
+    expectContinuation = options.expectContinuation
     state = .paused
     emitProgress()
     emitState()
@@ -63,6 +72,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     if synthesizer.isPaused {
       synthesizer.continueSpeaking()
       state = .playing
+      startDurationTimerIfNeeded()
       emitState()
       return
     }
@@ -73,6 +83,8 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     precondition(Thread.isMainThread)
     guard state == .playing else { return }
     synthesizer.pauseSpeaking(at: .immediate)
+    sleepTimer?.invalidate()
+    sleepTimer = nil
     state = .paused
     emitState()
   }
@@ -83,6 +95,8 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     paragraphs = []
     currentIndex = 0
     metadata = nil
+    expectContinuation = false
+    cancelSleepTimer()
     state = .idle
     nowPlaying.clear()
     emitState()
@@ -132,6 +146,39 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     }
   }
 
+  func setSleepTimer(_ config: TtsSleepTimerConfig) throws {
+    sleepTimer?.invalidate()
+    sleepTimer = nil
+    sleepTimerExpired = false
+    sleepTimerMode = config.mode
+    switch config.mode {
+    case .duration:
+      guard let seconds = config.durationSeconds.map(Int.init), (60...86_340).contains(seconds) else {
+        throw RuntimeError.error(withMessage: "Duration must be between 1 minute and 23 hours 59 minutes.")
+      }
+      remainingSeconds = seconds
+      remainingChapters = 0
+      startDurationTimerIfNeeded()
+    case .chapters:
+      guard let chapters = config.chapterCount.map(Int.init), (1...999).contains(chapters) else {
+        throw RuntimeError.error(withMessage: "Chapter count must be between 1 and 999.")
+      }
+      remainingChapters = chapters
+      remainingSeconds = 0
+    }
+    emitSleepTimer()
+  }
+
+  func cancelSleepTimer() {
+    sleepTimer?.invalidate()
+    sleepTimer = nil
+    sleepTimerMode = nil
+    remainingSeconds = 0
+    remainingChapters = 0
+    sleepTimerExpired = false
+    emitSleepTimer()
+  }
+
   func addStateListener(
     _ listener: @escaping (TtsPlaybackState) -> Void
   ) -> () -> Void {
@@ -154,6 +201,16 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
 
   func addErrorListener(_ listener: @escaping (String) -> Void) -> () -> Void {
     return errorListeners.add(listener)
+  }
+
+  func addSleepTimerListener(
+    _ listener: @escaping (TtsSleepTimerState) -> Void
+  ) -> () -> Void {
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      listener(self.sleepTimerState())
+    }
+    return sleepTimerListeners.add(listener)
   }
 
   func speechSynthesizer(
@@ -204,6 +261,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     activeUtterance = utterance
     synthesizer.speak(utterance)
     state = .playing
+    startDurationTimerIfNeeded()
     emitProgress()
     emitState()
   }
@@ -216,15 +274,30 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   }
 
   private func completeQueue() {
-    state = .completed
+    sleepTimer?.invalidate()
+    sleepTimer = nil
+    if sleepTimerMode == .chapters {
+      remainingChapters = max(0, remainingChapters - 1)
+      if remainingChapters == 0 {
+        sleepTimerMode = nil
+        sleepTimerExpired = true
+      }
+      emitSleepTimer()
+    }
+    state = expectContinuation ? .loading : .completed
     emitState()
-    try? AVAudioSession.sharedInstance().setActive(
-      false,
-      options: .notifyOthersOnDeactivation
-    )
+    if !expectContinuation {
+      cancelSleepTimer()
+      try? AVAudioSession.sharedInstance().setActive(
+        false,
+        options: .notifyOthersOnDeactivation
+      )
+    }
   }
 
   private func fail(_ message: String) {
+    sleepTimer?.invalidate()
+    sleepTimer = nil
     state = .error
     errorListeners.emit(message)
     emitState()
@@ -252,5 +325,38 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
       total: Double(paragraphs.count),
       paragraphId: paragraphs[currentIndex].id
     )
+  }
+
+  private func startDurationTimerIfNeeded() {
+    guard sleepTimerMode == .duration, state == .playing, sleepTimer == nil else { return }
+    sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+      guard let self else {
+        timer.invalidate()
+        return
+      }
+      self.remainingSeconds = max(0, self.remainingSeconds - 1)
+      if self.remainingSeconds == 0 {
+        timer.invalidate()
+        self.sleepTimer = nil
+        self.sleepTimerMode = nil
+        self.sleepTimerExpired = true
+        self.pause()
+      }
+      self.emitSleepTimer()
+    }
+  }
+
+  private func sleepTimerState() -> TtsSleepTimerState {
+    return TtsSleepTimerState(
+      active: sleepTimerMode != nil,
+      expired: sleepTimerExpired,
+      mode: sleepTimerMode,
+      remainingSeconds: sleepTimerMode == .duration ? Double(remainingSeconds) : nil,
+      remainingChapters: sleepTimerMode == .chapters ? Double(remainingChapters) : nil
+    )
+  }
+
+  private func emitSleepTimer() {
+    sleepTimerListeners.emit(sleepTimerState())
   }
 }

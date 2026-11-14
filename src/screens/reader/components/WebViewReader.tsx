@@ -1,4 +1,11 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   NativeEventEmitter,
   NativeModules,
@@ -37,6 +44,9 @@ import {
   isChapterRefreshUrl,
   isPluginIssueReportUrl,
 } from '../utils/sanitizeChapterText';
+import { buildTtsQueueFromHtml } from '../utils/ttsQueue';
+import { applyTextModifications } from '@utils/customCode';
+import TtsSleepTimerDialog from './TtsSleepTimerDialog';
 
 export type WebViewPostEvent = {
   type: string;
@@ -168,16 +178,46 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
+  const ttsChapterTransitionRef = useRef(false);
+  const ttsTransitionInFlightRef = useRef(false);
+  const ttsTransitionGenerationRef = useRef(0);
+  const mountedRef = useRef(true);
   const activeChapterIdRef = useRef(chapter.id);
   const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
   const {
     command: runTtsCommand,
+    cancelSleepTimer,
+    loadQueue,
     loadAndPlay,
     progress: ttsProgress,
     seekTo: seekTts,
     state: ttsState,
+    setSleepTimer,
+    sleepTimer,
     updateSettings: updateTtsSettings,
   } = useTtsSession();
+
+  const cancelTtsTransition = useCallback(() => {
+    ttsTransitionGenerationRef.current += 1;
+    ttsTransitionInFlightRef.current = false;
+    ttsChapterTransitionRef.current = false;
+    autoStartTTSRef.current = false;
+  }, []);
+
+  const stopTts = useCallback(() => {
+    cancelTtsTransition();
+    runTtsCommand('stop');
+  }, [cancelTtsTransition, runTtsCommand]);
+
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+      cancelTtsTransition();
+    },
+    [cancelTtsTransition],
+  );
+
+  const [sleepTimerDialogVisible, setSleepTimerDialogVisible] = useState(false);
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
 
@@ -207,6 +247,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   useEffect(() => {
     isTTSReadingRef.current = ttsState === 'playing';
+    if (ttsState === 'idle' || ttsState === 'error') {
+      cancelTtsTransition();
+    }
     webViewRef.current?.injectJavaScript(`
       window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
       true;
@@ -214,7 +257,113 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     if (ttsState === 'completed') {
       webViewRef.current?.injectJavaScript('window.tts?.complete?.(); true;');
     }
-  }, [isTTSReadingRef, ttsState, webViewRef]);
+  }, [cancelTtsTransition, isTTSReadingRef, ttsState, webViewRef]);
+
+  useEffect(() => {
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
+      true;
+    `);
+  }, [sleepTimer, webViewRef]);
+
+  useEffect(() => {
+    if (ttsState !== 'loading') {
+      return;
+    }
+    if (readerSettingsRef.current.tts?.autoPageAdvance !== true) {
+      stopTts();
+      return;
+    }
+    if (ttsTransitionInFlightRef.current) return;
+
+    ttsTransitionInFlightRef.current = true;
+    const transitionGeneration = ++ttsTransitionGenerationRef.current;
+    const timerExpiredAtBoundary = sleepTimer.expired;
+    const isTransitionActive = () =>
+      mountedRef.current &&
+      transitionGeneration === ttsTransitionGenerationRef.current &&
+      readerSettingsRef.current.tts?.autoPageAdvance === true;
+
+    void (async () => {
+      try {
+        ttsChapterTransitionRef.current = true;
+        const loaded = await navigateChapter('NEXT', isTransitionActive);
+        if (!isTransitionActive()) {
+          ttsChapterTransitionRef.current = false;
+          return;
+        }
+        if (!loaded) {
+          ttsChapterTransitionRef.current = false;
+          stopTts();
+          return;
+        }
+
+        const settings = readerSettingsRef.current;
+        const backgroundHtml = applyTextModifications(
+          loaded.html,
+          settings.removeText,
+          settings.replaceText,
+        );
+        const queue = buildTtsQueueFromHtml(backgroundHtml);
+        if (queue.length === 0) {
+          stopTts();
+          return;
+        }
+
+        const shouldContinue =
+          settings.tts?.autoPageAdvance === true && !timerExpiredAtBoundary;
+        const queueLoaded = await loadQueue(
+          queue,
+          0,
+          {
+            novelName: novel?.name || 'Unknown',
+            chapterName: loaded.chapter.name,
+            coverUri: novel?.cover || undefined,
+          },
+          toNativeTtsSettings(settings.tts),
+          {
+            autoplay: !timerExpiredAtBoundary,
+            expectContinuation: shouldContinue,
+            canContinue: isTransitionActive,
+          },
+        );
+        if (!isTransitionActive()) {
+          return;
+        }
+        if (!queueLoaded) {
+          stopTts();
+          return;
+        }
+        if (timerExpiredAtBoundary) {
+          cancelSleepTimer();
+        }
+      } catch {
+        stopTts();
+      } finally {
+        if (transitionGeneration === ttsTransitionGenerationRef.current) {
+          ttsTransitionInFlightRef.current = false;
+        }
+      }
+    })();
+  }, [
+    cancelSleepTimer,
+    loadQueue,
+    navigateChapter,
+    novel?.cover,
+    novel?.name,
+    sleepTimer.expired,
+    stopTts,
+    ttsState,
+  ]);
+
+  useEffect(() => {
+    if (
+      readerSettings.tts?.autoPageAdvance !== true &&
+      ttsTransitionInFlightRef.current
+    ) {
+      stopTts();
+    }
+  }, [readerSettings.tts?.autoPageAdvance, stopTts]);
 
   useEffect(() => {
     if (ttsProgress.total > 0) {
@@ -228,7 +377,11 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   useEffect(() => {
     if (activeChapterIdRef.current !== chapter.id) {
       activeChapterIdRef.current = chapter.id;
-      runTtsCommand('stop');
+      if (ttsChapterTransitionRef.current) {
+        ttsChapterTransitionRef.current = false;
+      } else {
+        runTtsCommand('stop');
+      }
     }
   }, [chapter.id, runTtsCommand]);
 
@@ -482,6 +635,16 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           webViewRef.current?.injectJavaScript(
             adjacentChapterScriptRef.current,
           );
+          webViewRef.current?.injectJavaScript(`
+            window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
+            window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
+            ${
+              ttsProgress.total > 0
+                ? `window.tts?.setActiveIndex?.(${ttsProgress.index});`
+                : ''
+            }
+            true;
+          `);
 
           const searchText = searchTextRef.current.trim();
           if (searchText) {
@@ -512,6 +675,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
           switch (event.type) {
             case 'tts-queue': {
+              cancelTtsTransition();
               const payload = event.data as
                 | { queue?: unknown; startIndex?: unknown }
                 | undefined;
@@ -534,6 +698,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   coverUri: novel?.cover || undefined,
                 },
                 toNativeTtsSettings(readerSettingsRef.current.tts),
+                readerSettingsRef.current.tts?.autoPageAdvance === true,
               );
               break;
             }
@@ -551,8 +716,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 case 'play':
                 case 'previous':
                 case 'replay':
-                case 'stop':
                   runTtsCommand(data.command);
+                  break;
+                case 'stop':
+                  stopTts();
                   break;
                 case 'seekTo':
                   if (typeof data.index === 'number') {
@@ -562,6 +729,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               }
               break;
             }
+            case 'tts-sleep-timer':
+              setSleepTimerDialogVisible(true);
+              break;
             case 'hide':
               onPress();
               break;
@@ -569,6 +739,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               refetch();
               break;
             case 'next':
+              cancelTtsTransition();
               nextChapterScreenVisible.current = true;
               if (event.autoStartTTS) {
                 autoStartTTSRef.current = true;
@@ -576,6 +747,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               navigateChapter('NEXT');
               break;
             case 'prev':
+              cancelTtsTransition();
               if (event.autoStartTTS) {
                 autoStartTTSRef.current = true;
               }
@@ -653,6 +825,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           <Dialog.Action onPress={handleReplaceSave}>Save</Dialog.Action>
         </Dialog.Actions>
       </Dialog.Root>
+      <TtsSleepTimerDialog
+        autoPageAdvance={readerSettings.tts?.autoPageAdvance === true}
+        onCancel={cancelSleepTimer}
+        onDismiss={() => setSleepTimerDialogVisible(false)}
+        onStart={setSleepTimer}
+        timer={sleepTimer}
+        visible={sleepTimerDialogVisible}
+      />
     </>
   );
 };

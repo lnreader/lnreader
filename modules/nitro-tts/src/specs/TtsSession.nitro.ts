@@ -1,10 +1,15 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type { ListenerSubscription } from '../types/ListenerSubscription';
 import type { TtsMetadata } from '../types/TtsMetadata';
+import type { TtsLoadOptions } from '../types/TtsLoadOptions';
 import type { TtsParagraph } from '../types/TtsParagraph';
 import type { TtsPlaybackState } from '../types/TtsPlaybackState';
 import type { TtsProgress } from '../types/TtsProgress';
 import type { TtsSettings } from '../types/TtsSettings';
+import type {
+  TtsSleepTimerConfig,
+  TtsSleepTimerState,
+} from '../types/TtsSleepTimer';
 
 /**
  * Controls one native text-to-speech queue and its media controls.
@@ -21,6 +26,7 @@ export interface TtsSession
     initialIndex: number,
     metadata: TtsMetadata,
     settings: TtsSettings,
+    options: TtsLoadOptions,
   ): Promise<void>;
 
   /** Starts or resumes playback. */
@@ -47,6 +53,12 @@ export interface TtsSession
   /** Applies voice, rate, and pitch preferences. */
   updateSettings(settings: TtsSettings): Promise<void>;
 
+  /** Starts or replaces the one-shot sleep timer for this session. */
+  setSleepTimer(config: TtsSleepTimerConfig): Promise<void>;
+
+  /** Removes the active sleep timer. */
+  cancelSleepTimer(): Promise<void>;
+
   /**
    * Observes playback-state changes.
    */
@@ -65,4 +77,9 @@ export interface TtsSession
    * Observes native playback failures.
    */
   addOnErrorListener(listener: (message: string) => void): ListenerSubscription;
+
+  /** Observes countdown, chapter-count and expiration updates. */
+  addOnSleepTimerChangedListener(
+    listener: (state: TtsSleepTimerState) => void,
+  ): ListenerSubscription;
 }

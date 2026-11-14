@@ -185,10 +185,12 @@ window.tts = new (function () {
   this.currentElement = reader.chapterElement;
   this.started = false;
   this.reading = false;
+  this.playbackState = 'idle';
   this.elementsRead = 0;
   this.totalElements = 0;
   this.allReadableElements = []; // Store all readable elements at start
   this.textQueue = []; // Flat list of normalized text for native fallback
+  this.sleepTimerState = { active: false, expired: false };
 
   this.readable = element => {
     const ele = element ?? this.currentElement;
@@ -308,16 +310,7 @@ window.tts = new (function () {
 
   this.start = element => {
     const startElement = element ?? reader.chapterElement;
-
-    const readableEntries = this.getAllReadableElements(reader.chapterElement)
-      .map(readableElement => ({
-        element: readableElement,
-        text: this.normalizeText(readableElement.innerText),
-      }))
-      .filter(entry => !!entry.text);
-    this.allReadableElements = readableEntries.map(entry => entry.element);
-    this.totalElements = this.allReadableElements.length;
-    this.textQueue = readableEntries.map(entry => entry.text);
+    this.initializeQueueFromChapter();
 
     const requestedIndex =
       element && element !== reader.chapterElement
@@ -325,7 +318,6 @@ window.tts = new (function () {
         : 0;
     const startIndex = requestedIndex >= 0 ? requestedIndex : 0;
 
-    this.started = this.totalElements > 0;
     this.reading = this.started;
     this.setActiveIndex(startIndex);
     reader.post({
@@ -354,6 +346,20 @@ window.tts = new (function () {
     };
     traverse(element);
     return elements;
+  };
+
+  this.initializeQueueFromChapter = () => {
+    const readableEntries = this.getAllReadableElements(reader.chapterElement)
+      .map(readableElement => ({
+        element: readableElement,
+        text: this.normalizeText(readableElement.innerText),
+      }))
+      .filter(entry => !!entry.text);
+    this.allReadableElements = readableEntries.map(entry => entry.element);
+    this.totalElements = this.allReadableElements.length;
+    this.textQueue = readableEntries.map(entry => entry.text);
+    this.started = this.totalElements > 0;
+    return this.started;
   };
 
   this.resume = () => {
@@ -391,6 +397,7 @@ window.tts = new (function () {
     this.currentElement = reader.chapterElement;
     this.started = false;
     this.reading = false;
+    this.playbackState = 'idle';
     this.elementsRead = 0;
     this.totalElements = 0;
     this.allReadableElements = [];
@@ -402,6 +409,16 @@ window.tts = new (function () {
   };
 
   this.setActiveIndex = index => {
+    const hasActiveSession =
+      this.playbackState === 'loading' ||
+      this.playbackState === 'playing' ||
+      this.playbackState === 'paused';
+    if (
+      hasActiveSession &&
+      (!this.started || !this.allReadableElements.length)
+    ) {
+      this.initializeQueueFromChapter();
+    }
     if (!this.allReadableElements.length) return;
     const targetIndex = Math.max(0, Math.min(index, this.totalElements - 1));
     this.currentElement?.classList?.remove('highlight');
@@ -417,6 +434,13 @@ window.tts = new (function () {
   };
 
   this.setPlaybackState = state => {
+    this.playbackState = state;
+    if (
+      (state === 'loading' || state === 'playing' || state === 'paused') &&
+      (!this.started || !this.allReadableElements.length)
+    ) {
+      this.initializeQueueFromChapter();
+    }
     this.reading = state === 'playing';
     if (state === 'error') {
       this.reset();
@@ -425,6 +449,29 @@ window.tts = new (function () {
     const playPauseButton = document.getElementById('TTS-PlayPause');
     if (playPauseButton) {
       playPauseButton.innerHTML = this.reading ? pauseIcon : resumeIcon;
+    }
+  };
+
+  this.setSleepTimerState = timerState => {
+    this.sleepTimerState = timerState ?? { active: false, expired: false };
+    const button = document.getElementById('TTS-SleepTimer');
+    const status = document.getElementById('TTS-TimerStatus');
+    button?.classList?.toggle('active', this.sleepTimerState.active === true);
+    if (!status) return;
+    if (this.sleepTimerState.mode === 'duration') {
+      const total = Math.max(0, this.sleepTimerState.remainingSeconds ?? 0);
+      const hours = Math.floor(total / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const seconds = Math.floor(total % 60);
+      status.textContent = hours
+        ? `${hours}:${String(minutes).padStart(2, '0')}:${String(
+            seconds,
+          ).padStart(2, '0')}`
+        : `${minutes}:${String(seconds).padStart(2, '0')}`;
+    } else if (this.sleepTimerState.mode === 'chapters') {
+      status.textContent = `${this.sleepTimerState.remainingChapters ?? 0}ch`;
+    } else {
+      status.textContent = '';
     }
   };
 

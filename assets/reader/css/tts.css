@@ -40,6 +40,10 @@
   background: var(--theme-rippleColor);
 }
 
+#TTS-Controller .tts-sleep-timer.active {
+  background: color-mix(in srgb, var(--theme-primary) 24%, transparent);
+}
+
 #TTS-Controller .tts-drag-handle {
   cursor: move;
   touch-action: none;
@@ -80,5 +84,12 @@
   font-size: 11px;
   min-width: 34px;
   padding-right: 6px;
+  text-align: center;
+}
+
+#TTS-TimerStatus {
+  color: var(--readerSettings-textColor);
+  font-size: 11px;
+  min-width: 30px;
   text-align: center;
 }

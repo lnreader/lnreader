@@ -31,6 +31,7 @@ internal class TtsMediaNotification(
 
         val isPlaying = snapshot.state == TtsPlaybackState.PLAYING
         val progressLabel = paragraphProgressLabel(snapshot.progress)
+        val timerLabel = sleepTimerLabel(snapshot.sleepTimer)
         val playPauseAction = if (isPlaying) {
             action(
                 android.R.drawable.ic_media_pause,
@@ -47,7 +48,10 @@ internal class TtsMediaNotification(
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(snapshot.metadata?.chapterName ?: "Text to speech")
-            .setContentText(progressLabel ?: snapshot.metadata?.novelName ?: "LNReader")
+            .setContentText(
+                listOfNotNull(progressLabel, timerLabel).joinToString(" · ")
+                    .ifBlank { snapshot.metadata?.novelName ?: "LNReader" },
+            )
             .setSubText(snapshot.metadata?.novelName)
             .setSmallIcon(context.applicationInfo.icon)
             .setContentIntent(contentIntent())
@@ -141,6 +145,28 @@ internal class TtsMediaNotification(
         }
         val current = progress.index.toInt().coerceIn(0, total - 1) + 1
         return "Paragraph $current of $total"
+    }
+
+    private fun sleepTimerLabel(timer: TtsSleepTimerState): String? {
+        if (!timer.active) return null
+        return when (timer.mode) {
+            TtsSleepTimerMode.DURATION -> {
+                val total = timer.remainingSeconds?.toInt() ?: return null
+                val hours = total / 3600
+                val minutes = (total % 3600) / 60
+                val seconds = total % 60
+                if (hours > 0) {
+                    "Timer %d:%02d:%02d".format(hours, minutes, seconds)
+                } else {
+                    "Timer %d:%02d".format(minutes, seconds)
+                }
+            }
+            TtsSleepTimerMode.CHAPTERS -> {
+                val chapters = timer.remainingChapters?.toInt() ?: return null
+                "Timer $chapters chapter${if (chapters == 1) "" else "s"}"
+            }
+            null -> null
+        }
     }
 
     private fun action(icon: Int, title: String, action: String): NotificationCompat.Action {
