@@ -7,6 +7,7 @@ import WebView, {
 import type {
   ShouldStartLoadRequest,
   WebViewErrorEvent,
+  WebViewHttpErrorEvent,
 } from 'react-native-webview/lib/WebViewTypes';
 
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
@@ -87,6 +88,7 @@ const HiddenWebViewHost = () => {
   const [activeRequest, setActiveRequest] =
     useState<HiddenWebviewRequest | null>(null);
   const webViewRef = useRef<WebView<object> | null>(null);
+  const topFrameUrlRef = useRef<string | null>(null);
   const defaultUserAgent = useMemo(() => getUserAgent(), []);
 
   useEffect(() => {
@@ -96,17 +98,7 @@ const HiddenWebViewHost = () => {
   }, []);
 
   useEffect(() => {
-    if (!activeRequest) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      failHiddenWebviewRequest(
-        activeRequest.id,
-        new Error('fetchViaWebview: timed out waiting for page'),
-      );
-    }, activeRequest.timeoutMs);
-
-    return () => clearTimeout(timer);
+    topFrameUrlRef.current = activeRequest?.url ?? null;
   }, [activeRequest]);
 
   const handleLoadEnd = useCallback(() => {
@@ -118,7 +110,13 @@ const HiddenWebViewHost = () => {
 
   const handleNavigationStateChange = useCallback(
     (nav: WebViewNavigation) => {
-      if (!activeRequest || nav.loading) {
+      if (!activeRequest) {
+        return;
+      }
+      if (nav.url) {
+        topFrameUrlRef.current = nav.url;
+      }
+      if (nav.loading) {
         return;
       }
       webViewRef.current?.injectJavaScript(buildExtractorScript(activeRequest));
@@ -178,6 +176,36 @@ const HiddenWebViewHost = () => {
     [activeRequest],
   );
 
+  const handleHttpError = useCallback(
+    (event: WebViewHttpErrorEvent) => {
+      if (!activeRequest || activeRequest.waitForSelector) {
+        return;
+      }
+      const { statusCode, url, description } = event.nativeEvent;
+      if (statusCode < 400) {
+        return;
+      }
+      const currentTopUrl = topFrameUrlRef.current;
+      if (
+        currentTopUrl &&
+        url &&
+        url !== currentTopUrl &&
+        url !== activeRequest.url
+      ) {
+        return;
+      }
+      failHiddenWebviewRequest(
+        activeRequest.id,
+        new Error(
+          description
+            ? `fetchViaWebview: HTTP ${statusCode} (${description})`
+            : `fetchViaWebview: HTTP ${statusCode}`,
+        ),
+      );
+    },
+    [activeRequest],
+  );
+
   const handleShouldStartLoadWithRequest = useCallback(
     (request: ShouldStartLoadRequest) => {
       if (!activeRequest) {
@@ -188,6 +216,9 @@ const HiddenWebViewHost = () => {
       }
       try {
         validateSameOriginUrl(request.url, activeRequest.allowedOrigin);
+        if (request.isTopFrame !== false) {
+          topFrameUrlRef.current = request.url;
+        }
         return true;
       } catch (err) {
         if (request.isTopFrame !== false) {
@@ -227,6 +258,7 @@ const HiddenWebViewHost = () => {
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
         onMessage={handleMessage}
         onError={handleError}
+        onHttpError={handleHttpError}
       />
     </View>
   );

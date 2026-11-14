@@ -33,24 +33,51 @@ let nextId = 1;
 let activeRequest: HiddenWebviewRequest | null = null;
 const queue: HiddenWebviewRequest[] = [];
 const listeners = new Set<Listener>();
+const requestTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
+const clearRequestTimer = (id: number) => {
+  const timer = requestTimers.get(id);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    requestTimers.delete(id);
+  }
+};
 
 const notify = () => {
   listeners.forEach(listener => listener(activeRequest));
 };
 
-const pump = () => {
-  if (activeRequest || queue.length === 0) {
-    return;
+const pump = (): boolean => {
+  if (activeRequest || queue.length === 0 || listeners.size === 0) {
+    return false;
   }
   activeRequest = queue.shift() || null;
   notify();
+  return activeRequest !== null;
+};
+
+const settleRequest = (
+  req: HiddenWebviewRequest,
+  settle: (r: HiddenWebviewRequest) => void,
+) => {
+  clearRequestTimer(req.id);
+  settle(req);
 };
 
 export const subscribeHiddenWebview = (listener: Listener): (() => void) => {
   listeners.add(listener);
-  listener(activeRequest);
+  if (!pump()) {
+    listener(activeRequest);
+  }
   return () => {
     listeners.delete(listener);
+    if (listeners.size === 0 && activeRequest) {
+      const req = activeRequest;
+      activeRequest = null;
+      settleRequest(req, r =>
+        r.reject(new Error('fetchViaWebview: HiddenWebViewHost unmounted')),
+      );
+    }
   };
 };
 
@@ -64,8 +91,30 @@ const settleActiveRequest = (
   const req = activeRequest;
   activeRequest = null;
   notify();
-  settle(req);
+  settleRequest(req, settle);
   pump();
+};
+
+const failTimedOutRequest = (id: number) => {
+  if (activeRequest?.id === id) {
+    settleActiveRequest(id, req =>
+      req.reject(new Error('fetchViaWebview: timed out waiting for page')),
+    );
+    return;
+  }
+  const queuedIndex = queue.findIndex(req => req.id === id);
+  if (queuedIndex !== -1) {
+    const [req] = queue.splice(queuedIndex, 1);
+    settleRequest(req, r =>
+      r.reject(
+        new Error(
+          listeners.size === 0
+            ? 'fetchViaWebview: timed out waiting for HiddenWebViewHost'
+            : 'fetchViaWebview: timed out waiting for page',
+        ),
+      ),
+    );
+  }
 };
 
 export const completeHiddenWebviewRequest = (
@@ -111,24 +160,25 @@ export const fetchViaWebviewForSite = (
   options?: HiddenWebviewFetchOptions,
 ): Promise<HiddenWebviewResponse> => {
   const validatedUrl = validateSameOriginUrl(url, site);
-  if (listeners.size === 0) {
-    return Promise.reject(
-      new Error('fetchViaWebview: HiddenWebViewHost is not mounted'),
-    );
-  }
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   return new Promise<HiddenWebviewResponse>((resolve, reject) => {
+    const id = nextId++;
     const req: HiddenWebviewRequest = {
-      id: nextId++,
+      id,
       url: validatedUrl,
       allowedOrigin: new URL(validatedUrl).origin,
       waitForSelector: options?.waitForSelector,
-      timeoutMs: options?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      timeoutMs,
       settleMs: options?.settleMs ?? DEFAULT_SETTLE_MS,
       userAgent: options?.userAgent,
       resolve,
       reject,
     };
+    requestTimers.set(
+      id,
+      setTimeout(() => failTimedOutRequest(id), timeoutMs),
+    );
     queue.push(req);
     pump();
   });

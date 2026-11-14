@@ -61,4 +61,81 @@ describe('hiddenWebview', () => {
       unsubscribe();
     }
   });
+
+  it('keeps pending requests until a host subscribes within timeoutMs', async () => {
+    const pending = fetchViaWebviewForSite(
+      'https://fenrirealm.com/pending',
+      'https://fenrirealm.com',
+      { timeoutMs: 2000 },
+    );
+
+    const unsubscribe = subscribeHiddenWebview(req => {
+      if (req) {
+        Promise.resolve().then(() => {
+          completeHiddenWebviewRequest(req.id, {
+            ok: true,
+            url: req.url,
+            html: '<html><body>late-host</body></html>',
+            title: 'Late',
+          });
+        });
+      }
+    });
+
+    try {
+      const res = await pending;
+      expect(res.ok).toBe(true);
+      expect(res.title).toBe('Late');
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it('times out queued requests when no host subscribes', async () => {
+    jest.useFakeTimers();
+    try {
+      const pending = fetchViaWebviewForSite(
+        'https://fenrirealm.com/no-host',
+        'https://fenrirealm.com',
+        { timeoutMs: 500 },
+      ).catch(err => err);
+      await jest.advanceTimersByTimeAsync(500);
+      const err = await pending;
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toContain(
+        'timed out waiting for HiddenWebViewHost',
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('rejects active request on last host unmount and times out queued requests', async () => {
+    jest.useFakeTimers();
+    try {
+      const unsubscribe = subscribeHiddenWebview(() => {});
+      const first = fetchViaWebviewForSite(
+        'https://fenrirealm.com/first',
+        'https://fenrirealm.com',
+        { timeoutMs: 1000 },
+      );
+      const second = fetchViaWebviewForSite(
+        'https://fenrirealm.com/second',
+        'https://fenrirealm.com',
+        { timeoutMs: 1000 },
+      ).catch(err => err);
+
+      unsubscribe();
+
+      await expect(first).rejects.toThrow('HiddenWebViewHost unmounted');
+      await jest.advanceTimersByTimeAsync(1000);
+      const secondErr = await second;
+      expect(secondErr).toBeInstanceOf(Error);
+      expect((secondErr as Error).message).toContain(
+        'timed out waiting for HiddenWebViewHost',
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
