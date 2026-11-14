@@ -153,9 +153,7 @@ describe('ChapterQueries', () => {
   describe('getAllNovelChaptersForBackup', () => {
     it('returns chapters beyond the 1000-row UI query limit', async () => {
       const testDb = getTestDb();
-      // No Novel row is needed for this selector test. Keeping the id orphaned
-      // also avoids running aggregate-stat triggers 1001 times during setup.
-      const novelId = 123456;
+      const novelId = await insertTestNovel(testDb);
 
       const values = Array.from(
         { length: 1001 },
@@ -184,6 +182,33 @@ describe('ChapterQueries', () => {
       const backupChapters = await getAllNovelChaptersForBackup(novelId);
       expect(backupChapters).toHaveLength(1001);
       expect(backupChapters.at(-1)?.name).toBe('Chapter 1001');
+    });
+
+    it('returns chapters for multiple novels in novel and chapter order', async () => {
+      const testDb = getTestDb();
+      const firstNovelId = await insertTestNovel(testDb);
+      const secondNovelId = await insertTestNovel(testDb);
+      testDb.sqlite.executeSync(`
+        INSERT INTO Chapter
+          (novelId, path, name, chapterNumber, page, position)
+        VALUES
+          (${firstNovelId}, '/chapter/1', 'Chapter 1', 1, '1', 1),
+          (${firstNovelId}, '/chapter/2', 'Chapter 2', 2, '1', 2),
+          (${secondNovelId}, '/chapter/1', 'Chapter 1', 1, '1', 1),
+          (${secondNovelId}, '/chapter/2', 'Chapter 2', 2, '1', 2)
+      `);
+
+      const chapters = await getAllNovelChaptersForBackup([
+        secondNovelId,
+        firstNovelId,
+      ]);
+
+      expect(chapters.map(chapter => [chapter.novelId, chapter.name])).toEqual([
+        [firstNovelId, 'Chapter 1'],
+        [firstNovelId, 'Chapter 2'],
+        [secondNovelId, 'Chapter 1'],
+        [secondNovelId, 'Chapter 2'],
+      ]);
     });
   });
 

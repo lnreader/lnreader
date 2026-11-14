@@ -1,5 +1,9 @@
+import type {
+  BatchQueryResult,
+  SQLBatchTuple,
+  Scalar,
+} from '@op-engineering/op-sqlite';
 import type { drizzleDb } from '@database/db';
-import type { SQLBatchTuple, Scalar } from '@op-engineering/op-sqlite';
 import { IDbManager } from './manager.d';
 import { DbTaskQueue } from './queue';
 import { Schema } from '../schema';
@@ -88,15 +92,32 @@ class DbManager implements IDbManager {
       .rows as Awaited<ReturnType<T['all']>>;
   }
 
+  public async executeBatch(
+    commands: SQLBatchTuple[],
+  ): Promise<BatchQueryResult> {
+    if (!commands.length) {
+      return { rowsAffected: 0 };
+    }
+
+    return await this.queue.enqueue({
+      id: 'write',
+      run: async () => {
+        const result = await this.db.$client.executeBatch(commands);
+        this.db.$client.flushPendingReactiveQueries();
+        return result;
+      },
+    });
+  }
+
   public async batch<T extends Record<string, unknown>>(
     data: T[],
     fn: (
       tx: TransactionParameter,
       ph: (arg: Extract<keyof T, string>) => Placeholder,
     ) => SQLitePreparedQuery<any>,
-  ) {
+  ): Promise<BatchQueryResult> {
     if (!data.length) {
-      return;
+      return { rowsAffected: 0 };
     }
 
     const ph = (arg: Extract<keyof T, string>) => sql.placeholder(arg);
@@ -110,13 +131,7 @@ class DbManager implements IDbManager {
     });
     const commands: SQLBatchTuple[] = [[query.sql, params]];
 
-    await this.queue.enqueue({
-      id: 'write',
-      run: async () => {
-        await this.db.$client.executeBatch(commands);
-        this.db.$client?.flushPendingReactiveQueries();
-      },
-    });
+    return await this.executeBatch(commands);
   }
 
   public async write<T>(

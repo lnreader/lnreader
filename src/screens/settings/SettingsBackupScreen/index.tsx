@@ -3,11 +3,13 @@ import { Appbar, List, SafeAreaView } from '@components';
 import { useBoolean } from '@hooks';
 import { BackupSettingsScreenProps } from '@navigators/types';
 import GoogleDriveModal from './Components/GoogleDriveModal';
+import RestoreConfirmationDialog from './Components/RestoreConfirmationDialog';
 import SelfHostModal from './Components/SelfHostModal';
 import {
   backgroundTasks,
   configureAutomaticBackups,
   type AutomaticBackupInterval,
+  type BackgroundTask,
 } from '@services/backgroundTasks';
 import { ScrollView } from 'react-native-gesture-handler';
 import { getString } from '@i18n/translations';
@@ -26,6 +28,11 @@ import AutomaticBackupDialog, {
 } from './Components/AutomaticBackupDialog';
 import { showToast } from '@utils/showToast';
 
+type RestoreTask = Extract<
+  BackgroundTask,
+  { name: 'LOCAL_RESTORE' | 'DRIVE_RESTORE' | 'SELF_HOST_RESTORE' }
+>;
+
 const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   const theme = useTheme();
   const {
@@ -38,6 +45,8 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
     ...DEFAULT_BACKUP_OPTIONS,
   });
+  const [pendingRestoreTask, setPendingRestoreTask] =
+    useState<RestoreTask | null>(null);
   const {
     value: backupOptionsVisible,
     setFalse: closeBackupOptions,
@@ -117,12 +126,19 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   const restoreLocalBackup = async () => {
     try {
       const sourceUri = await NativeFile.pickDocument('application/zip');
-      backgroundTasks.enqueue({
+      setPendingRestoreTask({
         name: 'LOCAL_RESTORE',
         data: { sourceUri },
       });
     } catch {
       // Closing Android's document picker intentionally leaves the queue unchanged.
+    }
+  };
+
+  const confirmRestore = () => {
+    if (pendingRestoreTask) {
+      backgroundTasks.enqueue(pendingRestoreTask);
+      setPendingRestoreTask(null);
     }
   };
 
@@ -203,11 +219,18 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
         visible={googleDriveModalVisible}
         theme={theme}
         closeModal={closeGoogleDriveModal}
+        onRestoreSelected={setPendingRestoreTask}
       />
       <SelfHostModal
         theme={theme}
         visible={selfHostModalVisible}
         closeModal={closeSelfHostModal}
+        onRestoreSelected={setPendingRestoreTask}
+      />
+      <RestoreConfirmationDialog
+        visible={pendingRestoreTask !== null}
+        onCancel={() => setPendingRestoreTask(null)}
+        onRestore={confirmRestore}
       />
       <BackupOptionsDialog
         onCancel={closeBackupOptions}

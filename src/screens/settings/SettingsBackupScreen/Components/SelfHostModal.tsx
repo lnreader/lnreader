@@ -1,7 +1,10 @@
 import { list } from '@api/remote';
 import { Button, Dialog, EmptyView } from '@components';
 import { useSelfHost } from '@hooks/persisted/useSelfHost';
-import { backgroundTasks } from '@services/backgroundTasks';
+import {
+  backgroundTasks,
+  type BackgroundTask,
+} from '@services/backgroundTasks';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import { fetchTimeout } from '@utils/fetch/fetch';
@@ -16,6 +19,11 @@ import {
 } from '@services/backup/options';
 import { BackupOptionsList } from './BackupOptions';
 
+type RestoreTask = Extract<
+  BackgroundTask,
+  { name: 'LOCAL_RESTORE' | 'DRIVE_RESTORE' | 'SELF_HOST_RESTORE' }
+>;
+
 enum BackupModal {
   SET_HOST,
   CONNECTED,
@@ -27,6 +35,7 @@ interface SelfHostModalProps {
   visible: boolean;
   theme: ThemeColors;
   closeModal: () => void;
+  onRestoreSelected: (task: RestoreTask) => void;
 }
 
 function CreateBackup({
@@ -93,11 +102,13 @@ function RestoreBackup({
   theme,
   setBackupModal,
   closeModal,
+  onRestoreSelected,
 }: {
   host: string;
   theme: ThemeColors;
   setBackupModal: (backupModal: BackupModal) => void;
   closeModal: () => void;
+  onRestoreSelected: (task: RestoreTask) => void;
 }) {
   const [backupList, setBackupList] = useState<string[]>([]);
   useEffect(() => {
@@ -128,7 +139,7 @@ function RestoreBackup({
               style={styles.btnOutline}
               onPress={() => {
                 closeModal();
-                backgroundTasks.enqueue({
+                onRestoreSelected({
                   name: 'SELF_HOST_RESTORE',
                   data: {
                     host,
@@ -249,6 +260,7 @@ export default function SelfHostModal({
   visible,
   theme,
   closeModal,
+  onRestoreSelected,
 }: SelfHostModalProps) {
   const [backupModal, setBackupModal] = useState(BackupModal.SET_HOST);
   const { host, setHost } = useSelfHost();
@@ -282,6 +294,7 @@ export default function SelfHostModal({
             closeModal={closeModal}
             setBackupModal={setBackupModal}
             theme={theme}
+            onRestoreSelected={onRestoreSelected}
           />
         );
     }

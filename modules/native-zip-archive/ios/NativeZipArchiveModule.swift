@@ -13,6 +13,10 @@ public class NativeZipArchiveModule: Module {
       promise.reject("NOT_IMPLEMENTED", "zip is not implemented on iOS")
     }
 
+    AsyncFunction("zipDirectories") { (sources: [[String: String]], zipFilePath: String, promise: Promise) in
+      promise.reject("NOT_IMPLEMENTED", "zipDirectories is not implemented on iOS")
+    }
+
     AsyncFunction("remoteUnzip") { (distDirPath: String, url: String, headers: [String: String], promise: Promise) in
       promise.reject("NOT_IMPLEMENTED", "remoteUnzip is not implemented on iOS")
     }
