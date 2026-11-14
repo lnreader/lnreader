@@ -3,10 +3,15 @@ import { applyTextModifications } from '@utils/customCode';
 import React, { useMemo, useState } from 'react';
 import type WebView from 'react-native-webview';
 import { WebViewPostEvent } from '../WebViewReader';
+import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
+import { filterChapterText } from '@screens/reader/utils/filterChapterText';
+
+const EMPTY_FILTERS: string[] = [];
 export default function useTextModifications(
   chapterText: string,
   webViewRef: React.RefObject<WebView<object> | null>,
 ) {
+  const { chapterTextFilters = EMPTY_FILTERS } = useNovelSettings();
   // Replace modal state
   const [replaceModalVisible, setReplaceModalVisible] = useState(false);
   const [selectedTextForReplace, setSelectedTextForReplace] = useState('');
@@ -15,19 +20,21 @@ export default function useTextModifications(
   const { setChapterReaderSettings, ...readerSettings } =
     useChapterReaderSettings();
 
-  // html is computed once per chapter at load time, using the current saved
-  // settings. Subsequent dynamic remove/replace actions inject JS directly
-  // into the WebView DOM instead of rebuilding the HTML source (which would
-  // reload the WebView and lose the reading position).
+  // Live remove/replace actions patch the DOM without reloading the page.
+  // When the chapter or novel filters change, rebuild using the latest saved
+  // edits so those DOM changes survive the reload.
   const html = useMemo(
     () =>
-      applyTextModifications(
-        chapterText,
-        readerSettings.removeText,
-        readerSettings.replaceText,
+      filterChapterText(
+        applyTextModifications(
+          chapterText,
+          readerSettings.removeText,
+          readerSettings.replaceText,
+        ),
+        chapterTextFilters,
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapterText],
+    [chapterText, chapterTextFilters],
   );
 
   const injectJS = React.useCallback(
@@ -71,7 +78,9 @@ export default function useTextModifications(
     }
     // Directly replace text in the WebView DOM to avoid full re-render
     injectJS(
-      `window.textRemover?.performReplace?.(${JSON.stringify(selectedTextForReplace)}, ${JSON.stringify(replacementText)}); true;`,
+      `window.textRemover?.performReplace?.(${JSON.stringify(
+        selectedTextForReplace,
+      )}, ${JSON.stringify(replacementText)}); true;`,
     );
     setReplaceModalVisible(false);
     return true;

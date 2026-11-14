@@ -648,6 +648,9 @@
   "readerScreen": {
     "bottomSheet": {
       "alignCenter": "Center",
+      "chapterTextFilters": "Text filters for this novel",
+      "chapterTextFiltersDescription": "Remove exact, case-sensitive matches from this novel. Remove a filter to restore the text.",
+      "filterText": "Text to remove",
       "alignJustify": "Justify",
       "alignLeft": "Left",
       "alignRight": "Right",

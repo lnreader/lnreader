@@ -75,6 +75,42 @@ describe('useTtsSession', () => {
     });
   });
 
+  it('stops an existing speech queue when filters rebuild the same chapter', async () => {
+    const { result, rerender } = renderHook(
+      (content: { chapterId: number; html: string }) => useTtsSession(content),
+      {
+        initialProps: { chapterId: 1, html: '<p>Story. Advertisement.</p>' },
+      },
+    );
+    const session = await getNativeSession();
+    await act(async () => {
+      await result.current.loadAndPlay(
+        ['Story. Advertisement.'],
+        0,
+        { novelName: 'Novel', chapterName: 'Chapter' },
+        { rate: 1, pitch: 1 },
+      );
+    });
+
+    rerender({ chapterId: 1, html: '<p>Story. Advertisement.</p>' });
+    expect(session.stop).not.toHaveBeenCalled();
+    rerender({ chapterId: 1, html: '<p>Story. </p>' });
+    await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
+    expect(session.play).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops speech on chapter navigation even when the text is identical', async () => {
+    const { rerender } = renderHook(
+      (content: { chapterId: number; html: string }) => useTtsSession(content),
+      {
+        initialProps: { chapterId: 1, html: '<p>Same text</p>' },
+      },
+    );
+    const session = await getNativeSession();
+    rerender({ chapterId: 2, html: '<p>Same text</p>' });
+    await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
+  });
+
   it('stops the native session and removes listeners on unmount', async () => {
     const { unmount } = renderHook(useTtsSession);
     const session = await getNativeSession();

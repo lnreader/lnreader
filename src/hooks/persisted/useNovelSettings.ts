@@ -104,6 +104,13 @@ export const useNovelSettings = () => {
 
   // #endregion
 
+  const setChapterTextFilters = useCallback(
+    (chapterTextFilters: string[]) => {
+      writeNovelSettings({ ...novelSettings, chapterTextFilters });
+    },
+    [novelSettings, writeNovelSettings],
+  );
+
   return useMemo(
     () => ({
       ...novelSettings,
@@ -115,6 +122,7 @@ export const useNovelSettings = () => {
       setChapterSort,
       setShowChapterTitles,
       setExcludedScanlators,
+      setChapterTextFilters,
     }),
     [
       cycleChapterFilter,
@@ -126,6 +134,7 @@ export const useNovelSettings = () => {
       setChapterSort,
       setShowChapterTitles,
       setExcludedScanlators,
+      setChapterTextFilters,
     ],
   );
 };

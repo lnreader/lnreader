@@ -17,7 +17,13 @@ const initialProgress: TtsProgress = {
   paragraphId: '',
 };
 
-export const useTtsSession = () => {
+export const useTtsSession = (content?: {
+  chapterId: number;
+  html: string;
+}) => {
+  const chapterId = content?.chapterId;
+  const html = content?.html;
+  const previousContentRef = useRef({ chapterId, html });
   const sessionRef = useRef<TtsSession | null>(null);
   const sessionPromiseRef = useRef<Promise<TtsSession> | null>(null);
   const subscriptionsRef = useRef<{ remove(): void }[]>([]);
@@ -117,6 +123,14 @@ export const useTtsSession = () => {
     },
     [run],
   );
+
+  useEffect(() => {
+    const previous = previousContentRef.current;
+    previousContentRef.current = { chapterId, html };
+    if (previous.chapterId !== chapterId || previous.html !== html) {
+      command('stop');
+    }
+  }, [chapterId, html, command]);
 
   const updateSettings = useCallback(
     (settings: TtsSettings) => {
