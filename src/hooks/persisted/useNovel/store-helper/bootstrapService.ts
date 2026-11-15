@@ -120,7 +120,7 @@ export const createBootstrapService = (
         .filter((page): page is string => page !== null);
     }
 
-    return tmpPages.length > 1 ? tmpPages : ['1'];
+    return tmpPages.length > 0 ? tmpPages : ['1'];
   };
 
   const resolveNovel = async (
