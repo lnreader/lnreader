@@ -42,6 +42,12 @@ describe('local selective backup', () => {
     });
     jest.mocked(NativeZipArchive.zip).mockResolvedValue(undefined);
     jest.mocked(NativeFile.copyFile).mockResolvedValue(undefined);
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest
+      .mocked(NativeFile.readDir)
+      .mockResolvedValue([
+        { name: 'index.js', path: '/storage/Plugins/a', isDirectory: false },
+      ]);
 
     await createBackup({
       destinationUri: 'content://backup.zip',
@@ -111,6 +117,123 @@ describe('local selective backup', () => {
       jest.mocked(finalizeRestoredPlugins).mock.invocationCallOrder[0],
     ).toBeGreaterThan(
       jest.mocked(NativeZipArchive.unzip).mock.invocationCallOrder[1],
+    );
+  });
+
+  it('archives an empty or missing section through a marker file', async () => {
+    jest.mocked(prepareBackupData).mockResolvedValue({
+      failedNovelCount: 0,
+      failedSectionCount: 0,
+    });
+    jest.mocked(NativeZipArchive.zip).mockResolvedValue(undefined);
+    jest.mocked(NativeFile.copyFile).mockResolvedValue(undefined);
+    jest
+      .mocked(NativeFile.exists)
+      .mockImplementation(
+        async path => path !== '/storage/Novels' && !path.includes('Empty'),
+      );
+    jest
+      .mocked(NativeFile.readDir)
+      .mockImplementation(async path =>
+        path === '/storage/Plugins'
+          ? [{ name: 'x', path: '/storage/Plugins/x', isDirectory: true }]
+          : [],
+      );
+
+    await createBackup({
+      destinationUri: 'content://backup.zip',
+      options: {
+        library: true,
+        settings: true,
+        plugins: true,
+        downloadedFiles: true,
+      },
+    });
+
+    const zipped = jest.mocked(NativeZipArchive.zip).mock.calls;
+    expect(zipped).toContainEqual([
+      '/mock/caches/BackupEmptySection-plugins.zip',
+      '/cache/BackupData/plugins.zip',
+    ]);
+    expect(zipped).toContainEqual([
+      '/mock/caches/BackupEmptySection-novel-files.zip',
+      '/cache/BackupData/novel-files.zip',
+    ]);
+    expect(NativeFile.writeFile).toHaveBeenCalledWith(
+      '/mock/caches/BackupEmptySection-plugins.zip/.lnreader-empty-section',
+      '',
+    );
+  });
+
+  it('restores an empty section archive that this Android cannot open', async () => {
+    jest.mocked(restoreData).mockResolvedValueOnce({
+      novelCount: 0,
+      failedNovelCount: 0,
+      categoryCount: 0,
+      failedCategoryCount: 0,
+      settingsRestored: true,
+      failedSectionCount: 0,
+      pluginIds: [],
+      novelMappings: [],
+      manifest: {
+        appVersion: '2.1.0',
+        formatVersion: 2 as const,
+        sections: {
+          library: true,
+          settings: true,
+          plugins: true,
+          downloadedFiles: false,
+        },
+      },
+    });
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest.mocked(NativeFile.copyFile).mockResolvedValue(undefined);
+    jest.mocked(NativeZipArchive.unzip).mockImplementation(async source => {
+      if (source.endsWith('plugins.zip')) {
+        throw new Error('No entries');
+      }
+    });
+    jest.mocked(finalizeRestoredPlugins).mockResolvedValueOnce([]);
+
+    await expect(
+      restoreBackup({ sourceUri: 'content://backup.zip' }),
+    ).resolves.toBeUndefined();
+    expect(finalizeRestoredPlugins).toHaveBeenCalled();
+  });
+
+  it('treats an absent section archive as empty', async () => {
+    jest.mocked(restoreData).mockResolvedValueOnce({
+      novelCount: 0,
+      failedNovelCount: 0,
+      categoryCount: 0,
+      failedCategoryCount: 0,
+      settingsRestored: true,
+      failedSectionCount: 0,
+      pluginIds: [],
+      novelMappings: [],
+      manifest: {
+        appVersion: '2.1.0',
+        formatVersion: 2 as const,
+        sections: {
+          library: true,
+          settings: true,
+          plugins: true,
+          downloadedFiles: false,
+        },
+      },
+    });
+    jest
+      .mocked(NativeFile.exists)
+      .mockImplementation(async path => !path.endsWith('plugins.zip'));
+    jest.mocked(NativeZipArchive.unzip).mockClear();
+    jest.mocked(finalizeRestoredPlugins).mockResolvedValueOnce([]);
+
+    await expect(
+      restoreBackup({ sourceUri: 'content://backup.zip' }),
+    ).resolves.toBeUndefined();
+    expect(NativeZipArchive.unzip).not.toHaveBeenCalledWith(
+      '/cache/BackupData/plugins.zip',
+      expect.any(String),
     );
   });
 });
