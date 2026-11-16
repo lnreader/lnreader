@@ -23,6 +23,12 @@ const mockSanitizeChapterText = jest.fn();
 const mockParseChapterNumber = jest.fn();
 
 const mockUseNovelValue = jest.fn();
+const mockDownloadChaptersAhead = jest.fn();
+
+jest.mock('@hooks/persisted/useDownload', () => ({
+  downloadChaptersAhead: (...args: unknown[]) =>
+    mockDownloadChaptersAhead(...args),
+}));
 
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
@@ -192,6 +198,7 @@ describe('useChapter', () => {
       showStatusAndNavBar: jest.fn(),
     });
 
+    mockDownloadChaptersAhead.mockResolvedValue(undefined);
     mockGetDbChapter.mockResolvedValue(initialChapter);
     mockGetChapterCount.mockResolvedValue(1);
     mockGetNextChapter.mockResolvedValue(undefined);
@@ -332,6 +339,104 @@ describe('useChapter', () => {
       initialChapter.name,
     );
     expect(updateAllTrackedNovels).toHaveBeenCalledWith({ progress: 5 });
+  });
+
+  describe('autoDownloadWhileReading', () => {
+    const renderLoaded = async (chapter: typeof initialChapter) => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockGetDbChapter.mockResolvedValue(chapter);
+
+      const { result } = renderHook(() => useFlatChapter(chapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      return store;
+    };
+
+    it('queues the following chapters once the chapter is open', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+
+      await renderLoaded(initialChapter);
+
+      await waitFor(() =>
+        expect(mockDownloadChaptersAhead).toHaveBeenCalledTimes(1),
+      );
+      expect(mockDownloadChaptersAhead).toHaveBeenCalledWith(
+        novel,
+        initialChapter,
+        3,
+        [],
+      );
+    });
+
+    it('queues again once the next source page has been inserted', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+      // Last chapter of the stored page: the first lookup finds nothing, the
+      // lookup after the next page is loaded finds the new first chapter.
+      mockGetNextChapter
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(makeChapter(3, '2'));
+
+      await renderLoaded(initialChapter);
+
+      await waitFor(() =>
+        expect(mockDownloadChaptersAhead).toHaveBeenCalledTimes(2),
+      );
+    });
+
+    it('survives a failing download-ahead query', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+      mockDownloadChaptersAhead.mockRejectedValue(new Error('db failed'));
+      mockGetNextChapter.mockResolvedValue(nextChapter);
+
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      await waitFor(() => expect(mockDownloadChaptersAhead).toHaveBeenCalled());
+      expect(result.current.error).toBeUndefined();
+    });
+
+    it('does not queue anything when the setting is disabled', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: false,
+      });
+
+      await renderLoaded(initialChapter);
+
+      // Wait for the adjacent-chapter pass that owns the call, so a negative
+      // assertion cannot pass just because nothing has happened yet.
+      await waitFor(() => expect(mockGetNextChapter).toHaveBeenCalled());
+      expect(mockDownloadChaptersAhead).not.toHaveBeenCalled();
+    });
+
+    it('does not queue anything in incognito mode', async () => {
+      mockUseAppSettings.mockReturnValue({
+        timeTrackingEnabled: true,
+        inactivityTimeoutMs: 60000,
+        autoDownloadWhileReading: true,
+      });
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: true });
+
+      await renderLoaded(initialChapter);
+
+      await waitFor(() => expect(mockGetNextChapter).toHaveBeenCalled());
+      expect(mockDownloadChaptersAhead).not.toHaveBeenCalled();
+    });
   });
 
   it('sets error and drops the failed load from the cache so a retry refetches', async () => {

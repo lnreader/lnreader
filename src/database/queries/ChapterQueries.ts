@@ -870,6 +870,45 @@ export const getNextChapter = async (
     .get();
 };
 
+/**
+ * The next `limit` chapters after the given position, in the order the reader
+ * navigates them. Read state is deliberately ignored: a chapter read online but
+ * never downloaded is still opened next, so it must be available offline.
+ *
+ * Mirrors `getNextChapter`'s page/position ordering.
+ */
+export const getFollowingChapters = async (
+  novelId: number,
+  chapterPosition: number,
+  page: string,
+  limit: number,
+  excludedScanlators?: string[],
+): Promise<ChapterInfo[]> => {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const conditions = [
+    eq(chapterSchema.novelId, novelId),
+    or(
+      and(
+        eq(chapterSchema.page, castInt(page)),
+        gt(chapterSchema.position, castInt(chapterPosition)),
+      ),
+      gt(chapterSchema.page, castInt(page)),
+    ),
+    scanlatorFilterToSQL(excludedScanlators),
+  ].filter(Boolean) as any[];
+
+  return dbManager
+    .select()
+    .from(chapterSchema)
+    .where(and(...conditions))
+    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
+    .limit(limit)
+    .all();
+};
+
 const getReadDownloadedChapters = async () =>
   dbManager
     .select({
