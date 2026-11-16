@@ -5,6 +5,26 @@ import {
   validateSameOriginUrl,
 } from '../hiddenWebview';
 
+const mountAutoCompletingHost = (
+  title: string,
+  html: string,
+  seen?: number[],
+) =>
+  subscribeHiddenWebview(req => {
+    if (!req) {
+      return;
+    }
+    seen?.push(req.id);
+    Promise.resolve().then(() => {
+      completeHiddenWebviewRequest(req.id, {
+        ok: true,
+        url: req.url,
+        html,
+        title,
+      });
+    });
+  });
+
 describe('hiddenWebview', () => {
   it('validates same-origin URLs and rejects cross-origin or invalid URLs', () => {
     expect(
@@ -29,19 +49,11 @@ describe('hiddenWebview', () => {
 
   it('queues requests sequentially and resolves when completed', async () => {
     const seen: number[] = [];
-    const unsubscribe = subscribeHiddenWebview(req => {
-      if (req) {
-        seen.push(req.id);
-        Promise.resolve().then(() => {
-          completeHiddenWebviewRequest(req.id, {
-            ok: true,
-            url: req.url,
-            html: '<html><body>ok</body></html>',
-            title: 'Test',
-          });
-        });
-      }
-    });
+    const unsubscribe = mountAutoCompletingHost(
+      'Test',
+      '<html><body>ok</body></html>',
+      seen,
+    );
 
     try {
       const [r1, r2] = await Promise.all([
@@ -69,18 +81,10 @@ describe('hiddenWebview', () => {
       { timeoutMs: 2000 },
     );
 
-    const unsubscribe = subscribeHiddenWebview(req => {
-      if (req) {
-        Promise.resolve().then(() => {
-          completeHiddenWebviewRequest(req.id, {
-            ok: true,
-            url: req.url,
-            html: '<html><body>late-host</body></html>',
-            title: 'Late',
-          });
-        });
-      }
-    });
+    const unsubscribe = mountAutoCompletingHost(
+      'Late',
+      '<html><body>late-host</body></html>',
+    );
 
     try {
       const res = await pending;
@@ -134,6 +138,51 @@ describe('hiddenWebview', () => {
       expect((secondErr as Error).message).toContain(
         'timed out waiting for HiddenWebViewHost',
       );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('grants queued requests a fresh timeoutMs budget when activated', async () => {
+    jest.useFakeTimers();
+    try {
+      let currentId: number | null = null;
+      const unsubscribe = subscribeHiddenWebview(req => {
+        currentId = req?.id ?? null;
+      });
+
+      const first = fetchViaWebviewForSite(
+        'https://fenrirealm.com/first',
+        'https://fenrirealm.com',
+        { timeoutMs: 1000 },
+      );
+      const second = fetchViaWebviewForSite(
+        'https://fenrirealm.com/second',
+        'https://fenrirealm.com',
+        { timeoutMs: 1000 },
+      );
+
+      // Spend 800ms on first request while second is queued
+      await jest.advanceTimersByTimeAsync(800);
+      completeHiddenWebviewRequest(currentId!, {
+        ok: true,
+        url: 'https://fenrirealm.com/first',
+        html: '<html>1</html>',
+        title: '1',
+      });
+      await expect(first).resolves.toMatchObject({ ok: true });
+
+      // Second request should still have a full 1000ms after activation
+      await jest.advanceTimersByTimeAsync(800);
+      completeHiddenWebviewRequest(currentId!, {
+        ok: true,
+        url: 'https://fenrirealm.com/second',
+        html: '<html>2</html>',
+        title: '2',
+      });
+      await expect(second).resolves.toMatchObject({ ok: true, title: '2' });
+
+      unsubscribe();
     } finally {
       jest.useRealTimers();
     }

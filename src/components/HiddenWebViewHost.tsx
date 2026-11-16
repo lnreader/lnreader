@@ -101,12 +101,14 @@ const HiddenWebViewHost = () => {
     topFrameUrlRef.current = activeRequest?.url ?? null;
   }, [activeRequest]);
 
-  const handleLoadEnd = useCallback(() => {
+  const injectExtractor = useCallback(() => {
     if (!activeRequest) {
       return;
     }
     webViewRef.current?.injectJavaScript(buildExtractorScript(activeRequest));
   }, [activeRequest]);
+
+  const handleLoadEnd = injectExtractor;
 
   const handleNavigationStateChange = useCallback(
     (nav: WebViewNavigation) => {
@@ -119,9 +121,9 @@ const HiddenWebViewHost = () => {
       if (nav.loading) {
         return;
       }
-      webViewRef.current?.injectJavaScript(buildExtractorScript(activeRequest));
+      injectExtractor();
     },
-    [activeRequest],
+    [activeRequest, injectExtractor],
   );
 
   const handleMessage = useCallback(

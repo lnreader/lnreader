@@ -43,6 +43,14 @@ const clearRequestTimer = (id: number) => {
   }
 };
 
+const startRequestTimer = (id: number, timeoutMs: number) => {
+  clearRequestTimer(id);
+  requestTimers.set(
+    id,
+    setTimeout(() => failTimedOutRequest(id), timeoutMs),
+  );
+};
+
 const notify = () => {
   listeners.forEach(listener => listener(activeRequest));
 };
@@ -52,6 +60,10 @@ const pump = (): boolean => {
     return false;
   }
   activeRequest = queue.shift() || null;
+  if (activeRequest) {
+    // Reset timer on activation so queued requests get their full timeoutMs budget
+    startRequestTimer(activeRequest.id, activeRequest.timeoutMs);
+  }
   notify();
   return activeRequest !== null;
 };
@@ -72,9 +84,7 @@ export const subscribeHiddenWebview = (listener: Listener): (() => void) => {
   return () => {
     listeners.delete(listener);
     if (listeners.size === 0 && activeRequest) {
-      const req = activeRequest;
-      activeRequest = null;
-      settleRequest(req, r =>
+      settleActiveRequest(activeRequest.id, r =>
         r.reject(new Error('fetchViaWebview: HiddenWebViewHost unmounted')),
       );
     }
@@ -175,10 +185,7 @@ export const fetchViaWebviewForSite = (
       resolve,
       reject,
     };
-    requestTimers.set(
-      id,
-      setTimeout(() => failTimedOutRequest(id), timeoutMs),
-    );
+    startRequestTimer(id, timeoutMs);
     queue.push(req);
     pump();
   });
