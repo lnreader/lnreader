@@ -25,6 +25,10 @@ import {
 import { NovelStatus, Plugin, PluginItem } from './types';
 import { defaultCover } from './helpers/constants';
 import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
+import {
+  fetchViaWebviewForSite,
+  HiddenWebviewFetchOptions,
+} from './helpers/hiddenWebview';
 import { FilterOption, FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
 
@@ -50,6 +54,20 @@ const initPlugin = (pluginId: string, rawCode: string) => {
           storage: new Storage(pluginId),
           localStorage: new LocalStorage(pluginId),
           sessionStorage: new SessionStorage(pluginId),
+        };
+      }
+      if (packageName === '@libs/fetch') {
+        return {
+          fetchApi,
+          fetchText,
+          fetchProto,
+          fetchViaWebview: (
+            url: string,
+            options?: HiddenWebviewFetchOptions,
+          ) => {
+            const site = plugins[pluginId]?.site;
+            return fetchViaWebviewForSite(url, site, options);
+          },
         };
       }
       return packages[packageName];
