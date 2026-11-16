@@ -61,6 +61,19 @@ export const getBackupSectionSource = async (
   return stagingPath;
 };
 
+export const extractSectionArchive = async (
+  extract: () => Promise<unknown>,
+) => {
+  try {
+    await extract();
+  } catch (error: any) {
+    // Android 9 and older refuse to open a zip with no entries.
+    if (error?.message !== 'No entries') {
+      throw error;
+    }
+  }
+};
+
 export const removeEmptySectionMarker = async (destination: string) => {
   const markerPath = `${destination}/${EMPTY_SECTION_MARKER}`;
   if (await NativeFile.exists(markerPath)) {

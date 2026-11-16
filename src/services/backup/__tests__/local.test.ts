@@ -229,7 +229,7 @@ describe('local selective backup', () => {
     expect(finalizeRestoredPlugins).toHaveBeenCalled();
   });
 
-  it('treats an absent section archive as empty', async () => {
+  it('rejects a restore whose selected section archive is absent', async () => {
     jest.mocked(restoreData).mockResolvedValueOnce({
       novelCount: 0,
       failedNovelCount: 0,
@@ -258,10 +258,7 @@ describe('local selective backup', () => {
 
     await expect(
       restoreBackup({ sourceUri: 'content://backup.zip' }),
-    ).resolves.toBeUndefined();
-    expect(NativeZipArchive.unzip).not.toHaveBeenCalledWith(
-      '/cache/BackupData/plugins.zip',
-      expect.any(String),
-    );
+    ).rejects.toThrow();
+    expect(finalizeRestoredPlugins).not.toHaveBeenCalled();
   });
 });

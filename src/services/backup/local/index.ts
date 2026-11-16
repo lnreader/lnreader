@@ -17,6 +17,7 @@ import { getString } from '@i18n/translations';
 import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import { sleep } from '@utils/sleep';
 import {
+  extractSectionArchive,
   getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
@@ -160,20 +161,15 @@ export const restoreBackup = async (
       )) {
         const archivePath = `${CACHE_DIR_PATH}/${section.archiveName}`;
         if (!(await NativeFile.exists(archivePath))) {
-          continue;
+          throw new Error(getString('backupScreen.invalidBackupFolder'));
         }
         const destination =
           section.archiveName === ZipBackupName.NOVEL_FILES
             ? novelFilesRestorePath
             : section.storagePath;
-        try {
-          await NativeZipArchive.unzip(archivePath, destination);
-        } catch (error: any) {
-          // Android 9 and older refuse to open a zip with no entries.
-          if (error?.message !== 'No entries') {
-            throw error;
-          }
-        }
+        await extractSectionArchive(() =>
+          NativeZipArchive.unzip(archivePath, destination),
+        );
         await removeEmptySectionMarker(destination);
       }
       if (restoreResult.manifest.sections.downloadedFiles) {

@@ -23,6 +23,7 @@ import {
   getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
+  extractSectionArchive,
   removeEmptySectionMarker,
   getSelectedBackupFileSections,
   restoreLegacyFiles,
@@ -160,7 +161,7 @@ export const driveRestore = async (
         section.archiveName === ZipBackupName.NOVEL_FILES
           ? novelFilesRestorePath
           : section.storagePath;
-      await download(file, destination);
+      await extractSectionArchive(() => download(file, destination));
       await removeEmptySectionMarker(destination);
     }
     if (restoreResult.manifest.sections.downloadedFiles) {
