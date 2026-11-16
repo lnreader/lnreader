@@ -10,7 +10,12 @@ import {
 } from '@database/queries/CategoryQueries';
 import NativeFile from '@modules/native-file';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
-import { prepareBackupData, restoreData } from '../utils';
+import NativeZipArchive from '@modules/native-zip-archive';
+import {
+  assertSupportedBackupArchive,
+  prepareBackupData,
+  restoreData,
+} from '../utils';
 import type { BackupOptions } from '../options';
 
 jest.mock('@database/queries/NovelQueries', () => ({
@@ -825,6 +830,218 @@ describe('selective backup data', () => {
         plugins: true,
         downloadedFiles: true,
       },
+    });
+  });
+});
+
+describe('unsupported backup formats', () => {
+  const allSections: BackupOptions = {
+    library: true,
+    settings: true,
+    plugins: true,
+    downloadedFiles: false,
+  };
+  // The layout of a format 3 backup: novels are JSON arrays in batch files.
+  const formatThreeManifest = JSON.stringify({
+    appVersion: '2.1.3',
+    formatVersion: 3,
+    novelDataFormat: 2,
+    sections: allSections,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest.mocked(MMKVStorage.getString).mockReturnValue(undefined);
+  });
+
+  const mockFormatThreeBackup = (batchCount: number) => {
+    const batchFile = JSON.stringify([
+      { c: [], id: 1, p: '/novel-1', pi: 'source', n: 'Novel 1' },
+    ]);
+    jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+      if (path.endsWith('/Version.json')) return formatThreeManifest;
+      if (path.endsWith('/Setting.json')) {
+        return JSON.stringify({ THEME: 'changed' });
+      }
+      if (path.endsWith('/Category.json')) {
+        return JSON.stringify([
+          { id: 7, name: 'Added', sort: 1, novelIds: [] },
+        ]);
+      }
+      return batchFile;
+    });
+    jest.mocked(NativeFile.readDir).mockResolvedValue(
+      Array.from({ length: batchCount }, (_, i) => ({
+        name: `batch-${i}.json`,
+        path: `/cache/NovelAndChapters/batch-${i}.json`,
+        isDirectory: false,
+      })),
+    );
+  };
+
+  it('rejects a format 3 backup without touching the database, categories or settings', async () => {
+    mockFormatThreeBackup(74);
+
+    await expect(restoreData('/cache')).rejects.toThrow(
+      'backupScreen.unsupportedBackupFormat',
+    );
+
+    expect(NativeFile.readDir).not.toHaveBeenCalled();
+    expect(_restoreNovelsAndChapters).not.toHaveBeenCalled();
+    expect(_restoreCategory).not.toHaveBeenCalled();
+    expect(MMKVStorage.set).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unsupported archive from its manifest alone', async () => {
+    jest
+      .mocked(NativeZipArchive.readEntry)
+      .mockResolvedValueOnce(formatThreeManifest);
+
+    await expect(
+      assertSupportedBackupArchive('content://backup.zip'),
+    ).rejects.toThrow('backupScreen.unsupportedBackupFormat');
+
+    expect(NativeZipArchive.readEntry).toHaveBeenCalledWith(
+      'content://backup.zip',
+      'Version.json',
+    );
+  });
+
+  it.each([
+    ['no manifest', null],
+    ['a legacy manifest', JSON.stringify({ version: '2.0.0' })],
+    ['format 1', JSON.stringify({ formatVersion: 1 })],
+    [
+      'the current format',
+      JSON.stringify({ formatVersion: 2, sections: allSections }),
+    ],
+    ['an unreadable manifest', '{"formatVers'],
+  ])('accepts an archive with %s', async (_name, manifest) => {
+    jest.mocked(NativeZipArchive.readEntry).mockResolvedValueOnce(manifest);
+
+    await expect(
+      assertSupportedBackupArchive('content://backup.zip'),
+    ).resolves.toBeUndefined();
+  });
+
+  it('leaves the check to the extracted backup when the archive cannot be read first', async () => {
+    jest
+      .mocked(NativeZipArchive.readEntry)
+      .mockRejectedValueOnce(new Error('not seekable'));
+
+    await expect(
+      assertSupportedBackupArchive('content://backup.zip'),
+    ).resolves.toBeUndefined();
+  });
+
+  describe('read-ahead on oddly shaped novel files', () => {
+    const currentManifest = JSON.stringify({
+      appVersion: '2.1.4',
+      formatVersion: 2,
+      sections: { ...allSections, settings: false, plugins: false },
+    });
+
+    const mockFiles = (files: Record<string, string>) => {
+      const reads: string[] = [];
+      jest.mocked(NativeFile.readFile).mockImplementation(async path => {
+        if (path.endsWith('/Version.json')) return currentManifest;
+        if (path.endsWith('/Category.json')) return '[]';
+        const name = path.split('/').pop()!;
+        reads.push(name);
+        return files[name];
+      });
+      jest.mocked(NativeFile.readDir).mockResolvedValue(
+        Object.keys(files).map(name => ({
+          name,
+          path: `/cache/NovelAndChapters/${name}`,
+          isDirectory: false,
+        })),
+      );
+      return reads;
+    };
+
+    it('holds only a bounded number of files before the first write when novels have no chapters', async () => {
+      const padding = 'x'.repeat(4 * 1024 * 1024);
+      const files: Record<string, string> = {};
+      for (let id = 1; id <= 40; id++) {
+        files[`${id}.json`] = JSON.stringify({
+          id,
+          path: `/novel-${id}`,
+          pluginId: 'source',
+          chapters: [],
+          summary: padding,
+        });
+      }
+      const reads = mockFiles(files);
+      let readsBeforeFirstWrite = -1;
+      jest
+        .mocked(_restoreNovelsAndChapters)
+        .mockImplementation(async novels => {
+          if (readsBeforeFirstWrite < 0) readsBeforeFirstWrite = reads.length;
+          return novels.map(novel => ({
+            mapping: {
+              pluginId: novel.pluginId,
+              backupNovelId: novel.id,
+              restoredNovelId: novel.id,
+              chapters: [],
+            },
+          }));
+        });
+
+      const result = await restoreData('/cache');
+
+      expect(result.novelCount).toBe(40);
+      expect(readsBeforeFirstWrite).toBeGreaterThan(0);
+      expect(readsBeforeFirstWrite).toBeLessThan(20);
+    });
+
+    it('fails files that are not novels one by one without holding them', async () => {
+      const files: Record<string, string> = {};
+      for (let i = 0; i < 74; i++) {
+        files[`batch-${i}.json`] = JSON.stringify([
+          { c: [], id: i, p: `/novel-${i}`, pi: 'source' },
+        ]);
+      }
+      files['no-chapters.json'] = JSON.stringify({
+        id: 900,
+        path: '/n',
+        pluginId: 'source',
+      });
+      files['no-plugin.json'] = JSON.stringify({
+        id: 901,
+        path: '/n',
+        chapters: [],
+      });
+      files['null.json'] = 'null';
+      files['valid.json'] = JSON.stringify({
+        id: 1,
+        path: '/novel-1',
+        pluginId: 'source',
+        chapters: [],
+      });
+      mockFiles(files);
+      jest.mocked(_restoreNovelsAndChapters).mockImplementation(async novels =>
+        novels.map(novel => ({
+          mapping: {
+            pluginId: novel.pluginId,
+            backupNovelId: novel.id,
+            restoredNovelId: novel.id,
+            chapters: [],
+          },
+        })),
+      );
+
+      const result = await restoreData('/cache');
+
+      expect(result.novelCount).toBe(1);
+      expect(result.failedNovelCount).toBe(77);
+      expect(result.pluginIds).toEqual(['source']);
+      expect(
+        jest
+          .mocked(_restoreNovelsAndChapters)
+          .mock.calls.map(([novels]) => novels.map(novel => novel.id)),
+      ).toEqual([[1]]);
     });
   });
 });

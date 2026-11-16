@@ -1,4 +1,5 @@
 import {
+  assertSupportedBackupArchive,
   CACHE_DIR_PATH,
   clearBackupCache,
   prepareBackupData,
@@ -103,6 +104,9 @@ export const restoreBackup = async (
       progress: 0 / 4,
       progressText: getString('backupScreen.downloadingData'),
     }));
+
+    // Rejects a backup in an unsupported format before the long copy.
+    await assertSupportedBackupArchive(sourceUri);
 
     await clearBackupCache();
     const localPath = CACHE_DIR_PATH + '-source.zip';

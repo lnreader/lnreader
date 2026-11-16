@@ -82,6 +82,7 @@ jest.mock('@modules/native-zip-archive', () => ({
   default: {
     zip: jest.fn().mockResolvedValue(),
     unzip: jest.fn().mockResolvedValue(),
+    readEntry: jest.fn().mockResolvedValue(null),
     remoteUnzip: jest.fn().mockResolvedValue(),
     remoteZip: jest.fn().mockResolvedValue(''),
   },

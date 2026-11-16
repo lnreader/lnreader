@@ -2,9 +2,15 @@ import NativeFile from '@modules/native-file';
 import NativeZipArchive from '@modules/native-zip-archive';
 import { createBackup, restoreBackup } from '../local';
 import { finalizeRestoredPlugins } from '../restoreResult';
-import { prepareBackupData, restoreData } from '../utils';
+import {
+  assertSupportedBackupArchive,
+  clearBackupCache,
+  prepareBackupData,
+  restoreData,
+} from '../utils';
 
 jest.mock('../utils', () => ({
+  assertSupportedBackupArchive: jest.fn(),
   CACHE_DIR_PATH: '/cache/BackupData',
   clearBackupCache: jest.fn(),
   prepareBackupData: jest.fn(),
@@ -112,5 +118,27 @@ describe('local selective backup', () => {
     ).toBeGreaterThan(
       jest.mocked(NativeZipArchive.unzip).mock.invocationCallOrder[1],
     );
+  });
+
+  it('rejects an unsupported backup before copying or changing anything', async () => {
+    jest
+      .mocked(assertSupportedBackupArchive)
+      .mockRejectedValueOnce(new Error('backupScreen.unsupportedBackupFormat'));
+    jest.mocked(NativeFile.copyFile).mockClear();
+    jest.mocked(clearBackupCache).mockClear();
+    jest.mocked(NativeZipArchive.unzip).mockClear();
+    jest.mocked(restoreData).mockClear();
+
+    await expect(
+      restoreBackup({ sourceUri: 'content://backup.zip' }),
+    ).rejects.toThrow('backupScreen.unsupportedBackupFormat');
+
+    expect(assertSupportedBackupArchive).toHaveBeenCalledWith(
+      'content://backup.zip',
+    );
+    expect(clearBackupCache).not.toHaveBeenCalled();
+    expect(NativeFile.copyFile).not.toHaveBeenCalled();
+    expect(NativeZipArchive.unzip).not.toHaveBeenCalled();
+    expect(restoreData).not.toHaveBeenCalled();
   });
 });

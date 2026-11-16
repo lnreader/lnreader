@@ -1,9 +1,12 @@
 package expo.modules.nativeziparchive
 
+import android.net.Uri
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -22,6 +25,48 @@ class NativeZipArchiveModule : Module() {
       zos.putNextEntry(entry)
       file.inputStream().use { fis ->
         fis.copyTo(zos, COPY_BUFFER_SIZE)
+      }
+    }
+  }
+
+  // Reads one small entry without extracting the archive. Returns null when the
+  // archive has no such entry or it is larger than MAX_ENTRY_BYTES.
+  private fun readZipEntry(sourcePath: String, entryName: String): String? {
+    val uri = Uri.parse(sourcePath)
+    if (uri.scheme == null) return readEntryFromFile(File(sourcePath), entryName)
+    if (uri.scheme.equals("file", ignoreCase = true)) {
+      return readEntryFromFile(File(uri.path ?: throw IOException("Invalid path")), entryName)
+    }
+    val resolver = appContext.reactContext?.contentResolver
+      ?: throw IOException("React context is unavailable")
+    // A seekable provider lets ZipFile jump to the central directory. Others
+    // are streamed until the entry is found.
+    try {
+      resolver.openFileDescriptor(uri, "r")?.use { pfd ->
+        return readEntryFromFile(File("/proc/self/fd/${pfd.fd}"), entryName)
+      }
+    } catch (e: Exception) {
+      // Not seekable: fall back to streaming.
+    }
+    val stream = resolver.openInputStream(uri) ?: throw IOException("Could not open $sourcePath")
+    return stream.use { readEntryFromStream(it, entryName) }
+  }
+
+  private fun readEntryFromFile(file: File, entryName: String): String? =
+    ZipFile(file).use { zip ->
+      val entry = zip.getEntry(entryName) ?: return null
+      if (entry.size > MAX_ENTRY_BYTES) return null
+      zip.getInputStream(entry).use { String(it.readBytes(), Charsets.UTF_8) }
+    }
+
+  private fun readEntryFromStream(input: InputStream, entryName: String): String? {
+    ZipInputStream(input.buffered(COPY_BUFFER_SIZE)).use { zis ->
+      while (true) {
+        val entry = zis.nextEntry ?: return null
+        if (entry.name == entryName) {
+          val bytes = zis.readBytes()
+          return if (bytes.size > MAX_ENTRY_BYTES) null else String(bytes, Charsets.UTF_8)
+        }
       }
     }
   }
@@ -63,6 +108,16 @@ class NativeZipArchiveModule : Module() {
           promise.resolve(null)
         } catch (e: Exception) {
           promise.reject("UNZIP_FAILED", e.message ?: "Unzip failed", e)
+        }
+      }.start()
+    }
+
+    AsyncFunction("readEntry") { sourcePath: String, entryName: String, promise: Promise ->
+      Thread {
+        try {
+          promise.resolve(readZipEntry(sourcePath, entryName))
+        } catch (e: Exception) {
+          promise.reject("READ_ENTRY_FAILED", e.message ?: "Read entry failed", e)
         }
       }.start()
     }
@@ -137,6 +192,7 @@ class NativeZipArchiveModule : Module() {
 
   private companion object {
     const val COPY_BUFFER_SIZE = 64 * 1024
+    const val MAX_ENTRY_BYTES = 1024 * 1024
   }
 
 }

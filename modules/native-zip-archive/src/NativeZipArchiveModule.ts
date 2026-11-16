@@ -2,6 +2,7 @@ import { requireNativeModule } from 'expo-modules-core';
 
 type NativeZipArchiveModule = {
   unzip(sourceFilePath: string, distDirPath: string): Promise<void>;
+  readEntry(sourcePath: string, entryName: string): Promise<string | null>;
   zip(sourceDirPath: string, zipFilePath: string): Promise<void>;
   remoteUnzip(
     distDirPath: string,
