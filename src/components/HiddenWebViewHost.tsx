@@ -221,7 +221,8 @@ const HiddenWebViewHost = () => {
         }
         return true;
       } catch (err) {
-        if (request.isTopFrame !== false) {
+        // Android omits `isTopFrame` (`undefined`); only fail fast when explicitly top-frame
+        if (request.isTopFrame === true) {
           failHiddenWebviewRequest(
             activeRequest.id,
             err instanceof Error ? err : new Error(String(err)),
@@ -248,6 +249,7 @@ const HiddenWebViewHost = () => {
         key={activeRequest.id}
         ref={webViewRef}
         source={source}
+        originWhitelist={['*']}
         userAgent={activeRequest.userAgent || defaultUserAgent}
         javaScriptEnabled={true}
         domStorageEnabled={true}
