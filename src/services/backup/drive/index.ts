@@ -20,8 +20,10 @@ import type {
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import {
+  getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
+  removeEmptySectionMarker,
   getSelectedBackupFileSections,
   restoreLegacyFiles,
   restoreNovelFiles,
@@ -79,7 +81,7 @@ export const createDriveBackup = async (
 
   for (const section of getSelectedBackupFileSections(options)) {
     await uploadBackupSection(
-      section.storagePath,
+      await getBackupSectionSource(section),
       section.archiveName,
       backupFolder,
     );
@@ -154,12 +156,12 @@ export const driveRestore = async (
       if (!file) {
         throw new Error(getString('backupScreen.invalidBackupFolder'));
       }
-      await download(
-        file,
+      const destination =
         section.archiveName === ZipBackupName.NOVEL_FILES
           ? novelFilesRestorePath
-          : section.storagePath,
-      );
+          : section.storagePath;
+      await download(file, destination);
+      await removeEmptySectionMarker(destination);
     }
     if (restoreResult.manifest.sections.downloadedFiles) {
       await restoreNovelFiles(

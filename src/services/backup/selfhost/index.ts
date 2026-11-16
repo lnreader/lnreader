@@ -18,8 +18,10 @@ import type {
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import {
+  getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
+  removeEmptySectionMarker,
   getSelectedBackupFileSections,
   restoreLegacyFiles,
   restoreNovelFiles,
@@ -59,7 +61,12 @@ export const createSelfHostBackup = async (
   await sleep(200);
 
   for (const section of getSelectedBackupFileSections(options)) {
-    await upload(host, backupFolder, section.archiveName, section.storagePath);
+    await upload(
+      host,
+      backupFolder,
+      section.archiveName,
+      await getBackupSectionSource(section),
+    );
   }
 
   const completionText = getBackupCompletionText(backupResult);
@@ -121,14 +128,12 @@ export const selfHostRestore = async (
     for (const section of getSelectedBackupFileSections(
       restoreResult.manifest.sections,
     )) {
-      await download(
-        host,
-        backupFolder,
-        section.archiveName,
+      const destination =
         section.archiveName === ZipBackupName.NOVEL_FILES
           ? novelFilesRestorePath
-          : section.storagePath,
-      );
+          : section.storagePath;
+      await download(host, backupFolder, section.archiveName, destination);
+      await removeEmptySectionMarker(destination);
     }
     if (restoreResult.manifest.sections.downloadedFiles) {
       await restoreNovelFiles(
