@@ -127,7 +127,7 @@ export const testModules = {
       'pickCustomNovelCover',
       'updateNovelCategoryById',
       'updateNovelCategories',
-      '_restoreNovelAndChapters',
+      '_restoreNovelsAndChapters',
     ],
   },
   RepositoryQueries: {
