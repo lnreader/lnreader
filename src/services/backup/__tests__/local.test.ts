@@ -254,6 +254,7 @@ describe('local selective backup', () => {
       .mocked(NativeFile.exists)
       .mockImplementation(async path => !path.endsWith('plugins.zip'));
     jest.mocked(NativeZipArchive.unzip).mockClear();
+    jest.mocked(finalizeRestoredPlugins).mockClear();
     jest.mocked(finalizeRestoredPlugins).mockResolvedValueOnce([]);
 
     await expect(
