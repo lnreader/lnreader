@@ -94,6 +94,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   } = useNovelScreenActions({
     chapters,
     clearSelection,
+    excludedScanlators: novelSettings.excludedScanlators,
     novel,
     selectedIds: selected,
     selectedChapters,
