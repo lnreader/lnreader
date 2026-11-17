@@ -55,17 +55,28 @@ class NativeZipArchiveModule : Module() {
   private fun readEntryFromFile(file: File, entryName: String): String? =
     ZipFile(file).use { zip ->
       val entry = zip.getEntry(entryName) ?: return null
-      if (entry.size > MAX_ENTRY_BYTES) return null
-      zip.getInputStream(entry).use { String(it.readBytes(), Charsets.UTF_8) }
+      zip.getInputStream(entry).use { readBounded(it) }
     }
+
+  // The size in a zip header can be unknown or wrong, so the limit is applied
+  // to the bytes actually inflated.
+  private fun readBounded(input: InputStream): String? {
+    val buffer = java.io.ByteArrayOutputStream()
+    val chunk = ByteArray(8 * 1024)
+    while (buffer.size() <= MAX_ENTRY_BYTES) {
+      val read = input.read(chunk, 0, minOf(chunk.size, MAX_ENTRY_BYTES + 1 - buffer.size()))
+      if (read < 0) break
+      buffer.write(chunk, 0, read)
+    }
+    return if (buffer.size() > MAX_ENTRY_BYTES) null else buffer.toString(Charsets.UTF_8.name())
+  }
 
   private fun readEntryFromStream(input: InputStream, entryName: String): String? {
     ZipInputStream(input.buffered(COPY_BUFFER_SIZE)).use { zis ->
       while (true) {
         val entry = zis.nextEntry ?: return null
         if (entry.name == entryName) {
-          val bytes = zis.readBytes()
-          return if (bytes.size > MAX_ENTRY_BYTES) null else String(bytes, Charsets.UTF_8)
+          return readBounded(zis)
         }
       }
     }
