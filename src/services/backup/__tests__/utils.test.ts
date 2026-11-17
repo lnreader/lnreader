@@ -925,6 +925,18 @@ describe('unsupported backup formats', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('rejects an archive whose manifest is too large to read', async () => {
+    jest
+      .mocked(NativeZipArchive.readEntry)
+      .mockRejectedValueOnce(
+        Object.assign(new Error('too large'), { code: 'ENTRY_TOO_LARGE' }),
+      );
+
+    await expect(
+      assertSupportedBackupArchive('content://backup.zip'),
+    ).rejects.toThrow('backupScreen.unsupportedBackupFormat');
+  });
+
   it('leaves the check to the extracted backup when the archive cannot be read first', async () => {
     jest
       .mocked(NativeZipArchive.readEntry)

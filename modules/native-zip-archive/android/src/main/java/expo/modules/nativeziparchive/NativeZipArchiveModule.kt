@@ -30,7 +30,7 @@ class NativeZipArchiveModule : Module() {
   }
 
   // Reads one small entry without extracting the archive. Returns null when the
-  // archive has no such entry or it is larger than MAX_ENTRY_BYTES.
+  // archive has no such entry; throws EntryTooLargeException above MAX_ENTRY_BYTES.
   private fun readZipEntry(sourcePath: String, entryName: String): String? {
     val uri = Uri.parse(sourcePath)
     if (uri.scheme == null) return readEntryFromFile(File(sourcePath), entryName)
@@ -60,7 +60,7 @@ class NativeZipArchiveModule : Module() {
 
   // The size in a zip header can be unknown or wrong, so the limit is applied
   // to the bytes actually inflated.
-  private fun readBounded(input: InputStream): String? {
+  private fun readBounded(input: InputStream): String {
     val buffer = java.io.ByteArrayOutputStream()
     val chunk = ByteArray(8 * 1024)
     while (buffer.size() <= MAX_ENTRY_BYTES) {
@@ -68,7 +68,8 @@ class NativeZipArchiveModule : Module() {
       if (read < 0) break
       buffer.write(chunk, 0, read)
     }
-    return if (buffer.size() > MAX_ENTRY_BYTES) null else buffer.toString(Charsets.UTF_8.name())
+    if (buffer.size() > MAX_ENTRY_BYTES) throw EntryTooLargeException()
+    return buffer.toString(Charsets.UTF_8.name())
   }
 
   private fun readEntryFromStream(input: InputStream, entryName: String): String? {
@@ -127,6 +128,8 @@ class NativeZipArchiveModule : Module() {
       Thread {
         try {
           promise.resolve(readZipEntry(sourcePath, entryName))
+        } catch (e: EntryTooLargeException) {
+          promise.reject("ENTRY_TOO_LARGE", "Entry is too large", e)
         } catch (e: Exception) {
           promise.reject("READ_ENTRY_FAILED", e.message ?: "Read entry failed", e)
         }
@@ -207,3 +210,5 @@ class NativeZipArchiveModule : Module() {
   }
 
 }
+
+private class EntryTooLargeException : IOException("Entry is too large")

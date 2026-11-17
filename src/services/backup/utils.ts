@@ -376,7 +376,10 @@ export const assertSupportedBackupArchive = async (archivePath: string) => {
       archivePath,
       BackupEntryName.VERSION,
     );
-  } catch {
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'ENTRY_TOO_LARGE') {
+      throw new Error(getString('backupScreen.unsupportedBackupFormat'));
+    }
     return;
   }
   if (fileContent) {
