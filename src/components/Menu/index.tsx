@@ -90,12 +90,14 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
       getAvailableMenuWidth(screenWidth, insets),
     );
 
-    return {
+    const position = {
       left,
       top,
       shadowColor: theme.isDark ? '#000' : theme.shadow,
-      [fullWidth ? 'width' : 'maxWidth']: maxWidth,
     };
+    return fullWidth
+      ? { ...position, width: maxWidth }
+      : { ...position, maxWidth };
   }, [
     anchorLayout,
     fullWidth,

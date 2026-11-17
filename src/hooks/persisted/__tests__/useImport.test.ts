@@ -1,21 +1,22 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
 import useImport from '../useImport';
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
 import { QueuedBackgroundTask } from '@services/backgroundTasks';
 
 let mockQueue: QueuedBackgroundTask[] = [];
 
-jest.mock('react-native-mmkv', () => ({
-  useMMKVObject: () => [mockQueue],
+jest.mock('@hooks/persisted/useBackgroundTasks', () => ({
+  useBackgroundTasks: (selector: (tasks: unknown[]) => unknown) =>
+    selector(mockQueue),
+  useBackgroundTaskQueue: () => mockQueue,
 }));
 
 jest.mock('@components/Context/LibraryContext', () => ({
-  useLibraryContext: jest.fn(),
+  useLibraryActions: jest.fn(),
 }));
 
 jest.mock('@services/backgroundTasks', () => ({
-  BACKGROUND_TASKS_STORE_KEY: 'tasks',
   backgroundTasks: {
     enqueue: jest.fn(),
     resumeAll: jest.fn(),
@@ -24,8 +25,8 @@ jest.mock('@services/backgroundTasks', () => ({
   },
 }));
 
-const mockUseLibraryContext = useLibraryContext as jest.MockedFunction<
-  typeof useLibraryContext
+const mockUseLibraryActions = useLibraryActions as jest.MockedFunction<
+  typeof useLibraryActions
 >;
 
 const importTask = (id: string, progress = 0): QueuedBackgroundTask => ({
@@ -46,9 +47,9 @@ describe('useImport', () => {
   beforeEach(() => {
     mockQueue = [];
     refetchLibrary.mockClear();
-    mockUseLibraryContext.mockReturnValue({
+    mockUseLibraryActions.mockReturnValue({
       refetchLibrary,
-    } as unknown as ReturnType<typeof useLibraryContext>);
+    } as unknown as ReturnType<typeof useLibraryActions>);
   });
 
   it('ignores import progress updates and refetches when an import finishes', async () => {
