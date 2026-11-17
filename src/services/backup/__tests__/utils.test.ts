@@ -893,6 +893,21 @@ describe('unsupported backup formats', () => {
     expect(MMKVStorage.set).not.toHaveBeenCalled();
   });
 
+  it('rejects an extracted manifest too large to read without reading it', async () => {
+    mockFormatThreeBackup(1);
+    jest.mocked(NativeFile.fileSize).mockResolvedValueOnce(300 * 1024 * 1024);
+
+    await expect(restoreData('/cache')).rejects.toThrow(
+      'backupScreen.unsupportedBackupFormat',
+    );
+
+    expect(NativeFile.fileSize).toHaveBeenCalledWith('/cache/Version.json');
+    expect(NativeFile.readFile).not.toHaveBeenCalled();
+    expect(_restoreNovelsAndChapters).not.toHaveBeenCalled();
+    expect(_restoreCategory).not.toHaveBeenCalled();
+    expect(MMKVStorage.set).not.toHaveBeenCalled();
+  });
+
   it('rejects an unsupported archive from its manifest alone', async () => {
     jest
       .mocked(NativeZipArchive.readEntry)

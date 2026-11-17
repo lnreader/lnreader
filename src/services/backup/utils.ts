@@ -57,6 +57,9 @@ const RESTORE_READ_CONCURRENCY = 4;
 const RESTORE_READ_AHEAD_MAX_NOVELS = RESTORE_BATCH_MAX_NOVELS;
 const RESTORE_READ_AHEAD_MAX_BYTES = 16 * 1024 * 1024;
 const SUPPORTED_BACKUP_FORMAT_VERSION = 2;
+// Same limit as NativeZipArchive.readEntry. A real manifest is a few hundred
+// bytes; anything larger is not a backup this app made.
+const MAX_BACKUP_MANIFEST_BYTES = 1024 * 1024;
 
 type PendingRestoreNovel = {
   backupNovel: BackupNovel;
@@ -353,11 +356,19 @@ const parseBackupManifest = (fileContent: string): ResolvedBackupManifest => {
 const getBackupManifest = async (
   cacheDirPath: string,
 ): Promise<ResolvedBackupManifest> => {
+  const manifestPath = cacheDirPath + '/' + BackupEntryName.VERSION;
+  let size: number;
+  try {
+    size = await NativeFile.fileSize(manifestPath);
+  } catch {
+    return LEGACY_MANIFEST;
+  }
+  if (size > MAX_BACKUP_MANIFEST_BYTES) {
+    throw new Error(getString('backupScreen.unsupportedBackupFormat'));
+  }
   let fileContent: string;
   try {
-    fileContent = await NativeFile.readFile(
-      cacheDirPath + '/' + BackupEntryName.VERSION,
-    );
+    fileContent = await NativeFile.readFile(manifestPath);
   } catch {
     return LEGACY_MANIFEST;
   }

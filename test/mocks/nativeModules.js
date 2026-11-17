@@ -30,6 +30,7 @@ jest.mock('@modules/native-file', () => ({
     ExternalCachesDirectoryPath: '/mock/caches',
     writeFile: jest.fn(),
     readFile: jest.fn(() => ''),
+    fileSize: jest.fn(() => Promise.resolve(0)),
     copyFile: jest.fn(),
     copyFileToDirectory: jest.fn(() =>
       Promise.resolve({ uri: '/mock/export.epub', size: 1 }),
