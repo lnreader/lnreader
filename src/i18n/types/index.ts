@@ -635,6 +635,8 @@ export interface StringMap {
   'statsScreen.statusDistribution': 'string';
   'statsScreen.title': 'string';
   'statsScreen.readingTime': 'string';
+  'statsScreen.noNovelReadingTime': 'string';
+  'statsScreen.noCategoryReadingTime': 'string';
   'statsScreen.chaptersInLibrary': 'string';
   'statsScreen.customizeGenres': 'string';
   'statsScreen.titlesInLibrary': 'string';

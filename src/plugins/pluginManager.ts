@@ -25,7 +25,11 @@ import {
 import { NovelStatus, Plugin, PluginItem } from './types';
 import { defaultCover } from './helpers/constants';
 import { downloadFile, fetchApi, fetchProto, fetchText } from './helpers/fetch';
-import { FilterTypes } from './types/filterTypes';
+import {
+  fetchViaWebviewForSite,
+  HiddenWebviewFetchOptions,
+} from './helpers/hiddenWebview';
+import { FilterOption, FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
 
 const packages: Record<string, any> = {
@@ -50,6 +54,20 @@ const initPlugin = (pluginId: string, rawCode: string) => {
           storage: new Storage(pluginId),
           localStorage: new LocalStorage(pluginId),
           sessionStorage: new SessionStorage(pluginId),
+        };
+      }
+      if (packageName === '@libs/fetch') {
+        return {
+          fetchApi,
+          fetchText,
+          fetchProto,
+          fetchViaWebview: (
+            url: string,
+            options?: HiddenWebviewFetchOptions,
+          ) => {
+            const site = plugins[pluginId]?.site;
+            return fetchViaWebviewForSite(url, site, options);
+          },
         };
       }
       return packages[packageName];
@@ -221,6 +239,19 @@ const loadPlugin = async (pluginId: string) => {
   }
 };
 
+// Returns [] for plugins that don't implement the optional method.
+const getFilterSuggestions = async (
+  pluginId: string,
+  filterKey: string,
+  query: string,
+): Promise<FilterOption[]> => {
+  const plugin = getPlugin(pluginId) ?? (await loadPlugin(pluginId));
+  if (typeof plugin?.getFilterSuggestions !== 'function') {
+    return [];
+  }
+  return plugin.getFilterSuggestions(filterKey, query);
+};
+
 const initializeInstalledPlugins = async () => {
   const installedPlugins =
     getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY) || [];
@@ -276,5 +307,6 @@ export {
   uninstallPlugin,
   updatePlugin,
   fetchPlugins,
+  getFilterSuggestions,
   LOCAL_PLUGIN_ID,
 };

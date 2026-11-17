@@ -15,6 +15,7 @@ import AppErrorBoundary, {
   ErrorFallback,
 } from '@components/AppErrorBoundary/AppErrorBoundary';
 import CrashRecoveryGate from '@components/AppErrorBoundary/CrashRecoveryGate';
+import HiddenWebViewHost from '@components/HiddenWebViewHost';
 
 import Main from './src/navigators/Main';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -98,6 +99,7 @@ const Application = () => {
               <BottomSheetModalProvider>
                 <StatusBar translucent={true} backgroundColor="transparent" />
                 <Main />
+                <HiddenWebViewHost />
               </BottomSheetModalProvider>
             </ThemedPaperProvider>
           </SafeAreaProvider>
