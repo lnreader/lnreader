@@ -4,7 +4,8 @@ import { exists } from '@api/drive';
 import { getString } from '@i18n/translations';
 import {
   CACHE_DIR_PATH,
-  clearBackupCache,
+  clearRestoreWorkingFiles,
+  clearRestoreWorkingFilesAfterRestore,
   prepareBackupData,
   restoreData,
 } from '../utils';
@@ -98,7 +99,7 @@ export const createDriveBackup = async (
   }));
 };
 
-export const driveRestore = async (
+const restoreFromDrive = async (
   backupFolder: DriveFile,
   setMeta: TaskProgressUpdater,
 ) => {
@@ -114,7 +115,7 @@ export const driveRestore = async (
     throw new Error(getString('backupScreen.invalidBackupFolder'));
   }
 
-  await clearBackupCache();
+  await clearRestoreWorkingFiles();
   await download(zipDataFile, CACHE_DIR_PATH);
   await sleep(500);
 
@@ -184,4 +185,15 @@ export const driveRestore = async (
     progressText: completionText,
     completionText,
   }));
+};
+
+export const driveRestore = async (
+  backupFolder: DriveFile,
+  setMeta: TaskProgressUpdater,
+) => {
+  try {
+    await restoreFromDrive(backupFolder, setMeta);
+  } finally {
+    await clearRestoreWorkingFilesAfterRestore();
+  }
 };

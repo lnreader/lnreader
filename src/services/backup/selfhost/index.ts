@@ -3,7 +3,8 @@ import { download, upload } from '@api/remote';
 import { getString } from '@i18n/translations';
 import {
   CACHE_DIR_PATH,
-  clearBackupCache,
+  clearRestoreWorkingFiles,
+  clearRestoreWorkingFilesAfterRestore,
   prepareBackupData,
   restoreData,
 } from '../utils';
@@ -80,7 +81,7 @@ export const createSelfHostBackup = async (
   }));
 };
 
-export const selfHostRestore = async (
+const restoreFromSelfHost = async (
   { host, backupFolder }: SelfHostData,
   setMeta: TaskProgressUpdater,
 ) => {
@@ -91,7 +92,7 @@ export const selfHostRestore = async (
     progressText: getString('backupScreen.downloadingData'),
   }));
 
-  await clearBackupCache();
+  await clearRestoreWorkingFiles();
   await download(host, backupFolder, ZipBackupName.DATA, CACHE_DIR_PATH);
 
   setMeta(meta => ({
@@ -158,4 +159,15 @@ export const selfHostRestore = async (
     progressText: completionText,
     completionText,
   }));
+};
+
+export const selfHostRestore = async (
+  data: SelfHostData,
+  setMeta: TaskProgressUpdater,
+) => {
+  try {
+    await restoreFromSelfHost(data, setMeta);
+  } finally {
+    await clearRestoreWorkingFilesAfterRestore();
+  }
 };

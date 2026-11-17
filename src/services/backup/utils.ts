@@ -39,6 +39,7 @@ import {
 } from './options';
 import { INSTALLED_PLUGINS_KEY } from '@plugins/pluginManager';
 import type { PluginItem } from '@plugins/types';
+import { createFolderBackupSource, type BackupSource } from './backupSource';
 
 const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
 
@@ -160,6 +161,61 @@ export const CACHE_DIR_PATH =
 export const clearBackupCache = async (cacheDirPath = CACHE_DIR_PATH) => {
   if (await NativeFile.exists(cacheDirPath)) {
     await NativeFile.unlink(cacheDirPath);
+  }
+};
+
+/** Where a local restore copies a backup it cannot read in place. */
+export const RESTORE_SOURCE_COPY_PATH = CACHE_DIR_PATH + '-source.zip';
+
+const decodeUri = (uri: string) => {
+  try {
+    return decodeURIComponent(uri);
+  } catch {
+    return uri;
+  }
+};
+
+/**
+ * Whether the picked backup is `path` or lies inside it. Storage provider
+ * document ids end with the file's path below the storage root, so a content
+ * URI is matched on that part of the path.
+ */
+export const isPickedBackupPath = (sourceUri: string, path: string) => {
+  const picked = decodeUri(sourceUri).replace(/^file:\/\//, '');
+  if (picked === path || picked.startsWith(path + '/')) {
+    return true;
+  }
+  const storageRelative = path.slice(path.indexOf('/Android/') + 1);
+  return (
+    path.includes('/Android/') &&
+    (picked.endsWith(storageRelative) || picked.includes(storageRelative + '/'))
+  );
+};
+
+/**
+ * Deletes a restore's working files: the unpacked backup and the local copy
+ * of the picked archive, including ones an earlier restore left behind. Only
+ * those two paths in the app's cache are touched, and never the picked backup.
+ */
+export const clearRestoreWorkingFiles = async (sourceUri?: string) => {
+  for (const path of [CACHE_DIR_PATH, RESTORE_SOURCE_COPY_PATH]) {
+    if (sourceUri && isPickedBackupPath(sourceUri, path)) {
+      continue;
+    }
+    if (await NativeFile.exists(path)) {
+      await NativeFile.unlink(path);
+    }
+  }
+};
+
+/** Cleanup after a restore ends; never turns the restore's outcome into an error. */
+export const clearRestoreWorkingFilesAfterRestore = async (
+  sourceUri?: string,
+) => {
+  try {
+    await clearRestoreWorkingFiles(sourceUri);
+  } catch {
+    // Retried at the start of the next restore.
   }
 };
 
@@ -354,12 +410,12 @@ const parseBackupManifest = (fileContent: string): ResolvedBackupManifest => {
 };
 
 const getBackupManifest = async (
-  cacheDirPath: string,
+  source: BackupSource,
 ): Promise<ResolvedBackupManifest> => {
-  const manifestPath = cacheDirPath + '/' + BackupEntryName.VERSION;
+  const manifestPath = BackupEntryName.VERSION;
   let size: number;
   try {
-    size = await NativeFile.fileSize(manifestPath);
+    size = await source.fileSize(manifestPath);
   } catch {
     return LEGACY_MANIFEST;
   }
@@ -368,7 +424,7 @@ const getBackupManifest = async (
   }
   let fileContent: string;
   try {
-    fileContent = await NativeFile.readFile(manifestPath);
+    fileContent = await source.readFile(manifestPath);
   } catch {
     return LEGACY_MANIFEST;
   }
@@ -408,13 +464,19 @@ const updateRestoreProgress = (
   }));
 };
 
+/**
+ * Restores the library, categories, settings and plugin registry from a
+ * backup, given as a folder it was unpacked into or as a source to read.
+ */
 export const restoreData = async (
-  cacheDirPath: string,
+  backup: string | BackupSource,
   setMeta?: TaskProgressUpdater,
 ): Promise<RestoreResult> => {
-  const manifest = await getBackupManifest(cacheDirPath);
-  const novelDirPath = cacheDirPath + '/' + BackupEntryName.NOVEL_AND_CHAPTERS;
-  const coversDirPath = cacheDirPath + '/' + BackupEntryName.COVERS;
+  const source =
+    typeof backup === 'string' ? createFolderBackupSource(backup) : backup;
+  const manifest = await getBackupManifest(source);
+  const novelDirPath = BackupEntryName.NOVEL_AND_CHAPTERS;
+  const coversDirPath = BackupEntryName.COVERS;
   const pluginIds = new Set<string>();
   const novelIdMap = new Map<number, number>();
   const novelMappings: RestoredNovelMapping[] = [];
@@ -442,11 +504,11 @@ export const restoreData = async (
 
   if (!manifest.sections.library) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(novelDirPath))) {
+  } else if (!(await source.exists(novelDirPath))) {
     failedSectionCount++;
   } else {
     try {
-      const items = (await NativeFile.readDir(novelDirPath)).filter(
+      const items = (await source.readDir(novelDirPath)).filter(
         item => !item.isDirectory,
       );
       // Chapter ids are only looked up when downloaded chapter files will be
@@ -499,10 +561,10 @@ export const restoreData = async (
           try {
             if (hasStoredCover) {
               const coverBackupPath = coversDirPath + '/' + backupNovel.id;
-              if (await NativeFile.exists(coverBackupPath)) {
+              if (await source.exists(coverBackupPath)) {
                 const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
                 await NativeFile.mkdir(parentDirectory(coverPath));
-                await NativeFile.copyFile(coverBackupPath, coverPath);
+                await source.takeFile(coverBackupPath, coverPath);
               }
             }
             novelCount++;
@@ -570,11 +632,13 @@ export const restoreData = async (
         reportProgress(0);
       }
       const loadNovel = async (item: {
-        path: string;
+        name: string;
       }): Promise<LoadedRestoreNovel> => {
         const loaded: LoadedRestoreNovel = { parsed: false, size: 0 };
         try {
-          const fileContent = await NativeFile.readFile(item.path);
+          const fileContent = await source.readFile(
+            `${novelDirPath}/${item.name}`,
+          );
           const backupNovel = JSON.parse(fileContent) as BackupNovel;
           if (!isBackupNovel(backupNovel)) {
             throw new Error('Invalid novel backup file');
@@ -642,17 +706,17 @@ export const restoreData = async (
       getString('backupScreen.restoringCategories'),
     );
   }
-  const categoryFilePath = cacheDirPath + '/' + BackupEntryName.CATEGORY;
+  const categoryFilePath = BackupEntryName.CATEGORY;
   let categoryCount = 0;
   let failedCategoryCount = 0;
 
   if (!manifest.sections.library) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(categoryFilePath))) {
+  } else if (!(await source.exists(categoryFilePath))) {
     failedSectionCount++;
   } else {
     try {
-      const fileContent = await NativeFile.readFile(categoryFilePath);
+      const fileContent = await source.readFile(categoryFilePath);
       const categories: BackupCategory[] = JSON.parse(fileContent);
 
       for (const [index, category] of categories.entries()) {
@@ -687,16 +751,16 @@ export const restoreData = async (
   if (manifest.sections.settings) {
     updateRestoreProgress(setMeta, getString('backupScreen.restoringSettings'));
   }
-  const settingsFilePath = cacheDirPath + '/' + BackupEntryName.SETTING;
+  const settingsFilePath = BackupEntryName.SETTING;
   let settingsRestored = !manifest.sections.settings;
 
   if (!manifest.sections.settings) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(settingsFilePath))) {
+  } else if (!(await source.exists(settingsFilePath))) {
     // Reported as a settings warning in the completion summary.
   } else {
     try {
-      const fileContent = await NativeFile.readFile(settingsFilePath);
+      const fileContent = await source.readFile(settingsFilePath);
       const settingsData = JSON.parse(fileContent);
       if (INSTALLED_PLUGINS_KEY in settingsData) {
         pluginsFromSettings = parsePluginList(
@@ -715,14 +779,13 @@ export const restoreData = async (
   if (manifest.sections.plugins) {
     let restoredPlugins = pluginsFromSettings;
     if (manifest.formatVersion === 2) {
-      const pluginMetadataPath =
-        cacheDirPath + '/' + BackupEntryName.PLUGIN_METADATA;
-      if (!(await NativeFile.exists(pluginMetadataPath))) {
+      const pluginMetadataPath = BackupEntryName.PLUGIN_METADATA;
+      if (!(await source.exists(pluginMetadataPath))) {
         failedSectionCount++;
       } else {
         try {
           restoredPlugins = parsePluginList(
-            await NativeFile.readFile(pluginMetadataPath),
+            await source.readFile(pluginMetadataPath),
           );
         } catch {
           failedSectionCount++;
