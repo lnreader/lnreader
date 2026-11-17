@@ -88,7 +88,11 @@ internal class SeekableZip(
       directorySize = zip64End.getLong(40)
       directoryOffset = zip64End.getLong(48)
     }
-    if (directorySize > Int.MAX_VALUE || directoryOffset + directorySize > archiveSize) {
+    // Zip64 values are signed 64-bit, so a crafted archive can make the sum
+    // overflow; compare against the space left instead.
+    if (directoryOffset < 0 || directorySize < 0 || directorySize > Int.MAX_VALUE ||
+      directoryOffset > archiveSize || directorySize > archiveSize - directoryOffset
+    ) {
       throw ZipException("Invalid central directory")
     }
 

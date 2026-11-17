@@ -15,6 +15,7 @@ import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -310,8 +311,19 @@ class NativeZipArchiveModule : Module() {
     AsyncFunction("extractArchiveFile") { handle: Int, path: String, destPath: String, promise: Promise ->
       runArchiveTask(promise, "EXTRACT_ARCHIVE_FAILED") {
         val (archive, entry) = archiveFile(handle, path)
-        archive.zip.open(entry).use { inputStream ->
-          FileOutputStream(destPath).use { fos -> inputStream.copyTo(fos, COPY_BUFFER_SIZE) }
+        // The destination can be an existing library cover; a damaged entry
+        // must not leave it half written, so it is replaced only once complete.
+        val destination = File(destPath)
+        val temporary = File(destination.parentFile, ".${destination.name}.${UUID.randomUUID()}.tmp")
+        try {
+          archive.zip.open(entry).use { inputStream ->
+            FileOutputStream(temporary).use { fos -> inputStream.copyTo(fos, COPY_BUFFER_SIZE) }
+          }
+          if (!temporary.renameTo(destination)) {
+            throw IOException("Could not replace $destPath")
+          }
+        } finally {
+          temporary.delete()
         }
         null
       }
