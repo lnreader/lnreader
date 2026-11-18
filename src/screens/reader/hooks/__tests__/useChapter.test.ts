@@ -5,6 +5,7 @@ import NativeVolumeButtonListener from '@modules/native-volume-button-listener';
 
 const mockUseNovelActions = jest.fn();
 const mockUseChapterGeneralSettings = jest.fn();
+const mockUseChapterReaderSettings = jest.fn();
 const mockUseLibrarySettings = jest.fn();
 const mockUseAppSettings = jest.fn();
 const mockUseTracker = jest.fn();
@@ -31,6 +32,7 @@ jest.mock('@screens/novel/NovelContext', () => ({
 
 jest.mock('@hooks/persisted', () => ({
   useChapterGeneralSettings: () => mockUseChapterGeneralSettings(),
+  useChapterReaderSettings: () => mockUseChapterReaderSettings(),
   useLibrarySettings: () => mockUseLibrarySettings(),
   useAppSettings: () => mockUseAppSettings(),
   useTracker: () => mockUseTracker(),
@@ -176,6 +178,9 @@ describe('useChapter', () => {
       pageReader: false,
       pageReaderInvertVolumeButtons: false,
       pageReaderDisableAnimation: false,
+    });
+    mockUseChapterReaderSettings.mockReturnValue({
+      tts: undefined,
     });
     mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
     mockUseAppSettings.mockReturnValue({

@@ -10,6 +10,7 @@ import { ChapterInfo, NovelInfo } from '@database/types';
 import {
   useAppSettings,
   useChapterGeneralSettings,
+  useChapterReaderSettings,
   useLibrarySettings,
   useTrackedNovel,
   useTracker,
@@ -77,6 +78,7 @@ export default function useChapter(
     pageReader,
     pageReaderInvertVolumeButtons,
   } = useChapterGeneralSettings();
+  const { tts } = useChapterReaderSettings();
   const { incognitoMode } = useLibrarySettings();
   const { timeTrackingEnabled, inactivityTimeoutMs } = useAppSettings();
   const [error, setError] = useState<string>();
@@ -177,6 +179,8 @@ export default function useChapter(
     [novel.pluginId],
   );
 
+  const strictSanitizationRef = useRef(tts?.strictSanitization !== false);
+
   /**
    * Returns render-ready (sanitized) chapter HTML, reusing the novel-scoped
    * cache. Sanitizing before caching keeps `sanitize-html` – which is the most
@@ -192,11 +196,17 @@ export default function useChapter(
       }
 
       const pending = loadChapterText(chap).then(text => {
+        const isStrict = strictSanitizationRef.current;
         const sanitized = sanitizeChapterText(
           novel.pluginId,
           novel.name,
           chap.name,
           text,
+          {
+            stripHiddenElements: isStrict,
+            flattenInlineSpans: isStrict,
+            deduplicateAdjacent: isStrict,
+          }
         );
         if (!text.trim()) {
           chapterTextCache.remove(chap.id);
@@ -210,7 +220,12 @@ export default function useChapter(
 
       return pending;
     },
-    [chapterTextCache, loadChapterText, novel.name, novel.pluginId],
+    [
+      chapterTextCache,
+      loadChapterText,
+      novel.name,
+      novel.pluginId,
+    ],
   );
 
   const prefetchChapter = useCallback(
@@ -530,6 +545,15 @@ export default function useChapter(
     setError('');
     getChapter();
   }, [chapterTextCache, getChapter]);
+
+  useEffect(() => {
+    const isStrict = tts?.strictSanitization !== false;
+    if (strictSanitizationRef.current !== isStrict) {
+      strictSanitizationRef.current = isStrict;
+      chapterTextCache.clear();
+      refetch();
+    }
+  }, [tts?.strictSanitization, chapterTextCache, refetch]);
 
   /**
    * Everything except `hidden`, which toggles on every tap on the page. Keeping
