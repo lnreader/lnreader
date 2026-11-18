@@ -15,7 +15,6 @@ import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -304,27 +303,14 @@ class NativeZipArchiveModule : Module() {
     AsyncFunction("readArchiveFile") { handle: Int, path: String, promise: Promise ->
       runArchiveTask(promise, "READ_ARCHIVE_FAILED") {
         val (archive, entry) = archiveFile(handle, path)
-        archive.zip.open(entry).use { it.readBytes().toString(Charsets.UTF_8) }
+        archive.zip.readText(entry, MAX_ARCHIVE_FILE_BYTES)
       }
     }
 
     AsyncFunction("extractArchiveFile") { handle: Int, path: String, destPath: String, promise: Promise ->
       runArchiveTask(promise, "EXTRACT_ARCHIVE_FAILED") {
         val (archive, entry) = archiveFile(handle, path)
-        // The destination can be an existing library cover; a damaged entry
-        // must not leave it half written, so it is replaced only once complete.
-        val destination = File(destPath)
-        val temporary = File(destination.parentFile, ".${destination.name}.${UUID.randomUUID()}.tmp")
-        try {
-          archive.zip.open(entry).use { inputStream ->
-            FileOutputStream(temporary).use { fos -> inputStream.copyTo(fos, COPY_BUFFER_SIZE) }
-          }
-          if (!temporary.renameTo(destination)) {
-            throw IOException("Could not replace $destPath")
-          }
-        } finally {
-          temporary.delete()
-        }
+        archive.zip.extract(entry, File(destPath))
         null
       }
     }
@@ -400,6 +386,10 @@ class NativeZipArchiveModule : Module() {
   private companion object {
     const val COPY_BUFFER_SIZE = 64 * 1024
     const val MAX_ENTRY_BYTES = 1024 * 1024
+    // A restore reads novel files through readArchiveFile, four at a time.
+    // This matches its 16 MiB read-ahead budget; the largest novel file in a
+    // 7,323-novel backup is 2.8 MB (7,207 chapters).
+    const val MAX_ARCHIVE_FILE_BYTES = 16 * 1024 * 1024
   }
 
 }
