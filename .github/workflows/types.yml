@@ -19,36 +19,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
-      - name: Validate Translation Changes
-        id: changes
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          node --test scripts/__tests__/check-translation-changes.test.cjs
-          node scripts/check-translation-changes.cjs
-
       - name: Setup pnpm
-        if: steps.changes.outputs.translation_only != 'true'
         uses: pnpm/action-setup@v4
 
       - name: Get pnpm Store Path
-        if: steps.changes.outputs.translation_only != 'true'
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Cache pnpm
-        if: steps.changes.outputs.translation_only != 'true'
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
@@ -57,13 +42,10 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        if: steps.changes.outputs.translation_only != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Generate Environment
-        if: steps.changes.outputs.translation_only != 'true'
         run: pnpm generate:env:debug
 
       - name: Check Types
-        if: steps.changes.outputs.translation_only != 'true'
         run: pnpm run type-check
