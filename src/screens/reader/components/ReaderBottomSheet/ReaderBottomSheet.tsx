@@ -6,20 +6,15 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import React, {
-  RefObject,
-  useMemo,
-  useState,
-  useCallback,
-  Suspense,
-} from 'react';
+import React, { RefObject, useState, useCallback, Suspense } from 'react';
 import Color from 'color';
 
 import { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { List, TopTabBar } from '@components';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
-import { SceneMap, TabView } from 'react-native-tab-view';
+import { TabView } from 'react-native-tab-view';
+import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
 import { getString } from '@i18n/translations';
 
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
@@ -29,6 +24,9 @@ import ReaderTextAlignSelector from './ReaderTextAlignSelector';
 import ReaderValueChange from './ReaderValueChange';
 import ReaderFontPicker from './ReaderFontPicker';
 import TTSTab from './TTSTab';
+import ChapterTextFilters, {
+  ChapterTextFiltersProps,
+} from './ChapterTextFilters';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { StringMap } from '@i18n/types';
 
@@ -151,7 +149,7 @@ const pagedModePreferences: GeneralPreference[] = [
   },
 ];
 
-const GeneralTab: React.FC = React.memo(() => {
+const GeneralTab = React.memo((filterProps: ChapterTextFiltersProps) => {
   const theme = useTheme();
   const { setChapterGeneralSettings, ...settings } =
     useChapterGeneralSettings();
@@ -187,7 +185,10 @@ const GeneralTab: React.FC = React.memo(() => {
   // Two small fixed groups: virtualising them costs more to mount and measure
   // than simply drawing them, and this runs while the sheet is opening.
   return (
-    <BottomSheetScrollView>
+    <BottomSheetScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 24 }}
+    >
       <List.SubHeader theme={theme}>
         {getString('readerScreen.bottomSheet.display')}
       </List.SubHeader>
@@ -207,6 +208,10 @@ const GeneralTab: React.FC = React.memo(() => {
         }
         return renderPreference(item);
       })}
+      <List.SubHeader theme={theme}>
+        {getString('readerScreen.bottomSheet.chapterTextFilters')}
+      </List.SubHeader>
+      <ChapterTextFilters {...filterProps} />
     </BottomSheetScrollView>
   );
 });
@@ -228,17 +233,31 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
 }) => {
   const theme = useTheme();
   const layout = useWindowDimensions();
+  const { chapterTextFilters = [], setChapterTextFilters } = useNovelSettings();
 
   const tabHeaderColor = theme.surfaceContainerLow ?? theme.surface;
 
-  const renderScene = useMemo(
-    () =>
-      SceneMap({
-        readerTab: ReaderTab,
-        generalTab: GeneralTab,
-        ttsTab: TTSTab,
-      }),
-    [],
+  // The sheet is portalled above NovelContextProvider. Read novel settings
+  // here and pass them into the portalled scene instead of reading context there.
+  const renderScene = useCallback(
+    ({ route }: { route: { key: string } }) => {
+      switch (route.key) {
+        case 'readerTab':
+          return <ReaderTab />;
+        case 'generalTab':
+          return (
+            <GeneralTab
+              chapterTextFilters={chapterTextFilters}
+              setChapterTextFilters={setChapterTextFilters}
+            />
+          );
+        case 'ttsTab':
+          return <TTSTab />;
+        default:
+          return null;
+      }
+    },
+    [chapterTextFilters, setChapterTextFilters],
   );
 
   const [index, setIndex] = useState(0);

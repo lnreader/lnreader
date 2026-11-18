@@ -72,6 +72,26 @@ describe('novelPersistence bridge', () => {
     novelPath: 'api/novels/xyz-123',
   };
 
+  it('persists chapter text filters only for their novel and allows removing them', () => {
+    const bridge = createNovelPersistenceBridge(createStorage());
+    const settings = {
+      ...defaultNovelSettings,
+      chapterTextFilters: ['Read more at Example'],
+    };
+    bridge.writeSettings(input, settings);
+    expect(bridge.readSettings(input)).toEqual(settings);
+    expect(
+      bridge.readSettings({ ...input, novelPath: 'another-novel' })
+        .chapterTextFilters,
+    ).toBeUndefined();
+    expect(
+      bridge.readSettings({ ...input, pluginId: 'another-source' })
+        .chapterTextFilters,
+    ).toBeUndefined();
+    bridge.writeSettings(input, { ...settings, chapterTextFilters: [] });
+    expect(bridge.readSettings(input).chapterTextFilters).toEqual([]);
+  });
+
   it('reads legacy continuity keys for page/settings/lastRead', () => {
     const storage = createStorage();
     const bridge = createNovelPersistenceBridge(storage);

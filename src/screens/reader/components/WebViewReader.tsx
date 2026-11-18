@@ -168,16 +168,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
-  const activeChapterIdRef = useRef(chapter.id);
   const adjacentChapterScriptRef = useRef(buildAdjacentChapterScript());
-  const {
-    command: runTtsCommand,
-    loadAndPlay,
-    progress: ttsProgress,
-    seekTo: seekTts,
-    state: ttsState,
-    updateSettings: updateTtsSettings,
-  } = useTtsSession();
 
   const { customJS, customCSS } = useCustomCode(initialReaderSettings);
 
@@ -192,6 +183,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     handleReplaceCancel,
     eventTextAction,
   } = useTextModifications(html, webViewRef);
+
+  const {
+    command: runTtsCommand,
+    loadAndPlay,
+    progress: ttsProgress,
+    seekTo: seekTts,
+    state: ttsState,
+    updateSettings: updateTtsSettings,
+  } = useTtsSession({ chapterId: chapter.id, html: processedHtml });
 
   const [readerSettings, setReaderSettings] = useState(
     () =>
@@ -224,13 +224,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       `);
     }
   }, [ttsProgress, webViewRef]);
-
-  useEffect(() => {
-    if (activeChapterIdRef.current !== chapter.id) {
-      activeChapterIdRef.current = chapter.id;
-      runTtsCommand('stop');
-    }
-  }, [chapter.id, runTtsCommand]);
 
   useEffect(() => {
     const script = buildAdjacentChapterScript(nextChapter, prevChapter);
