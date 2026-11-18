@@ -168,6 +168,42 @@ describe('fetchApi Cloudflare bypass', () => {
       ['LNReader test', 'Plugin UA'],
     );
   });
+
+  it('runs solves for different user agents on one host one at a time', async () => {
+    fetchMock.mockResolvedValue(challenge());
+    const finishSolves: ((solved: boolean) => void)[] = [];
+    solveChallenge.mockImplementation(
+      () => new Promise<boolean>(resolve => finishSolves.push(resolve)),
+    );
+    const fetchApi = loadFetchApi();
+
+    const defaultUa = fetchApi('https://site.test/novel/1');
+    const pluginUa = fetchApi('https://site.test/novel/2', {
+      headers: { 'User-Agent': 'Plugin UA' },
+    });
+    const otherHost = fetchApi('https://other.test/novel');
+    await new Promise(setImmediate);
+
+    // Both WebViews would read and write the one cf_clearance cookie of site.test.
+    expect(solveChallenge.mock.calls.map(([url]) => url)).toEqual([
+      'https://site.test/novel/1',
+      'https://other.test/novel',
+    ]);
+
+    finishSolves[0](false);
+    await defaultUa;
+    await new Promise(setImmediate);
+    expect(solveChallenge).toHaveBeenLastCalledWith(
+      'https://site.test/novel/2',
+      'Plugin UA',
+      expect.any(Number),
+    );
+
+    finishSolves[1](false);
+    finishSolves[2](false);
+    await Promise.all([pluginUa, otherHost]);
+    expect(solveChallenge).toHaveBeenCalledTimes(3);
+  });
 });
 
 describe('fetchText Cloudflare bypass', () => {
