@@ -1,22 +1,15 @@
 import * as React from 'react';
 import ChapterItem from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import {
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  RefreshControl,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { RefreshControl, useWindowDimensions, View } from 'react-native';
 import {
   runOnJS,
   SharedValue,
   useAnimatedReaction,
-  useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrackSheet from './Tracker/TrackSheet';
@@ -36,6 +29,8 @@ import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
+import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -83,6 +78,7 @@ const NovelScreenList = ({
     getNextChapterBatch,
     getChapters,
     openPage,
+    loadUpToBatch,
   } = useNovelActions();
 
   const routeNovel: Omit<NovelInfo, 'id'> & { id: 'NO_ID' } = {
@@ -124,7 +120,8 @@ const NovelScreenList = ({
 
   const [isFabExtended, setIsFabExtended] = useState(true);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const scrollOffset = useSharedValue(0);
+  const fastScrollMetrics = useFastScrollMetrics();
+  const { scrollOffset } = fastScrollMetrics;
   const { height: screenHeight } = useWindowDimensions();
 
   const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
@@ -165,11 +162,62 @@ const NovelScreenList = ({
     [headerOpacity, lastRead, screenHeight, useFabForContinueReading],
   );
 
-  const scrollHandler = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffset.set(event.nativeEvent.contentOffset.y);
+  // --- Fast scroll ---
+
+  const totalChapters = Math.max(
+    batchInformation.totalChapters ?? 0,
+    chapters.length,
+  );
+  const pendingScrubIndex = useRef<number | null>(null);
+
+  const scrollToChapterIndex = useCallback(
+    (index: number) => {
+      if (index === 0) {
+        // Offset 0 rather than index 0 so the novel info header is revealed.
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      } else {
+        listRef.current?.scrollToIndex({ index, animated: false });
+      }
     },
-    [scrollOffset],
+    [listRef],
+  );
+
+  const onFastScrub = useCallback(
+    (index: number) => {
+      if (index < chapters.length) {
+        pendingScrubIndex.current = null;
+        scrollToChapterIndex(index);
+        return;
+      }
+      pendingScrubIndex.current = index;
+      loadUpToBatch(Math.floor(index / CHAPTER_BATCH_SIZE));
+    },
+    [chapters.length, loadUpToBatch, scrollToChapterIndex],
+  );
+
+  useEffect(() => {
+    const index = pendingScrubIndex.current;
+    if (index !== null && index < chapters.length) {
+      pendingScrubIndex.current = null;
+      // Wait a frame so the list has received the newly appended batch.
+      requestAnimationFrame(() => scrollToChapterIndex(index));
+    }
+  }, [chapters.length, scrollToChapterIndex]);
+
+  const getChapterLabel = useCallback(
+    (index: number) => {
+      const chapter = chapters[index];
+      if (!chapter) {
+        return `#${index + 1}`;
+      }
+      if (showChapterTitles || chapter.chapterNumber == null) {
+        return chapter.name;
+      }
+      return getString('novelScreen.chapterChapnum', {
+        num: chapter.chapterNumber,
+      });
+    },
+    [chapters, showChapterTitles],
   );
 
   // --- Stable callbacks ---
@@ -420,6 +468,7 @@ const NovelScreenList = ({
         estimatedItemSize={64}
         data={chapters}
         recycleItems
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={listEmptyComponent}
         renderItem={renderChapter}
         keyExtractor={chapterKeyExtractor}
@@ -428,12 +477,22 @@ const NovelScreenList = ({
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}
         onEndReachedThreshold={6}
-        onScroll={scrollHandler}
+        onScroll={fastScrollMetrics.onScroll}
         //drawDistance={1000}
         ListHeaderComponent={listHeader}
       />
       {novel.id !== 'NO_ID' ? (
         <>
+          <FastScrollbar
+            metrics={fastScrollMetrics}
+            itemCount={totalChapters}
+            loadedCount={chapters.length}
+            onScrub={onFastScrub}
+            getLabel={getChapterLabel}
+            topInset={topInset + 56}
+            bottomInset={bottomInset + 16}
+            hapticFeedback={!disableHapticFeedback}
+          />
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}
             theme={theme}

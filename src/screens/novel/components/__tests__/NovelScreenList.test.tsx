@@ -1,4 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import NovelScreenList from '../NovelScreenList';
 
 const mockUseNovelValue = jest.fn();
@@ -7,6 +13,17 @@ const mockDownloadChapter = jest.fn();
 let mockDownloadingChapterIds = new Set<number>();
 let mockDownloadingNovelIds = new Set<number>();
 let mockDownloadQueue: any[] = [];
+let mockFastScrollbarProps: any;
+
+jest.mock('@components/FastScrollbar', () => ({
+  useFastScrollMetrics: jest.requireActual(
+    '@components/FastScrollbar/useFastScrollMetrics',
+  ).useFastScrollMetrics,
+  FastScrollbar: (props: any) => {
+    mockFastScrollbarProps = props;
+    return null;
+  },
+}));
 
 jest.mock('../../NovelContext', () => ({
   useNovelValue: (key: string) => mockUseNovelValue(key),
@@ -435,5 +452,122 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
       screen: 'Chapter',
       params: { novel: baseNovel, chapter: lastRead },
     });
+  });
+});
+
+describe('NovelScreenList fast scroll', () => {
+  const makeChapters = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      ...baseChapter,
+      id: index + 1,
+      name: `Chapter title ${index + 1}`,
+      chapterNumber: index + 1,
+    }));
+
+  const renderWithStore = (store: ReturnType<typeof createStore>) => {
+    const loadUpToBatch = jest.fn();
+    mockUseNovelValue.mockImplementation(
+      (key: keyof typeof store.state) => store.state[key],
+    );
+    mockUseNovelActions.mockReturnValue({
+      deleteChapter: store.state.deleteChapter,
+      setNovel: store.state.setNovel,
+      getChapters: store.state.getChapters,
+      openPage: store.state.openPage,
+      loadUpToBatch,
+    });
+    const ref = {
+      current: { scrollToOffset: jest.fn(), scrollToIndex: jest.fn() },
+    };
+    const element = () => (
+      <NovelScreenList
+        headerOpacity={headerOpacity as any}
+        listRef={ref as any}
+        navigation={navigation}
+        routeBaseNovel={{
+          name: 'Route Novel',
+          path: '/novel/test',
+          pluginId: 'plugin.test',
+        }}
+        selected={[]}
+        setSelected={jest.fn()}
+        onRefresh={onRefresh}
+        updating={false}
+      />
+    );
+    const view = render(element());
+    return { ref, loadUpToBatch, rerender: () => view.rerender(element()) };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFastScrollbarProps = undefined;
+  });
+
+  it('sizes the scrollbar to the total chapter count, not just loaded ones', () => {
+    const store = createStore({
+      chapters: makeChapters(3),
+      batchInformation: { batch: 0, total: 2, totalChapters: 2500 },
+    });
+    renderWithStore(store);
+
+    expect(mockFastScrollbarProps.itemCount).toBe(2500);
+    expect(mockFastScrollbarProps.loadedCount).toBe(3);
+  });
+
+  it('scrolls to loaded chapters and reveals the header at the top', () => {
+    const store = createStore({
+      chapters: makeChapters(3),
+      batchInformation: { batch: 0, total: 0, totalChapters: 3 },
+    });
+    const { ref, loadUpToBatch } = renderWithStore(store);
+
+    act(() => mockFastScrollbarProps.onScrub(2));
+    expect(ref.current.scrollToIndex).toHaveBeenCalledWith({
+      index: 2,
+      animated: false,
+    });
+
+    act(() => mockFastScrollbarProps.onScrub(0));
+    expect(ref.current.scrollToOffset).toHaveBeenCalledWith({
+      offset: 0,
+      animated: false,
+    });
+    expect(loadUpToBatch).not.toHaveBeenCalled();
+  });
+
+  it('loads the target batch when scrubbing past loaded chapters, then scrolls there', async () => {
+    const store = createStore({
+      chapters: makeChapters(2),
+      batchInformation: { batch: 0, total: 2, totalChapters: 2500 },
+    });
+    const { ref, loadUpToBatch, rerender } = renderWithStore(store);
+
+    act(() => mockFastScrollbarProps.onScrub(1001));
+    expect(loadUpToBatch).toHaveBeenCalledWith(1);
+    expect(ref.current.scrollToIndex).not.toHaveBeenCalled();
+
+    store.state.chapters = makeChapters(1002);
+    rerender();
+
+    await waitFor(() =>
+      expect(ref.current.scrollToIndex).toHaveBeenCalledWith({
+        index: 1001,
+        animated: false,
+      }),
+    );
+  });
+
+  it('labels chapters the same way chapter rows do', () => {
+    const store = createStore({ chapters: makeChapters(2) });
+    renderWithStore(store);
+    expect(mockFastScrollbarProps.getLabel(0)).toBe(
+      'novelScreen.chapterChapnum',
+    );
+    expect(mockFastScrollbarProps.getLabel(500)).toBe('#501');
+
+    store.state.novelSettings = { filter: [], showChapterTitles: true };
+    renderWithStore(store);
+    expect(mockFastScrollbarProps.getLabel(1)).toBe('Chapter title 2');
   });
 });
