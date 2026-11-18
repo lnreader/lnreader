@@ -203,6 +203,10 @@ internal class SeekableZip(
         }
         extra += 4 + length
       }
+      // Zip64 values are signed 64-bit.
+      if (size < 0 || compressedSize < 0 || localHeaderOffset < 0) {
+        throw ZipException("Invalid size or offset for $name")
+      }
       if (flags and ENCRYPTED_FLAG != 0) throw ZipException("Encrypted entry ${name}")
       result.add(
         Entry(name, name.endsWith('/'), method, compressedSize, size, crc, localHeaderOffset),

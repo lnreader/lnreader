@@ -127,6 +127,23 @@ class SeekableZipTest {
   }
 
   @Test
+  fun rejectsNegativeZip64SizesAndOffsets() {
+    val name = "NovelAndChapters/1.json".toByteArray()
+    for (values in listOf(longArrayOf(-1, 8, 0), longArrayOf(8, -1, 0), longArrayOf(8, 8, -1))) {
+      val record = ByteBuffer.allocate(46 + name.size + 28).order(ByteOrder.LITTLE_ENDIAN)
+        .putInt(0x02014b50).put(ByteArray(16)).putInt(-1).putInt(-1)
+        .putShort(name.size.toShort()).putShort(28).put(ByteArray(10)).putInt(-1).put(name)
+        .putShort(1).putShort(24).putLong(values[0]).putLong(values[1]).putLong(values[2])
+      val end = ByteBuffer.allocate(22).order(ByteOrder.LITTLE_ENDIAN)
+        .putInt(0x06054b50).putShort(0).putShort(0).putShort(1).putShort(1)
+        .putInt(record.capacity()).putInt(0).putShort(0)
+      val file = folder.newFile().apply { writeBytes(record.array() + end.array()) }
+
+      assertFails("Invalid size or offset") { openFile(file) }
+    }
+  }
+
+  @Test
   fun readsTheSameEntriesAsZipFile() {
     // Long names, extra fields and comments make records cross the
     // directory reader's window boundaries.
