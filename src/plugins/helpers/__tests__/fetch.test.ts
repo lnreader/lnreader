@@ -13,13 +13,13 @@ const solveChallenge = NativeCloudflare!.solveChallenge as jest.Mock;
 const fetchMock = jest.fn();
 
 const response = (status: number, headers: Record<string, string> = {}) =>
-  ({ status, ok: status < 400, headers: new Headers(headers) } as Response);
+  ({ status, ok: status < 400, headers: new Headers(headers) }) as Response;
 
 const challenge = () =>
   response(403, { 'cf-mitigated': 'challenge', 'server': 'cloudflare' });
 
 const textResponse = (text: string) =>
-  ({ ...response(200), blob: async () => ({ text }) } as unknown as Response);
+  ({ ...response(200), blob: async () => ({ text }) }) as unknown as Response;
 
 // React Native's FileReader needs the native blob module, which Jest lacks.
 class TextFileReader {
