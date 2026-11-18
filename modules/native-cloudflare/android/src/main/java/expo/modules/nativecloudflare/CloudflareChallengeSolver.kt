@@ -142,10 +142,14 @@ internal class CloudflareChallengeSolver(
                 finish(false)
                 return
             }
+            // Plain ES5: an un-updated system WebView on Android 7-9 (e.g. Chrome 69)
+            // rejects newer syntax such as optional chaining, and the whole listener
+            // would then be dropped.
             view.evaluateJavascript(
                 """
-                addEventListener("message", ({ data }) => {
-                  if (data?.source === "cloudflare-challenge" && data?.event === "interactiveBegin") {
+                addEventListener("message", function (event) {
+                  var data = event.data;
+                  if (data && data.source === "cloudflare-challenge" && data.event === "interactiveBegin") {
                     $JS_INTERFACE.interactiveDetected();
                   }
                 });
