@@ -713,6 +713,7 @@
     "backgroundColorModal": "Background color",
     "clearCustomCSS": "Reset your custom CSS?",
     "clearCustomJS": "Reset your custom JS?",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "Target specific sources using #sourceId-[SOURCEID] in your selectors",
     "customCSS": "Custom CSS",
     "customJS": "Custom JS",

@@ -606,6 +606,7 @@ export interface StringMap {
   'readerSettings.backgroundColorModal': 'string';
   'readerSettings.clearCustomCSS': 'string';
   'readerSettings.clearCustomJS': 'string';
+  'readerSettings.confirmRemoveText': 'string';
   'readerSettings.cssHint': 'string';
   'readerSettings.customCSS': 'string';
   'readerSettings.customJS': 'string';
