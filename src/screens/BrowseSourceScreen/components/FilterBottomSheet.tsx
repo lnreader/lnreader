@@ -125,8 +125,13 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
                   setInput(chip);
                   onChange(value.filter(v => v !== chip));
                 }}
+                style={styles.chipLabel}
               >
-                <Text style={{ color: theme.onSecondaryContainer }}>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ color: theme.onSecondaryContainer }}
+                >
                   {chip}
                 </Text>
               </Pressable>
@@ -135,6 +140,7 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
                 accessibilityLabel={`${getString('common.remove')} ${chip}`}
                 hitSlop={8}
                 onPress={() => onChange(value.filter(v => v !== chip))}
+                style={styles.chipClose}
               >
                 <MaterialCommunityIcons
                   name="close"
@@ -574,6 +580,8 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
   const theme = useTheme();
   const [selectedFilters, setSelectedFilters] =
     useState<SelectedFilters>(filters);
+  // Reset remounts the list so fields with local drafts (e.g. MultiText) clear.
+  const [resetVersion, setResetVersion] = useState(0);
 
   return (
     <BottomSheet bottomSheetRef={filterSheetRef} snapPoints={[400, 600]}>
@@ -589,6 +597,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             onPress={() => {
               setSelectedFilters(filters);
               clearFilters(filters);
+              setResetVersion(current => current + 1);
             }}
           />
           <Button
@@ -605,7 +614,9 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
           data={
             filters && (Object.entries(filters) as [string, Filters[string]][])
           }
-          keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+          keyExtractor={(item: [string, Filters[string]]) =>
+            `filter${item[0]}-${resetVersion}`
+          }
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }: { item: [string, Filters[string]] }) => (
             <FilterItem
@@ -725,8 +736,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flexDirection: 'row',
     gap: 6,
+    maxWidth: '100%',
     paddingHorizontal: 10,
     paddingVertical: 7,
   },
+  chipLabel: { flexShrink: 1, minWidth: 0 },
+  chipClose: { flexShrink: 0 },
   textInput: { width: '100%' },
 });
