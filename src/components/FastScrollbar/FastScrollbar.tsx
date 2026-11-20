@@ -4,6 +4,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   runOnJS,
+  runOnUI,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -14,12 +15,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
 import type { FastScrollMetrics } from './useFastScrollMetrics';
-import {
-  getScrollProgress,
-  getThumbLength,
-  progressToIndex,
-} from './fastScrollMath';
-import { ScrubController } from './ScrubController';
+import { getScrollProgress, getThumbLength } from './fastScrollMath';
+import { ScrubController, type ScrubbableList } from './ScrubController';
 
 // Timings and sizes mirror androidx.recyclerview.widget.FastScroller.
 const SHOW_DURATION_MS = 500;
@@ -33,34 +30,47 @@ const MINIMUM_RANGE = 50;
 // touches inside the 8dp-wide thumb itself.
 const MIN_THUMB_LENGTH = 48;
 const TOUCH_WIDTH = 24;
+// Native scroll offsets are rounded to whole pixels.
+const SETTLE_TOLERANCE = 1.5;
+const SETTLE_CORRECTION_MS = 150;
+
+// Replaced with the real target in an effect, before any gesture can run.
+const INITIAL_TARGET = {
+  getList: () => null,
+  itemCount: 0,
+  loadedCount: 0,
+  onSettleTarget: () => {},
+  onSettleTimeout: () => {},
+};
 
 // ValueAnimator's default AccelerateDecelerateInterpolator.
 const easing = Easing.inOut(Easing.sin);
 
 export interface FastScrollbarProps {
   metrics: FastScrollMetrics;
+  listRef: React.RefObject<ScrubbableList | null>;
   /** Total number of items, including ones not loaded yet. */
   itemCount: number;
   /** Number of items currently in the list's data. Defaults to `itemCount`. */
   loadedCount?: number;
-  /** Called (at most once per frame) with the index under the thumb. */
-  onScrub: (index: number) => void;
-  onScrubEnd?: (index: number) => void;
+  /** Asked to load items up to `index` when scrubbing past the loaded ones. */
+  onRequestItems?: (index: number) => void;
   topInset?: number;
   bottomInset?: number;
 }
 
 const FastScrollbar = ({
   metrics,
+  listRef,
   itemCount,
   loadedCount = itemCount,
-  onScrub,
-  onScrubEnd,
+  onRequestItems,
   topInset = 0,
   bottomInset = 0,
 }: FastScrollbarProps) => {
   const theme = useTheme();
-  const { scrollOffset, contentLength, viewportLength } = metrics;
+  const { scrollOffset, contentLength, viewportLength, userDragCount } =
+    metrics;
 
   const total = useSharedValue(itemCount);
   const loaded = useSharedValue(loadedCount);
@@ -70,7 +80,14 @@ const FastScrollbar = ({
   const dragging = useSharedValue(false);
   const dragY = useSharedValue(0);
   const startY = useSharedValue(0);
-  const lastIndex = useSharedValue(-1);
+  const lastProgress = useSharedValue(-1);
+  // After a drag the thumb stays where the finger left it until the list's
+  // scroll events catch up with the final scrub, then any residual gap is
+  // animated away. Without this it snaps back to the stale scroll position
+  // for a frame or two after release.
+  const settling = useSharedValue(false);
+  const settleOffset = useSharedValue(-1);
+  const correction = useSharedValue(0);
   const [interactive, setInteractive] = useState(false);
 
   useEffect(() => {
@@ -78,16 +95,81 @@ const FastScrollbar = ({
     loaded.set(loadedCount);
   }, [itemCount, loadedCount, total, loaded]);
 
-  const [controller] = useState(
-    () => new ScrubController({ onScrub, onScrubEnd }),
+  const scrollThumbY = useCallback(() => {
+    'worklet';
+    const length = getThumbLength(
+      trackHeight.get(),
+      contentLength.get(),
+      viewportLength.get(),
+      loaded.get(),
+      total.get(),
+      MIN_THUMB_LENGTH,
+    );
+    const range = Math.max(0, trackHeight.get() - length);
+    return (
+      getScrollProgress(
+        scrollOffset.get(),
+        contentLength.get(),
+        viewportLength.get(),
+        loaded.get(),
+        total.get(),
+      ) * range
+    );
+  }, [contentLength, loaded, scrollOffset, total, trackHeight, viewportLength]);
+
+  const endSettle = useCallback(() => {
+    'worklet';
+    if (!settling.get() || dragging.get()) {
+      return;
+    }
+    correction.set(dragY.get() - scrollThumbY());
+    correction.set(
+      withTiming(0, {
+        duration: SETTLE_CORRECTION_MS,
+        easing: Easing.out(Easing.cubic),
+      }),
+    );
+    settling.set(false);
+    settleOffset.set(-1);
+  }, [correction, dragY, dragging, scrollThumbY, settleOffset, settling]);
+
+  const settleAt = useCallback(
+    (offset: number) => {
+      'worklet';
+      if (!settling.get() || dragging.get()) {
+        return;
+      }
+      settleOffset.set(offset);
+      if (Math.abs(scrollOffset.get() - offset) <= SETTLE_TOLERANCE) {
+        endSettle();
+      }
+    },
+    [dragging, endSettle, scrollOffset, settleOffset, settling],
   );
+
+  const [controller] = useState(() => new ScrubController(INITIAL_TARGET));
   useEffect(() => {
-    controller.setHandlers({ onScrub, onScrubEnd });
-  }, [controller, onScrub, onScrubEnd]);
+    controller.setTarget({
+      getList: () => listRef.current,
+      itemCount,
+      loadedCount,
+      onRequestItems,
+      onSettleTarget: offset => runOnUI(settleAt)(offset),
+      onSettleTimeout: () => runOnUI(endSettle)(),
+    });
+  }, [
+    controller,
+    endSettle,
+    itemCount,
+    listRef,
+    loadedCount,
+    onRequestItems,
+    settleAt,
+  ]);
   useEffect(() => () => controller.dispose(), [controller]);
 
   // Worklets must capture plain functions, not the class instance.
-  const { schedule, release } = controller;
+  const { begin, schedule, release } = controller;
 
   const thumbLength = useDerivedValue(() =>
     getThumbLength(
@@ -101,19 +183,10 @@ const FastScrollbar = ({
   );
 
   const thumbY = useDerivedValue(() => {
-    if (dragging.get()) {
+    if (dragging.get() || settling.get()) {
       return dragY.get();
     }
-    const range = Math.max(0, trackHeight.get() - thumbLength.get());
-    return (
-      getScrollProgress(
-        scrollOffset.get(),
-        contentLength.get(),
-        viewportLength.get(),
-        loaded.get(),
-        total.get(),
-      ) * range
-    );
+    return scrollThumbY() + correction.get();
   });
 
   // FastScroller.show() + resetHideDelay(): fade in (500ms from the current
@@ -150,6 +223,13 @@ const FastScrollbar = ({
       if (previous === null || current === previous || dragging.get()) {
         return;
       }
+      if (settling.get()) {
+        const target = settleOffset.get();
+        if (target >= 0 && Math.abs(current - target) <= SETTLE_TOLERANCE) {
+          endSettle();
+        }
+        return;
+      }
       const scrollable =
         contentLength.get() > viewportLength.get() &&
         trackHeight.get() >= MINIMUM_RANGE &&
@@ -159,6 +239,16 @@ const FastScrollbar = ({
       } else if (opacity.get() > 0) {
         opacity.set(0);
         fadeInEndsAt.set(0);
+      }
+    },
+  );
+
+  // The user grabbed the list itself; stop holding the thumb in place.
+  useAnimatedReaction(
+    () => userDragCount.get(),
+    (current, previous) => {
+      if (previous !== null && current !== previous) {
+        endSettle();
       }
     },
   );
@@ -182,9 +272,13 @@ const FastScrollbar = ({
           const y = thumbY.get();
           startY.set(y);
           dragY.set(y);
+          correction.set(0);
           dragging.set(true);
-          lastIndex.set(-1);
+          settling.set(true);
+          settleOffset.set(-1);
+          lastProgress.set(-1);
           show(null);
+          runOnJS(begin)();
         })
         .onUpdate(event => {
           const range = Math.max(1, trackHeight.get() - thumbLength.get());
@@ -192,12 +286,13 @@ const FastScrollbar = ({
             Math.max(startY.get() + event.translationY, 0),
             range,
           );
-          dragY.set(y);
-          const index = progressToIndex(y / range, total.get());
-          if (index >= 0 && index !== lastIndex.get()) {
-            lastIndex.set(index);
-            runOnJS(schedule)(index);
+          if (y === dragY.get()) {
+            return;
           }
+          dragY.set(y);
+          const progress = y / range;
+          lastProgress.set(progress);
+          runOnJS(schedule)(progress);
         })
         .onFinalize(() => {
           if (!dragging.get()) {
@@ -205,19 +300,22 @@ const FastScrollbar = ({
           }
           dragging.set(false);
           show(HIDE_DELAY_AFTER_DRAGGING_MS);
-          runOnJS(release)(lastIndex.get());
+          runOnJS(release)(lastProgress.get());
         }),
     [
+      begin,
+      correction,
       dragY,
       dragging,
-      lastIndex,
+      lastProgress,
       release,
       schedule,
+      settleOffset,
+      settling,
       show,
       startY,
       thumbLength,
       thumbY,
-      total,
       trackHeight,
     ],
   );

@@ -312,9 +312,6 @@ export const PluginsTab = memo(
 
     const listRef = useRef<LegendListRef>(null);
     const fastScrollMetrics = useFastScrollMetrics();
-    const onFastScrub = useCallback((index: number) => {
-      listRef.current?.scrollToIndex({ index, animated: false });
-    }, []);
 
     const refresh = useCallback(async () => {
       setRefreshing(true);
@@ -374,11 +371,12 @@ export const PluginsTab = memo(
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           onScroll={fastScrollMetrics.onScroll}
+          onScrollBeginDrag={fastScrollMetrics.onScrollBeginDrag}
         />
         <FastScrollbar
           metrics={fastScrollMetrics}
+          listRef={listRef}
           itemCount={entries.length}
-          onScrub={onFastScrub}
         />
       </View>
     );

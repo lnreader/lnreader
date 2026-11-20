@@ -1,7 +1,7 @@
 import * as React from 'react';
 import ChapterItem from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -168,41 +168,11 @@ const NovelScreenList = ({
     batchInformation.totalChapters ?? 0,
     chapters.length,
   );
-  const pendingScrubIndex = useRef<number | null>(null);
 
-  const scrollToChapterIndex = useCallback(
-    (index: number) => {
-      if (index === 0) {
-        // Offset 0 rather than index 0 so the novel info header is revealed.
-        listRef.current?.scrollToOffset({ offset: 0, animated: false });
-      } else {
-        listRef.current?.scrollToIndex({ index, animated: false });
-      }
-    },
-    [listRef],
+  const loadChaptersUpTo = useCallback(
+    (index: number) => loadUpToBatch(Math.floor(index / CHAPTER_BATCH_SIZE)),
+    [loadUpToBatch],
   );
-
-  const onFastScrub = useCallback(
-    (index: number) => {
-      if (index < chapters.length) {
-        pendingScrubIndex.current = null;
-        scrollToChapterIndex(index);
-        return;
-      }
-      pendingScrubIndex.current = index;
-      loadUpToBatch(Math.floor(index / CHAPTER_BATCH_SIZE));
-    },
-    [chapters.length, loadUpToBatch, scrollToChapterIndex],
-  );
-
-  useEffect(() => {
-    const index = pendingScrubIndex.current;
-    if (index !== null && index < chapters.length) {
-      pendingScrubIndex.current = null;
-      // Wait a frame so the list has received the newly appended batch.
-      requestAnimationFrame(() => scrollToChapterIndex(index));
-    }
-  }, [chapters.length, scrollToChapterIndex]);
 
   // --- Stable callbacks ---
 
@@ -462,6 +432,7 @@ const NovelScreenList = ({
         onEndReached={getNextChapterBatch}
         onEndReachedThreshold={6}
         onScroll={fastScrollMetrics.onScroll}
+        onScrollBeginDrag={fastScrollMetrics.onScrollBeginDrag}
         //drawDistance={1000}
         ListHeaderComponent={listHeader}
       />
@@ -469,9 +440,10 @@ const NovelScreenList = ({
         <>
           <FastScrollbar
             metrics={fastScrollMetrics}
+            listRef={listRef}
             itemCount={totalChapters}
             loadedCount={chapters.length}
-            onScrub={onFastScrub}
+            onRequestItems={loadChaptersUpTo}
             topInset={topInset + 56}
             bottomInset={bottomInset + 16}
           />

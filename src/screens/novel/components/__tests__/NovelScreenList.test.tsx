@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import NovelScreenList from '../NovelScreenList';
 
 const mockUseNovelValue = jest.fn();
@@ -515,46 +509,19 @@ describe('NovelScreenList fast scroll', () => {
     expect(mockFastScrollbarProps.loadedCount).toBe(3);
   });
 
-  it('scrolls to loaded chapters and reveals the header at the top', () => {
-    const store = createStore({
-      chapters: makeChapters(3),
-      batchInformation: { batch: 0, total: 0, totalChapters: 3 },
-    });
-    const { ref, loadUpToBatch } = renderWithStore(store);
-
-    act(() => mockFastScrollbarProps.onScrub(2));
-    expect(ref.current.scrollToIndex).toHaveBeenCalledWith({
-      index: 2,
-      animated: false,
-    });
-
-    act(() => mockFastScrollbarProps.onScrub(0));
-    expect(ref.current.scrollToOffset).toHaveBeenCalledWith({
-      offset: 0,
-      animated: false,
-    });
-    expect(loadUpToBatch).not.toHaveBeenCalled();
-  });
-
-  it('loads the target batch when scrubbing past loaded chapters, then scrolls there', async () => {
+  it('drives the chapter list and loads the batch for unloaded chapters', () => {
     const store = createStore({
       chapters: makeChapters(2),
       batchInformation: { batch: 0, total: 2, totalChapters: 2500 },
     });
-    const { ref, loadUpToBatch, rerender } = renderWithStore(store);
+    const { ref, loadUpToBatch } = renderWithStore(store);
 
-    act(() => mockFastScrollbarProps.onScrub(1001));
+    expect(mockFastScrollbarProps.listRef).toBe(ref);
+
+    act(() => mockFastScrollbarProps.onRequestItems(1001));
     expect(loadUpToBatch).toHaveBeenCalledWith(1);
-    expect(ref.current.scrollToIndex).not.toHaveBeenCalled();
 
-    store.state.chapters = makeChapters(1002);
-    rerender();
-
-    await waitFor(() =>
-      expect(ref.current.scrollToIndex).toHaveBeenCalledWith({
-        index: 1001,
-        animated: false,
-      }),
-    );
+    act(() => mockFastScrollbarProps.onRequestItems(2499));
+    expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
   });
 });

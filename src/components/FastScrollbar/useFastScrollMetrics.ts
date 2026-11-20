@@ -6,13 +6,17 @@ export interface FastScrollMetrics {
   scrollOffset: SharedValue<number>;
   contentLength: SharedValue<number>;
   viewportLength: SharedValue<number>;
+  /** Incremented whenever the user starts dragging the list itself. */
+  userDragCount: SharedValue<number>;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onScrollBeginDrag: () => void;
 }
 
 export const useFastScrollMetrics = (): FastScrollMetrics => {
   const scrollOffset = useSharedValue(0);
   const contentLength = useSharedValue(0);
   const viewportLength = useSharedValue(0);
+  const userDragCount = useSharedValue(0);
 
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -29,8 +33,26 @@ export const useFastScrollMetrics = (): FastScrollMetrics => {
     [scrollOffset, contentLength, viewportLength],
   );
 
+  const onScrollBeginDrag = useCallback(() => {
+    userDragCount.set(userDragCount.get() + 1);
+  }, [userDragCount]);
+
   return useMemo(
-    () => ({ scrollOffset, contentLength, viewportLength, onScroll }),
-    [scrollOffset, contentLength, viewportLength, onScroll],
+    () => ({
+      scrollOffset,
+      contentLength,
+      viewportLength,
+      userDragCount,
+      onScroll,
+      onScrollBeginDrag,
+    }),
+    [
+      scrollOffset,
+      contentLength,
+      viewportLength,
+      userDragCount,
+      onScroll,
+      onScrollBeginDrag,
+    ],
   );
 };
