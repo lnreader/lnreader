@@ -61,27 +61,31 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0 }),
 }));
 
-jest.mock('@legendapp/list/react-native', () => {
+const mockLegendList = ({ data, renderItem, ListHeaderComponent }: any) => {
   const React = require('react');
   const { View } = require('react-native');
-
-  return {
-    LegendList: ({ data, renderItem, ListHeaderComponent }: any) =>
+  return React.createElement(
+    View,
+    null,
+    ListHeaderComponent,
+    ...(data || []).map((item: any, index: number) =>
       React.createElement(
-        View,
-        null,
-        ListHeaderComponent,
-        ...(data || []).map((item: any, index: number) =>
-          React.createElement(
-            React.Fragment,
-            { key: `row-${item.id ?? index}` },
-            renderItem({ item, index }),
-          ),
-        ),
+        React.Fragment,
+        { key: `row-${item.id ?? index}` },
+        renderItem({ item, index }),
       ),
-    LegendListRef: {},
-  };
-});
+    ),
+  );
+};
+
+jest.mock('@legendapp/list/react-native', () => ({
+  LegendList: (props: any) => mockLegendList(props),
+  LegendListRef: {},
+}));
+
+jest.mock('@legendapp/list/reanimated', () => ({
+  AnimatedLegendList: (props: any) => mockLegendList(props),
+}));
 
 jest.mock('../ChapterItem', () => {
   const React = require('react');

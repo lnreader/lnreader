@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -7,11 +7,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
-  LegendList,
-  LegendListRef,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
+import type { LegendListRenderItemProps } from '@legendapp/list/react-native';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
 
 import { Button, EmptyView, IconButtonV2 } from '@components';
 import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
@@ -310,7 +307,6 @@ export const PluginsTab = memo(
       ],
     );
 
-    const listRef = useRef<LegendListRef>(null);
     const fastScrollMetrics = useFastScrollMetrics();
 
     const refresh = useCallback(async () => {
@@ -326,8 +322,7 @@ export const PluginsTab = memo(
 
     return (
       <View style={styles.listContainer}>
-        <LegendList
-          ref={listRef}
+        <AnimatedLegendList
           data={entries}
           estimatedItemSize={64}
           getItemType={item => item.type}
@@ -370,14 +365,9 @@ export const PluginsTab = memo(
           }
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
-          onScroll={fastScrollMetrics.onScroll}
-          onScrollBeginDrag={fastScrollMetrics.onScrollBeginDrag}
+          {...fastScrollMetrics.listProps}
         />
-        <FastScrollbar
-          metrics={fastScrollMetrics}
-          listRef={listRef}
-          itemCount={entries.length}
-        />
+        <FastScrollbar metrics={fastScrollMetrics} itemCount={entries.length} />
       </View>
     );
   },

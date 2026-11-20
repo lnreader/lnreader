@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ChapterItem from './ChapterItem';
+import ChapterItem, { CHAPTER_ITEM_HEIGHT } from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
@@ -18,7 +18,8 @@ import PageNavigationBottomSheet from './PageNavigationBottomSheet';
 import * as Haptics from 'expo-haptics';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList, LegendListRef } from '@legendapp/list/react-native';
+import type { LegendListRef } from '@legendapp/list/react-native';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
 import PagePaginationControl from './PagePaginationControl';
 import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
@@ -50,6 +51,9 @@ type NovelScreenListProps = {
 };
 
 const chapterKeyExtractor = (item: ChapterInfo) => 'c' + item.id;
+// Exact sizes let rows mount at their final position after a fast scroll jump
+// instead of being measured and shifted.
+const getChapterItemSize = () => CHAPTER_ITEM_HEIGHT;
 
 const NovelScreenList = ({
   headerOpacity,
@@ -417,7 +421,7 @@ const NovelScreenList = ({
 
   return (
     <>
-      <LegendList
+      <AnimatedLegendList
         ref={listRef}
         estimatedItemSize={64}
         data={chapters}
@@ -431,8 +435,8 @@ const NovelScreenList = ({
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}
         onEndReachedThreshold={6}
-        onScroll={fastScrollMetrics.onScroll}
-        onScrollBeginDrag={fastScrollMetrics.onScrollBeginDrag}
+        getFixedItemSize={getChapterItemSize}
+        {...fastScrollMetrics.listProps}
         //drawDistance={1000}
         ListHeaderComponent={listHeader}
       />

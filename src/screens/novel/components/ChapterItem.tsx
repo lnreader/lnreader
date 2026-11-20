@@ -209,11 +209,14 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 
 export default memo(ChapterItem);
 
+/** Every chapter row is exactly this tall; lists use it as a fixed item size. */
+export const CHAPTER_ITEM_HEIGHT = 64;
+
 const styles = StyleSheet.create({
   chapterCardContainer: {
     alignItems: 'center',
     flexDirection: 'row',
-    height: 64,
+    height: CHAPTER_ITEM_HEIGHT,
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 8,
