@@ -1,11 +1,6 @@
-import * as Haptics from 'expo-haptics';
-
 export interface ScrubHandlers {
   onScrub: (index: number) => void;
   onScrubEnd?: (index: number) => void;
-  getLabel?: (index: number) => string | undefined;
-  setLabel?: (text: string | undefined) => void;
-  hapticFeedback?: boolean;
 }
 
 /**
@@ -27,15 +22,6 @@ export class ScrubController {
   setHandlers(handlers: ScrubHandlers) {
     this.handlers = handlers;
   }
-
-  grab = (index: number) => {
-    if (this.handlers.hapticFeedback) {
-      Haptics.selectionAsync();
-    }
-    if (index >= 0) {
-      this.updateLabel(index);
-    }
-  };
 
   schedule = (index: number) => {
     this.pendingIndex = index;
@@ -65,14 +51,8 @@ export class ScrubController {
   private flush = () => {
     this.frame = null;
     const index = this.pendingIndex;
-    if (index < 0) {
-      return;
+    if (index >= 0) {
+      this.handlers.onScrub(index);
     }
-    this.handlers.onScrub(index);
-    this.updateLabel(index);
   };
-
-  private updateLabel(index: number) {
-    this.handlers.setLabel?.(this.handlers.getLabel?.(index));
-  }
 }

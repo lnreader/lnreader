@@ -204,22 +204,6 @@ const NovelScreenList = ({
     }
   }, [chapters.length, scrollToChapterIndex]);
 
-  const getChapterLabel = useCallback(
-    (index: number) => {
-      const chapter = chapters[index];
-      if (!chapter) {
-        return `#${index + 1}`;
-      }
-      if (showChapterTitles || chapter.chapterNumber == null) {
-        return chapter.name;
-      }
-      return getString('novelScreen.chapterChapnum', {
-        num: chapter.chapterNumber,
-      });
-    },
-    [chapters, showChapterTitles],
-  );
-
   // --- Stable callbacks ---
 
   const navigateToChapter = useCallback(
@@ -488,10 +472,8 @@ const NovelScreenList = ({
             itemCount={totalChapters}
             loadedCount={chapters.length}
             onScrub={onFastScrub}
-            getLabel={getChapterLabel}
             topInset={topInset + 56}
             bottomInset={bottomInset + 16}
-            hapticFeedback={!disableHapticFeedback}
           />
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}

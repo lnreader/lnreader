@@ -1,6 +1,6 @@
 import {
   getScrollProgress,
-  isFastScrollUseful,
+  getThumbLength,
   progressToIndex,
 } from '../fastScrollMath';
 
@@ -41,19 +41,28 @@ describe('fastScrollMath', () => {
     });
   });
 
-  describe('isFastScrollUseful', () => {
-    it('requires the estimated content to span several screens', () => {
-      expect(isFastScrollUseful(3000, 1000, 50, 50, 4)).toBe(false);
-      expect(isFastScrollUseful(4000, 1000, 50, 50, 4)).toBe(true);
+  describe('getThumbLength', () => {
+    it('is proportional to the visible fraction of the content', () => {
+      // 1000px track, viewport shows a quarter of the content.
+      expect(getThumbLength(1000, 4000, 1000, 100, 100, 48)).toBe(250);
+    });
+
+    it('never exceeds the track', () => {
+      expect(getThumbLength(1000, 1000, 1000, 10, 10, 48)).toBe(1000);
+    });
+
+    it('applies the minimum length on very long lists', () => {
+      expect(getThumbLength(1000, 320000, 1000, 5000, 5000, 48)).toBe(48);
     });
 
     it('extrapolates content length from the loaded fraction', () => {
-      expect(isFastScrollUseful(2000, 1000, 1000, 2000, 4)).toBe(true);
+      // 1 of 4 batches loaded: full content is ~4x what is measured.
+      expect(getThumbLength(1000, 2000, 1000, 1000, 4000, 48)).toBe(125);
     });
 
-    it('is disabled before layout or without data', () => {
-      expect(isFastScrollUseful(4000, 0, 50, 50, 4)).toBe(false);
-      expect(isFastScrollUseful(4000, 1000, 0, 0, 4)).toBe(false);
+    it('handles an unmeasured list', () => {
+      expect(getThumbLength(0, 0, 0, 0, 0, 48)).toBe(0);
+      expect(getThumbLength(500, 0, 0, 0, 0, 48)).toBe(48);
     });
   });
 });

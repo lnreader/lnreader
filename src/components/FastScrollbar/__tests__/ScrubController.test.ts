@@ -1,7 +1,4 @@
-import * as Haptics from 'expo-haptics';
 import { ScrubController } from '../ScrubController';
-
-jest.mock('expo-haptics', () => ({ selectionAsync: jest.fn() }));
 
 describe('ScrubController', () => {
   let frames: FrameRequestCallback[];
@@ -29,12 +26,7 @@ describe('ScrubController', () => {
 
   it('coalesces scrubs to one per frame using the newest index', () => {
     const onScrub = jest.fn();
-    const setLabel = jest.fn();
-    const controller = new ScrubController({
-      onScrub,
-      setLabel,
-      getLabel: index => `Chapter ${index}`,
-    });
+    const controller = new ScrubController({ onScrub });
 
     controller.schedule(10);
     controller.schedule(20);
@@ -44,7 +36,6 @@ describe('ScrubController', () => {
     runFrame();
     expect(onScrub).toHaveBeenCalledTimes(1);
     expect(onScrub).toHaveBeenCalledWith(30);
-    expect(setLabel).toHaveBeenLastCalledWith('Chapter 30');
 
     controller.schedule(40);
     runFrame();
@@ -75,16 +66,6 @@ describe('ScrubController', () => {
 
     expect(onScrub).not.toHaveBeenCalled();
     expect(onScrubEnd).not.toHaveBeenCalled();
-  });
-
-  it('only fires haptics on grab when enabled', () => {
-    const controller = new ScrubController({ onScrub: jest.fn() });
-    controller.grab(0);
-    expect(Haptics.selectionAsync).not.toHaveBeenCalled();
-
-    controller.setHandlers({ onScrub: jest.fn(), hapticFeedback: true });
-    controller.grab(0);
-    expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
   });
 
   it('uses the latest handlers after they change', () => {

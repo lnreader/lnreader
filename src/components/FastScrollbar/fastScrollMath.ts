@@ -34,17 +34,26 @@ export const progressToIndex = (progress: number, totalCount: number) => {
   return Math.round(clamp01(progress) * (totalCount - 1));
 };
 
-export const isFastScrollUseful = (
+/**
+ * RecyclerView's `min(track, track * viewport / content)`, using the content
+ * length extrapolated to all items, with a floor so the thumb stays grabbable.
+ */
+export const getThumbLength = (
+  trackLength: number,
   contentLength: number,
   viewportLength: number,
   loadedCount: number,
   totalCount: number,
-  minScreens: number,
+  minLength: number,
 ) => {
   'worklet';
-  if (viewportLength <= 0 || loadedCount <= 0 || totalCount <= 0) {
-    return false;
+  if (trackLength <= 0 || contentLength <= 0 || loadedCount <= 0) {
+    return Math.min(trackLength, minLength);
   }
-  const estimatedLength = contentLength * (totalCount / loadedCount);
-  return estimatedLength >= viewportLength * minScreens;
+  const estimatedContent =
+    loadedCount >= totalCount
+      ? contentLength
+      : contentLength * (totalCount / loadedCount);
+  const proportional = (trackLength * viewportLength) / estimatedContent;
+  return Math.min(trackLength, Math.max(minLength, proportional));
 };

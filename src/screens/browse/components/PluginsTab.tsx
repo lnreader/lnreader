@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import {
   LegendList,
+  LegendListRef,
   LegendListRenderItemProps,
 } from '@legendapp/list/react-native';
 
 import { Button, EmptyView, IconButtonV2 } from '@components';
+import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
 import {
   useFilteredAvailablePlugins,
   useInstalledPlugins,
@@ -308,6 +310,12 @@ export const PluginsTab = memo(
       ],
     );
 
+    const listRef = useRef<LegendListRef>(null);
+    const fastScrollMetrics = useFastScrollMetrics();
+    const onFastScrub = useCallback((index: number) => {
+      listRef.current?.scrollToIndex({ index, animated: false });
+    }, []);
+
     const refresh = useCallback(async () => {
       setRefreshing(true);
       try {
@@ -320,50 +328,59 @@ export const PluginsTab = memo(
     }, [refreshPlugins]);
 
     return (
-      <LegendList
-        data={entries}
-        estimatedItemSize={64}
-        getItemType={item => item.type}
-        keyExtractor={item => item.key}
-        ListEmptyComponent={
-          <EmptyView
-            description={
-              searchText.trim()
-                ? getString('browseScreen.noSearchResults')
-                : getString('browseScreen.noPlugins')
-            }
-            actions={
-              searchText.trim()
-                ? undefined
-                : [
-                    {
-                      iconName: 'source-repository',
-                      onPress: openRepositories,
-                      title: getString('browseScreen.repositories'),
-                    },
-                    {
-                      iconName: 'tune',
-                      onPress: openBrowseSettings,
-                      title: getString('browseSettings'),
-                    },
-                  ]
-            }
-            theme={theme}
-          />
-        }
-        contentContainerStyle={!entries.length ? styles.emptyList : undefined}
-        recycleItems
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[theme.onPrimary]}
-            progressBackgroundColor={theme.primary}
-          />
-        }
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.listContainer}>
+        <LegendList
+          ref={listRef}
+          data={entries}
+          estimatedItemSize={64}
+          getItemType={item => item.type}
+          keyExtractor={item => item.key}
+          ListEmptyComponent={
+            <EmptyView
+              description={
+                searchText.trim()
+                  ? getString('browseScreen.noSearchResults')
+                  : getString('browseScreen.noPlugins')
+              }
+              actions={
+                searchText.trim()
+                  ? undefined
+                  : [
+                      {
+                        iconName: 'source-repository',
+                        onPress: openRepositories,
+                        title: getString('browseScreen.repositories'),
+                      },
+                      {
+                        iconName: 'tune',
+                        onPress: openBrowseSettings,
+                        title: getString('browseSettings'),
+                      },
+                    ]
+              }
+              theme={theme}
+            />
+          }
+          contentContainerStyle={!entries.length ? styles.emptyList : undefined}
+          recycleItems
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={[theme.onPrimary]}
+              progressBackgroundColor={theme.primary}
+            />
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          onScroll={fastScrollMetrics.onScroll}
+        />
+        <FastScrollbar
+          metrics={fastScrollMetrics}
+          itemCount={entries.length}
+          onScrub={onFastScrub}
+        />
+      </View>
     );
   },
 );
@@ -375,6 +392,9 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flexGrow: 1,
+  },
+  listContainer: {
+    flex: 1,
   },
   details: {
     flex: 1,

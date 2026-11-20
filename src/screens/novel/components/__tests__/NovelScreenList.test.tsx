@@ -557,17 +557,4 @@ describe('NovelScreenList fast scroll', () => {
       }),
     );
   });
-
-  it('labels chapters the same way chapter rows do', () => {
-    const store = createStore({ chapters: makeChapters(2) });
-    renderWithStore(store);
-    expect(mockFastScrollbarProps.getLabel(0)).toBe(
-      'novelScreen.chapterChapnum',
-    );
-    expect(mockFastScrollbarProps.getLabel(500)).toBe('#501');
-
-    store.state.novelSettings = { filter: [], showChapterTitles: true };
-    renderWithStore(store);
-    expect(mockFastScrollbarProps.getLabel(1)).toBe('Chapter title 2');
-  });
 });
