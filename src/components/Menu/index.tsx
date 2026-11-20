@@ -43,6 +43,10 @@ interface MenuItemProps {
   titleStyle?: StyleProp<TextStyle>;
 }
 
+// Everything that subscribes to window, inset or theme changes lives in the
+// popup, which only mounts while the menu is open. Closed menus sit in list
+// rows (e.g. every downloaded chapter), so they should cost no more than the
+// anchor itself.
 const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   visible,
   onDismiss,
@@ -51,10 +55,42 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   children,
   fullWidth,
 }) => {
+  const anchorRef = useRef<View>(null);
+
+  return (
+    <>
+      <View ref={anchorRef} collapsable={false}>
+        {anchor}
+      </View>
+
+      {visible && (
+        <MenuPopup
+          anchorRef={anchorRef}
+          onDismiss={onDismiss}
+          contentStyle={contentStyle}
+          fullWidth={fullWidth}
+        >
+          {children}
+        </MenuPopup>
+      )}
+    </>
+  );
+};
+
+interface MenuPopupProps extends Omit<MenuProps, 'visible' | 'anchor'> {
+  anchorRef: React.RefObject<View | null>;
+}
+
+const MenuPopup = ({
+  anchorRef,
+  onDismiss,
+  contentStyle,
+  children,
+  fullWidth,
+}: MenuPopupProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const anchorRef = useRef<View>(null);
 
   const [menuLayout, setMenuLayout] = useState<LayoutRectangle | null>(null);
   const [anchorLayout, setAnchorLayout] = useState<LayoutRectangle>({
@@ -68,13 +104,11 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
     anchorRef.current?.measureInWindow((x, y, width, height) => {
       setAnchorLayout({ x, y, width, height });
     });
-  }, []);
+  }, [anchorRef]);
 
   useLayoutEffect(() => {
-    if (visible) {
-      measureAnchor();
-    }
-  }, [measureAnchor, screenHeight, screenWidth, visible]);
+    measureAnchor();
+  }, [measureAnchor, screenHeight, screenWidth]);
 
   const menuPosition = useMemo(() => {
     if (!menuLayout) return { opacity: 0 };
@@ -110,64 +144,52 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   ]);
 
   return (
-    <>
-      <View ref={anchorRef} collapsable={false}>
-        {anchor}
-      </View>
-
-      {visible && (
-        <NativeModal
-          animationType="none"
-          hardwareAccelerated
-          navigationBarTranslucent
-          onRequestClose={onDismiss}
-          onShow={measureAnchor}
-          presentationStyle="overFullScreen"
-          statusBarTranslucent
-          transparent
-          visible
+    <NativeModal
+      animationType="none"
+      hardwareAccelerated
+      navigationBarTranslucent
+      onRequestClose={onDismiss}
+      onShow={measureAnchor}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
+      transparent
+      visible
+    >
+      <View style={styles.modal}>
+        <Pressable
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          onPress={onDismiss}
+          style={StyleSheet.absoluteFill}
+          testID="menu-backdrop"
+        />
+        <Animated.View
+          accessibilityRole="menu"
+          accessibilityViewIsModal
+          entering={menuLayout ? FadeIn.duration(ENTER_DURATION) : undefined}
+          exiting={menuLayout ? FadeOut.duration(EXIT_DURATION) : undefined}
+          key={menuLayout ? 'ready' : 'measuring'}
+          onLayout={event => setMenuLayout(event.nativeEvent.layout)}
+          style={[
+            styles.menuContainer,
+            {
+              backgroundColor:
+                theme.surfaceContainerLow ?? theme.surface2 ?? theme.surface,
+            },
+            contentStyle,
+            menuPosition,
+          ]}
+          testID="menu"
         >
-          <View style={styles.modal}>
-            <Pressable
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              onPress={onDismiss}
-              style={StyleSheet.absoluteFill}
-              testID="menu-backdrop"
-            />
-            <Animated.View
-              accessibilityRole="menu"
-              accessibilityViewIsModal
-              entering={
-                menuLayout ? FadeIn.duration(ENTER_DURATION) : undefined
-              }
-              exiting={menuLayout ? FadeOut.duration(EXIT_DURATION) : undefined}
-              key={menuLayout ? 'ready' : 'measuring'}
-              onLayout={event => setMenuLayout(event.nativeEvent.layout)}
-              style={[
-                styles.menuContainer,
-                {
-                  backgroundColor:
-                    theme.surfaceContainerLow ??
-                    theme.surface2 ??
-                    theme.surface,
-                },
-                contentStyle,
-                menuPosition,
-              ]}
-              testID="menu"
-            >
-              <ScrollView
-                contentContainerStyle={styles.menuContent}
-                style={{ maxHeight: screenHeight * MAX_MENU_HEIGHT_RATIO }}
-              >
-                {children}
-              </ScrollView>
-            </Animated.View>
-          </View>
-        </NativeModal>
-      )}
-    </>
+          <ScrollView
+            contentContainerStyle={styles.menuContent}
+            style={{ maxHeight: screenHeight * MAX_MENU_HEIGHT_RATIO }}
+          >
+            {children}
+          </ScrollView>
+        </Animated.View>
+      </View>
+    </NativeModal>
   );
 };
 

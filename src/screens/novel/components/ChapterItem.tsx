@@ -103,11 +103,13 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     color: theme.outline,
     marginStart: chapter.releaseTime || chapter.scanlator ? 5 : 0,
   } as const;
-  function parseTime(time?: string | Date | null) {
-    if (!time) return undefined;
-    return formatDate(time, dateFormat, relativeTimestamps);
-  }
-  const parsedTime = parseTime(releaseTime);
+  const parsedTime = useMemo(
+    () =>
+      releaseTime
+        ? formatDate(releaseTime, dateFormat, relativeTimestamps)
+        : undefined,
+    [releaseTime, dateFormat, relativeTimestamps],
+  );
 
   return (
     <View key={'chapterItem' + id}>

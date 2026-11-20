@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { type LayoutChangeEvent, PixelRatio, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
@@ -12,7 +12,6 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
   withDelay,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
@@ -91,11 +90,16 @@ const FastScrollbar = ({
   const trackHeight = useSharedValue(0);
   const opacity = useSharedValue(0);
   const fadeInEndsAt = useSharedValue(0);
+  // When the fade-out should start; -1 while dragging (no pending hide).
+  const hideAt = useSharedValue(-1);
+  const hideTimer = useSharedValue(0);
+  const hideTimerArmed = useSharedValue(false);
   const dragging = useSharedValue(false);
   const dragY = useSharedValue(0);
   const startY = useSharedValue(0);
   const lastScrolledOffset = useSharedValue(-1);
   const awaitingItems = useSharedValue(false);
+  const lastRequestedIndex = useSharedValue(-1);
   // After a drag the thumb stays where the finger left it until the list
   // reports the final offset, then any residual gap is animated away.
   const settling = useSharedValue(false);
@@ -103,23 +107,27 @@ const FastScrollbar = ({
   const settleTimer = useSharedValue(0);
   const correction = useSharedValue(0);
   const [interactive, setInteractive] = useState(false);
+  const pixelRatio = PixelRatio.get();
 
   useEffect(() => {
     total.set(itemCount);
     loaded.set(loadedCount);
   }, [itemCount, loadedCount, total, loaded]);
 
-  const scrollThumbY = useCallback(() => {
-    'worklet';
-    const length = getThumbLength(
+  const thumbLength = useDerivedValue(() =>
+    getThumbLength(
       trackHeight.get(),
       contentLength.get(),
       viewportLength.get(),
       loaded.get(),
       total.get(),
       MIN_THUMB_LENGTH,
-    );
-    const range = Math.max(0, trackHeight.get() - length);
+    ),
+  );
+
+  const scrollThumbY = useCallback(() => {
+    'worklet';
+    const range = Math.max(0, trackHeight.get() - thumbLength.get());
     return (
       getScrollProgress(
         scrollOffset.get(),
@@ -129,7 +137,15 @@ const FastScrollbar = ({
         total.get(),
       ) * range
     );
-  }, [contentLength, loaded, scrollOffset, total, trackHeight, viewportLength]);
+  }, [
+    contentLength,
+    loaded,
+    scrollOffset,
+    thumbLength,
+    total,
+    trackHeight,
+    viewportLength,
+  ]);
 
   const endSettle = useCallback(() => {
     'worklet';
@@ -203,10 +219,16 @@ const FastScrollbar = ({
   const scrollToOffset = useCallback(
     (offset: number) => {
       'worklet';
-      scrollTo(scrollViewRef, 0, offset, false);
-      lastScrolledOffset.set(offset);
+      // The native view can only land on whole physical pixels; skip pan
+      // updates that would not move it.
+      const snapped = Math.round(offset * pixelRatio) / pixelRatio;
+      if (snapped === lastScrolledOffset.get()) {
+        return;
+      }
+      scrollTo(scrollViewRef, 0, snapped, false);
+      lastScrolledOffset.set(snapped);
     },
-    [lastScrolledOffset, scrollViewRef],
+    [lastScrolledOffset, pixelRatio, scrollViewRef],
   );
 
   const resolvePendingScrub = useCallback(
@@ -241,17 +263,6 @@ const FastScrollbar = ({
   // Worklets must capture plain functions, not the class instance.
   const { request: requestItems, cancel: cancelPending } = pending;
 
-  const thumbLength = useDerivedValue(() =>
-    getThumbLength(
-      trackHeight.get(),
-      contentLength.get(),
-      viewportLength.get(),
-      loaded.get(),
-      total.get(),
-      MIN_THUMB_LENGTH,
-    ),
-  );
-
   const thumbY = useDerivedValue(() => {
     if (dragging.get() || settling.get()) {
       return dragY.get();
@@ -259,32 +270,62 @@ const FastScrollbar = ({
     return scrollThumbY() + correction.get();
   });
 
-  // FastScroller.show() + resetHideDelay(): fade in (500ms from the current
-  // alpha, unless already in or fading in), then fade out `hideDelay` ms after
-  // the most recent call. `null` cancels the pending hide (while dragging).
-  const show = useCallback(
-    (hideDelay: number | null) => {
+  // FastScroller.show(): fade in over 500ms from the current alpha, unless
+  // already visible or fading in.
+  const show = useCallback(() => {
+    'worklet';
+    const now = Date.now();
+    if (fadeInEndsAt.get() > now || opacity.get() >= 1) {
+      return;
+    }
+    fadeInEndsAt.set(now + SHOW_DURATION_MS);
+    opacity.set(withTiming(1, { duration: SHOW_DURATION_MS, easing }));
+  }, [fadeInEndsAt, opacity]);
+
+  // Like FastScroller's delayed hide runnable, but re-armed lazily: scrolling
+  // only moves the deadline, and the timer checks it when it fires. Per-frame
+  // scroll work stays a timestamp write instead of rebuilding the fade
+  // animation on every event.
+  const armHideTimer = useCallback(
+    (delay: number) => {
       'worklet';
-      const now = Date.now();
-      let fadeInMs = 0;
-      if (fadeInEndsAt.get() > now) {
-        fadeInMs = fadeInEndsAt.get() - now;
-      } else if (opacity.get() < 1) {
-        fadeInMs = SHOW_DURATION_MS;
-        fadeInEndsAt.set(now + SHOW_DURATION_MS);
-      }
-      const fadeIn = withTiming(1, { duration: fadeInMs, easing });
-      if (hideDelay === null) {
-        opacity.set(fadeIn);
+      hideTimerArmed.set(true);
+      hideTimer.set(0);
+      hideTimer.set(withDelay(delay, withTiming(1, { duration: 0 })));
+    },
+    [hideTimer, hideTimerArmed],
+  );
+
+  useAnimatedReaction(
+    () => hideTimer.get() === 1,
+    (fired, wasFired) => {
+      if (!fired || wasFired || !hideTimerArmed.get()) {
         return;
       }
-      const fadeOut = withDelay(
-        Math.max(0, hideDelay - fadeInMs),
-        withTiming(0, { duration: HIDE_DURATION_MS, easing }),
-      );
-      opacity.set(fadeInMs > 0 ? withSequence(fadeIn, fadeOut) : fadeOut);
+      const deadline = hideAt.get();
+      const remaining = deadline - Date.now();
+      if (deadline < 0) {
+        hideTimerArmed.set(false);
+      } else if (remaining > 16) {
+        armHideTimer(remaining);
+      } else {
+        hideTimerArmed.set(false);
+        hideAt.set(-1);
+        fadeInEndsAt.set(0);
+        opacity.set(withTiming(0, { duration: HIDE_DURATION_MS, easing }));
+      }
     },
-    [fadeInEndsAt, opacity],
+  );
+
+  const scheduleHide = useCallback(
+    (delay: number) => {
+      'worklet';
+      hideAt.set(Date.now() + delay);
+      if (!hideTimerArmed.get()) {
+        armHideTimer(delay);
+      }
+    },
+    [armHideTimer, hideAt, hideTimerArmed],
   );
 
   useAnimatedReaction(
@@ -305,8 +346,10 @@ const FastScrollbar = ({
         trackHeight.get() >= MINIMUM_RANGE &&
         total.get() > 0;
       if (scrollable) {
-        show(HIDE_DELAY_AFTER_VISIBLE_MS);
+        show();
+        scheduleHide(HIDE_DELAY_AFTER_VISIBLE_MS);
       } else if (opacity.get() > 0) {
+        hideAt.set(-1);
         opacity.set(0);
         fadeInEndsAt.set(0);
       }
@@ -351,7 +394,9 @@ const FastScrollbar = ({
           settling.set(true);
           settleOffset.set(-1);
           lastScrolledOffset.set(-1);
-          show(null);
+          lastRequestedIndex.set(-1);
+          hideAt.set(-1);
+          show();
         })
         .onUpdate(event => {
           const range = Math.max(1, trackHeight.get() - thumbLength.get());
@@ -373,6 +418,7 @@ const FastScrollbar = ({
           if (loadedProgress <= 1) {
             if (awaitingItems.get()) {
               awaitingItems.set(false);
+              lastRequestedIndex.set(-1);
               runOnJS(cancelPending)();
             }
             // Scrolling the native view straight from the gesture keeps the
@@ -384,10 +430,14 @@ const FastScrollbar = ({
             );
           } else {
             awaitingItems.set(true);
-            runOnJS(requestItems)(
-              progress,
-              Math.max(loadedItems, progressToIndex(progress, totalCount)),
+            const index = Math.max(
+              loadedItems,
+              progressToIndex(progress, totalCount),
             );
+            if (index !== lastRequestedIndex.get()) {
+              lastRequestedIndex.set(index);
+              runOnJS(requestItems)(progress, index);
+            }
           }
         })
         .onFinalize(() => {
@@ -395,7 +445,7 @@ const FastScrollbar = ({
             return;
           }
           dragging.set(false);
-          show(HIDE_DELAY_AFTER_DRAGGING_MS);
+          scheduleHide(HIDE_DELAY_AFTER_DRAGGING_MS);
           if (awaitingItems.get()) {
             startSettleTimer(PENDING_SETTLE_TIMEOUT_MS);
           } else if (lastScrolledOffset.get() >= 0) {
@@ -412,6 +462,8 @@ const FastScrollbar = ({
       dragY,
       dragging,
       endSettle,
+      hideAt,
+      lastRequestedIndex,
       lastScrolledOffset,
       loaded,
       requestItems,
@@ -420,6 +472,7 @@ const FastScrollbar = ({
       settleOffset,
       settleTimer,
       settling,
+      scheduleHide,
       show,
       startSettleTimer,
       startY,
@@ -437,18 +490,22 @@ const FastScrollbar = ({
       const height = event.nativeEvent.layout.height;
       if (height !== trackHeight.get()) {
         trackHeight.set(height);
+        hideAt.set(-1);
         opacity.set(0);
         fadeInEndsAt.set(0);
       }
     },
-    [trackHeight, opacity, fadeInEndsAt],
+    [trackHeight, hideAt, opacity, fadeInEndsAt],
   );
 
-  const trackStyle = useAnimatedStyle(() => ({ opacity: opacity.get() }));
-
-  const thumbStyle = useAnimatedStyle(() => ({
-    opacity: opacity.get(),
+  // One opacity for track and thumb together, and the rarely changing thumb
+  // length kept apart from the per-frame translate so layout props are not
+  // part of the hot path.
+  const containerStyle = useAnimatedStyle(() => ({ opacity: opacity.get() }));
+  const thumbSizeStyle = useAnimatedStyle(() => ({
     height: thumbLength.get(),
+  }));
+  const thumbPositionStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: thumbY.get() }],
   }));
 
@@ -459,28 +516,28 @@ const FastScrollbar = ({
   }));
 
   return (
-    <View
+    <Animated.View
       pointerEvents={interactive ? 'box-none' : 'none'}
-      style={[styles.container, { top: topInset, bottom: bottomInset }]}
+      style={[
+        styles.container,
+        { top: topInset, bottom: bottomInset },
+        containerStyle,
+      ]}
       onLayout={onLayout}
     >
       <Animated.View
         pointerEvents="none"
-        style={[
-          styles.track,
-          { backgroundColor: theme.outlineVariant },
-          trackStyle,
-        ]}
+        style={[styles.track, { backgroundColor: theme.outlineVariant }]}
       />
       <GestureDetector gesture={gesture}>
         <Animated.View
           testID="fast-scrollbar-thumb"
-          style={[styles.thumbTouchArea, thumbStyle]}
+          style={[styles.thumbTouchArea, thumbSizeStyle, thumbPositionStyle]}
         >
           <Animated.View style={[styles.thumb, barStyle]} />
         </Animated.View>
       </GestureDetector>
-    </View>
+    </Animated.View>
   );
 };
 

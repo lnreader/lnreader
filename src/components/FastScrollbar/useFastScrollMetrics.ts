@@ -1,4 +1,4 @@
-import { type RefCallback, useCallback, useMemo } from 'react';
+import { type RefCallback, useCallback, useMemo, useRef } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import Animated, {
   type AnimatedRef,
@@ -32,16 +32,22 @@ export const useFastScrollMetrics = (): FastScrollMetrics => {
   const viewportLength = useSharedValue(0);
   const userDragCount = useSharedValue(0);
   const scrollViewRef = useAnimatedRef<Animated.ScrollView>();
+  // JS-side copies, so unchanged sizes (nearly every event) skip the write;
+  // each shared value write from JS is a hop to the UI thread.
+  const lastSizes = useRef({ content: -1, viewport: -1, drags: 0 });
 
   // The offset itself comes from the UI thread; writing it here as well would
   // let late JS events overwrite newer values.
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { contentSize, layoutMeasurement } = event.nativeEvent;
-      if (contentSize) {
+      const last = lastSizes.current;
+      if (contentSize && contentSize.height !== last.content) {
+        last.content = contentSize.height;
         contentLength.set(contentSize.height);
       }
-      if (layoutMeasurement) {
+      if (layoutMeasurement && layoutMeasurement.height !== last.viewport) {
+        last.viewport = layoutMeasurement.height;
         viewportLength.set(layoutMeasurement.height);
       }
     },
@@ -49,7 +55,8 @@ export const useFastScrollMetrics = (): FastScrollMetrics => {
   );
 
   const onScrollBeginDrag = useCallback(() => {
-    userDragCount.set(userDragCount.get() + 1);
+    lastSizes.current.drags += 1;
+    userDragCount.set(lastSizes.current.drags);
   }, [userDragCount]);
 
   const listProps = useMemo(

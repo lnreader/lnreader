@@ -87,4 +87,30 @@ describe('Menu', () => {
       lineHeight: 20,
     });
   });
+
+  it('renders only the anchor while closed and keeps it mounted when opened', () => {
+    const { Text } = require('react-native');
+    const mounts = jest.fn();
+    const Anchor = () => {
+      require('react').useEffect(() => mounts(), []);
+      return <Text>anchor</Text>;
+    };
+    const element = (visible: boolean) => (
+      <Menu anchor={<Anchor />} onDismiss={() => {}} visible={visible}>
+        <Menu.Item onPress={() => {}} title="Open" />
+      </Menu>
+    );
+
+    const view = render(element(false));
+    expect(screen.getByText('anchor')).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId('menu', { includeHiddenElements: true }),
+    ).toBeNull();
+
+    view.rerender(element(true));
+    expect(
+      screen.getByTestId('menu', { includeHiddenElements: true }),
+    ).toBeTruthy();
+    expect(mounts).toHaveBeenCalledTimes(1);
+  });
 });
