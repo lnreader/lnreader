@@ -163,8 +163,10 @@ const NativeChapterList = ({
       storeId={storeId}
       colors={colors}
       strings={strings}
-      isLocal={isLocal}
-      refreshing={refreshing}
+      // Codegen casts these straight to Java booleans, and novel rows can carry
+      // SQLite's 0/1 here despite the type.
+      isLocal={!!isLocal}
+      refreshing={!!refreshing}
       refreshOffset={refreshOffset}
       contentPaddingBottom={contentPaddingBottom}
       fastScrollTopInset={fastScrollTopInset}

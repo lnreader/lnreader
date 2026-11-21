@@ -507,6 +507,17 @@ describe('NovelScreenList native chapter list', () => {
     ]);
   });
 
+  it('passes real booleans to the native view when SQLite returns 0/1', () => {
+    const store = createStore({
+      chapters: makeChapters(1),
+      novel: { ...baseNovel, isLocal: 1 },
+    });
+    const { list } = renderWithStore(store);
+
+    expect(list.props.isLocal).toBe(true);
+    expect(list.props.refreshing).toBe(false);
+  });
+
   it('loads the batch a placeholder range asks for', () => {
     const store = createStore({
       chapters: makeChapters(2),
