@@ -37,6 +37,7 @@ import {
 } from '@components/NativeChapterList';
 import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
 import { getChapter } from '@database/queries/ChapterQueries';
+import { showToast } from '@utils/showToast';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -210,6 +211,15 @@ const NovelScreenList = ({
   // Reloads (e.g. getChapters on refresh) drop back to the first batch
   // and cancel in-flight loads, so it's requested again until it's loaded.
   const neededBatch = useRef({ key: chapterSetKey, batch: -1 });
+  // A failed batch read is reported; the native list asks for the batch again
+  // when its placeholders bind after a few seconds (scrolling back to them).
+  const loadBatch = useCallback(
+    (batch: number) =>
+      loadUpToBatch(batch).catch((error: unknown) =>
+        showToast(error instanceof Error ? error.message : String(error)),
+      ),
+    [loadUpToBatch],
+  );
   const requestUpTo = useCallback(
     (index: number) => {
       const needed = neededBatch.current;
@@ -219,9 +229,9 @@ const NovelScreenList = ({
       }
       const batch = Math.floor(index / CHAPTER_BATCH_SIZE);
       needed.batch = Math.max(needed.batch, batch);
-      loadUpToBatch(batch);
+      loadBatch(batch);
     },
-    [chapterSetKey, loadUpToBatch],
+    [chapterSetKey, loadBatch],
   );
 
   const rowFormat = useMemo(
@@ -257,9 +267,9 @@ const NovelScreenList = ({
       needed.key === chapterSetKey &&
       needed.batch > loadedBatch
     ) {
-      loadUpToBatch(needed.batch);
+      loadBatch(needed.batch);
     }
-  }, [chapterSetKey, fetching, loadedBatch, loadUpToBatch]);
+  }, [chapterSetKey, fetching, loadedBatch, loadBatch]);
 
   // --- Stable callbacks ---
 

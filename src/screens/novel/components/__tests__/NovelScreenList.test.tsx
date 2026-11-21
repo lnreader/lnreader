@@ -434,7 +434,7 @@ describe('NovelScreenList native chapter list', () => {
     store: ReturnType<typeof createStore>,
     selected: number[] = [],
   ) => {
-    const loadUpToBatch = jest.fn();
+    const loadUpToBatch = jest.fn().mockResolvedValue(undefined);
     const setSelected = jest.fn();
     mockUseNovelValue.mockImplementation(
       (key: keyof typeof store.state) => store.state[key],
@@ -553,6 +553,22 @@ describe('NovelScreenList native chapter list', () => {
 
     fire(list, 'requestRange', { start: 2000, end: 2499 });
     expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
+  });
+
+  it('reports a batch that fails to load', async () => {
+    const { showToast } = jest.requireMock('@utils/showToast');
+    const store = createStore({
+      chapters: makeChapters(2),
+      batchInformation: { batch: 0, total: 3, totalChapters: 2500 },
+    });
+    const { list, loadUpToBatch } = renderWithStore(store);
+    loadUpToBatch.mockRejectedValueOnce(new Error('database is locked'));
+
+    fire(list, 'requestRange', { start: 1000, end: 1999 });
+
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('database is locked'),
+    );
   });
 
   it('keeps the rows on screen and reloads them when chapters reload after a download', () => {
