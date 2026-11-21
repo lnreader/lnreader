@@ -187,9 +187,15 @@ class ChapterListView(reactContext: ThemedReactContext) :
     )
   }
 
+  /**
+   * The view is being dropped, often while its screen animates away. Only stop
+   * listening: notifying the adapter here would schedule a layout pass of a
+   * list that's about to disappear.
+   */
   fun dispose() {
     store?.model?.removeListener(this)
-    adapter.model = null
+    adapter.detachModel()
+    removeCallbacks(midnightRefresh)
     store = null
   }
 

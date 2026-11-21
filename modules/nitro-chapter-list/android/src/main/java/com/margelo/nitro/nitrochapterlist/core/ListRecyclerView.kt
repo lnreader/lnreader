@@ -3,6 +3,7 @@ package com.margelo.nitro.nitrochapterlist.core
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.react.uimanager.events.NativeGestureUtil
@@ -111,6 +112,16 @@ class ListRecyclerView(
     val itemTop = paddingTop + header.contentHeight + index * rowHeight
     return (itemTop - viewPosition * (height - paddingBottom - rowHeight)).roundToInt()
   }
+
+  /**
+   * react-native-screens calls startViewTransition on every view of a screen
+   * being popped, so Fabric's removals stay visible during the exit animation.
+   * A child in a view transition keeps its parent when detached, and when
+   * RecyclerView then recycles one of its own item views it throws "Scrapped
+   * or attached views may not be recycled". Item views are never removed by
+   * Fabric, so they don't need the transition: ignore it.
+   */
+  override fun startViewTransition(view: View) {}
 
   override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
     if (super.onInterceptTouchEvent(e)) {

@@ -46,9 +46,10 @@ class HeaderContainer(context: Context) : ViewGroup(context) {
       addViewInLayout(child, 0, child.layoutParams ?: generateDefaultLayoutParams(), true)
       child.addOnLayoutChangeListener(childLayoutListener)
       updateContentHeight(child.height)
-    } else {
-      updateContentHeight(0)
     }
+    // On removal keep the last height: the header child only goes away when the
+    // list unmounts, often while its screen animates out, and collapsing it
+    // would shift the rows up mid-animation.
   }
 
   private fun updateContentHeight(height: Int) {

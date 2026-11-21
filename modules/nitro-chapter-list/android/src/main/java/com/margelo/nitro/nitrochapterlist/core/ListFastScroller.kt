@@ -20,7 +20,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Canvas
-import android.graphics.drawable.GradientDrawable
+import android.graphics.Paint
+import android.graphics.RectF
 import android.view.MotionEvent
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
@@ -54,9 +55,14 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   private val touchWidth = (TOUCH_WIDTH_DP * density).roundToInt()
   private val minimumRange = (MINIMUM_RANGE_DP * density).roundToInt()
 
-  private val thumbDrawable = GradientDrawable().apply { cornerRadius = thickness / 2f }
+  // Drawn directly as a round rect with radius = half the thickness, so the
+  // ends are always full semicircles.
+  private val thumbPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+  private val thumbRect = RectF()
   private var thumbColor = 0
   private var pressedThumbColor = 0
+  private var thumbAlpha = 0
+  private var thumbBaseColor = 0
 
   var topInset = 0
     set(value) {
@@ -100,7 +106,7 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   fun setColors(thumb: Int, pressedThumb: Int) {
     thumbColor = thumb
     pressedThumbColor = pressedThumb
-    thumbDrawable.setColor(if (state == STATE_DRAGGING) pressedThumbColor else thumbColor)
+    applyThumbColor(if (state == STATE_DRAGGING) pressedThumbColor else thumbColor)
     requestRedraw()
   }
 
@@ -109,13 +115,20 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
     if (state != STATE_HIDDEN) updateScrollPosition()
   }
 
+  private fun applyThumbColor(color: Int) {
+    thumbBaseColor = color
+    thumbPaint.color = color
+    // The fade animation's alpha on top of the colour's own alpha.
+    thumbPaint.alpha = thumbAlpha * ((color ushr 24) and 0xFF) / 255
+  }
+
   private fun requestRedraw() {
     recyclerView.invalidate()
   }
 
   private fun setState(newState: Int) {
     if (newState == STATE_DRAGGING && state != STATE_DRAGGING) {
-      thumbDrawable.setColor(pressedThumbColor)
+      applyThumbColor(pressedThumbColor)
       cancelHide()
     }
     if (newState == STATE_HIDDEN) {
@@ -124,7 +137,7 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
       show()
     }
     if (state == STATE_DRAGGING && newState != STATE_DRAGGING) {
-      thumbDrawable.setColor(thumbColor)
+      applyThumbColor(thumbColor)
       resetHideDelay(HIDE_DELAY_AFTER_DRAGGING_MS)
     } else if (newState == STATE_VISIBLE) {
       resetHideDelay(HIDE_DELAY_AFTER_VISIBLE_MS)
@@ -187,8 +200,9 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
 
   private fun drawVerticalScrollbar(canvas: Canvas) {
     val left = if (isLayoutRtl) edgeMargin else recyclerViewWidth - edgeMargin - thickness
-    thumbDrawable.setBounds(left, thumbTop, left + thickness, thumbTop + thumbLength)
-    thumbDrawable.draw(canvas)
+    thumbRect.set(left.toFloat(), thumbTop.toFloat(), (left + thickness).toFloat(), (thumbTop + thumbLength).toFloat())
+    val radius = thickness / 2f
+    canvas.drawRoundRect(thumbRect, radius, radius, thumbPaint)
   }
 
 
@@ -307,7 +321,8 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   private inner class AnimatorUpdater : ValueAnimator.AnimatorUpdateListener {
     override fun onAnimationUpdate(valueAnimator: ValueAnimator) {
       val alpha = (SCROLLBAR_FULL_OPAQUE * valueAnimator.animatedValue as Float).toInt()
-      thumbDrawable.alpha = alpha
+      thumbAlpha = alpha
+      applyThumbColor(thumbBaseColor)
       requestRedraw()
     }
   }

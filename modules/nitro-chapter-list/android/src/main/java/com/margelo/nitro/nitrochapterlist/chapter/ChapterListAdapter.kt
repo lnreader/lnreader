@@ -63,6 +63,11 @@ class ChapterListAdapter(
       notifyDataSetChanged()
     }
 
+  /** Stops listening to the model without touching the list (the view is going away). */
+  fun detachModel() {
+    model?.removeListener(this)
+  }
+
   /** Row text formatting; a new one rebinds the visible rows' text. */
   var formatter: ChapterRowFormatter = ChapterRowFormatter(ChapterRowFormat())
     set(value) {
