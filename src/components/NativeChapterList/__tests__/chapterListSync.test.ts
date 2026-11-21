@@ -80,12 +80,23 @@ describe('planChapterListSync', () => {
   it.each([
     ['the list key changes', snapshot(rows(1, 3), 2500, 'novel-2')],
     ['the total changes', snapshot(rows(1, 3), 2600)],
-    ['rows disappear', snapshot(rows(1, 2))],
     ['rows move', snapshot([row(2), row(1), row(3)])],
   ])('replaces the list when %s', (_, next) => {
     const ops = planChapterListSync(snapshot(rows(1, 3)), next);
     expect(ops[0]).toEqual({ type: 'reset', total: next.total });
     expect(ops[1]).toEqual({ type: 'setRows', start: 0, rows: next.rows });
+  });
+
+  it('keeps native rows when the same list is reloaded with fewer batches', () => {
+    // The novel store's getChapters (run after downloads) goes back to batch 0.
+    const prev = rows(1, 3000);
+    const next = prev.slice(0, 1000).map(r => ({ ...r }));
+    next[4] = { ...next[4], downloaded: true };
+
+    expect(planChapterListSync(snapshot(prev), snapshot(next))).toEqual([
+      { type: 'updateRows', rows: [next[4]] },
+      { type: 'staleRows', start: 1000, end: 3000 },
+    ]);
   });
 
   it('only resets when the replacement list has no loaded rows yet', () => {

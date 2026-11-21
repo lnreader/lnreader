@@ -61,13 +61,20 @@ export interface ChapterListSnapshot {
 export type ChapterListOp =
   | { type: 'reset'; total: number }
   | { type: 'setRows'; start: number; rows: ChapterRow[] }
-  | { type: 'updateRows'; rows: ChapterRow[] };
+  | { type: 'updateRows'; rows: ChapterRow[] }
+  /**
+   * Not a store call: native still shows rows `start..end-1` from before JS
+   * reloaded a shorter prefix of the same list. They should be reloaded.
+   */
+  | { type: 'staleRows'; start: number; end: number };
 
 /**
  * The fewest store calls that turn `prev` into `next`. Loaded rows are always a
  * prefix of the list, so a new batch is an append (`setRows`) and edits keep
- * positions (`updateRows`). Anything else (a new key, a new total, rows that
- * moved or disappeared) replaces the list.
+ * positions (`updateRows`). Reloading a shorter prefix of the same list (the
+ * novel store does this after downloads) keeps the rows native already shows
+ * and reports them as `staleRows`, instead of blanking them. Anything else (a
+ * new key, a new total, rows that moved) replaces the list.
  */
 export const planChapterListSync = (
   prev: ChapterListSnapshot | null,
@@ -81,17 +88,13 @@ export const planChapterListSync = (
     return ops;
   };
 
-  if (
-    !prev ||
-    prev.key !== next.key ||
-    prev.total !== next.total ||
-    next.rows.length < prev.rows.length
-  ) {
+  if (!prev || prev.key !== next.key || prev.total !== next.total) {
     return replace();
   }
 
+  const shared = Math.min(prev.rows.length, next.rows.length);
   const updated: ChapterRow[] = [];
-  for (let i = 0; i < prev.rows.length; i++) {
+  for (let i = 0; i < shared; i++) {
     const before = prev.rows[i];
     const after = next.rows[i];
     if (before === after) {
@@ -114,6 +117,12 @@ export const planChapterListSync = (
       type: 'setRows',
       start: prev.rows.length,
       rows: next.rows.slice(prev.rows.length),
+    });
+  } else if (next.rows.length < prev.rows.length) {
+    ops.push({
+      type: 'staleRows',
+      start: next.rows.length,
+      end: prev.rows.length,
     });
   }
   return ops;

@@ -532,6 +532,44 @@ describe('NovelScreenList native chapter list', () => {
     expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
   });
 
+  it('keeps the rows on screen and reloads them when chapters reload after a download', () => {
+    const store = createStore({
+      chapters: makeChapters(3000),
+      batchInformation: { batch: 2, total: 3, totalChapters: 3000 },
+    });
+    const { nativeStore, loadUpToBatch, rerender } = renderWithStore(store);
+    expect(nativeStore.reset).toHaveBeenCalledTimes(1);
+
+    // getChapters: back to the first batch, as fresh chapter objects.
+    store.state.chapters = makeChapters(1000);
+    store.state.batchInformation = { batch: 0, total: 3, totalChapters: 3000 };
+    rerender([]);
+
+    expect(nativeStore.reset).toHaveBeenCalledTimes(1);
+    expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
+  });
+
+  it('asks again for a batch whose load a reload cancelled', () => {
+    const store = createStore({
+      chapters: makeChapters(1000),
+      batchInformation: { batch: 0, total: 3, totalChapters: 3000 },
+    });
+    const { list, loadUpToBatch, rerender } = renderWithStore(store);
+
+    fire(list, 'requestRange', { start: 2000, end: 2999 });
+    expect(loadUpToBatch).toHaveBeenCalledTimes(1);
+
+    // A second getChapters invalidates that load and lands on batch 0 again.
+    store.state.fetching = true;
+    rerender([]);
+    store.state.chapters = makeChapters(1000);
+    store.state.fetching = false;
+    rerender([]);
+
+    expect(loadUpToBatch).toHaveBeenCalledTimes(2);
+    expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
+  });
+
   it('opens a chapter on press', () => {
     const store = createStore({ chapters: makeChapters(2) });
     const { list } = renderWithStore(store);

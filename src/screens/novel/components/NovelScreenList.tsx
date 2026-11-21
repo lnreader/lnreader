@@ -1,6 +1,6 @@
 import * as React from 'react';
 import NovelInfoHeader from './Info/NovelInfoHeader';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -186,6 +186,24 @@ const NovelScreenList = ({
     [chapters],
   );
 
+  // The furthest batch the native list has needed for this chapter set.
+  // Reloads (e.g. getChapters after a download) drop back to the first batch
+  // and cancel in-flight loads, so it's requested again until it's loaded.
+  const neededBatch = useRef({ key: chapterSetKey, batch: -1 });
+  const requestUpTo = useCallback(
+    (index: number) => {
+      const needed = neededBatch.current;
+      if (needed.key !== chapterSetKey) {
+        needed.key = chapterSetKey;
+        needed.batch = -1;
+      }
+      const batch = Math.floor(index / CHAPTER_BATCH_SIZE);
+      needed.batch = Math.max(needed.batch, batch);
+      loadUpToBatch(batch);
+    },
+    [chapterSetKey, loadUpToBatch],
+  );
+
   const storeId = useChapterListStore({
     chapters: listChapters,
     totalChapters,
@@ -193,14 +211,26 @@ const NovelScreenList = ({
     format: { showChapterTitles, dateFormat, relativeTimestamps },
     selectedIds,
     downloadingIds: hasNovel ? downloadingChapterIds : NO_IDS,
+    onStaleRows: (_start, end) => requestUpTo(end - 1),
   });
 
   // Unloaded rows ask for their range; loading a batch loads all before it.
   const onRequestRange = useCallback(
-    (_start: number, end: number) =>
-      loadUpToBatch(Math.floor(end / CHAPTER_BATCH_SIZE)),
-    [loadUpToBatch],
+    (_start: number, end: number) => requestUpTo(end),
+    [requestUpTo],
   );
+
+  const loadedBatch = batchInformation.batch;
+  useEffect(() => {
+    const needed = neededBatch.current;
+    if (
+      !fetching &&
+      needed.key === chapterSetKey &&
+      needed.batch > loadedBatch
+    ) {
+      loadUpToBatch(needed.batch);
+    }
+  }, [chapterSetKey, fetching, loadedBatch, loadUpToBatch]);
 
   // --- Stable callbacks ---
 

@@ -23,6 +23,11 @@ interface UseChapterListStoreOptions {
   format: ChapterRowFormat;
   selectedIds: ReadonlySet<number>;
   downloadingIds: ReadonlySet<number>;
+  /**
+   * Native kept showing rows `start..end-1` after JS reloaded a shorter prefix
+   * of the same list; load them again so they're current.
+   */
+  onStaleRows?: (start: number, end: number) => void;
 }
 
 /**
@@ -37,6 +42,7 @@ export const useChapterListStore = ({
   format,
   selectedIds,
   downloadingIds,
+  onStaleRows,
 }: UseChapterListStoreOptions): string => {
   const [store] = useState<ChapterListStore>(createChapterListStore);
   const snapshot = useRef<ChapterListSnapshot | null>(null);
@@ -52,6 +58,10 @@ export const useChapterListStore = ({
   });
 
   const { showChapterTitles, dateFormat, relativeTimestamps } = format;
+  const onStaleRowsRef = useRef(onStaleRows);
+  useLayoutEffect(() => {
+    onStaleRowsRef.current = onStaleRows;
+  });
 
   useLayoutEffect(() => {
     const cache = rowCache.current;
@@ -90,6 +100,9 @@ export const useChapterListStore = ({
           break;
         case 'updateRows':
           store.updateRows(op.rows);
+          break;
+        case 'staleRows':
+          onStaleRowsRef.current?.(op.start, op.end);
           break;
       }
     }
