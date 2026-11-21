@@ -791,4 +791,27 @@ export interface StringMap {
   'genreStats.normalizationValuePlaceholder': 'string';
   'genreStats.noCategories': 'string';
   'genreStats.noNormalization': 'string';
+  'widgets.continueReading': 'string';
+  'widgets.newChapters': 'string';
+  'widgets.resume': 'string';
+  'widgets.chapter': 'string';
+  'widgets.chapterProgress': 'string';
+  'widgets.more': 'string';
+  'widgets.updating': 'string';
+  'widgets.updatingProgress': 'string';
+  'widgets.update': 'string';
+  'widgets.search': 'string';
+  'widgets.random': 'string';
+  'widgets.downloads': 'string';
+  'widgets.chaptersThisWeek': 'string';
+  'widgets.streak': 'string';
+  'widgets.nothingRead': 'string';
+  'widgets.nothingReadDesc': 'string';
+  'widgets.browse': 'string';
+  'widgets.caughtUp': 'string';
+  'widgets.caughtUpDesc': 'string';
+  'widgets.openLibrary': 'string';
+  'widgets.noChaptersThisWeek': 'string';
+  'widgets.incognito': 'string';
+  'widgets.incognitoDesc': 'string';
 }
