@@ -55,6 +55,7 @@ jest.mock('@database/queries/LibraryQueries', () => ({
 
 jest.mock('@database/queries/RepositoryQueries', () => ({
   getRepositoriesFromDb: jest.fn(),
+  getEnabledRepositoriesFromDb: jest.fn().mockResolvedValue([]),
   isRepoUrlDuplicated: jest.fn(),
   createRepository: jest.fn(),
   deleteRepositoryById: jest.fn(),
