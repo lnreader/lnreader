@@ -20,6 +20,11 @@ export default function useNovelLinkNavigation(novel: CurrentNovel) {
       if (!link) {
         return false;
       }
+      // A second tap can arrive before the novel screen covers the reader.
+      // Pushing again would stack a copy, so Back would need two presses.
+      if (!navigation.isFocused()) {
+        return true;
+      }
       const params = { name: '', cover: null, ...link };
       if (link.pluginId === pluginId && link.path === path) {
         navigation.push('Novel', params);

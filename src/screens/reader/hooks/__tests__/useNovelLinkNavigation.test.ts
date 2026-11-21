@@ -3,7 +3,9 @@ import { renderHook } from '@testing-library/react-native';
 import useNovelLinkNavigation from '../useNovelLinkNavigation';
 
 const mockNavigation = {
+  focused: true,
   push: jest.fn(),
+  isFocused: () => mockNavigation.focused,
 };
 
 jest.mock('@react-navigation/native', () => ({
@@ -22,7 +24,12 @@ const reader = { pluginId: 'royalroad', path: 'fiction/112921' };
 
 describe('useNovelLinkNavigation', () => {
   beforeEach(() => {
+    mockNavigation.focused = true;
     mockNavigation.push.mockReset();
+    // Like the real navigator: after the push the reader is no longer focused.
+    mockNavigation.push.mockImplementation(() => {
+      mockNavigation.focused = false;
+    });
   });
 
   it('opens a linked novel in its own reader stack', () => {
@@ -61,5 +68,17 @@ describe('useNovelLinkNavigation', () => {
 
     expect(result.current('https://example.com/page')).toBe(false);
     expect(mockNavigation.push).not.toHaveBeenCalled();
+  });
+
+  // A double tap reaches the app twice before the novel screen covers the
+  // reader.
+  it('opens the novel once when the link is tapped twice', () => {
+    const { result } = renderHook(() => useNovelLinkNavigation(reader));
+
+    result.current(LINK);
+    const second = result.current(LINK);
+
+    expect(second).toBe(true);
+    expect(mockNavigation.push).toHaveBeenCalledTimes(1);
   });
 });

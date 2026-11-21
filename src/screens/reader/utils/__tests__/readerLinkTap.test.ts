@@ -76,4 +76,24 @@ describe('reader link taps', () => {
 
     expect(post).toHaveBeenCalledWith({ type: 'hide' });
   });
+
+  // The app may answer the second load request too late, and the WebView then
+  // loads the linked site in place of the chapter.
+  it('stops a second tap while the first one opens the link', () => {
+    const { tap, clock } = loadClickHandler();
+
+    tap(true);
+    clock.now += 300;
+
+    expect(tap(true).preventDefault).toHaveBeenCalled();
+  });
+
+  it('lets the link open again after one second', () => {
+    const { tap, clock } = loadClickHandler();
+
+    tap(true);
+    clock.now += 2000;
+
+    expect(tap(true).preventDefault).not.toHaveBeenCalled();
+  });
 });
