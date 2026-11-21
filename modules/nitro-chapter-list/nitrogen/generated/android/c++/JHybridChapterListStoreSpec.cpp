@@ -14,6 +14,7 @@ namespace margelo::nitro::nitrochapterlist { struct ChapterRow; }
 #include "ChapterRow.hpp"
 #include <vector>
 #include "JChapterRow.hpp"
+#include <optional>
 
 namespace margelo::nitro::nitrochapterlist {
 

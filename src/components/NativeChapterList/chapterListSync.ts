@@ -1,54 +1,105 @@
-import type { ChapterRow } from '@modules/nitro-chapter-list';
+import dayjs from 'dayjs';
+import calendar from 'dayjs/plugin/calendar';
+import type { ChapterRow, ChapterRowFormat } from '@modules/nitro-chapter-list';
 import type { ChapterInfo } from '@database/types';
-import { getString } from '@i18n/translations';
-import { createDateFormatter, DateFormat } from '@utils/dateFormat';
+import { getString, localization } from '@i18n/translations';
+import type { DateFormat } from '@utils/dateFormat';
 
-export interface ChapterRowFormat {
+export interface ChapterRowSettings {
   showChapterTitles: boolean;
   dateFormat: DateFormat;
   relativeTimestamps: boolean;
 }
 
-/** Builds the strings `ChapterItem` renders, so native rows only bind them. */
-export const buildChapterRow = (
-  chapter: ChapterInfo,
-  format: ChapterRowFormat,
-  // Share one across a batch: it caches and fixes "now" once.
-  formatReleaseDate: (value: string) => string = createDateFormatter(
-    format.dateFormat,
-    format.relativeTimestamps,
-  ),
-): ChapterRow => {
-  const { releaseTime, scanlator, progress, unread } = chapter;
-  const parts: string[] = [];
-  if (releaseTime) {
-    parts.push(formatReleaseDate(releaseTime));
-  }
-  if (scanlator) {
-    parts.push(scanlator);
-  }
-  if (progress && progress > 0 && unread) {
-    parts.push(getString('novelScreen.progress', { progress }));
+/**
+ * A chapter's raw row values. Native formats the text when the row is bound;
+ * JS only parses the release time, with the same dayjs parsing `formatDate`
+ * uses, because sources store it as free-form text.
+ */
+export const toChapterRow = (chapter: ChapterInfo): ChapterRow => {
+  let releaseTime: number | undefined;
+  let releaseText = '';
+  if (chapter.releaseTime) {
+    const date = dayjs(chapter.releaseTime);
+    if (date.isValid()) {
+      releaseTime = date.valueOf();
+    } else {
+      releaseText = chapter.releaseTime;
+    }
   }
   return {
     id: chapter.id,
-    title: format.showChapterTitles
-      ? chapter.name
-      : getString('novelScreen.chapterChapnum', {
-          num: chapter.chapterNumber,
-        }),
-    subtitle: parts.join(' •  '),
-    unread: !!unread,
+    name: chapter.name,
+    numberText:
+      chapter.chapterNumber === null || chapter.chapterNumber === undefined
+        ? ''
+        : String(chapter.chapterNumber),
+    releaseTime,
+    releaseText,
+    scanlator: chapter.scanlator ?? '',
+    progress: chapter.progress ?? 0,
+    unread: !!chapter.unread,
     bookmarked: !!chapter.bookmark,
     downloaded: !!chapter.isDownloaded,
+  };
+};
+
+dayjs.extend(calendar);
+
+const DAYS_IN_WEEK = 7;
+
+/**
+ * Everything native needs to format rows exactly like `ChapterItem`:
+ * translated templates, and the relative-date labels and month names produced
+ * by the same dayjs calls `formatDate` makes. The labels depend only on the
+ * weekday, so native can pick them for any "today".
+ */
+export const buildChapterRowFormat = ({
+  showChapterTitles,
+  dateFormat,
+  relativeTimestamps,
+}: ChapterRowSettings): ChapterRowFormat => {
+  // Any day works; dayjs' calendar labels depend only on the day offset and
+  // the weekday, never on the date or time.
+  const reference = dayjs(new Date(2024, 0, 10, 12));
+  const lastWeek: string[] = [];
+  const nextWeek: string[] = [];
+  for (let i = 0; i < DAYS_IN_WEEK; i++) {
+    const day = reference.add(i, 'day');
+    lastWeek[day.day()] = day.calendar(day.add(3, 'day'));
+    nextWeek[day.day()] = day.calendar(day.subtract(3, 'day'));
+  }
+  return {
+    showChapterTitles,
+    chapterTitleTemplate: getString('novelScreen.chapterChapnum', {
+      num: '%{num}',
+    }),
+    progressTemplate: getString('novelScreen.progress', {
+      progress: '%{progress}',
+    }),
+    dateFormat,
+    relativeDates: relativeTimestamps,
+    locale: localization,
+    sameDay: reference.calendar(reference),
+    lastDay: reference.subtract(1, 'day').calendar(reference),
+    nextDay: reference.add(1, 'day').calendar(reference),
+    lastWeek,
+    nextWeek,
+    monthsShort: Array.from({ length: 12 }, (_, month) =>
+      dayjs(new Date(2024, month, 15)).format('MMM'),
+    ),
   };
 };
 
 const sameRow = (a: ChapterRow, b: ChapterRow) =>
   a === b ||
   (a.id === b.id &&
-    a.title === b.title &&
-    a.subtitle === b.subtitle &&
+    a.name === b.name &&
+    a.numberText === b.numberText &&
+    a.releaseTime === b.releaseTime &&
+    a.releaseText === b.releaseText &&
+    a.scanlator === b.scanlator &&
+    a.progress === b.progress &&
     a.unread === b.unread &&
     a.bookmarked === b.bookmarked &&
     a.downloaded === b.downloaded);

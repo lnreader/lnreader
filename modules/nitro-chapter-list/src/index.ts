@@ -14,6 +14,7 @@ export { ChapterListViewNativeComponent };
 export type {
   ChapterIdEvent,
   ChapterListColors,
+  ChapterRowFormat,
   ChapterListScrollEvent,
   ChapterListStrings,
   NativeProps as ChapterListViewNativeProps,

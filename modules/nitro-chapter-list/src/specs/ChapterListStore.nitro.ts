@@ -1,11 +1,23 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 
-/** One chapter row, with every display string already formatted by JS. */
+/**
+ * One chapter row as raw values. Native formats the visible text when a row is
+ * bound, following the list's `rowFormat` prop; JS only parses and translates.
+ */
 export interface ChapterRow {
   id: number;
-  title: string;
-  /** An empty string hides the line. */
-  subtitle: string;
+  /** Shown when the list shows chapter titles. */
+  name: string;
+  /** `String(chapterNumber)`, filled into the "Chapter %{num}" title. */
+  numberText: string;
+  /** Release time in epoch ms, when JS could parse one. */
+  releaseTime?: number;
+  /** Release text shown as is when it couldn't be parsed; '' when none. */
+  releaseText: string;
+  /** '' when none. */
+  scanlator: string;
+  /** Reading progress in percent; shown for unread chapters when above 0. */
+  progress: number;
   unread: boolean;
   bookmarked: boolean;
   downloaded: boolean;

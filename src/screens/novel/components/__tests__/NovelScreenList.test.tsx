@@ -503,13 +503,31 @@ describe('NovelScreenList native chapter list', () => {
     expect(nativeStore.setRows).toHaveBeenCalledWith(0, [
       expect.objectContaining({
         id: 1,
-        title: 'novelScreen.chapterChapnum',
+        name: 'Chapter title 1',
+        numberText: '1',
         unread: true,
         downloaded: false,
       }),
       expect.objectContaining({ id: 2 }),
       expect.objectContaining({ id: 3 }),
     ]);
+  });
+
+  it("formats rows natively from the novel's display settings", () => {
+    const store = createStore({
+      chapters: makeChapters(1),
+      novelSettings: { filter: [], showChapterTitles: true },
+    });
+    const { list } = renderWithStore(store);
+
+    expect(list.props.rowFormat).toEqual(
+      expect.objectContaining({
+        showChapterTitles: true,
+        dateFormat: 'default',
+        relativeDates: true,
+        lastWeek: expect.arrayContaining([expect.any(String)]),
+      }),
+    );
   });
 
   it('passes real booleans to the native view when SQLite returns 0/1', () => {

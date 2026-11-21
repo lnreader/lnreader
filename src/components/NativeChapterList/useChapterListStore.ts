@@ -5,13 +5,11 @@ import {
   type ChapterRow,
 } from '@modules/nitro-chapter-list';
 import type { ChapterInfo } from '@database/types';
-import { createDateFormatter } from '@utils/dateFormat';
 import {
-  buildChapterRow,
   type ChapterListSnapshot,
-  type ChapterRowFormat,
   planChapterListSync,
   sameIdSet,
+  toChapterRow,
 } from './chapterListSync';
 
 interface UseChapterListStoreOptions {
@@ -21,7 +19,6 @@ interface UseChapterListStoreOptions {
   totalChapters: number;
   /** Changes whenever the list is replaced (novel, page, sort, filter). */
   dataKey: string;
-  format: ChapterRowFormat;
   selectedIds: ReadonlySet<number>;
   downloadingIds: ReadonlySet<number>;
   /**
@@ -40,7 +37,6 @@ export const useChapterListStore = ({
   chapters,
   totalChapters,
   dataKey,
-  format,
   selectedIds,
   downloadingIds,
   onStaleRows,
@@ -48,17 +44,14 @@ export const useChapterListStore = ({
   const [store] = useState<ChapterListStore>(createChapterListStore);
   const snapshot = useRef<ChapterListSnapshot | null>(null);
   // Chapters are replaced, never mutated, so unchanged ones keep their row and
-  // the diff below is mostly reference checks.
-  const rowCache = useRef({
-    format: null as ChapterRowFormat | null,
-    rows: new WeakMap<ChapterInfo, ChapterRow>(),
-  });
+  // the diff below is mostly reference checks. Rows hold raw values (native
+  // formats them), so display settings never invalidate this.
+  const rowCache = useRef(new WeakMap<ChapterInfo, ChapterRow>());
   const synced = useRef({
     selected: null as ReadonlySet<number> | null,
     downloading: null as ReadonlySet<number> | null,
   });
 
-  const { showChapterTitles, dateFormat, relativeTimestamps } = format;
   const onStaleRowsRef = useRef(onStaleRows);
   useLayoutEffect(() => {
     onStaleRowsRef.current = onStaleRows;
@@ -68,29 +61,12 @@ export const useChapterListStore = ({
     const startedAt = performance.now();
     let built = 0;
     const cache = rowCache.current;
-    let rowFormat = cache.format;
-    if (
-      !rowFormat ||
-      rowFormat.showChapterTitles !== showChapterTitles ||
-      rowFormat.dateFormat !== dateFormat ||
-      rowFormat.relativeTimestamps !== relativeTimestamps
-    ) {
-      rowFormat = { showChapterTitles, dateFormat, relativeTimestamps };
-      cache.format = rowFormat;
-      cache.rows = new WeakMap();
-    }
-    const activeFormat = rowFormat;
-    let formatReleaseDate: ((value: string) => string) | null = null;
     const rows = chapters.map(chapter => {
-      let row = cache.rows.get(chapter);
+      let row = cache.get(chapter);
       if (!row) {
-        formatReleaseDate ??= createDateFormatter(
-          activeFormat.dateFormat,
-          activeFormat.relativeTimestamps,
-        );
-        row = buildChapterRow(chapter, activeFormat, formatReleaseDate);
+        row = toChapterRow(chapter);
         built++;
-        cache.rows.set(chapter, row);
+        cache.set(chapter, row);
       }
       return row;
     });
@@ -124,15 +100,7 @@ export const useChapterListStore = ({
         end: performance.now(),
       });
     }
-  }, [
-    store,
-    chapters,
-    totalChapters,
-    dataKey,
-    showChapterTitles,
-    dateFormat,
-    relativeTimestamps,
-  ]);
+  }, [store, chapters, totalChapters, dataKey]);
 
   useLayoutEffect(() => {
     if (!sameIdSet(synced.current.selected, selectedIds)) {

@@ -28,6 +28,10 @@ class ChapterListView(reactContext: ThemedReactContext) :
   private var colors: Map<String, Int> = emptyMap()
   private var strings: Map<String, String> = emptyMap()
   private var resetAtNanos = 0L
+  private val midnightRefresh = Runnable {
+    adapter.refreshText()
+    scheduleMidnightRefresh()
+  }
 
   init {
     attachAdapter(adapter)
@@ -90,6 +94,37 @@ class ChapterListView(reactContext: ThemedReactContext) :
 
   fun setIsLocal(value: Boolean) {
     adapter.isLocal = value
+  }
+
+  fun setRowFormat(value: ChapterRowFormat) {
+    if (value == adapter.formatter.format) return
+    adapter.formatter = ChapterRowFormatter(value)
+  }
+
+  // Relative dates ("Today", "Last Monday") are worked out at bind time; rebind
+  // the visible rows when the day changes so they don't go stale on screen.
+  override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
+    scheduleMidnightRefresh()
+  }
+
+  override fun onDetachedFromWindow() {
+    removeCallbacks(midnightRefresh)
+    super.onDetachedFromWindow()
+  }
+
+  private fun scheduleMidnightRefresh() {
+    removeCallbacks(midnightRefresh)
+    val now = java.util.Calendar.getInstance()
+    val next =
+      (now.clone() as java.util.Calendar).apply {
+        add(java.util.Calendar.DAY_OF_MONTH, 1)
+        set(java.util.Calendar.HOUR_OF_DAY, 0)
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 1)
+        set(java.util.Calendar.MILLISECOND, 0)
+      }
+    postDelayed(midnightRefresh, next.timeInMillis - now.timeInMillis)
   }
 
   // --- Adapter callbacks ---

@@ -9,6 +9,7 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.viewmanagers.LNChapterListViewManagerDelegate
 import com.facebook.react.viewmanagers.LNChapterListViewManagerInterface
 import com.margelo.nitro.nitrochapterlist.chapter.ChapterListEvents
+import com.margelo.nitro.nitrochapterlist.chapter.ChapterRowFormat
 import com.margelo.nitro.nitrochapterlist.chapter.ChapterListView
 import com.margelo.nitro.nitrochapterlist.core.ListHostViewManager
 
@@ -54,6 +55,36 @@ class ChapterListViewManager :
       }
     }
     view.setStrings(strings)
+  }
+
+  override fun setRowFormat(view: ChapterListView, value: ReadableMap?) {
+    if (value == null) return
+    val defaults = ChapterRowFormat()
+    fun string(key: String, fallback: String) =
+      if (value.hasKey(key) && value.getType(key) == ReadableType.String) value.getString(key) ?: fallback else fallback
+    fun bool(key: String, fallback: Boolean) =
+      if (value.hasKey(key) && value.getType(key) == ReadableType.Boolean) value.getBoolean(key) else fallback
+    fun strings(key: String): List<String> {
+      if (!value.hasKey(key) || value.getType(key) != ReadableType.Array) return emptyList()
+      val array = value.getArray(key) ?: return emptyList()
+      return List(array.size()) { array.getString(it) ?: "" }
+    }
+    view.setRowFormat(
+      ChapterRowFormat(
+        showChapterTitles = bool("showChapterTitles", defaults.showChapterTitles),
+        chapterTitleTemplate = string("chapterTitleTemplate", defaults.chapterTitleTemplate),
+        progressTemplate = string("progressTemplate", defaults.progressTemplate),
+        dateFormat = string("dateFormat", defaults.dateFormat),
+        relativeDates = bool("relativeDates", defaults.relativeDates),
+        locale = string("locale", defaults.locale),
+        sameDay = string("sameDay", defaults.sameDay),
+        lastDay = string("lastDay", defaults.lastDay),
+        nextDay = string("nextDay", defaults.nextDay),
+        lastWeek = strings("lastWeek"),
+        nextWeek = strings("nextWeek"),
+        monthsShort = strings("monthsShort"),
+      ),
+    )
   }
 
   override fun setIsLocal(view: ChapterListView, value: Boolean) {

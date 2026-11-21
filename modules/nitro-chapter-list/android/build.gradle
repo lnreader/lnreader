@@ -101,4 +101,6 @@ dependencies {
   implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
   testImplementation "junit:junit:4.13.2"
+  // Real org.json for the parity test; android.jar only has stubs of it.
+  testImplementation "org.json:json:20250517"
 }

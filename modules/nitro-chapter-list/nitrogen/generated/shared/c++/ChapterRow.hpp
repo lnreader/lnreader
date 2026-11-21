@@ -31,6 +31,7 @@
 
 
 #include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrochapterlist {
 
@@ -40,15 +41,19 @@ namespace margelo::nitro::nitrochapterlist {
   struct ChapterRow final {
   public:
     double id     SWIFT_PRIVATE;
-    std::string title     SWIFT_PRIVATE;
-    std::string subtitle     SWIFT_PRIVATE;
+    std::string name     SWIFT_PRIVATE;
+    std::string numberText     SWIFT_PRIVATE;
+    std::optional<double> releaseTime     SWIFT_PRIVATE;
+    std::string releaseText     SWIFT_PRIVATE;
+    std::string scanlator     SWIFT_PRIVATE;
+    double progress     SWIFT_PRIVATE;
     bool unread     SWIFT_PRIVATE;
     bool bookmarked     SWIFT_PRIVATE;
     bool downloaded     SWIFT_PRIVATE;
 
   public:
     ChapterRow() = default;
-    explicit ChapterRow(double id, std::string title, std::string subtitle, bool unread, bool bookmarked, bool downloaded): id(id), title(title), subtitle(subtitle), unread(unread), bookmarked(bookmarked), downloaded(downloaded) {}
+    explicit ChapterRow(double id, std::string name, std::string numberText, std::optional<double> releaseTime, std::string releaseText, std::string scanlator, double progress, bool unread, bool bookmarked, bool downloaded): id(id), name(name), numberText(numberText), releaseTime(releaseTime), releaseText(releaseText), scanlator(scanlator), progress(progress), unread(unread), bookmarked(bookmarked), downloaded(downloaded) {}
 
   public:
     friend bool operator==(const ChapterRow& lhs, const ChapterRow& rhs) = default;
@@ -65,8 +70,12 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrochapterlist::ChapterRow(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "id"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "subtitle"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "name"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "numberText"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "releaseTime"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "releaseText"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scanlator"))),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "progress"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "unread"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bookmarked"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "downloaded")))
@@ -75,8 +84,12 @@ namespace margelo::nitro {
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrochapterlist::ChapterRow& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "id"), JSIConverter<double>::toJSI(runtime, arg.id));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "title"), JSIConverter<std::string>::toJSI(runtime, arg.title));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "subtitle"), JSIConverter<std::string>::toJSI(runtime, arg.subtitle));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "name"), JSIConverter<std::string>::toJSI(runtime, arg.name));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "numberText"), JSIConverter<std::string>::toJSI(runtime, arg.numberText));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "releaseTime"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.releaseTime));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "releaseText"), JSIConverter<std::string>::toJSI(runtime, arg.releaseText));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "scanlator"), JSIConverter<std::string>::toJSI(runtime, arg.scanlator));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "progress"), JSIConverter<double>::toJSI(runtime, arg.progress));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "unread"), JSIConverter<bool>::toJSI(runtime, arg.unread));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bookmarked"), JSIConverter<bool>::toJSI(runtime, arg.bookmarked));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "downloaded"), JSIConverter<bool>::toJSI(runtime, arg.downloaded));
@@ -91,8 +104,12 @@ namespace margelo::nitro {
         return false;
       }
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "id")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "subtitle")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "name")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "numberText")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "releaseTime")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "releaseText")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scanlator")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "progress")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "unread")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bookmarked")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "downloaded")))) return false;

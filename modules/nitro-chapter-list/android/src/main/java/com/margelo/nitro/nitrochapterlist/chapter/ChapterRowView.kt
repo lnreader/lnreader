@@ -122,12 +122,13 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     if (isSelected) selectedLayer.color = value.selectedBackground
   }
 
-  fun bindRow(row: ChapterRow) {
-    title.text = row.title
-    if (row.subtitle.isEmpty()) {
+  fun bindRow(row: ChapterRow, formatter: ChapterRowFormatter) {
+    title.text = formatter.title(row)
+    val subtitleText = formatter.subtitle(row)
+    if (subtitleText.isEmpty()) {
       subtitle.visibility = GONE
     } else {
-      subtitle.text = row.subtitle
+      subtitle.text = subtitleText
       subtitle.visibility = VISIBLE
     }
     unread = row.unread

@@ -10,6 +10,7 @@
 #include <fbjni/fbjni.h>
 #include "ChapterRow.hpp"
 
+#include <optional>
 #include <string>
 
 namespace margelo::nitro::nitrochapterlist {
@@ -33,10 +34,18 @@ namespace margelo::nitro::nitrochapterlist {
       static const auto clazz = javaClassStatic();
       static const auto fieldId = clazz->getField<double>("id");
       double id = this->getFieldValue(fieldId);
-      static const auto fieldTitle = clazz->getField<jni::JString>("title");
-      jni::local_ref<jni::JString> title = this->getFieldValue(fieldTitle);
-      static const auto fieldSubtitle = clazz->getField<jni::JString>("subtitle");
-      jni::local_ref<jni::JString> subtitle = this->getFieldValue(fieldSubtitle);
+      static const auto fieldName = clazz->getField<jni::JString>("name");
+      jni::local_ref<jni::JString> name = this->getFieldValue(fieldName);
+      static const auto fieldNumberText = clazz->getField<jni::JString>("numberText");
+      jni::local_ref<jni::JString> numberText = this->getFieldValue(fieldNumberText);
+      static const auto fieldReleaseTime = clazz->getField<jni::JDouble>("releaseTime");
+      jni::local_ref<jni::JDouble> releaseTime = this->getFieldValue(fieldReleaseTime);
+      static const auto fieldReleaseText = clazz->getField<jni::JString>("releaseText");
+      jni::local_ref<jni::JString> releaseText = this->getFieldValue(fieldReleaseText);
+      static const auto fieldScanlator = clazz->getField<jni::JString>("scanlator");
+      jni::local_ref<jni::JString> scanlator = this->getFieldValue(fieldScanlator);
+      static const auto fieldProgress = clazz->getField<double>("progress");
+      double progress = this->getFieldValue(fieldProgress);
       static const auto fieldUnread = clazz->getField<jboolean>("unread");
       jboolean unread = this->getFieldValue(fieldUnread);
       static const auto fieldBookmarked = clazz->getField<jboolean>("bookmarked");
@@ -45,8 +54,12 @@ namespace margelo::nitro::nitrochapterlist {
       jboolean downloaded = this->getFieldValue(fieldDownloaded);
       return ChapterRow(
         id,
-        title->toStdString(),
-        subtitle->toStdString(),
+        name->toStdString(),
+        numberText->toStdString(),
+        releaseTime != nullptr ? std::make_optional(releaseTime->value()) : std::nullopt,
+        releaseText->toStdString(),
+        scanlator->toStdString(),
+        progress,
         static_cast<bool>(unread),
         static_cast<bool>(bookmarked),
         static_cast<bool>(downloaded)
@@ -59,14 +72,18 @@ namespace margelo::nitro::nitrochapterlist {
      */
     [[maybe_unused]]
     static jni::local_ref<JChapterRow::javaobject> fromCpp(const ChapterRow& value) {
-      using JSignature = JChapterRow(double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jboolean, jboolean, jboolean);
+      using JSignature = JChapterRow(double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, double, jboolean, jboolean, jboolean);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.id,
-        jni::make_jstring(value.title),
-        jni::make_jstring(value.subtitle),
+        jni::make_jstring(value.name),
+        jni::make_jstring(value.numberText),
+        value.releaseTime.has_value() ? jni::JDouble::valueOf(value.releaseTime.value()) : nullptr,
+        jni::make_jstring(value.releaseText),
+        jni::make_jstring(value.scanlator),
+        value.progress,
         value.unread,
         value.bookmarked,
         value.downloaded

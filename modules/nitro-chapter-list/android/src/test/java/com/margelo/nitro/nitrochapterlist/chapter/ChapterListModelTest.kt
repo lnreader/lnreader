@@ -12,8 +12,19 @@ class ChapterListModelTest {
   private val model = ChapterListModel()
   private val events = ArrayList<String>()
 
-  private fun row(id: Int, title: String = "Chapter $id", downloaded: Boolean = false) =
-    ChapterRow(id.toDouble(), title, "", unread = true, bookmarked = false, downloaded = downloaded)
+  private fun row(id: Int, name: String = "Chapter $id", downloaded: Boolean = false) =
+    ChapterRow(
+      id = id.toDouble(),
+      name = name,
+      numberText = id.toString(),
+      releaseTime = null,
+      releaseText = "",
+      scanlator = "",
+      progress = 0.0,
+      unread = true,
+      bookmarked = false,
+      downloaded = downloaded,
+    )
 
   private fun rows(ids: IntRange) = ids.map { row(it) }.toTypedArray()
 
@@ -95,7 +106,7 @@ class ChapterListModelTest {
       arrayOf(row(4, "read"), row(3, "read"), row(9, "read"), row(42, "unknown"), row(1)),
     )
 
-    assertEquals("read", model.rowAt(2)?.title)
+    assertEquals("read", model.rowAt(2)?.name)
     // Row 1 is unchanged and id 42 isn't in the list.
     assertEquals(listOf("changed 2+2", "changed 8+1"), events)
   }

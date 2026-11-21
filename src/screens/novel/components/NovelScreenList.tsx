@@ -30,6 +30,7 @@ import NovelFloatingActions from './NovelFloatingActions';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
 import {
+  buildChapterRowFormat,
   NativeChapterList,
   type NativeChapterListRef,
   useChapterListStore,
@@ -223,11 +224,20 @@ const NovelScreenList = ({
     [chapterSetKey, loadUpToBatch],
   );
 
+  const rowFormat = useMemo(
+    () =>
+      buildChapterRowFormat({
+        showChapterTitles,
+        dateFormat,
+        relativeTimestamps,
+      }),
+    [showChapterTitles, dateFormat, relativeTimestamps],
+  );
+
   const storeId = useChapterListStore({
     chapters: listChapters,
     totalChapters,
     dataKey: chapterSetKey,
-    format: { showChapterTitles, dateFormat, relativeTimestamps },
     selectedIds,
     downloadingIds: hasNovel ? downloadingChapterIds : NO_IDS,
     onStaleRows: (_start, end) => requestUpTo(end - 1),
@@ -463,6 +473,7 @@ const NovelScreenList = ({
         ref={listRef}
         storeId={storeId}
         theme={theme}
+        rowFormat={rowFormat}
         header={listHeader}
         isLocal={novel.isLocal ?? false}
         refreshing={updating}

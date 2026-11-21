@@ -30,6 +30,33 @@ export type ChapterListStrings = Readonly<{
   downloadingA11yLabel: string;
 }>;
 
+/**
+ * How native formats row text. JS supplies everything that needs translating
+ * or locale data, so native only picks and fills strings:
+ * - title: `name`, or `chapterTitleTemplate` with `%{num}` filled in;
+ * - subtitle: release date, scanlator and progress, joined with " •  ".
+ *
+ * Release dates within six days of today use `sameDay` / `lastDay` / `nextDay`
+ * or the per-weekday `lastWeek` / `nextWeek` labels (index 0 is Sunday), when
+ * `relativeDates` is on. Other dates use `dateFormat`: 'default' is the
+ * locale's short date; anything else is a dayjs pattern of YYYY, YY, MMM, MM
+ * and DD (MMM from `monthsShort`).
+ */
+export type ChapterRowFormat = Readonly<{
+  showChapterTitles: boolean;
+  chapterTitleTemplate: string;
+  progressTemplate: string;
+  dateFormat: string;
+  relativeDates: boolean;
+  locale: string;
+  sameDay: string;
+  lastDay: string;
+  nextDay: string;
+  lastWeek: ReadonlyArray<string>;
+  nextWeek: ReadonlyArray<string>;
+  monthsShort: ReadonlyArray<string>;
+}>;
+
 /** Shaped like ScrollView's scroll event so Reanimated can handle it. */
 export type ChapterListScrollEvent = Readonly<{
   contentOffset: Readonly<{ x: Double; y: Double }>;
@@ -46,6 +73,7 @@ export interface NativeProps extends ViewProps {
   storeId: string;
   colors: ChapterListColors;
   strings: ChapterListStrings;
+  rowFormat: ChapterRowFormat;
   isLocal?: WithDefault<boolean, false>;
   refreshing?: WithDefault<boolean, false>;
   refreshOffset?: WithDefault<Float, 0>;

@@ -23,10 +23,22 @@ data class ChapterRow(
   val id: Double,
   @DoNotStrip
   @Keep
-  val title: String,
+  val name: String,
   @DoNotStrip
   @Keep
-  val subtitle: String,
+  val numberText: String,
+  @DoNotStrip
+  @Keep
+  val releaseTime: Double?,
+  @DoNotStrip
+  @Keep
+  val releaseText: String,
+  @DoNotStrip
+  @Keep
+  val scanlator: String,
+  @DoNotStrip
+  @Keep
+  val progress: Double,
   @DoNotStrip
   @Keep
   val unread: Boolean,
@@ -43,8 +55,12 @@ data class ChapterRow(
     if (this === other) return true
     if (other !is ChapterRow) return false
     return Objects.deepEquals(this.id, other.id)
-      && Objects.deepEquals(this.title, other.title)
-      && Objects.deepEquals(this.subtitle, other.subtitle)
+      && Objects.deepEquals(this.name, other.name)
+      && Objects.deepEquals(this.numberText, other.numberText)
+      && Objects.deepEquals(this.releaseTime, other.releaseTime)
+      && Objects.deepEquals(this.releaseText, other.releaseText)
+      && Objects.deepEquals(this.scanlator, other.scanlator)
+      && Objects.deepEquals(this.progress, other.progress)
       && Objects.deepEquals(this.unread, other.unread)
       && Objects.deepEquals(this.bookmarked, other.bookmarked)
       && Objects.deepEquals(this.downloaded, other.downloaded)
@@ -53,8 +69,12 @@ data class ChapterRow(
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       id,
-      title,
-      subtitle,
+      name,
+      numberText,
+      releaseTime,
+      releaseText,
+      scanlator,
+      progress,
       unread,
       bookmarked,
       downloaded
@@ -69,8 +89,8 @@ data class ChapterRow(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(id: Double, title: String, subtitle: String, unread: Boolean, bookmarked: Boolean, downloaded: Boolean): ChapterRow {
-      return ChapterRow(id, title, subtitle, unread, bookmarked, downloaded)
+    private fun fromCpp(id: Double, name: String, numberText: String, releaseTime: Double?, releaseText: String, scanlator: String, progress: Double, unread: Boolean, bookmarked: Boolean, downloaded: Boolean): ChapterRow {
+      return ChapterRow(id, name, numberText, releaseTime, releaseText, scanlator, progress, unread, bookmarked, downloaded)
     }
   }
 }

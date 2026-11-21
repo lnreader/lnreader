@@ -63,6 +63,18 @@ class ChapterListAdapter(
       notifyDataSetChanged()
     }
 
+  /** Row text formatting; a new one rebinds the visible rows' text. */
+  var formatter: ChapterRowFormatter = ChapterRowFormatter(ChapterRowFormat())
+    set(value) {
+      field = value
+      notifyItemRangeChanged(HEADER_COUNT, chapterCount, Payload.TEXT)
+    }
+
+  /** Rebinds the visible rows' text, e.g. so relative dates move on at midnight. */
+  fun refreshText() {
+    notifyItemRangeChanged(HEADER_COUNT, chapterCount, Payload.TEXT)
+  }
+
   var theme: ChapterListTheme = ChapterListTheme()
     set(value) {
       if (field == value) return
@@ -121,7 +133,7 @@ class ChapterListAdapter(
       callbacks.onPlaceholderBound(position - HEADER_COUNT)
       return
     }
-    row.bindRow(chapter)
+    row.bindRow(chapter, formatter)
     bindSelection(row, model, chapter)
     bindDownload(row, model, chapter)
   }
@@ -147,8 +159,9 @@ class ChapterListAdapter(
         ChapterListModel.Payload.DOWNLOADING -> bindDownload(holder.row, model, chapter)
         Payload.THEME -> {
           holder.row.applyTheme(theme)
-          holder.row.bindRow(chapter)
+          holder.row.bindRow(chapter, formatter)
         }
+        Payload.TEXT -> holder.row.bindRow(chapter, formatter)
         else -> {
           onBindViewHolder(holder, position)
           return
@@ -188,6 +201,7 @@ class ChapterListAdapter(
 
   private object Payload {
     val THEME = Any()
+    val TEXT = Any()
   }
 
   companion object {

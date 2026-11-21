@@ -14,7 +14,7 @@ split so another screen can reuse the list without the chapter parts:
 | Package   | What                                                   | Files                                                                                                                                                                                                                                                                                                                       |
 | --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `core`    | Generic native list host, knows nothing about chapters | `ListHostView` (SwipeRefreshLayout > RecyclerView, header item, events, commands), `ListHostViewManager` (hosting the React header child), `ListRecyclerView` (exact metrics, jumps), `ListFastScroller` (fork of androidx `FastScroller`, Apache 2.0), `HeaderContainer`, `ScrollEventGate`, `RangeRequester`, `ListEvent` |
-| `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                                                                 |
+| `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterRowFormatter` (row text), `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                               |
 | root      | Entry points that Nitro and RN look up by name         | `HybridChapterListStore` (the Nitro store), `ChapterListStoreRegistry`, `ChapterListViewManager` (`LNChapterListView`), `NitroChapterListPackage`                                                                                                                                                                           |
 
 A new list type adds its own package with a `ListHostView` subclass, adapter,
@@ -48,9 +48,40 @@ than that does no JS work at all.
 ## Maintenance
 
 **Every change to how a chapter row looks or behaves on the novel screen is now
-Kotlin work** in `ChapterRowView.kt` and `ChapterListAdapter.kt`, plus the strings
-in `buildChapterRow` (`src/components/NativeChapterList/chapterListSync.ts`).
-`ChapterItem.tsx` still renders rows elsewhere in the app, so keep the two in step.
+Kotlin work** in `ChapterRowView.kt`, `ChapterListAdapter.kt` and
+`ChapterRowFormatter.kt`. `ChapterItem.tsx` still renders rows elsewhere in the
+app, so keep the two in step.
+
+### Row text
+
+Native formats each row's title and subtitle when the row is bound, so only
+the rows on screen are ever formatted, and changing a display setting only
+rebinds those. The work is split so that native never parses or translates:
+
+- **JS** (`src/components/NativeChapterList/chapterListSync.ts`):
+  - `toChapterRow` sends raw values. The release time is parsed with dayjs,
+    exactly as `formatDate` parses it. Text it can't parse is sent as is.
+  - `buildChapterRowFormat` builds the `rowFormat` prop: the translated
+    templates, the relative-date labels (Today, Yesterday, Tomorrow, and
+    "Last …" and next week for each weekday) and the month names, all produced
+    by the same dayjs and i18n calls `formatDate` makes.
+- **Native** (`ChapterRowFormatter`): picks a label for days -6..6 from today
+  (the same rule as `formatDate`, with today taken from the device clock, and
+  a rebind at midnight), applies the dayjs date patterns, and joins the parts
+  with `" •  "`. `'default'` dates use the locale's short date from Android's
+  ICU, which Hermes' `Intl` is built on.
+
+The parity fixture `fixtures/chapter-row-format.json` keeps the two in step.
+`chapterRowFormatParity.test.ts` checks it against the JS formatting, and
+`ChapterRowFormatterParityTest.kt` checks the Kotlin formatter against it in
+several time zones. After changing a case or a string, regenerate it:
+
+```sh
+UPDATE_CHAPTER_ROW_FIXTURE=1 pnpm exec jest --selectProjects rn -- chapterRowFormatParity
+```
+
+The locale short date (`'default'` format, more than six days away) is the one
+part the fixture can't cover. Check it on a device.
 
 After changing `src/specs/*.nitro.ts`, regenerate the bindings:
 
@@ -66,6 +97,8 @@ React Native codegen for `src/fabric` runs as part of the Android build.
   colour. `ChapterItem` draws it in `outline`.
 - The gap between subtitle parts is the text `" •  "`. `ChapterItem` uses a 5dp
   margin before `"•  "`.
+- A chapter with no chapter number shows "Chapter " (empty number). JS shows
+  i18n-js's missing-value placeholder.
 
 ## Timing logs
 
@@ -81,7 +114,8 @@ React Native codegen for `src/fabric` runs as part of the Android build.
   `src/screens/novel/components/__tests__/NovelScreenList.test.tsx`. The global
   mock is in `test/mocks/nitroChapterList.js`.
 - Kotlin: `android/src/test`: `ChapterListModelTest` (store bookkeeping and
-  notification ranges), `ScrollEventGateTest` and `RangeRequesterTest`. Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
+  notification ranges), `ChapterRowFormatterParityTest`, `ScrollEventGateTest`
+  and `RangeRequesterTest`. Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
   from `android/`.
 
 ## Device checklist

@@ -1,24 +1,16 @@
 import type { ChapterRow } from '@modules/nitro-chapter-list';
-import type { ChapterInfo } from '@database/types';
 import {
-  buildChapterRow,
   type ChapterListSnapshot,
   planChapterListSync,
 } from '../chapterListSync';
 
-jest.mock('@i18n/translations', () => ({
-  getString: (key: string, params?: Record<string, unknown>) =>
-    params ? `${key} ${JSON.stringify(params)}` : key,
-}));
-
-jest.mock('@utils/dateFormat', () => ({
-  createDateFormatter: () => (value: string) => `date(${value})`,
-}));
-
-const row = (id: number, title = `Chapter ${id}`): ChapterRow => ({
+const row = (id: number, name = `Chapter ${id}`): ChapterRow => ({
   id,
-  title,
-  subtitle: '',
+  name,
+  numberText: String(id),
+  releaseText: '',
+  scanlator: '',
+  progress: 0,
   unread: true,
   bookmarked: false,
   downloaded: false,
@@ -103,52 +95,5 @@ describe('planChapterListSync', () => {
     expect(
       planChapterListSync(snapshot(rows(1, 3)), snapshot([], 0, 'novel-2')),
     ).toEqual([{ type: 'reset', total: 0 }]);
-  });
-});
-
-describe('buildChapterRow', () => {
-  const chapter = {
-    id: 7,
-    name: 'The Beginning',
-    chapterNumber: 12,
-    releaseTime: '2026-01-01',
-    scanlator: 'Team A',
-    progress: 40,
-    unread: true,
-    bookmark: true,
-    isDownloaded: true,
-  } as ChapterInfo;
-  const format = {
-    showChapterTitles: false,
-    dateFormat: 'default' as const,
-    relativeTimestamps: true,
-  };
-
-  it('formats the title and joins date, scanlator and progress', () => {
-    expect(buildChapterRow(chapter, format)).toEqual({
-      id: 7,
-      title: 'novelScreen.chapterChapnum {"num":12}',
-      subtitle:
-        'date(2026-01-01) •  Team A •  novelScreen.progress {"progress":40}',
-      unread: true,
-      bookmarked: true,
-      downloaded: true,
-    });
-  });
-
-  it('uses the chapter name when titles are shown', () => {
-    expect(
-      buildChapterRow(chapter, { ...format, showChapterTitles: true }).title,
-    ).toBe('The Beginning');
-  });
-
-  it('hides progress for read chapters and leaves an empty subtitle when nothing is known', () => {
-    const read = buildChapterRow({ ...chapter, unread: false }, format);
-    expect(read.subtitle).toBe('date(2026-01-01) •  Team A');
-    const bare = buildChapterRow(
-      { ...chapter, releaseTime: null, scanlator: null, progress: 0 },
-      format,
-    );
-    expect(bare.subtitle).toBe('');
   });
 });

@@ -17,6 +17,7 @@ import {
   type ChapterIdEvent,
   type ChapterListColors,
   type ChapterListStrings,
+  type ChapterRowFormat,
   ChapterListViewCommands,
   ChapterListViewNativeComponent,
   type RequestRangeEvent,
@@ -43,6 +44,8 @@ interface NativeChapterListProps {
   ref?: React.Ref<NativeChapterListRef>;
   storeId: string;
   theme: ThemeColors;
+  /** How native formats row text; see `buildChapterRowFormat`. */
+  rowFormat: ChapterRowFormat;
   /** Rendered by React above the rows and scrolled with them. */
   header: React.ReactNode;
   isLocal: boolean;
@@ -86,6 +89,7 @@ const NativeChapterList = ({
   ref,
   storeId,
   theme,
+  rowFormat,
   header,
   isLocal,
   refreshing,
@@ -172,6 +176,7 @@ const NativeChapterList = ({
       storeId={storeId}
       colors={colors}
       strings={strings}
+      rowFormat={rowFormat}
       // Codegen casts these straight to Java booleans, and novel rows can carry
       // SQLite's 0/1 here despite the type.
       isLocal={!!isLocal}
