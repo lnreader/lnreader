@@ -87,11 +87,7 @@ private fun ContinueReadingContent(state: WidgetState) {
         message != null -> WideMessage(
             message = message,
             horizontal = !tall,
-            header = if (tall) {
-                @Composable { WidgetHeader(title = strings.continueReading, onClick = null) }
-            } else {
-                null
-            },
+            header = if (tall) continueHeader(strings) else null,
         )
         !wide -> CoverLayout(state)
         !tall -> DetailLayout(state)
@@ -260,6 +256,10 @@ private fun ListLayout(state: WidgetState) {
 }
 
 private fun strings(state: WidgetState) = state.snapshot.strings
+
+private fun continueHeader(strings: WidgetStrings): @Composable () -> Unit = {
+    WidgetHeader(title = strings.continueReading, onClick = null)
+}
 
 private fun progressLabel(strings: WidgetStrings, item: ReadingItem): String {
     val progress = item.novelProgress

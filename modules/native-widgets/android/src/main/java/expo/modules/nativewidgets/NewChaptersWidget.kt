@@ -65,21 +65,22 @@ private fun NewChaptersContent(state: WidgetState) {
     val update = state.libraryUpdate
     val large = size.height >= LARGE_MIN_HEIGHT
 
-    val header = @Composable {
+    // Typed vals, not inline branches: in a `when` branch `-> @Composable { }`
+    // parses as an annotated block body rather than a lambda.
+    val refresh: (@Composable () -> Unit)? =
+        if (snapshot.incognito) null else ({ RefreshButton(updating = update != null, onClick = WidgetLinks.refreshLibrary()) })
+    val badge: (@Composable () -> Unit)? = when {
+        snapshot.incognito -> null
+        update != null -> ({ UpdatingLabel(strings, update) })
+        snapshot.updatesCount > 0 -> ({ CountBadge(snapshot.updatesCount) })
+        else -> null
+    }
+    val header: @Composable () -> Unit = {
         WidgetHeader(
             title = strings.newChapters,
             onClick = WidgetLinks.updates(context),
-            trailing = if (snapshot.incognito) {
-                null
-            } else {
-                @Composable { RefreshButton(updating = update != null, onClick = WidgetLinks.refreshLibrary()) }
-            },
-            badge = when {
-                snapshot.incognito -> null
-                update != null -> @Composable { UpdatingLabel(strings, update) }
-                snapshot.updatesCount > 0 -> @Composable { CountBadge(snapshot.updatesCount) }
-                else -> null
-            },
+            trailing = refresh,
+            badge = badge,
         )
     }
 
