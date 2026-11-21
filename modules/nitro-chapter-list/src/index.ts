@@ -1,13 +1,16 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { ChapterListStore } from './specs/ChapterListStore.nitro';
+// Re-exported under another name: RN's codegen Babel plugin reserves a
+// `Commands` export for files that call codegenNativeCommands.
+import ChapterListViewNativeComponent, {
+  Commands as NativeCommands,
+} from './fabric/ChapterListViewNativeComponent';
 
 export const createChapterListStore = (): ChapterListStore =>
   NitroModules.createHybridObject<ChapterListStore>('ChapterListStore');
 
-export {
-  default as ChapterListViewNativeComponent,
-  Commands as ChapterListViewCommands,
-} from './fabric/ChapterListViewNativeComponent';
+export const ChapterListViewCommands = NativeCommands;
+export { ChapterListViewNativeComponent };
 export type {
   ChapterIdEvent,
   ChapterListColors,
