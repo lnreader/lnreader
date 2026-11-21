@@ -115,6 +115,10 @@ describe('WidgetIntentHandler', () => {
       expect(parseWidgetUrl('lnreader://repo/add?url=x')).toBeNull();
       expect(parseWidgetUrl('lnreader://widget/')).toBeNull();
     });
+
+    it('ignores links with malformed escapes instead of throwing', () => {
+      expect(parseWidgetUrl('lnreader://widget/chapter?novelId=%')).toBeNull();
+    });
   });
 
   describe('openWidgetLink', () => {

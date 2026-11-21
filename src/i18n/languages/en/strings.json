@@ -943,6 +943,7 @@
     "resume": "Resume",
     "chapter": "Ch. %{number}",
     "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
     "more": "+%{remaining} more",
     "updating": "Updating",
     "updatingProgress": "Updating · %{done}/%{total}",

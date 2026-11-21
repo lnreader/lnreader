@@ -14,8 +14,11 @@ data class WidgetSnapshot(
     val reading: List<ReadingItem>,
     val updatesCount: Int,
     val updates: List<UpdateItem>,
-    /** Chapters read per local day, keyed `yyyy-MM-dd`. */
+    /** Chapters read per local day over the last week, keyed `yyyy-MM-dd`. */
     val readDays: Map<String, Int>,
+    /** Consecutive reading days ending on [streakLastDay] (`yyyy-MM-dd`). */
+    val streakDays: Int,
+    val streakLastDay: String?,
     val strings: WidgetStrings,
 ) {
     companion object {
@@ -25,6 +28,8 @@ data class WidgetSnapshot(
             updatesCount = 0,
             updates = emptyList(),
             readDays = emptyMap(),
+            streakDays = 0,
+            streakLastDay = null,
             strings = WidgetStrings(emptyMap()),
         )
 
@@ -41,6 +46,8 @@ data class WidgetSnapshot(
                     readDays = root.optJSONObject("readDays")?.let { days ->
                         days.keys().asSequence().associateWith { days.optInt(it, 0) }
                     } ?: emptyMap(),
+                    streakDays = root.optJSONObject("streak")?.optInt("days", 0) ?: 0,
+                    streakLastDay = root.optJSONObject("streak")?.optStringOrNull("lastDay"),
                     strings = WidgetStrings(
                         root.optJSONObject("strings")?.let { s ->
                             s.keys().asSequence().associateWith { s.optString(it) }
@@ -60,8 +67,10 @@ data class ReadingItem(
     val novelName: String,
     val chapterName: String,
     val chapterNumber: String,
-    /** Novel progress in [0, 1], or null when the chapter count is unknown. */
+    /** Place in the novel's reading order over its chapter count, or null when unknown. */
     val novelProgress: Float?,
+    /** The chapter number is also its place in the novel, so "Ch. N of total" reads correctly. */
+    val showTotal: Boolean,
     /** Scroll progress inside the chapter in [0, 1]. */
     val chapterProgress: Float,
     val totalChapters: Int,
@@ -82,6 +91,7 @@ data class ReadingItem(
             } else {
                 null
             },
+            showTotal = o.optBoolean("showTotal", false),
             chapterProgress = o.optDouble("chapterProgress", 0.0).toFloat().coerceIn(0f, 1f),
             totalChapters = o.optInt("totalChapters", 0),
             cover = o.optStringOrNull("cover"),
@@ -135,6 +145,9 @@ class WidgetStrings(private val values: Map<String, String>) {
             "total" to NumberFormat.getIntegerInstance().format(total),
             "percent" to percent,
         )
+
+    fun chapterPercent(number: String, percent: Int) =
+        get("chapterPercent", "Ch. {number} · {percent}%", "number" to number, "percent" to percent)
 
     /** "Ch. 412", or the chapter name when the number could not be parsed. */
     fun chapterLabel(number: String, name: String) = if (number.isEmpty()) name else chapter(number)

@@ -11,6 +11,7 @@ import { insertTestNovel, insertTestChapter, clearAllTables } from './testData';
 
 import {
   getRandomLibraryNovelFromDb,
+  getWidgetReadDatesFromDb,
   getWidgetReadDaysFromDb,
   getWidgetReadingFromDb,
   getWidgetUpdatesCountFromDb,
@@ -66,6 +67,39 @@ describe('WidgetQueries', () => {
         totalChapters: 2,
         progress: 40,
       });
+    });
+
+    it("gives the chapter's place in reading order, not its source number", async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      // A source that starts at chapter 400 and spans two pages.
+      await insertTestChapter(testDb, novelId, {
+        chapterNumber: 400,
+        page: '1',
+        position: 0,
+      });
+      await insertTestChapter(testDb, novelId, {
+        chapterNumber: 401,
+        page: '1',
+        position: 1,
+      });
+      await insertTestChapter(testDb, novelId, {
+        chapterNumber: 450,
+        page: '2',
+        position: 0,
+        readTime: localTime(0),
+      });
+      await insertTestChapter(testDb, novelId, {
+        chapterNumber: 451,
+        page: '2',
+        position: 1,
+      });
+
+      const [row] = await getWidgetReadingFromDb(4);
+
+      expect(row.chapterNumber).toBe(450);
+      expect(row.chapterPosition).toBe(3);
+      expect(row.totalChapters).toBe(4);
     });
 
     it('respects the limit', async () => {
@@ -140,6 +174,24 @@ describe('WidgetQueries', () => {
         [dayjs().format('YYYY-MM-DD')]: 2,
         [dayjs().subtract(2, 'day').format('YYYY-MM-DD')]: 1,
       });
+    });
+  });
+
+  describe('getWidgetReadDatesFromDb', () => {
+    it('returns every distinct reading day, newest first', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      await insertTestChapter(testDb, novelId, { readTime: localTime(0) });
+      await insertTestChapter(testDb, novelId, {
+        readTime: localTime(0, '22:00:00'),
+      });
+      await insertTestChapter(testDb, novelId, { readTime: localTime(120) });
+      await insertTestChapter(testDb, novelId);
+
+      expect(await getWidgetReadDatesFromDb()).toEqual([
+        dayjs().format('YYYY-MM-DD'),
+        dayjs().subtract(120, 'day').format('YYYY-MM-DD'),
+      ]);
     });
   });
 

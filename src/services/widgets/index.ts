@@ -9,6 +9,7 @@ import {
   type LibrarySettings,
 } from '@hooks/persisted/useSettings';
 import {
+  getWidgetReadDatesFromDb,
   getWidgetReadDaysFromDb,
   getWidgetReadingFromDb,
   getWidgetUpdatesCountFromDb,
@@ -17,8 +18,8 @@ import {
 
 const READING_LIMIT = 4;
 const UPDATES_LIMIT = 6;
-// Enough history for the 7 dots plus a long streak.
-const READ_DAYS_WINDOW = 60;
+// The 7 activity dots; the streak is computed from the full history.
+const READ_DAYS_WINDOW = 7;
 
 /** Mirrors WidgetSnapshot.kt; every widget renders from this. */
 export interface WidgetSnapshot {
@@ -29,7 +30,13 @@ export interface WidgetSnapshot {
     novelName: string;
     chapterName: string;
     chapterNumber: string;
+    /** Place in the novel's reading order over its chapter count. */
     novelProgress: number | null;
+    /**
+     * Whether "Ch. {number} of {total}" reads correctly, i.e. the source's
+     * chapter number is also the chapter's place in the novel.
+     */
+    showTotal: boolean;
     chapterProgress: number;
     totalChapters: number;
     cover: string | null;
@@ -47,6 +54,8 @@ export interface WidgetSnapshot {
     }[];
   };
   readDays: Record<string, number>;
+  /** Consecutive reading days ending on `lastDay` (`YYYY-MM-DD`). */
+  streak: { days: number; lastDay: string } | null;
   strings: Record<string, string>;
 }
 
@@ -76,6 +85,10 @@ const widgetStrings = (): Record<string, string> => ({
     total: '{total}',
     percent: '{percent}',
   }),
+  chapterPercent: getString('widgets.chapterPercent', {
+    number: '{number}',
+    percent: '{percent}',
+  }),
   more: getString('widgets.more', { remaining: '{remaining}' }),
   updating: getString('widgets.updating'),
   updatingProgress: getString('widgets.updatingProgress', {
@@ -101,10 +114,35 @@ const widgetStrings = (): Record<string, string> => ({
   updateNotificationDescription: getString('common.preparing'),
 });
 
+/**
+ * Length of the run of consecutive days ending on the most recent one.
+ * Native code decides at render time whether that run is still alive
+ * (last day is today or yesterday), so the widget stays right past midnight.
+ */
+export const computeReadingStreak = (
+  datesNewestFirst: string[],
+): WidgetSnapshot['streak'] => {
+  const [lastDay] = datesNewestFirst;
+  if (!lastDay) {
+    return null;
+  }
+  let days = 1;
+  let expected = dayjs(lastDay).subtract(1, 'day');
+  for (const date of datesNewestFirst.slice(1)) {
+    if (date !== expected.format('YYYY-MM-DD')) {
+      break;
+    }
+    days++;
+    expected = expected.subtract(1, 'day');
+  }
+  return { days, lastDay };
+};
+
+const isIncognito = () =>
+  Boolean(getMMKVObject<LibrarySettings>(LIBRARY_SETTINGS)?.incognitoMode);
+
 export const buildWidgetSnapshot = async (): Promise<WidgetSnapshot> => {
-  const incognito = Boolean(
-    getMMKVObject<LibrarySettings>(LIBRARY_SETTINGS)?.incognitoMode,
-  );
+  const incognito = isIncognito();
   const strings = widgetStrings();
 
   // Incognito hides reading history everywhere, including the home screen:
@@ -115,16 +153,19 @@ export const buildWidgetSnapshot = async (): Promise<WidgetSnapshot> => {
       reading: [],
       updates: { count: 0, items: [] },
       readDays: {},
+      streak: null,
       strings,
     };
   }
 
-  const [reading, updates, updatesCount, readDays] = await Promise.all([
-    getWidgetReadingFromDb(READING_LIMIT),
-    getWidgetUpdatesFromDb(UPDATES_LIMIT),
-    getWidgetUpdatesCountFromDb(),
-    getWidgetReadDaysFromDb(READ_DAYS_WINDOW),
-  ]);
+  const [reading, updates, updatesCount, readDays, readDates] =
+    await Promise.all([
+      getWidgetReadingFromDb(READING_LIMIT),
+      getWidgetUpdatesFromDb(UPDATES_LIMIT),
+      getWidgetUpdatesCountFromDb(),
+      getWidgetReadDaysFromDb(READ_DAYS_WINDOW),
+      getWidgetReadDatesFromDb(),
+    ]);
 
   return {
     incognito,
@@ -135,16 +176,18 @@ export const buildWidgetSnapshot = async (): Promise<WidgetSnapshot> => {
         row.chapterName,
       );
       const totalChapters = row.totalChapters ?? 0;
+      const position = row.chapterPosition ?? 0;
+      const hasProgress = totalChapters > 0 && position > 0;
       return {
         novelId: row.novelId,
         chapterId: row.chapterId,
         novelName: row.novelName,
         chapterName: row.chapterName,
         chapterNumber: formatChapterNumber(number),
-        novelProgress:
-          totalChapters > 0 && number > 0
-            ? Math.min(1, number / totalChapters)
-            : null,
+        novelProgress: hasProgress
+          ? Math.min(1, position / totalChapters)
+          : null,
+        showTotal: hasProgress && number === position,
         chapterProgress: Math.min(1, Math.max(0, (row.progress ?? 0) / 100)),
         totalChapters,
         cover: row.novelCover ?? null,
@@ -173,6 +216,7 @@ export const buildWidgetSnapshot = async (): Promise<WidgetSnapshot> => {
         .filter(row => Boolean(row.day))
         .map(row => [row.day, row.chapters]),
     ),
+    streak: computeReadingStreak(readDates),
     strings,
   };
 };
@@ -184,7 +228,7 @@ export const buildWidgetSnapshot = async (): Promise<WidgetSnapshot> => {
  * regardless, so a widget added later renders real data immediately instead
  * of waiting for the next app launch.
  */
-export const syncWidgets = async ({ force = false } = {}) => {
+const publishSnapshot = async (force: boolean) => {
   if (!NativeWidgets) {
     return;
   }
@@ -192,11 +236,25 @@ export const syncWidgets = async ({ force = false } = {}) => {
     if (!force && !(await NativeWidgets.hasWidgets())) {
       return;
     }
-    const snapshot = await buildWidgetSnapshot();
+    let snapshot = await buildWidgetSnapshot();
+    // Incognito may have been switched on while the queries ran. Never
+    // publish history captured before that.
+    if (snapshot.incognito !== isIncognito()) {
+      snapshot = await buildWidgetSnapshot();
+    }
     await NativeWidgets.setSnapshot(JSON.stringify(snapshot));
   } catch {
     // Widgets are best effort; a failed sync keeps the previous snapshot.
   }
+};
+
+// Syncs run one at a time, in call order, so an older snapshot can never be
+// published after a newer one (e.g. one built just before incognito was on).
+let syncQueue: Promise<void> = Promise.resolve();
+
+export const syncWidgets = ({ force = false } = {}): Promise<void> => {
+  syncQueue = syncQueue.then(() => publishSnapshot(force));
+  return syncQueue;
 };
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;

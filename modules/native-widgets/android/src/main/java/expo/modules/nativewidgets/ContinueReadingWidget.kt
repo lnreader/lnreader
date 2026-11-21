@@ -263,10 +263,13 @@ private fun continueHeader(strings: WidgetStrings): @Composable () -> Unit = {
 
 private fun progressLabel(strings: WidgetStrings, item: ReadingItem): String {
     val progress = item.novelProgress
-    return if (progress != null && item.totalChapters > 0 && item.chapterNumber.isNotEmpty()) {
-        strings.chapterProgress(item.chapterNumber, item.totalChapters, (progress * 100).toInt())
-    } else {
-        strings.chapterLabel(item.chapterNumber, item.chapterName)
+    val percent = ((progress ?: 0f) * 100).toInt()
+    return when {
+        progress == null || item.chapterNumber.isEmpty() ->
+            strings.chapterLabel(item.chapterNumber, item.chapterName)
+        item.showTotal -> strings.chapterProgress(item.chapterNumber, item.totalChapters, percent)
+        // Numbering that skips or starts late: "Ch. 412 of 100" would be wrong.
+        else -> strings.chapterPercent(item.chapterNumber, percent)
     }
 }
 

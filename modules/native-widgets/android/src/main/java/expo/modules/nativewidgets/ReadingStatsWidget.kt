@@ -56,7 +56,12 @@ internal data class WeekStats(val chapters: Int, val days: List<DayDot>, val str
  * Computed at render time rather than in JS so the week rolls over at
  * midnight even if the app has not run since.
  */
-internal fun weekStats(readDays: Map<String, Int>, now: Calendar = Calendar.getInstance()): WeekStats {
+internal fun weekStats(
+    readDays: Map<String, Int>,
+    streakDays: Int,
+    streakLastDay: String?,
+    now: Calendar = Calendar.getInstance(),
+): WeekStats {
     val keyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     val labelFormat = SimpleDateFormat("EEEEE", Locale.getDefault())
     val day = now.clone() as Calendar
@@ -71,15 +76,11 @@ internal fun weekStats(readDays: Map<String, Int>, now: Calendar = Calendar.getI
         day.add(Calendar.DAY_OF_YEAR, 1)
     }
 
-    // A streak survives until the end of today, so start from yesterday when
-    // nothing has been read yet today.
-    val cursor = now.clone() as Calendar
-    if ((readDays[keyFormat.format(cursor.time)] ?: 0) == 0) cursor.add(Calendar.DAY_OF_YEAR, -1)
-    var streak = 0
-    while ((readDays[keyFormat.format(cursor.time)] ?: 0) > 0) {
-        streak++
-        cursor.add(Calendar.DAY_OF_YEAR, -1)
-    }
+    // The streak's length comes from the full history (JS); it is still alive
+    // only if its last day is today, or yesterday since today is not over.
+    val today = keyFormat.format(now.time)
+    val yesterday = keyFormat.format((now.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -1) }.time)
+    val streak = if (streakLastDay == today || streakLastDay == yesterday) streakDays else 0
 
     return WeekStats(chapters, days, streak)
 }
@@ -90,7 +91,7 @@ private fun ReadingStatsContent(state: WidgetState) {
     val size = LocalSize.current
     val snapshot = state.snapshot
     val strings = snapshot.strings
-    val stats = weekStats(snapshot.readDays)
+    val stats = weekStats(snapshot.readDays, snapshot.streakDays, snapshot.streakLastDay)
 
     if (snapshot.incognito || stats.chapters == 0) {
         val message = if (snapshot.incognito) {

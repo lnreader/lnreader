@@ -796,6 +796,7 @@ export interface StringMap {
   'widgets.resume': 'string';
   'widgets.chapter': 'string';
   'widgets.chapterProgress': 'string';
+  'widgets.chapterPercent': 'string';
   'widgets.more': 'string';
   'widgets.updating': 'string';
   'widgets.updatingProgress': 'string';

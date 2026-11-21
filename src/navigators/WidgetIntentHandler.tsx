@@ -36,7 +36,12 @@ export const parseWidgetUrl = (url: string): WidgetLink | null => {
       continue;
     }
     const [key, value = ''] = pair.split('=');
-    params[decodeURIComponent(key)] = decodeURIComponent(value);
+    try {
+      params[decodeURIComponent(key)] = decodeURIComponent(value);
+    } catch {
+      // Malformed escape (e.g. a bare "%"); not a link a widget would send.
+      return null;
+    }
   }
   return { target, params };
 };
