@@ -35,6 +35,7 @@ import { PLUGIN_STORAGE } from '@utils/Storages';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
+import useNovelLinkNavigation from '../hooks/useNovelLinkNavigation';
 import type { TtsSettings } from '@modules/nitro-tts';
 import { ChapterInfo } from '@database/types';
 import { Dialog } from '@components/Dialog';
@@ -215,6 +216,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     refetch,
   } = useChapterContext();
   const theme = useTheme();
+  const openNovelLink = useNovelLinkNavigation(novel);
   // Custom code snippets apply from the next chapter on, like before chapters
   // were swapped into the loaded page.
   const chapterReaderSettings = useMemo(
@@ -907,7 +909,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             refetch();
             return false;
           }
-          return true;
+          return !openNovelLink(url);
+        }}
+        // Android sends a target="_blank" link to the browser unless the app
+        // handles the new window, so the app sends other links there itself.
+        onOpenWindow={({ nativeEvent: { targetUrl } }) => {
+          if (!openNovelLink(targetUrl)) {
+            void Linking.openURL(targetUrl).catch(() => undefined);
+          }
         }}
         onLoadEnd={() => {
           shellReadyRef.current = true;
