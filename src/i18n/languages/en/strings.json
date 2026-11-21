@@ -104,6 +104,8 @@
     "automaticBackupEvery2Days": "Every 2 days",
     "automaticBackupWeekly": "Weekly",
     "automaticBackupLocation": "Automatic backup location",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "Backup name",
     "backupCreated": "Backup created successfully",

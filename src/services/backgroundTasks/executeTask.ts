@@ -7,6 +7,7 @@ import { importEpubBatch } from '../epub/import';
 import { migrateNovel } from '../migrate/migrateNovel';
 import { updateLibrary } from '../updates';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
+import { APP_SETTINGS, type AppSettings } from '@hooks/persisted/useSettings';
 import type {
   BackgroundTask,
   BackgroundTaskEnqueuer,
@@ -35,17 +36,20 @@ export const executeBackgroundTask = async (
       return createSelfHostBackup(task.data, updateProgress);
     case 'SELF_HOST_RESTORE':
       return selfHostRestore(task.data, updateProgress);
-    case 'LOCAL_BACKUP':
-      await createBackup(task.data, updateProgress);
-      if (task.data.automatic) {
-        const settings =
-          getMMKVObject<Record<string, unknown>>('APP_SETTINGS') ?? {};
-        setMMKVObject('APP_SETTINGS', {
-          ...settings,
-          lastAutomaticBackupAt: Date.now(),
-        });
+    case 'LOCAL_BACKUP': {
+      if (!task.data.automatic) {
+        return createBackup(task.data, updateProgress);
       }
+
+      const options =
+        getMMKVObject<AppSettings>(APP_SETTINGS)?.automaticBackupOptions;
+      await createBackup({ ...task.data, options }, updateProgress);
+      setMMKVObject(APP_SETTINGS, {
+        ...getMMKVObject<AppSettings>(APP_SETTINGS),
+        lastAutomaticBackupAt: Date.now(),
+      });
       return;
+    }
     case 'LOCAL_RESTORE':
       return restoreBackup(task.data, updateProgress);
     case 'MIGRATE_NOVEL':

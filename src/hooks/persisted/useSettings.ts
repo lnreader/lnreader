@@ -9,6 +9,7 @@ import { useMMKVObject } from 'react-native-mmkv';
 import { useEffect, useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { DateFormat } from '@utils/dateFormat';
+import type { BackupOptions } from '@services/backup/options';
 import type {
   AutomaticBackupInterval,
   AutomaticLibraryUpdateInterval,
@@ -91,6 +92,7 @@ export interface AppSettings {
   automaticBackupIntervalHours?: AutomaticBackupInterval;
   automaticBackupDirectoryUri?: string;
   automaticBackupDirectoryName?: string;
+  automaticBackupOptions?: BackupOptions;
   lastAutomaticBackupAt?: number;
   updateLibraryOnLaunch: boolean;
   downloadNewChapters: boolean;
@@ -377,7 +379,10 @@ export const useAppSettings = () => {
     useMMKVObject<AppSettings>(APP_SETTINGS);
 
   const setAppSettings = (values: Partial<AppSettings>) =>
-    setSettings({ ...appSettings, ...values });
+    setSettings(currentSettings => ({
+      ...(currentSettings ?? initialAppSettings),
+      ...values,
+    }));
 
   return {
     ...appSettings,

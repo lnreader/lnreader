@@ -97,6 +97,8 @@ export interface StringMap {
   'backupScreen.automaticBackupEvery2Days': 'string';
   'backupScreen.automaticBackupWeekly': 'string';
   'backupScreen.automaticBackupLocation': 'string';
+  'backupScreen.automaticBackupContents': 'string';
+  'backupScreen.automaticBackupContentsDescription': 'string';
   'backupScreen.lastAutomaticBackup': 'string';
   'backupScreen.backupName': 'string';
   'backupScreen.backupCreated': 'string';
