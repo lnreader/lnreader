@@ -1,6 +1,11 @@
 package com.margelo.nitro.nitrochapterlist.chapter
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.view.Menu
 import android.view.ViewTreeObserver
 import android.widget.PopupMenu
@@ -103,13 +108,46 @@ class ChapterListView(reactContext: ThemedReactContext) :
 
   // Relative dates ("Today", "Last Monday") are worked out at bind time; rebind
   // the visible rows when the day changes so they don't go stale on screen.
+  // A time zone change moves calendar days (and the formatter keeps the zone
+  // it was built with); a clock change can move "today".
+  private val clockReceiver =
+    object : BroadcastReceiver() {
+      override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
+          adapter.formatter = ChapterRowFormatter(adapter.formatter.format)
+        } else {
+          adapter.refreshText()
+        }
+        scheduleMidnightRefresh()
+      }
+    }
+  private var clockReceiverRegistered = false
+
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     scheduleMidnightRefresh()
+    if (!clockReceiverRegistered) {
+      val filter =
+        IntentFilter().apply {
+          addAction(Intent.ACTION_TIMEZONE_CHANGED)
+          addAction(Intent.ACTION_TIME_CHANGED)
+        }
+      // Both are system broadcasts, which non-exported receivers still get.
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        context.applicationContext.registerReceiver(clockReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+      } else {
+        context.applicationContext.registerReceiver(clockReceiver, filter)
+      }
+      clockReceiverRegistered = true
+    }
   }
 
   override fun onDetachedFromWindow() {
     removeCallbacks(midnightRefresh)
+    if (clockReceiverRegistered) {
+      context.applicationContext.unregisterReceiver(clockReceiver)
+      clockReceiverRegistered = false
+    }
     super.onDetachedFromWindow()
   }
 
