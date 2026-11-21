@@ -40,6 +40,10 @@ import ShareIntentHandler, {
   flushPendingShare,
   navigationRef,
 } from './ShareIntentHandler';
+import WidgetIntentHandler, {
+  flushPendingWidgetLink,
+  isWidgetUrl,
+} from './WidgetIntentHandler';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
@@ -81,7 +85,10 @@ const MainNavigator = () => {
   return (
     <NavigationContainer<RootStackParamList>
       ref={navigationRef}
-      onReady={flushPendingShare}
+      onReady={() => {
+        flushPendingShare();
+        flushPendingWidgetLink();
+      }}
       theme={{
         colors: {
           ...DefaultTheme.colors,
@@ -96,6 +103,8 @@ const MainNavigator = () => {
       }}
       linking={{
         prefixes: ['lnreader://'],
+        // Widget taps are routed by WidgetIntentHandler.
+        filter: url => !isWidgetUrl(url),
         config: {
           screens: {
             MoreStack: {
@@ -112,6 +121,7 @@ const MainNavigator = () => {
       }}
     >
       <ShareIntentHandler />
+      <WidgetIntentHandler />
       <LibraryContextProvider>
         <UpdateContextProvider>
           <AppUpdateChecker />

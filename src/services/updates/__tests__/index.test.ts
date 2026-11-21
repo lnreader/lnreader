@@ -4,6 +4,7 @@ import {
 } from '@database/queries/LibraryQueries';
 import type { BackgroundTaskMetadata } from '@services/backgroundTasks/contracts';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
+import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
 import { updateNovel } from '../LibraryUpdateQueries';
 import { updateLibrary } from '../index';
 
@@ -23,6 +24,10 @@ jest.mock('@utils/showToast', () => ({
 jest.mock('@utils/mmkv/mmkv', () => ({
   MMKVStorage: { set: jest.fn() },
   getMMKVObject: jest.fn(() => ({})),
+}));
+jest.mock('@services/widgets', () => ({
+  reportLibraryUpdateProgress: jest.fn(),
+  syncWidgets: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('@hooks/persisted/useUpdates', () => ({
   LAST_UPDATE_TIME: 'LAST_UPDATE_TIME',
@@ -131,6 +136,23 @@ describe('updateLibrary', () => {
 
     expect(mockedGetLibraryWithCategory).toHaveBeenCalledWith(4, true);
     expect(mockedGetLibraryNovels).not.toHaveBeenCalled();
+  });
+
+  it('reports progress to the home screen widgets and syncs them when done', async () => {
+    mockedGetLibraryNovels.mockResolvedValue([
+      novel(1, 'source-a', 'A One'),
+      novel(2, 'source-b', 'B One'),
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    const progress = jest.mocked(reportLibraryUpdateProgress).mock.calls;
+    expect(progress[0]).toEqual([true]);
+    expect(progress).toContainEqual([true, 0, 2]);
+    expect(progress).toContainEqual([true, 2, 2]);
+    expect(progress[progress.length - 1]).toEqual([false]);
+    expect(syncWidgets).toHaveBeenCalledTimes(1);
   });
 
   it('passes smart update preferences to the global update query', async () => {

@@ -78,6 +78,15 @@ jest.mock('@modules/native-share-receiver', () => ({
   },
 }));
 
+jest.mock('@modules/native-widgets', () => ({
+  __esModule: true,
+  default: {
+    hasWidgets: jest.fn().mockResolvedValue(false),
+    setSnapshot: jest.fn().mockResolvedValue(),
+    setLibraryUpdateState: jest.fn().mockResolvedValue(),
+  },
+}));
+
 jest.mock('@modules/native-zip-archive', () => ({
   __esModule: true,
   default: {
