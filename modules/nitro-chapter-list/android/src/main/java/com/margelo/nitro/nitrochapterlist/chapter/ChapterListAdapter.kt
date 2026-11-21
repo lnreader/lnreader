@@ -28,26 +28,27 @@ class ChapterListAdapter(
   private class HeaderHolder(view: HeaderContainer) : RecyclerView.ViewHolder(view)
 
   private inner class RowHolder(val row: ChapterRowView) : RecyclerView.ViewHolder(row) {
-    private val position: Int
+    // Not `position`: ViewHolder already has a final getPosition().
+    private val chapterPosition: Int
       get() = bindingAdapterPosition - HEADER_COUNT
 
     init {
       row.setOnClickListener {
         val id = idAt(bindingAdapterPosition) ?: return@setOnClickListener
-        callbacks.onChapterPress(id, position)
+        callbacks.onChapterPress(id, chapterPosition)
       }
       row.setOnLongClickListener {
         val id = idAt(bindingAdapterPosition) ?: return@setOnLongClickListener false
-        callbacks.onChapterLongPress(id, position)
+        callbacks.onChapterLongPress(id, chapterPosition)
         true
       }
       row.downloadButton.setOnClickListener {
-        val chapterRow = model?.rowAt(position) ?: return@setOnClickListener
+        val chapterRow = model?.rowAt(chapterPosition) ?: return@setOnClickListener
         val id = chapterRow.id.toInt()
         if (chapterRow.downloaded) {
-          callbacks.onDeleteMenuRequested(id, position, row)
+          callbacks.onDeleteMenuRequested(id, chapterPosition, row)
         } else {
-          callbacks.onDownloadPress(id, position)
+          callbacks.onDownloadPress(id, chapterPosition)
         }
       }
     }
