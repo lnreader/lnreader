@@ -309,8 +309,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           return;
         }
 
-        const shouldContinue =
-          settings.tts?.autoPageAdvance === true && !timerExpiredAtBoundary;
         const queueLoaded = await loadQueue(
           queue,
           0,
@@ -322,7 +320,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           toNativeTtsSettings(settings.tts),
           {
             autoplay: !timerExpiredAtBoundary,
-            expectContinuation: shouldContinue,
+            expectContinuation: settings.tts?.autoPageAdvance === true,
             canContinue: isTransitionActive,
           },
         );

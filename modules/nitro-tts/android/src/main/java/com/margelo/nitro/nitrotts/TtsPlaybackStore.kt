@@ -40,7 +40,7 @@ internal object TtsPlaybackStore {
     private var remainingDurationMs = 0L
     private var remainingChapters = 0
     private var durationStartedAtMs: Long? = null
-    private var sleepTimerExpired = false
+    private var chapterTimerExpired = false
 
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
@@ -352,7 +352,7 @@ internal object TtsPlaybackStore {
 
     fun setSleepTimer(config: TtsSleepTimerConfig) {
         ownerHandler.removeCallbacks(sleepTimerTick)
-        sleepTimerExpired = false
+        chapterTimerExpired = false
         durationStartedAtMs = null
         when (config.mode) {
             TtsSleepTimerMode.DURATION -> {
@@ -482,13 +482,16 @@ internal object TtsPlaybackStore {
     }
 
     private fun completeQueue() {
+        if (state == TtsPlaybackState.LOADING || state == TtsPlaybackState.COMPLETED) return
+        generation += 1
+        engine?.stop()
         freezeDurationTimer()
-        val chapterTimerExpired = completeChapterTimer()
+        val expiredAtBoundary = completeChapterTimer()
         if (expectContinuation) {
             state = TtsPlaybackState.LOADING
         } else {
             state = TtsPlaybackState.COMPLETED
-            if (!chapterTimerExpired) {
+            if (!expiredAtBoundary) {
                 clearSleepTimer(emit = true)
             }
         }
@@ -539,11 +542,7 @@ internal object TtsPlaybackStore {
     }
 
     private fun expireDurationTimer() {
-        remainingDurationMs = 0L
-        durationStartedAtMs = null
-        ownerHandler.removeCallbacks(sleepTimerTick)
-        sleepTimerExpired = true
-        sleepTimerMode = null
+        clearSleepTimer(emit = false)
         pauseEngine()
         emitSleepTimer()
     }
@@ -553,7 +552,7 @@ internal object TtsPlaybackStore {
         remainingChapters = (remainingChapters - 1).coerceAtLeast(0)
         if (remainingChapters == 0) {
             sleepTimerMode = null
-            sleepTimerExpired = true
+            chapterTimerExpired = true
             emitSleepTimer()
             return true
         }
@@ -567,7 +566,7 @@ internal object TtsPlaybackStore {
         remainingDurationMs = 0L
         remainingChapters = 0
         durationStartedAtMs = null
-        sleepTimerExpired = false
+        chapterTimerExpired = false
         if (emit) emitSleepTimer()
     }
 
@@ -578,7 +577,7 @@ internal object TtsPlaybackStore {
         } else null
         return TtsSleepTimerState(
             active = mode != null,
-            expired = sleepTimerExpired,
+            expired = chapterTimerExpired,
             mode = mode,
             remainingSeconds = remainingSeconds,
             remainingChapters = if (mode == TtsSleepTimerMode.CHAPTERS) remainingChapters.toDouble() else null,

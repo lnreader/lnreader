@@ -12,6 +12,7 @@ export interface TtsSleepTimerConfig {
 /** Current native sleep-timer projection. */
 export interface TtsSleepTimerState {
   active: boolean;
+  /** A chapter-count timer expired at the end of a chapter. */
   expired: boolean;
   mode?: TtsSleepTimerMode;
   remainingSeconds?: number;

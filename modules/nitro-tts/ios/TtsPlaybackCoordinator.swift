@@ -22,7 +22,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private var sleepTimerMode: TtsSleepTimerMode?
   private var remainingSeconds = 0
   private var remainingChapters = 0
-  private var sleepTimerExpired = false
+  private var chapterTimerExpired = false
   private var sleepTimer: Timer?
 
   private lazy var remoteCommands = TtsRemoteCommandController(
@@ -149,7 +149,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   func setSleepTimer(_ config: TtsSleepTimerConfig) throws {
     sleepTimer?.invalidate()
     sleepTimer = nil
-    sleepTimerExpired = false
+    chapterTimerExpired = false
     sleepTimerMode = config.mode
     switch config.mode {
     case .duration:
@@ -175,7 +175,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
     sleepTimerMode = nil
     remainingSeconds = 0
     remainingChapters = 0
-    sleepTimerExpired = false
+    chapterTimerExpired = false
     emitSleepTimer()
   }
 
@@ -267,20 +267,22 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   }
 
   private func interruptSpeech() {
+    activeUtterance = nil
     if synthesizer.isSpeaking || synthesizer.isPaused {
       synthesizer.stopSpeaking(at: .immediate)
     }
-    activeUtterance = nil
   }
 
   private func completeQueue() {
+    guard state != .loading, state != .completed else { return }
+    interruptSpeech()
     sleepTimer?.invalidate()
     sleepTimer = nil
     if sleepTimerMode == .chapters {
       remainingChapters = max(0, remainingChapters - 1)
       if remainingChapters == 0 {
         sleepTimerMode = nil
-        sleepTimerExpired = true
+        chapterTimerExpired = true
       }
       emitSleepTimer()
     }
@@ -339,7 +341,6 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
         timer.invalidate()
         self.sleepTimer = nil
         self.sleepTimerMode = nil
-        self.sleepTimerExpired = true
         self.pause()
       }
       self.emitSleepTimer()
@@ -349,7 +350,7 @@ final class TtsPlaybackCoordinator: NSObject, AVSpeechSynthesizerDelegate {
   private func sleepTimerState() -> TtsSleepTimerState {
     return TtsSleepTimerState(
       active: sleepTimerMode != nil,
-      expired: sleepTimerExpired,
+      expired: chapterTimerExpired,
       mode: sleepTimerMode,
       remainingSeconds: sleepTimerMode == .duration ? Double(remainingSeconds) : nil,
       remainingChapters: sleepTimerMode == .chapters ? Double(remainingChapters) : nil
