@@ -103,11 +103,13 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     color: theme.outline,
     marginStart: chapter.releaseTime || chapter.scanlator ? 5 : 0,
   } as const;
-  function parseTime(time?: string | Date | null) {
-    if (!time) return undefined;
-    return formatDate(time, dateFormat, relativeTimestamps);
-  }
-  const parsedTime = parseTime(releaseTime);
+  const parsedTime = useMemo(
+    () =>
+      releaseTime
+        ? formatDate(releaseTime, dateFormat, relativeTimestamps)
+        : undefined,
+    [releaseTime, dateFormat, relativeTimestamps],
+  );
 
   return (
     <View key={'chapterItem' + id}>
@@ -209,11 +211,14 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
 
 export default memo(ChapterItem);
 
+/** Every chapter row is exactly this tall; lists use it as a fixed item size. */
+export const CHAPTER_ITEM_HEIGHT = 64;
+
 const styles = StyleSheet.create({
   chapterCardContainer: {
     alignItems: 'center',
     flexDirection: 'row',
-    height: 64,
+    height: CHAPTER_ITEM_HEIGHT,
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 8,

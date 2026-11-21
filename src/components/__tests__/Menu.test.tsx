@@ -1,5 +1,5 @@
 import './mocks';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@test-utils';
 
 import Menu from '../Menu';
 
@@ -9,9 +9,22 @@ jest.mock('@hooks/persisted', () => ({
   useTheme: () => mockUseTheme(),
 }));
 
-jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
-}));
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = jest.requireActual('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: React.ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 
 describe('Menu', () => {
   beforeEach(() => {
@@ -86,5 +99,31 @@ describe('Menu', () => {
       letterSpacing: 0.1,
       lineHeight: 20,
     });
+  });
+
+  it('renders only the anchor while closed and keeps it mounted when opened', () => {
+    const { Text } = require('react-native');
+    const mounts = jest.fn();
+    const Anchor = () => {
+      require('react').useEffect(() => mounts(), []);
+      return <Text>anchor</Text>;
+    };
+    const element = (visible: boolean) => (
+      <Menu anchor={<Anchor />} onDismiss={() => {}} visible={visible}>
+        <Menu.Item onPress={() => {}} title="Open" />
+      </Menu>
+    );
+
+    const view = render(element(false));
+    expect(screen.getByText('anchor')).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId('menu', { includeHiddenElements: true }),
+    ).toBeNull();
+
+    view.rerender(element(true));
+    expect(
+      screen.getByTestId('menu', { includeHiddenElements: true }),
+    ).toBeTruthy();
+    expect(mounts).toHaveBeenCalledTimes(1);
   });
 });
