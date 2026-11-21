@@ -12,7 +12,7 @@ jest.mock('@i18n/translations', () => ({
 }));
 
 jest.mock('@utils/dateFormat', () => ({
-  formatDate: (value: string) => `date(${value})`,
+  createDateFormatter: () => (value: string) => `date(${value})`,
 }));
 
 const row = (id: number, title = `Chapter ${id}`): ChapterRow => ({

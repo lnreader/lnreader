@@ -1,7 +1,7 @@
 import type { ChapterRow } from '@modules/nitro-chapter-list';
 import type { ChapterInfo } from '@database/types';
 import { getString } from '@i18n/translations';
-import { DateFormat, formatDate } from '@utils/dateFormat';
+import { createDateFormatter, DateFormat } from '@utils/dateFormat';
 
 export interface ChapterRowFormat {
   showChapterTitles: boolean;
@@ -13,13 +13,16 @@ export interface ChapterRowFormat {
 export const buildChapterRow = (
   chapter: ChapterInfo,
   format: ChapterRowFormat,
+  // Share one across a batch: it caches and fixes "now" once.
+  formatReleaseDate: (value: string) => string = createDateFormatter(
+    format.dateFormat,
+    format.relativeTimestamps,
+  ),
 ): ChapterRow => {
   const { releaseTime, scanlator, progress, unread } = chapter;
   const parts: string[] = [];
   if (releaseTime) {
-    parts.push(
-      formatDate(releaseTime, format.dateFormat, format.relativeTimestamps),
-    );
+    parts.push(formatReleaseDate(releaseTime));
   }
   if (scanlator) {
     parts.push(scanlator);

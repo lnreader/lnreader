@@ -5,6 +5,7 @@ import {
   type ChapterRow,
 } from '@modules/nitro-chapter-list';
 import type { ChapterInfo } from '@database/types';
+import { createDateFormatter } from '@utils/dateFormat';
 import {
   buildChapterRow,
   type ChapterListSnapshot,
@@ -64,6 +65,8 @@ export const useChapterListStore = ({
   });
 
   useLayoutEffect(() => {
+    const startedAt = performance.now();
+    let built = 0;
     const cache = rowCache.current;
     let rowFormat = cache.format;
     if (
@@ -77,10 +80,16 @@ export const useChapterListStore = ({
       cache.rows = new WeakMap();
     }
     const activeFormat = rowFormat;
+    let formatReleaseDate: ((value: string) => string) | null = null;
     const rows = chapters.map(chapter => {
       let row = cache.rows.get(chapter);
       if (!row) {
-        row = buildChapterRow(chapter, activeFormat);
+        formatReleaseDate ??= createDateFormatter(
+          activeFormat.dateFormat,
+          activeFormat.relativeTimestamps,
+        );
+        row = buildChapterRow(chapter, activeFormat, formatReleaseDate);
+        built++;
         cache.rows.set(chapter, row);
       }
       return row;
@@ -107,6 +116,14 @@ export const useChapterListStore = ({
       }
     }
     snapshot.current = next;
+    if (built > 0) {
+      // Shows up in the RN DevTools performance panel and in Perfetto traces.
+      // Optional: some runtimes (and Jest) only provide performance.now.
+      performance.measure?.(`LNChapterList: build ${built} rows + sync`, {
+        start: startedAt,
+        end: performance.now(),
+      });
+    }
   }, [
     store,
     chapters,

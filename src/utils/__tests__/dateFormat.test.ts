@@ -1,4 +1,9 @@
-import { formatDate, getDateFormatLabel } from '../dateFormat';
+import {
+  createDateFormatter,
+  DATE_FORMATS,
+  formatDate,
+  getDateFormatLabel,
+} from '../dateFormat';
 
 describe('dateFormat', () => {
   const now = new Date(2026, 6, 25, 12);
@@ -34,5 +39,36 @@ describe('dateFormat', () => {
 
   it('preserves invalid string values', () => {
     expect(formatDate('Unknown', 'YYYY-MM-DD')).toBe('Unknown');
+  });
+
+  describe('createDateFormatter', () => {
+    const values = [
+      now,
+      new Date(2026, 6, 24, 23, 59),
+      new Date(2026, 6, 19, 0, 1),
+      new Date(2026, 6, 18, 12),
+      new Date(2026, 7, 1, 12),
+      new Date(2026, 7, 2, 12),
+      '2026-07-25',
+      '2026-01-01T10:00:00.000Z',
+      'Unknown',
+    ];
+
+    it.each(
+      DATE_FORMATS.flatMap(f => [[f, true] as const, [f, false] as const]),
+    )('matches formatDate for %s (relative: %s)', (dateFormat, relative) => {
+      const format = createDateFormatter(dateFormat, relative, now);
+      for (const value of values) {
+        expect(format(value)).toBe(
+          formatDate(value, dateFormat, relative, now),
+        );
+      }
+    });
+
+    it('returns cached results for repeated values', () => {
+      const format = createDateFormatter('YYYY-MM-DD', false, now);
+      expect(format('2026-01-01')).toBe('2026-01-01');
+      expect(format('2026-01-01')).toBe('2026-01-01');
+    });
   });
 });
