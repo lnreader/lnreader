@@ -7,6 +7,7 @@ import {
   initializeInstalledPlugins,
   installPlugin,
   INSTALLED_PLUGINS_KEY,
+  loadPlugin,
   reloadInstalledPlugins,
   getFilterSuggestions,
 } from '../pluginManager';
@@ -210,5 +211,72 @@ describe('getFilterSuggestions', () => {
     await expect(
       getFilterSuggestions('suggestions', 'genres', 'abc'),
     ).resolves.toEqual([{ label: 'genres:abc', value: 'abc' }]);
+  });
+});
+
+describe('@libs/pluginError bridge', () => {
+  it('exposes PluginError, createPluginError, httpError, checkResponse, assertNoChallenge, and isPluginError to plugins', async () => {
+    jest.mocked(NativeFile.readFile).mockResolvedValueOnce(`
+      const {
+        PluginError,
+        createPluginError,
+        httpError,
+        checkResponse,
+        assertNoChallenge,
+        isPluginError,
+      } = require('@libs/pluginError');
+
+      exports.default = {
+        id: 'plugin-error-bridge',
+        name: 'PluginError Bridge',
+        version: '1.0.0',
+        site: 'https://example.com',
+        popularNovels: async () => {
+          throw createPluginError(PluginError.EmptyContent, {
+            message: 'No novels found',
+          });
+        },
+        parseNovel: async () => {
+          checkResponse(
+            { ok: false, status: 404, url: 'https://example.com/n' },
+            { notFoundCode: PluginError.NovelNotFound },
+          );
+        },
+        parseChapter: async mode => {
+          if (mode === '429') {
+            throw httpError(429);
+          }
+          if (mode === 'challenge') {
+            assertNoChallenge('<title>Just a moment...</title>');
+          }
+          return String(isPluginError(httpError(403)));
+        },
+      };
+    `);
+
+    const plugin = await loadPlugin('plugin-error-bridge');
+    expect(plugin).toBeDefined();
+
+    await expect(plugin!.popularNovels(1)).rejects.toMatchObject({
+      message: 'No novels found',
+      code: 'No readable content was found.',
+    });
+
+    await expect(plugin!.parseNovel('n')).rejects.toMatchObject({
+      status: 404,
+      code: 'Novel not found (404), it may have been removed from this source.',
+    });
+
+    await expect(plugin!.parseChapter('429')).rejects.toMatchObject({
+      status: 429,
+      code: 'Too many requests (429). Please try again later.',
+    });
+
+    await expect(plugin!.parseChapter('challenge')).rejects.toMatchObject({
+      status: 403,
+      code: 'Captcha error, please open in webview',
+    });
+
+    await expect(plugin!.parseChapter('ok')).resolves.toBe('true');
   });
 });

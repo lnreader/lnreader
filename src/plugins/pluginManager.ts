@@ -31,6 +31,15 @@ import {
 } from './helpers/hiddenWebview';
 import { FilterOption, FilterTypes } from './types/filterTypes';
 import { isUrlAbsolute } from './helpers/isAbsoluteUrl';
+import {
+  PluginError,
+  assertNoChallenge,
+  checkResponse,
+  createPluginError,
+  httpError,
+  isChallengeHtml,
+  isPluginError,
+} from './helpers/pluginError';
 
 const packages: Record<string, any> = {
   'htmlparser2': { Parser },
@@ -38,6 +47,15 @@ const packages: Record<string, any> = {
   'dayjs': dayjs,
   'urlencode': { encode, decode },
   '@libs/novelStatus': { NovelStatus },
+  '@libs/pluginError': {
+    PluginError,
+    createPluginError,
+    httpError,
+    checkResponse,
+    isChallengeHtml,
+    assertNoChallenge,
+    isPluginError,
+  },
   '@libs/fetch': { fetchApi, fetchText, fetchProto },
   '@libs/isAbsoluteUrl': { isUrlAbsolute },
   '@libs/filterInputs': { FilterTypes },

@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { NOVEL_STORAGE } from '@utils/Storages';
-import { Plugin } from '@plugins/types';
+import { Plugin, PluginError } from '@plugins/types';
 import { downloadFile } from '@plugins/helpers/fetch';
 import { getPlugin } from '@plugins/pluginManager';
 import { getString } from '@i18n/translations';
@@ -97,6 +97,17 @@ const downloadChapter = async (chapterId: number) => {
   }
 };
 
+const isRateLimitError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const { code, status } = error as { code?: unknown; status?: unknown };
+  return code === PluginError.RateLimited || status === 429;
+};
+
+const formatErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 export const downloadChapters = async (
   {
     novelName,
@@ -119,6 +130,12 @@ export const downloadChapters = async (
   for (let index = checkpoint.nextIndex; index < chapters.length; index++) {
     const chapter = chapters[index];
     let firstFailure: string | undefined;
+    const recordFailure = (error: unknown) => {
+      const failure = `${chapter.chapterName}: ${formatErrorMessage(error)}`;
+      if (failures.length === 0) firstFailure = failure;
+      failures.push(failure);
+    };
+
     setMeta(meta => ({
       ...meta,
       isRunning: true,
@@ -129,11 +146,16 @@ export const downloadChapters = async (
     try {
       await downloadChapter(chapter.chapterId);
     } catch (error) {
-      const failure = `${chapter.chapterName}: ${
-        error instanceof Error ? error.message : String(error)
-      }`;
-      if (failures.length === 0) firstFailure = failure;
-      failures.push(failure);
+      if (isRateLimitError(error)) {
+        await sleep(Math.max(getChapterDownloadCooldownMs() * 2, 3500));
+        try {
+          await downloadChapter(chapter.chapterId);
+        } catch (retryError) {
+          recordFailure(retryError);
+        }
+      } else {
+        recordFailure(error);
+      }
     }
 
     await context.updateCheckpoint(
