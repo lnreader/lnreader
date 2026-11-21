@@ -1,6 +1,7 @@
 import type { PluginItem } from '@plugins/types';
 import { INSTALLED_PLUGINS_KEY } from '@plugins/pluginManager';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
+import { getNovelByPathPrefix } from '@database/queries/NovelQueries';
 
 export type NovelLink = { pluginId: string; path: string };
 
@@ -14,6 +15,13 @@ export type SharedUrlResult =
 const NOVEL_PATH_RULES: Record<string, (path: string) => string | undefined> = {
   royalroad: path => /^(fiction\/\d+)(?:\/|$)/.exec(path)?.[1],
 };
+
+// A novel saved from a shared URL keeps the long form, so reuse the stored
+// record instead of creating a second one under the short path.
+const toNovelLink = (pluginId: string, path: string): NovelLink => ({
+  pluginId,
+  path: getNovelByPathPrefix(path, pluginId)?.path ?? path,
+});
 
 const trimSlashes = (path: string) => path.replace(/^\/+|\/+$/g, '');
 const stripWww = (host: string) => host.replace(/^www\./, '');
@@ -74,7 +82,7 @@ export const resolveNovelLink = (href: string): NovelLink | undefined => {
     return undefined;
   }
   const path = NOVEL_PATH_RULES[match.pluginId]?.(match.path);
-  return path ? { pluginId: match.pluginId, path } : undefined;
+  return path ? toNovelLink(match.pluginId, path) : undefined;
 };
 
 export const resolveSharedUrl = (text: string): SharedUrlResult | undefined => {
@@ -84,8 +92,17 @@ export const resolveSharedUrl = (text: string): SharedUrlResult | undefined => {
   }
   const searchText = text.trim();
   const match = findPluginForUrl(url);
-  if (!match?.path) {
+  if (!match) {
     return { kind: 'search', searchText };
   }
-  return { kind: 'novel', ...match };
+  const rule = NOVEL_PATH_RULES[match.pluginId];
+  if (!rule) {
+    return match.path
+      ? { kind: 'novel', ...match }
+      : { kind: 'search', searchText };
+  }
+  const path = rule(match.path);
+  return path
+    ? { kind: 'novel', ...toNovelLink(match.pluginId, path) }
+    : { kind: 'search', searchText };
 };

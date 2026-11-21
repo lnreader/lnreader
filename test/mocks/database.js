@@ -1,6 +1,7 @@
 jest.mock('@database/queries/NovelQueries', () => ({
   getNovelById: jest.fn(),
   getNovelByPath: jest.fn(),
+  getNovelByPathPrefix: jest.fn(),
   deleteCachedNovels: jest.fn(),
   getCachedNovels: jest.fn(),
   insertNovelAndChapters: jest.fn(),

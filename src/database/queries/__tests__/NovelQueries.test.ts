@@ -33,6 +33,7 @@ import {
   getAllNovels,
   getNovelById,
   getNovelByPath,
+  getNovelByPathPrefix,
   insertNovelAndChapters,
   switchNovelToLibraryQuery,
   removeNovelsFromLibrary,
@@ -116,6 +117,48 @@ describe('NovelQueries', () => {
       const result = getNovelByPath('/nonexistent', 'test-plugin');
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getNovelByPathPrefix', () => {
+    it('finds a novel stored under a longer path below the given one', async () => {
+      const testDb = getTestDb();
+      await insertTestNovel(testDb, {
+        path: 'fiction/1/title',
+        pluginId: 'royalroad',
+      });
+
+      expect(getNovelByPathPrefix('fiction/1', 'royalroad')?.path).toBe(
+        'fiction/1/title',
+      );
+    });
+
+    it('prefers the library entry when both path forms are stored', async () => {
+      const testDb = getTestDb();
+      await insertTestNovel(testDb, {
+        path: 'fiction/1',
+        pluginId: 'royalroad',
+      });
+      await insertTestNovel(testDb, {
+        path: 'fiction/1/title',
+        pluginId: 'royalroad',
+        inLibrary: true,
+      });
+
+      expect(getNovelByPathPrefix('fiction/1', 'royalroad')?.path).toBe(
+        'fiction/1/title',
+      );
+    });
+
+    it('ignores sibling paths and other plugins', async () => {
+      const testDb = getTestDb();
+      await insertTestNovel(testDb, {
+        path: 'fiction/12',
+        pluginId: 'royalroad',
+      });
+      await insertTestNovel(testDb, { path: 'fiction/1', pluginId: 'other' });
+
+      expect(getNovelByPathPrefix('fiction/1', 'royalroad')).toBeUndefined();
     });
   });
 
