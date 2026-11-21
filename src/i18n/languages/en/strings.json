@@ -565,6 +565,9 @@
       }
     },
     "chapterChapnum": "Chapter %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "chapters",
     "continueReading": "Continue reading",
     "exportEpubModal": {

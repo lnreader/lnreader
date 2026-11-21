@@ -14,9 +14,9 @@ import {
 } from '@database/queries/ChapterQueries';
 import {
   LegendList,
-  LegendListRef,
   LegendListRenderItemProps,
 } from '@legendapp/list/react-native';
+import type { NativeChapterListRef } from '@components/NativeChapterList';
 import { useNovelAction, useNovelValue } from '../NovelContext';
 import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/store-helper/bootstrapService';
 
@@ -25,7 +25,7 @@ interface JumpToChapterModalProps {
   modalVisible: boolean;
   navigation: NovelScreenProps['navigation'];
   novel: NovelInfo;
-  chapterListRef: React.RefObject<LegendListRef | null>;
+  chapterListRef: React.RefObject<NativeChapterListRef | null>;
 }
 
 const JumpToChapterModal = ({
