@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.core
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -45,7 +45,7 @@ import kotlin.math.roundToInt
  * Colours follow the JS FastScrollbar: thumb onSurfaceVariant (primary while
  * pressed), track outlineVariant, [thickness] wide with round ends.
  */
-class ChapterFastScroller(private val recyclerView: ChapterRecyclerView) :
+class ListFastScroller(private val recyclerView: ListRecyclerView) :
   RecyclerView.ItemDecoration(), RecyclerView.OnItemTouchListener {
 
   private val density = recyclerView.resources.displayMetrics.density

@@ -37,7 +37,8 @@ export type ChapterListScrollEvent = Readonly<{
   layoutMeasurement: Readonly<{ width: Double; height: Double }>;
 }>;
 
-export type ChapterIdEvent = Readonly<{ id: Int32 }>;
+/** `position` is the chapter's list position (excluding the header). */
+export type ChapterIdEvent = Readonly<{ id: Int32; position: Int32 }>;
 export type RequestRangeEvent = Readonly<{ start: Int32; end: Int32 }>;
 export type RefreshEvent = Readonly<{}>;
 
@@ -53,6 +54,13 @@ export interface NativeProps extends ViewProps {
   fastScrollBottomInset?: WithDefault<Float, 0>;
   /** `onRequestRange` asks for whole batches of this many chapters. */
   batchSize?: WithDefault<Int32, 1000>;
+  /**
+   * `onScroll` fires on every change only up to this offset (negative: always);
+   * past it, only when the offset crosses one of `scrollEventThresholds`.
+   * Every scroll event reaches the JS thread, even when Reanimated handles it.
+   */
+  scrollEventMaxOffset?: WithDefault<Float, -1>;
+  scrollEventThresholds?: ReadonlyArray<Float>;
   onScroll?: DirectEventHandler<ChapterListScrollEvent>;
   onChapterPress?: DirectEventHandler<ChapterIdEvent>;
   onChapterLongPress?: DirectEventHandler<ChapterIdEvent>;

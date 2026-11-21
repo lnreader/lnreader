@@ -6,15 +6,27 @@ chapters does no JS work per frame.
 
 Android only.
 
-## Pieces
+## Layout
 
-| Piece | Where | Role |
-|---|---|---|
-| `ChapterListStore` (Nitro HybridObject) | `src/specs`, `HybridChapterListStore.kt`, `ChapterListModel.kt` | Bulk row data, selection and downloading state. JS writes and native reads. Each JS call is copied and applied in one main-thread post, which produces the smallest set of `notifyItemRange*` calls. |
-| `LNChapterListView` (Fabric codegen component) | `src/fabric`, `ChapterListViewManager.kt`, `ChapterListView.kt` | `SwipeRefreshLayout` > `RecyclerView`. Its single React child (the novel header) is placed in the RecyclerView's header item, the way `react-native-pager-view` hosts its pages. |
-| Rows | `ChapterRowView.kt`, `IconView.kt` | Built in code with a custom measure and layout, 64dp tall. Icons come from the same `MaterialDesignIcons.ttf` that the RN app loads. |
-| Fast scroller | `ChapterFastScroller.kt` | A fork of androidx `FastScroller` (Apache 2.0). See the class comment for what changed. |
-| JS wrapper | `src/components/NativeChapterList` in the app | `useChapterListStore()` syncs the novel store into the native store, and `<NativeChapterList>` wraps the view and the ref. |
+The Kotlin code (`android/src/main/java/com/margelo/nitro/nitrochapterlist`) is
+split so another screen can reuse the list without the chapter parts:
+
+| Package   | What                                                   | Files                                                                                                                                                                                                                                                                                                                       |
+| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core`    | Generic native list host, knows nothing about chapters | `ListHostView` (SwipeRefreshLayout > RecyclerView, header item, events, commands), `ListHostViewManager` (hosting the React header child), `ListRecyclerView` (exact metrics, jumps), `ListFastScroller` (fork of androidx `FastScroller`, Apache 2.0), `HeaderContainer`, `ScrollEventGate`, `RangeRequester`, `ListEvent` |
+| `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                                                                 |
+| root      | Entry points that Nitro and RN look up by name         | `HybridChapterListStore` (the Nitro store), `ChapterListStoreRegistry`, `ChapterListViewManager` (`LNChapterListView`), `NitroChapterListPackage`                                                                                                                                                                           |
+
+A new list type adds its own package with a `ListHostView` subclass, adapter,
+row view and Nitro store, plus a Fabric spec and view manager. It reuses `core`
+unchanged.
+
+| Piece                                                      | Role                                                                                                                                                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ChapterListStore` (Nitro HybridObject)                    | Bulk row data, selection and downloading state. JS writes and native reads. Each JS call is copied and applied in one main-thread post, which produces the smallest set of `notifyItemRange*` calls. |
+| `LNChapterListView` (Fabric codegen component)             | Its single React child (the novel header) is placed in the RecyclerView's header item, the way `react-native-pager-view` hosts its pages.                                                            |
+| Rows                                                       | Built in code with a custom measure and layout, 64dp tall. Icons come from the same `MaterialDesignIcons.ttf` that the RN app loads. Row events carry the chapter's position as well as its id.      |
+| JS wrapper (`src/components/NativeChapterList` in the app) | `useChapterListStore()` syncs the novel store into the native store, and `<NativeChapterList>` wraps the view and the ref.                                                                           |
 
 The view gets its store through the `storeId` prop (`ChapterListStoreRegistry`).
 The adapter's item count is the full filtered total. Rows that aren't loaded yet
@@ -27,8 +39,11 @@ LinearLayoutManager's averaged estimate is wrong with a tall header.
 
 Scroll events are ScrollView-shaped `topScroll` events, emitted through RN's pooled
 `ScrollEvent`, so `useAnimatedScrollHandler` handles them on the UI thread.
-Reanimated still forwards each event to an empty JS listener, which is the same
-cost a ScrollView with an animated scroll handler pays.
+Reanimated still forwards each event to an empty JS listener, so the events are
+gated (`ScrollEventGate`). They go out on every change only up to
+`scrollEventMaxOffset` (the app bar fade), and past that only when the offset
+crosses one of `scrollEventThresholds` (the scroll-to-top FAB). Scrolling deeper
+than that does no JS work at all.
 
 ## Maintenance
 
@@ -52,13 +67,21 @@ React Native codegen for `src/fabric` runs as part of the Android build.
 - The gap between subtitle parts is the text `" •  "`. `ChapterItem` uses a 5dp
   margin before `"•  "`.
 
+## Timing logs
+
+- Native: `adb logcat -s LNChapterList`. For each `reset` and `setRows` there's
+  one line for how long the call waited for the main thread and one for how
+  long it took there. There's also one line from a list reset to the next frame.
+- JS: `LNChapterList: build N rows + sync` is a `performance.measure` entry,
+  visible in the RN DevTools performance panel and in Perfetto.
+
 ## Tests
 
 - JS: `src/components/NativeChapterList/__tests__` (store sync) and
   `src/screens/novel/components/__tests__/NovelScreenList.test.tsx`. The global
   mock is in `test/mocks/nitroChapterList.js`.
-- Kotlin: `android/src/test` (`ChapterListModelTest`, store bookkeeping and
-  notification ranges). Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
+- Kotlin: `android/src/test`: `ChapterListModelTest` (store bookkeeping and
+  notification ranges), `ScrollEventGateTest` and `RangeRequesterTest`. Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
   from `android/`.
 
 ## Device checklist

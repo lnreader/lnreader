@@ -1,5 +1,6 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.chapter
 
+import com.margelo.nitro.nitrochapterlist.ChapterRow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

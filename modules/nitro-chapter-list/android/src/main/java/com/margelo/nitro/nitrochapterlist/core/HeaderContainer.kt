@@ -1,4 +1,4 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.core
 
 import android.annotation.SuppressLint
 import android.content.Context

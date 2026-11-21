@@ -35,6 +35,7 @@ import {
   useChapterListStore,
 } from '@components/NativeChapterList';
 import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
+import { getChapter } from '@database/queries/ChapterQueries';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -55,6 +56,12 @@ type NovelScreenListProps = {
 
 const NO_CHAPTERS: ChapterInfo[] = [];
 const NO_IDS = new Set<number>();
+
+// The app bar fades in over the first 200dp of scroll; past that, JS only
+// needs to know when the offset crosses the scroll-to-top threshold, so the
+// native list stops sending scroll events in between.
+const HEADER_FADE_START = 50;
+const HEADER_FADE_END = 200;
 
 const NovelScreenList = ({
   headerOpacity,
@@ -77,8 +84,13 @@ const NovelScreenList = ({
   const novelSettings = useNovelValue('novelSettings');
   const pageIndex = useNovelValue('pageIndex');
   const lastRead = useNovelValue('lastRead');
-  const { deleteChapter, setNovel, getChapters, openPage, loadUpToBatch } =
-    useNovelActions();
+  const {
+    deleteChapter,
+    setNovel,
+    syncDownloadedChapters,
+    openPage,
+    loadUpToBatch,
+  } = useNovelActions();
 
   const routeNovel: Omit<NovelInfo, 'id'> & { id: 'NO_ID' } = {
     inLibrary: false,
@@ -106,6 +118,8 @@ const NovelScreenList = ({
 
   // Reconcile as chapters complete and once more when the queue settles so
   // downloaded state remains accurate after success, failure, or cancellation.
+  // Only the downloaded flags change; reloading the list here would drop it
+  // back to the first batch after every chapter.
   const isNovelDownloading =
     novel.id !== 'NO_ID' && downloadingNovelIds.has(novel.id);
   const novelId = novel.id;
@@ -115,7 +129,7 @@ const NovelScreenList = ({
   useDownloadReconciliation(
     isNovelDownloading,
     novelDownloadProgressKey,
-    getChapters,
+    syncDownloadedChapters,
   );
 
   const [isFabExtended, setIsFabExtended] = useState(true);
@@ -128,6 +142,10 @@ const NovelScreenList = ({
     },
   });
   const { height: screenHeight } = useWindowDimensions();
+  const scrollEventThresholds = useMemo(
+    () => [screenHeight / 2],
+    [screenHeight],
+  );
 
   const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const trackerSheetRef = useRef<BottomSheetModalMethods>(null);
@@ -145,7 +163,13 @@ const NovelScreenList = ({
     () => scrollOffset.value,
     (currentOffset, previousOffset) => {
       headerOpacity.set(
-        currentOffset < 50 ? 0 : Math.min((currentOffset - 50) / 150, 1),
+        currentOffset < HEADER_FADE_START
+          ? 0
+          : Math.min(
+              (currentOffset - HEADER_FADE_START) /
+                (HEADER_FADE_END - HEADER_FADE_START),
+              1,
+            ),
       );
 
       if (previousOffset === null) {
@@ -181,13 +205,8 @@ const NovelScreenList = ({
     [novel.id, pageIndex, novelSettings],
   );
 
-  const chapterById = useMemo(
-    () => new Map(chapters.map(chapter => [chapter.id, chapter])),
-    [chapters],
-  );
-
   // The furthest batch the native list has needed for this chapter set.
-  // Reloads (e.g. getChapters after a download) drop back to the first batch
+  // Reloads (e.g. getChapters on refresh) drop back to the first batch
   // and cancel in-flight loads, so it's requested again until it's loaded.
   const neededBatch = useRef({ key: chapterSetKey, batch: -1 });
   const requestUpTo = useCallback(
@@ -311,14 +330,27 @@ const NovelScreenList = ({
     [novel, downloadChapter],
   );
 
+  // Native rows carry their position, and loaded chapters are the start of
+  // the list, so a row is almost always chapters[position]. Rows native kept
+  // from before a reload may not be loaded in JS yet; read those from the DB.
   const withChapter = useCallback(
-    (handler: (chapter: ChapterInfo) => void) => (id: number) => {
-      const chapter = chapterById.get(id);
-      if (chapter) {
-        handler(chapter);
-      }
-    },
-    [chapterById],
+    (handler: (chapter: ChapterInfo) => void) =>
+      (id: number, position: number) => {
+        const chapter =
+          chapters[position]?.id === id
+            ? chapters[position]
+            : chapters.find(item => item.id === id);
+        if (chapter) {
+          handler(chapter);
+          return;
+        }
+        void getChapter(id).then(row => {
+          if (row) {
+            handler(row as ChapterInfo);
+          }
+        });
+      },
+    [chapters],
   );
 
   const scrollToTop = useCallback(() => {
@@ -439,6 +471,8 @@ const NovelScreenList = ({
         fastScrollTopInset={topInset + 56}
         fastScrollBottomInset={bottomInset + 16}
         batchSize={CHAPTER_BATCH_SIZE}
+        scrollEventMaxOffset={HEADER_FADE_END}
+        scrollEventThresholds={scrollEventThresholds}
         onScroll={scrollHandler}
         onRefresh={onRefresh}
         onChapterPress={withChapter(onSelectPress)}

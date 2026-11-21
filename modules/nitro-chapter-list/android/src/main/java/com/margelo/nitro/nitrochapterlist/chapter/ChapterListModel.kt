@@ -1,4 +1,6 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.chapter
+
+import com.margelo.nitro.nitrochapterlist.ChapterRow
 
 /**
  * Position-indexed chapter rows plus selection and downloading state.

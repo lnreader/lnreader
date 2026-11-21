@@ -52,13 +52,20 @@ interface NativeChapterListProps {
   fastScrollTopInset: number;
   fastScrollBottomInset: number;
   batchSize: number;
+  /**
+   * `onScroll` fires on every change only up to this offset; past it, only
+   * when crossing one of `scrollEventThresholds`. Leave unset for every change.
+   */
+  scrollEventMaxOffset?: number;
+  scrollEventThresholds?: number[];
   /** A Reanimated `useAnimatedScrollHandler`, run on the UI thread. */
   onScroll?: unknown;
   onRefresh: () => void;
-  onChapterPress: (id: number) => void;
-  onChapterLongPress: (id: number) => void;
-  onDownloadPress: (id: number) => void;
-  onDeletePress: (id: number) => void;
+  /** `position` is the chapter's list position, excluding the header. */
+  onChapterPress: (id: number, position: number) => void;
+  onChapterLongPress: (id: number, position: number) => void;
+  onDownloadPress: (id: number, position: number) => void;
+  onDeletePress: (id: number, position: number) => void;
   onRequestRange: (start: number, end: number) => void;
   style?: StyleProp<ViewStyle>;
 }
@@ -66,10 +73,10 @@ interface NativeChapterListProps {
 const toColor = (color: string | undefined, fallback: string): number =>
   (processColor(color ?? fallback) as number | null) ?? 0;
 
-const idHandler =
-  (handler: (id: number) => void) =>
+const rowHandler =
+  (handler: (id: number, position: number) => void) =>
   (event: NativeSyntheticEvent<ChapterIdEvent>) =>
-    handler(event.nativeEvent.id);
+    handler(event.nativeEvent.id, event.nativeEvent.position);
 
 /**
  * Native RecyclerView chapter list (Android). Rows come from the
@@ -87,6 +94,8 @@ const NativeChapterList = ({
   fastScrollTopInset,
   fastScrollBottomInset,
   batchSize,
+  scrollEventMaxOffset,
+  scrollEventThresholds,
   onScroll,
   onRefresh,
   onChapterPress,
@@ -172,13 +181,15 @@ const NativeChapterList = ({
       fastScrollTopInset={fastScrollTopInset}
       fastScrollBottomInset={fastScrollBottomInset}
       batchSize={batchSize}
+      scrollEventMaxOffset={scrollEventMaxOffset}
+      scrollEventThresholds={scrollEventThresholds}
       // Reanimated handlers aren't plain functions; it unwraps them itself.
       onScroll={onScroll as never}
       onRefresh={onRefresh}
-      onChapterPress={idHandler(onChapterPress)}
-      onChapterLongPress={idHandler(onChapterLongPress)}
-      onDownloadPress={idHandler(onDownloadPress)}
-      onDeletePress={idHandler(onDeletePress)}
+      onChapterPress={rowHandler(onChapterPress)}
+      onChapterLongPress={rowHandler(onChapterLongPress)}
+      onDownloadPress={rowHandler(onDownloadPress)}
+      onDeletePress={rowHandler(onDeletePress)}
       onRequestRange={handleRequestRange}
     >
       {/* Never flattened: native code hosts this view inside the RecyclerView. */}

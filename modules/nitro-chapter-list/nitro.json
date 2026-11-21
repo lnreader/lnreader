@@ -1,15 +1,11 @@
 {
   "$schema": "https://nitro.margelo.com/nitro.schema.json",
-  "cxxNamespace": [
-    "nitrochapterlist"
-  ],
+  "cxxNamespace": ["nitrochapterlist"],
   "ios": {
     "iosModuleName": "NitroChapterList"
   },
   "android": {
-    "androidNamespace": [
-      "nitrochapterlist"
-    ],
+    "androidNamespace": ["nitrochapterlist"],
     "androidCxxLibName": "NitroChapterList"
   },
   "autolinking": {
@@ -20,8 +16,5 @@
       }
     }
   },
-  "ignorePaths": [
-    "**/node_modules",
-    "src/fabric"
-  ]
+  "ignorePaths": ["**/node_modules", "src/fabric"]
 }

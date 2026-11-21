@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.nitrochapterlist.chapter.ChapterListModel
+import com.margelo.nitro.nitrochapterlist.chapter.ChapterListPerf
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -27,14 +29,14 @@ class HybridChapterListStore : HybridChapterListStoreSpec() {
 
   override fun reset(totalCount: Double) {
     val count = totalCount.toInt()
-    mainHandler.post { model.reset(count) }
+    postTimed("reset($count)") { model.reset(count) }
   }
 
   override fun setRows(start: Double, rows: Array<ChapterRow>) {
     val position = start.toInt()
     // Nitro hands over a fresh array; copy anyway so JS-side reuse can't race.
     val copy = rows.copyOf()
-    mainHandler.post { model.setRows(position, copy) }
+    postTimed("setRows($position, ${copy.size})") { model.setRows(position, copy) }
   }
 
   override fun updateRows(rows: Array<ChapterRow>) {
@@ -50,6 +52,17 @@ class HybridChapterListStore : HybridChapterListStoreSpec() {
   override fun setDownloading(ids: DoubleArray) {
     val copy = IntArray(ids.size) { ids[it].toInt() }
     mainHandler.post { model.setDownloading(copy) }
+  }
+
+  /** Bulk changes log how long they waited for the main thread and how long they took there. */
+  private fun postTimed(what: String, block: () -> Unit) {
+    val postedAt = ChapterListPerf.now()
+    mainHandler.post {
+      ChapterListPerf.log("$what queued", postedAt)
+      val startedAt = ChapterListPerf.now()
+      block()
+      ChapterListPerf.log("$what applied", startedAt)
+    }
   }
 
   private companion object {

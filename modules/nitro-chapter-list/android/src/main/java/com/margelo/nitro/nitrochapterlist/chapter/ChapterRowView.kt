@@ -1,4 +1,4 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.chapter
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.margelo.nitro.nitrochapterlist.ChapterRow
 
 /** Colours (ARGB) and strings shared by every row; replaced as a whole on change. */
 data class ChapterListTheme(
@@ -95,6 +96,9 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
 
   private fun createText(sizeSp: Float) =
     TextView(context).apply {
+      // A non-wrap width lets setText skip requestLayout when the line height
+      // is unchanged, so rebinding a row only redraws it.
+      layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
       setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
       setSingleLine(true)
       maxLines = 1

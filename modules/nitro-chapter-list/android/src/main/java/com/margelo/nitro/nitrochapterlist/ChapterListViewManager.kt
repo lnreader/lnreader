@@ -1,23 +1,21 @@
 package com.margelo.nitro.nitrochapterlist
 
-import android.view.View
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.viewmanagers.LNChapterListViewManagerDelegate
 import com.facebook.react.viewmanagers.LNChapterListViewManagerInterface
+import com.margelo.nitro.nitrochapterlist.chapter.ChapterListEvents
+import com.margelo.nitro.nitrochapterlist.chapter.ChapterListView
+import com.margelo.nitro.nitrochapterlist.core.ListHostViewManager
 
-/**
- * Fabric manager for `LNChapterListView`. Its single React child (the novel
- * header) is placed in the RecyclerView's header item instead of being added to
- * the view itself, the way react-native-pager-view hosts pages.
- */
+/** Fabric manager for `LNChapterListView`; child hosting comes from [ListHostViewManager]. */
 @ReactModule(name = ChapterListViewManager.NAME)
 class ChapterListViewManager :
-  ViewGroupManager<ChapterListView>(), LNChapterListViewManagerInterface<ChapterListView> {
+  ListHostViewManager<ChapterListView>(), LNChapterListViewManagerInterface<ChapterListView> {
 
   private val delegate: ViewManagerDelegate<ChapterListView> = LNChapterListViewManagerDelegate(this)
 
@@ -32,32 +30,6 @@ class ChapterListViewManager :
     view.dispose()
     super.onDropViewInstance(view)
   }
-
-  // --- React children ---
-
-  override fun addView(parent: ChapterListView, child: View, index: Int) {
-    parent.setHeaderChild(child)
-  }
-
-  override fun getChildCount(parent: ChapterListView): Int = if (parent.header.reactChild != null) 1 else 0
-
-  override fun getChildAt(parent: ChapterListView, index: Int): View? =
-    if (index == 0) parent.header.reactChild else null
-
-  override fun removeViewAt(parent: ChapterListView, index: Int) {
-    if (index == 0) parent.setHeaderChild(null)
-  }
-
-  override fun removeView(parent: ChapterListView, view: View) {
-    if (parent.header.reactChild === view) parent.setHeaderChild(null)
-  }
-
-  override fun removeAllViews(parent: ChapterListView) {
-    parent.setHeaderChild(null)
-  }
-
-  // Fabric keeps laying the header child out at its Yoga frame.
-  override fun needsCustomLayoutForChildren(): Boolean = false
 
   // --- Props ---
 
@@ -109,7 +81,16 @@ class ChapterListViewManager :
   }
 
   override fun setBatchSize(view: ChapterListView, value: Int) {
-    view.batchSize = value.coerceAtLeast(1)
+    view.batchSize = value
+  }
+
+  override fun setScrollEventMaxOffset(view: ChapterListView, value: Float) {
+    view.setScrollEventMaxOffset(value)
+  }
+
+  override fun setScrollEventThresholds(view: ChapterListView, value: ReadableArray?) {
+    val size = value?.size() ?: 0
+    view.setScrollEventThresholds(FloatArray(size) { value!!.getDouble(it).toFloat() })
   }
 
   // --- Commands ---
@@ -122,13 +103,8 @@ class ChapterListViewManager :
     view.scrollToOffset(offset, animated)
   }
 
-  override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> {
-    val constants = super.getExportedCustomDirectEventTypeConstants() ?: HashMap()
-    ChapterListEvent.registrationNames.forEach { (event, registrationName) ->
-      constants[event] = mapOf("registrationName" to registrationName)
-    }
-    return constants
-  }
+  override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> =
+    directEventTypes(ChapterListEvents.registrationNames)
 
   companion object {
     const val NAME = "LNChapterListView"

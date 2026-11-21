@@ -1,4 +1,8 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.chapter
+
+import com.margelo.nitro.nitrochapterlist.ChapterRow
+import com.margelo.nitro.nitrochapterlist.core.HeaderContainer
+import com.margelo.nitro.nitrochapterlist.core.ListRecyclerView
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -13,30 +17,37 @@ class ChapterListAdapter(
   private val callbacks: Callbacks,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ChapterListModel.Listener {
   interface Callbacks {
-    fun onChapterPress(id: Int)
-    fun onChapterLongPress(id: Int)
-    fun onDownloadPress(id: Int)
-    fun onDeleteMenuRequested(id: Int, anchor: ChapterRowView)
+    // Positions are chapter positions (excluding the header).
+    fun onChapterPress(id: Int, position: Int)
+    fun onChapterLongPress(id: Int, position: Int)
+    fun onDownloadPress(id: Int, position: Int)
+    fun onDeleteMenuRequested(id: Int, position: Int, anchor: ChapterRowView)
     fun onPlaceholderBound(position: Int)
   }
 
   private class HeaderHolder(view: HeaderContainer) : RecyclerView.ViewHolder(view)
 
   private inner class RowHolder(val row: ChapterRowView) : RecyclerView.ViewHolder(row) {
+    private val position: Int
+      get() = bindingAdapterPosition - HEADER_COUNT
+
     init {
-      row.setOnClickListener { idAt(bindingAdapterPosition)?.let(callbacks::onChapterPress) }
+      row.setOnClickListener {
+        val id = idAt(bindingAdapterPosition) ?: return@setOnClickListener
+        callbacks.onChapterPress(id, position)
+      }
       row.setOnLongClickListener {
         val id = idAt(bindingAdapterPosition) ?: return@setOnLongClickListener false
-        callbacks.onChapterLongPress(id)
+        callbacks.onChapterLongPress(id, position)
         true
       }
       row.downloadButton.setOnClickListener {
-        val id = idAt(bindingAdapterPosition) ?: return@setOnClickListener
-        val chapterRow = model?.rowAt(bindingAdapterPosition - HEADER_COUNT) ?: return@setOnClickListener
+        val chapterRow = model?.rowAt(position) ?: return@setOnClickListener
+        val id = chapterRow.id.toInt()
         if (chapterRow.downloaded) {
-          callbacks.onDeleteMenuRequested(id, row)
+          callbacks.onDeleteMenuRequested(id, position, row)
         } else {
-          callbacks.onDownloadPress(id)
+          callbacks.onDownloadPress(id, position)
         }
       }
     }
@@ -179,9 +190,9 @@ class ChapterListAdapter(
   }
 
   companion object {
-    const val HEADER_COUNT = 1
+    private const val HEADER_COUNT = ListRecyclerView.HEADER_COUNT
     private const val TYPE_HEADER = 0
-    private const val TYPE_ROW = 1
+    const val TYPE_ROW = 1
     private const val HEADER_ID = Long.MIN_VALUE
   }
 }

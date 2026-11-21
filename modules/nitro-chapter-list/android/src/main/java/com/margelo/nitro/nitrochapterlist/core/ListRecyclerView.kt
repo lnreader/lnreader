@@ -1,4 +1,4 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.core
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,7 +10,8 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * RecyclerView with exact scroll metrics for "header + fixed-height rows".
+ * RecyclerView with exact scroll metrics for "header + fixed-height rows":
+ * adapter position 0 is [header], every other item is [rowHeight] px tall.
  *
  * LinearLayoutManager estimates offset and range from the average height of the
  * visible children, which a tall header skews. Rows are all [rowHeight] tall,
@@ -18,8 +19,11 @@ import kotlin.math.roundToInt
  * event and [scrollToOffset] all use them.
  */
 @SuppressLint("ViewConstructor")
-class ChapterRecyclerView(context: Context, private val header: HeaderContainer) : RecyclerView(context) {
-  val rowHeight: Int = (ChapterRowView.ROW_HEIGHT_DP * resources.displayMetrics.density).roundToInt()
+class ListRecyclerView(
+  context: Context,
+  private val header: HeaderContainer,
+  val rowHeight: Int,
+) : RecyclerView(context) {
   val linearLayoutManager = LinearLayoutManager(context)
   private var nativeGestureStarted = false
   private var pendingSmoothScroll: Runnable? = null
@@ -33,11 +37,11 @@ class ChapterRecyclerView(context: Context, private val header: HeaderContainer)
     overScrollMode = OVER_SCROLL_ALWAYS
   }
 
-  private val chapterCount: Int
-    get() = ((adapter?.itemCount ?: 0) - ChapterListAdapter.HEADER_COUNT).coerceAtLeast(0)
+  private val rowCount: Int
+    get() = ((adapter?.itemCount ?: 0) - HEADER_COUNT).coerceAtLeast(0)
 
   val contentHeight: Int
-    get() = paddingTop + header.contentHeight + chapterCount * rowHeight + paddingBottom
+    get() = paddingTop + header.contentHeight + rowCount * rowHeight + paddingBottom
 
   val maxScrollOffset: Int
     get() = (contentHeight - height).coerceAtLeast(0)
@@ -52,7 +56,7 @@ class ChapterRecyclerView(context: Context, private val header: HeaderContainer)
     if (position == NO_POSITION) return 0
     val top = linearLayoutManager.getDecoratedTop(first)
     val itemStart =
-      if (position == 0) 0 else header.contentHeight + (position - ChapterListAdapter.HEADER_COUNT) * rowHeight
+      if (position == 0) 0 else header.contentHeight + (position - HEADER_COUNT) * rowHeight
     return paddingTop + itemStart - top
   }
 
@@ -60,14 +64,14 @@ class ChapterRecyclerView(context: Context, private val header: HeaderContainer)
   fun jumpToOffset(offset: Int) {
     val target = offset.coerceIn(0, maxScrollOffset)
     val headerHeight = header.contentHeight
-    if (target < headerHeight || chapterCount == 0) {
+    if (target < headerHeight || rowCount == 0) {
       linearLayoutManager.scrollToPositionWithOffset(0, -target)
       return
     }
     val intoRows = target - headerHeight
-    val index = (intoRows / rowHeight).coerceAtMost(chapterCount - 1)
+    val index = (intoRows / rowHeight).coerceAtMost(rowCount - 1)
     linearLayoutManager.scrollToPositionWithOffset(
-      index + ChapterListAdapter.HEADER_COUNT,
+      index + HEADER_COUNT,
       -(intoRows - index * rowHeight),
     )
   }
@@ -102,7 +106,7 @@ class ChapterRecyclerView(context: Context, private val header: HeaderContainer)
     post(smooth)
   }
 
-  /** Offset that puts chapter [index] at [viewPosition] (0 top, 1 bottom) of the viewport. */
+  /** Offset that puts row [index] at [viewPosition] (0 top, 1 bottom) of the viewport. */
   fun offsetForIndex(index: Int, viewPosition: Float): Int {
     val itemTop = paddingTop + header.contentHeight + index * rowHeight
     return (itemTop - viewPosition * (height - paddingBottom - rowHeight)).roundToInt()
@@ -133,5 +137,10 @@ class ChapterRecyclerView(context: Context, private val header: HeaderContainer)
     if (nativeGestureStarted) return
     NativeGestureUtil.notifyNativeGestureStarted(this, e)
     nativeGestureStarted = true
+  }
+
+  companion object {
+    /** Adapters put the header at position 0; rows start here. */
+    const val HEADER_COUNT = 1
   }
 }

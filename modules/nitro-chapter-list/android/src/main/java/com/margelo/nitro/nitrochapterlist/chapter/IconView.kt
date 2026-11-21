@@ -1,4 +1,4 @@
-package com.margelo.nitro.nitrochapterlist
+package com.margelo.nitro.nitrochapterlist.chapter
 
 import android.content.Context
 import android.graphics.Canvas
