@@ -1,6 +1,6 @@
 import { getString } from '@i18n/translations';
 
-const escapeSqlString = (value: string) => value.replace(/'/g, "''");
+const escapeSqlString = (value: string) => value.replaceAll("'", "''");
 
 // if category with id = 2 exists, nothing in db.ts file is executed
 export const createCategoryDefaultQuery = `
