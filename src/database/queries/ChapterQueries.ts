@@ -901,6 +901,23 @@ export const getDownloadedChapters = async () =>
     .where(eq(chapterSchema.isDownloaded, true))
     .all();
 
+/** Ids of a novel's downloaded chapters; cheap enough to run after every download. */
+export const getDownloadedChapterIds = async (
+  novelId: number,
+): Promise<number[]> => {
+  const rows = await dbManager
+    .select({ id: chapterSchema.id })
+    .from(chapterSchema)
+    .where(
+      and(
+        eq(chapterSchema.novelId, novelId),
+        eq(chapterSchema.isDownloaded, true),
+      ),
+    )
+    .all();
+  return rows.map(row => row.id);
+};
+
 export const getNovelDownloadedChapters = async (
   novelId: number,
   startPosition?: number,

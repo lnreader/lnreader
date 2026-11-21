@@ -1,6 +1,7 @@
 import '../../../__tests__/mocks';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import {
+  applyDownloadedChapterIds,
   bookmarkChaptersAction,
   ChapterActionsDependencies,
   deleteChapterAction,
@@ -13,6 +14,7 @@ import {
   markPreviouschaptersReadAction,
   markPreviousChaptersUnreadAction,
   refreshChaptersAction,
+  syncDownloadedChaptersAction,
   updateChapterProgressAction,
 } from '../store/chapterActions';
 
@@ -344,5 +346,65 @@ describe('chapterActions', () => {
     // Reading time is reported every few seconds and no screen renders it from
     // the store, so the list must not be rebuilt for it.
     expect(state.getState()).toBe(before);
+  });
+});
+
+describe('syncing downloaded chapters', () => {
+  it('flips only the chapters whose downloaded state changed', () => {
+    const unchanged = makeChapter(1, { isDownloaded: true });
+    const finished = makeChapter(2, { isDownloaded: false });
+    const deleted = makeChapter(3, { isDownloaded: true });
+    const chapters = [unchanged, finished, deleted] as ChapterInfo[];
+
+    const next = applyDownloadedChapterIds(chapters, new Set([1, 2]));
+
+    expect(next[0]).toBe(unchanged);
+    expect(next[1]).toEqual({ ...finished, isDownloaded: true });
+    expect(next[2]).toEqual({ ...deleted, isDownloaded: false });
+  });
+
+  it('returns the same list when nothing changed', () => {
+    const chapters = [makeChapter(1), makeChapter(2)] as ChapterInfo[];
+    expect(applyDownloadedChapterIds(chapters, new Set([1, 2]))).toBe(chapters);
+  });
+
+  it('reads the ids from the database and patches the loaded chapters in place', async () => {
+    const deps = createDeps();
+    deps.getDownloadedChapterIds = jest.fn().mockResolvedValue([2]);
+    let chapters = [
+      makeChapter(1, { isDownloaded: false }),
+      makeChapter(2, { isDownloaded: false }),
+    ] as ChapterInfo[];
+    const mutateChapters = jest.fn(
+      (mutation: (chs: ChapterInfo[]) => ChapterInfo[]) => {
+        chapters = mutation(chapters);
+      },
+    );
+
+    await syncDownloadedChaptersAction(() => mockNovel, mutateChapters, deps);
+
+    expect(deps.getDownloadedChapterIds).toHaveBeenCalledWith(1);
+    expect(chapters.map(chapter => chapter.isDownloaded)).toEqual([
+      false,
+      true,
+    ]);
+    expect(deps.getPageChapters).not.toHaveBeenCalled();
+  });
+
+  it('drops the result when the novel changed while reading', async () => {
+    const deps = createDeps();
+    deps.getDownloadedChapterIds = jest.fn().mockResolvedValue([1]);
+    let novel: NovelInfo | undefined = mockNovel;
+    const mutateChapters = jest.fn();
+    const pending = syncDownloadedChaptersAction(
+      () => novel,
+      mutateChapters,
+      deps,
+    );
+    novel = { ...mockNovel, id: 2 };
+
+    await pending;
+
+    expect(mutateChapters).not.toHaveBeenCalled();
   });
 });

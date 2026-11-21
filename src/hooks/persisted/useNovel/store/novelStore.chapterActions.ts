@@ -14,6 +14,7 @@ import {
   markChaptersUnreadAndResetProgressAction,
   markPreviouschaptersReadAction,
   markPreviousChaptersUnreadAction,
+  syncDownloadedChaptersAction,
   updateChapterProgressAction,
 } from './chapterActions';
 import { NovelSettings } from '../types';
@@ -348,6 +349,13 @@ export const createNovelStoreChapterActions = ({
     refreshChapters: () => {
       void get().actions.getChapters();
     },
+
+    syncDownloadedChapters: () =>
+      syncDownloadedChaptersAction(
+        () => get().novel,
+        mutateChapters,
+        chapterActionsDependencies,
+      ),
 
     increaseTimeSpent: (chapterId, timeSpent) => {
       increaseTimeSpentAction(chapterId, timeSpent, chapterActionsDependencies);
