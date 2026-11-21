@@ -217,6 +217,7 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('appearance')}
         handleGoBack={navigation.goBack}
         theme={theme}

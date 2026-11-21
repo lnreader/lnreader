@@ -34,6 +34,7 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('generalSettings')}
         handleGoBack={navigation.goBack}
         theme={theme}

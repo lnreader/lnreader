@@ -250,6 +250,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('library')}
         handleGoBack={navigation.goBack}
         theme={theme}

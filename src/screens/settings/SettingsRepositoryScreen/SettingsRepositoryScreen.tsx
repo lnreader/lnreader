@@ -100,6 +100,7 @@ const SettingsBrowseScreen = ({
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('browseScreen.repositories')}
         handleGoBack={() => {
           if (navigation.canGoBack()) {
