@@ -173,6 +173,12 @@ const NovelScreenList = ({
     chapters.length,
   );
 
+  // Page, sort, filter and scanlator changes replace the chapter list.
+  const chapterSetKey = useMemo(
+    () => JSON.stringify([novel.id, pageIndex, novelSettings]),
+    [novel.id, pageIndex, novelSettings],
+  );
+
   const loadChaptersUpTo = useCallback(
     (index: number) => loadUpToBatch(Math.floor(index / CHAPTER_BATCH_SIZE)),
     [loadUpToBatch],
@@ -448,6 +454,7 @@ const NovelScreenList = ({
             itemCount={totalChapters}
             loadedCount={chapters.length}
             onRequestItems={loadChaptersUpTo}
+            dataKey={chapterSetKey}
             topInset={topInset + 56}
             bottomInset={bottomInset + 16}
           />

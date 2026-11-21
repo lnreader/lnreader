@@ -63,6 +63,11 @@ export interface FastScrollbarProps {
   loadedCount?: number;
   /** Asked to load items up to `index` when scrubbing past the loaded ones. */
   onRequestItems?: (index: number) => void;
+  /**
+   * Identifies the data set (e.g. page, sort and filter). Changing it drops a
+   * scrub that is still waiting for items, so it cannot land in the new list.
+   */
+  dataKey?: unknown;
   topInset?: number;
   bottomInset?: number;
 }
@@ -73,6 +78,7 @@ const FastScrollbar = ({
   itemCount,
   loadedCount = itemCount,
   onRequestItems,
+  dataKey,
   topInset = 0,
   bottomInset = 0,
 }: FastScrollbarProps) => {
@@ -125,6 +131,21 @@ const FastScrollbar = ({
     ),
   );
 
+  const [pending] = useState(() => new PendingScrub(INITIAL_TARGET));
+  // Worklets must capture plain functions, not the class instance.
+  const { request: requestItems, cancel: cancelPending } = pending;
+
+  // Drops a scrub waiting on unloaded items on both threads, so it can never
+  // scroll the list after the user has moved on.
+  const abandonPendingScrub = useCallback(() => {
+    'worklet';
+    if (awaitingItems.get()) {
+      awaitingItems.set(false);
+      lastRequestedIndex.set(-1);
+      runOnJS(cancelPending)();
+    }
+  }, [awaitingItems, cancelPending, lastRequestedIndex]);
+
   const scrollThumbY = useCallback(() => {
     'worklet';
     const range = Math.max(0, trackHeight.get() - thumbLength.get());
@@ -162,9 +183,9 @@ const FastScrollbar = ({
     );
     settling.set(false);
     settleOffset.set(-1);
-    awaitingItems.set(false);
+    abandonPendingScrub();
   }, [
-    awaitingItems,
+    abandonPendingScrub,
     correction,
     dragY,
     dragging,
@@ -234,14 +255,18 @@ const FastScrollbar = ({
   const resolvePendingScrub = useCallback(
     (offset: number) => {
       'worklet';
+      // Resolutions already in flight when the scrub was abandoned.
+      if (!awaitingItems.get()) {
+        return;
+      }
       awaitingItems.set(false);
+      lastRequestedIndex.set(-1);
       scrollToOffset(offset);
       settleAt(offset);
     },
-    [awaitingItems, scrollToOffset, settleAt],
+    [awaitingItems, lastRequestedIndex, scrollToOffset, settleAt],
   );
 
-  const [pending] = useState(() => new PendingScrub(INITIAL_TARGET));
   useEffect(() => {
     pending.setTarget({
       getList: () => listRef?.current,
@@ -260,8 +285,16 @@ const FastScrollbar = ({
   ]);
   useEffect(() => () => pending.dispose(), [pending]);
 
-  // Worklets must capture plain functions, not the class instance.
-  const { request: requestItems, cancel: cancelPending } = pending;
+  const resetForNewData = useCallback(() => {
+    'worklet';
+    abandonPendingScrub();
+    endSettle();
+  }, [abandonPendingScrub, endSettle]);
+
+  useEffect(() => {
+    pending.cancel();
+    runOnUI(resetForNewData)();
+  }, [dataKey, pending, resetForNewData]);
 
   const thumbY = useDerivedValue(() => {
     if (dragging.get() || settling.get()) {
@@ -361,9 +394,7 @@ const FastScrollbar = ({
     () => userDragCount.get(),
     (current, previous) => {
       if (previous !== null && current !== previous) {
-        if (awaitingItems.get()) {
-          runOnJS(cancelPending)();
-        }
+        abandonPendingScrub();
         endSettle();
       }
     },
@@ -416,11 +447,7 @@ const FastScrollbar = ({
               ? progress
               : (progress * totalCount) / Math.max(1, loadedItems);
           if (loadedProgress <= 1) {
-            if (awaitingItems.get()) {
-              awaitingItems.set(false);
-              lastRequestedIndex.set(-1);
-              runOnJS(cancelPending)();
-            }
+            abandonPendingScrub();
             // Scrolling the native view straight from the gesture keeps the
             // list in step with the thumb and lets LegendList treat it like a
             // user fling, without its programmatic-scroll bookkeeping.
@@ -455,8 +482,8 @@ const FastScrollbar = ({
           }
         }),
     [
+      abandonPendingScrub,
       awaitingItems,
-      cancelPending,
       contentLength,
       correction,
       dragY,

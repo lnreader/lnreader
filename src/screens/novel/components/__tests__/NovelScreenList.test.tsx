@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@test-utils';
 import NovelScreenList from '../NovelScreenList';
 
 const mockUseNovelValue = jest.fn();
@@ -57,9 +57,22 @@ jest.mock('@hooks/index', () => ({
   }),
 }));
 
-jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({ top: 0, bottom: 0 }),
-}));
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = jest.requireActual('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: React.ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 
 const mockLegendList = ({ data, renderItem, ListHeaderComponent }: any) => {
   const React = require('react');
@@ -154,6 +167,7 @@ jest.mock('react-native-paper', () => {
   const { Pressable, Text } = require('react-native');
 
   return {
+    ...jest.requireActual('react-native-paper'),
     AnimatedFAB: ({ onPress, label }: any) =>
       React.createElement(
         Pressable,

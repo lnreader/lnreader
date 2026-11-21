@@ -82,4 +82,15 @@ describe('PendingScrub', () => {
     pending.request(0.5, 2000);
     expect(target.onRequestItems).toHaveBeenCalledTimes(2);
   });
+
+  it('drops a resolution that was already queued when cancelled', () => {
+    const { target, pending } = setup();
+
+    pending.request(0.5, 2000);
+    pending.setTarget({ ...target, loadedCount: 3000 });
+    pending.cancel();
+    runFrame();
+
+    expect(target.onResolved).not.toHaveBeenCalled();
+  });
 });
