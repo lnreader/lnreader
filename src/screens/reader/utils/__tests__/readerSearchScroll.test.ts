@@ -20,6 +20,7 @@ const loadReaderSearch = (chapterTop: number) => {
     reader: {
       generalSettings: { val: { pageReader: false } },
       layoutHeight: 800,
+      scrollBehavior: () => 'smooth',
       chapterTop,
     },
     document: {},
