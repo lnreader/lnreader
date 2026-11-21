@@ -194,46 +194,36 @@ window.textRemover = new (function () {
 })();
 
 /**
- * Directly remove text from the chapter DOM without reloading the WebView.
- * Also updates reader.rawHTML so the text-options deriver (bionic reading,
- * paragraph spacing) doesn't re-introduce removed text on its next run.
+ * Directly replace text in every chapter in the DOM without reloading the
+ * WebView. Also updates each chapter's raw HTML so the text-options deriver
+ * (bionic reading, paragraph spacing) doesn't re-introduce the old text on its
+ * next run.
  */
-window.textRemover.performRemove = function (text) {
-  const el = document.querySelector('#LNReader-chapter');
-  if (!el) return;
-  const m = text.match(/^\/(.*)\/([gmiyuvsd]*)$/);
-  let result;
+window.textRemover.replaceInChapters = function (from, to) {
+  const m = from.match(/^\/(.*)\/([gmiyuvsd]*)$/);
+  let pattern;
   if (m) {
     try {
-      result = el.innerHTML.replace(new RegExp(m[1], m[2]), '');
+      pattern = new RegExp(m[1], m[2]);
     } catch (_e) {
       return;
     }
-  } else {
-    result = el.innerHTML.split(text).join('');
   }
-  el.innerHTML = result;
-  reader.rawHTML = result;
+  for (const segment of reader.segments) {
+    const html = segment.element.innerHTML;
+    const result = pattern
+      ? html.replace(pattern, to)
+      : html.split(from).join(to);
+    segment.element.innerHTML = result;
+    segment.rawHTML = result;
+    segment.appliedHTML = result;
+  }
 };
 
-/**
- * Directly replace text in the chapter DOM without reloading the WebView.
- * Also updates reader.rawHTML so the text-options deriver stays in sync.
- */
+window.textRemover.performRemove = function (text) {
+  window.textRemover.replaceInChapters(text, '');
+};
+
 window.textRemover.performReplace = function (from, to) {
-  const el = document.querySelector('#LNReader-chapter');
-  if (!el) return;
-  const m = from.match(/^\/(.*)\/([gmiyuvsd]*)$/);
-  let result;
-  if (m) {
-    try {
-      result = el.innerHTML.replace(new RegExp(m[1], m[2]), to);
-    } catch (_e) {
-      return;
-    }
-  } else {
-    result = el.innerHTML.split(from).join(to);
-  }
-  el.innerHTML = result;
-  reader.rawHTML = result;
+  window.textRemover.replaceInChapters(from, to);
 };

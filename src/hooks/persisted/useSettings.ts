@@ -210,6 +210,7 @@ export interface ChapterGeneralSettings {
   TTSEnable: boolean;
   pageReaderInvertVolumeButtons: boolean;
   pageReaderDisableAnimation: boolean;
+  infiniteScroll: boolean;
 }
 
 export interface ReaderTheme {
@@ -339,6 +340,7 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   TTSEnable: true,
   pageReaderInvertVolumeButtons: false,
   pageReaderDisableAnimation: false,
+  infiniteScroll: false,
 };
 
 export const initialChapterReaderSettings: ChapterReaderSettings = {
