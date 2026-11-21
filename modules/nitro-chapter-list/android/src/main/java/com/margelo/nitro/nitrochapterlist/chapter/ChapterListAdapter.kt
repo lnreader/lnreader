@@ -2,6 +2,7 @@ package com.margelo.nitro.nitrochapterlist.chapter
 
 import com.margelo.nitro.nitrochapterlist.ChapterRow
 import com.margelo.nitro.nitrochapterlist.core.HeaderContainer
+import com.margelo.nitro.nitrochapterlist.core.HeaderViewHolder
 import com.margelo.nitro.nitrochapterlist.core.ListRecyclerView
 
 import android.view.ViewGroup
@@ -25,7 +26,6 @@ class ChapterListAdapter(
     fun onPlaceholderBound(position: Int)
   }
 
-  private class HeaderHolder(view: HeaderContainer) : RecyclerView.ViewHolder(view)
 
   private inner class RowHolder(val row: ChapterRowView) : RecyclerView.ViewHolder(row) {
     // Not `position`: ViewHolder already has a final getPosition().
@@ -113,16 +113,15 @@ class ChapterListAdapter(
   }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-    if (viewType == TYPE_HEADER) {
-      // One header container for the list's lifetime, so the React child is
-      // never moved; RecyclerView drops this holder when it scrolls away.
-      (header.parent as? ViewGroup)?.removeView(header)
-      return HeaderHolder(header).apply { setIsRecyclable(false) }
-    }
+    if (viewType == TYPE_HEADER) return HeaderViewHolder(parent.context)
     return RowHolder(ChapterRowView(parent.context))
   }
 
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    if (holder is HeaderViewHolder) {
+      holder.bind(header)
+      return
+    }
     if (holder !is RowHolder) return
     val row = holder.row
     row.applyTheme(theme)

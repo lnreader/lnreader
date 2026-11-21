@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
 
 /**
- * Hosts the list's React child (the novel header) as RecyclerView item 0.
+ * Hosts the list's React child (the novel header). [HeaderViewHolder] moves it
+ * into whichever header item RecyclerView is showing.
  *
  * Fabric keeps measuring and laying out the child at its Yoga frame (top-left of
  * the list, full width). This container never re-lays the child out; it only
@@ -30,7 +30,6 @@ class HeaderContainer(context: Context) : ViewGroup(context) {
     OnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ -> updateContentHeight(bottom - top) }
 
   init {
-    layoutParams = RecyclerView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
     clipChildren = false
   }
 
