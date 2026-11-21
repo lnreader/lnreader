@@ -15,6 +15,7 @@ jest.mock('@modules/native-background-tasks', () => ({
     fail: jest.fn(),
     getTask: jest.fn(),
     getTasks: jest.fn().mockResolvedValue([]),
+    postWarning: jest.fn(),
     updateProgress: jest.fn().mockResolvedValue(undefined),
   },
 }));
@@ -95,6 +96,32 @@ describe('BackgroundTaskQueue completion notifications', () => {
       'Failed: Invalid backup',
       false,
     );
+  });
+
+  it('lets work finish if Android cannot post a warning', async () => {
+    jest
+      .mocked(NativeBackgroundTasks.postWarning)
+      .mockRejectedValueOnce(new Error('Could not post notification'));
+    jest
+      .mocked(executeBackgroundTask)
+      .mockImplementationOnce(
+        async (_task, _updateProgress, _enqueue, context) => {
+          await context.postWarning('Backup warning', 'Could not copy a cover');
+        },
+      );
+
+    await new BackgroundTaskQueue().run('restore-3', task);
+
+    expect(NativeBackgroundTasks.postWarning).toHaveBeenCalledWith(
+      'restore-3',
+      'Backup warning',
+      'Could not copy a cover',
+    );
+    expect(NativeBackgroundTasks.complete).toHaveBeenCalledWith(
+      'restore-3',
+      'Completed',
+    );
+    expect(NativeBackgroundTasks.fail).not.toHaveBeenCalled();
   });
 
   it('shows queued feedback when the task must wait in its lane', async () => {

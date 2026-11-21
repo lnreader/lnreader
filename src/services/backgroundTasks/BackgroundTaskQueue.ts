@@ -183,6 +183,13 @@ export class BackgroundTaskQueue {
         this.enqueueSilently,
         {
           checkpoint,
+          postWarning: async (title, message) => {
+            try {
+              await NativeBackgroundTasks.postWarning(taskId, title, message);
+            } catch {
+              // Notification delivery must not interrupt background work.
+            }
+          },
           updateCheckpoint: value => {
             if (this.interruptedTasks.get(taskId) === 'cancel') {
               this.throwIfInterrupted(taskId);

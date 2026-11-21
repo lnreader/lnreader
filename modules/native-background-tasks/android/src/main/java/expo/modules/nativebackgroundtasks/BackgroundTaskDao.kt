@@ -44,6 +44,9 @@ interface BackgroundTaskDao {
     @Query("SELECT * FROM background_tasks WHERE id = :id LIMIT 1")
     suspend fun get(id: String): BackgroundTaskEntity?
 
+    @Query("SELECT state FROM background_tasks WHERE id = :id")
+    suspend fun getState(id: String): String?
+
     @Query("SELECT * FROM background_tasks WHERE type = :type AND state IN ('queued', 'running', 'paused') LIMIT 1")
     suspend fun getActiveByType(type: String): BackgroundTaskEntity?
 

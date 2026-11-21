@@ -99,6 +99,7 @@ const downloadChapter = async (chapterId: number) => {
 
 export const downloadChapters = async (
   {
+    novelName,
     chapters,
   }: {
     novelName: string;
@@ -117,6 +118,7 @@ export const downloadChapters = async (
 
   for (let index = checkpoint.nextIndex; index < chapters.length; index++) {
     const chapter = chapters[index];
+    let firstFailure: string | undefined;
     setMeta(meta => ({
       ...meta,
       isRunning: true,
@@ -127,16 +129,22 @@ export const downloadChapters = async (
     try {
       await downloadChapter(chapter.chapterId);
     } catch (error) {
-      failures.push(
-        `${chapter.chapterName}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      const failure = `${chapter.chapterName}: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      if (failures.length === 0) firstFailure = failure;
+      failures.push(failure);
     }
 
     await context.updateCheckpoint(
       JSON.stringify({ nextIndex: index + 1, failures }),
     );
+    if (firstFailure !== undefined) {
+      await context.postWarning(
+        getString('notifications.chapterDownloadFailed', { novelName }),
+        firstFailure,
+      );
+    }
   }
 
   setMeta(meta => ({

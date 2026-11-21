@@ -707,6 +707,7 @@ export interface StringMap {
   'notifications.LOCAL_RESTORE': 'string';
   'notifications.MIGRATE_NOVEL': 'string';
   'notifications.DOWNLOAD_CHAPTER': 'string';
+  'notifications.chapterDownloadFailed': 'string';
   'notifications.taskQueued': 'string';
   'notifications.taskCompleted': 'string';
   'notifications.taskFailed': 'string';

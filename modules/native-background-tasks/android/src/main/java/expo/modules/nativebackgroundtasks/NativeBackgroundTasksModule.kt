@@ -3,6 +3,7 @@ package expo.modules.nativebackgroundtasks
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import kotlinx.coroutines.Dispatchers
@@ -130,6 +131,17 @@ class NativeBackgroundTasksModule : Module() {
             runBlocking(Dispatchers.IO) {
                 requireTask(taskId)
                 dao.updateCheckpoint(taskId, checkpoint, System.currentTimeMillis())
+            }
+        }
+
+        AsyncFunction("postWarning") Coroutine { taskId: String, title: String, message: String ->
+            val context = requireNotNull(appContext.reactContext).applicationContext
+            if (dao.getState(taskId) in BackgroundTaskState.active) {
+                TaskNotificationFactory.postWarning(context, taskId, title, message)
+                // Cancellation can dismiss the warning between the state check and posting it.
+                if (dao.getState(taskId) !in BackgroundTaskState.active) {
+                    TaskNotificationFactory.dismissWarning(context, taskId)
+                }
             }
         }
 
