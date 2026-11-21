@@ -236,7 +236,20 @@ describe('@libs/pluginError bridge', () => {
             message: 'No novels found',
           });
         },
-        parseNovel: async () => {
+        parseNovel: async mode => {
+          if (mode === 'search-404') {
+            checkResponse(
+              { ok: false, status: 404, url: 'https://example.com/s' },
+              { search: true },
+            );
+            return { name: 'empty-search', path: 's' };
+          }
+          if (mode === 'search-429') {
+            checkResponse(
+              { ok: false, status: 429, url: 'https://example.com/s' },
+              { search: true },
+            );
+          }
           checkResponse(
             { ok: false, status: 404, url: 'https://example.com/n' },
             { notFoundCode: PluginError.NovelNotFound },
@@ -265,6 +278,15 @@ describe('@libs/pluginError bridge', () => {
     await expect(plugin!.parseNovel('n')).rejects.toMatchObject({
       status: 404,
       code: 'Novel not found (404), it may have been removed from this source.',
+    });
+
+    await expect(plugin!.parseNovel('search-404')).resolves.toMatchObject({
+      name: 'empty-search',
+    });
+
+    await expect(plugin!.parseNovel('search-429')).rejects.toMatchObject({
+      status: 429,
+      code: 'Too many requests (429). Please try again later.',
     });
 
     await expect(plugin!.parseChapter('429')).rejects.toMatchObject({

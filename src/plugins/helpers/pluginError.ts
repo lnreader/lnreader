@@ -95,7 +95,7 @@ export function checkResponse(
   response: Response,
   options?: CheckResponseOptions,
 ): Response {
-  if (response.ok || options?.search) {
+  if (response.ok || (options?.search && response.status === 404)) {
     return response;
   }
   if (response.status === 404 && options?.notFoundCode) {

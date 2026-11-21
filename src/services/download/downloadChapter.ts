@@ -148,6 +148,14 @@ export const downloadChapters = async (
     } catch (error) {
       if (isRateLimitError(error)) {
         await sleep(Math.max(getChapterDownloadCooldownMs() * 2, 3500));
+        setMeta(meta => ({
+          ...meta,
+          isRunning: true,
+          progress: index / chapters.length,
+          progressText: `${index + 1}/${chapters.length} · ${
+            chapter.chapterName
+          }`,
+        }));
         try {
           await downloadChapter(chapter.chapterId);
         } catch (retryError) {
