@@ -20,6 +20,7 @@ import type {
   BackgroundTaskEnqueuer,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
+import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
 
 const UPDATE_SOURCE_CONCURRENCY = 3;
 
@@ -88,6 +89,7 @@ const updateLibrary = async (
     isRunning: true,
     progress: 0,
   }));
+  reportLibraryUpdateProgress(true);
 
   const {
     downloadNewChapters,
@@ -125,6 +127,7 @@ const updateLibrary = async (
       const activeNovels = new Map<string, string>();
       let completedNovels = 0;
       let nextSourceQueue = 0;
+      let reportedNovels = -1;
 
       const publishProgress = () => {
         setMeta(meta => ({
@@ -132,6 +135,14 @@ const updateLibrary = async (
           progressText: [...activeNovels.values()].join('\n') || undefined,
           progress: completedNovels / libraryNovels.length,
         }));
+        if (completedNovels !== reportedNovels) {
+          reportedNovels = completedNovels;
+          reportLibraryUpdateProgress(
+            true,
+            completedNovels,
+            libraryNovels.length,
+          );
+        }
       };
 
       const updateSourceQueue = async (sourceQueue: DBNovelInfo[]) => {
@@ -188,6 +199,8 @@ const updateLibrary = async (
       progressText: undefined,
       isRunning: false,
     }));
+    reportLibraryUpdateProgress(false);
+    await syncWidgets();
   }
 };
 
