@@ -482,6 +482,9 @@ export interface StringMap {
   'novelScreen.bottomSheet.order.byChapterName': 'string';
   'novelScreen.bottomSheet.order.bySource': 'string';
   'novelScreen.chapterChapnum': 'string';
+  'novelScreen.chapterDownloadA11y': 'string';
+  'novelScreen.chapterDeleteA11y': 'string';
+  'novelScreen.chapterDownloadingA11y': 'string';
   'novelScreen.chapters': 'string';
   'novelScreen.continueReading': 'string';
   'novelScreen.exportEpubModal.applyReaderTheme': 'string';

@@ -14,6 +14,7 @@ import {
   markChaptersUnreadAndResetProgressAction,
   markPreviouschaptersReadAction,
   markPreviousChaptersUnreadAction,
+  syncDownloadedChaptersAction,
   updateChapterProgressAction,
 } from './chapterActions';
 import { NovelSettings } from '../types';
@@ -347,6 +348,20 @@ export const createNovelStoreChapterActions = ({
 
     refreshChapters: () => {
       void get().actions.getChapters();
+    },
+
+    syncDownloadedChapters: () => {
+      // With a download filter, downloads change which chapters are in the
+      // list (and the batch offsets), so only a reload is correct.
+      const filter = getSettingsFilter(get().novelSettings);
+      if (filter.includes('downloaded') || filter.includes('not-downloaded')) {
+        return get().actions.getChapters();
+      }
+      return syncDownloadedChaptersAction(
+        () => get().novel,
+        mutateChapters,
+        chapterActionsDependencies,
+      );
     },
 
     increaseTimeSpent: (chapterId, timeSpent) => {

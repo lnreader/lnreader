@@ -33,6 +33,7 @@ import {
   getNextChapter,
   getDownloadedChapters,
   getNovelDownloadedChapters,
+  getDownloadedChapterIds,
   getUpdatedOverviewFromDb,
   getDetailedUpdatesFromDb,
   isChapterDownloaded,
@@ -1520,6 +1521,21 @@ describe('ChapterQueries', () => {
       expect(result.length).toBeGreaterThanOrEqual(1);
       expect(result[0].isDownloaded).toBe(true);
       expect(result[0].pluginId).toBe('test-plugin');
+    });
+  });
+
+  describe('getDownloadedChapterIds', () => {
+    it("returns only the novel's downloaded chapter ids", async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      const downloaded = await insertTestChapter(testDb, novelId, {
+        isDownloaded: true,
+      });
+      await insertTestChapter(testDb, novelId, { isDownloaded: false });
+      await insertTestChapter(testDb, otherNovelId, { isDownloaded: true });
+
+      expect(await getDownloadedChapterIds(novelId)).toEqual([downloaded]);
     });
   });
 
