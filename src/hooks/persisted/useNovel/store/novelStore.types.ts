@@ -56,6 +56,8 @@ export interface NovelStoreChapterActions {
   deleteChapter: (chapter: ChapterInfo) => void;
   deleteChapters: (chapterIds: number[]) => void;
   refreshChapters: () => void;
+  /** Re-reads which loaded chapters are downloaded, without reloading the list. */
+  syncDownloadedChapters: () => Promise<void>;
   increaseTimeSpent: (chapterId: number, timeSpent: number) => void;
 }
 

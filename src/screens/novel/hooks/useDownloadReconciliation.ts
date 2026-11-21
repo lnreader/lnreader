@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 export const useDownloadReconciliation = (
   isNovelDownloading: boolean,
   downloadProgressKey: string,
-  reloadChapters: () => Promise<void>,
+  reconcile: () => Promise<void>,
 ) => {
   const hadNovelDownloadsRef = useRef(false);
   const previousProgressKeyRef = useRef('');
@@ -14,7 +14,7 @@ export const useDownloadReconciliation = (
         hadNovelDownloadsRef.current &&
         previousProgressKeyRef.current !== downloadProgressKey
       ) {
-        void reloadChapters();
+        void reconcile();
       }
       hadNovelDownloadsRef.current = true;
       previousProgressKeyRef.current = downloadProgressKey;
@@ -24,7 +24,7 @@ export const useDownloadReconciliation = (
     if (hadNovelDownloadsRef.current) {
       hadNovelDownloadsRef.current = false;
       previousProgressKeyRef.current = '';
-      void reloadChapters();
+      void reconcile();
     }
-  }, [downloadProgressKey, isNovelDownloading, reloadChapters]);
+  }, [downloadProgressKey, isNovelDownloading, reconcile]);
 };

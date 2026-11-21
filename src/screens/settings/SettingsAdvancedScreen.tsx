@@ -92,6 +92,7 @@ const AdvancedSettings = ({ navigation }: AdvancedSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('advancedSettings')}
         handleGoBack={() => navigation.goBack()}
         theme={theme}

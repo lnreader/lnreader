@@ -32,11 +32,31 @@ const DATE_FORMAT_NAMES: Record<Exclude<DateFormat, 'default'>, string> = {
   'MMM DD, YYYY': 'MMM dd, yyyy',
 };
 
+// Building an Intl.DateTimeFormat costs far more than formatting with one, and
+// lists format many dates in a row. A formatter keeps the time zone it was
+// built in, so it's rebuilt when the device's UTC offset changes (a time zone
+// change, or a DST switch).
+let defaultFormatter: {
+  locale: string;
+  utcOffset: number;
+  format: Intl.DateTimeFormat;
+} | null = null;
+
 const formatDefaultDate = (date: Date): string => {
   try {
-    return new Intl.DateTimeFormat(localization, {
-      dateStyle: 'short',
-    }).format(date);
+    const utcOffset = new Date().getTimezoneOffset();
+    if (
+      !defaultFormatter ||
+      defaultFormatter.locale !== localization ||
+      defaultFormatter.utcOffset !== utcOffset
+    ) {
+      defaultFormatter = {
+        locale: localization,
+        utcOffset,
+        format: new Intl.DateTimeFormat(localization, { dateStyle: 'short' }),
+      };
+    }
+    return defaultFormatter.format.format(date);
   } catch {
     return dayjs(date).format('L');
   }

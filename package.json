@@ -150,6 +150,7 @@
           "native-file",
           "native-crash-logs",
           "nitro-tts",
+          "nitro-chapter-list",
           "native-volume-button-listener",
           "native-zip-archive",
           "nitro-epub",

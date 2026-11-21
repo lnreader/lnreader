@@ -414,6 +414,37 @@ describe('novelStore.chapterActions', () => {
     expect(harness.getState().actions.getChapters).toHaveBeenCalledTimes(1);
   });
 
+  it('syncDownloadedChapters patches flags in place on an unfiltered list', async () => {
+    const harness = createHarness({
+      chapters: [makeChapter(1, { isDownloaded: false })],
+    });
+    harness.chapterDeps.getDownloadedChapterIds = jest
+      .fn()
+      .mockResolvedValue([1]);
+
+    await harness.actions.syncDownloadedChapters();
+
+    expect(harness.getState().chapters[0].isDownloaded).toBe(true);
+    expect(harness.getState().actions.getChapters).not.toHaveBeenCalled();
+  });
+
+  it.each(['downloaded', 'not-downloaded'] as const)(
+    'syncDownloadedChapters reloads the list when filtered by %s',
+    async filterKey => {
+      const harness = createHarness({
+        novelSettings: { filter: [filterKey], showChapterTitles: true },
+      });
+      harness.chapterDeps.getDownloadedChapterIds = jest.fn();
+
+      await harness.actions.syncDownloadedChapters();
+
+      expect(harness.getState().actions.getChapters).toHaveBeenCalledTimes(1);
+      expect(
+        harness.chapterDeps.getDownloadedChapterIds,
+      ).not.toHaveBeenCalled();
+    },
+  );
+
   it('delegates remaining chapter action entry points to low-level helpers', () => {
     const harness = createHarness();
 

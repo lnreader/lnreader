@@ -21,7 +21,7 @@ import NovelScreenList from './components/NovelScreenList';
 import { ThemeColors } from '@theme/types';
 import { EmptyView, SafeAreaView } from '@components';
 import { useNovelActions, useNovelValue } from './NovelContext';
-import { LegendListRef } from '@legendapp/list/react-native';
+import type { NativeChapterListRef } from '@components/NativeChapterList';
 import { useCustomNovelCover } from './hooks/useCustomNovelCover';
 import { useChapterSelection } from './hooks/useChapterSelection';
 import { useNovelScreenActions } from './hooks/useNovelScreenActions';
@@ -67,7 +67,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   } = useChapterSelection(chapters, getAllChapterIds);
   const [editInfoModal, showEditInfoModal] = useState(false);
 
-  const chapterListRef = useRef<LegendListRef | null>(null);
+  const chapterListRef = useRef<NativeChapterListRef | null>(null);
 
   const deleteDownloadsSnackbar = useBoolean();
   const {

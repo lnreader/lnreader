@@ -28,6 +28,8 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   deleteChapter: jest.fn(),
   deleteChapters: jest.fn(),
   getPageChapters: jest.fn(),
+  getChapter: jest.fn(),
+  getDownloadedChapterIds: jest.fn(async () => []),
   insertChapters: jest.fn(),
   getCustomPages: jest.fn(),
   getChapterCount: jest.fn(),

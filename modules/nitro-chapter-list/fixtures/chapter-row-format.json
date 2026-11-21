@@ -1,0 +1,422 @@
+{
+  "now": "2026-07-25T12:00:00",
+  "baseFormat": {
+    "showChapterTitles": false,
+    "chapterTitleTemplate": "Chapter %{num}",
+    "progressTemplate": "Progress %{progress} %",
+    "dateFormat": "default",
+    "relativeDates": true,
+    "locale": "en-US",
+    "sameDay": "Today",
+    "lastDay": "Yesterday",
+    "nextDay": "Tomorrow",
+    "lastWeek": [
+      "Last Sunday",
+      "Last Monday",
+      "Last Tuesday",
+      "Last Wednesday",
+      "Last Thursday",
+      "Last Friday",
+      "Last Saturday"
+    ],
+    "nextWeek": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "monthsShort": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "cases": [
+    {
+      "name": "today, with scanlator and progress",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "Team A",
+        "progress": 40,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-25T09:00:00",
+      "title": "Chapter 12",
+      "subtitle": "Today •  Team A •  Progress 40 %"
+    },
+    {
+      "name": "yesterday, late evening",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-24T23:30:00",
+      "title": "Chapter 12",
+      "subtitle": "Yesterday"
+    },
+    {
+      "name": "last week, Monday",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-20T08:00:00",
+      "title": "Chapter 12",
+      "subtitle": "Last Monday"
+    },
+    {
+      "name": "six days ago, Sunday",
+      "settings": {
+        "dateFormat": "YYYY-MM-DD",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-19T00:05:00",
+      "title": "Chapter 12",
+      "subtitle": "Last Sunday"
+    },
+    {
+      "name": "seven days ago falls back to the date format",
+      "settings": {
+        "dateFormat": "YYYY-MM-DD",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-18T12:00:00",
+      "title": "Chapter 12",
+      "subtitle": "2026-07-18"
+    },
+    {
+      "name": "tomorrow",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-26T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "Tomorrow"
+    },
+    {
+      "name": "next week, Tuesday",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-28T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "Tuesday"
+    },
+    {
+      "name": "a week ahead uses DD MMM YYYY",
+      "settings": {
+        "dateFormat": "DD MMM YYYY",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-08-01T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "01 Aug 2026"
+    },
+    {
+      "name": "MMM DD, YYYY",
+      "settings": {
+        "dateFormat": "MMM DD, YYYY",
+        "relativeTimestamps": false,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-01-05T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "Jan 05, 2026"
+    },
+    {
+      "name": "MM/DD/YY",
+      "settings": {
+        "dateFormat": "MM/DD/YY",
+        "relativeTimestamps": false,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-01-05T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "01/05/26"
+    },
+    {
+      "name": "DD/MM/YY",
+      "settings": {
+        "dateFormat": "DD/MM/YY",
+        "relativeTimestamps": false,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-12-31T23:59:00",
+      "title": "Chapter 12",
+      "subtitle": "31/12/26"
+    },
+    {
+      "name": "relative dates off shows today as a date",
+      "settings": {
+        "dateFormat": "YYYY-MM-DD",
+        "relativeTimestamps": false,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-07-25T09:00:00",
+      "title": "Chapter 12",
+      "subtitle": "2026-07-25"
+    },
+    {
+      "name": "unparseable release text is shown as is",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "Unknown",
+        "scanlator": "Team B",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": null,
+      "title": "Chapter 12",
+      "subtitle": "Unknown •  Team B"
+    },
+    {
+      "name": "nothing to show",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": null,
+      "title": "Chapter 12",
+      "subtitle": ""
+    },
+    {
+      "name": "read chapters hide progress",
+      "settings": {
+        "dateFormat": "YYYY-MM-DD",
+        "relativeTimestamps": false,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 40,
+        "unread": false,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": "2026-03-01T10:00:00",
+      "title": "Chapter 12",
+      "subtitle": "2026-03-01"
+    },
+    {
+      "name": "chapter titles",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": true
+      },
+      "row": {
+        "id": 1,
+        "name": "Chapter 1669: I Love You",
+        "numberText": "12",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 5,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": null,
+      "title": "Chapter 1669: I Love You",
+      "subtitle": "Progress 5 %"
+    },
+    {
+      "name": "fractional chapter number",
+      "settings": {
+        "dateFormat": "default",
+        "relativeTimestamps": true,
+        "showChapterTitles": false
+      },
+      "row": {
+        "id": 1,
+        "name": "The Beginning",
+        "numberText": "10.5",
+        "releaseText": "",
+        "scanlator": "",
+        "progress": 0,
+        "unread": true,
+        "bookmarked": false,
+        "downloaded": false
+      },
+      "releaseLocal": null,
+      "title": "Chapter 10.5",
+      "subtitle": ""
+    }
+  ]
+}

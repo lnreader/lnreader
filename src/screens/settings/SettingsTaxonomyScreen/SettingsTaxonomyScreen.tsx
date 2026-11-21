@@ -157,6 +157,7 @@ const SettingsTaxonomyScreen = ({ navigation }: GenreTaxonomyScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('genreStats.taxonomyTitle')}
         handleGoBack={navigation.goBack}
         theme={theme}

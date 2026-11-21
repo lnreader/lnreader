@@ -3,6 +3,7 @@ import {
   bookmarkChapters as _bookmarkChapters,
   deleteChapter as _deleteChapter,
   deleteChapters as _deleteChapters,
+  getDownloadedChapterIds as _getDownloadedChapterIds,
   getPageChapters as _getPageChapters,
   markChapterRead as _markChapterRead,
   markChaptersRead as _markChaptersRead,
@@ -56,6 +57,7 @@ export interface ChapterActionsDependencies {
     page?: string,
   ) => Promise<ChapterInfo[]>;
   increaseTimeSpent: (chapterId: number, timeSpent: number) => Promise<void>;
+  getDownloadedChapterIds?: (novelId: number) => Promise<number[]>;
   showToast: (message: string) => void;
   getString: typeof translateGetString;
 }
@@ -73,6 +75,7 @@ export const defaultChapterActionsDependencies: ChapterActionsDependencies = {
   deleteChapters: _deleteChapters,
   getPageChapters: _getPageChapters,
   increaseTimeSpent: _increaseTimeSpent,
+  getDownloadedChapterIds: _getDownloadedChapterIds,
   showToast,
   getString: translateGetString,
 };
@@ -391,3 +394,49 @@ export function increaseTimeSpentAction(
 ) {
   runAsyncAction(deps.increaseTimeSpent(chapterId, timeSpent), deps);
 }
+
+/**
+ * Marks loaded chapters downloaded or not from the given ids. Unchanged
+ * chapters keep their objects, and an unchanged list is returned as is, so
+ * nothing downstream re-renders or resyncs for chapters a download didn't touch.
+ */
+export const applyDownloadedChapterIds = (
+  chapters: ChapterInfo[],
+  downloadedIds: ReadonlySet<number>,
+): ChapterInfo[] => {
+  let changed = false;
+  const next = chapters.map(chapter => {
+    const isDownloaded = downloadedIds.has(chapter.id);
+    if (!!chapter.isDownloaded === isDownloaded) {
+      return chapter;
+    }
+    changed = true;
+    return { ...chapter, isDownloaded };
+  });
+  return changed ? next : chapters;
+};
+
+/**
+ * Refreshes only the downloaded flag of loaded chapters after downloads finish,
+ * fail or are cancelled, instead of reloading the chapter list.
+ */
+export const syncDownloadedChaptersAction = async (
+  getNovel: () => NovelInfo | undefined,
+  mutateChapters: MutateChapters,
+  deps: ChapterActionsDependencies = defaultChapterActionsDependencies,
+) => {
+  const novel = getNovel();
+  const getIds = deps.getDownloadedChapterIds ?? _getDownloadedChapterIds;
+  if (!novel) {
+    return;
+  }
+  try {
+    const ids = new Set(await getIds(novel.id));
+    if (getNovel()?.id !== novel.id) {
+      return;
+    }
+    mutateChapters(chs => applyDownloadedChapterIds(chs, ids));
+  } catch (error) {
+    deps.showToast(getErrorMessage(error));
+  }
+};
