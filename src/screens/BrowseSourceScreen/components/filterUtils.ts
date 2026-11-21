@@ -78,7 +78,10 @@ export const getSuggestionPlacement = ({
 
   const belowTop = anchor.y + anchor.height + ANCHOR_GAP;
   const spaceBelow = Math.max(0, maxBottom - belowTop);
-  const spaceAbove = Math.max(0, anchor.y - ANCHOR_GAP - minTop);
+  // A field low in the sheet can sit behind the keyboard, so the flipped list
+  // is clamped to the same bottom edge instead of the field's top.
+  const aboveBottom = Math.min(anchor.y - ANCHOR_GAP, maxBottom);
+  const spaceAbove = Math.max(0, aboveBottom - minTop);
 
   const desiredHeight = Math.min(contentHeight, MAX_SUGGESTIONS_HEIGHT);
   const opensAbove = spaceBelow < desiredHeight && spaceAbove > spaceBelow;
@@ -86,7 +89,7 @@ export const getSuggestionPlacement = ({
     desiredHeight,
     opensAbove ? spaceAbove : spaceBelow,
   );
-  const top = opensAbove ? anchor.y - ANCHOR_GAP - maxHeight : belowTop;
+  const top = opensAbove ? aboveBottom - maxHeight : belowTop;
 
   return { left, maxHeight, top, width };
 };

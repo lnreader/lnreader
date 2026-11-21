@@ -102,6 +102,17 @@ describe('getSuggestionPlacement', () => {
       }),
     ).toEqual({ left: 24, maxHeight: 54, top: 32, width: 352 });
   });
+
+  it('keeps a flipped list above the keyboard when the field is behind it', () => {
+    expect(
+      getSuggestionPlacement({
+        anchor: { ...anchor, y: 600 },
+        contentHeight: 162,
+        insets: { ...noInsets, bottom: 300 },
+        screen: { height: 800, width: 400 },
+      }),
+    ).toEqual({ left: 24, maxHeight: 162, top: 330, width: 352 });
+  });
 });
 
 describe('getEstimatedSuggestionsHeight', () => {
