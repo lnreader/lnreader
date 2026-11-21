@@ -12,6 +12,8 @@ export const defaultNovelSettings: NovelSettingsWithoutSort = {
 
 export const defaultPageIndex = 0;
 
+export const CHAPTER_BATCH_SIZE = 1000;
+
 export interface NovelSettingsWithoutSort {
   filter: ChapterFilterKey[];
   showChapterTitles: boolean;

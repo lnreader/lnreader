@@ -740,6 +740,7 @@ function calculatePages(behavior = 'instant') {
       (reader.chapterHeight * reader.chapter.progress) / 100 -
       reader.layoutHeight;
     window.scrollTo({ top: restoredScrollTop, behavior });
+    window.dispatchEvent(new Event('reader-position-restored'));
   }
 }
 
@@ -1006,14 +1007,14 @@ window.addEventListener('load', () => {
             `${
               /\/p>/.test(_)
                 ? _.replace(
-                    /<br>\s*<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?:>| [^>]+>)<br>\s*<br>))\s*/g,
+                    /<br>\s*<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?: [^>]+)?>\s*<br>\s*<br>))\s*/g,
                     '',
                   )
                 : _
             }`,
         ) //if p found, delete all double br near p
         .replace(
-          /<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?:>| [^>]+>)(?:<[^>]+>)*\s*<br>))\s*/g,
+          /<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?: [^>]+)?>\s*(?:<[^>]+>\s*)*<br>))\s*/g,
           '',
         );
     }

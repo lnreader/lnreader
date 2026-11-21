@@ -4,8 +4,9 @@ import { LAST_UPDATE_TIME } from '@hooks/persisted/useUpdates';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import { version } from '../../../package.json';
 import {
-  _restoreNovelAndChapters,
+  _restoreNovelsAndChapters,
   getAllNovels,
+  type RestoreNovelResult,
 } from '@database/queries/NovelQueries';
 import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
 import {
@@ -27,6 +28,7 @@ import { NOVEL_STORAGE, ROOT_STORAGE } from '@utils/Storages';
 import { BACKGROUND_TASKS_STORE_KEY } from '@services/backgroundTasks/constants';
 import type { TaskProgressUpdater } from '@services/backgroundTasks/contracts';
 import NativeFile from '@modules/native-file';
+import NativeZipArchive from '@modules/native-zip-archive';
 import { getString } from '@i18n/translations';
 import type { RestoreResult } from './restoreResult';
 import type { BackupResult } from './backupResult';
@@ -37,8 +39,108 @@ import {
 } from './options';
 import { INSTALLED_PLUGINS_KEY } from '@plugins/pluginManager';
 import type { PluginItem } from '@plugins/types';
+import { createFolderBackupSource, type BackupSource } from './backupSource';
 
 const APP_STORAGE_URI = 'file://' + ROOT_STORAGE;
+
+// Restored novels are written in groups so each transaction commit (and the
+// live queries it wakes) covers many novels instead of one.
+const RESTORE_BATCH_MAX_NOVELS = 200;
+const RESTORE_BATCH_MAX_CHAPTERS = 20000;
+// Cover copies run on native threads, so a few can overlap.
+const RESTORE_COVER_CONCURRENCY = 8;
+// Novel files are read and parsed ahead of the database writes, which spend
+// most of their time waiting on SQLite. The bounds cap what is held in memory.
+// Sizes are the characters of the novel files, so the caps hold whatever the
+// files contain, including files without a chapter list.
+const RESTORE_BATCH_MAX_BYTES = 32 * 1024 * 1024;
+const RESTORE_READ_CONCURRENCY = 4;
+const RESTORE_READ_AHEAD_MAX_NOVELS = RESTORE_BATCH_MAX_NOVELS;
+const RESTORE_READ_AHEAD_MAX_BYTES = 16 * 1024 * 1024;
+const SUPPORTED_BACKUP_FORMAT_VERSION = 2;
+// Same limit as NativeZipArchive.readEntry. A real manifest is a few hundred
+// bytes; anything larger is not a backup this app made.
+const MAX_BACKUP_MANIFEST_BYTES = 1024 * 1024;
+
+type PendingRestoreNovel = {
+  backupNovel: BackupNovel;
+  hasStoredCover: boolean;
+};
+
+// `parsed` tells whether the file got far enough to name its plugin.
+type LoadedRestoreNovel = {
+  parsed: boolean;
+  pluginId?: string;
+  pending?: PendingRestoreNovel;
+  size: number;
+};
+
+/**
+ * Loads `items` ahead of the consumer and hands them out in their original
+ * order. `load` must not reject.
+ */
+const createReadAhead = <T, R>(
+  items: T[],
+  load: (item: T) => Promise<R>,
+  weigh: (result: R) => number,
+) => {
+  const results: (Promise<R> | undefined)[] = [];
+  let started = 0;
+  let consumed = 0;
+  let inFlight = 0;
+  let bufferedWeight = 0;
+  let stopped = false;
+
+  const start = () => {
+    inFlight++;
+    const index = started++;
+    results[index] = load(items[index]).then(result => {
+      inFlight--;
+      bufferedWeight += weigh(result);
+      pump();
+      return result;
+    });
+  };
+  const pump = () => {
+    while (
+      !stopped &&
+      started < items.length &&
+      inFlight < RESTORE_READ_CONCURRENCY &&
+      started - consumed < RESTORE_READ_AHEAD_MAX_NOVELS &&
+      bufferedWeight < RESTORE_READ_AHEAD_MAX_BYTES
+    ) {
+      start();
+    }
+  };
+
+  return {
+    next: async (): Promise<R> => {
+      pump();
+      if (started === consumed) {
+        start();
+      }
+      const result = await results[consumed]!;
+      results[consumed++] = undefined;
+      bufferedWeight -= weigh(result);
+      pump();
+      return result;
+    },
+    stop: () => {
+      stopped = true;
+    },
+  };
+};
+
+const isBackupNovel = (value: unknown): value is BackupNovel => {
+  const novel = value as Partial<BackupNovel> | null;
+  return (
+    typeof novel === 'object' &&
+    novel !== null &&
+    typeof novel.pluginId === 'string' &&
+    typeof novel.path === 'string' &&
+    Array.isArray(novel.chapters)
+  );
+};
 
 const stripUriSuffix = (uri: string) => uri.split(/[?#]/, 1)[0];
 
@@ -59,6 +161,61 @@ export const CACHE_DIR_PATH =
 export const clearBackupCache = async (cacheDirPath = CACHE_DIR_PATH) => {
   if (await NativeFile.exists(cacheDirPath)) {
     await NativeFile.unlink(cacheDirPath);
+  }
+};
+
+/** Where a local restore copies a backup it cannot read in place. */
+export const RESTORE_SOURCE_COPY_PATH = CACHE_DIR_PATH + '-source.zip';
+
+const decodeUri = (uri: string) => {
+  try {
+    return decodeURIComponent(uri);
+  } catch {
+    return uri;
+  }
+};
+
+/**
+ * Whether the picked backup is `path` or lies inside it. Storage provider
+ * document ids end with the file's path below the storage root, so a content
+ * URI is matched on that part of the path.
+ */
+export const isPickedBackupPath = (sourceUri: string, path: string) => {
+  const picked = decodeUri(sourceUri).replace(/^file:\/\//, '');
+  if (picked === path || picked.startsWith(path + '/')) {
+    return true;
+  }
+  const storageRelative = path.slice(path.indexOf('/Android/') + 1);
+  return (
+    path.includes('/Android/') &&
+    (picked.endsWith(storageRelative) || picked.includes(storageRelative + '/'))
+  );
+};
+
+/**
+ * Deletes a restore's working files: the unpacked backup and the local copy
+ * of the picked archive, including ones an earlier restore left behind. Only
+ * those two paths in the app's cache are touched, and never the picked backup.
+ */
+export const clearRestoreWorkingFiles = async (sourceUri?: string) => {
+  for (const path of [CACHE_DIR_PATH, RESTORE_SOURCE_COPY_PATH]) {
+    if (sourceUri && isPickedBackupPath(sourceUri, path)) {
+      continue;
+    }
+    if (await NativeFile.exists(path)) {
+      await NativeFile.unlink(path);
+    }
+  }
+};
+
+/** Cleanup after a restore ends; never turns the restore's outcome into an error. */
+export const clearRestoreWorkingFilesAfterRestore = async (
+  sourceUri?: string,
+) => {
+  try {
+    await clearRestoreWorkingFiles(sourceUri);
+  } catch {
+    // Retried at the start of the next restore.
   }
 };
 
@@ -211,16 +368,30 @@ export const prepareBackupData = async (
   };
 };
 
-const getBackupManifest = async (
-  cacheDirPath: string,
-): Promise<ResolvedBackupManifest> => {
+const LEGACY_MANIFEST: ResolvedBackupManifest = {
+  formatVersion: 1,
+  sections: DEFAULT_BACKUP_OPTIONS,
+};
+
+// Throws for a backup made in a format newer than this app reads. Anything
+// else that is not a v2 manifest is a legacy backup.
+const parseBackupManifest = (fileContent: string): ResolvedBackupManifest => {
+  let data: (Partial<BackupManifest> & { version?: string }) | null;
   try {
-    const fileContent = await NativeFile.readFile(
-      cacheDirPath + '/' + BackupEntryName.VERSION,
-    );
-    const data = JSON.parse(fileContent) as Partial<BackupManifest> & {
-      version?: string;
-    };
+    data = JSON.parse(fileContent);
+  } catch {
+    return LEGACY_MANIFEST;
+  }
+  if (!data || typeof data !== 'object') {
+    return LEGACY_MANIFEST;
+  }
+  if (
+    typeof data.formatVersion === 'number' &&
+    data.formatVersion > SUPPORTED_BACKUP_FORMAT_VERSION
+  ) {
+    throw new Error(getString('backupScreen.unsupportedBackupFormat'));
+  }
+  try {
     if (data.formatVersion === 2 && data.sections) {
       return {
         appVersion: data.appVersion ?? data.version ?? '',
@@ -228,17 +399,58 @@ const getBackupManifest = async (
         sections: resolveBackupOptions(data.sections),
       };
     }
-
     return {
       appVersion: data.version,
       formatVersion: 1,
       sections: DEFAULT_BACKUP_OPTIONS,
     };
   } catch {
-    return {
-      formatVersion: 1,
-      sections: DEFAULT_BACKUP_OPTIONS,
-    };
+    return LEGACY_MANIFEST;
+  }
+};
+
+const getBackupManifest = async (
+  source: BackupSource,
+): Promise<ResolvedBackupManifest> => {
+  const manifestPath = BackupEntryName.VERSION;
+  let size: number;
+  try {
+    size = await source.fileSize(manifestPath);
+  } catch {
+    return LEGACY_MANIFEST;
+  }
+  if (size > MAX_BACKUP_MANIFEST_BYTES) {
+    throw new Error(getString('backupScreen.unsupportedBackupFormat'));
+  }
+  let fileContent: string;
+  try {
+    fileContent = await source.readFile(manifestPath);
+  } catch {
+    return LEGACY_MANIFEST;
+  }
+  return parseBackupManifest(fileContent);
+};
+
+/**
+ * Reads the manifest straight out of a backup archive, before it is copied or
+ * extracted, and throws if its format is not supported. A backup whose
+ * manifest cannot be read here is left to the check in `restoreData`.
+ */
+export const assertSupportedBackupArchive = async (archivePath: string) => {
+  let fileContent: string | null;
+  try {
+    fileContent = await NativeZipArchive.readEntry(
+      archivePath,
+      BackupEntryName.VERSION,
+    );
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'ENTRY_TOO_LARGE') {
+      throw new Error(getString('backupScreen.unsupportedBackupFormat'));
+    }
+    return;
+  }
+  if (fileContent) {
+    parseBackupManifest(fileContent);
   }
 };
 
@@ -252,13 +464,19 @@ const updateRestoreProgress = (
   }));
 };
 
+/**
+ * Restores the library, categories, settings and plugin registry from a
+ * backup, given as a folder it was unpacked into or as a source to read.
+ */
 export const restoreData = async (
-  cacheDirPath: string,
+  backup: string | BackupSource,
   setMeta?: TaskProgressUpdater,
 ): Promise<RestoreResult> => {
-  const manifest = await getBackupManifest(cacheDirPath);
-  const novelDirPath = cacheDirPath + '/' + BackupEntryName.NOVEL_AND_CHAPTERS;
-  const coversDirPath = cacheDirPath + '/' + BackupEntryName.COVERS;
+  const source =
+    typeof backup === 'string' ? createFolderBackupSource(backup) : backup;
+  const manifest = await getBackupManifest(source);
+  const novelDirPath = BackupEntryName.NOVEL_AND_CHAPTERS;
+  const coversDirPath = BackupEntryName.COVERS;
   const pluginIds = new Set<string>();
   const novelIdMap = new Map<number, number>();
   const novelMappings: RestoredNovelMapping[] = [];
@@ -286,48 +504,195 @@ export const restoreData = async (
 
   if (!manifest.sections.library) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(novelDirPath))) {
+  } else if (!(await source.exists(novelDirPath))) {
     failedSectionCount++;
   } else {
     try {
-      const items = (await NativeFile.readDir(novelDirPath)).filter(
+      const items = (await source.readDir(novelDirPath)).filter(
         item => !item.isDirectory,
       );
-      for (const [index, item] of items.entries()) {
+      // Chapter ids are only looked up when downloaded chapter files will be
+      // moved to them afterwards.
+      const withChapterMappings =
+        manifest.formatVersion === 1 || manifest.sections.downloadedFiles;
+      let pendingNovels: PendingRestoreNovel[] = [];
+      let pendingChapterCount = 0;
+      let pendingSize = 0;
+
+      let coverCopies = Promise.resolve();
+
+      const restorePendingNovels = async () => {
+        const batch = pendingNovels;
+        pendingNovels = [];
+        pendingChapterCount = 0;
+        pendingSize = 0;
+        let results: RestoreNovelResult[];
+        try {
+          results = await _restoreNovelsAndChapters(
+            batch.map(({ backupNovel }) => backupNovel),
+            { withChapterMappings },
+          );
+        } catch {
+          failedCount += batch.length;
+          return;
+        }
+
+        const restoredNovels: {
+          backupNovel: BackupNovel;
+          hasStoredCover: boolean;
+          novelMapping: RestoredNovelMapping;
+        }[] = [];
+        for (const [index, pending] of batch.entries()) {
+          const novelMapping = results[index].mapping;
+          if (!novelMapping) {
+            failedCount++;
+            continue;
+          }
+          novelMappings.push(novelMapping);
+          novelIdMap.set(pending.backupNovel.id, novelMapping.restoredNovelId);
+          restoredNovels.push({ ...pending, novelMapping });
+        }
+
+        const restoreCover = async ({
+          backupNovel,
+          hasStoredCover,
+          novelMapping,
+        }: (typeof restoredNovels)[number]) => {
+          try {
+            if (hasStoredCover) {
+              const coverBackupPath = coversDirPath + '/' + backupNovel.id;
+              if (await source.exists(coverBackupPath)) {
+                const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
+                await NativeFile.mkdir(parentDirectory(coverPath));
+                await source.takeFile(coverBackupPath, coverPath);
+              }
+            }
+            novelCount++;
+          } catch {
+            failedCount++;
+          }
+        };
+        // Backup novels that share a path and plugin restore into one novel
+        // and one cover file. Their copies run one after another in backup
+        // order, as the sequential restore did, so the last cover that exists
+        // in the backup wins and no two copies write the same destination at
+        // once. Different novels copy concurrently.
+        const coverGroups = new Map<number, typeof restoredNovels>();
+        for (const restored of restoredNovels) {
+          const id = restored.novelMapping.restoredNovelId;
+          const group = coverGroups.get(id);
+          if (group) {
+            group.push(restored);
+          } else {
+            coverGroups.set(id, [restored]);
+          }
+        }
+        const coverJobs = [...coverGroups.values()];
+        const restoreCoverGroup = async (group: typeof restoredNovels) => {
+          for (const restored of group) {
+            await restoreCover(restored);
+          }
+        };
+        // Covers copy while the next batch is written. Each batch's copies
+        // start after the previous batch's, so the concurrency limit holds
+        // and a cover is never written by two batches at once.
+        const previousCoverCopies = coverCopies;
+        coverCopies = (async () => {
+          await previousCoverCopies;
+          for (
+            let start = 0;
+            start < coverJobs.length;
+            start += RESTORE_COVER_CONCURRENCY
+          ) {
+            await Promise.all(
+              coverJobs
+                .slice(start, start + RESTORE_COVER_CONCURRENCY)
+                .map(restoreCoverGroup),
+            );
+          }
+        })();
+      };
+
+      let reportedCount = -1;
+      const reportProgress = (completed: number) => {
+        if (completed === reportedCount) {
+          return;
+        }
+        reportedCount = completed;
         updateRestoreProgress(
           setMeta,
           getString('backupScreen.restoringNovelsProgress', {
-            current: index + 1,
+            current: completed,
             total: items.length,
           }),
         );
-        try {
-          const fileContent = await NativeFile.readFile(item.path);
-          const backupNovel = JSON.parse(fileContent) as BackupNovel;
-          pluginIds.add(backupNovel.pluginId);
+      };
 
-          const hasStoredCover =
-            backupNovel.cover && !backupNovel.cover.startsWith('http');
+      if (items.length > 0) {
+        reportProgress(0);
+      }
+      const loadNovel = async (item: {
+        name: string;
+      }): Promise<LoadedRestoreNovel> => {
+        const loaded: LoadedRestoreNovel = { parsed: false, size: 0 };
+        try {
+          const fileContent = await source.readFile(
+            `${novelDirPath}/${item.name}`,
+          );
+          const backupNovel = JSON.parse(fileContent) as BackupNovel;
+          if (!isBackupNovel(backupNovel)) {
+            throw new Error('Invalid novel backup file');
+          }
+          loaded.pluginId = backupNovel.pluginId;
+          loaded.parsed = true;
+          loaded.size = fileContent.length;
+
+          const hasStoredCover = Boolean(
+            backupNovel.cover && !backupNovel.cover.startsWith('http'),
+          );
           if (hasStoredCover) {
             backupNovel.cover = APP_STORAGE_URI + backupNovel.cover;
           }
-
-          const novelMapping = await _restoreNovelAndChapters(backupNovel);
-          novelMappings.push(novelMapping);
-          novelIdMap.set(backupNovel.id, novelMapping.restoredNovelId);
-
-          if (hasStoredCover) {
-            const coverBackupPath = coversDirPath + '/' + backupNovel.id;
-            if (await NativeFile.exists(coverBackupPath)) {
-              const coverPath = `${NOVEL_STORAGE}/${backupNovel.pluginId}/${novelMapping.restoredNovelId}/cover.png`;
-              await NativeFile.mkdir(parentDirectory(coverPath));
-              await NativeFile.copyFile(coverBackupPath, coverPath);
-            }
-          }
-          novelCount++;
+          loaded.pending = { backupNovel, hasStoredCover };
         } catch {
-          failedCount++;
+          // Counted as a failed novel by the consumer.
         }
+        return loaded;
+      };
+      const readAhead = createReadAhead(
+        items,
+        loadNovel,
+        loaded => loaded.size,
+      );
+      try {
+        for (let index = 0; index < items.length; index++) {
+          const { parsed, pluginId, pending, size } = await readAhead.next();
+          if (parsed) {
+            pluginIds.add(pluginId as string);
+          }
+          if (pending) {
+            pendingNovels.push(pending);
+            pendingChapterCount += pending.backupNovel.chapters.length;
+            pendingSize += size;
+          } else {
+            failedCount++;
+          }
+          if (
+            pendingNovels.length >= RESTORE_BATCH_MAX_NOVELS ||
+            pendingChapterCount >= RESTORE_BATCH_MAX_CHAPTERS ||
+            pendingSize >= RESTORE_BATCH_MAX_BYTES
+          ) {
+            await restorePendingNovels();
+            reportProgress(index + 1);
+          }
+        }
+        await restorePendingNovels();
+      } finally {
+        readAhead.stop();
+        await coverCopies;
+      }
+      if (items.length > 0) {
+        reportProgress(items.length);
       }
     } catch {
       failedSectionCount++;
@@ -341,17 +706,17 @@ export const restoreData = async (
       getString('backupScreen.restoringCategories'),
     );
   }
-  const categoryFilePath = cacheDirPath + '/' + BackupEntryName.CATEGORY;
+  const categoryFilePath = BackupEntryName.CATEGORY;
   let categoryCount = 0;
   let failedCategoryCount = 0;
 
   if (!manifest.sections.library) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(categoryFilePath))) {
+  } else if (!(await source.exists(categoryFilePath))) {
     failedSectionCount++;
   } else {
     try {
-      const fileContent = await NativeFile.readFile(categoryFilePath);
+      const fileContent = await source.readFile(categoryFilePath);
       const categories: BackupCategory[] = JSON.parse(fileContent);
 
       for (const [index, category] of categories.entries()) {
@@ -386,16 +751,16 @@ export const restoreData = async (
   if (manifest.sections.settings) {
     updateRestoreProgress(setMeta, getString('backupScreen.restoringSettings'));
   }
-  const settingsFilePath = cacheDirPath + '/' + BackupEntryName.SETTING;
+  const settingsFilePath = BackupEntryName.SETTING;
   let settingsRestored = !manifest.sections.settings;
 
   if (!manifest.sections.settings) {
     // Intentionally omitted from this backup.
-  } else if (!(await NativeFile.exists(settingsFilePath))) {
+  } else if (!(await source.exists(settingsFilePath))) {
     // Reported as a settings warning in the completion summary.
   } else {
     try {
-      const fileContent = await NativeFile.readFile(settingsFilePath);
+      const fileContent = await source.readFile(settingsFilePath);
       const settingsData = JSON.parse(fileContent);
       if (INSTALLED_PLUGINS_KEY in settingsData) {
         pluginsFromSettings = parsePluginList(
@@ -414,14 +779,13 @@ export const restoreData = async (
   if (manifest.sections.plugins) {
     let restoredPlugins = pluginsFromSettings;
     if (manifest.formatVersion === 2) {
-      const pluginMetadataPath =
-        cacheDirPath + '/' + BackupEntryName.PLUGIN_METADATA;
-      if (!(await NativeFile.exists(pluginMetadataPath))) {
+      const pluginMetadataPath = BackupEntryName.PLUGIN_METADATA;
+      if (!(await source.exists(pluginMetadataPath))) {
         failedSectionCount++;
       } else {
         try {
           restoredPlugins = parsePluginList(
-            await NativeFile.readFile(pluginMetadataPath),
+            await source.readFile(pluginMetadataPath),
           );
         } catch {
           failedSectionCount++;

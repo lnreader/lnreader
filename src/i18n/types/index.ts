@@ -156,6 +156,7 @@ export interface StringMap {
   'backupScreen.googeDriveDesc': 'string';
   'backupScreen.invalidBackupFolder': 'string';
   'backupScreen.localBackup': 'string';
+  'backupScreen.unsupportedBackupFormat': 'string';
   'backupScreen.noBackupFound': 'string';
   'backupScreen.options.title': 'string';
   'backupScreen.options.description': 'string';
@@ -617,6 +618,7 @@ export interface StringMap {
   'readerSettings.backgroundColorModal': 'string';
   'readerSettings.clearCustomCSS': 'string';
   'readerSettings.clearCustomJS': 'string';
+  'readerSettings.confirmRemoveText': 'string';
   'readerSettings.cssHint': 'string';
   'readerSettings.customCSS': 'string';
   'readerSettings.customJS': 'string';
@@ -646,6 +648,8 @@ export interface StringMap {
   'statsScreen.statusDistribution': 'string';
   'statsScreen.title': 'string';
   'statsScreen.readingTime': 'string';
+  'statsScreen.noNovelReadingTime': 'string';
+  'statsScreen.noCategoryReadingTime': 'string';
   'statsScreen.chaptersInLibrary': 'string';
   'statsScreen.customizeGenres': 'string';
   'statsScreen.titlesInLibrary': 'string';

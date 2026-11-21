@@ -183,15 +183,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   const {
     html: processedHtml,
-    replaceModalVisible,
-    setReplaceModalVisible,
-    selectedTextForReplace,
+    pendingTextAction,
     replacementText,
     setReplacementText,
-    handleReplaceSave,
-    handleReplaceCancel,
+    confirmTextAction,
+    dismissTextAction,
     eventTextAction,
   } = useTextModifications(html, webViewRef);
+  const isRemovingText = pendingTextAction?.type === 'remove';
 
   const [readerSettings, setReaderSettings] = useState(
     () =>
@@ -625,34 +624,62 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         source={source}
       />
       <Dialog.Root
-        visible={replaceModalVisible}
-        onDismiss={() => setReplaceModalVisible(false)}
+        visible={pendingTextAction !== null}
+        onDismiss={dismissTextAction}
       >
         <Dialog.Header>
-          <Dialog.Title>Replace Text</Dialog.Title>
+          <Dialog.Title>
+            {getString(
+              isRemovingText
+                ? 'customCodeSettings.removeText'
+                : 'common.replaceText',
+            )}
+          </Dialog.Title>
+          {isRemovingText ? (
+            <Dialog.Description>
+              {getString('readerSettings.confirmRemoveText')}
+            </Dialog.Description>
+          ) : null}
         </Dialog.Header>
         <Dialog.Content>
-          <TextInput
-            label="Text to replace"
-            value={selectedTextForReplace}
-            editable={false}
-            mode="outlined"
-            style={styles.textInput}
-            theme={{ colors: { background: theme.surface } }}
-          />
-          <TextInput
-            label="Replace with"
-            value={replacementText}
-            onChangeText={setReplacementText}
-            autoCorrect={false}
-            mode="outlined"
-            style={styles.textInput}
-            theme={{ colors: { background: theme.surface } }}
-          />
+          {isRemovingText ? (
+            <Dialog.Description numberOfLines={4}>
+              {pendingTextAction.text}
+            </Dialog.Description>
+          ) : (
+            <>
+              <TextInput
+                label={getString('common.textToReplace')}
+                value={pendingTextAction?.text ?? ''}
+                editable={false}
+                mode="outlined"
+                style={styles.textInput}
+                theme={{ colors: { background: theme.surface } }}
+              />
+              <TextInput
+                label={getString('common.replaceWith')}
+                value={replacementText}
+                onChangeText={setReplacementText}
+                autoCorrect={false}
+                mode="outlined"
+                style={styles.textInput}
+                theme={{ colors: { background: theme.surface } }}
+              />
+            </>
+          )}
         </Dialog.Content>
         <Dialog.Actions>
-          <Dialog.Action onPress={handleReplaceCancel}>Cancel</Dialog.Action>
-          <Dialog.Action onPress={handleReplaceSave}>Save</Dialog.Action>
+          <Dialog.Action onPress={dismissTextAction}>
+            {getString('common.cancel')}
+          </Dialog.Action>
+          <Dialog.Action
+            onPress={confirmTextAction}
+            tone={isRemovingText ? 'danger' : 'primary'}
+          >
+            {getString(
+              isRemovingText ? 'common.remove' : 'customCodeSettings.replace',
+            )}
+          </Dialog.Action>
         </Dialog.Actions>
       </Dialog.Root>
     </>

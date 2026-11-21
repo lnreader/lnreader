@@ -222,6 +222,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
           <FilterBottomSheet
             filterSheetRef={filterSheetRef}
             filters={filterValues}
+            pluginId={pluginId}
             setFilters={setFilters}
             clearFilters={clearFilters}
           />

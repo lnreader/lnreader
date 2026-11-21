@@ -13,6 +13,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 
 import { useTheme } from '@hooks/persisted';
 import {
+  FilterOption,
   FilterTypes,
   FilterToValues,
   Filters,
@@ -22,46 +23,139 @@ import { Checkbox } from '@components/Checkbox/Checkbox';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useBoolean } from '@hooks';
 import { TextInput, overlay } from 'react-native-paper';
-import { getValueFor } from './filterUtils';
+import { addMultiTextValues, getValueFor } from './filterUtils';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import Switch from '@components/Switch/Switch';
+import { useFilterSuggestions } from '../useFilterSuggestions';
 
 const insertOrRemoveIntoArray = (array: string[], val: string): string[] =>
   array.indexOf(val) > -1 ? array.filter(ele => ele !== val) : [...array, val];
 
 type SelectedFilters = FilterToValues<Filters>;
 
-interface FilterItemProps {
+interface FilterSuggestionListProps {
   theme: ThemeColors;
-  filter: Filters[string];
-  filterKey: keyof Filters;
-  selectedFilters: SelectedFilters;
-  setSelectedFilters: React.Dispatch<React.SetStateAction<SelectedFilters>>;
+  suggestions: FilterOption[];
+  onSelect: (option: FilterOption) => void;
 }
 
-const FilterItem: React.FC<FilterItemProps> = ({
+const FilterSuggestionList: React.FC<FilterSuggestionListProps> = ({
   theme,
-  filter,
+  suggestions,
+  onSelect,
+}) => (
+  <View
+    style={[
+      styles.suggestionsContainer,
+      {
+        backgroundColor: theme.surfaceVariant,
+        borderColor: theme.outlineVariant,
+      },
+    ]}
+  >
+    {suggestions.map(option => (
+      <Pressable
+        key={option.value}
+        onPress={() => onSelect(option)}
+        android_ripple={{ color: theme.rippleColor }}
+        style={styles.suggestionItem}
+      >
+        <Text numberOfLines={1} style={{ color: theme.onSurfaceVariant }}>
+          {option.label}
+        </Text>
+      </Pressable>
+    ))}
+  </View>
+);
+
+interface MultiTextFilterProps {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  pluginId: string;
+  filterKey: string;
+  autocomplete?: boolean;
+  theme: ThemeColors;
+}
+
+const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
+  label,
+  value,
+  onChange,
+  pluginId,
   filterKey,
-  selectedFilters,
-  setSelectedFilters,
+  autocomplete,
+  theme,
 }) => {
-  const {
-    value: isVisible,
-    toggle: toggleCard,
-    setFalse: closeCard,
-  } = useBoolean();
-  const { width: screenWidth } = useWindowDimensions();
-  if (filter.type === FilterTypes.TextInput) {
-    const value = getValueFor<(typeof filter)['type']>(
-      filter,
-      selectedFilters[filterKey],
-    );
-    return (
-      <View style={styles.textContainer}>
+  const [input, setInput] = useState('');
+
+  // Commit on submit, split pasted newlines, commas stay literal.
+  const commit = (rawText: string) => {
+    const next = addMultiTextValues(value, rawText.split('\n'));
+    if (next.length !== value.length) {
+      onChange(next);
+    }
+    setInput('');
+  };
+
+  const field = useFilterSuggestions(
+    pluginId,
+    filterKey,
+    autocomplete ? input : '',
+    option => commit(option.value),
+  );
+
+  return (
+    <View style={styles.multiTextContainer}>
+      {value.length > 0 ? (
+        <View style={styles.chips}>
+          {value.map(chip => (
+            <View
+              key={chip}
+              style={[
+                styles.chip,
+                { backgroundColor: theme.secondaryContainer },
+              ]}
+            >
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${getString('common.edit')} ${chip}`}
+                onPress={() => {
+                  setInput(chip);
+                  onChange(value.filter(v => v !== chip));
+                }}
+                style={styles.chipLabel}
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ color: theme.onSecondaryContainer }}
+                >
+                  {chip}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${getString('common.remove')} ${chip}`}
+                hitSlop={8}
+                onPress={() => onChange(value.filter(v => v !== chip))}
+                style={styles.chipClose}
+              >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={16}
+                  color={theme.onSecondaryContainer}
+                />
+              </Pressable>
+            </View>
+          ))}
+        </View>
+      ) : null}
+      <View style={styles.multiTextField}>
         <TextInput
-          style={[styles.flex, { width: screenWidth - 48 }]}
+          testID="multiTextInput"
+          style={styles.textInput}
           mode="outlined"
           label={
             <Text
@@ -72,20 +166,139 @@ const FilterItem: React.FC<FilterItemProps> = ({
                 },
               ]}
             >
-              {` ${filter.label} `}
+              {` ${label} `}
             </Text>
           }
-          defaultValue={value}
+          value={input}
+          onChangeText={text => {
+            if (autocomplete) {
+              field.onEdit();
+            }
+            // A newline only arrives via paste, so split it into chips now.
+            if (text.includes('\n')) {
+              commit(text);
+            } else {
+              setInput(text);
+            }
+          }}
+          onSubmitEditing={() => commit(input)}
+          returnKeyType="done"
           theme={{ colors: { background: 'transparent' } }}
           outlineColor={theme.onSurface}
           textColor={theme.onSurface}
-          onChangeText={text =>
-            setSelectedFilters(prevState => ({
-              ...prevState,
-              [filterKey]: { value: text, type: FilterTypes.TextInput },
-            }))
+          {...(autocomplete
+            ? { onFocus: field.onFocus, onBlur: field.onBlur }
+            : {})}
+          right={
+            <TextInput.Icon
+              icon="plus"
+              disabled={!input.trim()}
+              onPress={() => commit(input)}
+            />
           }
         />
+        {field.isVisible && (
+          <FilterSuggestionList
+            theme={theme}
+            suggestions={field.suggestions}
+            onSelect={field.select}
+          />
+        )}
+      </View>
+    </View>
+  );
+};
+
+interface FilterItemProps {
+  theme: ThemeColors;
+  filter: Filters[string];
+  filterKey: keyof Filters;
+  pluginId: string;
+  selectedFilters: SelectedFilters;
+  setSelectedFilters: React.Dispatch<React.SetStateAction<SelectedFilters>>;
+}
+
+const FilterItem: React.FC<FilterItemProps> = ({
+  theme,
+  filter,
+  filterKey,
+  pluginId,
+  selectedFilters,
+  setSelectedFilters,
+}) => {
+  const {
+    value: isVisible,
+    toggle: toggleCard,
+    setFalse: closeCard,
+  } = useBoolean();
+  const { width: screenWidth } = useWindowDimensions();
+
+  const isAutocomplete =
+    filter.type === FilterTypes.TextInput &&
+    'autocomplete' in filter &&
+    !!filter.autocomplete;
+  const field = useFilterSuggestions(
+    pluginId,
+    filterKey,
+    isAutocomplete
+      ? String(getValueFor<FilterTypes>(filter, selectedFilters[filterKey]))
+      : '',
+    option => {
+      setSelectedFilters(prevState => ({
+        ...prevState,
+        [filterKey]: { value: option.value, type: FilterTypes.TextInput },
+      }));
+    },
+  );
+
+  if (filter.type === FilterTypes.TextInput) {
+    const value = getValueFor<(typeof filter)['type']>(
+      filter,
+      selectedFilters[filterKey],
+    );
+
+    return (
+      <View style={styles.textContainer}>
+        <View style={{ width: screenWidth - 48, position: 'relative' }}>
+          <TextInput
+            style={styles.flex}
+            mode="outlined"
+            label={
+              <Text
+                style={[
+                  {
+                    color: theme.onSurface,
+                    backgroundColor: overlay(2, theme.surface),
+                  },
+                ]}
+              >
+                {` ${filter.label} `}
+              </Text>
+            }
+            theme={{ colors: { background: 'transparent' } }}
+            outlineColor={theme.onSurface}
+            textColor={theme.onSurface}
+            onChangeText={text => {
+              if (isAutocomplete) {
+                field.onEdit();
+              }
+              setSelectedFilters(prevState => ({
+                ...prevState,
+                [filterKey]: { value: text, type: FilterTypes.TextInput },
+              }));
+            }}
+            {...(isAutocomplete
+              ? { value, onFocus: field.onFocus, onBlur: field.onBlur }
+              : { defaultValue: value })}
+          />
+          {field.isVisible && (
+            <FilterSuggestionList
+              theme={theme}
+              suggestions={field.suggestions}
+              onSelect={field.select}
+            />
+          )}
+        </View>
       </View>
     );
   }
@@ -324,12 +537,35 @@ const FilterItem: React.FC<FilterItemProps> = ({
       </View>
     );
   }
+  if (filter.type === FilterTypes.MultiText) {
+    const value = getValueFor<(typeof filter)['type']>(
+      filter,
+      selectedFilters[filterKey],
+    );
+    return (
+      <MultiTextFilter
+        label={filter.label}
+        value={value}
+        pluginId={pluginId}
+        filterKey={filterKey}
+        autocomplete={filter.autocomplete}
+        theme={theme}
+        onChange={next =>
+          setSelectedFilters(prevState => ({
+            ...prevState,
+            [filterKey]: { type: FilterTypes.MultiText, value: next },
+          }))
+        }
+      />
+    );
+  }
   return <></>;
 };
 
 interface BottomSheetProps {
   filterSheetRef: React.RefObject<BottomSheetModalMethods | null>;
   filters: Filters;
+  pluginId: string;
   setFilters: (filters?: SelectedFilters) => void;
   clearFilters: (filters: Filters) => void;
 }
@@ -337,12 +573,15 @@ interface BottomSheetProps {
 const FilterBottomSheet: React.FC<BottomSheetProps> = ({
   filters,
   filterSheetRef,
+  pluginId,
   clearFilters,
   setFilters,
 }) => {
   const theme = useTheme();
   const [selectedFilters, setSelectedFilters] =
     useState<SelectedFilters>(filters);
+  // Reset remounts the list so fields with local drafts (e.g. MultiText) clear.
+  const [resetVersion, setResetVersion] = useState(0);
 
   return (
     <BottomSheet bottomSheetRef={filterSheetRef} snapPoints={[400, 600]}>
@@ -358,6 +597,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             onPress={() => {
               setSelectedFilters(filters);
               clearFilters(filters);
+              setResetVersion(current => current + 1);
             }}
           />
           <Button
@@ -374,12 +614,16 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
           data={
             filters && (Object.entries(filters) as [string, Filters[string]][])
           }
-          keyExtractor={(item: [string, Filters[string]]) => 'filter' + item[0]}
+          keyExtractor={(item: [string, Filters[string]]) =>
+            `filter${item[0]}-${resetVersion}`
+          }
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }: { item: [string, Filters[string]] }) => (
             <FilterItem
               theme={theme}
               filter={item[1]}
               filterKey={item[0]}
+              pluginId={pluginId}
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
             />
@@ -444,6 +688,22 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingHorizontal: 24,
   },
+  suggestionItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    elevation: 4,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    borderWidth: 1,
+    borderTopWidth: 0,
+  },
   switchContainer: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -465,4 +725,22 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingHorizontal: 24,
   },
+  multiTextContainer: {
+    marginVertical: 8,
+    paddingHorizontal: 24,
+  },
+  multiTextField: { position: 'relative' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+  chip: {
+    alignItems: 'center',
+    borderRadius: 8,
+    flexDirection: 'row',
+    gap: 6,
+    maxWidth: '100%',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  chipLabel: { flexShrink: 1, minWidth: 0 },
+  chipClose: { flexShrink: 0 },
+  textInput: { width: '100%' },
 });

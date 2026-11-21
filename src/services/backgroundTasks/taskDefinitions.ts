@@ -46,6 +46,33 @@ export const getDownloadProgressKey = (
     )
     .join('|');
 
+export type DownloadIndex = {
+  chapterIds: Set<number>;
+  novelIds: Set<number>;
+};
+
+export const getDownloadIndex = (
+  tasks: QueuedBackgroundTask[],
+): DownloadIndex => {
+  const chapterIds = new Set<number>();
+  const novelIds = new Set<number>();
+
+  for (const { task } of tasks) {
+    if (task?.name !== 'DOWNLOAD_CHAPTER') continue;
+    if (task.data.novelId !== undefined) {
+      novelIds.add(task.data.novelId);
+    }
+    for (const chapter of task.data.chapters) {
+      chapterIds.add(chapter.chapterId);
+      if (chapter.novelId !== undefined) {
+        novelIds.add(chapter.novelId);
+      }
+    }
+  }
+
+  return { chapterIds, novelIds };
+};
+
 export const getBackgroundTaskQueueName = (task: BackgroundTask) =>
   task.name === 'DOWNLOAD_CHAPTER'
     ? `${BACKGROUND_TASK_QUEUE_PREFIX}:download:${

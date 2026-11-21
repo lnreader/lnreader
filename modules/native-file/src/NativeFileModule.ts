@@ -25,6 +25,7 @@ type NativeFileModule = {
   pickDirectory(): Promise<DirectorySelection>;
   writeFile(path: string, content: string): Promise<void>;
   readFile(path: string): Promise<string>;
+  fileSize(path: string): Promise<number>;
   copyFile(filepath: string, destPath: string): Promise<void>;
   copyFileToDirectory(
     sourcePath: string,

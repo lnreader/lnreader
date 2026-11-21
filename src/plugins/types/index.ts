@@ -1,4 +1,4 @@
-import { FilterToValues, Filters } from './filterTypes';
+import { FilterOption, FilterToValues, Filters } from './filterTypes';
 
 export interface TextSetting {
   value: string;
@@ -127,6 +127,10 @@ export interface Plugin extends PluginItem {
   parsePage?: (novelPath: string, page: string) => Promise<SourcePage>;
   parseChapter: (chapterPath: string) => Promise<string>;
   searchNovels: (searchTerm: string, pageNo: number) => Promise<NovelItem[]>;
+  getFilterSuggestions?: (
+    filterKey: string,
+    query: string,
+  ) => Promise<FilterOption[]>;
   resolveUrl?: (path: string, isNovel?: boolean) => string;
   webStorageUtilized?: boolean;
 }

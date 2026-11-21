@@ -4,7 +4,8 @@ import { exists } from '@api/drive';
 import { getString } from '@i18n/translations';
 import {
   CACHE_DIR_PATH,
-  clearBackupCache,
+  clearRestoreWorkingFiles,
+  clearRestoreWorkingFilesAfterRestore,
   prepareBackupData,
   restoreData,
 } from '../utils';
@@ -20,8 +21,11 @@ import type {
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import {
+  getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
+  extractSectionArchive,
+  removeEmptySectionMarker,
   getSelectedBackupFileSections,
   restoreLegacyFiles,
   restoreNovelFiles,
@@ -79,7 +83,7 @@ export const createDriveBackup = async (
 
   for (const section of getSelectedBackupFileSections(options)) {
     await uploadBackupSection(
-      section.storagePath,
+      await getBackupSectionSource(section),
       section.archiveName,
       backupFolder,
     );
@@ -95,7 +99,7 @@ export const createDriveBackup = async (
   }));
 };
 
-export const driveRestore = async (
+const restoreFromDrive = async (
   backupFolder: DriveFile,
   setMeta: TaskProgressUpdater,
 ) => {
@@ -111,7 +115,7 @@ export const driveRestore = async (
     throw new Error(getString('backupScreen.invalidBackupFolder'));
   }
 
-  await clearBackupCache();
+  await clearRestoreWorkingFiles();
   await download(zipDataFile, CACHE_DIR_PATH);
   await sleep(500);
 
@@ -154,12 +158,12 @@ export const driveRestore = async (
       if (!file) {
         throw new Error(getString('backupScreen.invalidBackupFolder'));
       }
-      await download(
-        file,
+      const destination =
         section.archiveName === ZipBackupName.NOVEL_FILES
           ? novelFilesRestorePath
-          : section.storagePath,
-      );
+          : section.storagePath;
+      await extractSectionArchive(() => download(file, destination));
+      await removeEmptySectionMarker(destination);
     }
     if (restoreResult.manifest.sections.downloadedFiles) {
       await restoreNovelFiles(
@@ -181,4 +185,15 @@ export const driveRestore = async (
     progressText: completionText,
     completionText,
   }));
+};
+
+export const driveRestore = async (
+  backupFolder: DriveFile,
+  setMeta: TaskProgressUpdater,
+) => {
+  try {
+    await restoreFromDrive(backupFolder, setMeta);
+  } finally {
+    await clearRestoreWorkingFilesAfterRestore();
+  }
 };

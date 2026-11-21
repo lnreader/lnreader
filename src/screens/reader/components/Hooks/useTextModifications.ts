@@ -1,15 +1,18 @@
 import { useChapterReaderSettings } from '@hooks/persisted/useSettings';
 import { applyTextModifications } from '@utils/customCode';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState, type RefObject } from 'react';
 import type WebView from 'react-native-webview';
-import { WebViewPostEvent } from '../WebViewReader';
+import type { WebViewPostEvent } from '../WebViewReader';
+
+type TextAction = { type: 'remove' | 'replace'; text: string };
+
 export default function useTextModifications(
   chapterText: string,
-  webViewRef: React.RefObject<WebView<object> | null>,
+  webViewRef: RefObject<WebView<object> | null>,
 ) {
-  // Replace modal state
-  const [replaceModalVisible, setReplaceModalVisible] = useState(false);
-  const [selectedTextForReplace, setSelectedTextForReplace] = useState('');
+  const [pendingTextAction, setPendingTextAction] = useState<TextAction | null>(
+    null,
+  );
   const [replacementText, setReplacementText] = useState('');
 
   const { setChapterReaderSettings, ...readerSettings } =
@@ -30,84 +33,59 @@ export default function useTextModifications(
     [chapterText],
   );
 
-  const injectJS = React.useCallback(
-    (script: string) => {
-      webViewRef.current?.injectJavaScript(script);
-    },
-    [webViewRef],
-  );
-  const handleTextAction = React.useCallback(
-    (action: string, text: string) => {
-      if (!text) return;
-
-      if (action === 'remove') {
-        // Add to removeText array if not already present
-        const newRemoveText = [...readerSettings.removeText];
-        if (!newRemoveText.includes(text)) {
-          newRemoveText.push(text);
-          setChapterReaderSettings({ removeText: newRemoveText });
-        }
-        // Directly remove text in the WebView DOM to avoid full re-render
-        injectJS(
-          `window.textRemover?.performRemove?.(${JSON.stringify(text)}); true;`,
-        );
-      } else if (action === 'replace') {
-        // Show modal for user to enter replacement text
-        setSelectedTextForReplace(text);
-        setReplacementText('');
-        setReplaceModalVisible(true);
-      }
-    },
-    [readerSettings.removeText, setChapterReaderSettings, injectJS],
-  );
-
-  const handleReplaceSave = React.useCallback(() => {
-    if (!selectedTextForReplace) return false;
-
-    const newReplaceText = { ...readerSettings.replaceText };
-    if (!(selectedTextForReplace in newReplaceText)) {
-      newReplaceText[selectedTextForReplace] = replacementText;
-      setChapterReaderSettings({ replaceText: newReplaceText });
-    }
-    // Directly replace text in the WebView DOM to avoid full re-render
-    injectJS(
-      `window.textRemover?.performReplace?.(${JSON.stringify(selectedTextForReplace)}, ${JSON.stringify(replacementText)}); true;`,
-    );
-    setReplaceModalVisible(false);
-    return true;
-  }, [
-    selectedTextForReplace,
-    readerSettings.replaceText,
-    replacementText,
-    setChapterReaderSettings,
-    injectJS,
-  ]);
-
-  const handleReplaceCancel = React.useCallback(() => {
-    setReplaceModalVisible(false);
-    setSelectedTextForReplace('');
+  function dismissTextAction() {
+    setPendingTextAction(null);
     setReplacementText('');
-  }, []);
+  }
+
+  function confirmTextAction() {
+    if (!pendingTextAction) return;
+
+    const { type, text } = pendingTextAction;
+    if (type === 'remove') {
+      if (!readerSettings.removeText.includes(text)) {
+        setChapterReaderSettings({
+          removeText: [...readerSettings.removeText, text],
+        });
+      }
+      webViewRef.current?.injectJavaScript(
+        `window.textRemover?.performRemove?.(${JSON.stringify(text)}); true;`,
+      );
+    } else {
+      if (!(text in readerSettings.replaceText)) {
+        setChapterReaderSettings({
+          replaceText: {
+            ...readerSettings.replaceText,
+            [text]: replacementText,
+          },
+        });
+      }
+      webViewRef.current?.injectJavaScript(
+        `window.textRemover?.performReplace?.(${JSON.stringify(
+          text,
+        )}, ${JSON.stringify(replacementText)}); true;`,
+      );
+    }
+    dismissTextAction();
+  }
 
   function eventTextAction(event: WebViewPostEvent) {
-    if (event.data) {
-      const data = event.data as Record<string, unknown>;
-      const action = Object.keys(data)[0];
-      const text = data[action];
-      handleTextAction(action as string, String(text));
-    }
+    if (!event.data || typeof event.data !== 'object') return;
+
+    const [type, text] = Object.entries(event.data)[0] ?? [];
+    if (type !== 'remove' && type !== 'replace') return;
+    if (typeof text !== 'string' || !text.trim()) return;
+
+    setPendingTextAction(current => current ?? { type, text });
   }
 
   return {
     html,
-    replaceModalVisible,
-    setReplaceModalVisible,
-    selectedTextForReplace,
-    setSelectedTextForReplace,
+    pendingTextAction,
     replacementText,
     setReplacementText,
-    handleReplaceSave,
-    handleReplaceCancel,
+    confirmTextAction,
+    dismissTextAction,
     eventTextAction,
   };
 }

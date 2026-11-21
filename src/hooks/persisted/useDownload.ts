@@ -1,54 +1,13 @@
 import { ChapterInfo, NovelInfo } from '@database/types';
-import {
-  BACKGROUND_TASKS_STORE_KEY,
-  BackgroundTaskMetadata,
-  backgroundTasks,
-  DownloadChapterTask,
-  QueuedBackgroundTask,
-} from '@services/backgroundTasks';
-import { useMemo } from 'react';
-import { useMMKVObject } from 'react-native-mmkv';
+import { backgroundTasks } from '@services/backgroundTasks';
+import { useDownloadIndex } from './useBackgroundTasks';
 
 export const DOWNLOAD_QUEUE = 'DOWNLOAD';
 export const CHAPTER_DOWNLOADING = 'CHAPTER_DOWNLOADING';
 
 export default function useDownload() {
-  const [queue] = useMMKVObject<QueuedBackgroundTask[]>(
-    BACKGROUND_TASKS_STORE_KEY,
-  );
-
-  const downloadQueue = useMemo(
-    () => queue?.filter(t => t.task?.name === 'DOWNLOAD_CHAPTER') || [],
-    [queue],
-  ) as (QueuedBackgroundTask & {
-    task: DownloadChapterTask;
-    meta: BackgroundTaskMetadata;
-  })[];
-
-  const downloadingChapterIds = useMemo(
-    () =>
-      new Set(
-        downloadQueue.flatMap(item =>
-          item.task.data.chapters.map(chapter => chapter.chapterId),
-        ),
-      ),
-    [downloadQueue],
-  );
-
-  const downloadingNovelIds = useMemo(
-    () =>
-      new Set(
-        downloadQueue.flatMap(item => [
-          ...(item.task.data.novelId === undefined
-            ? []
-            : [item.task.data.novelId]),
-          ...item.task.data.chapters.flatMap(chapter =>
-            chapter.novelId === undefined ? [] : [chapter.novelId],
-          ),
-        ]),
-      ),
-    [downloadQueue],
-  );
+  const { chapterIds: downloadingChapterIds, novelIds: downloadingNovelIds } =
+    useDownloadIndex();
 
   const downloadChapter = (novel: NovelInfo, chapter: ChapterInfo) =>
     backgroundTasks.enqueue({
@@ -83,7 +42,6 @@ export default function useDownload() {
   const cancelDownload = () => backgroundTasks.cancelByType('DOWNLOAD_CHAPTER');
 
   return {
-    downloadQueue,
     downloadingChapterIds,
     downloadingNovelIds,
     resumeDownload,
