@@ -1,7 +1,7 @@
- 
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
 import { parse as parseProto } from 'protobufjs';
+import { isCloudflareChallenge, solveCloudflareChallenge } from './cloudflare';
 
 type FetchInit = {
   headers?: Record<string, string> | Headers;
@@ -40,12 +40,40 @@ const makeInit = (init?: FetchInit) => {
   return init;
 };
 
+const getUserAgentHeader = (headers: FetchInit['headers']) => {
+  if (headers instanceof Headers) {
+    return headers.get('User-Agent');
+  }
+  // makeInit spreads plugin headers after the defaults, so a plugin's
+  // differently-cased `user-agent` comes last and is the one to honour.
+  return Object.entries(headers ?? {})
+    .filter(([name]) => name.toLowerCase() === 'user-agent')
+    .pop()?.[1];
+};
+
+/**
+ * On a Cloudflare challenge, clears it in a hidden WebView and retries once.
+ * If it cannot be cleared the challenge response is returned unchanged, so
+ * plugins keep reporting it and the user can still solve it in the WebView.
+ */
+const fetchWithCloudflareBypass = async (url: string, init: FetchInit) => {
+  const response = await fetch(url, init);
+  if (!isCloudflareChallenge(response)) {
+    return response;
+  }
+  const userAgent = getUserAgentHeader(init.headers) || getUserAgent();
+  if (await solveCloudflareChallenge(url, userAgent)) {
+    return fetch(url, init);
+  }
+  return response;
+};
+
 export const fetchApi = async (
   url: string,
   init?: FetchInit,
 ): Promise<Response> => {
   init = makeInit(init);
-  return await fetch(url, init);
+  return await fetchWithCloudflareBypass(url, init);
 };
 
 const FILE_READER_PREFIX_LENGTH = 'data:application/octet-stream;base64,'
@@ -80,7 +108,7 @@ export const fetchText = async (
 ): Promise<string> => {
   init = makeInit(init);
   try {
-    const res = await fetch(url, init);
+    const res = await fetchWithCloudflareBypass(url, init);
     if (!res.ok) {
       throw new Error();
     }
