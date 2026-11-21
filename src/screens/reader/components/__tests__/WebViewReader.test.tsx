@@ -2,6 +2,7 @@ import React from 'react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
+import * as Linking from 'expo-linking';
 import { act, render } from '@test-utils';
 import type { ChapterInfo, NovelInfo } from '@database/types';
 import WebViewReader, { CHAPTER_SWAP_TIMEOUT_MS } from '../WebViewReader';
@@ -10,6 +11,8 @@ type WebViewProps = {
   source: { html: string; baseUrl?: string };
   onLoadEnd(): void;
   onMessage(event: { nativeEvent: { data: string } }): void;
+  onShouldStartLoadWithRequest(request: { url: string }): boolean;
+  onOpenWindow(event: { nativeEvent: { targetUrl: string } }): void;
 };
 
 const mockInjectJavaScript = jest.fn();
@@ -129,6 +132,16 @@ jest.mock('../Hooks/useTextModifications', () => ({
 jest.mock('../../utils/sanitizeChapterText', () => ({
   isChapterRefreshUrl: () => false,
   isPluginIssueReportUrl: () => false,
+}));
+
+const mockOpenNovel = jest.fn((_url: string) => false);
+jest.mock('../../hooks/useNovelLinkNavigation', () => ({
+  __esModule: true,
+  default: () => mockOpenNovel,
+}));
+
+jest.mock('expo-linking', () => ({
+  openURL: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('../../utils/ttsQueue', () => ({
@@ -437,4 +450,43 @@ describe('WebViewReader page reload', () => {
       );
     },
   );
+});
+
+describe('WebViewReader links', () => {
+  beforeEach(() => {
+    mockInstalledPlugins.length = 0;
+    mockOpenNovel.mockReset().mockReturnValue(false);
+  });
+
+  it('sends page messages, load requests, and new windows to novel navigation', () => {
+    renderLoadedReader();
+    mockOpenNovel.mockReturnValue(true);
+    const url = 'https://royalroad.com/fiction/123';
+
+    post({ type: 'link', data: { url } });
+
+    expect(mockOpenNovel).toHaveBeenCalledWith(url);
+    expect(mockWebView.props!.onShouldStartLoadWithRequest({ url })).toBe(
+      false,
+    );
+    act(() =>
+      mockWebView.props!.onOpenWindow({ nativeEvent: { targetUrl: url } }),
+    );
+    expect(mockOpenNovel).toHaveBeenCalledTimes(3);
+  });
+
+  it('ignores a browser error for a link that no app can open', async () => {
+    jest
+      .mocked(Linking.openURL)
+      .mockRejectedValueOnce(new Error('unsupported'));
+    renderLoadedReader();
+
+    await act(async () =>
+      mockWebView.props!.onOpenWindow({
+        nativeEvent: { targetUrl: 'unknown:example' },
+      }),
+    );
+
+    expect(Linking.openURL).toHaveBeenCalledWith('unknown:example');
+  });
 });

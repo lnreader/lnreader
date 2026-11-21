@@ -42,10 +42,6 @@ import { Dialog } from '@components/Dialog';
 import { TextInput } from 'react-native-paper';
 import useCustomCode from './Hooks/useCustomCode';
 import useTextModifications from './Hooks/useTextModifications';
-import {
-  isChapterRefreshUrl,
-  isPluginIssueReportUrl,
-} from '../utils/sanitizeChapterText';
 import { buildTtsQueueFromHtml } from '../utils/ttsQueue';
 import { applyTextModifications } from '@utils/customCode';
 import TtsSleepTimerDialog from './TtsSleepTimerDialog';
@@ -61,6 +57,7 @@ import {
   shouldReloadShell,
 } from '../utils/readerShell';
 import { buildReaderChromeScript } from '../utils/buildReaderChromeScript';
+import { createReaderLinkHandlers } from '../utils/handleReaderLink';
 
 export type WebViewPostEvent = {
   type: string;
@@ -222,6 +219,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   } = useChapterContext();
   const theme = useTheme();
   const openNovelLink = useNovelLinkNavigation(novel);
+  const linkHandlers = () =>
+    createReaderLinkHandlers({
+      openNovel: openNovelLink,
+      openExternal: url => {
+        void Linking.openURL(url).catch(() => undefined);
+      },
+      inject: script => webViewRef.current?.injectJavaScript(script),
+      refresh: refetch,
+    });
   // Custom code snippets apply from the next chapter on, like before chapters
   // were swapped into the loaded page.
   const chapterReaderSettings = useMemo(
@@ -905,23 +911,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         showsVerticalScrollIndicator={false}
         javaScriptEnabled={true}
         webviewDebuggingEnabled={__DEV__}
-        onShouldStartLoadWithRequest={({ url }) => {
-          if (isPluginIssueReportUrl(url)) {
-            void Linking.openURL(url);
-            return false;
-          }
-          if (isChapterRefreshUrl(url)) {
-            refetch();
-            return false;
-          }
-          return !openNovelLink(url);
-        }}
+        onShouldStartLoadWithRequest={({ url }) =>
+          linkHandlers().shouldStartLoad(url)
+        }
         // Android sends a target="_blank" link to the browser unless the app
         // handles the new window, so the app sends other links there itself.
         onOpenWindow={({ nativeEvent: { targetUrl } }) => {
-          if (!openNovelLink(targetUrl)) {
-            void Linking.openURL(targetUrl).catch(() => undefined);
-          }
+          linkHandlers().openWindow(targetUrl);
         }}
         onLoadEnd={() => {
           shellReadyRef.current = true;
@@ -940,6 +936,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           __DEV__ && onLogMessage(ev);
           const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
           switch (event.type) {
+            case 'link':
+              linkHandlers().handlePage(event.data);
+              break;
             case 'tts-queue': {
               cancelTtsTransition();
               const payload = event.data as
