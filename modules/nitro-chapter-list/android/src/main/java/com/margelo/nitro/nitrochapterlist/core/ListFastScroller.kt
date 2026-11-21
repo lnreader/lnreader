@@ -40,22 +40,21 @@ import kotlin.math.roundToInt
  * - dragging maps the thumb position to an absolute offset, and jumps
  *   (scrollToPositionWithOffset) instead of scrollBy when the step is more than
  *   a screen, so scrubbing never lays out the rows in between;
- * - [topInset]/[bottomInset] keep the track clear of the app bar.
- *
- * Colours follow the JS FastScrollbar: thumb onSurfaceVariant (primary while
- * pressed), track outlineVariant, [thickness] wide with round ends.
+ * - [topInset]/[bottomInset] keep the track clear of the app bar;
+ * - the look: a [thickness]-wide pill thumb with fully round ends, inset
+ *   [edgeMargin] from the edge, and no visible track.
  */
 class ListFastScroller(private val recyclerView: ListRecyclerView) :
   RecyclerView.ItemDecoration(), RecyclerView.OnItemTouchListener {
 
   private val density = recyclerView.resources.displayMetrics.density
   private val thickness = (THICKNESS_DP * density).roundToInt()
+  private val edgeMargin = (EDGE_MARGIN_DP * density).roundToInt()
   private val minThumbLength = (MIN_THUMB_LENGTH_DP * density).roundToInt()
   private val touchWidth = (TOUCH_WIDTH_DP * density).roundToInt()
   private val minimumRange = (MINIMUM_RANGE_DP * density).roundToInt()
 
   private val thumbDrawable = GradientDrawable().apply { cornerRadius = thickness / 2f }
-  private val trackDrawable = GradientDrawable().apply { cornerRadius = thickness / 2f }
   private var thumbColor = 0
   private var pressedThumbColor = 0
 
@@ -98,11 +97,10 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
     recyclerView.addOnScrollListener(onScrollListener)
   }
 
-  fun setColors(thumb: Int, pressedThumb: Int, track: Int) {
+  fun setColors(thumb: Int, pressedThumb: Int) {
     thumbColor = thumb
     pressedThumbColor = pressedThumb
     thumbDrawable.setColor(if (state == STATE_DRAGGING) pressedThumbColor else thumbColor)
-    trackDrawable.setColor(track)
     requestRedraw()
   }
 
@@ -188,12 +186,11 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   }
 
   private fun drawVerticalScrollbar(canvas: Canvas) {
-    val left = if (isLayoutRtl) 0 else recyclerViewWidth - thickness
-    trackDrawable.setBounds(left, trackTop, left + thickness, trackBottom)
-    trackDrawable.draw(canvas)
+    val left = if (isLayoutRtl) edgeMargin else recyclerViewWidth - edgeMargin - thickness
     thumbDrawable.setBounds(left, thumbTop, left + thickness, thumbTop + thumbLength)
     thumbDrawable.draw(canvas)
   }
+
 
   private val trackTop: Int
     get() = topInset
@@ -311,7 +308,6 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
     override fun onAnimationUpdate(valueAnimator: ValueAnimator) {
       val alpha = (SCROLLBAR_FULL_OPAQUE * valueAnimator.animatedValue as Float).toInt()
       thumbDrawable.alpha = alpha
-      trackDrawable.alpha = alpha
       requestRedraw()
     }
   }
@@ -332,9 +328,11 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
     const val HIDE_DURATION_MS = 500L
     const val SCROLLBAR_FULL_OPAQUE = 255
 
-    const val THICKNESS_DP = 8f
+    const val THICKNESS_DP = 12f
+    const val EDGE_MARGIN_DP = 8f
     const val MIN_THUMB_LENGTH_DP = 48f
-    const val TOUCH_WIDTH_DP = 24f
+    // From the edge: covers the inset, the thumb and a little beyond it.
+    const val TOUCH_WIDTH_DP = 32f
     const val MINIMUM_RANGE_DP = 50f
   }
 }

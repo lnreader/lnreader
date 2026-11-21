@@ -86,11 +86,10 @@ abstract class ListHostView(
   protected fun setListColors(
     thumb: Int,
     pressedThumb: Int,
-    track: Int,
     refreshIndicator: Int,
     refreshBackground: Int,
   ) {
-    fastScroller.setColors(thumb, pressedThumb, track)
+    fastScroller.setColors(thumb, pressedThumb)
     swipeRefresh.setColorSchemeColors(refreshIndicator)
     swipeRefresh.setProgressBackgroundColorSchemeColor(refreshBackground)
   }

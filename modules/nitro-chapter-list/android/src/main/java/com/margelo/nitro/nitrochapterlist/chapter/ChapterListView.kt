@@ -84,9 +84,9 @@ class ChapterListView(reactContext: ThemedReactContext) :
       )
     adapter.theme = theme
     setListColors(
-      thumb = theme.onSurfaceVariant,
-      pressedThumb = theme.primary,
-      track = theme.outlineVariant,
+      thumb = theme.primary,
+      // Pressed: the thumb darkens (light theme) or lightens (dark) a little.
+      pressedThumb = blend(theme.primary, theme.onSurface, PRESSED_THUMB_BLEND),
       refreshIndicator = theme.primary,
       refreshBackground = theme.onPrimary,
     )
@@ -196,6 +196,16 @@ class ChapterListView(reactContext: ThemedReactContext) :
   private companion object {
     const val MENU_DELETE = 1
     const val ROW_POOL_SIZE = 32
+    const val PRESSED_THUMB_BLEND = 0.3f
+
+    fun blend(from: Int, to: Int, ratio: Float): Int {
+      fun channel(shift: Int): Int {
+        val a = (from shr shift) and 0xFF
+        val b = (to shr shift) and 0xFF
+        return (a + (b - a) * ratio).roundToInt() and 0xFF
+      }
+      return (channel(24) shl 24) or (channel(16) shl 16) or (channel(8) shl 8) or channel(0)
+    }
   }
 }
 
