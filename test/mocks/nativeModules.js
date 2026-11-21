@@ -30,6 +30,7 @@ jest.mock('@modules/native-file', () => ({
     ExternalCachesDirectoryPath: '/mock/caches',
     writeFile: jest.fn(),
     readFile: jest.fn(() => ''),
+    fileSize: jest.fn(() => Promise.resolve(0)),
     copyFile: jest.fn(),
     copyFileToDirectory: jest.fn(() =>
       Promise.resolve({ uri: '/mock/export.epub', size: 1 }),
@@ -82,6 +83,14 @@ jest.mock('@modules/native-zip-archive', () => ({
   default: {
     zip: jest.fn().mockResolvedValue(),
     unzip: jest.fn().mockResolvedValue(),
+    readEntry: jest.fn().mockResolvedValue(null),
+    openArchive: jest.fn().mockResolvedValue(1),
+    closeArchive: jest.fn().mockResolvedValue(),
+    archiveEntryExists: jest.fn().mockResolvedValue(false),
+    archiveEntrySize: jest.fn().mockResolvedValue(0),
+    readArchiveDir: jest.fn().mockResolvedValue([]),
+    readArchiveFile: jest.fn().mockResolvedValue(''),
+    extractArchiveFile: jest.fn().mockResolvedValue(),
     remoteUnzip: jest.fn().mockResolvedValue(),
     remoteZip: jest.fn().mockResolvedValue(''),
   },

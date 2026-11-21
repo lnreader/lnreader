@@ -147,6 +147,7 @@ export interface StringMap {
   'backupScreen.googeDriveDesc': 'string';
   'backupScreen.invalidBackupFolder': 'string';
   'backupScreen.localBackup': 'string';
+  'backupScreen.unsupportedBackupFormat': 'string';
   'backupScreen.noBackupFound': 'string';
   'backupScreen.options.title': 'string';
   'backupScreen.options.description': 'string';

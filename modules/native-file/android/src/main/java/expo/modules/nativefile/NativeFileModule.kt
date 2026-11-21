@@ -494,6 +494,21 @@ class NativeFileModule : Module() {
             }
         }
 
+        AsyncFunction("fileSize") { path: String, promise: Promise ->
+            coroutineScope.launch {
+                try {
+                    val file = File(path)
+                    if (!file.isFile) {
+                        promise.reject("ENOENT", "File not found: '$path'", null)
+                        return@launch
+                    }
+                    promise.resolve(file.length().toDouble())
+                } catch (e: Exception) {
+                    rejectFileOperation(promise, "inspect", path, e)
+                }
+            }
+        }
+
         AsyncFunction("copyFile") { filepath: String, destPath: String, promise: Promise ->
             coroutineScope.launch {
                 try {

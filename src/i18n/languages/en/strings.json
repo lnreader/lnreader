@@ -170,6 +170,7 @@
     "googeDriveDesc": "Backup to your Google Drive",
     "invalidBackupFolder": "Invalid backup folder",
     "localBackup": "Local Backup",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "No backup found",
     "options": {
       "title": "Backup contents",
