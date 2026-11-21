@@ -96,6 +96,7 @@ const NovelScreenList = ({
   const {
     useFabForContinueReading,
     disableHapticFeedback,
+    reduceAppAnimations = false,
     dateFormat = 'default',
     relativeTimestamps = true,
   } = useAppSettings();
@@ -277,8 +278,11 @@ const NovelScreenList = ({
   );
 
   const scrollToTop = useCallback(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [listRef]);
+    listRef.current?.scrollToOffset({
+      offset: 0,
+      animated: !reduceAppAnimations,
+    });
+  }, [listRef, reduceAppAnimations]);
 
   const setCustomNovelCover = useCustomNovelCover(
     novel.id === 'NO_ID' ? undefined : novel,

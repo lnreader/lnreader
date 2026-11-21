@@ -4,6 +4,15 @@ html {
   word-wrap: break-word;
 }
 
+html.no-animation,
+html.no-animation *,
+html.no-animation *::before,
+html.no-animation *::after {
+  scroll-behavior: auto !important;
+  animation: none !important;
+  transition: none !important;
+}
+
 ::selection {
   color: var(--theme-onSecondary);
   background-color: var(--theme-secondary);

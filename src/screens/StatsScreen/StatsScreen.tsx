@@ -3,7 +3,7 @@ import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { TabView } from 'react-native-tab-view';
 
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
 import {
@@ -34,6 +34,7 @@ type StatsRoute = {
 
 const StatsScreen = () => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const navigation = useNavigation<any>();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -221,6 +222,7 @@ const StatsScreen = () => {
     <SafeAreaView excludeTop>
       {Header}
       <TabView
+        animationEnabled={!reduceAppAnimations}
         navigationState={navigationState}
         renderTabBar={renderTabBar}
         renderScene={renderScene}

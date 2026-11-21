@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Color from 'color';
 
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 
 import Button from '../Button/Button';
 
@@ -48,13 +48,14 @@ const DialogRoot = ({
   testID = 'dialog',
 }: DialogRootProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const backdropColor = Color(theme.scrim ?? '#000000')
     .alpha(0.32)
     .string();
 
   return (
     <NativeModal
-      animationType="fade"
+      animationType={reduceAppAnimations ? 'none' : 'fade'}
       hardwareAccelerated
       navigationBarTranslucent
       onRequestClose={onDismiss}

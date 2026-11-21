@@ -50,6 +50,7 @@ const ChapterDrawer = ({ onClose }: ChapterDrawerProps) => {
   const insets = useSafeAreaInsets();
   const {
     defaultChapterSort,
+    reduceAppAnimations = false,
     dateFormat = 'default',
     relativeTimestamps = true,
   } = useAppSettings();
@@ -178,18 +179,21 @@ const ChapterDrawer = ({ onClose }: ChapterDrawerProps) => {
     [chapter.id, openChapter, styles, theme, dateFormat, relativeTimestamps],
   );
 
-  const scroll = useCallback((index?: number) => {
-    if (index !== undefined) {
-      listRef.current?.scrollToIndex({
-        index,
-        animated: true,
-      });
-    } else {
-      listRef.current?.scrollToEnd({
-        animated: true,
-      });
-    }
-  }, []);
+  const scroll = useCallback(
+    (index?: number) => {
+      if (index !== undefined) {
+        listRef.current?.scrollToIndex({
+          index,
+          animated: !reduceAppAnimations,
+        });
+      } else {
+        listRef.current?.scrollToEnd({
+          animated: !reduceAppAnimations,
+        });
+      }
+    },
+    [reduceAppAnimations],
+  );
 
   useEffect(() => {
     if (currentScrollIndex === undefined) {

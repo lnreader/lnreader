@@ -18,7 +18,11 @@ import Color from 'color';
 import { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { List, TopTabBar } from '@components';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useChapterGeneralSettings,
+  useTheme,
+} from '@hooks/persisted';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import { getString } from '@i18n/translations';
 
@@ -136,6 +140,11 @@ const navigationPreferences: GeneralPreference[] = [
     label: 'tapToScroll',
     description: 'tapToScrollDescription',
   },
+  {
+    key: 'pageReaderDisableAnimation',
+    label: 'disableReaderAnimations',
+    description: 'disableReaderAnimationsDescription',
+  },
 ];
 
 const pagedModePreferences: GeneralPreference[] = [
@@ -143,11 +152,6 @@ const pagedModePreferences: GeneralPreference[] = [
     key: 'pageReaderInvertVolumeButtons',
     label: 'invertVolumeButtons',
     description: 'invertVolumeButtonsDescription',
-  },
-  {
-    key: 'pageReaderDisableAnimation',
-    label: 'disablePageTransitions',
-    description: 'disablePageTransitionsDescription',
   },
 ];
 
@@ -227,6 +231,7 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   bottomSheetRef,
 }) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const layout = useWindowDimensions();
 
   const tabHeaderColor = theme.surfaceContainerLow ?? theme.surface;
@@ -271,6 +276,7 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
     <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[360, 600]}>
       <BottomSheetView style={styles.flex}>
         <TabView
+          animationEnabled={!reduceAppAnimations}
           commonOptions={{
             label: renderLabel,
           }}

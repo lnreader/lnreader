@@ -48,8 +48,11 @@ const JumpToChapterModal = ({
 
   const maxNumber = batchInformation.totalChapters ?? -1;
   const theme = useTheme();
-  const { dateFormat = 'default', relativeTimestamps = true } =
-    useAppSettings();
+  const {
+    reduceAppAnimations = false,
+    dateFormat = 'default',
+    relativeTimestamps = true,
+  } = useAppSettings();
   const [mode, setMode] = useState(false);
   const [openChapter, setOpenChapter] = useState(false);
 
@@ -83,7 +86,7 @@ const JumpToChapterModal = ({
     if (loadedIndex >= 0) {
       onDismiss();
       chapterListRef.current?.scrollToIndex({
-        animated: true,
+        animated: !reduceAppAnimations,
         index: loadedIndex,
         viewPosition: 0.5,
       });
@@ -119,7 +122,7 @@ const JumpToChapterModal = ({
 
           onDismiss();
           chapterListRef.current?.scrollToIndex({
-            animated: true,
+            animated: !reduceAppAnimations,
             index: resolvedIndex,
             viewPosition: 0.5,
           });

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Alert, View, Text, Pressable, StyleSheet } from 'react-native';
 import {
   useMMKVBoolean,
   useMMKVNumber,
@@ -10,7 +10,8 @@ import type { SegmentedControlOption } from '@components/SegmentedControl';
 import { ThemePicker } from '@components/ThemePicker/ThemePicker';
 import { ThemeColors } from '@theme/types';
 import { useTheme } from '@hooks/persisted';
-import { darkThemes, lightThemes } from '@theme/md3';
+import { useEPaperOptimizations } from '@hooks/persisted/useEPaperOptimizations';
+import { darkThemes, lightThemes, E_PAPER_THEME_ID } from '@theme/md3';
 import {
   getSystemDynamicTheme,
   isDynamicThemeAvailable,
@@ -54,6 +55,11 @@ export default function ThemeSelectionStep() {
   const theme = useTheme();
   const [themeMode = 'system', setThemeMode] = useMMKVString('THEME_MODE');
   const [, setThemeId] = useMMKVNumber('APP_THEME_ID');
+  const {
+    ePaperOptimizations,
+    applyEPaperOptimizations,
+    disableEPaperOptimizations,
+  } = useEPaperOptimizations();
 
   const currentMode = themeMode as ThemeMode;
 
@@ -92,6 +98,35 @@ export default function ThemeSelectionStep() {
   };
 
   const handleThemeSelect = (selectedTheme: ThemeColors) => {
+    if (selectedTheme.id === E_PAPER_THEME_ID) {
+      setThemeId(selectedTheme.id);
+      if (theme.id !== E_PAPER_THEME_ID && !ePaperOptimizations) {
+        applyEPaperOptimizations();
+      }
+      return;
+    }
+
+    if (theme.id === E_PAPER_THEME_ID && ePaperOptimizations) {
+      Alert.alert(
+        getString('appearanceScreen.ePaperLeaveTitle'),
+        getString('appearanceScreen.ePaperLeaveDescription'),
+        [
+          {
+            text: getString('appearanceScreen.ePaperKeep'),
+            onPress: () => setThemeId(selectedTheme.id),
+          },
+          {
+            text: getString('appearanceScreen.ePaperRestore'),
+            onPress: () => {
+              disableEPaperOptimizations();
+              setThemeId(selectedTheme.id);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
     setThemeId(selectedTheme.id);
   };
 
@@ -111,7 +146,7 @@ export default function ThemeSelectionStep() {
         numColumns={3}
         showsHorizontalScrollIndicator={false}
         data={availableThemes}
-        extraData={theme}
+        extraData={[theme, ePaperOptimizations]}
         keyExtractor={item => 'theme-' + item.id}
         renderItem={({ item }) => (
           <View>
@@ -123,6 +158,33 @@ export default function ThemeSelectionStep() {
           </View>
         )}
       />
+      {theme.id === E_PAPER_THEME_ID && (
+        <Pressable
+          style={styles.amoledContainer}
+          onPress={
+            ePaperOptimizations
+              ? disableEPaperOptimizations
+              : applyEPaperOptimizations
+          }
+        >
+          <View style={styles.ePaperText}>
+            <Text style={[styles.amoledLabel, { color: theme.onSurface }]}>
+              {getString('appearanceScreen.ePaperApply')}
+            </Text>
+            <Text style={{ color: theme.onSurfaceVariant }}>
+              {getString('onboardingScreen.ePaperOptimizationsDescription')}
+            </Text>
+          </View>
+          <Switch
+            value={ePaperOptimizations}
+            onValueChange={
+              ePaperOptimizations
+                ? disableEPaperOptimizations
+                : applyEPaperOptimizations
+            }
+          />
+        </Pressable>
+      )}
       {/* AMOLED Toggle */}
       <AmoledToggle theme={theme} />
     </View>
@@ -148,6 +210,10 @@ const styles = StyleSheet.create({
   amoledLabel: {
     fontSize: 16,
     fontWeight: '400',
+  },
+  ePaperText: {
+    flex: 1,
+    paddingRight: 12,
   },
   toggle: {
     width: 52,
