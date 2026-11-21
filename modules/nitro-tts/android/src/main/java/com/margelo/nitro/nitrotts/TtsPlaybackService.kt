@@ -1,5 +1,6 @@
 package com.margelo.nitro.nitrotts
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -15,15 +16,11 @@ internal class TtsPlaybackService : Service() {
     override fun onCreate() {
         super.onCreate()
         mediaNotification = TtsMediaNotification(this)
-        val snapshot = TtsPlaybackStore.snapshot()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID,
-                mediaNotification.build(snapshot),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, mediaNotification.build(snapshot))
+        // Promote even when nothing is loaded: a service started with startForegroundService()
+        // that stops before calling startForeground() is itself a crash.
+        if (!promoteToForeground() || !TtsPlaybackStore.hasQueue()) {
+            stopSelf()
+            return
         }
         removeSnapshotListener = TtsPlaybackStore.addSnapshotListener(
             mediaNotification::notify,
@@ -31,14 +28,38 @@ internal class TtsPlaybackService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_PLAY -> TtsPlaybackStore.play()
-            ACTION_PAUSE -> TtsPlaybackStore.pause()
-            ACTION_STOP -> TtsPlaybackStore.stop()
-            ACTION_PREVIOUS -> TtsPlaybackStore.skipPrevious()
-            ACTION_NEXT -> TtsPlaybackStore.skipNext()
+        if (!TtsPlaybackStore.hasQueue()) {
+            stopSelf(startId)
         }
         return START_NOT_STICKY
+    }
+
+    /**
+     * Returns false when Android 12+ refuses the promotion (the app was in the background and
+     * not exempt), instead of letting it crash the process.
+     */
+    private fun promoteToForeground(): Boolean {
+        val notification = mediaNotification.build(TtsPlaybackStore.snapshot())
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+            true
+        } catch (error: IllegalStateException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                error is ForegroundServiceStartNotAllowedException
+            ) {
+                false
+            } else {
+                throw error
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -52,11 +73,6 @@ internal class TtsPlaybackService : Service() {
 
     companion object {
         internal const val NOTIFICATION_ID = 1001
-        internal const val ACTION_PLAY = "com.lnreader.TTS_PLAY"
-        internal const val ACTION_PAUSE = "com.lnreader.TTS_PAUSE"
-        internal const val ACTION_STOP = "com.lnreader.TTS_STOP"
-        internal const val ACTION_PREVIOUS = "com.lnreader.TTS_PREVIOUS"
-        internal const val ACTION_NEXT = "com.lnreader.TTS_NEXT"
 
         fun start(context: Context) {
             val intent = Intent(context, TtsPlaybackService::class.java)
@@ -66,6 +82,5 @@ internal class TtsPlaybackService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, TtsPlaybackService::class.java))
         }
-
     }
 }

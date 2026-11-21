@@ -170,6 +170,31 @@ internal object TtsPlaybackStore {
         TtsPlaybackService.start(context)
     }
 
+    fun hasQueue(): Boolean = paragraphs.isNotEmpty()
+
+    /**
+     * Applies a control from the media notification or MediaSession. These can arrive after the
+     * queue was cleared or in a freshly restarted process, so they must never throw on the main
+     * thread. Returns false when there is nothing loaded to control.
+     */
+    fun handleTransportControl(action: String): Boolean {
+        if (paragraphs.isEmpty()) {
+            return false
+        }
+        try {
+            when (action) {
+                TtsActionReceiver.ACTION_PLAY -> play()
+                TtsActionReceiver.ACTION_PAUSE -> pause()
+                TtsActionReceiver.ACTION_STOP -> stop()
+                TtsActionReceiver.ACTION_PREVIOUS -> skipPrevious()
+                TtsActionReceiver.ACTION_NEXT -> skipNext()
+            }
+        } catch (error: IllegalStateException) {
+            fail(error.message ?: "Text-to-speech playback failed.")
+        }
+        return true
+    }
+
     fun play() {
         requireReady()
         check(paragraphs.isNotEmpty()) { "Load a paragraph queue before starting TTS." }

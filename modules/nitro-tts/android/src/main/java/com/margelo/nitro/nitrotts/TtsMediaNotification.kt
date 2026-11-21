@@ -35,13 +35,13 @@ internal class TtsMediaNotification(
             action(
                 android.R.drawable.ic_media_pause,
                 "Pause",
-                TtsPlaybackService.ACTION_PAUSE,
+                TtsActionReceiver.ACTION_PAUSE,
             )
         } else {
             action(
                 android.R.drawable.ic_media_play,
                 "Play",
-                TtsPlaybackService.ACTION_PLAY,
+                TtsActionReceiver.ACTION_PLAY,
             )
         }
 
@@ -51,7 +51,7 @@ internal class TtsMediaNotification(
             .setSubText(snapshot.metadata?.novelName)
             .setSmallIcon(context.applicationInfo.icon)
             .setContentIntent(contentIntent())
-            .setDeleteIntent(serviceIntent(TtsPlaybackService.ACTION_STOP))
+            .setDeleteIntent(actionIntent(TtsActionReceiver.ACTION_STOP))
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOnlyAlertOnce(true)
             .setOngoing(isPlaying)
@@ -59,7 +59,7 @@ internal class TtsMediaNotification(
                 action(
                     android.R.drawable.ic_media_previous,
                     "Previous paragraph",
-                    TtsPlaybackService.ACTION_PREVIOUS,
+                    TtsActionReceiver.ACTION_PREVIOUS,
                 ),
             )
             .addAction(playPauseAction)
@@ -67,7 +67,7 @@ internal class TtsMediaNotification(
                 action(
                     android.R.drawable.ic_media_next,
                     "Next paragraph",
-                    TtsPlaybackService.ACTION_NEXT,
+                    TtsActionReceiver.ACTION_NEXT,
                 ),
             )
             .setStyle(
@@ -147,13 +147,13 @@ internal class TtsMediaNotification(
         return NotificationCompat.Action.Builder(
             icon,
             title,
-            serviceIntent(action),
+            actionIntent(action),
         ).build()
     }
 
-    private fun serviceIntent(action: String): PendingIntent {
-        val intent = Intent(context, TtsPlaybackService::class.java).setAction(action)
-        return PendingIntent.getService(
+    private fun actionIntent(action: String): PendingIntent {
+        val intent = Intent(context, TtsActionReceiver::class.java).setAction(action)
+        return PendingIntent.getBroadcast(
             context,
             action.hashCode(),
             intent,

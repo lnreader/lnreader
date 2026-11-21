@@ -4,22 +4,22 @@ import android.support.v4.media.session.MediaSessionCompat
 
 internal class TtsMediaSessionCallback : MediaSessionCompat.Callback() {
     override fun onPlay() {
-        TtsPlaybackStore.play()
+        TtsPlaybackStore.handleTransportControl(TtsActionReceiver.ACTION_PLAY)
     }
 
     override fun onPause() {
-        TtsPlaybackStore.pause()
+        TtsPlaybackStore.handleTransportControl(TtsActionReceiver.ACTION_PAUSE)
     }
 
     override fun onStop() {
-        TtsPlaybackStore.stop()
+        TtsPlaybackStore.handleTransportControl(TtsActionReceiver.ACTION_STOP)
     }
 
     override fun onSkipToPrevious() {
-        TtsPlaybackStore.skipPrevious()
+        TtsPlaybackStore.handleTransportControl(TtsActionReceiver.ACTION_PREVIOUS)
     }
 
     override fun onSkipToNext() {
-        TtsPlaybackStore.skipNext()
+        TtsPlaybackStore.handleTransportControl(TtsActionReceiver.ACTION_NEXT)
     }
 }

@@ -14,5 +14,8 @@
       android:exported="false"
       android:foregroundServiceType="mediaPlayback"
       android:stopWithTask="false" />
+    <receiver
+      android:name=".TtsActionReceiver"
+      android:exported="false" />
   </application>
 </manifest>
