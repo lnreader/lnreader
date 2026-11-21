@@ -19,23 +19,32 @@ namespace margelo::nitro::nitrotts { struct TtsParagraph; }
 namespace margelo::nitro::nitrotts { struct TtsMetadata; }
 // Forward declaration of `TtsSettings` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsSettings; }
+// Forward declaration of `TtsLoadOptions` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsLoadOptions; }
+// Forward declaration of `TtsSleepTimerConfig` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerConfig; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct ListenerSubscription; }
 // Forward declaration of `TtsPlaybackState` to properly resolve imports.
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsSleepTimerState` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerState; }
 
 #include <NitroModules/Promise.hpp>
 #include "TtsParagraph.hpp"
 #include <vector>
 #include "TtsMetadata.hpp"
 #include "TtsSettings.hpp"
+#include "TtsLoadOptions.hpp"
+#include "TtsSleepTimerConfig.hpp"
 #include "ListenerSubscription.hpp"
 #include "TtsPlaybackState.hpp"
 #include <functional>
 #include "TtsProgress.hpp"
 #include <string>
+#include "TtsSleepTimerState.hpp"
 
 namespace margelo::nitro::nitrotts {
 
@@ -68,7 +77,7 @@ namespace margelo::nitro::nitrotts {
 
     public:
       // Methods
-      virtual std::shared_ptr<Promise<void>> load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings) = 0;
+      virtual std::shared_ptr<Promise<void>> load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings, const TtsLoadOptions& options) = 0;
       virtual std::shared_ptr<Promise<void>> play() = 0;
       virtual std::shared_ptr<Promise<void>> pause() = 0;
       virtual std::shared_ptr<Promise<void>> stop() = 0;
@@ -77,9 +86,12 @@ namespace margelo::nitro::nitrotts {
       virtual std::shared_ptr<Promise<void>> replayCurrent() = 0;
       virtual std::shared_ptr<Promise<void>> seekTo(double index) = 0;
       virtual std::shared_ptr<Promise<void>> updateSettings(const TtsSettings& settings) = 0;
+      virtual std::shared_ptr<Promise<void>> setSleepTimer(const TtsSleepTimerConfig& config) = 0;
+      virtual std::shared_ptr<Promise<void>> cancelSleepTimer() = 0;
       virtual ListenerSubscription addOnStateChangedListener(const std::function<void(TtsPlaybackState /* state */)>& listener) = 0;
       virtual ListenerSubscription addOnProgressChangedListener(const std::function<void(const TtsProgress& /* progress */)>& listener) = 0;
       virtual ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) = 0;
+      virtual ListenerSubscription addOnSleepTimerChangedListener(const std::function<void(const TtsSleepTimerState& /* state */)>& listener) = 0;
 
     protected:
       // Hybrid Setup

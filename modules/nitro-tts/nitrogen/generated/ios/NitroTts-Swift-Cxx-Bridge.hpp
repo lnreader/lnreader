@@ -22,6 +22,10 @@ namespace margelo::nitro::nitrotts { struct TtsParagraph; }
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsSleepTimerMode` to properly resolve imports.
+namespace margelo::nitro::nitrotts { enum class TtsSleepTimerMode; }
+// Forward declaration of `TtsSleepTimerState` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerState; }
 // Forward declaration of `TtsVoice` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsVoice; }
 
@@ -39,6 +43,8 @@ namespace NitroTts { class HybridTtsSessionSpec_cxx; }
 #include "TtsParagraph.hpp"
 #include "TtsPlaybackState.hpp"
 #include "TtsProgress.hpp"
+#include "TtsSleepTimerMode.hpp"
+#include "TtsSleepTimerState.hpp"
 #include "TtsVoice.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
@@ -313,6 +319,21 @@ namespace margelo::nitro::nitrotts::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
+  }
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::function<void(TtsPlaybackState /* state */)>
   /**
    * Specialized version of `std::function<void(TtsPlaybackState)>`.
@@ -377,6 +398,43 @@ namespace margelo::nitro::nitrotts::bridge::swift {
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
     return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<TtsSleepTimerMode>
+  /**
+   * Specialized version of `std::optional<TtsSleepTimerMode>`.
+   */
+  using std__optional_TtsSleepTimerMode_ = std::optional<TtsSleepTimerMode>;
+  inline std::optional<TtsSleepTimerMode> create_std__optional_TtsSleepTimerMode_(const TtsSleepTimerMode& value) noexcept {
+    return std::optional<TtsSleepTimerMode>(value);
+  }
+  inline bool has_value_std__optional_TtsSleepTimerMode_(const std::optional<TtsSleepTimerMode>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline TtsSleepTimerMode get_std__optional_TtsSleepTimerMode_(const std::optional<TtsSleepTimerMode>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::function<void(const TtsSleepTimerState& /* state */)>
+  /**
+   * Specialized version of `std::function<void(const TtsSleepTimerState&)>`.
+   */
+  using Func_void_TtsSleepTimerState = std::function<void(const TtsSleepTimerState& /* state */)>;
+  /**
+   * Wrapper class for a `std::function<void(const TtsSleepTimerState& / * state * /)>`, this can be used from Swift.
+   */
+  class Func_void_TtsSleepTimerState_Wrapper final {
+  public:
+    explicit Func_void_TtsSleepTimerState_Wrapper(std::function<void(const TtsSleepTimerState& /* state */)>&& func): _function(std::make_unique<std::function<void(const TtsSleepTimerState& /* state */)>>(std::move(func))) {}
+    inline void call(TtsSleepTimerState state) const noexcept {
+      _function->operator()(state);
+    }
+  private:
+    std::unique_ptr<std::function<void(const TtsSleepTimerState& /* state */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_TtsSleepTimerState create_Func_void_TtsSleepTimerState(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_TtsSleepTimerState_Wrapper wrap_Func_void_TtsSleepTimerState(Func_void_TtsSleepTimerState value) noexcept {
+    return Func_void_TtsSleepTimerState_Wrapper(std::move(value));
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<void>>>

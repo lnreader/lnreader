@@ -563,6 +563,15 @@ const TTSController = () => {
       innerHTML: nextParagraphIcon,
       onclick: runCommand(() => tts.next()),
     }),
+    button({
+      id: 'TTS-SleepTimer',
+      type: 'button',
+      class: 'tts-control-button tts-sleep-timer',
+      'aria-label': 'Set sleep timer',
+      innerHTML: sleepTimerIcon,
+      onclick: runCommand(() => reader.post({ type: 'tts-sleep-timer' })),
+    }),
+    span({ id: 'TTS-TimerStatus', 'aria-hidden': 'true' }),
     span({ id: 'TTS-Progress', 'aria-hidden': 'true' }),
   );
 };

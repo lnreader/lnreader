@@ -9,9 +9,12 @@ const mockTtsSession = {
   replayCurrent: jest.fn(async () => undefined),
   seekTo: jest.fn(async () => undefined),
   updateSettings: jest.fn(async () => undefined),
+  setSleepTimer: jest.fn(async () => undefined),
+  cancelSleepTimer: jest.fn(async () => undefined),
   addOnStateChangedListener: jest.fn(() => mockSubscription),
   addOnProgressChangedListener: jest.fn(() => mockSubscription),
   addOnErrorListener: jest.fn(() => mockSubscription),
+  addOnSleepTimerChangedListener: jest.fn(() => mockSubscription),
 };
 
 jest.mock('react-native-nitro-modules', () => ({

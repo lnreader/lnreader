@@ -346,7 +346,7 @@ export default function useChapter(
   );
 
   const getChapter = useCallback(
-    async (navChapter?: ChapterInfo) => {
+    async (navChapter?: ChapterInfo, canCommit?: () => boolean) => {
       const loadId = ++loadIdRef.current;
       const isStale = () => loadId !== loadIdRef.current;
       const requested = navChapter ?? chapterRef.current;
@@ -358,7 +358,7 @@ export default function useChapter(
           navChapter ? undefined : getDbChapter(requested.id),
           htmlPromise,
         ]);
-        if (isStale()) {
+        if (isStale() || canCommit?.() === false) {
           return;
         }
 
@@ -369,12 +369,14 @@ export default function useChapter(
         setLoading(false);
 
         void resolveAdjacentChapters(chap, loadId);
+        return { chapter: chap, html };
       } catch (e: any) {
-        if (isStale()) {
+        if (isStale() || canCommit?.() === false) {
           return;
         }
         setError(e.message);
         setLoading(false);
+        return undefined;
       }
     },
     [loadChapterHtml, resolveAdjacentChapters],
@@ -476,18 +478,19 @@ export default function useChapter(
   }, [setImmersiveMode, showStatusAndNavBar, webViewRef]);
 
   const navigateChapter = useCallback(
-    (position: 'NEXT' | 'PREV') => {
+    async (position: 'NEXT' | 'PREV', canCommit?: () => boolean) => {
       const [next, prev] = adjacentChapterRef.current;
       const navChapter = position === 'NEXT' ? next : prev;
 
       if (navChapter) {
-        getChapter(navChapter);
+        return await getChapter(navChapter, canCommit);
       } else {
         showToast(
           position === 'NEXT'
             ? getString('readerScreen.noNextChapter')
             : getString('readerScreen.noPreviousChapter'),
         );
+        return undefined;
       }
     },
     [getChapter],

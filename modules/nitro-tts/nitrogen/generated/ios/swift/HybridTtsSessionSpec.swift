@@ -13,7 +13,7 @@ public protocol HybridTtsSessionSpec_protocol: HybridObject {
   
 
   // Methods
-  func load(paragraphs: [TtsParagraph], initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings) throws -> Promise<Void>
+  func load(paragraphs: [TtsParagraph], initialIndex: Double, metadata: TtsMetadata, settings: TtsSettings, options: TtsLoadOptions) throws -> Promise<Void>
   func play() throws -> Promise<Void>
   func pause() throws -> Promise<Void>
   func stop() throws -> Promise<Void>
@@ -22,9 +22,12 @@ public protocol HybridTtsSessionSpec_protocol: HybridObject {
   func replayCurrent() throws -> Promise<Void>
   func seekTo(index: Double) throws -> Promise<Void>
   func updateSettings(settings: TtsSettings) throws -> Promise<Void>
+  func setSleepTimer(config: TtsSleepTimerConfig) throws -> Promise<Void>
+  func cancelSleepTimer() throws -> Promise<Void>
   func addOnStateChangedListener(listener: @escaping (_ state: TtsPlaybackState) -> Void) throws -> ListenerSubscription
   func addOnProgressChangedListener(listener: @escaping (_ progress: TtsProgress) -> Void) throws -> ListenerSubscription
   func addOnErrorListener(listener: @escaping (_ message: String) -> Void) throws -> ListenerSubscription
+  func addOnSleepTimerChangedListener(listener: @escaping (_ state: TtsSleepTimerState) -> Void) throws -> ListenerSubscription
 }
 
 public extension HybridTtsSessionSpec_protocol {

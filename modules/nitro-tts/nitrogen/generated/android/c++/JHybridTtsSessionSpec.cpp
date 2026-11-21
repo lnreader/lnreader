@@ -15,10 +15,18 @@ namespace margelo::nitro::nitrotts { struct TtsParagraph; }
 namespace margelo::nitro::nitrotts { struct TtsMetadata; }
 // Forward declaration of `TtsSettings` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsSettings; }
+// Forward declaration of `TtsLoadOptions` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsLoadOptions; }
+// Forward declaration of `TtsSleepTimerConfig` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerConfig; }
+// Forward declaration of `TtsSleepTimerMode` to properly resolve imports.
+namespace margelo::nitro::nitrotts { enum class TtsSleepTimerMode; }
 // Forward declaration of `TtsPlaybackState` to properly resolve imports.
 namespace margelo::nitro::nitrotts { enum class TtsPlaybackState; }
 // Forward declaration of `TtsProgress` to properly resolve imports.
 namespace margelo::nitro::nitrotts { struct TtsProgress; }
+// Forward declaration of `TtsSleepTimerState` to properly resolve imports.
+namespace margelo::nitro::nitrotts { struct TtsSleepTimerState; }
 
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
@@ -37,6 +45,12 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include <optional>
 #include "TtsSettings.hpp"
 #include "JTtsSettings.hpp"
+#include "TtsLoadOptions.hpp"
+#include "JTtsLoadOptions.hpp"
+#include "TtsSleepTimerConfig.hpp"
+#include "JTtsSleepTimerConfig.hpp"
+#include "TtsSleepTimerMode.hpp"
+#include "JTtsSleepTimerMode.hpp"
 #include "TtsPlaybackState.hpp"
 #include "JFunc_void_TtsPlaybackState.hpp"
 #include "JTtsPlaybackState.hpp"
@@ -44,6 +58,9 @@ namespace margelo::nitro::nitrotts { struct TtsProgress; }
 #include "JFunc_void_TtsProgress.hpp"
 #include "JTtsProgress.hpp"
 #include "JFunc_void_std__string.hpp"
+#include "TtsSleepTimerState.hpp"
+#include "JFunc_void_TtsSleepTimerState.hpp"
+#include "JTtsSleepTimerState.hpp"
 
 namespace margelo::nitro::nitrotts {
 
@@ -78,8 +95,8 @@ namespace margelo::nitro::nitrotts {
   
 
   // Methods
-  std::shared_ptr<Promise<void>> JHybridTtsSessionSpec::load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JTtsParagraph>> /* paragraphs */, double /* initialIndex */, jni::alias_ref<JTtsMetadata> /* metadata */, jni::alias_ref<JTtsSettings> /* settings */)>("load");
+  std::shared_ptr<Promise<void>> JHybridTtsSessionSpec::load(const std::vector<TtsParagraph>& paragraphs, double initialIndex, const TtsMetadata& metadata, const TtsSettings& settings, const TtsLoadOptions& options) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JTtsParagraph>> /* paragraphs */, double /* initialIndex */, jni::alias_ref<JTtsMetadata> /* metadata */, jni::alias_ref<JTtsSettings> /* settings */, jni::alias_ref<JTtsLoadOptions> /* options */)>("load");
     auto __result = method(_javaPart, [&](auto&& __input) {
       size_t __size = __input.size();
       jni::local_ref<jni::JArrayClass<JTtsParagraph>> __array = jni::JArrayClass<JTtsParagraph>::newArray(__size);
@@ -89,7 +106,7 @@ namespace margelo::nitro::nitrotts {
         __array->setElement(__i, *__elementJni);
       }
       return __array;
-    }(paragraphs), initialIndex, JTtsMetadata::fromCpp(metadata), JTtsSettings::fromCpp(settings));
+    }(paragraphs), initialIndex, JTtsMetadata::fromCpp(metadata), JTtsSettings::fromCpp(settings), JTtsLoadOptions::fromCpp(options));
     return [&]() {
       auto __promise = Promise<void>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
@@ -222,6 +239,36 @@ namespace margelo::nitro::nitrotts {
       return __promise;
     }();
   }
+  std::shared_ptr<Promise<void>> JHybridTtsSessionSpec::setSleepTimer(const TtsSleepTimerConfig& config) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JTtsSleepTimerConfig> /* config */)>("setSleepTimer");
+    auto __result = method(_javaPart, JTtsSleepTimerConfig::fromCpp(config));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridTtsSessionSpec::cancelSleepTimer() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("cancelSleepTimer");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
   ListenerSubscription JHybridTtsSessionSpec::addOnStateChangedListener(const std::function<void(TtsPlaybackState /* state */)>& listener) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_TtsPlaybackState::javaobject> /* listener */)>("addOnStateChangedListener_cxx");
     auto __result = method(_javaPart, JFunc_void_TtsPlaybackState_cxx::fromCpp(listener));
@@ -235,6 +282,11 @@ namespace margelo::nitro::nitrotts {
   ListenerSubscription JHybridTtsSessionSpec::addOnErrorListener(const std::function<void(const std::string& /* message */)>& listener) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_std__string::javaobject> /* listener */)>("addOnErrorListener_cxx");
     auto __result = method(_javaPart, JFunc_void_std__string_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridTtsSessionSpec::addOnSleepTimerChangedListener(const std::function<void(const TtsSleepTimerState& /* state */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_TtsSleepTimerState::javaobject> /* listener */)>("addOnSleepTimerChangedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_TtsSleepTimerState_cxx::fromCpp(listener));
     return __result->toCpp();
   }
 

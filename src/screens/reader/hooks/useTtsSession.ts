@@ -7,6 +7,8 @@ import {
   TtsProgress,
   TtsSession,
   TtsSettings,
+  TtsSleepTimerConfig,
+  TtsSleepTimerState,
 } from '@modules/nitro-tts';
 
 type TtsCommand = 'next' | 'pause' | 'play' | 'previous' | 'replay' | 'stop';
@@ -17,14 +19,22 @@ const initialProgress: TtsProgress = {
   paragraphId: '',
 };
 
+const initialSleepTimer: TtsSleepTimerState = {
+  active: false,
+  expired: false,
+};
+
 export const useTtsSession = () => {
   const sessionRef = useRef<TtsSession | null>(null);
   const sessionPromiseRef = useRef<Promise<TtsSession> | null>(null);
   const subscriptionsRef = useRef<{ remove(): void }[]>([]);
   const mountedRef = useRef(true);
+  const loadGenerationRef = useRef(0);
   const [state, setState] = useState<TtsPlaybackState>('idle');
   const [progress, setProgress] = useState<TtsProgress>(initialProgress);
   const [error, setError] = useState<string | null>(null);
+  const [sleepTimer, setSleepTimerState] =
+    useState<TtsSleepTimerState>(initialSleepTimer);
 
   const ensureSession = useCallback(async () => {
     if (sessionRef.current) {
@@ -42,6 +52,7 @@ export const useTtsSession = () => {
             session.addOnStateChangedListener(setState),
             session.addOnProgressChangedListener(setProgress),
             session.addOnErrorListener(setError),
+            session.addOnSleepTimerChangedListener(setSleepTimerState),
           ];
           return session;
         })
@@ -58,35 +69,71 @@ export const useTtsSession = () => {
       try {
         setError(null);
         await operation(await ensureSession());
+        return true;
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : String(cause));
+        return false;
       }
     },
     [ensureSession],
   );
 
-  const loadAndPlay = useCallback(
+  const loadQueue = useCallback(
     async (
       queue: string[],
       startIndex: number,
       metadata: TtsMetadata,
       settings: TtsSettings,
+      options: {
+        autoplay: boolean;
+        expectContinuation: boolean;
+        canContinue?: () => boolean;
+      },
     ) => {
       if (queue.length === 0) {
         setError('No readable paragraphs were found in this chapter.');
-        return;
+        return false;
       }
-      await run(async session => {
+      const loadGeneration = ++loadGenerationRef.current;
+      let completed = false;
+      const succeeded = await run(async session => {
         await session.load(
           queue.map((text, index) => ({ id: String(index), text })),
           startIndex,
           metadata,
           settings,
+          { expectContinuation: options.expectContinuation },
         );
-        await session.play();
+        if (loadGeneration !== loadGenerationRef.current) {
+          return;
+        }
+        if (options.canContinue?.() === false) {
+          await session.stop();
+          return;
+        }
+        if (options.autoplay) {
+          await session.play();
+        }
+        completed = true;
       });
+      return succeeded && completed;
     },
     [run],
+  );
+
+  const loadAndPlay = useCallback(
+    (
+      queue: string[],
+      startIndex: number,
+      metadata: TtsMetadata,
+      settings: TtsSettings,
+      expectContinuation = false,
+    ) =>
+      loadQueue(queue, startIndex, metadata, settings, {
+        autoplay: true,
+        expectContinuation,
+      }),
+    [loadQueue],
   );
 
   const command = useCallback(
@@ -127,6 +174,17 @@ export const useTtsSession = () => {
     [run],
   );
 
+  const setSleepTimer = useCallback(
+    (config: TtsSleepTimerConfig) => {
+      void run(session => session.setSleepTimer(config));
+    },
+    [run],
+  );
+
+  const cancelSleepTimer = useCallback(() => {
+    void run(session => session.cancelSleepTimer());
+  }, [run]);
+
   useEffect(() => {
     void ensureSession().catch(cause => {
       if (mountedRef.current) {
@@ -147,10 +205,14 @@ export const useTtsSession = () => {
   return {
     command,
     error,
+    cancelSleepTimer,
+    loadQueue,
     loadAndPlay,
     progress,
     seekTo,
     state,
+    setSleepTimer,
+    sleepTimer,
     updateSettings,
   };
 };

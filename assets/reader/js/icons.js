@@ -12,3 +12,5 @@ const minimizeIcon =
   '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e8eaed"><path d="M120-784l56-56 184 184v-104h80v240H200v-80h104L120-784Zm720 608-56 56-184-184v104h-80v-240h240v80H656l184 184Z"/></svg>';
 const textToSpeechIcon =
   '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e8eaed"><path d="M160-280v-400h80v400h-80Zm160 80v-560h80v560h-80Zm160 80v-720h80v720h-80Zm160-160v-400h80v400h-80Z"/></svg>';
+const sleepTimerIcon =
+  '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e8eaed"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q150 0 255 105t105 255q0 150-105 255T480-120Zm0-80q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm40-280v-200h-80v240l168 100 40-68-128-72Z"/></svg>';

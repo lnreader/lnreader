@@ -110,5 +110,13 @@ namespace margelo::nitro::nitrotts::bridge::swift {
       swiftClosure.call(message);
     };
   }
+  
+  // pragma MARK: std::function<void(const TtsSleepTimerState& /* state */)>
+  Func_void_TtsSleepTimerState create_Func_void_TtsSleepTimerState(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroTts::Func_void_TtsSleepTimerState::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const TtsSleepTimerState& state) mutable -> void {
+      swiftClosure.call(state);
+    };
+  }
 
 } // namespace margelo::nitro::nitrotts::bridge::swift
