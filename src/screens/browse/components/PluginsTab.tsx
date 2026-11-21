@@ -7,12 +7,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
-  LegendList,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
+import type { LegendListRenderItemProps } from '@legendapp/list/react-native';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
 
 import { Button, EmptyView, IconButtonV2 } from '@components';
+import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
 import {
   useFilteredAvailablePlugins,
   useInstalledPlugins,
@@ -308,6 +307,8 @@ export const PluginsTab = memo(
       ],
     );
 
+    const fastScrollMetrics = useFastScrollMetrics();
+
     const refresh = useCallback(async () => {
       setRefreshing(true);
       try {
@@ -320,50 +321,54 @@ export const PluginsTab = memo(
     }, [refreshPlugins]);
 
     return (
-      <LegendList
-        data={entries}
-        estimatedItemSize={64}
-        getItemType={item => item.type}
-        keyExtractor={item => item.key}
-        ListEmptyComponent={
-          <EmptyView
-            description={
-              searchText.trim()
-                ? getString('browseScreen.noSearchResults')
-                : getString('browseScreen.noPlugins')
-            }
-            actions={
-              searchText.trim()
-                ? undefined
-                : [
-                    {
-                      iconName: 'source-repository',
-                      onPress: openRepositories,
-                      title: getString('browseScreen.repositories'),
-                    },
-                    {
-                      iconName: 'tune',
-                      onPress: openBrowseSettings,
-                      title: getString('browseSettings'),
-                    },
-                  ]
-            }
-            theme={theme}
-          />
-        }
-        contentContainerStyle={!entries.length ? styles.emptyList : undefined}
-        recycleItems
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[theme.onPrimary]}
-            progressBackgroundColor={theme.primary}
-          />
-        }
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.listContainer}>
+        <AnimatedLegendList
+          data={entries}
+          estimatedItemSize={64}
+          getItemType={item => item.type}
+          keyExtractor={item => item.key}
+          ListEmptyComponent={
+            <EmptyView
+              description={
+                searchText.trim()
+                  ? getString('browseScreen.noSearchResults')
+                  : getString('browseScreen.noPlugins')
+              }
+              actions={
+                searchText.trim()
+                  ? undefined
+                  : [
+                      {
+                        iconName: 'source-repository',
+                        onPress: openRepositories,
+                        title: getString('browseScreen.repositories'),
+                      },
+                      {
+                        iconName: 'tune',
+                        onPress: openBrowseSettings,
+                        title: getString('browseSettings'),
+                      },
+                    ]
+              }
+              theme={theme}
+            />
+          }
+          contentContainerStyle={!entries.length ? styles.emptyList : undefined}
+          recycleItems
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={[theme.onPrimary]}
+              progressBackgroundColor={theme.primary}
+            />
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          {...fastScrollMetrics.listProps}
+        />
+        <FastScrollbar metrics={fastScrollMetrics} itemCount={entries.length} />
+      </View>
     );
   },
 );
@@ -375,6 +380,9 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flexGrow: 1,
+  },
+  listContainer: {
+    flex: 1,
   },
   details: {
     flex: 1,

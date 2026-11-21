@@ -291,6 +291,26 @@ describe('ChapterQueries', () => {
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.unread === true)).toBe(true);
     });
+
+    it('should reset reading progress when marking all chapters unread (issue #1431)', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 96,
+      });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+      });
+
+      await markAllChaptersUnread(novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+      expect(chapters.every(c => (c.progress ?? 0) === 0)).toBe(true);
+    });
   });
 
   describe('insertChapters', () => {
@@ -495,6 +515,112 @@ describe('ChapterQueries', () => {
       expect(chapters).toHaveLength(1);
       expect(chapters[0].chapterNumber).toBe(1);
       expect(chapters[0].chapterNumber).not.toBeNull();
+    });
+
+    describe('library update (touchUpdatedTime)', () => {
+      const ISO = '2024-03-05T10:20:30.000Z';
+      const touch = { touchUpdatedTime: true };
+
+      it('fills an empty releaseTime without marking the chapter updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: '',
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('keeps the stored releaseTime when the incoming one is empty', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: ISO,
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: '' }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('does not mark position/page/chapterNumber changes as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 7,
+          position: 5,
+          page: '3',
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', chapterNumber: 1 }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.position).toBe(0);
+        expect(chapter.page).toBe('1');
+        expect(chapter.chapterNumber).toBe(1);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('marks only new and renamed chapters as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 1,
+          position: 0,
+        });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/2',
+          name: 'Chapter 2 🔒',
+          chapterNumber: 2,
+          position: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [
+            { path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO },
+            { path: '/chapter/2', name: 'Chapter 2' },
+            { path: '/chapter/3', name: 'Chapter 3' },
+          ],
+          touch,
+        );
+
+        const chapters = await getNovelChapters(novelId);
+        const updated = Object.fromEntries(
+          chapters.map(c => [c.path, c.updatedTime]),
+        );
+        expect(updated['/chapter/1']).toBeNull();
+        expect(updated['/chapter/2']).not.toBeNull();
+        expect(updated['/chapter/3']).not.toBeNull();
+      });
     });
   });
 
@@ -715,6 +841,39 @@ describe('ChapterQueries', () => {
       expect(chapter1?.unread).toBe(true);
       expect(chapter2?.unread).toBe(true);
       expect(chapter3?.unread).toBe(false);
+    });
+
+    it('should reset reading progress when marking previous chapters unread', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 80,
+        position: 0,
+      });
+      const chapterId2 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+        position: 1,
+      });
+      const chapterId3 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 45,
+        position: 2,
+      });
+
+      await markPreviousChaptersUnread(chapterId2, novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter1 = chapters.find(c => c.id === chapterId1);
+      const chapter2 = chapters.find(c => c.id === chapterId2);
+      const chapter3 = chapters.find(c => c.id === chapterId3);
+      expect(chapter1?.unread).toBe(true);
+      expect(chapter2?.unread).toBe(true);
+      expect(chapter3?.unread).toBe(false);
+      expect(chapter1?.progress).toBe(0);
+      expect(chapter2?.progress).toBe(0);
+      expect(chapter3?.progress).toBe(45);
     });
   });
 

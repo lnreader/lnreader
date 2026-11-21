@@ -21,7 +21,7 @@ import {
   fetchPage as defaultFetchPage,
 } from '@services/plugin/fetch';
 import { getString as defaultGetString } from '@i18n/translations';
-import { BatchInfo } from '../types';
+import { BatchInfo, CHAPTER_BATCH_SIZE } from '../types';
 
 export interface ChapterLoadResult {
   chapters: ChapterInfo[];
@@ -29,7 +29,7 @@ export interface ChapterLoadResult {
   firstUnreadChapter: ChapterInfo | undefined;
 }
 
-export const CHAPTER_BATCH_SIZE = 1000;
+export { CHAPTER_BATCH_SIZE };
 
 export interface BootstrapSuccessResult extends ChapterLoadResult {
   ok: true;
@@ -120,7 +120,7 @@ export const createBootstrapService = (
         .filter((page): page is string => page !== null);
     }
 
-    return tmpPages.length > 1 ? tmpPages : ['1'];
+    return tmpPages.length > 0 ? tmpPages : ['1'];
   };
 
   const resolveNovel = async (

@@ -3,7 +3,8 @@ import { download, upload } from '@api/remote';
 import { getString } from '@i18n/translations';
 import {
   CACHE_DIR_PATH,
-  clearBackupCache,
+  clearRestoreWorkingFiles,
+  clearRestoreWorkingFilesAfterRestore,
   prepareBackupData,
   restoreData,
 } from '../utils';
@@ -18,8 +19,11 @@ import type {
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
 import {
+  getBackupSectionSource,
   getLegacyFilesRestorePath,
   getNovelFilesRestorePath,
+  extractSectionArchive,
+  removeEmptySectionMarker,
   getSelectedBackupFileSections,
   restoreLegacyFiles,
   restoreNovelFiles,
@@ -59,7 +63,12 @@ export const createSelfHostBackup = async (
   await sleep(200);
 
   for (const section of getSelectedBackupFileSections(options)) {
-    await upload(host, backupFolder, section.archiveName, section.storagePath);
+    await upload(
+      host,
+      backupFolder,
+      section.archiveName,
+      await getBackupSectionSource(section),
+    );
   }
 
   const completionText = getBackupCompletionText(backupResult);
@@ -72,7 +81,7 @@ export const createSelfHostBackup = async (
   }));
 };
 
-export const selfHostRestore = async (
+const restoreFromSelfHost = async (
   { host, backupFolder }: SelfHostData,
   setMeta: TaskProgressUpdater,
 ) => {
@@ -83,7 +92,7 @@ export const selfHostRestore = async (
     progressText: getString('backupScreen.downloadingData'),
   }));
 
-  await clearBackupCache();
+  await clearRestoreWorkingFiles();
   await download(host, backupFolder, ZipBackupName.DATA, CACHE_DIR_PATH);
 
   setMeta(meta => ({
@@ -121,14 +130,14 @@ export const selfHostRestore = async (
     for (const section of getSelectedBackupFileSections(
       restoreResult.manifest.sections,
     )) {
-      await download(
-        host,
-        backupFolder,
-        section.archiveName,
+      const destination =
         section.archiveName === ZipBackupName.NOVEL_FILES
           ? novelFilesRestorePath
-          : section.storagePath,
+          : section.storagePath;
+      await extractSectionArchive(() =>
+        download(host, backupFolder, section.archiveName, destination),
       );
+      await removeEmptySectionMarker(destination);
     }
     if (restoreResult.manifest.sections.downloadedFiles) {
       await restoreNovelFiles(
@@ -150,4 +159,15 @@ export const selfHostRestore = async (
     progressText: completionText,
     completionText,
   }));
+};
+
+export const selfHostRestore = async (
+  data: SelfHostData,
+  setMeta: TaskProgressUpdater,
+) => {
+  try {
+    await restoreFromSelfHost(data, setMeta);
+  } finally {
+    await clearRestoreWorkingFilesAfterRestore();
+  }
 };

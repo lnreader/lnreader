@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
 
-import { useLibrarySettings, useTheme } from '@hooks/persisted';
+import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import {
@@ -195,6 +195,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   style,
 }) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
 
   const layout = useWindowDimensions();
 
@@ -257,6 +258,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
     <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
       <BottomSheetView style={styles.bottomSheetCtn}>
         <TabView
+          animationEnabled={!reduceAppAnimations}
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
           renderTabBar={renderTabBar}

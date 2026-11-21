@@ -15,7 +15,7 @@ const mockGetCategoriesWithCount = jest.fn();
 const mockRefetchLibrary = jest.fn();
 
 jest.mock('@components/Context/LibraryContext', () => ({
-  useLibraryContext: () => ({
+  useLibraryActions: () => ({
     refetchLibrary: mockRefetchLibrary,
   }),
 }));
@@ -35,6 +35,7 @@ jest.mock('@i18n/translations', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTracker: () => ({ tracker: undefined }),
   useTrackedNovel: () => ({ trackedNovel: undefined }),
   useTheme: () =>

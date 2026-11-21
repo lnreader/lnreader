@@ -13,6 +13,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { defaultCover } from '@plugins/helpers/constants';
 import type { ImageRequestInit } from '@plugins/types';
 import type { ThemeColors } from '@theme/types';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 
 interface NovelCoverImageProps
   extends Pick<
@@ -57,6 +58,7 @@ const NovelCoverImage = ({
   testID,
   transition = 150,
 }: NovelCoverImageProps) => {
+  const { reduceAppAnimations = false } = useAppSettings();
   const normalizedUri = uri?.trim();
   const [failedUri, setFailedUri] = useState<string>();
   const showPlaceholder =
@@ -130,7 +132,7 @@ const NovelCoverImage = ({
       source={{ headers: requestInit?.headers, uri: normalizedUri }}
       style={[{ backgroundColor: theme.surfaceVariant }, style]}
       testID={testID}
-      transition={transition}
+      transition={reduceAppAnimations ? 0 : transition}
     />
   );
 };

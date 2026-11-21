@@ -22,6 +22,7 @@ import { Button, TopTabBar } from '@components';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { ThemeColors } from '@theme/types';
 import { useNovelSettings } from '@hooks/persisted/useNovelSettings';
+import { useAppSettings } from '@hooks/persisted';
 import { useNovelValue } from '@screens/novel/NovelContext';
 
 interface ChaptersSettingsSheetProps {
@@ -38,6 +39,7 @@ const ChaptersSettingsSheet = ({
   bottomSheetRef,
   theme,
 }: ChaptersSettingsSheetProps) => {
+  const { reduceAppAnimations = false } = useAppSettings();
   const {
     setChapterSort,
     getChapterFilterState,
@@ -265,6 +267,7 @@ const ChaptersSettingsSheet = ({
       <BottomSheet snapPoints={[290]} bottomSheetRef={bottomSheetRef}>
         <BottomSheetView style={styles.contentContainer}>
           <TabView
+            animationEnabled={!reduceAppAnimations}
             commonOptions={{
               label: renderLabel,
             }}
@@ -281,7 +284,7 @@ const ChaptersSettingsSheet = ({
         <RNModal
           visible={scanlatorsModalVisible}
           transparent={true}
-          animationType="fade"
+          animationType={reduceAppAnimations ? 'none' : 'fade'}
           onRequestClose={() => setScanlatorsModalVisible(false)}
         >
           <View style={styles.modalBackdrop}>

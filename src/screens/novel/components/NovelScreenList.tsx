@@ -1,22 +1,15 @@
 import * as React from 'react';
-import ChapterItem from './ChapterItem';
+import ChapterItem, { CHAPTER_ITEM_HEIGHT } from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import {
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  RefreshControl,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { RefreshControl, useWindowDimensions, View } from 'react-native';
 import {
   runOnJS,
   SharedValue,
   useAnimatedReaction,
-  useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrackSheet from './Tracker/TrackSheet';
@@ -25,7 +18,8 @@ import PageNavigationBottomSheet from './PageNavigationBottomSheet';
 import * as Haptics from 'expo-haptics';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList, LegendListRef } from '@legendapp/list/react-native';
+import type { LegendListRef } from '@legendapp/list/react-native';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
 import PagePaginationControl from './PagePaginationControl';
 import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
@@ -35,6 +29,9 @@ import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
+import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -54,6 +51,9 @@ type NovelScreenListProps = {
 };
 
 const chapterKeyExtractor = (item: ChapterInfo) => 'c' + item.id;
+// Exact sizes let rows mount at their final position after a fast scroll jump
+// instead of being measured and shifted.
+const getChapterItemSize = () => CHAPTER_ITEM_HEIGHT;
 
 const NovelScreenList = ({
   headerOpacity,
@@ -82,6 +82,7 @@ const NovelScreenList = ({
     getNextChapterBatch,
     getChapters,
     openPage,
+    loadUpToBatch,
   } = useNovelActions();
 
   const routeNovel: Omit<NovelInfo, 'id'> & { id: 'NO_ID' } = {
@@ -95,6 +96,7 @@ const NovelScreenList = ({
   const {
     useFabForContinueReading,
     disableHapticFeedback,
+    reduceAppAnimations = false,
     dateFormat = 'default',
     relativeTimestamps = true,
   } = useAppSettings();
@@ -104,23 +106,16 @@ const NovelScreenList = ({
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  const {
-    downloadQueue,
-    downloadingChapterIds,
-    downloadingNovelIds,
-    downloadChapter,
-  } = useDownload();
+  const { downloadingChapterIds, downloadingNovelIds, downloadChapter } =
+    useDownload();
 
   // Reconcile as chapters complete and once more when the queue settles so
   // downloaded state remains accurate after success, failure, or cancellation.
   const isNovelDownloading =
     novel.id !== 'NO_ID' && downloadingNovelIds.has(novel.id);
-  const novelDownloadProgressKey = useMemo(
-    () =>
-      novel.id === 'NO_ID'
-        ? ''
-        : getDownloadProgressKey(downloadQueue, novel.id),
-    [downloadQueue, novel.id],
+  const novelId = novel.id;
+  const novelDownloadProgressKey = useBackgroundTasks(tasks =>
+    novelId === 'NO_ID' ? '' : getDownloadProgressKey(tasks, novelId),
   );
   useDownloadReconciliation(
     isNovelDownloading,
@@ -130,7 +125,8 @@ const NovelScreenList = ({
 
   const [isFabExtended, setIsFabExtended] = useState(true);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const scrollOffset = useSharedValue(0);
+  const fastScrollMetrics = useFastScrollMetrics();
+  const { scrollOffset } = fastScrollMetrics;
   const { height: screenHeight } = useWindowDimensions();
 
   const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
@@ -171,11 +167,22 @@ const NovelScreenList = ({
     [headerOpacity, lastRead, screenHeight, useFabForContinueReading],
   );
 
-  const scrollHandler = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffset.value = event.nativeEvent.contentOffset.y;
-    },
-    [scrollOffset],
+  // --- Fast scroll ---
+
+  const totalChapters = Math.max(
+    batchInformation.totalChapters ?? 0,
+    chapters.length,
+  );
+
+  // Page, sort, filter and scanlator changes replace the chapter list.
+  const chapterSetKey = useMemo(
+    () => JSON.stringify([novel.id, pageIndex, novelSettings]),
+    [novel.id, pageIndex, novelSettings],
+  );
+
+  const loadChaptersUpTo = useCallback(
+    (index: number) => loadUpToBatch(Math.floor(index / CHAPTER_BATCH_SIZE)),
+    [loadUpToBatch],
   );
 
   // --- Stable callbacks ---
@@ -271,8 +278,11 @@ const NovelScreenList = ({
   );
 
   const scrollToTop = useCallback(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [listRef]);
+    listRef.current?.scrollToOffset({
+      offset: 0,
+      animated: !reduceAppAnimations,
+    });
+  }, [listRef, reduceAppAnimations]);
 
   const setCustomNovelCover = useCustomNovelCover(
     novel.id === 'NO_ID' ? undefined : novel,
@@ -421,11 +431,12 @@ const NovelScreenList = ({
 
   return (
     <>
-      <LegendList
+      <AnimatedLegendList
         ref={listRef}
         estimatedItemSize={64}
         data={chapters}
         recycleItems
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={listEmptyComponent}
         renderItem={renderChapter}
         keyExtractor={chapterKeyExtractor}
@@ -434,12 +445,23 @@ const NovelScreenList = ({
         refreshControl={refreshControlElement}
         onEndReached={getNextChapterBatch}
         onEndReachedThreshold={6}
-        onScroll={scrollHandler}
+        getFixedItemSize={getChapterItemSize}
+        {...fastScrollMetrics.listProps}
         //drawDistance={1000}
         ListHeaderComponent={listHeader}
       />
       {novel.id !== 'NO_ID' ? (
         <>
+          <FastScrollbar
+            metrics={fastScrollMetrics}
+            listRef={listRef}
+            itemCount={totalChapters}
+            loadedCount={chapters.length}
+            onRequestItems={loadChaptersUpTo}
+            dataKey={chapterSetKey}
+            topInset={topInset + 56}
+            bottomInset={bottomInset + 16}
+          />
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}
             theme={theme}

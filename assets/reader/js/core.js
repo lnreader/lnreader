@@ -32,6 +32,8 @@ window.reader = new (function () {
   this.batteryLevel = van.state(batteryLevel);
   this.readerSettings = van.state(readerSettings);
   this.generalSettings = van.state(chapterGeneralSettings);
+  this.scrollBehavior = () =>
+    this.generalSettings.val.pageReaderDisableAnimation ? 'auto' : 'smooth';
   /**
    * Bumped whenever the app pushes new adjacent chapters. The chapter is
    * rendered before its neighbours are known, so any UI that depends on them
@@ -544,12 +546,12 @@ window.tts = new (function () {
 
         window.scrollTo({
           top: offsetPosition,
-          behavior: 'smooth',
+          behavior: reader.scrollBehavior(),
         });
       } else {
         // Center scroll (original behavior)
         element.scrollIntoView({
-          behavior: 'smooth',
+          behavior: reader.scrollBehavior(),
           block: 'center',
           inline: 'nearest',
         });
@@ -742,13 +744,17 @@ window.pageReader = pageReader = new (function () {
         reader.refresh();
         window.scrollTo({
           top: reader.chapterHeight * ratio - reader.layoutHeight,
-          behavior: 'smooth',
+          behavior: reader.scrollBehavior(),
         });
       });
     }
   });
 
   van.derive(() => {
+    document.documentElement.classList.toggle(
+      'no-animation',
+      Boolean(reader.generalSettings.val.pageReaderDisableAnimation),
+    );
     document.body.classList.toggle(
       'no-animation',
       Boolean(reader.generalSettings.val.pageReaderDisableAnimation),
@@ -781,6 +787,7 @@ function calculatePages(behavior = 'instant') {
       (reader.chapterHeight * reader.chapter.progress) / 100 -
       reader.layoutHeight;
     window.scrollTo({ top: restoredScrollTop, behavior });
+    window.dispatchEvent(new Event('reader-position-restored'));
   }
 }
 
@@ -933,14 +940,14 @@ window.addEventListener('load', () => {
         if (position === 'top') {
           window.scrollBy({
             top: -reader.layoutHeight * 0.75,
-            behavior: 'smooth',
+            behavior: reader.scrollBehavior(),
           });
           return;
         }
         if (position === 'bottom') {
           window.scrollBy({
             top: reader.layoutHeight * 0.75,
-            behavior: 'smooth',
+            behavior: reader.scrollBehavior(),
           });
           return;
         }
@@ -1047,14 +1054,14 @@ window.addEventListener('load', () => {
             `${
               /\/p>/.test(_)
                 ? _.replace(
-                    /<br>\s*<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?:>| [^>]+>)<br>\s*<br>))\s*/g,
+                    /<br>\s*<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?: [^>]+)?>\s*<br>\s*<br>))\s*/g,
                     '',
                   )
                 : _
             }`,
         ) //if p found, delete all double br near p
         .replace(
-          /<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?:>| [^>]+>)(?:<[^>]+>)*\s*<br>))\s*/g,
+          /<br>(?:(?=\s*<\/?p[> ])|(?<=<\/?p(?: [^>]+)?>\s*(?:<[^>]+>\s*)*<br>))\s*/g,
           '',
         );
     }

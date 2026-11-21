@@ -51,6 +51,14 @@ export interface StringMap {
   'appearanceScreen.languagePickerModal.restartNote': 'string';
   'appearanceScreen.appLanguageDefault': 'string';
   'appearanceScreen.appTheme': 'string';
+  'appearanceScreen.ePaperApplyTitle': 'string';
+  'appearanceScreen.ePaperApplyDescription': 'string';
+  'appearanceScreen.ePaperThemeOnly': 'string';
+  'appearanceScreen.ePaperApply': 'string';
+  'appearanceScreen.ePaperLeaveTitle': 'string';
+  'appearanceScreen.ePaperLeaveDescription': 'string';
+  'appearanceScreen.ePaperKeep': 'string';
+  'appearanceScreen.ePaperRestore': 'string';
   'appearanceScreen.darkTheme': 'string';
   'appearanceScreen.dateFormat': 'string';
   'appearanceScreen.dateFormatDefault': 'string';
@@ -79,6 +87,7 @@ export interface StringMap {
   'appearanceScreen.theme.yotsuba': 'string';
   'appearanceScreen.theme.catppuccin': 'string';
   'appearanceScreen.theme.yinyang': 'string';
+  'appearanceScreen.theme.ePaperDisplay': 'string';
   'backupScreen.automaticBackupFrequency': 'string';
   'backupScreen.automaticBackupDescription': 'string';
   'backupScreen.automaticBackupOff': 'string';
@@ -147,6 +156,7 @@ export interface StringMap {
   'backupScreen.googeDriveDesc': 'string';
   'backupScreen.invalidBackupFolder': 'string';
   'backupScreen.localBackup': 'string';
+  'backupScreen.unsupportedBackupFormat': 'string';
   'backupScreen.noBackupFound': 'string';
   'backupScreen.options.title': 'string';
   'backupScreen.options.description': 'string';
@@ -363,6 +373,8 @@ export interface StringMap {
   'generalSettingsScreen.desc': 'string';
   'generalSettingsScreen.disableLoadingAnimations': 'string';
   'generalSettingsScreen.disableLoadingAnimationsDesc': 'string';
+  'generalSettingsScreen.reduceAppAnimations': 'string';
+  'generalSettingsScreen.reduceAppAnimationsDesc': 'string';
   'generalSettingsScreen.disableHapticFeedback': 'string';
   'generalSettingsScreen.disableHapticFeedbackDescription': 'string';
   'generalSettingsScreen.chapterDownloadCooldown': 'string';
@@ -568,8 +580,8 @@ export interface StringMap {
   'readerScreen.bottomSheet.pageReaderDescription': 'string';
   'readerScreen.bottomSheet.invertVolumeButtons': 'string';
   'readerScreen.bottomSheet.invertVolumeButtonsDescription': 'string';
-  'readerScreen.bottomSheet.disablePageTransitions': 'string';
-  'readerScreen.bottomSheet.disablePageTransitionsDescription': 'string';
+  'readerScreen.bottomSheet.disableReaderAnimations': 'string';
+  'readerScreen.bottomSheet.disableReaderAnimationsDescription': 'string';
   'readerScreen.bottomSheet.removeExtraSpacing': 'string';
   'readerScreen.bottomSheet.removeExtraSpacingDescription': 'string';
   'readerScreen.bottomSheet.scrollAmount': 'string';
@@ -617,6 +629,7 @@ export interface StringMap {
   'readerSettings.backgroundColorModal': 'string';
   'readerSettings.clearCustomCSS': 'string';
   'readerSettings.clearCustomJS': 'string';
+  'readerSettings.confirmRemoveText': 'string';
   'readerSettings.cssHint': 'string';
   'readerSettings.customCSS': 'string';
   'readerSettings.customJS': 'string';
@@ -646,6 +659,8 @@ export interface StringMap {
   'statsScreen.statusDistribution': 'string';
   'statsScreen.title': 'string';
   'statsScreen.readingTime': 'string';
+  'statsScreen.noNovelReadingTime': 'string';
+  'statsScreen.noCategoryReadingTime': 'string';
   'statsScreen.chaptersInLibrary': 'string';
   'statsScreen.customizeGenres': 'string';
   'statsScreen.titlesInLibrary': 'string';
@@ -676,6 +691,7 @@ export interface StringMap {
   'updatesScreen.updatingLibrary': 'string';
   'onboardingScreen.welcome': 'string';
   'onboardingScreen.pickATheme': 'string';
+  'onboardingScreen.ePaperOptimizationsDescription': 'string';
   'onboardingScreen.light': 'string';
   'onboardingScreen.dark': 'string';
   'onboardingScreen.system': 'string';

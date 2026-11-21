@@ -37,9 +37,15 @@ describe('bottom sheet layout', () => {
   it('sorts and clamps snap points without mutating the caller array', () => {
     const snapPoints = [720, 320, 480];
 
-    expect(normalizeBottomSheetSnapPoints(snapPoints, 600)).toEqual([
+    expect(normalizeBottomSheetSnapPoints(snapPoints, 600, 0)).toEqual([
       320, 480, 600,
     ]);
     expect(snapPoints).toEqual([720, 320, 480]);
+  });
+
+  it('extends snap points behind the navigation bar', () => {
+    expect(normalizeBottomSheetSnapPoints([400, 720], 600, 48)).toEqual([
+      448, 648,
+    ]);
   });
 });

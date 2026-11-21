@@ -41,8 +41,9 @@ module.exports = {
     {
       displayName: 'db',
       testEnvironment: 'node',
-      roots: ['<rootDir>/src/database'],
-      testMatch: ['**/__tests__/**/*.test.ts'],
+      // Include shared source dependencies when selecting related tests.
+      roots: ['<rootDir>/src'],
+      testMatch: ['<rootDir>/src/database/**/__tests__/**/*.test.ts'],
       moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
       transform: baseTransform,
       transformIgnorePatterns: baseTransformIgnorePatterns,

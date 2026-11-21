@@ -17,12 +17,28 @@ import {
   switchNovelToLibraryQuery,
 } from '@database/queries/NovelQueries';
 import {
-  BACKGROUND_TASKS_STORE_KEY,
   BackgroundTask,
   getDownloadProgressKey,
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
-import { useMMKVObject } from 'react-native-mmkv';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+
+const getAllDownloadsProgressKey = (tasks: QueuedBackgroundTask[]) =>
+  getDownloadProgressKey(tasks);
+
+const RESTORE_TASK_NAMES: (string | undefined)[] = [
+  'LOCAL_RESTORE',
+  'DRIVE_RESTORE',
+  'SELF_HOST_RESTORE',
+];
+
+const countRestoreTasks = (tasks: QueuedBackgroundTask[]) =>
+  tasks.filter(t =>
+    RESTORE_TASK_NAMES.includes(
+      // Entries persisted before tasks were wrapped in queue metadata.
+      t?.task?.name || (t as unknown as BackgroundTask)?.name,
+    ),
+  ).length;
 
 // type Library = Category & { novels: LibraryNovelInfo[] };
 export type ExtendedCategory = Category & { novelIds: number[] };
@@ -133,11 +149,13 @@ export const useLibrary = (): UseLibraryReturnType => {
         hasErrorRef.current = true;
         setError(loadError);
       }
-    } finally {
-      if (requestId === loadRequestIdRef.current) {
-        hasLoadedRef.current = true;
-        setIsLoading(false);
-      }
+    }
+
+    // Not a `finally`: React Compiler skips any function containing one, which
+    // left this hook's return value (the library context value) unmemoized.
+    if (requestId === loadRequestIdRef.current) {
+      hasLoadedRef.current = true;
+      setIsLoading(false);
     }
   }, [downloadedOnlyMode, filter, refreshCategories, searchText, sortOrder]);
 
@@ -246,13 +264,7 @@ export const useLibrary = (): UseLibraryReturnType => {
     }, [getLibrary]),
   );
 
-  const [taskQueue] = useMMKVObject<(BackgroundTask | QueuedBackgroundTask)[]>(
-    BACKGROUND_TASKS_STORE_KEY,
-  );
-  const downloadProgressKey = useMemo(
-    () => getDownloadProgressKey(taskQueue),
-    [taskQueue],
-  );
+  const downloadProgressKey = useBackgroundTasks(getAllDownloadsProgressKey);
   const previousDownloadProgressKeyRef = useRef(downloadProgressKey);
   const hadDownloadTasksRef = useRef(downloadProgressKey.length > 0);
 
@@ -273,23 +285,7 @@ export const useLibrary = (): UseLibraryReturnType => {
     previousDownloadProgressKeyRef.current = downloadProgressKey;
   }, [downloadProgressKey, getLibrary]);
 
-  const restoreTasksCount = useMemo(
-    () =>
-      taskQueue?.filter(t => {
-        /**
-         * Handle backward compatibility: check for new format first, then old format
-         */
-        const taskName =
-          (t as QueuedBackgroundTask)?.task?.name ||
-          (t as BackgroundTask)?.name;
-        return (
-          taskName === 'LOCAL_RESTORE' ||
-          taskName === 'DRIVE_RESTORE' ||
-          taskName === 'SELF_HOST_RESTORE'
-        );
-      }).length || 0,
-    [taskQueue],
-  );
+  const restoreTasksCount = useBackgroundTasks(countRestoreTasks);
   const prevRestoreTasksCountRef = useRef(restoreTasksCount);
 
   useEffect(() => {

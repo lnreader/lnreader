@@ -48,7 +48,12 @@ const ChapterDrawer = ({ onClose }: ChapterDrawerProps) => {
 
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { defaultChapterSort } = useAppSettings();
+  const {
+    defaultChapterSort,
+    reduceAppAnimations = false,
+    dateFormat = 'default',
+    relativeTimestamps = true,
+  } = useAppSettings();
   const listRef = useRef<LegendListRef | null>(null);
 
   const styles = useMemo(
@@ -167,23 +172,28 @@ const ChapterDrawer = ({ onClose }: ChapterDrawerProps) => {
         theme={theme}
         chapterId={chapter.id}
         onPress={openChapter}
+        dateFormat={dateFormat}
+        relativeTimestamps={relativeTimestamps}
       />
     ),
-    [chapter.id, openChapter, styles, theme],
+    [chapter.id, openChapter, styles, theme, dateFormat, relativeTimestamps],
   );
 
-  const scroll = useCallback((index?: number) => {
-    if (index !== undefined) {
-      listRef.current?.scrollToIndex({
-        index,
-        animated: true,
-      });
-    } else {
-      listRef.current?.scrollToEnd({
-        animated: true,
-      });
-    }
-  }, []);
+  const scroll = useCallback(
+    (index?: number) => {
+      if (index !== undefined) {
+        listRef.current?.scrollToIndex({
+          index,
+          animated: !reduceAppAnimations,
+        });
+      } else {
+        listRef.current?.scrollToEnd({
+          animated: !reduceAppAnimations,
+        });
+      }
+    },
+    [reduceAppAnimations],
+  );
 
   useEffect(() => {
     if (currentScrollIndex === undefined) {

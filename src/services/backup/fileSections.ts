@@ -30,6 +30,57 @@ export const getSelectedBackupFileSections = (
   return sections;
 };
 
+export const EMPTY_SECTION_MARKER = '.lnreader-empty-section';
+
+const containsFile = async (directory: string): Promise<boolean> => {
+  if (!(await NativeFile.exists(directory))) {
+    return false;
+  }
+  for (const item of await NativeFile.readDir(directory)) {
+    if (!item.isDirectory || (await containsFile(item.path))) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// Android 9 and older cannot write (or open) a zip with no entries, so an empty
+// section is archived with one marker file; restore removes the marker again.
+export const getBackupSectionSource = async (
+  section: BackupFileSection,
+): Promise<string> => {
+  if (await containsFile(section.storagePath)) {
+    return section.storagePath;
+  }
+  const stagingPath = `${NativeFile.ExternalCachesDirectoryPath}/BackupEmptySection-${section.archiveName}`;
+  if (await NativeFile.exists(stagingPath)) {
+    await NativeFile.unlink(stagingPath);
+  }
+  await NativeFile.mkdir(stagingPath);
+  await NativeFile.writeFile(`${stagingPath}/${EMPTY_SECTION_MARKER}`, '');
+  return stagingPath;
+};
+
+export const extractSectionArchive = async (
+  extract: () => Promise<unknown>,
+) => {
+  try {
+    await extract();
+  } catch (error: any) {
+    // Android 9 and older refuse to open a zip with no entries.
+    if (error?.message !== 'No entries') {
+      throw error;
+    }
+  }
+};
+
+export const removeEmptySectionMarker = async (destination: string) => {
+  const markerPath = `${destination}/${EMPTY_SECTION_MARKER}`;
+  if (await NativeFile.exists(markerPath)) {
+    await NativeFile.unlink(markerPath);
+  }
+};
+
 export const getNovelFilesRestorePath = (cacheDirPath: string) =>
   `${cacheDirPath}/RestoredNovelFiles`;
 

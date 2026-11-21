@@ -459,7 +459,7 @@ describe('useChapter', () => {
     expect(result.current.chapterText).toBe('SANITIZED:initial body');
   });
 
-  it('injects scripts supporting paged and normal modes when volume buttons are pressed', async () => {
+  it('handles volume and Page Up/Down keys in paged and scrolling modes', async () => {
     const store = createStore();
     mockUseNovelActions.mockReturnValue(store.state);
     const mockInjectJavaScript = jest.fn();
@@ -482,9 +482,17 @@ describe('useChapter', () => {
     const volumeDownCall = (
       NativeVolumeButtonListener.addListener as jest.Mock
     ).mock.calls.find(([event]) => event === 'VolumeDown');
+    const pageUpCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'PageUp');
+    const pageDownCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'PageDown');
 
     expect(volumeUpCall).toBeDefined();
     expect(volumeDownCall).toBeDefined();
+    expect(pageUpCall).toBeDefined();
+    expect(pageDownCall).toBeDefined();
 
     // Trigger VolumeUp callback
     volumeUpCall[1]();
@@ -495,6 +503,15 @@ describe('useChapter', () => {
     );
     expect(mockInjectJavaScript).toHaveBeenCalledWith(
       expect.stringContaining('window.scrollBy'),
+    );
+
+    pageUpCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenLastCalledWith(
+      expect.stringContaining('window.scrollBy({top: -100,'),
+    );
+    pageDownCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenLastCalledWith(
+      expect.stringContaining('window.scrollBy({top: 100,'),
     );
 
     // Trigger VolumeDown callback
@@ -542,9 +559,17 @@ describe('useChapter', () => {
     const volumeDownCall = (
       NativeVolumeButtonListener.addListener as jest.Mock
     ).mock.calls.find(([event]) => event === 'VolumeDown');
+    const pageUpCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'PageUp');
+    const pageDownCall = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'PageDown');
 
     expect(volumeUpCall).toBeDefined();
     expect(volumeDownCall).toBeDefined();
+    expect(pageUpCall).toBeDefined();
+    expect(pageDownCall).toBeDefined();
 
     // VolumeUp callback should move +1 (forward) when inverted
     volumeUpCall[1]();
@@ -559,6 +584,19 @@ describe('useChapter', () => {
     expect(mockInjectJavaScript).toHaveBeenCalledWith(
       expect.stringContaining(
         'window.pageReader.movePage((window.pageReader.page?.val ?? 0) - 1)',
+      ),
+    );
+
+    pageUpCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenLastCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) - 1)',
+      ),
+    );
+    pageDownCall[1]();
+    expect(mockInjectJavaScript).toHaveBeenLastCalledWith(
+      expect.stringContaining(
+        'window.pageReader.movePage((window.pageReader.page?.val ?? 0) + 1)',
       ),
     );
   });

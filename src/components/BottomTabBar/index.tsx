@@ -5,6 +5,7 @@ import { Text } from 'react-native-paper';
 import { ThemeColors } from '@theme/types';
 import Animated from 'react-native-reanimated';
 import Color from 'color';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 
 interface CustomBottomTabBarProps extends BottomTabBarProps {
   theme: ThemeColors;
@@ -27,6 +28,7 @@ function CustomBottomTabBar({
   showLabelsInNav,
   renderIcon,
 }: CustomBottomTabBarProps) {
+  const { reduceAppAnimations = false } = useAppSettings();
   const transparentBg = Color(theme.primaryContainer).fade(1).rgb().toString();
   const getLabelText = useCallback(
     (route: any) => {
@@ -108,7 +110,7 @@ function CustomBottomTabBar({
                   styles.indicator,
                   {
                     transitionProperty: ['transform', 'backgroundColor'],
-                    transitionDuration: 250,
+                    transitionDuration: reduceAppAnimations ? 0 : 250,
                     transitionTimingFunction: 'ease-in-out',
                     transform: [{ scaleX: isFocused ? 1 : 0.5 }],
                     backgroundColor: isFocused

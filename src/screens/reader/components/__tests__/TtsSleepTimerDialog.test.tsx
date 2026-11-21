@@ -35,6 +35,7 @@ jest.mock('@hooks/persisted/useTheme', () => {
 });
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTheme: () => ({
     error: '#ba1a1a',
     onPrimaryContainer: '#21005d',
