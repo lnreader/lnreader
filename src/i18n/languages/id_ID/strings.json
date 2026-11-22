@@ -54,6 +54,14 @@
     },
     "appLanguageDefault": "Bawaan",
     "appTheme": "Tema aplikasi",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "Tema Gelap",
     "dateFormat": "Format tanggal",
     "dateFormatDefault": "Bawaan (%{date})",
@@ -82,7 +90,8 @@
       "turquoise": "Turquoise",
       "yotsuba": "Yotsuba",
       "catppuccin": "Catppuccin",
-      "yinyang": "Yin & Yang"
+      "yinyang": "Yin & Yang",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +104,8 @@
     "automaticBackupEvery2Days": "Setiap 2 hari",
     "automaticBackupWeekly": "Mingguan",
     "automaticBackupLocation": "Lokasi pencadangan otomatis",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Pencadangan otomatis terakhir: %{time}",
     "backupName": "Nama cadangan",
     "backupCreated": "Cadangan berhasil dibuat",
@@ -170,6 +181,7 @@
     "googeDriveDesc": "Cadangkan ke Google Drive Anda",
     "invalidBackupFolder": "Folder cadangan tidak valid",
     "localBackup": "Cadangan Lokal",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "Tidak ada cadangan ditemukan",
     "options": {
       "title": "Konten cadangan",
@@ -420,6 +432,8 @@
     "desc": "(Menurun)",
     "disableLoadingAnimations": "Nonaktifkan animasi pemuatan",
     "disableLoadingAnimationsDesc": "Dapat meningkatkan performa pada perangkat yang lebih lambat",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "Nonaktifkan umpan balik haptic",
     "disableHapticFeedbackDescription": "Matikan getaran untuk interaksi sentuh.",
     "chapterDownloadCooldown": "Jeda unduhan bab",
@@ -553,6 +567,9 @@
       }
     },
     "chapterChapnum": "Bab %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "bab",
     "continueReading": "Lanjutkan membaca",
     "exportEpubModal": {
@@ -670,8 +687,8 @@
       "pageReaderDescription": "Bagi bab menjadi beberapa halaman, bukan menggulir. Eksperimental — dapat merusak format pada beberapa novel",
       "invertVolumeButtons": "Balikkan tombol volume",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
-      "disablePageTransitions": "Nonaktifkan animasi transisi halaman",
-      "disablePageTransitionsDescription": "Balik halaman secara instan tanpa animasi geser",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "Hapus jarak ekstra",
       "removeExtraSpacingDescription": "Sembunyikan baris kosong tambahan di antara paragraf",
       "scrollAmount": "Banyak gulung (tinggi layar secara bawaan)",
@@ -704,7 +721,20 @@
     "noNextChapter": "Tidak ada bab berikutnya",
     "noPreviousChapter": "Tidak ada bab sebelumnya",
     "searchMinLength": "Masukkan setidaknya %{count} karakter untuk mencari",
-    "searchPlaceholder": "Cari bab"
+    "searchPlaceholder": "Cari bab",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Chapters",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "chapterCount": "Number of chapters",
+      "start": "Start timer",
+      "cancelTimer": "Cancel timer",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Enter between 1 and 999 chapters.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "Interval gulir (detik)",
@@ -713,6 +743,7 @@
     "backgroundColorModal": "Warna latar belakang",
     "clearCustomCSS": "Reset CSS kustom Anda?",
     "clearCustomJS": "Reset JS kustom Anda?",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "Targetkan sumber tertentu dengan #sourceId-[SOURCEID] pada selector Anda",
     "customCSS": "Kostumisasi CSS",
     "customJS": "JS Khusus",
@@ -784,6 +815,7 @@
   "onboardingScreen": {
     "welcome": "Selamat datang",
     "pickATheme": "Pilih tema",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "Terang",
     "dark": "Gelap",
     "system": "Sistem",
@@ -801,6 +833,7 @@
     "LOCAL_RESTORE": "Pemulihan Lokal",
     "MIGRATE_NOVEL": "Migrasi Novel",
     "DOWNLOAD_CHAPTER": "Mengunduh Bab",
+    "chapterDownloadFailed": "Chapter download failed for %{novelName}",
     "taskQueued": "%{task} dalam antrean",
     "taskCompleted": "Selesai",
     "taskFailed": "Gagal: %{error}"
@@ -909,5 +942,31 @@
     "normalizationValuePlaceholder": "mis. Sci-Fi",
     "noCategories": "Belum ada grup genre",
     "noNormalization": "Tidak ada aturan normalisasi yang dikonfigurasi"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }
