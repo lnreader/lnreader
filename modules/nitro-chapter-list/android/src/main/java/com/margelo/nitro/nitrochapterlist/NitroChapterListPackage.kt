@@ -16,7 +16,7 @@ class NitroChapterListPackage : BaseReactPackage() {
     ReactModuleInfoProvider { HashMap() }
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =
-    listOf(ChapterListViewManager())
+    listOf(ChapterListViewManager(), GroupedChapterListViewManager())
 
   companion object {
     init {

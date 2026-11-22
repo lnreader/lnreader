@@ -15,6 +15,7 @@ jest.mock('@modules/nitro-chapter-list', () => {
       updateRows: jest.fn(),
       setSelected: jest.fn(),
       setDownloading: jest.fn(),
+      setHighlighted: jest.fn(),
     };
   });
 
@@ -29,6 +30,12 @@ jest.mock('@modules/nitro-chapter-list', () => {
   return {
     __esModule: true,
     createChapterListStore,
+    createGroupedChapterListStore: jest.fn(() => ({
+      id: 'mock-grouped-chapter-list',
+      setRows: jest.fn(),
+    })),
+    GroupedChapterListViewNativeComponent: props =>
+      React.createElement(View, { ...props, testID: 'grouped-chapter-list' }),
     ChapterListViewNativeComponent,
     ChapterListViewCommands: {
       scrollToIndex: jest.fn(),

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Appbar as MaterialAppbar } from 'react-native-paper';
 
@@ -15,18 +14,20 @@ import { useTheme } from '@hooks/persisted';
 
 import RemoveDownloadsDialog from './components/RemoveDownloadsDialog';
 import UpdatesSkeletonLoading from '@screens/updates/components/UpdatesSkeletonLoading';
-import DownloadedNovelChapterGroup from './components/DownloadedNovelChapterGroup';
+import GroupedChapterList, {
+  type ChapterGroup,
+  toggleChapterGroup,
+} from '@components/GroupedChapterList/GroupedChapterList';
 import { getString } from '@i18n/translations';
 import { DownloadsScreenProps } from '@navigators/types';
 import { DownloadedChapter } from '@database/types';
 import { showToast } from '@utils/showToast';
-import { parseChapterNumber } from '@utils/parseChapterNumber';
 
 type DownloadGroup = Record<number, DownloadedChapter[]>;
 
 const groupChaptersByNovel = (
   chapters: DownloadedChapter[],
-): DownloadedChapter[][] => {
+): ChapterGroup[] => {
   const novelGroups = chapters.reduce((groups, chapter) => {
     if (!groups[chapter.novelId]) {
       groups[chapter.novelId] = [];
@@ -36,7 +37,25 @@ const groupChaptersByNovel = (
     return groups;
   }, {} as DownloadGroup);
 
-  return Object.values(novelGroups);
+  return Object.values(novelGroups).flatMap(group => {
+    const chapter = group[0];
+    return chapter
+      ? [
+          {
+            key: String(chapter.novelId),
+            novel: {
+              id: chapter.novelId,
+              pluginId: chapter.pluginId,
+              name: chapter.novelName,
+              path: chapter.novelPath,
+              cover: chapter.novelCover,
+            },
+            count: group.length,
+            chapters: group,
+          },
+        ]
+      : [];
+  });
 };
 
 const Downloads = ({ navigation }: DownloadsScreenProps) => {
@@ -51,19 +70,34 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
 
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const sections = useMemo(
+    () => [{ key: 'downloads', groups: groupChaptersByNovel(chapters) }],
+    [chapters],
+  );
   const getChapters = useCallback(async () => {
-    const res = await getDownloadedChapters();
-    setChapters(
-      res.map(download => {
-        return {
-          ...download,
-          chapterNumber: download.chapterNumber
-            ? download.chapterNumber
-            : parseChapterNumber(download.novelName, download.name),
-        };
-      }),
-    );
+    setChapters(await getDownloadedChapters());
   }, []);
+
+  const onDeleteChapter = useCallback(
+    async (chapter: DownloadedChapter) => {
+      try {
+        await deleteChapter(chapter.pluginId, chapter.novelId, chapter.id);
+        showToast(`${getString('common.delete')} ${chapter.name}`);
+      } catch (error) {
+        showToast(
+          error instanceof Error
+            ? error.message
+            : getString('novelScreen.deleteChapterError'),
+        );
+      } finally {
+        await getChapters();
+      }
+    },
+    [getChapters],
+  );
 
   useEffect(() => {
     const timer = setTimeout(
@@ -97,29 +131,16 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
       {loading ? (
         <UpdatesSkeletonLoading theme={theme} />
       ) : (
-        <FlatList
-          contentContainerStyle={styles.flatList}
-          data={groupChaptersByNovel(chapters)}
-          keyExtractor={item => `downloadGroup-${item[0]?.novelId}`}
-          renderItem={({ item }) => {
-            return (
-              <DownloadedNovelChapterGroup
-                chapters={item}
-                chapterCountLabel={getString('downloadScreen.downloadsLower')}
-                onDeleteChapter={chapter => {
-                  deleteChapter(
-                    chapter.pluginId,
-                    chapter.novelId,
-                    chapter.id,
-                  ).then(() => {
-                    showToast(`${getString('common.delete')} ${chapter.name}`);
-                    getChapters();
-                  });
-                }}
-              />
-            );
-          }}
-          ListEmptyComponent={
+        <GroupedChapterList
+          sections={sections}
+          theme={theme}
+          expanded={expanded}
+          onToggleGroup={key =>
+            setExpanded(previous => toggleChapterGroup(previous, key))
+          }
+          countLabel={getString('downloadScreen.downloadsLower')}
+          onDeleteChapter={onDeleteChapter}
+          empty={
             <EmptyView
               icon="(˘･_･˘)"
               description={getString('downloadScreen.noDownloads')}
@@ -134,6 +155,7 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
           try {
             await deleteDownloads(chapters);
             setChapters([]);
+            setExpanded(new Set());
           } catch (error) {
             showToast(
               error instanceof Error
@@ -151,8 +173,3 @@ const Downloads = ({ navigation }: DownloadsScreenProps) => {
 };
 
 export default Downloads;
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  flatList: { flexGrow: 1, paddingVertical: 8 },
-});

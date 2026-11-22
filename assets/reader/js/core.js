@@ -40,6 +40,11 @@ window.reader = new (function () {
    * has to read this state to re-render when they arrive.
    */
   this.adjacentVersion = van.state(0);
+  /**
+   * Bumped whenever a new chapter is swapped into the loaded page, for UI that
+   * renders per-chapter text (e.g. the "finished" line).
+   */
+  this.chapterVersion = van.state(0);
 
   this.chapterElement = document.querySelector('#LNReader-chapter');
   this.selection = window.getSelection();
@@ -149,6 +154,9 @@ window.reader = new (function () {
           ((window.scrollY + this.layoutHeight) / this.chapterHeight) * 100,
           10,
         ),
+        // The page outlives a chapter, so the app has to be able to tell a
+        // late save of the previous chapter apart from one of the current.
+        chapterId: this.chapter.id,
       });
     }
   };
@@ -583,6 +591,7 @@ window.pageReader = pageReader = new (function () {
   this.totalPages = van.state(0);
   this.ignoreClickUntil = 0;
   this.chapterNavigationPending = false;
+  this.navigationTimer = undefined;
   this.chapterEndingVisible = van.state(
     config.nextChapterScreenVisible === true,
   );
@@ -641,7 +650,8 @@ window.pageReader = pageReader = new (function () {
         reader.prevChapter.name;
       this.showChapterEnding(true, noAnim, true);
       this.chapterNavigationPending = true;
-      setTimeout(
+      clearTimeout(this.navigationTimer);
+      this.navigationTimer = setTimeout(
         () => {
           reader.post({ type: 'prev' });
         },
@@ -655,7 +665,8 @@ window.pageReader = pageReader = new (function () {
         reader.nextChapter.name;
       this.showChapterEnding(true, noAnim);
       this.chapterNavigationPending = true;
-      setTimeout(
+      clearTimeout(this.navigationTimer);
+      this.navigationTimer = setTimeout(
         () => {
           reader.post({ type: 'next' });
         },
@@ -677,6 +688,7 @@ window.pageReader = pageReader = new (function () {
       reader.post({
         type: 'save',
         data: newProgress,
+        chapterId: reader.chapter.id,
       });
     }
   };
@@ -717,6 +729,27 @@ window.pageReader = pageReader = new (function () {
       ),
     );
     this.movePage(destination, { interaction: false, save: false });
+  };
+
+  /** Puts the page reader in the state a freshly loaded chapter starts in. */
+  this.resetForChapter = (chapterName, nextChapterScreenVisible) => {
+    clearTimeout(this.navigationTimer);
+    this.navigationTimer = undefined;
+    this.chapterNavigationPending = false;
+    this.page.val = 0;
+    reader.chapterElement.style.removeProperty('transform');
+    reader.chapterElement.style.removeProperty('transition');
+    this.chapterEnding ??=
+      document.getElementsByClassName('transition-chapter')[0];
+    if (!this.chapterEnding) {
+      this.chapterEndingVisible.val = false;
+      return;
+    }
+    this.chapterEnding.innerText = chapterName;
+    this.chapterEnding.style.display = reader.generalSettings.val.pageReader
+      ? ''
+      : 'none';
+    this.showChapterEnding(nextChapterScreenVisible, true);
   };
 
   van.derive(() => {
@@ -767,15 +800,15 @@ window.pageReader = pageReader = new (function () {
   });
 })();
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (pageReader.chapterEndingVisible.val) {
-    pageReader.showChapterEnding(true, true);
-  }
-});
-
 /** Scroll offset the reading position was restored to, in scroll mode. */
 let restoredScrollTop = null;
 let positionRestored = false;
+/**
+ * Incremented for every chapter shown in this page. Deferred work captures it
+ * and bails out once a newer chapter has been swapped in, so it can never act
+ * on (or save progress for) the wrong chapter.
+ */
+let chapterGeneration = 0;
 
 function calculatePages(behavior = 'instant') {
   reader.refresh();
@@ -791,8 +824,9 @@ function calculatePages(behavior = 'instant') {
   }
 }
 
-let pageCalculationFrame;
-let pendingPageRatio;
+// `var`: the reader's settings derive calls this before these lines have run.
+var pageCalculationFrame;
+var pendingPageRatio;
 function schedulePageCalculation(ratio) {
   if (Number.isFinite(ratio)) {
     pendingPageRatio = ratio;
@@ -818,9 +852,21 @@ const ro = new ResizeObserver(() => {
   }
 });
 ro.observe(reader.chapterElement);
+let imageLoadFrame;
 reader.chapterElement.addEventListener(
   'load',
-  () => schedulePageCalculation(),
+  () => {
+    schedulePageCalculation();
+    // A swapped-in chapter gets no window `load` event, so its images have to
+    // correct the restored position themselves.
+    if (imageLoadFrame || document.readyState !== 'complete') {
+      return;
+    }
+    imageLoadFrame = requestAnimationFrame(() => {
+      imageLoadFrame = undefined;
+      correctReadingPosition();
+    });
+  },
   true,
 );
 
@@ -858,8 +904,12 @@ const correctReadingPosition = () => {
 };
 
 const restoreReadingPosition = () => {
+  const generation = chapterGeneration;
   requestAnimationFrame(() =>
     setTimeout(() => {
+      if (generation !== chapterGeneration) {
+        return;
+      }
       positionRestored = true;
       calculatePages();
       // Deliberately not awaited before restoring: `document.fonts.ready` does
@@ -870,15 +920,106 @@ const restoreReadingPosition = () => {
   );
 };
 
-// Restore as soon as the chapter itself is parsed and styled. Waiting for
-// `load` means waiting for every image in the chapter, which can take seconds -
-// the reader would sit at the top of the chapter until then.
+function cancelPendingLayoutWork() {
+  cancelAnimationFrame(pageCalculationFrame);
+  pageCalculationFrame = undefined;
+  pendingPageRatio = undefined;
+  cancelAnimationFrame(imageLoadFrame);
+  imageLoadFrame = undefined;
+}
+
+/**
+ * The per-chapter part of starting the reader. A fresh document runs it once
+ * its markup is parsed; `reader.setChapter` runs it after swapping new markup
+ * into the already loaded page.
+ */
+function showChapter(
+  { chapter, novel, html, strings, nextChapterScreenVisible },
+  { initial = false } = {},
+) {
+  const generation = ++chapterGeneration;
+  cancelPendingLayoutWork();
+  restoredScrollTop = null;
+  positionRestored = false;
+
+  if (!initial) {
+    // Reset everything that points into the outgoing chapter's markup before
+    // it is replaced.
+    window.tts?.reset();
+    window.readerSearch?.reset?.();
+    window.textRemover?.reset?.();
+
+    reader.chapter = chapter;
+    reader.novel = novel;
+    reader.strings = { ...strings };
+    reader.nextChapter = undefined;
+    reader.prevChapter = undefined;
+    reader.chapterEndingVisible.val = false;
+    reader.rawHTML = html;
+    textOptions.render(html);
+    if (typeof window.lnApplyCustomJS === 'function') {
+      try {
+        window.lnApplyCustomJS();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  pageReader.resetForChapter(chapter.name, nextChapterScreenVisible === true);
+
+  if (initial) {
+    // Restore as soon as the chapter itself is parsed and styled. Waiting for
+    // `load` means waiting for every image in the chapter, which can take
+    // seconds - the reader would sit at the top of the chapter until then.
+    restoreReadingPosition();
+    return;
+  }
+
+  reader.chapterVersion.val++;
+  document.dispatchEvent(
+    new CustomEvent('ln:chapter-change', { detail: { chapter, novel } }),
+  );
+  // Measuring forces a synchronous layout, so the position is restored before
+  // the new markup is ever painted at the previous chapter's scroll offset.
+  positionRestored = true;
+  calculatePages();
+  document.fonts.ready.then(correctReadingPosition);
+  requestAnimationFrame(() => {
+    if (generation === chapterGeneration) {
+      reader.post({ type: 'chapter-shown', chapterId: chapter.id });
+    }
+  });
+}
+
+/** Swaps the next chapter into the loaded page instead of reloading it. */
+reader.setChapter = payload => {
+  try {
+    showChapter(payload);
+  } catch (e) {
+    reader.post({
+      type: 'chapter-swap-failed',
+      chapterId: payload?.chapter?.id,
+      error: String(e?.message ?? e),
+    });
+  }
+};
+
+const showInitialChapter = () =>
+  showChapter(
+    {
+      chapter: reader.chapter,
+      nextChapterScreenVisible: pageReader.chapterEndingVisible.val,
+    },
+    { initial: true },
+  );
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', restoreReadingPosition, {
+  document.addEventListener('DOMContentLoaded', showInitialChapter, {
     once: true,
   });
 } else {
-  restoreReadingPosition();
+  showInitialChapter();
 }
 
 window.addEventListener('load', () => {
@@ -1031,17 +1172,17 @@ window.addEventListener('load', () => {
 })();
 
 // text options
-(function () {
+var textOptions = (function () {
   // What the chapter element currently holds. The document is delivered with
   // the untransformed chapter already parsed, so writing the same markup back
   // would re-parse and re-layout the whole chapter (and restart image loads)
   // for nothing - which is exactly what happens when neither transform is on.
   let appliedHTML = reader.rawHTML;
 
-  van.derive(() => {
-    let html = reader.rawHTML;
+  const transform = rawHTML => {
+    let html = rawHTML;
     if (reader.generalSettings.val.bionicReading) {
-      html = textVide.textVide(reader.rawHTML);
+      html = textVide.textVide(rawHTML);
     }
 
     if (reader.generalSettings.val.removeExtraParagraphSpacing) {
@@ -1065,6 +1206,11 @@ window.addEventListener('load', () => {
           '',
         );
     }
+    return html;
+  };
+
+  van.derive(() => {
+    const html = transform(reader.rawHTML);
     if (html === appliedHTML) {
       return;
     }
@@ -1081,4 +1227,13 @@ window.addEventListener('load', () => {
       window.readerSearch.search(searchQuery, searchIndex);
     }
   });
+
+  return {
+    /** Renders a newly swapped-in chapter with the current text options. */
+    render: rawHTML => {
+      const html = transform(rawHTML);
+      reader.chapterElement.innerHTML = html;
+      appliedHTML = html;
+    },
+  };
 })();

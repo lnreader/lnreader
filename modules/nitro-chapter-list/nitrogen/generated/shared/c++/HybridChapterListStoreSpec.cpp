@@ -20,6 +20,7 @@ namespace margelo::nitro::nitrochapterlist {
       prototype.registerHybridMethod("updateRows", &HybridChapterListStoreSpec::updateRows);
       prototype.registerHybridMethod("setSelected", &HybridChapterListStoreSpec::setSelected);
       prototype.registerHybridMethod("setDownloading", &HybridChapterListStoreSpec::setDownloading);
+      prototype.registerHybridMethod("setHighlighted", &HybridChapterListStoreSpec::setHighlighted);
     });
   }
 

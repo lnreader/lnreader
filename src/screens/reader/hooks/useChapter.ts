@@ -25,6 +25,7 @@ import {
   useState,
 } from 'react';
 import { sanitizeChapterText } from '../utils/sanitizeChapterText';
+import { markChapterRequest } from '../utils/readerShell';
 import { parseChapterNumber } from '@utils/parseChapterNumber';
 import WebView from 'react-native-webview';
 import { useFullscreenMode } from '@hooks';
@@ -350,6 +351,7 @@ export default function useChapter(
       const loadId = ++loadIdRef.current;
       const isStale = () => loadId !== loadIdRef.current;
       const requested = navChapter ?? chapterRef.current;
+      markChapterRequest();
 
       try {
         // Start the text load first: it is the only thing needed to paint.

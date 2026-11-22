@@ -68,6 +68,12 @@ class ChapterRowFormatter(
     return parts.toString()
   }
 
+  /** The release date alone (the reader drawer's subtitle): formatted, the raw text, or ''. */
+  fun releaseLabel(row: ChapterRow): String {
+    val releaseTime = row.releaseTime
+    return if (releaseTime != null) releaseDate(releaseTime.toLong()) else row.releaseText
+  }
+
   private fun append(part: String) {
     if (parts.isNotEmpty()) parts.append(SEPARATOR)
     parts.append(part)

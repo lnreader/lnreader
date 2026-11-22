@@ -19,7 +19,8 @@ import color from 'color';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
-import { getPlugin } from '@plugins/pluginManager';
+import { INSTALLED_PLUGINS_KEY, getPlugin } from '@plugins/pluginManager';
+import type { Plugin, PluginItem } from '@plugins/types';
 import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';
 import {
   CHAPTER_GENERAL_SETTINGS,
@@ -47,6 +48,17 @@ import {
 import { buildTtsQueueFromHtml } from '../utils/ttsQueue';
 import { applyTextModifications } from '@utils/customCode';
 import TtsSleepTimerDialog from './TtsSleepTimerDialog';
+import {
+  ChapterPayload,
+  ReaderShellKey,
+  buildChapterPayload,
+  buildSetChapterScript,
+  buildShellKey,
+  isSameShellKey,
+  measureChapterShown,
+  serializeForScript,
+  shouldReloadShell,
+} from '../utils/readerShell';
 
 export type WebViewPostEvent = {
   type: string;
@@ -54,6 +66,7 @@ export type WebViewPostEvent = {
   autoStartTTS?: boolean;
   index?: number;
   total?: number;
+  chapterId?: number;
 };
 
 type WebViewReaderProps = {
@@ -134,6 +147,40 @@ const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'
   : 'file:///android_asset';
 
+/** How long a chapter swap may take before the page is reloaded instead. */
+export const CHAPTER_SWAP_TIMEOUT_MS = 5000;
+
+const readReaderSettings = (): ChapterReaderSettings => ({
+  ...initialChapterReaderSettings,
+  ...getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS),
+});
+
+const readGeneralSettings = (): ChapterGeneralSettings => ({
+  ...initialChapterGeneralSettings,
+  ...getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS),
+});
+
+const hasPluginCustomJS = (pluginId?: string) =>
+  !!pluginId &&
+  !!getMMKVObject<PluginItem[]>(INSTALLED_PLUGINS_KEY)?.find(
+    item => item.id === pluginId,
+  )?.customJS;
+
+/** What the loaded reader page was built from. */
+type ReaderShell = {
+  key: ReaderShellKey;
+  /** The chapter the page was loaded with; later ones are swapped in. */
+  payload: ChapterPayload;
+  plugin?: Plugin;
+  theme: ReturnType<typeof useTheme>;
+  readerDir: 'ltr' | 'rtl';
+  customJS: string;
+  customCSS: string;
+  readerSettings: ChapterReaderSettings;
+  generalSettings: ChapterGeneralSettings;
+  batteryLevel: number;
+};
+
 const WebViewReader: React.FC<WebViewReaderProps> = ({
   onPress,
   onTouchStart,
@@ -154,28 +201,21 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     refetch,
   } = useChapterContext();
   const theme = useTheme();
-  const initialReaderSettings = useMemo(
-    () => ({
-      ...initialChapterReaderSettings,
-      ...getMMKVObject<ChapterReaderSettings>(CHAPTER_READER_SETTINGS),
-    }), // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
-  );
-
-  const chapterGeneralSettings = useMemo(
-    () => ({
-      ...initialChapterGeneralSettings,
-      ...getMMKVObject<ChapterGeneralSettings>(CHAPTER_GENERAL_SETTINGS),
-    }),
-    // needed to preserve settings during chapter change
+  // Custom code snippets apply from the next chapter on, like before chapters
+  // were swapped into the loaded page.
+  const chapterReaderSettings = useMemo(
+    () => readReaderSettings(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapter.id],
   );
 
-  const [batteryLevel] = useState(lastKnownBatteryLevel);
   const plugin = getPlugin(novel?.pluginId);
-  const pluginCustomJS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.js`;
-  const pluginCustomCSS = `file://${PLUGIN_STORAGE}/${plugin?.id}/custom.css`;
+  const pluginCustomJS = useMemo(
+    () => hasPluginCustomJS(plugin?.id),
+    // Re-checked per chapter, as a plugin update can add or drop its script.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [plugin?.id, chapter.id],
+  );
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
   const ttsChapterTransitionRef = useRef(false);
@@ -219,7 +259,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
 
   const [sleepTimerDialogVisible, setSleepTimerDialogVisible] = useState(false);
 
-  const { customJS, customCSS } = useCustomCode(initialReaderSettings);
+  const { customJS, customCSS } = useCustomCode(chapterReaderSettings);
 
   const {
     html: processedHtml,
@@ -456,23 +496,165 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const isRTL = plugin?.lang === 'Arabic' || plugin?.lang === 'Hebrew';
   const readerDir = isRTL ? 'rtl' : 'ltr';
 
+  const shellKey = useMemo(
+    () =>
+      buildShellKey({
+        plugin,
+        isDownloaded: chapter.isDownloaded,
+        pluginCustomJS,
+        readerDir,
+        theme,
+        customJS,
+        customCSS,
+      }),
+    [
+      chapter.isDownloaded,
+      customCSS,
+      customJS,
+      plugin,
+      pluginCustomJS,
+      readerDir,
+      theme,
+    ],
+  );
+
+  const createShell = (payload: ChapterPayload): ReaderShell => ({
+    key: shellKey,
+    payload,
+    plugin,
+    theme,
+    readerDir,
+    customJS,
+    customCSS,
+    readerSettings: readReaderSettings(),
+    generalSettings: readGeneralSettings(),
+    batteryLevel: lastKnownBatteryLevel,
+  });
+
+  const [shell, setShell] = useState(() =>
+    createShell(
+      buildChapterPayload({
+        chapter,
+        novel,
+        html: processedHtml,
+        nextChapterScreenVisible: false,
+      }),
+    ),
+  );
+  /** Set once the page has loaded; injected scripts are dropped before that. */
+  const shellReadyRef = useRef(false);
+  const displayedChapterRef = useRef({
+    chapterId: chapter.id,
+    html: processedHtml,
+  });
+  const pendingSwapRef = useRef<{
+    chapterId: number;
+    timeout: ReturnType<typeof setTimeout>;
+  } | null>(null);
+  /** Bumped when a swap fails, to reload the page with the chapter instead. */
+  const [failedSwaps, setFailedSwaps] = useState(0);
+  const handledFailedSwapsRef = useRef(0);
+
+  const clearPendingSwap = useCallback(() => {
+    if (pendingSwapRef.current) {
+      clearTimeout(pendingSwapRef.current.timeout);
+      pendingSwapRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearPendingSwap, [clearPendingSwap]);
+
   /**
-   * Serialising the whole chapter is expensive, so the document is built once
-   * per chapter. Handing the WebView a different `source` also reloads the
-   * page, so nothing that changes while a chapter is on screen may be part of
-   * it – those updates go through `injectJavaScript` instead.
+   * Shows a new chapter by swapping it into the loaded page, and only loads a
+   * new page when something the page was built from has changed, or the swap
+   * did not work out.
+   */
+  useEffect(() => {
+    const displayed = displayedChapterRef.current;
+    const chapterChanged =
+      displayed.chapterId !== chapter.id || displayed.html !== processedHtml;
+    const swapFailed = failedSwaps !== handledFailedSwapsRef.current;
+    handledFailedSwapsRef.current = failedSwaps;
+
+    let reload: boolean;
+    if (swapFailed) {
+      reload = true;
+    } else if (chapterChanged) {
+      reload = shouldReloadShell(shell.key, shellKey, {
+        shellReady: shellReadyRef.current,
+      });
+    } else {
+      reload = !isSameShellKey(shell.key, shellKey);
+    }
+    if (!chapterChanged && !reload) {
+      return;
+    }
+
+    const payload = buildChapterPayload({
+      chapter,
+      novel,
+      html: processedHtml,
+      nextChapterScreenVisible: nextChapterScreenVisible.current,
+    });
+    displayedChapterRef.current = {
+      chapterId: chapter.id,
+      html: processedHtml,
+    };
+    clearPendingSwap();
+
+    if (reload) {
+      shellReadyRef.current = false;
+      setShell(createShell(payload));
+      return;
+    }
+
+    const chapterId = chapter.id;
+    pendingSwapRef.current = {
+      chapterId,
+      timeout: setTimeout(() => {
+        if (pendingSwapRef.current?.chapterId === chapterId) {
+          pendingSwapRef.current = null;
+          setFailedSwaps(count => count + 1);
+        }
+      }, CHAPTER_SWAP_TIMEOUT_MS),
+    };
+    webViewRef.current?.injectJavaScript(buildSetChapterScript(payload));
+    // `createShell` only reads values that are dependencies already.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    chapter,
+    clearPendingSwap,
+    failedSwaps,
+    novel,
+    processedHtml,
+    shell.key,
+    shellKey,
+    webViewRef,
+  ]);
+
+  /**
+   * Builds the reader page. Handing the WebView a different `source` reloads
+   * the page, so this depends on the shell alone: chapters are swapped in with
+   * `reader.setChapter`, and settings pushed with `injectJavaScript`.
    */
   const source = useMemo(() => {
-    // eslint-disable-next-line react-hooks/refs
-    const isNextChapterScreenVisible = nextChapterScreenVisible.current;
+    const {
+      payload,
+      plugin: shellPlugin,
+      theme: shellTheme,
+      readerSettings: initialReaderSettings,
+      generalSettings: chapterGeneralSettings,
+    } = shell;
+    const isNextChapterScreenVisible = payload.nextChapterScreenVisible;
+    const pluginDir = `file://${PLUGIN_STORAGE}/${shellPlugin?.id}`;
     return {
-      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
-      headers: plugin?.imageRequestInit?.headers,
-      method: plugin?.imageRequestInit?.method,
-      body: plugin?.imageRequestInit?.body,
+      baseUrl: shell.key.baseUrl,
+      headers: shellPlugin?.imageRequestInit?.headers,
+      method: shellPlugin?.imageRequestInit?.method,
+      body: shellPlugin?.imageRequestInit?.body,
       html: `
         <!DOCTYPE html>
-          <html dir="${readerDir}" class="${
+          <html dir="${shell.readerDir}" class="${
         chapterGeneralSettings.pageReaderDisableAnimation ? 'no-animation' : ''
       }">
             <head>
@@ -495,22 +677,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 --readerSettings-fontFamily: ${
                   initialReaderSettings.fontFamily
                 };
-                --theme-primary: ${theme.primary};
-                --theme-onPrimary: ${theme.onPrimary};
-                --theme-secondary: ${theme.secondary};
-                --theme-tertiary: ${theme.tertiary};
-                --theme-onTertiary: ${theme.onTertiary};
-                --theme-onSecondary: ${theme.onSecondary};
-                --theme-surface: ${theme.surface};
-                --theme-surface-0-9: ${color(theme.surface)
+                --theme-primary: ${shellTheme.primary};
+                --theme-onPrimary: ${shellTheme.onPrimary};
+                --theme-secondary: ${shellTheme.secondary};
+                --theme-tertiary: ${shellTheme.tertiary};
+                --theme-onTertiary: ${shellTheme.onTertiary};
+                --theme-onSecondary: ${shellTheme.onSecondary};
+                --theme-surface: ${shellTheme.surface};
+                --theme-surface-0-9: ${color(shellTheme.surface)
                   .alpha(0.9)
                   .toString()};
-                --theme-onSurface: ${theme.onSurface};
-                --theme-surfaceVariant: ${theme.surfaceVariant};
-                --theme-onSurfaceVariant: ${theme.onSurfaceVariant};
-                --theme-outline: ${theme.outline};
-                --theme-outlineVariant: ${theme.outlineVariant};
-                --theme-rippleColor: ${theme.rippleColor};
+                --theme-onSurface: ${shellTheme.onSurface};
+                --theme-surfaceVariant: ${shellTheme.surfaceVariant};
+                --theme-onSurfaceVariant: ${shellTheme.onSurfaceVariant};
+                --theme-outline: ${shellTheme.outline};
+                --theme-outlineVariant: ${shellTheme.outlineVariant};
+                --theme-rippleColor: ${shellTheme.rippleColor};
                 }
                 </style>
                 <style id="ln-font">
@@ -521,8 +703,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   }.ttf");
                 }
 				</style>
-              <link rel="stylesheet" href="${pluginCustomCSS}">
-              <style id="ln-custom-css">${customCSS}</style>
+              <link rel="stylesheet" href="${pluginDir}/custom.css">
+              <style id="ln-custom-css">${shell.customCSS}</style>
             </head>
             <body class="${
               chapterGeneralSettings.pageReader ? 'page-reader' : ''
@@ -535,35 +717,27 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   : 'translateX(0%)'
               };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
-              ">${chapter.name}</div>
+              ">${payload.chapter.name}</div>
               <div id="LNReader-chapter">
-                ${processedHtml}
+                ${payload.html}
               </div>
               <div id="reader-ui"></div>
               </body>
               <script>
-                var initialPageReaderConfig = ${JSON.stringify({
+                var initialPageReaderConfig = ${serializeForScript({
                   nextChapterScreenVisible: isNextChapterScreenVisible,
                 })};
 
 
-                var initialReaderConfig = ${JSON.stringify({
+                var initialReaderConfig = ${serializeForScript({
                   readerSettings: initialReaderSettings,
                   chapterGeneralSettings,
-                  novel,
-                  chapter,
-                  batteryLevel,
+                  novel: payload.novel,
+                  chapter: payload.chapter,
+                  batteryLevel: shell.batteryLevel,
                   autoSaveInterval: 2222,
                   DEBUG: __DEV__,
-                  strings: {
-                    finished:
-                      getString('readerScreen.finished') +
-                      ': ' +
-                      chapter.name.trim(),
-                    noNextChapter: getString('readerScreen.noNextChapter'),
-                    removeText: getString('common.remove'),
-                    replaceText: getString('customCodeSettings.replace'),
-                  },
+                  strings: payload.strings,
                 })}
               </script>
               <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
@@ -574,33 +748,69 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${assetsUriPrefix}/js/search.js"></script>
               <script src="${assetsUriPrefix}/js/index.js"></script>
               <script src="${assetsUriPrefix}/js/textRemover.js"></script>
-              <script src="${pluginCustomJS}"></script>
-              <script id="ln-custom-js">
+              <script src="${pluginDir}/custom.js"></script>
+              ${
+                shell.customJS
+                  ? `<script id="ln-custom-js">
               function fn(){
                 let html = document.querySelector('#LNReader-chapter').innerHTML;
-                ${customJS}
+                ${shell.customJS}
                 document.querySelector('#LNReader-chapter').innerHTML = html;
               }
+              window.lnApplyCustomJS = fn;
               document.addEventListener('DOMContentLoaded', fn);
-              </script>
+              </script>`
+                  : ''
+              }
           </html>
           `,
     };
-  }, [
-    batteryLevel,
-    chapter,
-    chapterGeneralSettings,
-    processedHtml,
-    customJS,
-    customCSS,
-    initialReaderSettings,
-    novel,
-    plugin,
-    pluginCustomCSS,
-    pluginCustomJS,
-    readerDir,
-    theme,
-  ]);
+  }, [shell]);
+
+  /**
+   * Brings the page up to date with the app once a chapter is on screen,
+   * whether the page was just loaded or the chapter swapped into it.
+   */
+  const afterChapterShown = () => {
+    webViewRef.current?.injectJavaScript(
+      `if (window.reader && window.reader.batteryLevel) {
+      window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
+    }`,
+    );
+    webViewRef.current?.injectJavaScript(adjacentChapterScriptRef.current);
+    webViewRef.current?.injectJavaScript(`
+      window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
+      window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
+      ${
+        ttsProgress.total > 0
+          ? `window.tts?.setActiveIndex?.(${ttsProgress.index});`
+          : ''
+      }
+      true;
+    `);
+
+    const searchText = searchTextRef.current.trim();
+    if (searchText) {
+      webViewRef.current?.injectJavaScript(
+        `window.readerSearch?.search(${JSON.stringify(searchText)}); true;`,
+      );
+    }
+
+    if (autoStartTTSRef.current) {
+      autoStartTTSRef.current = false;
+      setTimeout(() => {
+        webViewRef.current?.injectJavaScript(`
+        (function() {
+          if (window.tts && reader.generalSettings.val.TTSEnable) {
+            setTimeout(() => {
+              tts.start();
+            }, 500);
+          }
+        })();
+      `);
+      }, 300);
+    }
+  };
 
   return (
     <>
@@ -626,48 +836,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           return true;
         }}
         onLoadEnd={() => {
-          webViewRef.current?.injectJavaScript(
-            `if (window.reader && window.reader.batteryLevel) {
-            window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
-          }`,
-          );
-          webViewRef.current?.injectJavaScript(
-            adjacentChapterScriptRef.current,
-          );
-          webViewRef.current?.injectJavaScript(`
-            window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
-            window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
-            ${
-              ttsProgress.total > 0
-                ? `window.tts?.setActiveIndex?.(${ttsProgress.index});`
-                : ''
-            }
-            true;
-          `);
-
-          const searchText = searchTextRef.current.trim();
-          if (searchText) {
-            webViewRef.current?.injectJavaScript(
-              `window.readerSearch?.search(${JSON.stringify(
-                searchText,
-              )}); true;`,
-            );
-          }
-
-          if (autoStartTTSRef.current) {
-            autoStartTTSRef.current = false;
-            setTimeout(() => {
-              webViewRef.current?.injectJavaScript(`
-              (function() {
-                if (window.tts && reader.generalSettings.val.TTSEnable) {
-                  setTimeout(() => {
-                    tts.start();
-                  }, 500);
-                }
-              })();
-            `);
-            }, 300);
-          }
+          shellReadyRef.current = true;
+          measureChapterShown('reload');
+          afterChapterShown();
         }}
         onMessage={(ev: { nativeEvent: { data: string } }) => {
           __DEV__ && onLogMessage(ev);
@@ -753,8 +924,33 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               navigateChapter('PREV');
               break;
             case 'save':
+              // A save can still arrive from the chapter that was just
+              // replaced; it must not land on the current one.
+              if (
+                event.chapterId !== undefined &&
+                event.chapterId !== chapter.id
+              ) {
+                break;
+              }
               if (event.data && typeof event.data === 'number') {
                 saveProgress(event.data);
+              }
+              break;
+            case 'chapter-shown':
+              if (
+                event.chapterId !== chapter.id ||
+                pendingSwapRef.current?.chapterId !== chapter.id
+              ) {
+                break;
+              }
+              clearPendingSwap();
+              measureChapterShown('swap');
+              afterChapterShown();
+              break;
+            case 'chapter-swap-failed':
+              if (event.chapterId === chapter.id) {
+                clearPendingSwap();
+                setFailedSwaps(count => count + 1);
               }
               break;
             case 'text-action':

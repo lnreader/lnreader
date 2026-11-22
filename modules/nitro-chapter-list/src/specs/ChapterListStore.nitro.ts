@@ -37,4 +37,9 @@ export interface ChapterListStore extends HybridObject<{ android: 'kotlin' }> {
   updateRows(rows: ChapterRow[]): void;
   setSelected(ids: number[]): void;
   setDownloading(ids: number[]): void;
+  /**
+   * Highlights one chapter (the reader drawer's current chapter); `undefined`
+   * clears it. Only the previous and the new row rebind.
+   */
+  setHighlighted(id?: number): void;
 }

@@ -32,10 +32,25 @@ class ChapterListViewManager :
     super.onDropViewInstance(view)
   }
 
+  // Props within one update arrive in no particular order; the initial
+  // position depends on the variant (header or not), so it waits for all of them.
+  override fun onAfterUpdateTransaction(view: ChapterListView) {
+    super.onAfterUpdateTransaction(view)
+    view.onPropsApplied()
+  }
+
   // --- Props ---
 
   override fun setStoreId(view: ChapterListView, value: String?) {
     view.setStoreId(value)
+  }
+
+  override fun setVariant(view: ChapterListView, value: String?) {
+    view.setVariant(value)
+  }
+
+  override fun setInitialPosition(view: ChapterListView, value: Int) {
+    view.setInitialPosition(value)
   }
 
   override fun setColors(view: ChapterListView, value: ReadableMap?) {
@@ -97,6 +112,10 @@ class ChapterListViewManager :
 
   override fun setRefreshOffset(view: ChapterListView, value: Float) {
     view.setRefreshOffset(value)
+  }
+
+  override fun setContentPaddingTop(view: ChapterListView, value: Float) {
+    view.setContentPaddingTop(value)
   }
 
   override fun setContentPaddingBottom(view: ChapterListView, value: Float) {

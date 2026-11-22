@@ -63,6 +63,9 @@ class IconView(context: Context, sizeSp: Float) : View(context) {
 
   companion object {
     // Code points from MaterialDesignIcons.json in the vector-icons package.
+    val CHEVRON_DOWN = glyphOf(983360)
+    val CHEVRON_UP = glyphOf(983363)
+    val BOOK_OUTLINE = glyphOf(988630)
     val CIRCLE = glyphOf(984933)
     val BOOKMARK = glyphOf(983232)
     val DOWNLOAD = glyphOf(986332) // arrow-down-circle-outline

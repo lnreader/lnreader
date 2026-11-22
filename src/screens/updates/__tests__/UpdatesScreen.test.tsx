@@ -61,7 +61,13 @@ jest.mock('@utils/dateFormat', () => ({
   formatDate: (date: string) => date,
 }));
 
-jest.mock('../components/UpdateNovelChapterGroup', () => () => null);
+jest.mock(
+  '@components/GroupedChapterList/GroupedChapterList',
+  () => () => null,
+);
+jest.mock('../useGroupedUpdateChapters', () => ({
+  useGroupedUpdateChapters: () => new Map(),
+}));
 
 const mockUseFocusEffect = useFocusEffect as jest.MockedFunction<
   typeof useFocusEffect

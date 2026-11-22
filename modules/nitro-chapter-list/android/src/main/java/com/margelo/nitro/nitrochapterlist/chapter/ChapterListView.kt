@@ -13,10 +13,17 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.ThemedReactContext
 import com.margelo.nitro.nitrochapterlist.ChapterListStoreRegistry
 import com.margelo.nitro.nitrochapterlist.HybridChapterListStore
+import com.margelo.nitro.nitrochapterlist.core.HighlightVisibility
 import com.margelo.nitro.nitrochapterlist.core.ListHostView
 import kotlin.math.roundToInt
 
-/** The novel screen's chapter list: [ListHostView] with chapter rows from a [HybridChapterListStore]. */
+/**
+ * A chapter list: [ListHostView] with chapter rows from a [HybridChapterListStore].
+ * The `novel` variant is the Novel screen's list (React header, novel rows,
+ * scroll events, pull-to-refresh); the `drawer` variant is the reader's chapter
+ * drawer (headerless, drawer rows, a highlighted current chapter reported
+ * through `topHighlightedVisibilityChange`, and no scroll events).
+ */
 @SuppressLint("ViewConstructor")
 class ChapterListView(reactContext: ThemedReactContext) :
   ListHostView(
@@ -33,6 +40,16 @@ class ChapterListView(reactContext: ThemedReactContext) :
   private var colors: Map<String, Int> = emptyMap()
   private var strings: Map<String, String> = emptyMap()
   private var resetAtNanos = 0L
+  private var drawer = false
+  private val highlightVisibility = HighlightVisibility()
+  private var highlightUpdatePosted = false
+  private val highlightUpdate = Runnable {
+    highlightUpdatePosted = false
+    updateHighlightVisibility()
+  }
+  private var initialPosition = -1
+  private var initialPositionApplied = false
+  private var propsApplied = false
   private val midnightRefresh = Runnable {
     adapter.refreshText()
     scheduleMidnightRefresh()
@@ -55,6 +72,52 @@ class ChapterListView(reactContext: ThemedReactContext) :
     store?.model?.addListener(this)
     adapter.model = store?.model
     onContentChanged()
+    applyInitialPosition()
+    postHighlightUpdate()
+  }
+
+  /** `novel` (default) or `drawer`; see the class comment. */
+  fun setVariant(value: String?) {
+    val isDrawer = value == VARIANT_DRAWER
+    if (isDrawer == drawer) return
+    drawer = isDrawer
+    emitsScrollEvents = !isDrawer
+    adapter.variant = if (isDrawer) ChapterListAdapter.Variant.DRAWER else ChapterListAdapter.Variant.NOVEL
+    adapter.headerCount = if (isDrawer) 0 else 1
+    setHasHeader(!isDrawer)
+    rowHeight =
+      if (isDrawer) {
+        ChapterRowView.drawerRowHeight(context)
+      } else {
+        (ChapterRowView.ROW_HEIGHT_DP * resources.displayMetrics.density).roundToInt()
+      }
+    setRefreshEnabled(!isDrawer)
+    recyclerView.recycledViewPool.setMaxRecycledViews(ChapterListAdapter.TYPE_DRAWER_ROW, ROW_POOL_SIZE)
+    highlightVisibility.reset()
+  }
+
+  /**
+   * Row the list opens at (at the top), applied once, before the first layout
+   * that has rows, so it never visibly jumps there. Negative: the top.
+   */
+  fun setInitialPosition(value: Int) {
+    if (initialPositionApplied) return
+    initialPosition = value
+    applyInitialPosition()
+  }
+
+  /** The first prop update is complete, so the variant (and header count) is known. */
+  fun onPropsApplied() {
+    propsApplied = true
+    applyInitialPosition()
+  }
+
+  private fun applyInitialPosition() {
+    if (!propsApplied || initialPositionApplied || initialPosition < 0) return
+    val count = store?.model?.count ?: return
+    if (count == 0) return
+    recyclerView.scrollToRowBeforeLayout(initialPosition.coerceAtMost(count - 1))
+    initialPositionApplied = true
   }
 
   fun setColors(value: Map<String, Int>) {
@@ -82,6 +145,8 @@ class ChapterListView(reactContext: ThemedReactContext) :
         rippleColor = color("rippleColor", defaults.rippleColor),
         surface = color("surface", defaults.surface),
         selectedBackground = color("selectedBackground", defaults.selectedBackground),
+        secondaryContainer = color("secondaryContainer", defaults.secondaryContainer),
+        onSecondaryContainer = color("onSecondaryContainer", defaults.onSecondaryContainer),
         deleteLabel = string("deleteLabel", defaults.deleteLabel),
         downloadA11yLabel = string("downloadA11yLabel", defaults.downloadA11yLabel),
         deleteA11yLabel = string("deleteA11yLabel", defaults.deleteA11yLabel),
@@ -194,12 +259,44 @@ class ChapterListView(reactContext: ThemedReactContext) :
 
   override fun onReset() {
     onContentChanged()
+    applyInitialPosition()
+    highlightVisibility.reset()
+    postHighlightUpdate()
     logFirstDrawAfterReset()
   }
 
-  override fun onRangeChanged(start: Int, count: Int, payload: Any?) {}
+  // Loaded rows (and setHighlighted) can make the highlighted position known.
+  override fun onRangeChanged(start: Int, count: Int, payload: Any?) {
+    if (payload == null || payload === ChapterListModel.Payload.HIGHLIGHT) postHighlightUpdate()
+  }
 
-  override fun onRangeInserted(start: Int, count: Int) = onContentChanged()
+  override fun onRangeInserted(start: Int, count: Int) {
+    onContentChanged()
+    applyInitialPosition()
+    postHighlightUpdate()
+  }
+
+  // --- Highlighted row visibility (drawer) ---
+
+  override fun onVisibleRangeChanged() = updateHighlightVisibility()
+
+  /** After the layout pass the model change scheduled, so the visible rows are current. */
+  private fun postHighlightUpdate() {
+    if (!drawer || highlightUpdatePosted) return
+    highlightUpdatePosted = true
+    post(highlightUpdate)
+  }
+
+  private fun updateHighlightVisibility() {
+    if (!drawer) return
+    val model = store?.model ?: return
+    val state =
+      highlightVisibility.update(firstVisibleRow(), lastVisibleRow(), model.highlightedPosition) ?: return
+    dispatch(
+      ChapterListEvents.HIGHLIGHTED_VISIBILITY_CHANGE,
+      Arguments.createMap().apply { putString("state", state.jsName) },
+    )
+  }
 
   private fun logFirstDrawAfterReset() {
     resetAtNanos = ChapterListPerf.now()
@@ -234,6 +331,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
     store?.model?.removeListener(this)
     adapter.detachModel()
     removeCallbacks(midnightRefresh)
+    removeCallbacks(highlightUpdate)
     store = null
   }
 
@@ -241,6 +339,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
     const val MENU_DELETE = 1
     const val ROW_POOL_SIZE = 32
     const val PRESSED_THUMB_BLEND = 0.3f
+    const val VARIANT_DRAWER = "drawer"
 
     fun blend(from: Int, to: Int, ratio: Float): Int {
       fun channel(shift: Int): Int {
@@ -259,6 +358,7 @@ object ChapterListEvents {
   const val CHAPTER_LONG_PRESS = "topChapterLongPress"
   const val DOWNLOAD_PRESS = "topDownloadPress"
   const val DELETE_PRESS = "topDeletePress"
+  const val HIGHLIGHTED_VISIBILITY_CHANGE = "topHighlightedVisibilityChange"
 
   val registrationNames =
     mapOf(
@@ -266,5 +366,6 @@ object ChapterListEvents {
       CHAPTER_LONG_PRESS to "onChapterLongPress",
       DOWNLOAD_PRESS to "onDownloadPress",
       DELETE_PRESS to "onDeletePress",
+      HIGHLIGHTED_VISIBILITY_CHANGE to "onHighlightedVisibilityChange",
     )
 }
