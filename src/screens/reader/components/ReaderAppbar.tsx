@@ -1,14 +1,10 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import color from 'color';
 
 import { Text } from 'react-native-paper';
 import { IconButtonV2, Menu } from '../../../components';
-import Animated, {
-  Easing,
-  ReduceMotion,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { ThemeColors } from '@theme/types';
 import { bookmarkChapter } from '@database/queries/ChapterQueries';
 import { useChapterContext } from '../ChapterContext';
@@ -18,6 +14,8 @@ import { ReaderSearchResult } from '../types';
 import { getString } from '@i18n/translations';
 
 interface ReaderAppbarProps {
+  visible: boolean;
+  fadeDuration: number;
   theme: ThemeColors;
   goBack: () => void;
   bookmarked: boolean;
@@ -34,9 +32,9 @@ interface ReaderAppbarProps {
   shareChapter: () => void;
 }
 
-const fastOutSlowIn = Easing.bezier(0.4, 0.0, 0.2, 1.0);
-
 const ReaderAppbar = ({
+  visible,
+  fadeDuration,
   goBack,
   theme,
   bookmarked,
@@ -61,54 +59,26 @@ const ReaderAppbar = ({
     action();
   }, []);
 
-  const entering = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(0, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(1, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: -statusBarHeight,
-      opacity: 0,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
-  const exiting = () => {
-    'worklet';
-    const animations = {
-      originY: withTiming(-statusBarHeight, {
-        duration: 250,
-        easing: fastOutSlowIn,
-        reduceMotion: ReduceMotion.System,
-      }),
-      opacity: withTiming(0, { duration: 150 }),
-    };
-    const initialValues = {
-      originY: 0,
-      opacity: 1,
-    };
-    return {
-      initialValues,
-      animations,
-    };
-  };
+  useEffect(() => {
+    if (!visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMenuVisible(false);
+    }
+  }, [visible]);
 
   return (
     <Animated.View
-      entering={entering}
-      exiting={exiting}
+      pointerEvents={visible ? 'auto' : 'none'}
+      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
       style={[
         styles.container,
         {
           paddingTop: statusBarHeight,
           backgroundColor: color(theme.surface).alpha(0.9).string(),
+          opacity: visible ? 1 : 0,
+          transitionProperty: 'opacity',
+          transitionDuration: fadeDuration,
+          transitionTimingFunction: 'ease-out',
         },
       ]}
     >
@@ -154,7 +124,7 @@ const ReaderAppbar = ({
         />
         {!novel.isLocal ? (
           <Menu
-            visible={menuVisible}
+            visible={visible && menuVisible}
             onDismiss={() => setMenuVisible(false)}
             anchor={
               <IconButtonV2

@@ -641,6 +641,16 @@
     "loadFailed": "Unable to load novel",
     "migrate": "Migrate",
     "noSummary": "No summary",
+    "nativeDetails": {
+      "expandSummary": "Expand summary",
+      "collapseSummary": "Collapse summary",
+      "selectAll": "Select all chapters",
+      "bookmark": "Toggle bookmark",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "markPreviousRead": "Mark previous chapters as read",
+      "markPreviousUnread": "Mark previous chapters as unread"
+    },
     "noCoverFound": "No cover found",
     "notFound": "Novel not found on the source",
     "progress": "Progress %{progress} %",

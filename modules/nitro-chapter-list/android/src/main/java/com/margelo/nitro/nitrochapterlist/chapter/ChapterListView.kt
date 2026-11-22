@@ -6,21 +6,30 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.Trace
 import android.view.Menu
+import android.view.HapticFeedbackConstants
 import android.view.ViewTreeObserver
 import android.widget.PopupMenu
+import android.widget.FrameLayout
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.ThemedReactContext
 import com.margelo.nitro.nitrochapterlist.ChapterListStoreRegistry
 import com.margelo.nitro.nitrochapterlist.HybridChapterListStore
 import com.margelo.nitro.nitrochapterlist.core.HighlightVisibility
 import com.margelo.nitro.nitrochapterlist.core.ListHostView
+import com.margelo.nitro.nitrochapterlist.novel.NovelDetailsChrome
+import com.margelo.nitro.nitrochapterlist.novel.NovelDetailsHeader
+import com.margelo.nitro.nitrochapterlist.novel.NovelDetailsModel
+import com.margelo.nitro.nitrochapterlist.novel.NovelChapterJumpDialog
+import com.margelo.nitro.nitrochapterlist.novel.NovelChapterSettingsSheet
+import org.json.JSONObject
 import kotlin.math.roundToInt
 
 /**
  * A chapter list: [ListHostView] with chapter rows from a [HybridChapterListStore].
- * The `novel` variant is the Novel screen's list (React header, novel rows,
- * scroll events, pull-to-refresh); the `drawer` variant is the reader's chapter
+ * The `novel` variant hosts the Novel screen's header, controls, and chapter
+ * rows with pull-to-refresh. The `drawer` variant is the reader's chapter
  * drawer (headerless, drawer rows, a highlighted current chapter reported
  * through `topHighlightedVisibilityChange`, and no scroll events).
  */
@@ -41,6 +50,18 @@ class ChapterListView(reactContext: ThemedReactContext) :
   private var strings: Map<String, String> = emptyMap()
   private var resetAtNanos = 0L
   private var drawer = false
+  private var isLocalNovel = false
+  private var detailsValue: String? = null
+  private var details: NovelDetailsModel? = null
+  private var detailsHeader: NovelDetailsHeader? = null
+  private var detailsChrome: NovelDetailsChrome? = null
+  private var detailsDirty = false
+  private var selectionResult: Pair<Int, IntArray>? = null
+  private var jumpResult: JSONObject? = null
+  private var jumpSequence = 0
+  private var chapterJump: NovelChapterJumpDialog? = null
+  private var chapterSettings: NovelChapterSettingsSheet? = null
+  private var chapterSettingsTab = 0
   private val highlightVisibility = HighlightVisibility()
   private var highlightUpdatePosted = false
   private val highlightUpdate = Runnable {
@@ -69,11 +90,13 @@ class ChapterListView(reactContext: ThemedReactContext) :
     storeId = id
     store?.model?.removeListener(this)
     store = id?.let { ChapterListStoreRegistry.get(it) }
+    details?.selectionKey?.let { store?.model?.setSelectionScope(it) }
     store?.model?.addListener(this)
     adapter.model = store?.model
     onContentChanged()
     applyInitialPosition()
     postHighlightUpdate()
+    onSelectionChanged()
   }
 
   /** `novel` (default) or `drawer`; see the class comment. */
@@ -81,7 +104,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
     val isDrawer = value == VARIANT_DRAWER
     if (isDrawer == drawer) return
     drawer = isDrawer
-    emitsScrollEvents = !isDrawer
+    emitsScrollEvents = !isDrawer && details == null
     adapter.variant = if (isDrawer) ChapterListAdapter.Variant.DRAWER else ChapterListAdapter.Variant.NOVEL
     adapter.headerCount = if (isDrawer) 0 else 1
     setHasHeader(!isDrawer)
@@ -110,6 +133,168 @@ class ChapterListView(reactContext: ThemedReactContext) :
   fun onPropsApplied() {
     propsApplied = true
     applyInitialPosition()
+    if (detailsDirty) {
+      detailsDirty = false
+      applyNovelDetails()
+    }
+    selectionResult?.let { (request, ids) -> store?.model?.completeSelectAll(request, ids) }
+    selectionResult = null
+    jumpResult?.let { chapterJump?.accept(it) }
+    jumpResult = null
+  }
+
+  fun setJumpResult(value: String?) {
+    jumpResult = value?.let(::JSONObject)
+  }
+
+  fun setSelectionResult(request: Int, ids: IntArray) {
+    selectionResult = request to ids
+  }
+
+  fun setNovelDetails(value: String?) {
+    if (detailsValue == value) return
+    val next = value?.let { NovelDetailsModel(JSONObject(it)) }
+    if (details?.chapterControlScope != next?.chapterControlScope) chapterJump?.dismiss()
+    detailsValue = value
+    details = next
+    emitsScrollEvents = !drawer && details == null
+    detailsDirty = true
+  }
+
+  private fun applyNovelDetails() {
+    val model = details
+    if (model == null) {
+      detailsHeader?.dispose()
+      detailsHeader = null
+      header.setNativeChild(null)
+      detailsChrome?.let(::removeView)
+      detailsChrome = null
+      return
+    }
+
+    Trace.beginSection("LNReader Novel Details bind")
+    try {
+      model.selectionKey?.let { store?.model?.setSelectionScope(it) }
+      val nativeHeader = detailsHeader ?: NovelDetailsHeader(reactContext, ::onNovelAction).also {
+        detailsHeader = it
+        header.setNativeChild(it)
+      }
+      val chrome = detailsChrome ?: NovelDetailsChrome(reactContext, ::onNovelAction) {
+        scrollToOffset(0f, details?.reduceMotion != true)
+      }.also {
+        detailsChrome = it
+        addView(it, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+      }
+      setBackgroundColor(model.background)
+      nativeHeader.bind(model, theme)
+      chrome.bind(model, theme)
+      onSelectionChanged()
+    } finally {
+      Trace.endSection()
+    }
+  }
+
+  private fun onNovelAction(action: String) {
+    if (action == "filter" && details?.chapterSettings != null) {
+      showChapterSettings()
+      return
+    }
+    if (action == "jump" && details?.chapterJump != null) {
+      showChapterJump()
+      return
+    }
+    val model = store?.model
+    if (model != null && details?.selectionKey != null) {
+      when {
+        action == "clear-selection" -> {
+          model.clearSelection()
+          return
+        }
+        action == "select-all" -> {
+          if (model.selectionCount > 0) {
+            val request = model.requestSelectAll()
+            dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply {
+              putString("action", action)
+              putInt("requestId", request)
+            })
+          }
+          return
+        }
+        action.startsWith("selection-") -> {
+          if (model.selectionCount == 0) return
+          val ids = model.selectionIds()
+          val onlyLoaded = model.selectionSummary().onlyLoaded
+          dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply {
+            putString("action", action)
+            putArray("selectedIds", Arguments.createArray().apply { ids.forEach(::pushInt) })
+            onlyLoaded?.let { putInt("chapterId", it.id.toInt()) }
+          })
+          model.clearSelection()
+          return
+        }
+      }
+    }
+    dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply { putString("action", action) })
+  }
+
+  private fun showChapterSettings() {
+    if (chapterSettings != null) return
+    val activity = reactContext.currentActivity ?: return
+    val details = details ?: return
+    val config = details.chapterSettings ?: return
+    chapterSettings = NovelChapterSettingsSheet(activity, chapterSettingsTab, config, details, theme,
+      onChange = { key, value, values ->
+        dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply {
+          putString("action", "chapter-settings-$key")
+          value?.let { putString("value", it) }
+          values?.let { putArray("values", Arguments.createArray().apply { it.forEach(::pushString) }) }
+        })
+      },
+      onDismiss = { tab ->
+        chapterSettingsTab = tab
+        chapterSettings = null
+      },
+    ).also { it.show() }
+  }
+
+  private fun showChapterJump() {
+    if (chapterJump != null) return
+    val activity = reactContext.currentActivity ?: return
+    val details = details ?: return
+    val config = details.chapterJump ?: return
+    chapterJump = NovelChapterJumpDialog(activity, config, details, theme,
+      nextRequest = { ++jumpSequence },
+      onSearch = { request, query, byName ->
+        dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply {
+          putString("action", "chapter-jump-search")
+          putInt("requestId", request)
+          putString("value", query)
+          putBoolean("byName", byName)
+        })
+      },
+      onChoose = { request, chapterId, open ->
+        val position = store?.model?.positionOf(chapterId) ?: -1
+        if (!open && position >= 0) {
+          scrollToJumpTarget(position)
+        } else {
+          dispatch(ChapterListEvents.NOVEL_ACTION, Arguments.createMap().apply {
+            putString("action", if (open) "chapter-jump-open" else "chapter-jump-scroll")
+            putInt("requestId", request)
+            putInt("chapterId", chapterId)
+          })
+          open
+        }
+      },
+      onScroll = ::scrollToJumpTarget,
+      onDismiss = { chapterJump = null },
+    ).also { it.show() }
+  }
+
+  private fun scrollToJumpTarget(index: Int): Boolean {
+    val count = store?.model?.count ?: return false
+    if (index !in 0 until count) return false
+    scrollToIndex(index, details?.reduceMotion != true, 0.5f)
+    return true
   }
 
   private fun applyInitialPosition() {
@@ -153,6 +338,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
         downloadingA11yLabel = string("downloadingA11yLabel", defaults.downloadingA11yLabel),
       )
     adapter.theme = theme
+    if (details != null) detailsDirty = true
     setListColors(
       thumb = theme.primary,
       // Pressed: the thumb darkens (light theme) or lightens (dark) a little.
@@ -163,7 +349,9 @@ class ChapterListView(reactContext: ThemedReactContext) :
   }
 
   fun setIsLocal(value: Boolean) {
+    isLocalNovel = value
     adapter.isLocal = value
+    onSelectionChanged()
   }
 
   fun setRowFormat(value: ChapterRowFormat) {
@@ -208,6 +396,8 @@ class ChapterListView(reactContext: ThemedReactContext) :
   }
 
   override fun onDetachedFromWindow() {
+    chapterSettings?.dismiss()
+    chapterJump?.dismiss()
     removeCallbacks(midnightRefresh)
     if (clockReceiverRegistered) {
       context.applicationContext.unregisterReceiver(clockReceiver)
@@ -232,10 +422,27 @@ class ChapterListView(reactContext: ThemedReactContext) :
 
   // --- Adapter callbacks ---
 
-  override fun onChapterPress(id: Int, position: Int) = dispatchRow(ChapterListEvents.CHAPTER_PRESS, id, position)
+  override fun onChapterPress(id: Int, position: Int) {
+    val model = store?.model
+    if (!drawer && details?.selectionKey != null && model != null && model.selectionCount > 0) {
+      model.toggleSelection(id)
+    } else {
+      dispatchRow(ChapterListEvents.CHAPTER_PRESS, id, position)
+    }
+  }
 
-  override fun onChapterLongPress(id: Int, position: Int) =
-    dispatchRow(ChapterListEvents.CHAPTER_LONG_PRESS, id, position)
+  override fun onChapterLongPress(id: Int, position: Int) {
+    val model = store?.model
+    val details = details
+    if (!drawer && details?.selectionKey != null && model != null) {
+      if (model.selectionCount == 0 && details.selectionHaptics) {
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+      }
+      model.extendSelection(id)
+    } else {
+      dispatchRow(ChapterListEvents.CHAPTER_LONG_PRESS, id, position)
+    }
+  }
 
   override fun onDownloadPress(id: Int, position: Int) = dispatchRow(ChapterListEvents.DOWNLOAD_PRESS, id, position)
 
@@ -263,22 +470,34 @@ class ChapterListView(reactContext: ThemedReactContext) :
     highlightVisibility.reset()
     postHighlightUpdate()
     logFirstDrawAfterReset()
+    onSelectionChanged()
   }
 
   // Loaded rows (and setHighlighted) can make the highlighted position known.
   override fun onRangeChanged(start: Int, count: Int, payload: Any?) {
     if (payload == null || payload === ChapterListModel.Payload.HIGHLIGHT) postHighlightUpdate()
+    if (payload == null && (store?.model?.selectionCount ?: 0) > 0) onSelectionChanged()
   }
 
   override fun onRangeInserted(start: Int, count: Int) {
     onContentChanged()
     applyInitialPosition()
     postHighlightUpdate()
+    if ((store?.model?.selectionCount ?: 0) > 0) onSelectionChanged()
+  }
+
+  override fun onSelectionChanged() {
+    val chrome = detailsChrome ?: return
+    val model = store?.model
+    chrome.updateSelection(model?.selectionSummary() ?: ChapterSelectionSummary(), theme, isLocalNovel)
   }
 
   // --- Highlighted row visibility (drawer) ---
 
-  override fun onVisibleRangeChanged() = updateHighlightVisibility()
+  override fun onVisibleRangeChanged() {
+    updateHighlightVisibility()
+    detailsChrome?.updateScroll(recyclerView.computeVerticalScrollOffset(), recyclerView.height)
+  }
 
   /** After the layout pass the model change scheduled, so the visible rows are current. */
   private fun postHighlightUpdate() {
@@ -328,6 +547,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
    * list that's about to disappear.
    */
   fun dispose() {
+    detailsHeader?.dispose()
     store?.model?.removeListener(this)
     adapter.detachModel()
     removeCallbacks(midnightRefresh)
@@ -354,6 +574,7 @@ class ChapterListView(reactContext: ThemedReactContext) :
 
 /** Chapter row events (direct events, mapped to their JS props). */
 object ChapterListEvents {
+  const val NOVEL_ACTION = "topNovelAction"
   const val CHAPTER_PRESS = "topChapterPress"
   const val CHAPTER_LONG_PRESS = "topChapterLongPress"
   const val DOWNLOAD_PRESS = "topDownloadPress"
@@ -363,6 +584,7 @@ object ChapterListEvents {
   val registrationNames =
     mapOf(
       CHAPTER_PRESS to "onChapterPress",
+      NOVEL_ACTION to "onNovelAction",
       CHAPTER_LONG_PRESS to "onChapterLongPress",
       DOWNLOAD_PRESS to "onDownloadPress",
       DELETE_PRESS to "onDeletePress",

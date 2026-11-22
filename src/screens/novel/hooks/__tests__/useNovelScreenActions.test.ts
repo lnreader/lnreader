@@ -42,10 +42,7 @@ const setup = (chapters: any[] = [], withNovel = true) =>
   renderHook(() =>
     useNovelScreenActions({
       chapters,
-      clearSelection: jest.fn(),
       novel: withNovel ? novel : undefined,
-      selectedIds: [],
-      selectedChapters: [],
     }),
   ).result.current;
 

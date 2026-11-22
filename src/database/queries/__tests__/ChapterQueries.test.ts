@@ -152,6 +152,23 @@ describe('ChapterQueries', () => {
     });
   });
 
+  it('returns page IDs in the same order as chapter rows with tied titles', async () => {
+    const novelId = 123456;
+    getTestDb().sqlite.executeSync(
+      `INSERT INTO Chapter (novelId, path, name, chapterNumber, page, position)
+       VALUES
+         (${novelId}, '/1', 'A', 1, '1', 0),
+         (${novelId}, '/2', 'Z', 2, '1', 1),
+         (${novelId}, '/3', 'Z', 3, '1', 2),
+         (${novelId}, '/4', 'Y', 4, '2', 3)`,
+    );
+
+    const chapters = await getPageChapters(novelId, 'nameDesc', [], '1');
+    const ids = await getPageChapterIds(novelId, [], '1', [], 'nameDesc');
+    expect(chapters.map(chapter => chapter.chapterNumber)).toEqual([2, 3, 1]);
+    expect(ids).toEqual(chapters.map(chapter => chapter.id));
+  });
+
   describe('getAllNovelChaptersForBackup', () => {
     it('returns chapters beyond the 1000-row UI query limit', async () => {
       const testDb = getTestDb();

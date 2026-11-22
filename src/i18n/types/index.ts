@@ -544,6 +544,14 @@ export interface StringMap {
   'novelScreen.loadFailed': 'string';
   'novelScreen.migrate': 'string';
   'novelScreen.noSummary': 'string';
+  'novelScreen.nativeDetails.expandSummary': 'string';
+  'novelScreen.nativeDetails.collapseSummary': 'string';
+  'novelScreen.nativeDetails.selectAll': 'string';
+  'novelScreen.nativeDetails.bookmark': 'string';
+  'novelScreen.nativeDetails.markRead': 'string';
+  'novelScreen.nativeDetails.markUnread': 'string';
+  'novelScreen.nativeDetails.markPreviousRead': 'string';
+  'novelScreen.nativeDetails.markPreviousUnread': 'string';
   'novelScreen.noCoverFound': 'string';
   'novelScreen.notFound': 'string';
   'novelScreen.progress': 'string';

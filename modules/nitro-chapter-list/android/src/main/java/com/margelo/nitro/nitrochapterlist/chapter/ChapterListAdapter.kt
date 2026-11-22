@@ -61,6 +61,7 @@ class ChapterListAdapter(
     }
 
     private fun setNovelRowListeners() {
+      row.isHapticFeedbackEnabled = false
       row.setOnLongClickListener {
         val id = idAt(bindingAdapterPosition) ?: return@setOnLongClickListener false
         callbacks.onChapterLongPress(id, chapterPosition)

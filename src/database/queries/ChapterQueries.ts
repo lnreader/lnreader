@@ -626,7 +626,7 @@ export const getPageChapters = async (
     .$dynamic();
 
   if (sort) {
-    query.orderBy(chapterOrderToSQL(sort));
+    query.orderBy(chapterOrderToSQL(sort), asc(chapterSchema.id));
   }
   if (limit !== undefined) {
     query.limit(limit);
@@ -643,6 +643,7 @@ export const getPageChapterIds = async (
   filter?: ChapterFilterKey[],
   page?: string,
   excludedScanlators?: string[],
+  sort?: ChapterOrderKey,
 ): Promise<number[]> => {
   const conditions = [
     eq(chapterSchema.novelId, novelId),
@@ -651,11 +652,13 @@ export const getPageChapterIds = async (
     scanlatorFilterToSQL(excludedScanlators),
   ].filter(Boolean) as any[];
 
-  const rows = await dbManager
+  const query = dbManager
     .select({ id: chapterSchema.id })
     .from(chapterSchema)
     .where(and(...conditions))
-    .all();
+    .$dynamic();
+  if (sort) query.orderBy(chapterOrderToSQL(sort), asc(chapterSchema.id));
+  const rows = await query.all();
 
   return rows.map(chapter => chapter.id);
 };
@@ -748,7 +751,7 @@ export const getPageChaptersBatched = async (
     .$dynamic();
 
   if (sort) {
-    query.orderBy(chapterOrderToSQL(sort));
+    query.orderBy(chapterOrderToSQL(sort), asc(chapterSchema.id));
   }
   return query.all();
 };

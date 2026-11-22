@@ -15,6 +15,7 @@ class ChapterListModel {
     fun onReset()
     fun onRangeChanged(start: Int, count: Int, payload: Any?)
     fun onRangeInserted(start: Int, count: Int)
+    fun onSelectionChanged() {}
   }
 
   /** Partial-bind payloads, so only the affected parts of a row rebind. */
@@ -33,7 +34,10 @@ class ChapterListModel {
 
   private var rows: Array<ChapterRow?> = emptyArray()
   private val positions = HashMap<Int, Int>()
-  private var selected = HashSet<Int>()
+  private var selected = LinkedHashSet<Int>()
+  private var selectionKey: String? = null
+  private var requestSequence = 0
+  private var pendingSelectAll: Int? = null
   private var downloading = HashSet<Int>()
 
   /** The highlighted chapter (the reader's current chapter), or null. */
@@ -54,6 +58,79 @@ class ChapterListModel {
   fun positionOf(id: Int): Int = positions[id] ?: -1
 
   fun isSelected(id: Int): Boolean = selected.contains(id)
+
+  val selectionCount: Int get() = selected.size
+
+  fun selectionIds(): IntArray = selected.toIntArray()
+
+  fun setSelectionScope(key: String) {
+    if (selectionKey == key) return
+    selectionKey = key
+    clearSelection()
+  }
+
+  fun clearSelection() = setSelected(IntArray(0))
+
+  fun toggleSelection(id: Int) {
+    if (positions[id] == null) return
+    pendingSelectAll = null
+    if (!selected.remove(id)) selected.add(id)
+    listeners.forEach { it.onRangeChanged(positions.getValue(id), 1, Payload.SELECTION) }
+    listeners.forEach { it.onSelectionChanged() }
+  }
+
+  fun extendSelection(id: Int) {
+    if (positions[id] == null) return
+    val anchor = selected.lastOrNull()
+    if (anchor == null) {
+      toggleSelection(id)
+      return
+    }
+    pendingSelectAll = null
+    if (id == anchor) return
+    // Match the existing long-press rule: include loaded IDs between the two presses.
+    val bounds = minOf(id, anchor)..maxOf(id, anchor)
+    val changed = IntArray(positions.size)
+    var size = 0
+    for ((position, row) in rows.withIndex()) {
+      val rowId = row?.id?.toInt() ?: continue
+      if (rowId in bounds && selected.add(rowId)) changed[size++] = position
+    }
+    if (size == 0) return
+    dispatchChanged(changed, size, Payload.SELECTION)
+    listeners.forEach { it.onSelectionChanged() }
+  }
+
+  fun requestSelectAll(): Int = (++requestSequence).also { pendingSelectAll = it }
+
+  fun completeSelectAll(request: Int, ids: IntArray) {
+    if (pendingSelectAll == request) setSelected(ids)
+  }
+
+  fun selectionSummary(): ChapterSelectionSummary {
+    var loadedCount = 0
+    var onlyLoaded: ChapterRow? = null
+    var downloaded = false
+    var undownloaded = false
+    var unread = false
+    var read = false
+    for (id in selected) {
+      val row = positions[id]?.let { rows[it] } ?: continue
+      loadedCount++
+      onlyLoaded = row
+      if (row.downloaded) downloaded = true else undownloaded = true
+      if (row.unread) unread = true else read = true
+    }
+    val hasUnloaded = loadedCount < selected.size
+    return ChapterSelectionSummary(
+      selected.size,
+      downloaded || hasUnloaded,
+      undownloaded || hasUnloaded,
+      unread || hasUnloaded,
+      read || hasUnloaded,
+      onlyLoaded?.takeIf { loadedCount == 1 },
+    )
+  }
 
   fun isDownloading(id: Int): Boolean = downloading.contains(id)
 
@@ -77,6 +154,7 @@ class ChapterListModel {
   }
 
   fun reset(totalCount: Int) {
+    pendingSelectAll = null
     count = totalCount.coerceAtLeast(0)
     rows = arrayOfNulls(count)
     positions.clear()
@@ -125,17 +203,23 @@ class ChapterListModel {
   }
 
   fun setSelected(ids: IntArray) {
-    selected = applyIdSet(selected, ids, Payload.SELECTION)
+    pendingSelectAll = null
+    val previous = selected
+    val next = ids.toCollection(LinkedHashSet())
+    selected = next
+    if (previous == next) return
+    dispatchIdSetChanges(previous, next, Payload.SELECTION)
+    listeners.forEach { it.onSelectionChanged() }
   }
 
   fun setDownloading(ids: IntArray) {
-    downloading = applyIdSet(downloading, ids, Payload.DOWNLOADING)
+    val previous = downloading
+    downloading = ids.toHashSet()
+    dispatchIdSetChanges(previous, downloading, Payload.DOWNLOADING)
   }
 
   /** Swaps in the new id set and notifies the positions whose membership changed. */
-  private fun applyIdSet(old: HashSet<Int>, ids: IntArray, payload: Any): HashSet<Int> {
-    val next = HashSet<Int>(ids.size * 2)
-    ids.forEach { next.add(it) }
+  private fun dispatchIdSetChanges(old: Set<Int>, next: Set<Int>, payload: Any) {
     val changed = IntArray(old.size + next.size)
     var changedCount = 0
     for (id in old) {
@@ -151,7 +235,6 @@ class ChapterListModel {
       }
     }
     dispatchChanged(changed, changedCount, payload)
-    return next
   }
 
   private fun dispatchChanged(changed: IntArray, size: Int, payload: Any?) {
