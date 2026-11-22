@@ -54,6 +54,14 @@
     },
     "appLanguageDefault": "الافتراضي",
     "appTheme": "مظهر التطبيق",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "المظهر الداكن",
     "dateFormat": "Date format",
     "dateFormatDefault": "Default (%{date})",
@@ -82,7 +90,8 @@
       "turquoise": "فيروزي",
       "yotsuba": "يوتسوبا",
       "catppuccin": "كاتبوتشين",
-      "yinyang": "ين ويانغ"
+      "yinyang": "ين ويانغ",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +104,8 @@
     "automaticBackupEvery2Days": "Every 2 days",
     "automaticBackupWeekly": "Weekly",
     "automaticBackupLocation": "Automatic backup location",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "اسم النسخة الاحتياطية",
     "backupCreated": "Backup created successfully",
@@ -170,6 +181,7 @@
     "googeDriveDesc": "نسخ احتياطي إلى جوجل درايف الخاص بك",
     "invalidBackupFolder": "مجلد نسخة احتياطية غير صالح",
     "localBackup": "نسخ احتياطي محلي",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "لم يتم العثور على نسخة احتياطية",
     "options": {
       "title": "Backup contents",
@@ -420,6 +432,8 @@
     "desc": "(ترتيب تنازلي)",
     "disableLoadingAnimations": "تعطيل حركات التحميل",
     "disableLoadingAnimationsDesc": "قد يحسن الأداء على الأجهزة الأبطأ",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "تعطيل الاهتزاز",
     "disableHapticFeedbackDescription": "إيقاف الاهتزازات عند اللمس.",
     "chapterDownloadCooldown": "Chapter download cooldown",
@@ -553,6 +567,9 @@
       }
     },
     "chapterChapnum": "Chapter %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "الفصول",
     "continueReading": "متابعة القراءة",
     "exportEpubModal": {
@@ -670,8 +687,8 @@
       "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
-      "disablePageTransitions": "Disable page transition animation",
-      "disablePageTransitionsDescription": "Turn pages instantly without slide animation",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "إزالة المسافات الزائدة",
       "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "مقدار التمرير (افتراضياً طول الشاشة)",
@@ -704,7 +721,20 @@
     "noNextChapter": "لا يوجد فصل تالي",
     "noPreviousChapter": "لا يوجد فصل سابق",
     "searchMinLength": "Enter at least %{count} characters to search",
-    "searchPlaceholder": "Search chapter"
+    "searchPlaceholder": "Search chapter",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Chapters",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "chapterCount": "Number of chapters",
+      "start": "Start timer",
+      "cancelTimer": "Cancel timer",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Enter between 1 and 999 chapters.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "فاصل التمرير (ثواني)",
@@ -713,6 +743,7 @@
     "backgroundColorModal": "لون الخلفية",
     "clearCustomCSS": "إعادة تعيين CSS المخصص؟",
     "clearCustomJS": "إعادة تعيين JS المخصص؟",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "استهدف مصادر محددة باستخدام #sourceId-[SOURCEID] في محدداتك",
     "customCSS": "تنسيقات CSS مخصصة",
     "customJS": "JS مخصص",
@@ -784,6 +815,7 @@
   "onboardingScreen": {
     "welcome": "مرحباً",
     "pickATheme": "اختر سمة",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "فاتح",
     "dark": "داكن",
     "system": "النظام",
@@ -801,6 +833,7 @@
     "LOCAL_RESTORE": "استعادة من نسخة احتياطية محلية",
     "MIGRATE_NOVEL": "جاري نقل الرواية",
     "DOWNLOAD_CHAPTER": "جاري تنزيل الفصل",
+    "chapterDownloadFailed": "Chapter download failed for %{novelName}",
     "taskQueued": "%{task} queued",
     "taskCompleted": "Completed",
     "taskFailed": "Failed: %{error}"
@@ -909,5 +942,31 @@
     "normalizationValuePlaceholder": "e.g. Sci-Fi",
     "noCategories": "No genre groups yet",
     "noNormalization": "No normalization rules configured"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }
