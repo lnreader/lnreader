@@ -139,6 +139,31 @@ describe('initializeInstalledPlugins', () => {
     expect(getPlugin('legacy')).toMatchObject({ id: 'legacy' });
   });
 
+  it('compiles an installed plugin on first use instead of at launch', async () => {
+    const plugin = {
+      id: 'deferred',
+      name: 'Deferred plugin',
+      url: 'https://example.com/deferred.js',
+    } as PluginItem;
+    const globals = globalThis as { deferredPluginRuns?: number };
+    globals.deferredPluginRuns = 0;
+    jest.mocked(getMMKVObject).mockReturnValueOnce([plugin]);
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest
+      .mocked(NativeFile.readFile)
+      .mockResolvedValue(
+        `globalThis.deferredPluginRuns += 1;\n${pluginCode('deferred')}`,
+      );
+
+    await initializeInstalledPlugins();
+    expect(globals.deferredPluginRuns).toBe(0);
+
+    expect(getPlugin('deferred')).toMatchObject({ id: 'deferred' });
+    expect(getPlugin('deferred')).toMatchObject({ id: 'deferred' });
+    expect(globals.deferredPluginRuns).toBe(1);
+    delete globals.deferredPluginRuns;
+  });
+
   it('downloads a replacement when the installed bundle is missing', async () => {
     const plugin = {
       id: 'missing',

@@ -15,6 +15,16 @@ const readerAssetContentTypes = {
 
 config.resolver.sourceExts.push('sql');
 
+// Expo turns inline requires off, which makes the app evaluate every module in
+// the bundle (all screens, cheerio, sanitize-html, backup, EPUB...) before the
+// first frame. Inlining defers each import until it is first used.
+config.transformer.getTransformOptions = async () => ({
+  transform: {
+    experimentalImportSupport: true,
+    inlineRequires: true,
+  },
+});
+
 config.server.enhanceMiddleware = metroMiddleware => {
   return (request, response, next) => {
     let pathname;
