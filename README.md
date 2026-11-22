@@ -60,6 +60,9 @@ LNReader does not have any affiliation with the content providers available.
 
 Plugin requests should be created at [lnreader-plugins](https://github.com/lnreader/lnreader-plugins).
 
+Reported issues on a plugin's details page come from configured GitHub repositories.
+Issue titles and links use the repository that supplied each report.
+
 ## Translation
 
 Help translate LNReader into your language on [Crowdin](https://crowdin.com/project/lnreader).
