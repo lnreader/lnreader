@@ -450,6 +450,7 @@ export interface StringMap {
   'libraryScreen.bottomSheet.display.unread': 'string';
   'libraryScreen.bottomSheet.display.unreadBadges': 'string';
   'libraryScreen.bottomSheet.filters.completed': 'string';
+  'libraryScreen.bottomSheet.filters.customUpdateFrequency': 'string';
   'libraryScreen.bottomSheet.filters.downloaded': 'string';
   'libraryScreen.bottomSheet.filters.started': 'string';
   'libraryScreen.bottomSheet.filters.unread': 'string';
@@ -532,6 +533,8 @@ export interface StringMap {
   'novelScreen.edit.summary': 'string';
   'novelScreen.edit.title': 'string';
   'novelScreen.inLibaray': 'string';
+  'novelScreen.nextUpdate.customInterval': 'string';
+  'novelScreen.nextUpdate.default': 'string';
   'novelScreen.nextUpdate.expected': 'string';
   'novelScreen.nextUpdate.expectedNull': 'string';
   'novelScreen.nextUpdate.notApplicable': 'string';

@@ -27,6 +27,7 @@ import {
   startOfLocalDay,
   toLocalDay,
 } from '@services/updates/releaseSchedule';
+import { setNovelFetchInterval } from '@services/updates/novelSchedule';
 
 import {
   getAllNovels,
@@ -196,6 +197,25 @@ describe('NovelQueries', () => {
       expect(novel?.nextUpdate).toBe(
         startOfLocalDay(yesterday + 2).toISOString(),
       );
+    });
+
+    it('pins a custom update interval from the last release and can reset it', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const yesterday = toLocalDay(new Date()) - 1;
+      await insertTestChapter(testDb, novelId, {
+        updatedTime: startOfLocalDay(yesterday).toISOString(),
+      });
+
+      const pinned = await setNovelFetchInterval(novelId, 3);
+      expect(pinned).toEqual({
+        fetchInterval: -3,
+        nextUpdate: startOfLocalDay(yesterday + 3).toISOString(),
+      });
+
+      const reset = await setNovelFetchInterval(novelId, 0);
+      // One release day isn't enough history, so the default interval applies
+      expect(reset?.fetchInterval).toBe(7);
     });
 
     it('should remove novel from library', async () => {

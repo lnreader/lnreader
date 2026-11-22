@@ -68,3 +68,27 @@ export const updateNovelSchedule = async (
       .run();
   });
 };
+
+/**
+ * Pins a novel to checking every [days] days from its last release, or with 0
+ * goes back to the predicted schedule. Returns the stored schedule.
+ */
+export const setNovelFetchInterval = async (novelId: number, days: number) => {
+  await dbManager.write(async tx => {
+    await tx
+      .update(novelSchema)
+      .set({ fetchInterval: days > 0 ? -days : 0 })
+      .where(eq(novelSchema.id, novelId))
+      .run();
+  });
+  await updateNovelSchedule(novelId, { manual: true });
+
+  return dbManager
+    .select({
+      fetchInterval: novelSchema.fetchInterval,
+      nextUpdate: novelSchema.nextUpdate,
+    })
+    .from(novelSchema)
+    .where(eq(novelSchema.id, novelId))
+    .get();
+};

@@ -18,6 +18,7 @@ import {
   daysUntilNextUpdate,
   toLocalDay,
 } from '@services/updates/releaseSchedule';
+import { setNovelFetchInterval } from '@services/updates/novelSchedule';
 import NextUpdateDialog from './NextUpdateDialog';
 
 const NButton = ({
@@ -123,6 +124,13 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
   } else if (daysUntilUpdate !== null) {
     nextUpdateLabel = getString('time.days', { count: daysUntilUpdate });
   }
+  const handleIntervalChange = async (days: number) => {
+    if (novel.id === 'NO_ID') return;
+    const schedule = await setNovelFetchInterval(novel.id, days);
+    if (schedule) {
+      setNovel({ ...novel, ...schedule });
+    }
+  };
 
   return (
     <>
@@ -176,12 +184,13 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           />
         ) : null}
       </View>
-      {showNextUpdate ? (
+      {showNextUpdate && nextUpdateDialog.value ? (
         <NextUpdateDialog
-          visible={nextUpdateDialog.value}
+          visible
           onDismiss={nextUpdateDialog.setFalse}
           daysUntilUpdate={daysUntilUpdate}
           fetchInterval={fetchInterval}
+          onIntervalChange={handleIntervalChange}
         />
       ) : null}
       {novel.id !== 'NO_ID' && setCategoryModalVisible ? (

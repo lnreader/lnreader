@@ -14,6 +14,12 @@ const mockSetNovel = jest.fn();
 const mockUpdateNovelCategories = jest.fn();
 const mockGetCategoriesWithCount = jest.fn();
 const mockRefetchLibrary = jest.fn();
+const mockSetNovelFetchInterval = jest.fn();
+
+jest.mock('@services/updates/novelSchedule', () => ({
+  setNovelFetchInterval: (...args: unknown[]) =>
+    mockSetNovelFetchInterval(...args),
+}));
 
 jest.mock('@components/Context/LibraryContext', () => ({
   useLibraryActions: () => ({
@@ -196,6 +202,38 @@ describe('NovelScreenButtonGroup', () => {
       expect(
         screen.getByText('novelScreen.nextUpdate.expectedNull'),
       ).toBeOnTheScreen();
+    });
+
+    it('pins a custom update frequency picked in the dialog', async () => {
+      const nextUpdate = dueIn(3);
+      mockSetNovelFetchInterval.mockResolvedValue({
+        fetchInterval: -3,
+        nextUpdate,
+      });
+      renderWith({ ...baseNovel, fetchInterval: 7, nextUpdate: dueIn(5) });
+
+      fireEvent.press(screen.getByText('time.days'));
+      fireEvent.press(screen.getByText('3'));
+      fireEvent.press(screen.getByText('common.ok'));
+
+      await waitFor(() =>
+        expect(mockSetNovelFetchInterval).toHaveBeenCalledWith(1, 3),
+      );
+      await waitFor(() =>
+        expect(mockSetNovel).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 1, fetchInterval: -3, nextUpdate }),
+        ),
+      );
+    });
+
+    it('leaves the interval alone when the dialog is cancelled', () => {
+      renderWith({ ...baseNovel, fetchInterval: -5, nextUpdate: dueIn(2) });
+
+      fireEvent.press(screen.getByText('time.days'));
+      fireEvent.press(screen.getByText('3'));
+      fireEvent.press(screen.getByText('common.cancel'));
+
+      expect(mockSetNovelFetchInterval).not.toHaveBeenCalled();
     });
 
     it('is hidden for novels outside the library', () => {

@@ -517,6 +517,7 @@
       },
       "filters": {
         "completed": "Completed",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Downloaded",
         "started": "Started",
         "unread": "Unread"
@@ -626,6 +627,8 @@
     },
     "inLibaray": "In library",
     "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
       "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
       "expectedNull": "This novel is either completed, or there is no predicted release date.",
       "notApplicable": "N/A",
