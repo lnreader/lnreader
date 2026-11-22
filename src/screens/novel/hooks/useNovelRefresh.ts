@@ -35,6 +35,7 @@ export const useNovelRefresh = ({
         downloadNewChapters,
         refreshNovelMetadata,
         enqueue,
+        manual: true,
       });
       await Promise.all([
         reloadNovel(),

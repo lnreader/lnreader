@@ -406,6 +406,7 @@ export interface StringMap {
   'generalSettingsScreen.refreshMetadataDescription': 'string';
   'generalSettingsScreen.smartUpdate': 'string';
   'generalSettingsScreen.smartUpdateSkipCompleted': 'string';
+  'generalSettingsScreen.smartUpdateSkipNotDue': 'string';
   'generalSettingsScreen.smartUpdateSkipUnstarted': 'string';
   'generalSettingsScreen.smartUpdateSkipWithUnread': 'string';
   'generalSettingsScreen.sortOrder': 'string';
@@ -531,6 +532,10 @@ export interface StringMap {
   'novelScreen.edit.summary': 'string';
   'novelScreen.edit.title': 'string';
   'novelScreen.inLibaray': 'string';
+  'novelScreen.nextUpdate.expected': 'string';
+  'novelScreen.nextUpdate.expectedNull': 'string';
+  'novelScreen.nextUpdate.notApplicable': 'string';
+  'novelScreen.nextUpdate.soon': 'string';
   'novelScreen.jumpToChapterModal.chapterName': 'string';
   'novelScreen.jumpToChapterModal.chapterNumber': 'string';
   'novelScreen.jumpToChapterModal.description': 'string';
@@ -691,6 +696,8 @@ export interface StringMap {
   'updatesScreen.newChapters': 'string';
   'updatesScreen.novelsUpdated': 'string';
   'updatesScreen.searchbar': 'string';
+  'updatesScreen.skippedNotInReleasePeriod.one': 'string';
+  'updatesScreen.skippedNotInReleasePeriod.other': 'string';
   'updatesScreen.unableToGetNovel': 'string';
   'updatesScreen.updatesLower': 'string';
   'updatesScreen.updatingLibrary': 'string';

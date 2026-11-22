@@ -5,6 +5,7 @@ import type { Scalar, Transaction } from '@op-engineering/op-sqlite';
 
 import { fetchNovel } from '@services/plugin/fetch';
 import { insertChapters } from './ChapterQueries';
+import { updateNovelSchedule } from '@services/updates/novelSchedule';
 
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
@@ -225,6 +226,9 @@ export const switchNovelToLibraryQuery = async (
         showToast(getString('browseScreen.addedToLibrary'));
       }
     });
+    if (newInLibrary) {
+      await updateNovelSchedule(novel.id);
+    }
     return { ...novel, inLibrary: newInLibrary };
   } else {
     const sourceNovel = await fetchNovel(pluginId, novelPath);
@@ -251,6 +255,7 @@ export const switchNovelToLibraryQuery = async (
             .run();
         }
       });
+      await updateNovelSchedule(novelId);
       showToast(getString('browseScreen.addedToLibrary'));
       return getNovelById(novelId);
     }

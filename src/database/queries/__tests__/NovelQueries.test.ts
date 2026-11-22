@@ -22,6 +22,11 @@ import {
 import { eq } from 'drizzle-orm';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
 import type { BackupNovel } from '@database/types';
+import {
+  formatDay,
+  startOfLocalDay,
+  toLocalDay,
+} from '@services/updates/releaseSchedule';
 
 import {
   getAllNovels,
@@ -168,6 +173,29 @@ describe('NovelQueries', () => {
       expect(Boolean(result?.inLibrary)).toBe(true);
       const novel = getNovelById(novelId);
       expect(Boolean(novel?.inLibrary)).toBe(true);
+    });
+
+    it('predicts the next release when a novel joins the library', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, {
+        inLibrary: false,
+        path: '/test/novel',
+        pluginId: 'test-plugin',
+      });
+      const yesterday = toLocalDay(new Date()) - 1;
+      for (const daysBack of [0, 2, 4, 6, 8]) {
+        await insertTestChapter(testDb, novelId, {
+          releaseTime: formatDay(yesterday - daysBack),
+        });
+      }
+
+      await switchNovelToLibraryQuery('/test/novel', 'test-plugin');
+
+      const novel = getNovelById(novelId);
+      expect(novel?.fetchInterval).toBe(2);
+      expect(novel?.nextUpdate).toBe(
+        startOfLocalDay(yesterday + 2).toISOString(),
+      );
     });
 
     it('should remove novel from library', async () => {

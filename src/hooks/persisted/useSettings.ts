@@ -88,6 +88,7 @@ export interface AppSettings {
   smartUpdateSkipCompleted: boolean;
   smartUpdateSkipUnstarted: boolean;
   smartUpdateSkipWithUnread: boolean;
+  smartUpdateSkipNotDue: boolean;
   automaticLibraryUpdateIntervalHours: AutomaticLibraryUpdateInterval;
   automaticBackupIntervalHours?: AutomaticBackupInterval;
   automaticBackupDirectoryUri?: string;
@@ -296,6 +297,7 @@ const initialAppSettings: AppSettings = {
   smartUpdateSkipCompleted: false,
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
+  smartUpdateSkipNotDue: false,
   automaticLibraryUpdateIntervalHours: 0,
   automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,

@@ -14,6 +14,11 @@ import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { MaterialDesignIconName } from '@type/icon';
 import { useNovelAction } from '@screens/novel/NovelContext';
 import { useLibraryActions } from '@components/Context/LibraryContext';
+import {
+  daysUntilNextUpdate,
+  toLocalDay,
+} from '@services/updates/releaseSchedule';
+import NextUpdateDialog from './NextUpdateDialog';
 
 const NButton = ({
   onPress,
@@ -105,6 +110,19 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
     setTrue: showSetCategoryModal,
     setFalse: closeSetCategoryModal,
   } = useBoolean();
+  const nextUpdateDialog = useBoolean();
+
+  const showNextUpdate = inLibrary && !isLocal;
+  const fetchInterval = novel.fetchInterval ?? 0;
+  const daysUntilUpdate = showNextUpdate
+    ? daysUntilNextUpdate(novel, toLocalDay(new Date()))
+    : null;
+  let nextUpdateLabel = getString('novelScreen.nextUpdate.notApplicable');
+  if (daysUntilUpdate === 0) {
+    nextUpdateLabel = getString('novelScreen.nextUpdate.soon');
+  } else if (daysUntilUpdate !== null) {
+    nextUpdateLabel = getString('time.days', { count: daysUntilUpdate });
+  }
 
   return (
     <>
@@ -119,7 +137,15 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           )}
           color={followButtonColor}
         />
-
+        {showNextUpdate ? (
+          <Button
+            theme={theme}
+            onPress={nextUpdateDialog.setTrue}
+            icon="timer-sand-empty"
+            label={nextUpdateLabel}
+            color={fetchInterval < 0 ? theme.primary : undefined}
+          />
+        ) : null}
         {tracker ? (
           <Button
             theme={theme}
@@ -150,6 +176,14 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           />
         ) : null}
       </View>
+      {showNextUpdate ? (
+        <NextUpdateDialog
+          visible={nextUpdateDialog.value}
+          onDismiss={nextUpdateDialog.setFalse}
+          daysUntilUpdate={daysUntilUpdate}
+          fetchInterval={fetchInterval}
+        />
+      ) : null}
       {novel.id !== 'NO_ID' && setCategoryModalVisible ? (
         <SetCategoryModal
           novelIds={[novel.id]}

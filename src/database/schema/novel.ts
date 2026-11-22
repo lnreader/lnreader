@@ -27,6 +27,8 @@ export const novel = sqliteTable(
     totalChapters: integer('totalChapters').default(0),
     lastReadAt: text('lastReadAt'),
     lastUpdatedAt: text('lastUpdatedAt'),
+    fetchInterval: integer('fetchInterval').default(0),
+    nextUpdate: text('nextUpdate'),
   },
   table => [
     uniqueIndex('novel_path_plugin_unique').on(table.path, table.pluginId),
