@@ -35,7 +35,8 @@ const onScrollRatio = (() => {
 
 const ChapterEnding = () => {
   return () =>
-    reader.generalSettings.val.pageReader
+    // Subscribes to chapter swaps, which replace `reader.strings`.
+    reader.chapterVersion.val >= 0 && reader.generalSettings.val.pageReader
       ? div()
       : div(div({ class: 'info-text' }, reader.strings.finished), () =>
           // Reading `adjacentVersion` subscribes this binding to the adjacent
@@ -212,6 +213,11 @@ const ModalWrapper = () => {
       } else {
         hideImage();
       }
+    }
+  });
+  document.addEventListener('ln:chapter-change', () => {
+    if (imgSrc.val) {
+      hideImage();
     }
   });
   return div(ImageModal({ src: imgSrc }));

@@ -378,6 +378,21 @@ window.readerSearch = new (function () {
     this.focus(Math.max(0, Math.min(preferredIndex, this.matches.length - 1)));
   };
 
+  /**
+   * Forgets the search without touching the DOM, for when the chapter markup
+   * (and every highlight in it) is about to be replaced anyway.
+   */
+  this.reset = () => {
+    this.cancelPendingSearch();
+    this.query = '';
+    this.matches = [];
+    this.index = -1;
+    this.total = 0;
+    this.isTruncated = false;
+    this.cachedSegments = null;
+    this.isValidState = true;
+  };
+
   this.invalidateCache = () => {
     this.cachedSegments = null;
     this.isValidState = false;

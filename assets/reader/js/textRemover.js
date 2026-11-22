@@ -191,6 +191,12 @@ window.textRemover = new (function () {
   window.addEventListener('scroll', function () {
     hideSelectionUI();
   });
+
+  /** Drops any selection in the outgoing chapter before it is replaced. */
+  this.reset = function () {
+    hideSelectionUI();
+    window.getSelection()?.removeAllRanges();
+  };
 })();
 
 /**
