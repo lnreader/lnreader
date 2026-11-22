@@ -33,24 +33,24 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const getReaderStack = () => require('./ReaderStack').default;
 const getMoreStack = () => require('./MoreStack').default;
 const getSourceScreen = () =>
-  require('../screens/BrowseSourceScreen/BrowseSourceScreen').default;
+  require('@screens/BrowseSourceScreen/BrowseSourceScreen').default;
 const getMalTopNovels = () =>
-  require('../screens/browse/discover/MalTopNovels').default;
+  require('@screens/browse/discover/MalTopNovels').default;
 const getAniListTopNovels = () =>
-  require('../screens/browse/discover/AniListTopNovels').default;
+  require('@screens/browse/discover/AniListTopNovels').default;
 const getBrowseSettings = () =>
-  require('../screens/browse/settings/BrowseSettings').default;
+  require('@screens/browse/settings/BrowseSettings').default;
 const getPluginDetails = () =>
-  require('../screens/browse/PluginDetailsScreen').default;
+  require('@screens/browse/PluginDetailsScreen').default;
 const getGlobalSearch = () =>
-  require('../screens/GlobalSearchScreen/GlobalSearchScreen').default;
+  require('@screens/GlobalSearchScreen/GlobalSearchScreen').default;
 const getMigration = () =>
-  require('../screens/browse/migration/Migration').default;
-const getSourceNovels = () => require('../screens/browse/SourceNovels').default;
+  require('@screens/browse/migration/Migration').default;
+const getSourceNovels = () => require('@screens/browse/SourceNovels').default;
 const getMigrateNovel = () =>
-  require('../screens/browse/migration/MigrationNovels').default;
+  require('@screens/browse/migration/MigrationNovels').default;
 const getWebviewScreen = () =>
-  require('../screens/WebviewScreen/WebviewScreen').default;
+  require('@screens/WebviewScreen/WebviewScreen').default;
 
 const MainNavigator = () => {
   const theme = useTheme();

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash-es/debounce';
 
 import { NovelItem, PluginItem } from '@plugins/types';
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, waitForPluginRepair } from '@plugins/pluginManager';
 import {
   useBrowseSettings,
   useFilteredInstalledPlugins,
@@ -72,7 +72,8 @@ export const useGlobalSearch = ({
 
       async function searchInPlugin(_plugin: PluginItem) {
         try {
-          const plugin = getPlugin(_plugin.id);
+          const plugin =
+            getPlugin(_plugin.id) ?? (await waitForPluginRepair(_plugin.id));
           if (!plugin) {
             throw new Error(`Unknown plugin: ${_plugin.id}`);
           }

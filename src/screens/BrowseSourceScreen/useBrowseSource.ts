@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { NovelItem } from '@plugins/types';
 
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, waitForPluginRepair } from '@plugins/pluginManager';
 import { FilterToValues, Filters } from '@plugins/types/filterTypes';
 
 export const useBrowseSource = (
@@ -47,7 +47,8 @@ export const useBrowseSource = (
         }
         const generation = generationRef.current;
         try {
-          const plugin = getPlugin(pluginId);
+          const plugin =
+            getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
           if (!plugin) {
             throw new Error(`Unknown plugin: ${pluginId}`);
           }
@@ -194,7 +195,8 @@ export const useSearchSource = (pluginId: string) => {
         }
         const generation = searchGenerationRef.current;
         try {
-          const plugin = getPlugin(pluginId);
+          const plugin =
+            getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
           if (!plugin) {
             throw new Error(`Unknown plugin: ${pluginId}`);
           }

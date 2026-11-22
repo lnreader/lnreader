@@ -9,6 +9,7 @@ import {
   INSTALLED_PLUGINS_KEY,
   reloadInstalledPlugins,
   getFilterSuggestions,
+  waitForPluginRepair,
 } from '../pluginManager';
 import type { PluginItem } from '../types';
 
@@ -162,6 +163,28 @@ describe('initializeInstalledPlugins', () => {
     expect(getPlugin('deferred')).toMatchObject({ id: 'deferred' });
     expect(globals.deferredPluginRuns).toBe(1);
     delete globals.deferredPluginRuns;
+  });
+
+  it('lets source actions wait for a bundle that fails to compile on first use', async () => {
+    const plugin = {
+      id: 'broken',
+      name: 'Broken plugin',
+      url: 'https://example.com/broken.js',
+    } as PluginItem;
+    jest.mocked(getMMKVObject).mockReturnValueOnce([plugin]);
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest.mocked(NativeFile.readFile).mockResolvedValue('this is not { valid');
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      text: async () => pluginCode('broken'),
+    } as Response);
+
+    await initializeInstalledPlugins();
+
+    expect(getPlugin('broken')).toBeUndefined();
+    await expect(waitForPluginRepair('broken')).resolves.toMatchObject({
+      id: 'broken',
+    });
+    expect(getPlugin('broken')).toMatchObject({ id: 'broken' });
   });
 
   it('downloads a replacement when the installed bundle is missing', async () => {

@@ -21,80 +21,78 @@ const SettingsStack = () => {
     >
       <Stack.Screen
         name="Settings"
-        getComponent={() =>
-          require('../screens/settings/SettingsScreen').default
-        }
+        getComponent={() => require('@screens/settings/SettingsScreen').default}
       />
       <Stack.Screen
         name="GeneralSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsGeneralScreen/SettingsGeneralScreen')
+          require('@screens/settings/SettingsGeneralScreen/SettingsGeneralScreen')
             .default
         }
       />
       <Stack.Screen
         name="ReaderSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsReaderScreen/SettingsReaderScreen')
+          require('@screens/settings/SettingsReaderScreen/SettingsReaderScreen')
             .default
         }
       />
       <Stack.Screen
         name="TrackerSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsTrackerScreen').default
+          require('@screens/settings/SettingsTrackerScreen').default
         }
       />
       <Stack.Screen
         name="BackupSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsBackupScreen').default
+          require('@screens/settings/SettingsBackupScreen').default
         }
       />
       <Stack.Screen
         name="AppearanceSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen')
+          require('@screens/settings/SettingsAppearanceScreen/SettingsAppearanceScreen')
             .default
         }
       />
       <Stack.Screen
         name="AdvancedSettings"
         getComponent={() =>
-          require('../screens/settings/SettingsAdvancedScreen').default
+          require('@screens/settings/SettingsAdvancedScreen').default
         }
       />
       <Stack.Screen
         name="RespositorySettings"
         getComponent={() =>
-          require('../screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen')
+          require('@screens/settings/SettingsRepositoryScreen/SettingsRepositoryScreen')
             .default
         }
       />
       <Stack.Screen
         name="LibrarySettings"
         getComponent={() =>
-          require('../screens/settings/SettingsLibraryScreen/SettingsLibraryScreen')
+          require('@screens/settings/SettingsLibraryScreen/SettingsLibraryScreen')
             .default
         }
       />
       <Stack.Screen
         name="CustomCode"
         getComponent={() =>
-          require('../screens/settings/SettingsCustomCodeScreen').default
+          require('@screens/settings/SettingsCustomCodeScreen').default
         }
       />
       <Stack.Screen
         name="CodeSnippets"
         getComponent={() =>
-          require('../screens/settings/SettingsCustomCodeScreen/CodeSnippetsScreen')
+          require('@screens/settings/SettingsCustomCodeScreen/CodeSnippetsScreen')
             .default
         }
       />
       <Stack.Screen
         name="GenreTaxonomy"
         getComponent={() =>
-          require('../screens/settings/SettingsTaxonomyScreen/SettingsTaxonomyScreen')
+          require('@screens/settings/SettingsTaxonomyScreen/SettingsTaxonomyScreen')
             .default
         }
       />
@@ -116,27 +114,25 @@ const MoreStack = () => {
       <Stack.Screen name="SettingsStack" component={SettingsStack} />
       <Stack.Screen
         name="About"
-        getComponent={() => require('../screens/more/About').default}
+        getComponent={() => require('@screens/more/About').default}
       />
       <Stack.Screen
         name="TaskQueue"
-        getComponent={() => require('../screens/more/TaskQueueScreen').default}
+        getComponent={() => require('@screens/more/TaskQueueScreen').default}
       />
       <Stack.Screen
         name="Downloads"
-        getComponent={() => require('../screens/more/DownloadsScreen').default}
+        getComponent={() => require('@screens/more/DownloadsScreen').default}
       />
       <Stack.Screen
         name="Categories"
         getComponent={() =>
-          require('../screens/Categories/CategoriesScreen').default
+          require('@screens/Categories/CategoriesScreen').default
         }
       />
       <Stack.Screen
         name="Statistics"
-        getComponent={() =>
-          require('../screens/StatsScreen/StatsScreen').default
-        }
+        getComponent={() => require('@screens/StatsScreen/StatsScreen').default}
       />
     </Stack.Navigator>
   );

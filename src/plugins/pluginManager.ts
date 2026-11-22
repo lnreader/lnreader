@@ -113,6 +113,9 @@ const plugins: Record<string, Plugin | undefined> = {};
  */
 const pendingPlugins = new Map<string, { code: string; item: PluginItem }>();
 
+/** Re-downloads of stored bundles that no longer compile, by plugin id. */
+const pluginRepairs = new Map<string, Promise<Plugin | undefined>>();
+
 const resolvePlugin = (pluginId: string) => {
   const pending = pendingPlugins.get(pluginId);
   if (!plugins[pluginId] && pending) {
@@ -120,11 +123,21 @@ const resolvePlugin = (pluginId: string) => {
     plugins[pluginId] = initPlugin(pluginId, pending.code);
     if (!plugins[pluginId]) {
       // The stored bundle no longer compiles; fetch it again, as launch used to.
-      installPlugin(pending.item).catch(() => undefined);
+      const repair = installPlugin(pending.item)
+        .catch(() => undefined)
+        .finally(() => pluginRepairs.delete(pluginId));
+      pluginRepairs.set(pluginId, repair);
     }
   }
   return plugins[pluginId];
 };
+
+/**
+ * For source actions, which can wait: resolves once a plugin whose stored
+ * bundle failed to compile on first use has been downloaded again.
+ */
+const waitForPluginRepair = async (pluginId: string) =>
+  pluginRepairs.get(pluginId) ?? plugins[pluginId];
 export { INSTALLED_PLUGINS_KEY } from './constants';
 const PLUGIN_FILES = ['custom.js', 'custom.css', 'index.js'] as const;
 
@@ -248,6 +261,10 @@ const loadPlugin = async (pluginId: string) => {
   if (resolvePlugin(pluginId)) {
     return plugins[pluginId];
   }
+  const repair = pluginRepairs.get(pluginId);
+  if (repair) {
+    return repair;
+  }
 
   const filePath = `${PLUGIN_STORAGE}/${pluginId}/index.js`;
   try {
@@ -334,6 +351,7 @@ const LOCAL_PLUGIN_ID = 'local';
 
 export {
   getPlugin,
+  waitForPluginRepair,
   loadPlugin,
   initializeInstalledPlugins,
   reloadInstalledPlugins,

@@ -99,9 +99,7 @@ const BottomNavigator = () => {
       {showUpdatesTab ? (
         <Tab.Screen
           name="Updates"
-          getComponent={() =>
-            require('../screens/updates/UpdatesScreen').default
-          }
+          getComponent={() => require('@screens/updates/UpdatesScreen').default}
           options={{
             title: getString('updates'),
           }}
@@ -110,9 +108,7 @@ const BottomNavigator = () => {
       {showHistoryTab ? (
         <Tab.Screen
           name="History"
-          getComponent={() =>
-            require('../screens/history/HistoryScreen').default
-          }
+          getComponent={() => require('@screens/history/HistoryScreen').default}
           options={{
             title: getString('history'),
           }}
@@ -120,7 +116,7 @@ const BottomNavigator = () => {
       ) : null}
       <Tab.Screen
         name="Browse"
-        getComponent={() => require('../screens/browse/BrowseScreen').default}
+        getComponent={() => require('@screens/browse/BrowseScreen').default}
         options={{
           title: getString('browse'),
           freezeOnBlur: false,
@@ -131,7 +127,7 @@ const BottomNavigator = () => {
       />
       <Tab.Screen
         name="More"
-        getComponent={() => require('../screens/more/MoreScreen').default}
+        getComponent={() => require('@screens/more/MoreScreen').default}
         options={{
           title: getString('more'),
         }}
