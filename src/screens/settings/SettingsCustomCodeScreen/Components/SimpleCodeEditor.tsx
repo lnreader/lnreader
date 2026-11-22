@@ -159,8 +159,8 @@ function getStylesForNode(
 
 function stripLineBreaks(value: string | number): string {
   return String(value).includes('\r')
-    ? String(value).replace(/\r?\n/g, '')
-    : String(value);
+    ? String(value).replaceAll('\r\n', '')
+    : String(value).replaceAll('\n', '')
 }
 
 function renderInlineNodes(
