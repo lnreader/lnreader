@@ -54,6 +54,14 @@
     },
     "appLanguageDefault": "默认",
     "appTheme": "主题",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "深色",
     "dateFormat": "Date format",
     "dateFormatDefault": "Default (%{date})",
@@ -82,7 +90,8 @@
       "turquoise": "绿松石",
       "yotsuba": "四叶草",
       "catppuccin": "猫咪",
-      "yinyang": "阴阳"
+      "yinyang": "阴阳",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +104,8 @@
     "automaticBackupEvery2Days": "Every 2 days",
     "automaticBackupWeekly": "Weekly",
     "automaticBackupLocation": "Automatic backup location",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Last automatically backed up: %{time}",
     "backupName": "备份名称",
     "backupCreated": "成功创建备份",
@@ -170,6 +181,7 @@
     "googeDriveDesc": "备份到您的 Google 云端硬盘",
     "invalidBackupFolder": "备份文件夹有误",
     "localBackup": "本地备份",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "没有找到备份",
     "options": {
       "title": "Backup contents",
@@ -420,6 +432,8 @@
     "desc": "(递减)",
     "disableLoadingAnimations": "关闭加载动画",
     "disableLoadingAnimationsDesc": "可能会在运行缓慢的设备上提高性能",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "禁用振动反馈",
     "disableHapticFeedbackDescription": "关闭交互时产生的振动。",
     "chapterDownloadCooldown": "Chapter download cooldown",
@@ -553,6 +567,9 @@
       }
     },
     "chapterChapnum": "第 %{num} 章",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "章节",
     "continueReading": "继续阅读",
     "exportEpubModal": {
@@ -670,8 +687,8 @@
       "pageReaderDescription": "Split the chapter into pages instead of scrolling. Experimental — may break formatting in some novels",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
-      "disablePageTransitions": "Disable page transition animation",
-      "disablePageTransitionsDescription": "Turn pages instantly without slide animation",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "删除额外间距",
       "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "滚动长度 (默认屏幕高度)",
@@ -704,7 +721,20 @@
     "noNextChapter": "没有下一章节",
     "noPreviousChapter": "没有上一章节",
     "searchMinLength": "Enter at least %{count} characters to search",
-    "searchPlaceholder": "Search chapter"
+    "searchPlaceholder": "Search chapter",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Chapters",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "chapterCount": "Number of chapters",
+      "start": "Start timer",
+      "cancelTimer": "Cancel timer",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Enter between 1 and 999 chapters.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "滚屏间隔 (秒)",
@@ -713,6 +743,7 @@
     "backgroundColorModal": "背景颜色",
     "clearCustomCSS": "重置您的自定义CSS吗？",
     "clearCustomJS": "重置您的自定义JS吗？",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "在您的选择器中使用 #sourceId-[SOURCEID] 指定特定来源",
     "customCSS": "自定义 CSS",
     "customJS": "自定义 JS",
@@ -784,6 +815,7 @@
   "onboardingScreen": {
     "welcome": "欢迎",
     "pickATheme": "选择一个主题",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "明亮",
     "dark": "黑暗",
     "system": "系统",
@@ -801,6 +833,7 @@
     "LOCAL_RESTORE": "本地恢复",
     "MIGRATE_NOVEL": "正在迁移小说",
     "DOWNLOAD_CHAPTER": "正在下载章节",
+    "chapterDownloadFailed": "Chapter download failed for %{novelName}",
     "taskQueued": "%{task} queued",
     "taskCompleted": "Completed",
     "taskFailed": "Failed: %{error}"
@@ -909,5 +942,31 @@
     "normalizationValuePlaceholder": "e.g. Sci-Fi",
     "noCategories": "No genre groups yet",
     "noNormalization": "No normalization rules configured"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }
