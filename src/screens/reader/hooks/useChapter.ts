@@ -70,9 +70,6 @@ export default function useChapter(
   const [[nextChapter, prevChapter], setAdjacentChapter] =
     useState<AdjacentChapters>(NO_ADJACENT_CHAPTERS);
   const {
-    autoScroll,
-    autoScrollInterval,
-    autoScrollOffset,
     useVolumeButtons,
     volumeButtonsOffset,
     pageReader,
@@ -406,29 +403,6 @@ export default function useChapter(
     },
     [webViewRef],
   );
-
-  const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (!autoScroll) {
-      return undefined;
-    }
-
-    scrollInterval.current = setInterval(() => {
-      webViewRef.current?.injectJavaScript(`(()=>{
-        window.scrollBy({top:${defaultTo(
-          autoScrollOffset,
-          Dimensions.get('window').height,
-        )},behavior:window.reader?.scrollBehavior?.() ?? 'smooth'})
-      })()`);
-    }, autoScrollInterval * 1000);
-
-    return () => {
-      if (scrollInterval.current) {
-        clearInterval(scrollInterval.current);
-        scrollInterval.current = null;
-      }
-    };
-  }, [autoScroll, autoScrollInterval, autoScrollOffset, webViewRef]);
 
   const updateTracker = useCallback(() => {
     const chapterNumber = parseChapterNumber(novel.name, chapter.name);

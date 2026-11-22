@@ -69,6 +69,19 @@ export type ChapterListScrollEvent = Readonly<{
 
 /** `position` is the chapter's list position (excluding the header). */
 export type ChapterIdEvent = Readonly<{ id: Int32; position: Int32 }>;
+export type NovelActionEvent = Readonly<{
+  action: string;
+  requestId?: Int32;
+  selectedIds?: Int32[];
+  chapterId?: Int32;
+  value?: string;
+  values?: string[];
+  byName?: boolean;
+}>;
+export type ChapterSelectionResult = Readonly<{
+  requestId: Int32;
+  ids: ReadonlyArray<Int32>;
+}>;
 export type RequestRangeEvent = Readonly<{ start: Int32; end: Int32 }>;
 export type RefreshEvent = Readonly<{}>;
 /** Where the highlighted chapter is relative to the visible rows. */
@@ -81,8 +94,12 @@ export interface NativeProps extends ViewProps {
   colors: ChapterListColors;
   strings: ChapterListStrings;
   rowFormat: ChapterRowFormat;
+  /** Serialized NovelDetails snapshot. Optional for other consumers of this list. */
+  novelDetails?: string;
+  selectionResult?: ChapterSelectionResult;
+  jumpResult?: string;
   /**
-   * `novel`: the Novel screen's list (its single child is the header).
+   * `novel`: the Novel screen's list, with a native details snapshot or a header child.
    * `drawer`: the reader's chapter drawer: no child and no header item, name and
    * date rows, the `setHighlighted` chapter highlighted, no scroll events.
    */
@@ -107,6 +124,7 @@ export interface NativeProps extends ViewProps {
   scrollEventThresholds?: ReadonlyArray<Float>;
   onScroll?: DirectEventHandler<ChapterListScrollEvent>;
   onChapterPress?: DirectEventHandler<ChapterIdEvent>;
+  onNovelAction?: DirectEventHandler<NovelActionEvent>;
   onChapterLongPress?: DirectEventHandler<ChapterIdEvent>;
   onDownloadPress?: DirectEventHandler<ChapterIdEvent>;
   onDeletePress?: DirectEventHandler<ChapterIdEvent>;

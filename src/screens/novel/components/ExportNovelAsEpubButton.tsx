@@ -7,7 +7,6 @@ import NativeFile from '@modules/native-file';
 
 import { NovelInfo } from '@database/types';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
-import { useBoolean } from '@hooks/index';
 import { showToast } from '@utils/showToast';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { getString } from '@i18n/translations';
@@ -18,20 +17,14 @@ import ExportEpubModal, { EpubExportOptions } from './ExportEpubModal';
 
 interface ExportNovelAsEpubButtonProps {
   novel?: NovelInfo;
-  renderIcon: (onPress: () => void) => React.ReactNode;
+  onDismiss: () => void;
 }
 
 const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
   novel,
-  renderIcon,
+  onDismiss,
 }) => {
   const theme = useTheme();
-
-  const {
-    value: isModalVisible,
-    setTrue: showModal,
-    setFalse: hideModal,
-  } = useBoolean(false);
 
   const readerSettings = useChapterReaderSettings();
   const appThemeStylesheet = useMemo(() => {
@@ -180,19 +173,14 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
   };
 
   return (
-    <>
-      {renderIcon(showModal)}
-      <Portal>
-        {isModalVisible ? (
-          <ExportEpubModal
-            isVisible
-            defaultFileName={novel?.name || 'novel'}
-            hideModal={hideModal}
-            onSubmit={exportNovelAsEpub}
-          />
-        ) : null}
-      </Portal>
-    </>
+    <Portal>
+      <ExportEpubModal
+        isVisible
+        defaultFileName={novel?.name || 'novel'}
+        hideModal={onDismiss}
+        onSubmit={exportNovelAsEpub}
+      />
+    </Portal>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Share } from 'react-native';
 import isNumber from 'lodash-es/isNumber';
 
@@ -13,29 +13,17 @@ import { useDownload } from '@hooks/persisted';
 import { resolveUrl } from '@services/plugin/fetch';
 import { getErrorMessage } from '@utils/error';
 import { showToast } from '@utils/showToast';
-import { MaterialDesignIconName } from '@type/icon';
 
 import { useNovelActions } from '../NovelContext';
 
-type SelectionAction = {
-  icon: MaterialDesignIconName;
-  onPress: () => void;
-};
-
 interface UseNovelScreenActionsOptions {
   chapters: ChapterInfo[];
-  clearSelection: () => void;
   novel?: NovelInfo;
-  selectedIds: number[];
-  selectedChapters: ChapterInfo[];
 }
 
 export const useNovelScreenActions = ({
   chapters,
-  clearSelection,
   novel,
-  selectedIds,
-  selectedChapters,
 }: UseNovelScreenActionsOptions) => {
   const {
     bookmarkChapters,
@@ -95,118 +83,63 @@ export const useNovelScreenActions = ({
     }
   }, [novel]);
 
-  const selectionActions = useMemo(() => {
-    const actions: SelectionAction[] = [];
-    const finish = (action: () => void) => () => {
-      action();
-      clearSelection();
-    };
-
-    const hasUnloadedSelection = selectedIds.length > selectedChapters.length;
-
-    if (
-      !novel?.isLocal &&
-      (hasUnloadedSelection ||
-        selectedChapters.some(chapter => !chapter.isDownloaded))
-    ) {
-      actions.push({
-        icon: 'download-outline',
-        onPress: finish(() => {
-          if (novel) {
-            void getChaptersByIds(selectedIds).then(chaptersToDownload => {
-              const availableChapters = chaptersToDownload.filter(
-                chapter => !chapter.isDownloaded,
-              );
-              if (availableChapters.length > 0) {
-                downloadChapters(novel, availableChapters);
-              }
-            });
+  const runSelectionAction = useCallback(
+    async (action: string, ids: readonly number[], chapterId?: number) => {
+      if (!novel || ids.length === 0) return;
+      const selectedIds = [...ids];
+      switch (action) {
+        case 'selection-download-outline': {
+          const rows = await getChaptersByIds(selectedIds);
+          const available = rows.filter(chapter => !chapter.isDownloaded);
+          if (available.length > 0) downloadChapters(novel, available);
+          break;
+        }
+        case 'selection-trash-can-outline': {
+          const rows = await getChaptersByIds(selectedIds);
+          const downloadedIds = rows
+            .filter(chapter => chapter.isDownloaded)
+            .map(chapter => chapter.id);
+          if (downloadedIds.length > 0) await deleteChapters(downloadedIds);
+          break;
+        }
+        case 'selection-bookmark-outline':
+          await bookmarkChapters(selectedIds);
+          break;
+        case 'selection-check':
+          await markChaptersRead(selectedIds);
+          break;
+        case 'selection-check-outline':
+          await markChaptersUnreadAndResetProgress(selectedIds);
+          break;
+        case 'selection-playlist-check':
+          if (chapterId !== undefined) {
+            await markPreviouschaptersRead(chapterId);
           }
-        }),
-      });
-    }
-
-    if (
-      !novel?.isLocal &&
-      (hasUnloadedSelection ||
-        selectedChapters.some(chapter => chapter.isDownloaded))
-    ) {
-      actions.push({
-        icon: 'trash-can-outline',
-        onPress: finish(() => {
-          void getChaptersByIds(selectedIds).then(selectedChapterRows => {
-            const downloadedChapterIds = selectedChapterRows
-              .filter(chapter => chapter.isDownloaded)
-              .map(chapter => chapter.id);
-            if (downloadedChapterIds.length > 0) {
-              deleteChapters(downloadedChapterIds);
-            }
-          });
-        }),
-      });
-    }
-
-    actions.push({
-      icon: 'bookmark-outline',
-      onPress: finish(() => bookmarkChapters(selectedIds)),
-    });
-
-    if (
-      hasUnloadedSelection ||
-      selectedChapters.some(chapter => chapter.unread)
-    ) {
-      actions.push({
-        icon: 'check',
-        onPress: finish(() => markChaptersRead(selectedIds)),
-      });
-    }
-
-    if (
-      hasUnloadedSelection ||
-      selectedChapters.some(chapter => !chapter.unread)
-    ) {
-      actions.push({
-        icon: 'check-outline',
-        onPress: finish(() => {
-          void markChaptersUnreadAndResetProgress(selectedIds);
-        }),
-      });
-    }
-
-    if (selectedChapters.length === 1) {
-      const selectedChapter = selectedChapters[0];
-      actions.push({
-        icon: selectedChapter.unread ? 'playlist-check' : 'playlist-remove',
-        onPress: finish(() => {
-          if (selectedChapter.unread) {
-            markPreviouschaptersRead(selectedChapter.id);
-          } else {
-            markPreviousChaptersUnread(selectedChapter.id);
+          break;
+        case 'selection-playlist-remove':
+          if (chapterId !== undefined) {
+            await markPreviousChaptersUnread(chapterId);
           }
-        }),
-      });
-    }
-
-    return actions;
-  }, [
-    bookmarkChapters,
-    clearSelection,
-    deleteChapters,
-    downloadChapters,
-    markChaptersRead,
-    markChaptersUnreadAndResetProgress,
-    markPreviousChaptersUnread,
-    markPreviouschaptersRead,
-    novel,
-    selectedIds,
-    selectedChapters,
-  ]);
+          break;
+      }
+    },
+    [
+      novel,
+      downloadChapters,
+      deleteChapters,
+      bookmarkChapters,
+      markChaptersRead,
+      markChaptersUnreadAndResetProgress,
+      markPreviouschaptersRead,
+      markPreviousChaptersUnread,
+    ],
+  );
 
   return {
     deleteDownloadedChapters,
     downloadAvailableChapters,
     downloadChapters,
-    selectionActions,
+    runSelectionAction,
     shareNovel,
   };
 };

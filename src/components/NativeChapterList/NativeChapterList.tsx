@@ -21,6 +21,10 @@ import {
   ChapterListViewCommands,
   ChapterListViewNativeComponent,
   type HighlightedVisibilityChangeEvent,
+  type NovelDetails,
+  type ChapterJumpResult,
+  type NovelActionEvent,
+  type ChapterSelectionResult,
   type RequestRangeEvent,
 } from '@modules/nitro-chapter-list';
 import type { ThemeColors } from '@theme/types';
@@ -58,6 +62,10 @@ interface NativeChapterListProps {
   variant?: 'novel' | 'drawer';
   /** Rendered by React above the rows and scrolled with them. Omit for none. */
   header?: React.ReactNode;
+  novelDetails?: NovelDetails;
+  onNovelAction?: (event: NovelActionEvent) => void;
+  selectionResult?: ChapterSelectionResult;
+  jumpResult?: ChapterJumpResult;
   /** Row placed at the top when the list first shows rows, without a jump. */
   initialPosition?: number;
   isLocal?: boolean;
@@ -111,6 +119,10 @@ const NativeChapterList = ({
   rowFormat,
   variant = 'novel',
   header,
+  novelDetails,
+  onNovelAction,
+  selectionResult,
+  jumpResult,
   initialPosition,
   isLocal = false,
   refreshing = false,
@@ -202,6 +214,10 @@ const NativeChapterList = ({
       onRequestRange(event.nativeEvent.start, event.nativeEvent.end),
     [onRequestRange],
   );
+  const serializedDetails = useMemo(
+    () => (novelDetails ? JSON.stringify(novelDetails) : undefined),
+    [novelDetails],
+  );
 
   const handleHighlightedVisibilityChange = useMemo(
     () =>
@@ -220,6 +236,12 @@ const NativeChapterList = ({
       colors={colors}
       strings={strings}
       rowFormat={rowFormat}
+      novelDetails={serializedDetails}
+      selectionResult={selectionResult}
+      jumpResult={jumpResult ? JSON.stringify(jumpResult) : undefined}
+      onNovelAction={
+        onNovelAction ? event => onNovelAction(event.nativeEvent) : undefined
+      }
       variant={variant}
       initialPosition={initialPosition}
       // Codegen casts these straight to Java booleans, and novel rows can carry

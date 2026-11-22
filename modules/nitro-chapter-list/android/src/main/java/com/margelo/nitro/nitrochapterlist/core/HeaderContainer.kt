@@ -6,20 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 
 /**
- * Hosts the list's React child (the novel header). [HeaderViewHolder] moves it
- * into whichever header item RecyclerView is showing.
+ * Hosts the native novel header or a React header supplied by the caller.
+ * [HeaderViewHolder] moves this container into the visible header item.
  *
  * Fabric keeps measuring and laying out the child at its Yoga frame (top-left of
- * the list, full width). This container never re-lays the child out; it only
- * sizes itself to the child's height and asks the list to relayout when that
- * height changes.
+ * the list, full width). Native headers use RecyclerView's width and measure
+ * their own height so metadata and text size changes stay in Android layout.
  */
 @SuppressLint("ViewConstructor")
 class HeaderContainer(context: Context) : ViewGroup(context) {
   var reactChild: View? = null
     private set
+  private var nativeChild: View? = null
 
-  /** Last height Fabric gave the child, kept while the header is scrolled away. */
+  /** Last measured header height, kept while the header is scrolled away. */
   var contentHeight: Int = 0
     private set
 
@@ -52,6 +52,14 @@ class HeaderContainer(context: Context) : ViewGroup(context) {
     // would shift the rows up mid-animation.
   }
 
+  fun setNativeChild(child: View?) {
+    if (nativeChild === child) return
+    nativeChild?.let(::removeView)
+    nativeChild = child
+    if (child != null) addView(child)
+    requestLayout()
+  }
+
   private fun updateContentHeight(height: Int) {
     if (height == contentHeight) return
     contentHeight = height
@@ -60,10 +68,18 @@ class HeaderContainer(context: Context) : ViewGroup(context) {
   }
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    nativeChild?.let { child ->
+      child.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
+      if (contentHeight != child.measuredHeight) {
+        contentHeight = child.measuredHeight
+        post { onContentHeightChanged?.invoke() }
+      }
+    }
     setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), contentHeight)
   }
 
   override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+    nativeChild?.let { it.layout(0, 0, it.measuredWidth, it.measuredHeight) }
     // Fabric owns the child's frame.
   }
 

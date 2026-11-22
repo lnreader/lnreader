@@ -190,6 +190,44 @@ const loadReader = async ({
 const restoredTop = (progress: number) =>
   (CHAPTER_HEIGHT * progress) / 100 - VIEWPORT.height;
 
+it('keeps one auto-scroll timer across chapter swaps and clears it when disabled', async () => {
+  const page = await loadReader();
+  const { window } = page;
+  const settings = window.reader.generalSettings;
+  const startTimer = jest.spyOn(window, 'setInterval').mockReturnValue(42);
+  const stopTimer = jest.spyOn(window, 'clearInterval');
+  const scrollBy = jest.spyOn(window, 'scrollBy');
+
+  try {
+    settings.val = { ...settings.val, autoScroll: true, autoScrollInterval: 2 };
+    await settle(window);
+    expect(startTimer).toHaveBeenCalledWith(expect.any(Function), 2000);
+    const tick = startTimer.mock.calls[0][0] as () => void;
+    tick();
+    expect(scrollBy).toHaveBeenLastCalledWith({
+      top: VIEWPORT.height,
+      behavior: 'smooth',
+    });
+
+    settings.val = {
+      ...settings.val,
+      autoScrollOffset: 100,
+      pageReaderDisableAnimation: true,
+    };
+    await page.setChapter(2, 0, '<p>Second chapter</p>');
+    expect(startTimer).toHaveBeenCalledTimes(1);
+    tick();
+    expect(scrollBy).toHaveBeenLastCalledWith({ top: 100, behavior: 'auto' });
+
+    settings.val = { ...settings.val, autoScroll: false };
+    await settle(window);
+    expect(stopTimer).toHaveBeenCalledWith(42);
+    expect(startTimer).toHaveBeenCalledTimes(1);
+  } finally {
+    page.close();
+  }
+});
+
 describe('reader.setChapter', () => {
   it('replaces the chapter and restores its reading position', async () => {
     const page = await loadReader();

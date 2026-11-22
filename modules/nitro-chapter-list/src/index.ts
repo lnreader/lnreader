@@ -6,6 +6,13 @@ import type { ChapterListStore } from './specs/ChapterListStore.nitro';
 import ChapterListViewNativeComponent, {
   Commands as NativeCommands,
 } from './fabric/ChapterListViewNativeComponent';
+export type {
+  NovelDetails,
+  NovelDetailsAction,
+  ChapterSettingsPanel,
+  ChapterJumpPanel,
+  ChapterJumpResult,
+} from './NovelDetails';
 
 export const createChapterListStore = (): ChapterListStore =>
   NitroModules.createHybridObject<ChapterListStore>('ChapterListStore');
@@ -21,6 +28,8 @@ export type {
   ChapterListStrings,
   NativeProps as ChapterListViewNativeProps,
   RequestRangeEvent,
+  NovelActionEvent,
+  ChapterSelectionResult,
 } from './fabric/ChapterListViewNativeComponent';
 export type {
   ChapterListStore,

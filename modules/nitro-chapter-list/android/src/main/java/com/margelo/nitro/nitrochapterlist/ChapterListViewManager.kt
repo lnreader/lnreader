@@ -45,6 +45,19 @@ class ChapterListViewManager :
     view.setStoreId(value)
   }
 
+  override fun setNovelDetails(view: ChapterListView, value: String?) {
+    view.setNovelDetails(value)
+  }
+
+  override fun setJumpResult(view: ChapterListView, value: String?) {
+    view.setJumpResult(value)
+  }
+
+  override fun setSelectionResult(view: ChapterListView, value: ReadableMap?) {
+    val ids = value?.getArray("ids") ?: return
+    view.setSelectionResult(value.getInt("requestId"), IntArray(ids.size(), ids::getInt))
+  }
+
   override fun setVariant(view: ChapterListView, value: String?) {
     view.setVariant(value)
   }

@@ -115,7 +115,7 @@ export function NovelContextProvider({ children, route }: Props) {
   );
 }
 
-function useNovelStoreApi() {
+export function useNovelStoreApi() {
   const store = useContext(NovelStoreContext);
 
   if (!store) {

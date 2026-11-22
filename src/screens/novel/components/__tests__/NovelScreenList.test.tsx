@@ -8,13 +8,28 @@ import NovelScreenList from '../NovelScreenList';
 const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
 const mockDownloadChapter = jest.fn();
+const mockPresentSheet = jest.fn();
 let mockDownloadingChapterIds = new Set<number>();
 let mockDownloadingNovelIds = new Set<number>();
 let mockDownloadQueue: any[] = [];
 
+jest.mock('@plugins/pluginManager', () => ({
+  getPlugin: () => undefined,
+}));
+
 jest.mock('../../NovelContext', () => ({
   useNovelValue: (key: string) => mockUseNovelValue(key),
   useNovelActions: () => mockUseNovelActions(),
+  useNovelStoreApi: () => ({
+    getState: () => ({
+      actions: mockUseNovelActions(),
+      novel: mockUseNovelValue('novel'),
+      novelSettings: mockUseNovelValue('novelSettings'),
+      pages: mockUseNovelValue('pages'),
+      pageIndex: mockUseNovelValue('pageIndex'),
+    }),
+  }),
+  useNovelAction: (key: string) => mockUseNovelActions()[key],
 }));
 
 jest.mock('@hooks/persisted', () => ({
@@ -29,6 +44,8 @@ jest.mock('@hooks/persisted', () => ({
     downloadingNovelIds: mockDownloadingNovelIds,
     downloadChapter: mockDownloadChapter,
   }),
+  useTracker: () => ({ tracker: 'anilist' }),
+  useTrackedNovel: () => ({ trackedNovel: undefined }),
   useTheme: () => ({
     primary: '#111',
     onPrimary: '#fff',
@@ -67,70 +84,31 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('../Info/NovelInfoHeader', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-  return () =>
-    React.createElement(Text, { testID: 'novel-info-header' }, 'hdr');
-});
-
-jest.mock('../PagePaginationControl', () => {
-  const React = require('react');
-  const { Pressable, Text, View } = require('react-native');
-
-  return ({ onPageChange }: any) =>
-    React.createElement(
-      View,
-      null,
-      React.createElement(
-        Pressable,
-        { testID: 'pagination-change-page', onPress: () => onPageChange(1) },
-        React.createElement(Text, null, 'change-page'),
-      ),
-    );
-});
-
-jest.mock('../NovelBottomSheet', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-  return () =>
-    React.createElement(Text, { testID: 'novel-bottom-sheet' }, 'nbs');
-});
-
 jest.mock('../Tracker/TrackSheet', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () => React.createElement(Text, { testID: 'track-sheet' }, 'track');
+  return ({ bottomSheetRef }: any) => {
+    React.useImperativeHandle(bottomSheetRef, () => ({
+      present: () => mockPresentSheet('track-sheet'),
+    }));
+    return React.createElement(Text, { testID: 'track-sheet' }, 'track');
+  };
 });
 
 jest.mock('../PageNavigationBottomSheet', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () =>
-    React.createElement(Text, { testID: 'page-navigation-sheet' }, 'navsheet');
-});
-
-jest.mock('react-native-paper', () => {
-  const React = require('react');
-  const { Pressable, Text } = require('react-native');
-
-  return {
-    ...jest.requireActual('react-native-paper'),
-    AnimatedFAB: ({ onPress, label }: any) =>
-      React.createElement(
-        Pressable,
-        {
-          testID: label ? 'continue-reading-fab' : 'scroll-to-top-fab',
-          onPress,
-        },
-        React.createElement(Text, null, label || 'fab'),
-      ),
+  return ({ bottomSheetRef }: any) => {
+    React.useImperativeHandle(bottomSheetRef, () => ({
+      present: () => mockPresentSheet('page-navigation-sheet'),
+    }));
+    return React.createElement(
+      Text,
+      { testID: 'page-navigation-sheet' },
+      'navsheet',
+    );
   };
 });
-
-jest.mock('@components/Skeleton/Skeleton', () => ({
-  ChapterListSkeleton: () => null,
-}));
 
 jest.mock('@database/queries/NovelQueries', () => ({
   pickCustomNovelCover: jest.fn(),
@@ -213,6 +191,7 @@ const createStore = (overrides: Record<string, unknown> = {}) => {
     novelSettings: { filter: [], showChapterTitles: false },
     pages: ['1', '2'],
     setNovel: jest.fn(),
+    setNovelSettings: jest.fn(),
     novel: baseNovel,
     batchInformation: { batch: 0, total: 1, totalChapters: 2 },
     pageIndex: 0,
@@ -239,6 +218,7 @@ const wireStoreSelectors = (store: ReturnType<typeof createStore>) => {
   mockUseNovelActions.mockReturnValue({
     deleteChapter: store.state.deleteChapter,
     setNovel: store.state.setNovel,
+    setNovelSettings: store.state.setNovelSettings,
     getChapters: store.state.getChapters,
     syncDownloadedChapters: store.state.syncDownloadedChapters,
     openPage: store.state.openPage,
@@ -249,13 +229,16 @@ const wireStoreSelectors = (store: ReturnType<typeof createStore>) => {
 
 const navigation = { navigate: jest.fn() };
 const listRef = { current: { scrollToOffset: jest.fn() } };
-const headerOpacity = { set: jest.fn() };
 const onRefresh = jest.fn();
+
+const fireNovelAction = (action: string) =>
+  fireEvent(screen.getByTestId('native-chapter-list'), 'novelAction', {
+    nativeEvent: { action },
+  });
 
 const renderList = () =>
   render(
     <NovelScreenList
-      headerOpacity={headerOpacity as any}
       listRef={listRef as any}
       navigation={navigation}
       routeBaseNovel={{
@@ -263,8 +246,6 @@ const renderList = () =>
         path: '/novel/test',
         pluginId: 'plugin.test',
       }}
-      selected={[]}
-      setSelected={jest.fn()}
       onRefresh={onRefresh}
       updating={false}
     />,
@@ -303,7 +284,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
     mockDownloadingChapterIds = new Set<number>([2]);
     view.rerender(
       <NovelScreenList
-        headerOpacity={headerOpacity as any}
         listRef={listRef as any}
         navigation={navigation}
         routeBaseNovel={{
@@ -311,8 +291,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
           path: '/novel/test',
           pluginId: 'plugin.test',
         }}
-        selected={[]}
-        setSelected={jest.fn()}
         onRefresh={onRefresh}
         updating={false}
       />,
@@ -324,7 +302,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
     mockDownloadingNovelIds = new Set<number>();
     view.rerender(
       <NovelScreenList
-        headerOpacity={headerOpacity as any}
         listRef={listRef as any}
         navigation={navigation}
         routeBaseNovel={{
@@ -332,8 +309,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
           path: '/novel/test',
           pluginId: 'plugin.test',
         }}
-        selected={[]}
-        setSelected={jest.fn()}
         onRefresh={onRefresh}
         updating={false}
       />,
@@ -371,7 +346,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
     ];
     view.rerender(
       <NovelScreenList
-        headerOpacity={headerOpacity as any}
         listRef={listRef as any}
         navigation={navigation}
         routeBaseNovel={{
@@ -379,8 +353,6 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
           path: '/novel/test',
           pluginId: 'plugin.test',
         }}
-        selected={[]}
-        setSelected={jest.fn()}
         onRefresh={onRefresh}
         updating={false}
       />,
@@ -396,10 +368,29 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
 
     renderList();
 
-    fireEvent.press(screen.getByTestId('pagination-change-page'));
+    fireNovelAction('page-1');
 
     expect(store.state.openPage).toHaveBeenCalledWith(1);
   });
+
+  it.each([
+    ['track-sheet', 'track'],
+    ['page-navigation-sheet', 'page-picker'],
+  ])(
+    'mounts and presents the %s on its first tap and presents it again on reopen',
+    (sheet, action) => {
+      wireStoreSelectors(createStore({ pages: ['1', '2', '3', '4'] }));
+      renderList();
+
+      expect(screen.queryByTestId(sheet)).toBeNull();
+
+      fireNovelAction(action);
+      expect(screen.getByTestId(sheet)).toBeOnTheScreen();
+
+      fireNovelAction(action);
+      expect(mockPresentSheet.mock.calls).toEqual([[sheet], [sheet]]);
+    },
+  );
 
   it('keeps continue-reading FAB navigation parity with lastRead fallback chain', () => {
     const lastRead = { ...baseChapter, id: 42 };
@@ -412,7 +403,7 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
 
     renderList();
 
-    fireEvent.press(screen.getByTestId('continue-reading-fab'));
+    fireNovelAction('resume');
 
     expect(navigation.navigate).toHaveBeenCalledWith('ReaderStack', {
       screen: 'Chapter',
@@ -430,18 +421,16 @@ describe('NovelScreenList native chapter list', () => {
       chapterNumber: index + 1,
     }));
 
-  const renderWithStore = (
-    store: ReturnType<typeof createStore>,
-    selected: number[] = [],
-  ) => {
+  const renderWithStore = (store: ReturnType<typeof createStore>) => {
     const loadUpToBatch = jest.fn().mockResolvedValue(undefined);
-    const setSelected = jest.fn();
+    const onSelectionAction = jest.fn().mockResolvedValue(undefined);
     mockUseNovelValue.mockImplementation(
       (key: keyof typeof store.state) => store.state[key],
     );
     mockUseNovelActions.mockReturnValue({
       deleteChapter: store.state.deleteChapter,
       setNovel: store.state.setNovel,
+      setNovelSettings: store.state.setNovelSettings,
       getChapters: store.state.getChapters,
       syncDownloadedChapters: store.state.syncDownloadedChapters,
       openPage: store.state.openPage,
@@ -450,23 +439,21 @@ describe('NovelScreenList native chapter list', () => {
     const ref = {
       current: { scrollToOffset: jest.fn(), scrollToIndex: jest.fn() },
     };
-    const element = (nextSelected: number[]) => (
+    const element = () => (
       <NovelScreenList
-        headerOpacity={headerOpacity as any}
         listRef={ref as any}
+        onSelectionAction={onSelectionAction}
         navigation={navigation}
         routeBaseNovel={{
           name: 'Route Novel',
           path: '/novel/test',
           pluginId: 'plugin.test',
         }}
-        selected={nextSelected}
-        setSelected={setSelected}
         onRefresh={onRefresh}
         updating={false}
       />
     );
-    const view = render(element(selected));
+    const view = render(element());
     const list = screen.getByTestId('native-chapter-list');
     const nativeStore = (createChapterListStore as jest.Mock).mock.results.at(
       -1,
@@ -476,9 +463,8 @@ describe('NovelScreenList native chapter list', () => {
       list,
       nativeStore,
       loadUpToBatch,
-      setSelected,
-      rerender: (nextSelected: number[]) =>
-        view.rerender(element(nextSelected)),
+      onSelectionAction,
+      rerender: () => view.rerender(element()),
     };
   };
 
@@ -582,7 +568,7 @@ describe('NovelScreenList native chapter list', () => {
     // getChapters: back to the first batch, as fresh chapter objects.
     store.state.chapters = makeChapters(1000);
     store.state.batchInformation = { batch: 0, total: 3, totalChapters: 3000 };
-    rerender([]);
+    rerender();
 
     expect(nativeStore.reset).toHaveBeenCalledTimes(1);
     expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
@@ -600,10 +586,10 @@ describe('NovelScreenList native chapter list', () => {
 
     // A second getChapters invalidates that load and lands on batch 0 again.
     store.state.fetching = true;
-    rerender([]);
+    rerender();
     store.state.chapters = makeChapters(1000);
     store.state.fetching = false;
-    rerender([]);
+    rerender();
 
     expect(loadUpToBatch).toHaveBeenCalledTimes(2);
     expect(loadUpToBatch).toHaveBeenLastCalledWith(2);
@@ -627,12 +613,29 @@ describe('NovelScreenList native chapter list', () => {
     );
   });
 
-  it('only asks for scroll events where the app bar and FABs need them', () => {
+  it('normalizes genres for the native details header', () => {
+    const store = createStore({
+      novel: { ...baseNovel, genres: 'Fantasy, Adventure, , Romance ' },
+    });
+    const { list } = renderWithStore(store);
+    expect(JSON.parse(list.props.novelDetails).genres).toEqual([
+      'Fantasy',
+      'Adventure',
+      'Romance',
+    ]);
+  });
+
+  it('uses native details and handles scroll controls without JS scroll events', () => {
     const store = createStore({ chapters: makeChapters(2) });
     const { list } = renderWithStore(store);
 
-    expect(list.props.scrollEventMaxOffset).toBe(200);
-    expect(list.props.scrollEventThresholds).toEqual([expect.any(Number)]);
+    expect(JSON.parse(list.props.novelDetails)).toMatchObject({
+      title: baseNovel.name,
+      pages: expect.arrayContaining([
+        expect.objectContaining({ id: 'page-0' }),
+      ]),
+    });
+    expect(list.props.onScroll).toBeUndefined();
   });
 
   it('opens a chapter on press', () => {
@@ -650,33 +653,168 @@ describe('NovelScreenList native chapter list', () => {
     });
   });
 
-  it('starts selection on long press and toggles it on press in selection mode', () => {
-    const store = createStore({ chapters: makeChapters(3) });
-    const { list, setSelected, rerender } = renderWithStore(store);
+  it('returns filtered Select All IDs to the native request, including unloaded chapters', async () => {
+    const { getPageChapterIds } = jest.requireMock(
+      '@database/queries/ChapterQueries',
+    );
+    const ids = Array.from({ length: 1001 }, (_, index) => index + 1);
+    getPageChapterIds.mockResolvedValueOnce(ids);
+    const store = createStore({
+      chapters: makeChapters(3),
+      pageIndex: 1,
+      novelSettings: { filter: ['unread'], excludedScanlators: ['Group'] },
+    });
+    const { list } = renderWithStore(store);
+    fire(list, 'novelAction', { action: 'select-all', requestId: 42 });
 
-    fire(list, 'chapterLongPress', { id: 2, position: 1 });
-    const startSelection = setSelected.mock.calls[0][0];
-    expect(startSelection([])).toEqual([2]);
-
-    rerender([2]);
-    fire(list, 'chapterPress', { id: 3, position: 2 });
-
-    expect(navigation.navigate).not.toHaveBeenCalled();
-    const toggle = setSelected.mock.calls[1][0];
-    expect(toggle([2])).toEqual([2, 3]);
+    expect(getPageChapterIds).toHaveBeenCalledWith(7, ['unread'], '2', [
+      'Group',
+    ]);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('native-chapter-list').props.selectionResult,
+      ).toEqual({ requestId: 42, ids }),
+    );
   });
 
-  it('pushes selection and downloading state to the native store', () => {
+  it('applies native settings changes against the latest stored settings', () => {
+    const store = createStore();
+    store.state.setNovelSettings.mockImplementation(next => {
+      store.state.novelSettings = next;
+    });
+    const { list } = renderWithStore(store);
+
+    fire(list, 'novelAction', {
+      action: 'chapter-settings-filter',
+      values: ['not-read', 'bookmarked'],
+    });
+    fire(list, 'novelAction', {
+      action: 'chapter-settings-sort',
+      value: 'nameDesc',
+    });
+    fire(list, 'novelAction', {
+      action: 'chapter-settings-display',
+      value: 'title',
+    });
+    fire(list, 'novelAction', {
+      action: 'chapter-settings-scanlators',
+      values: ['Group'],
+    });
+
+    expect(store.state.novelSettings).toEqual({
+      filter: ['not-read', 'bookmarked'],
+      sort: 'nameDesc',
+      showChapterTitles: true,
+      excludedScanlators: ['Group'],
+    });
+  });
+
+  it('returns name matches and the ordered index of an unloaded chapter', async () => {
+    const { getNovelChaptersByName, getPageChapterIds } = jest.requireMock(
+      '@database/queries/ChapterQueries',
+    );
+    getNovelChaptersByName.mockResolvedValueOnce([{ ...baseChapter, id: 42 }]);
+    getPageChapterIds.mockResolvedValueOnce([8, 42, 1]);
+    const { list } = renderWithStore(
+      createStore({
+        pageIndex: 1,
+        novelSettings: {
+          sort: 'nameDesc',
+          filter: ['not-read'],
+          excludedScanlators: ['Group'],
+        },
+      }),
+    );
+    fire(list, 'novelAction', {
+      action: 'chapter-jump-search',
+      requestId: 4,
+      value: ' Chapter ',
+      byName: true,
+    });
+
+    expect(getNovelChaptersByName).toHaveBeenCalledWith(7, 'chapter');
+    const getResult = () =>
+      JSON.parse(screen.getByTestId('native-chapter-list').props.jumpResult);
+    await waitFor(() =>
+      expect(getResult()).toMatchObject({
+        requestId: 4,
+        matches: [{ id: 42, title: 'Chapter 1' }],
+      }),
+    );
+
+    fire(list, 'novelAction', {
+      action: 'chapter-jump-scroll',
+      requestId: 4,
+      chapterId: 42,
+    });
+
+    expect(getPageChapterIds).toHaveBeenCalledWith(
+      7,
+      ['not-read'],
+      '2',
+      ['Group'],
+      'nameDesc',
+    );
+    await waitFor(() =>
+      expect(getResult()).toEqual({ requestId: 4, index: 1 }),
+    );
+  });
+
+  it('opens the chapter confirmed by the native jump dialog', async () => {
+    const { getNovelChaptersByNumber } = jest.requireMock(
+      '@database/queries/ChapterQueries',
+    );
+    getNovelChaptersByNumber.mockResolvedValueOnce([baseChapter]);
+    const { list } = renderWithStore(createStore());
+    fire(list, 'novelAction', {
+      action: 'chapter-jump-search',
+      requestId: 5,
+      value: '1',
+    });
+
+    expect(getNovelChaptersByNumber).toHaveBeenCalledWith(7, 1);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('native-chapter-list').props.jumpResult,
+      ).toContain('"id":1'),
+    );
+    fire(list, 'novelAction', {
+      action: 'chapter-jump-open',
+      requestId: 5,
+      chapterId: 1,
+    });
+
+    expect(navigation.navigate).toHaveBeenCalledWith('ReaderStack', {
+      screen: 'Chapter',
+      params: { novel: baseNovel, chapter: baseChapter },
+    });
+  });
+
+  it('runs a bulk action with the selection snapshot supplied by native', () => {
+    const { list, nativeStore, onSelectionAction } = renderWithStore(
+      createStore(),
+    );
+    fire(list, 'novelAction', {
+      action: 'selection-check',
+      selectedIds: [1, 1001],
+    });
+
+    expect(onSelectionAction).toHaveBeenCalledWith(
+      'selection-check',
+      [1, 1001],
+      undefined,
+    );
+    expect(nativeStore.setSelected).not.toHaveBeenCalled();
+    expect(list.props.onChapterLongPress).toBeUndefined();
+  });
+
+  it('still pushes download state to the native store', () => {
     mockDownloadingChapterIds = new Set<number>([3]);
-    const store = createStore({ chapters: makeChapters(3) });
-    const { nativeStore, rerender } = renderWithStore(store);
-
+    const { nativeStore } = renderWithStore(
+      createStore({ chapters: makeChapters(3) }),
+    );
     expect(nativeStore.setDownloading).toHaveBeenCalledWith([3]);
-    expect(nativeStore.setSelected).toHaveBeenLastCalledWith([]);
-
-    rerender([1, 2]);
-
-    expect(nativeStore.setSelected).toHaveBeenLastCalledWith([1, 2]);
+    expect(nativeStore.setSelected).not.toHaveBeenCalled();
   });
 
   it('downloads a chapter from its download button', () => {

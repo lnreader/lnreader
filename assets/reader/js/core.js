@@ -34,6 +34,28 @@ window.reader = new (function () {
   this.generalSettings = van.state(chapterGeneralSettings);
   this.scrollBehavior = () =>
     this.generalSettings.val.pageReaderDisableAnimation ? 'auto' : 'smooth';
+
+  // The document owns the timer so a tick can scroll without a call from React Native.
+  const autoScrollDelay = van.derive(() => {
+    const { autoScroll, autoScrollInterval } = this.generalSettings.val;
+    return autoScroll && autoScrollInterval > 0 ? autoScrollInterval * 1000 : 0;
+  });
+  let autoScrollTimer;
+  van.derive(() => {
+    const delay = autoScrollDelay.val;
+    clearInterval(autoScrollTimer);
+    if (delay) {
+      autoScrollTimer = setInterval(() => {
+        if (!document.hidden) {
+          window.scrollBy({
+            top:
+              this.generalSettings.val.autoScrollOffset ?? window.innerHeight,
+            behavior: this.scrollBehavior(),
+          });
+        }
+      }, delay);
+    }
+  });
   /**
    * Bumped whenever the app pushes new adjacent chapters. The chapter is
    * rendered before its neighbours are known, so any UI that depends on them

@@ -1,5 +1,10 @@
 import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
-import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useChapterGeneralSettings,
+  useTheme,
+} from '@hooks/persisted';
+import { useReducedMotion } from 'react-native-reanimated';
 
 import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
@@ -134,6 +139,10 @@ export const ChapterContent = ({
     refetch,
   } = useChapterContext();
   const hidden = useReaderChromeHidden();
+  const { reduceAppAnimations } = useAppSettings();
+  const systemReducedMotion = useReducedMotion();
+  const chromeFadeDuration =
+    reduceAppAnimations || systemReducedMotion ? 0 : 150;
   const readerSheetRef = useRef<BottomSheetModalMethods>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
@@ -315,33 +324,31 @@ export const ChapterContent = ({
       {readerSheetMounted ? (
         <ReaderBottomSheetV2 bottomSheetRef={readerSheetRef} />
       ) : null}
-      {!hidden ? (
-        <>
-          <ReaderAppbar
-            goBack={navigation.goBack}
-            theme={theme}
-            bookmarked={bookmarked}
-            setBookmarked={setBookmarked}
-            searchVisible={searchVisible}
-            setSearchVisible={setSearchVisible}
-            searchText={searchText}
-            setSearchText={setSearchText}
-            searchResult={searchResult}
-            resetSearchResult={resetSearchResult}
-            resetSearch={resetSearch}
-            openInWebView={openChapterInWebView}
-            openInBrowser={openChapterInBrowser}
-            shareChapter={shareChapter}
-          />
-          {!searchVisible ? (
-            <ReaderFooter
-              openReaderSheet={openReaderSheet}
-              scrollToStart={scrollToStart}
-              openDrawer={openDrawerI}
-            />
-          ) : null}
-        </>
-      ) : null}
+      <ReaderAppbar
+        visible={!hidden}
+        fadeDuration={chromeFadeDuration}
+        goBack={navigation.goBack}
+        theme={theme}
+        bookmarked={bookmarked}
+        setBookmarked={setBookmarked}
+        searchVisible={!hidden && searchVisible}
+        setSearchVisible={setSearchVisible}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        searchResult={searchResult}
+        resetSearchResult={resetSearchResult}
+        resetSearch={resetSearch}
+        openInWebView={openChapterInWebView}
+        openInBrowser={openChapterInBrowser}
+        shareChapter={shareChapter}
+      />
+      <ReaderFooter
+        visible={!hidden && !searchVisible}
+        fadeDuration={chromeFadeDuration}
+        openReaderSheet={openReaderSheet}
+        scrollToStart={scrollToStart}
+        openDrawer={openDrawerI}
+      />
     </View>
   );
 };

@@ -19,7 +19,7 @@ interface UseChapterListStoreOptions {
   totalChapters: number;
   /** Changes whenever the list is replaced (novel, page, sort, filter). */
   dataKey: string;
-  selectedIds: ReadonlySet<number>;
+  selectedIds?: ReadonlySet<number>;
   downloadingIds: ReadonlySet<number>;
   /** The highlighted chapter (the reader drawer's current one); none when undefined. */
   highlightedId?: number;
@@ -107,7 +107,7 @@ export const useChapterListStore = ({
   }, [store, chapters, totalChapters, dataKey]);
 
   useLayoutEffect(() => {
-    if (!sameIdSet(synced.current.selected, selectedIds)) {
+    if (selectedIds && !sameIdSet(synced.current.selected, selectedIds)) {
       synced.current.selected = selectedIds;
       store.setSelected(Array.from(selectedIds));
     }

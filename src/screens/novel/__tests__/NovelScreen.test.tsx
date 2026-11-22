@@ -1,11 +1,21 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import NovelScreen from '../NovelScreen';
 
 const mockDownloadChapters = jest.fn();
+const mockRefetchLibrary = jest.fn();
+const mockUpdateNovelCategories = jest.fn();
 const mockUpdateChapterProgressByIds = jest.fn();
-const mockGetPageChapterIds = jest.fn();
 const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
+
+jest.mock('@plugins/pluginManager', () => ({
+  getPlugin: () => undefined,
+}));
 
 jest.mock('@hooks/persisted', () => ({
   useAppSettings: () => ({
@@ -38,13 +48,19 @@ jest.mock('@services/backgroundTasks', () => ({
   },
 }));
 
-jest.mock('@hooks', () => ({
-  useBoolean: () => ({
-    value: false,
-    setTrue: jest.fn(),
-    setFalse: jest.fn(),
-  }),
-}));
+jest.mock('@hooks', () => {
+  const { useState } = require('react');
+  return {
+    useBoolean: () => {
+      const [value, setValue] = useState(false);
+      return {
+        value,
+        setTrue: () => setValue(true),
+        setFalse: () => setValue(false),
+      };
+    },
+  };
+});
 
 jest.mock('../NovelContext', () => ({
   useNovelValue: (key: string) => mockUseNovelValue(key),
@@ -63,25 +79,40 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   getAllUndownloadedAndUnreadChapters: jest.fn().mockResolvedValue([]),
   getAllUndownloadedChapters: jest.fn().mockResolvedValue([]),
   getChaptersByIds: jest.fn().mockResolvedValue([]),
-  getPageChapterIds: (...args: unknown[]) => mockGetPageChapterIds(...args),
   updateChapterProgressByIds: (...args: unknown[]) =>
     mockUpdateChapterProgressByIds(...args),
 }));
 
 jest.mock('../../../database/queries/NovelQueries', () => ({
   pickCustomNovelCover: jest.fn().mockResolvedValue(undefined),
+  updateNovelCategories: (...args: unknown[]) =>
+    mockUpdateNovelCategories(...args),
 }));
 
-jest.mock('../components/NovelAppbar', () => {
+jest.mock('@components/Context/LibraryContext', () => ({
+  useLibraryActions: () => ({ refetchLibrary: mockRefetchLibrary }),
+}));
+
+jest.mock('@database/queries/CategoryQueries', () => ({
+  getCategoriesWithCount: jest
+    .fn()
+    .mockResolvedValue([{ id: 10, name: 'Reading', sort: 1, novelsCount: 0 }]),
+}));
+
+jest.mock('@components/Checkbox/Checkbox', () => {
   const React = require('react');
-  const { Text } = require('react-native');
-  return ({ hideActions }: { hideActions?: boolean }) =>
-    React.createElement(
-      Text,
-      { testID: 'novel-appbar' },
-      hideActions ? 'appbar-actions-hidden' : 'appbar',
-    );
+  const { Pressable, Text } = require('react-native');
+  return {
+    Checkbox: ({ label, onPress }: any) =>
+      React.createElement(
+        Pressable,
+        { onPress },
+        React.createElement(Text, null, label),
+      ),
+  };
 });
+
+jest.mock('../components/ExportNovelAsEpubButton', () => () => null);
 
 jest.mock('../components/NovelScreenList', () => {
   const React = require('react');
@@ -89,60 +120,35 @@ jest.mock('../components/NovelScreenList', () => {
 
   return {
     __esModule: true,
-    default: ({ setSelected }: any) => {
+    default: ({
+      onSelectionAction,
+      toolbar,
+      selectionActions,
+      error,
+      onEditCategories,
+    }: any) => {
       return React.createElement(
         View,
         null,
-        React.createElement(
-          Pressable,
-          {
-            testID: 'select-unread',
-            onPress: () => setSelected([10]),
-          },
-          React.createElement(Text, null, 'select-unread'),
+        React.createElement(Text, { testID: 'novel-appbar' }, 'appbar'),
+        error ? React.createElement(Text, null, error) : null,
+        React.createElement(Pressable, {
+          testID: 'native-library-long-press',
+          onLongPress: onEditCategories,
+        }),
+        ...toolbar.map((action: any) =>
+          React.createElement(Pressable, {
+            key: action.id,
+            testID: action.id,
+            onPress: action.run,
+          }),
         ),
-        React.createElement(
-          Pressable,
-          {
-            testID: 'select-read',
-            onPress: () => setSelected([11]),
-          },
-          React.createElement(Text, null, 'select-read'),
-        ),
-        React.createElement(
-          Pressable,
-          {
-            testID: 'select-undownloaded',
-            onPress: () => setSelected([12]),
-          },
-          React.createElement(Text, null, 'select-undownloaded'),
-        ),
-      );
-    },
-  };
-});
-
-jest.mock('../../../components/Actionbar/Actionbar', () => {
-  const React = require('react');
-  const { Pressable, Text, View } = require('react-native');
-
-  return {
-    Actionbar: ({ active, actions }: any) => {
-      if (!active) return null;
-
-      return React.createElement(
-        View,
-        { testID: 'actionbar' },
-        ...actions.map((action: any) =>
-          React.createElement(
-            Pressable,
-            {
-              key: action.icon,
-              testID: `action-${action.icon}`,
-              onPress: action.onPress,
-            },
-            React.createElement(Text, null, action.icon),
-          ),
+        ...selectionActions.map((action: any) =>
+          React.createElement(Pressable, {
+            key: action.id,
+            testID: action.id,
+            onPress: () => onSelectionAction(action.id, [10, 1001]),
+          }),
         ),
       );
     },
@@ -151,40 +157,27 @@ jest.mock('../../../components/Actionbar/Actionbar', () => {
 
 jest.mock('@components', () => {
   const React = require('react');
-  const { Pressable, Text, View } = require('react-native');
+  const { Pressable, Text } = require('react-native');
+  const Container = ({ children }: { children: React.ReactNode }) => children;
   return {
-    SafeAreaView: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
-    EmptyView: ({
-      description,
-      actions,
-    }: {
-      description: string;
-      actions?: { iconName: string; title: string; onPress: () => void }[];
-    }) =>
-      React.createElement(
-        View,
-        null,
-        React.createElement(Text, null, description),
-        ...(actions || []).map(action =>
-          React.createElement(
-            Pressable,
-            {
-              key: action.title,
-              testID: `emptyview-action-${action.iconName}`,
-              onPress: action.onPress,
-            },
-            React.createElement(Text, null, action.title),
-          ),
+    SafeAreaView: Container,
+    Dialog: {
+      Root: Container,
+      ScrollArea: Container,
+      Actions: Container,
+      Title: ({ children }: any) => React.createElement(Text, null, children),
+      Action: ({ children, onPress }: any) =>
+        React.createElement(
+          Pressable,
+          { onPress },
+          React.createElement(Text, null, children),
         ),
-      ),
+    },
   };
 });
 
 jest.mock('react-native-paper', () => {
   const React = require('react');
-  const { Pressable, Text } = require('react-native');
-
   const Portal: any = ({ children }: { children: React.ReactNode }) =>
     React.createElement(React.Fragment, null, children);
   Portal.Host = ({ children }: { children: React.ReactNode }) =>
@@ -192,25 +185,9 @@ jest.mock('react-native-paper', () => {
 
   return {
     Portal,
-    Appbar: {
-      Action: ({ icon, onPress }: any) =>
-        React.createElement(
-          Pressable,
-          { testID: `appbar-action-${icon}`, onPress },
-          React.createElement(Text, null, icon),
-        ),
-      Content: ({ title }: any) => React.createElement(Text, null, title),
-    },
     Snackbar: ({ visible, children }: any) =>
       visible ? React.createElement(React.Fragment, null, children) : null,
   };
-});
-
-jest.mock('../components/JumpToChapterModal', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-  return () =>
-    React.createElement(Text, { testID: 'jump-to-chapter-modal' }, 'jump');
 });
 
 jest.mock('../components/EditInfoModal', () => {
@@ -334,8 +311,31 @@ const navigation = {
 describe('NovelScreen (task 12 context boundary cutover)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetPageChapterIds.mockResolvedValue([]);
   });
+
+  it.each([true, false])(
+    'refreshes the library when categories are set (inLibrary=%s)',
+    async inLibrary => {
+      const store = createStore({ novel: { ...baseNovel, inLibrary } });
+      wireStoreSelectors(store);
+
+      render(
+        // @ts-expect-error narrowed test props
+        <NovelScreen navigation={navigation} route={route} />,
+      );
+
+      fireEvent(screen.getByTestId('native-library-long-press'), 'longPress');
+      fireEvent.press(await screen.findByText('Reading'));
+      fireEvent.press(screen.getByText('common.ok'));
+
+      await waitFor(() =>
+        expect(mockUpdateNovelCategories).toHaveBeenCalledWith([7], [10]),
+      );
+      await waitFor(() => expect(mockRefetchLibrary).toHaveBeenCalled());
+      const changes = inLibrary ? [] : [[{ ...baseNovel, inLibrary: true }]];
+      expect(store.state.setNovel.mock.calls).toEqual(changes);
+    },
+  );
 
   it('uses novelStore action selectors for selected unread workflow', () => {
     const store = createStore();
@@ -346,34 +346,9 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
       <NovelScreen navigation={navigation} route={route} />,
     );
 
-    fireEvent.press(screen.getByTestId('select-unread'));
-    fireEvent.press(screen.getByTestId('action-check'));
+    fireEvent.press(screen.getByTestId('selection-check'));
 
-    expect(store.state.markChaptersRead).toHaveBeenCalledTimes(1);
-  });
-
-  it('selects chapter ids beyond the loaded chapter batch', async () => {
-    const store = createStore();
-    wireStoreSelectors(store);
-    mockGetPageChapterIds.mockResolvedValue(
-      Array.from({ length: 1001 }, (_, index) => index + 1),
-    );
-
-    render(
-      // @ts-expect-error narrowed test props
-      <NovelScreen navigation={navigation} route={route} />,
-    );
-
-    fireEvent.press(screen.getByTestId('select-unread'));
-    fireEvent.press(screen.getByTestId('appbar-action-select-all'));
-
-    expect(await screen.findByText('1001')).toBeOnTheScreen();
-    expect(mockGetPageChapterIds).toHaveBeenCalledWith(7, [], '1', []);
-
-    fireEvent.press(screen.getByTestId('action-check'));
-    expect(store.state.markChaptersRead).toHaveBeenCalledWith(
-      Array.from({ length: 1001 }, (_, index) => index + 1),
-    );
+    expect(store.state.markChaptersRead).toHaveBeenCalledWith([10, 1001]);
   });
 
   it('uses the atomic unread and progress-reset workflow', () => {
@@ -385,8 +360,7 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
       <NovelScreen navigation={navigation} route={route} />,
     );
 
-    fireEvent.press(screen.getByTestId('select-read'));
-    fireEvent.press(screen.getByTestId('action-check-outline'));
+    fireEvent.press(screen.getByTestId('selection-check-outline'));
 
     expect(
       store.state.markChaptersUnreadAndResetProgress,
@@ -408,11 +382,10 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     );
 
     expect(screen.getByText('Novel not found on the source')).toBeTruthy();
-    expect(screen.getByTestId('novel-appbar')).toHaveTextContent(
-      'appbar-actions-hidden',
-    );
+    expect(screen.getByTestId('back')).toBeOnTheScreen();
+    expect(screen.queryByTestId('overflow')).toBeNull();
 
-    fireEvent.press(screen.getByTestId('emptyview-action-arrow-left'));
+    fireEvent.press(screen.getByTestId('back'));
     expect(navigation.goBack).toHaveBeenCalled();
   });
 
@@ -442,12 +415,10 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
       <NovelScreen navigation={navigation} route={route} />,
     );
 
-    expect(screen.queryByTestId('jump-to-chapter-modal')).toBeNull();
     expect(screen.queryByTestId('edit-info-modal')).toBeNull();
     expect(screen.queryByTestId('download-custom-modal')).toBeNull();
 
-    fireEvent.press(screen.getByTestId('select-undownloaded'));
-    fireEvent.press(screen.getByTestId('action-download-outline'));
+    fireEvent.press(screen.getByTestId('selection-download-outline'));
 
     expect(mockDownloadChapters).not.toHaveBeenCalled();
   });

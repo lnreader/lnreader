@@ -152,6 +152,51 @@ class ChapterListModelTest {
   }
 
   @Test
+  fun longPressExtendsSelectionAndTapTogglesAChapter() {
+    model.setRows(0, arrayOf(row(5), row(3), row(20), row(2), row(4)))
+
+    model.extendSelection(5)
+    model.extendSelection(2)
+    assertEquals(listOf(5, 3, 2, 4), model.selectionIds().toList())
+
+    model.toggleSelection(3)
+    assertEquals(listOf(5, 2, 4), model.selectionIds().toList())
+    assertFalse(model.isSelected(20))
+  }
+
+  @Test
+  fun selectAllIncludesUnloadedRowsAndIgnoresAnOlderRequest() {
+    model.setRows(0, arrayOf(row(1), row(2)))
+    model.toggleSelection(1)
+    val old = model.requestSelectAll()
+    val next = model.requestSelectAll()
+
+    model.completeSelectAll(old, intArrayOf(7))
+    assertEquals(listOf(1), model.selectionIds().toList())
+
+    model.completeSelectAll(next, intArrayOf(1, 2, 3))
+    assertEquals(3, model.selectionCount)
+    assertTrue(model.isSelected(3))
+    assertTrue(model.selectionSummary().hasDownloaded)
+  }
+
+  @Test
+  fun selectionEditsAndPageChangesInvalidatePendingSelectAll() {
+    model.setSelectionScope("page-one")
+    model.setRows(0, rows(1..3))
+    model.toggleSelection(1)
+    val beforeEdit = model.requestSelectAll()
+    model.toggleSelection(2)
+    model.completeSelectAll(beforeEdit, intArrayOf(1, 2, 3))
+    assertEquals(listOf(1, 2), model.selectionIds().toList())
+
+    val beforePage = model.requestSelectAll()
+    model.setSelectionScope("page-two")
+    model.completeSelectAll(beforePage, intArrayOf(1, 2, 3))
+    assertEquals(0, model.selectionCount)
+  }
+
+  @Test
   fun highlightRebindsOnlyThePreviousAndNewRows() {
     model.reset(100)
     model.setRows(0, rows(1..100))
