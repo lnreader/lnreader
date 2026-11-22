@@ -617,6 +617,36 @@ describe('useChapter', () => {
       expect(mockInsertChapters).not.toHaveBeenCalled();
     });
 
+    it('drops progress the page reports for a chapter navigated away from', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+
+      const { result } = renderHook(() => useFlatChapter(initialChapter));
+      await waitFor(() =>
+        expect(result.current.nextChapter).toEqual(nextChapter),
+      );
+      await act(async () => {
+        await result.current.navigateChapter('NEXT');
+      });
+      expect(result.current.documentChapter).toEqual(nextChapter);
+
+      act(() => {
+        // The page outlives a chapter, so a late save of the previous one can
+        // still arrive after the next one was swapped in.
+        result.current.saveProgress(90, initialChapter.id);
+        result.current.saveProgress(20, nextChapter.id);
+      });
+
+      expect(store.state.updateChapterProgress).not.toHaveBeenCalledWith(
+        initialChapter.id,
+        90,
+      );
+      expect(store.state.updateChapterProgress).toHaveBeenCalledWith(
+        nextChapter.id,
+        20,
+      );
+    });
+
     it('saves progress and marks read the chapter the reader reports, not the current one', async () => {
       const store = createStore();
       mockUseNovelActions.mockReturnValue(store.state);

@@ -1261,6 +1261,9 @@ function showChapter(
     try {
       positionRestored = true;
       calculatePages();
+      // A chapter that fits on one screen never scrolls, which is otherwise
+      // what asks for the next chapter.
+      window.continuousScroll.update();
       document.fonts.ready.then(correctReadingPosition);
       requestAnimationFrame(() => {
         if (generation === chapterGeneration) {

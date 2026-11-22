@@ -560,7 +560,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   /** Set once the page has loaded; injected scripts are dropped before that. */
   const shellReadyRef = useRef(false);
   const displayedChapterRef = useRef({
-    chapterId: documentChapter.id,
+    chapter: documentChapter,
     html: processedHtml,
   });
   const pendingSwapRef = useRef<{
@@ -587,9 +587,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
    */
   useEffect(() => {
     const displayed = displayedChapterRef.current;
+    // Compared by identity: returning to the chapter infinite scrolling moved
+    // on from must still replace the chapters appended below it.
     const chapterChanged =
-      displayed.chapterId !== documentChapter.id ||
-      displayed.html !== processedHtml;
+      displayed.chapter !== documentChapter || displayed.html !== processedHtml;
     const swapFailed = failedSwaps !== handledFailedSwapsRef.current;
     handledFailedSwapsRef.current = failedSwaps;
 
@@ -614,7 +615,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       nextChapterScreenVisible: nextChapterScreenVisible.current,
     });
     displayedChapterRef.current = {
-      chapterId: documentChapter.id,
+      chapter: documentChapter,
       html: processedHtml,
     };
     clearPendingSwap();

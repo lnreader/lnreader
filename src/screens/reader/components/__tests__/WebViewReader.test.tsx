@@ -333,6 +333,16 @@ describe('WebViewReader chapter changes', () => {
     expect(injected().some(s => s.includes('setChapter('))).toBe(false);
   });
 
+  it('replaces the page when returning to its chapter after infinite scrolling moved on', () => {
+    const view = renderLoadedReader();
+
+    mockContext = { ...mockContext, chapter: makeChapter(2) };
+    view.rerender(ui());
+    goToChapter(view, makeChapter(1), '<p>First chapter</p>');
+
+    expect(injected().some(s => s.includes('setChapter('))).toBe(true);
+  });
+
   it('rebuilds the page from the chapter being read at its live progress', () => {
     const view = renderLoadedReader();
     const source = mockWebView.props!.source;
