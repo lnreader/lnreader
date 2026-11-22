@@ -20,6 +20,7 @@ import {
   type ChapterRowFormat,
   ChapterListViewCommands,
   ChapterListViewNativeComponent,
+  type HighlightedVisibilityChangeEvent,
   type RequestRangeEvent,
 } from '@modules/nitro-chapter-list';
 import type { ThemeColors } from '@theme/types';
@@ -38,7 +39,10 @@ export interface NativeChapterListRef {
     viewPosition?: number;
   }) => void;
   scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
+  scrollToEnd: (params?: { animated?: boolean }) => void;
 }
+
+export type HighlightedVisibility = HighlightedVisibilityChangeEvent['state'];
 
 interface NativeChapterListProps {
   ref?: React.Ref<NativeChapterListRef>;
@@ -46,11 +50,20 @@ interface NativeChapterListProps {
   theme: ThemeColors;
   /** How native formats row text; see `buildChapterRowFormat`. */
   rowFormat: ChapterRowFormat;
-  /** Rendered by React above the rows and scrolled with them. */
-  header: React.ReactNode;
-  isLocal: boolean;
-  refreshing: boolean;
-  refreshOffset: number;
+  /**
+   * `novel` (default): the Novel screen's rows below `header`. `drawer`: the
+   * reader drawer's rows (name and date, the `highlightedId` chapter of
+   * `useChapterListStore` highlighted), no header, no scroll events.
+   */
+  variant?: 'novel' | 'drawer';
+  /** Rendered by React above the rows and scrolled with them. Omit for none. */
+  header?: React.ReactNode;
+  /** Row placed at the top when the list first shows rows, without a jump. */
+  initialPosition?: number;
+  isLocal?: boolean;
+  refreshing?: boolean;
+  refreshOffset?: number;
+  contentPaddingTop?: number;
   contentPaddingBottom: number;
   fastScrollTopInset: number;
   fastScrollBottomInset: number;
@@ -63,23 +76,29 @@ interface NativeChapterListProps {
   scrollEventThresholds?: number[];
   /** A Reanimated `useAnimatedScrollHandler`, run on the UI thread. */
   onScroll?: unknown;
-  onRefresh: () => void;
+  onRefresh?: () => void;
   /** `position` is the chapter's list position, excluding the header. */
   onChapterPress: (id: number, position: number) => void;
-  onChapterLongPress: (id: number, position: number) => void;
-  onDownloadPress: (id: number, position: number) => void;
-  onDeletePress: (id: number, position: number) => void;
+  onChapterLongPress?: (id: number, position: number) => void;
+  onDownloadPress?: (id: number, position: number) => void;
+  onDeletePress?: (id: number, position: number) => void;
   onRequestRange: (start: number, end: number) => void;
+  /** Drawer: the highlighted chapter moved out of (or into) view. */
+  onHighlightedVisibilityChange?: (state: HighlightedVisibility) => void;
   style?: StyleProp<ViewStyle>;
 }
 
 const toColor = (color: string | undefined, fallback: string): number =>
   (processColor(color ?? fallback) as number | null) ?? 0;
 
-const rowHandler =
-  (handler: (id: number, position: number) => void) =>
-  (event: NativeSyntheticEvent<ChapterIdEvent>) =>
-    handler(event.nativeEvent.id, event.nativeEvent.position);
+const rowHandler = (handler?: (id: number, position: number) => void) =>
+  handler
+    ? (event: NativeSyntheticEvent<ChapterIdEvent>) =>
+        handler(event.nativeEvent.id, event.nativeEvent.position)
+    : undefined;
+
+// Past the end; native clamps it to the last offset.
+const END_OFFSET = 1e9;
 
 /**
  * Native RecyclerView chapter list (Android). Rows come from the
@@ -90,10 +109,13 @@ const NativeChapterList = ({
   storeId,
   theme,
   rowFormat,
+  variant = 'novel',
   header,
-  isLocal,
-  refreshing,
-  refreshOffset,
+  initialPosition,
+  isLocal = false,
+  refreshing = false,
+  refreshOffset = 0,
+  contentPaddingTop = 0,
   contentPaddingBottom,
   fastScrollTopInset,
   fastScrollBottomInset,
@@ -107,6 +129,7 @@ const NativeChapterList = ({
   onDownloadPress,
   onDeletePress,
   onRequestRange,
+  onHighlightedVisibilityChange,
   style,
 }: NativeChapterListProps) => {
   const nativeRef =
@@ -134,6 +157,15 @@ const NativeChapterList = ({
           );
         }
       },
+      scrollToEnd: ({ animated = true } = {}) => {
+        if (nativeRef.current) {
+          ChapterListViewCommands.scrollToOffset(
+            nativeRef.current,
+            END_OFFSET,
+            animated,
+          );
+        }
+      },
     }),
     [],
   );
@@ -150,6 +182,8 @@ const NativeChapterList = ({
       rippleColor: toColor(ripple, '#0001'),
       surface: toColor(theme.surface, '#fff'),
       selectedBackground: toColor(ripple, '#0001'),
+      secondaryContainer: toColor(theme.secondaryContainer, '#ddd'),
+      onSecondaryContainer: toColor(theme.onSecondaryContainer, '#000'),
     };
   }, [theme]);
 
@@ -169,6 +203,15 @@ const NativeChapterList = ({
     [onRequestRange],
   );
 
+  const handleHighlightedVisibilityChange = useMemo(
+    () =>
+      onHighlightedVisibilityChange
+        ? (event: NativeSyntheticEvent<HighlightedVisibilityChangeEvent>) =>
+            onHighlightedVisibilityChange(event.nativeEvent.state)
+        : undefined,
+    [onHighlightedVisibilityChange],
+  );
+
   return (
     <AnimatedChapterListView
       ref={nativeRef}
@@ -177,11 +220,14 @@ const NativeChapterList = ({
       colors={colors}
       strings={strings}
       rowFormat={rowFormat}
+      variant={variant}
+      initialPosition={initialPosition}
       // Codegen casts these straight to Java booleans, and novel rows can carry
       // SQLite's 0/1 here despite the type.
       isLocal={!!isLocal}
       refreshing={!!refreshing}
       refreshOffset={refreshOffset}
+      contentPaddingTop={contentPaddingTop}
       contentPaddingBottom={contentPaddingBottom}
       fastScrollTopInset={fastScrollTopInset}
       fastScrollBottomInset={fastScrollBottomInset}
@@ -196,11 +242,14 @@ const NativeChapterList = ({
       onDownloadPress={rowHandler(onDownloadPress)}
       onDeletePress={rowHandler(onDeletePress)}
       onRequestRange={handleRequestRange}
+      onHighlightedVisibilityChange={handleHighlightedVisibilityChange}
     >
-      {/* Never flattened: native code hosts this view inside the RecyclerView. */}
-      <View collapsable={false} style={styles.header}>
-        {header}
-      </View>
+      {header === undefined ? null : (
+        // Never flattened: native code hosts this view inside the RecyclerView.
+        <View collapsable={false} style={styles.header}>
+          {header}
+        </View>
+      )}
     </AnimatedChapterListView>
   );
 };

@@ -21,6 +21,8 @@ interface UseChapterListStoreOptions {
   dataKey: string;
   selectedIds: ReadonlySet<number>;
   downloadingIds: ReadonlySet<number>;
+  /** The highlighted chapter (the reader drawer's current one); none when undefined. */
+  highlightedId?: number;
   /**
    * Native kept showing rows `start..end-1` after JS reloaded a shorter prefix
    * of the same list; load them again so they're current.
@@ -39,6 +41,7 @@ export const useChapterListStore = ({
   dataKey,
   selectedIds,
   downloadingIds,
+  highlightedId,
   onStaleRows,
 }: UseChapterListStoreOptions): string => {
   const [store] = useState<ChapterListStore>(createChapterListStore);
@@ -50,6 +53,7 @@ export const useChapterListStore = ({
   const synced = useRef({
     selected: null as ReadonlySet<number> | null,
     downloading: null as ReadonlySet<number> | null,
+    highlighted: undefined as number | undefined,
   });
 
   const onStaleRowsRef = useRef(onStaleRows);
@@ -115,6 +119,13 @@ export const useChapterListStore = ({
       store.setDownloading(Array.from(downloadingIds));
     }
   }, [store, downloadingIds]);
+
+  useLayoutEffect(() => {
+    if (synced.current.highlighted !== highlightedId) {
+      synced.current.highlighted = highlightedId;
+      store.setHighlighted(highlightedId);
+    }
+  }, [store, highlightedId]);
 
   return store.id;
 };

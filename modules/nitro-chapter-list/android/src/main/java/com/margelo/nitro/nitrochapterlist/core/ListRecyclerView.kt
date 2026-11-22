@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.react.uimanager.events.NativeGestureUtil
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
- * RecyclerView with exact scroll metrics for "header + fixed-height rows":
- * adapter position 0 is [header], every other item is [rowHeight] px tall.
+ * RecyclerView with exact scroll metrics for "optional header + fixed-height
+ * rows": with a header, adapter position 0 is [header]; every other item is
+ * [rowHeight] px tall. See [ListMetrics].
  *
  * LinearLayoutManager estimates offset and range from the average height of the
  * visible children, which a tall header skews. Rows are all [rowHeight] tall,
@@ -23,12 +23,27 @@ import kotlin.math.roundToInt
 class ListRecyclerView(
   context: Context,
   private val header: HeaderContainer,
-  val rowHeight: Int,
+  rowHeight: Int,
 ) : RecyclerView(context) {
   val linearLayoutManager = LinearLayoutManager(context)
+  val metrics = ListMetrics(rowHeight) { header.contentHeight }
+
+  var rowHeight: Int
+    get() = metrics.rowHeight
+    set(value) {
+      metrics.rowHeight = value
+    }
+
   // Optional cumulative heights for lists with shorter section and loading rows.
-  var rowOffsets: IntArray? = null
-  private fun rowTop(index: Int): Int = rowOffsets?.getOrNull(index) ?: index * rowHeight
+  var rowOffsets: IntArray?
+    get() = metrics.rowOffsets
+    set(value) {
+      metrics.rowOffsets = value
+    }
+
+  /** 1 with the header item at position 0, 0 when headerless (rows start at 0). */
+  val headerCount: Int
+    get() = metrics.headerCount
 
   private var nativeGestureStarted = false
   private var pendingSmoothScroll: Runnable? = null
@@ -42,11 +57,11 @@ class ListRecyclerView(
     overScrollMode = OVER_SCROLL_ALWAYS
   }
 
-  private val rowCount: Int
-    get() = ((adapter?.itemCount ?: 0) - HEADER_COUNT).coerceAtLeast(0)
+  private val itemCount: Int
+    get() = adapter?.itemCount ?: 0
 
   val contentHeight: Int
-    get() = paddingTop + header.contentHeight + rowTop(rowCount) + paddingBottom
+    get() = metrics.contentHeight(itemCount, paddingTop, paddingBottom)
 
   val maxScrollOffset: Int
     get() = (contentHeight - height).coerceAtLeast(0)
@@ -59,28 +74,23 @@ class ListRecyclerView(
     val first = getChildAt(0) ?: return 0
     val position = getChildLayoutPosition(first)
     if (position == NO_POSITION) return 0
-    val top = linearLayoutManager.getDecoratedTop(first)
-    val itemStart =
-      if (position == 0) 0 else header.contentHeight + rowTop(position - HEADER_COUNT)
-    return paddingTop + itemStart - top
+    return metrics.scrollOffset(position, linearLayoutManager.getDecoratedTop(first), paddingTop)
   }
+
+  /** First and last (partly) visible row indices, or -1 when none (the header doesn't count). */
+  fun firstVisibleRow(): Int = metrics.rowIndex(linearLayoutManager.findFirstVisibleItemPosition())
+
+  fun lastVisibleRow(): Int = metrics.rowIndex(linearLayoutManager.findLastVisibleItemPosition())
 
   /** Puts the list at [offset] px immediately, without laying out what's in between. */
   fun jumpToOffset(offset: Int) {
-    val target = offset.coerceIn(0, maxScrollOffset)
-    val headerHeight = header.contentHeight
-    if (target < headerHeight || rowCount == 0) {
-      linearLayoutManager.scrollToPositionWithOffset(0, -target)
-      return
-    }
-    val intoRows = target - headerHeight
-    val index = (rowOffsets?.binarySearch(intoRows)?.let { result ->
-      if (result >= 0) result else -result - 2
-    } ?: (intoRows / rowHeight)).coerceIn(0, rowCount - 1)
-    linearLayoutManager.scrollToPositionWithOffset(
-      index + HEADER_COUNT,
-      -(intoRows - rowTop(index)),
-    )
+    val (position, within) = metrics.jumpTarget(offset.coerceIn(0, maxScrollOffset), itemCount)
+    linearLayoutManager.scrollToPositionWithOffset(position, -within)
+  }
+
+  /** Before the first layout: opens the list with row [index] at the top. */
+  fun scrollToRowBeforeLayout(index: Int) {
+    linearLayoutManager.scrollToPositionWithOffset(index + headerCount, 0)
   }
 
   /**
@@ -114,11 +124,8 @@ class ListRecyclerView(
   }
 
   /** Offset that puts row [index] at [viewPosition] (0 top, 1 bottom) of the viewport. */
-  fun offsetForIndex(index: Int, viewPosition: Float): Int {
-    val itemTop = paddingTop + header.contentHeight + rowTop(index)
-    val itemHeight = rowTop(index + 1) - rowTop(index)
-    return (itemTop - viewPosition * (height - paddingBottom - itemHeight)).roundToInt()
-  }
+  fun offsetForIndex(index: Int, viewPosition: Float): Int =
+    metrics.offsetForIndex(index, viewPosition, paddingTop, height, paddingBottom)
 
   /**
    * react-native-screens calls startViewTransition on every view of a screen
@@ -157,8 +164,4 @@ class ListRecyclerView(
     nativeGestureStarted = true
   }
 
-  companion object {
-    /** Adapters put the header at position 0; rows start here. */
-    const val HEADER_COUNT = 1
-  }
 }

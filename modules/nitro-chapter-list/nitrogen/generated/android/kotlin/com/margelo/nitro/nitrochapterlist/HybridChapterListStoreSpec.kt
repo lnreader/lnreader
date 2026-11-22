@@ -49,6 +49,10 @@ abstract class HybridChapterListStoreSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun setDownloading(ids: DoubleArray): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun setHighlighted(id: Double?): Unit
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

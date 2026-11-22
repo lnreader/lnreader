@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
@@ -18,6 +19,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.widget.TextViewCompat
 import com.margelo.nitro.nitrochapterlist.ChapterRow
 import com.margelo.nitro.nitrochapterlist.grouped.GroupedCoverView
 
@@ -33,6 +35,8 @@ data class ChapterListTheme(
   val surface: Int = Color.WHITE,
   val surfaceVariant: Int = Color.LTGRAY,
   val selectedBackground: Int = 0x1F000000,
+  val secondaryContainer: Int = Color.LTGRAY,
+  val onSecondaryContainer: Int = Color.BLACK,
   val chapterTitleTemplate: String = "Chapter %{num}",
   val deleteLabel: String = "Delete",
   val downloadA11yLabel: String = "Download",
@@ -44,9 +48,18 @@ data class ChapterListTheme(
  * One chapter row, laid out in code to mirror `ChapterItem`: 64dp tall, 16dp
  * horizontal and 8dp vertical padding; [bookmark] [unread dot + title / subtitle]
  * [download button]. Mirrors itself in RTL.
+ *
+ * [drawer] rows mirror the reader drawer's former React rows instead: the name
+ * and the release date only, 12dp horizontal and 10dp vertical padding inside
+ * a 2dp vertical margin, and a highlighted background for the current chapter.
+ * See [drawerRowHeight].
  */
 @SuppressLint("ViewConstructor")
-class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(context) {
+class ChapterRowView(
+  context: Context,
+  grouped: Boolean = false,
+  private val drawer: Boolean = false,
+) : ViewGroup(context) {
   enum class DownloadState { HIDDEN, DOWNLOAD, DOWNLOADING, DOWNLOADED, EXPANDED, COLLAPSED }
 
   val cover = if (grouped) GroupedCoverView(context) else null
@@ -57,18 +70,18 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
 
   private val coverSize = dp(40f)
   private val coverMargin = dp(16f)
-  private val rowHeight = dp(ROW_HEIGHT_DP)
-  private val paddingH = dp(16f)
+  private val rowHeight = if (drawer) drawerRowHeight(context) else dp(ROW_HEIGHT_DP)
+  private val paddingH = dp(if (drawer) DRAWER_PADDING_H_DP else 16f)
   private val buttonSize = dp(40f)
   private val bookmarkMarginStart = dp(2f)
   private val bookmarkPadding = dp(8f)
   private val dotMarginEnd = dp(4f)
-  private val subtitleMarginTop = dp(4f)
+  private val subtitleMarginTop = dp(if (drawer) DRAWER_TITLE_GAP_DP else 4f)
 
   private val bookmark = IconView(context, 18f).apply { setGlyph(IconView.BOOKMARK) }
   private val unreadDot = IconView(context, 8f).apply { setGlyph(IconView.CIRCLE) }
-  private val title = createText(14f)
-  private val subtitle = createText(12f)
+  private val title = createText(14f, if (drawer) DRAWER_TITLE_LINE_SP else 0f)
+  private val subtitle = createText(12f, if (drawer) DRAWER_SUBTITLE_LINE_SP else 0f)
   private val downloadIcon = IconView(context, 25f)
   private val downloadSpinner =
     ProgressBar(context).apply {
@@ -89,10 +102,11 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
   private var unread = false
   private var bookmarked = false
   private var downloadState = DownloadState.HIDDEN
+  private var highlighted = false
 
   init {
     isClickable = true
-    isLongClickable = !grouped
+    isLongClickable = !grouped && !drawer
     isFocusable = true
     cover?.let { addView(it) }
     novelTitle?.let { addView(it) }
@@ -104,7 +118,7 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, rowHeight)
   }
 
-  private fun createText(sizeSp: Float) =
+  private fun createText(sizeSp: Float, lineHeightSp: Float = 0f) =
     TextView(context).apply {
       // A non-wrap width lets setText skip requestLayout when the line height
       // is unchanged, so rebinding a row only redraws it.
@@ -114,14 +128,16 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
       maxLines = 1
       ellipsize = TextUtils.TruncateAt.END
       textAlignment = TEXT_ALIGNMENT_VIEW_START
+      if (lineHeightSp > 0f) TextViewCompat.setLineHeight(this, sp(context, lineHeightSp))
     }
 
   /** Call when the theme object changes; rows remember the last one they applied. */
   fun applyTheme(value: ChapterListTheme) {
     if (theme === value) return
     theme = value
-    background =
-      RippleDrawable(ColorStateList.valueOf(value.rippleColor), selectedLayer, ColorDrawable(Color.WHITE))
+    val ripple = RippleDrawable(ColorStateList.valueOf(value.rippleColor), selectedLayer, ColorDrawable(Color.WHITE))
+    // The drawer's highlight and ripple stay inside the row's 2dp margins.
+    background = if (drawer) InsetDrawable(ripple, 0, dp(DRAWER_MARGIN_V_DP), 0, dp(DRAWER_MARGIN_V_DP)) else ripple
     downloadButton.background =
       RippleDrawable(ColorStateList.valueOf(value.rippleColor), null, ShapeDrawable(OvalShape()))
     cover?.applyColors(value.surfaceVariant, value.onSurfaceVariant)
@@ -130,7 +146,38 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
     downloadSpinner.indeterminateTintList = ColorStateList.valueOf(value.outline)
     applyTextColors()
     applyDownloadState(downloadState, force = true)
-    if (isSelected) selectedLayer.color = value.selectedBackground
+    if (drawer) {
+      selectedLayer.color = if (highlighted) value.secondaryContainer else Color.TRANSPARENT
+    } else if (isSelected) {
+      selectedLayer.color = value.selectedBackground
+    }
+  }
+
+  /** Drawer rows: the chapter's name, and its release date when it has one. */
+  fun bindDrawerRow(row: ChapterRow, formatter: ChapterRowFormatter) {
+    title.text = row.name
+    val date = formatter.releaseLabel(row)
+    if (date.isEmpty()) {
+      subtitle.visibility = GONE
+    } else {
+      subtitle.text = date
+      subtitle.visibility = VISIBLE
+    }
+    unread = row.unread
+    bookmarked = false
+    unreadDot.visibility = GONE
+    bookmark.visibility = GONE
+    applyDownloadState(DownloadState.HIDDEN, force = false)
+    applyTextColors()
+  }
+
+  /** Drawer rows: the current chapter gets the secondary container colours. */
+  fun bindHighlighted(value: Boolean) {
+    highlighted = value
+    // TalkBack announces the current chapter as selected.
+    isSelected = value
+    selectedLayer.color = if (value) theme?.secondaryContainer ?: Color.TRANSPARENT else Color.TRANSPARENT
+    applyTextColors()
   }
 
   fun bindRow(row: ChapterRow, formatter: ChapterRowFormatter) {
@@ -233,6 +280,23 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
   private fun applyTextColors() {
     val theme = theme ?: return
     novelTitle?.setTextColor(if (unread) theme.onSurface else theme.outline)
+    if (drawer) {
+      title.setTextColor(
+        when {
+          highlighted -> theme.onSecondaryContainer
+          unread -> theme.onSurface
+          else -> theme.outline
+        },
+      )
+      subtitle.setTextColor(
+        when {
+          highlighted -> theme.onSecondaryContainer
+          unread -> theme.onSurfaceVariant
+          else -> theme.outline
+        },
+      )
+      return
+    }
     title.setTextColor(
       when {
         !unread -> theme.outline
@@ -362,5 +426,27 @@ class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(con
   companion object {
     const val ROW_HEIGHT_DP = 64f
     private const val WRAP = FrameLayout.LayoutParams.WRAP_CONTENT
+
+    private const val DRAWER_PADDING_H_DP = 12f
+    private const val DRAWER_PADDING_V_DP = 10f
+    private const val DRAWER_MARGIN_V_DP = 2f
+    private const val DRAWER_TITLE_GAP_DP = 2f
+    private const val DRAWER_TITLE_LINE_SP = 20f
+    private const val DRAWER_SUBTITLE_LINE_SP = 16f
+
+    private fun sp(context: Context, value: Float): Int =
+      Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, value, context.resources.displayMetrics))
+
+    /**
+     * The drawer row's fixed height: 2dp margins, 10dp padding, a 20sp title
+     * line, a 2dp gap and a 16sp date line, which is 62dp at the default font
+     * scale. Every drawer row has this height (with or without a date), so the
+     * list's scroll metrics stay exact; it follows the font scale.
+     */
+    fun drawerRowHeight(context: Context): Int {
+      val density = context.resources.displayMetrics.density
+      val vertical = (DRAWER_MARGIN_V_DP + DRAWER_PADDING_V_DP) * 2 + DRAWER_TITLE_GAP_DP
+      return Math.round(vertical * density) + sp(context, DRAWER_TITLE_LINE_SP) + sp(context, DRAWER_SUBTITLE_LINE_SP)
+    }
   }
 }

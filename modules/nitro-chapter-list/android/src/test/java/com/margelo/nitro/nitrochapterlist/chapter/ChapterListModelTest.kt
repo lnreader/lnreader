@@ -41,6 +41,7 @@ class ChapterListModelTest {
             when (payload) {
               ChapterListModel.Payload.SELECTION -> ":selection"
               ChapterListModel.Payload.DOWNLOADING -> ":downloading"
+              ChapterListModel.Payload.HIGHLIGHT -> ":highlight"
               else -> ""
             }
           events.add("changed $start+$count$tag")
@@ -148,6 +149,38 @@ class ChapterListModelTest {
 
     assertTrue(model.isSelected(7))
     assertEquals(listOf("changed 0+1"), events)
+  }
+
+  @Test
+  fun highlightRebindsOnlyThePreviousAndNewRows() {
+    model.reset(100)
+    model.setRows(0, rows(1..100))
+    events.clear()
+
+    model.setHighlighted(10)
+    model.setHighlighted(50)
+    model.setHighlighted(50)
+    model.setHighlighted(null)
+
+    assertEquals(
+      listOf("changed 9+1:highlight", "changed 9+1:highlight", "changed 49+1:highlight", "changed 49+1:highlight"),
+      events,
+    )
+    assertEquals(-1, model.highlightedPosition)
+  }
+
+  @Test
+  fun highlightOfAnUnloadedChapterIsKeptForWhenItLoads() {
+    model.reset(2000)
+    events.clear()
+
+    model.setHighlighted(1500)
+    assertTrue(events.isEmpty())
+    assertEquals(-1, model.highlightedPosition)
+
+    model.setRows(1000, rows(1001..2000))
+    assertEquals(1499, model.highlightedPosition)
+    assertTrue(model.isHighlighted(1500))
   }
 
   @Test

@@ -17,6 +17,7 @@ export type {
   ChapterListColors,
   ChapterRowFormat,
   ChapterListScrollEvent,
+  HighlightedVisibilityChangeEvent,
   ChapterListStrings,
   NativeProps as ChapterListViewNativeProps,
   RequestRangeEvent,
