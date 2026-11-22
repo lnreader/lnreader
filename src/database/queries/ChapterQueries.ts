@@ -994,6 +994,35 @@ export const getDetailedUpdatesQuery = (
     .orderBy(desc(chapterSchema.updatedTime))
     .limit(limit ?? -1);
 
+export const getGroupedUpdateChaptersQuery = (
+  groups: readonly (readonly [novelId: number, updateDate: string])[],
+) => {
+  const updateDate = sql<string>`DATE(${chapterSchema.updatedTime})`;
+  return (
+    dbManager
+      .select({
+        ...getColumns(chapterSchema),
+        pluginId: novelSchema.pluginId,
+        novelName: novelSchema.name,
+        novelPath: novelSchema.path,
+        novelCover: novelSchema.cover,
+        updateDate: updateDate.as('updateDate'),
+      })
+      // Keep the requested groups outermost so SQLite can seek chapters by novel.
+      .from(sql`json_each(${JSON.stringify(groups)}) AS requested`)
+      .crossJoin(chapterSchema)
+      .innerJoin(novelSchema, eq(novelSchema.id, chapterSchema.novelId))
+      .where(
+        and(
+          isNotNull(chapterSchema.updatedTime),
+          sql`${chapterSchema.novelId} = json_extract(requested.value, '$[0]')
+        AND ${updateDate} IS json_extract(requested.value, '$[1]')`,
+        ),
+      )
+      .orderBy(desc(chapterSchema.updatedTime))
+  );
+};
+
 export const getDetailedUpdatesFromDb = (
   novelId: number,
   onlyDownloadableChapters?: boolean,

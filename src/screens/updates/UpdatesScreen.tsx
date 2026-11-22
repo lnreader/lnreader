@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { RefreshControl, SectionList, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import {
   EmptyView,
@@ -13,12 +13,19 @@ import { useSearch } from '@hooks';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
-import UpdateNovelChapterGroup from './components/UpdateNovelChapterGroup';
+import GroupedChapterList, {
+  type ChapterGroupSection,
+  toggleChapterGroup,
+} from '@components/GroupedChapterList/GroupedChapterList';
+import {
+  updateGroupKey,
+  useGroupedUpdateChapters,
+} from './useGroupedUpdateChapters';
 import { deleteChapter } from '@database/queries/ChapterQueries';
 import { showToast } from '@utils/showToast';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { UpdateScreenProps } from '@navigators/types';
-import { UpdateOverview } from '@database/types';
+import type { Update } from '@database/types';
 import { useUpdateContext } from '@components/Context/UpdateContext';
 import { formatDate } from '@utils/dateFormat';
 import { useFocusEffect } from '@react-navigation/native';
@@ -45,32 +52,60 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
     }, [getUpdates]),
   );
 
-  const sections = useMemo(
-    () =>
-      updatesOverview
-        .filter(update =>
-          searchText
-            ? update.novelName.toLowerCase().includes(searchText.toLowerCase())
-            : true,
-        )
-        .reduce(
-          (
-            groups: { data: UpdateOverview[]; date: string }[],
-            update: UpdateOverview,
-          ) => {
-            if (
-              groups.length === 0 ||
-              groups[groups.length - 1]?.date !== update.updateDate
-            ) {
-              groups.push({ data: [update], date: update.updateDate });
-              return groups;
-            }
-            groups[groups.length - 1]?.data.push(update);
-            return groups;
-          },
-          [],
-        ),
-    [searchText, updatesOverview],
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const details = useGroupedUpdateChapters(updatesOverview, expanded);
+  const sections = useMemo(() => {
+    const groups: ChapterGroupSection[] = [];
+    const search = searchText.toLowerCase();
+    for (const update of updatesOverview) {
+      if (search && !update.novelName.toLowerCase().includes(search)) {
+        continue;
+      }
+      let section = groups.at(-1);
+      if (!section || section.key !== update.updateDate) {
+        section = {
+          key: update.updateDate,
+          title: formatDate(update.updateDate, dateFormat, relativeTimestamps),
+          groups: [],
+        };
+        groups.push(section);
+      }
+      const key = updateGroupKey(update.novelId, update.updateDate);
+      section.groups.push({
+        key,
+        count: update.updatesPerDay,
+        chapters: details.get(key),
+        novel: {
+          id: update.novelId,
+          pluginId: update.pluginId,
+          name: update.novelName,
+          path: update.novelPath,
+          cover: update.novelCover,
+          inLibrary: update.inLibrary,
+        },
+      });
+    }
+    return groups;
+  }, [dateFormat, details, relativeTimestamps, searchText, updatesOverview]);
+
+  const onDeleteChapter = useCallback(
+    async (chapter: Update) => {
+      try {
+        await deleteChapter(chapter.pluginId, chapter.novelId, chapter.id);
+        showToast(getString('common.deleted', { name: chapter.name }));
+      } catch (deleteError) {
+        showToast(
+          deleteError instanceof Error
+            ? deleteError.message
+            : getString('novelScreen.deleteChapterError'),
+        );
+      } finally {
+        await getUpdates();
+      }
+    },
+    [getUpdates],
   );
 
   useEffect(
@@ -106,57 +141,26 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
       {error ? (
         <ErrorScreenV2 error={error} />
       ) : (
-        <SectionList
-          ListHeaderComponent={
+        <GroupedChapterList
+          theme={theme}
+          sections={sections}
+          expanded={expanded}
+          onToggleGroup={key =>
+            setExpanded(previous => toggleChapterGroup(previous, key))
+          }
+          countLabel={getString('updatesScreen.updatesLower')}
+          onDeleteChapter={onDeleteChapter}
+          onRefresh={() => backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' })}
+          header={
             showLastUpdateTime && lastUpdateTime ? (
               <LastUpdateTime lastUpdateTime={lastUpdateTime} theme={theme} />
             ) : null
           }
-          contentContainerStyle={styles.listContainer}
-          renderSectionHeader={({ section: { date } }) => (
-            <Text style={[styles.dateHeader, { color: theme.onSurface }]}>
-              {formatDate(date, dateFormat, relativeTimestamps)}
-            </Text>
-          )}
-          sections={sections}
-          keyExtractor={item =>
-            `updatedGroup-${item.novelId}-${item.updateDate}-${item.updatesPerDay}`
-          }
-          renderItem={({ item }) => (
-            <UpdateNovelChapterGroup
-              onDeleteChapter={chapter => {
-                deleteChapter(
-                  chapter.pluginId,
-                  chapter.novelId,
-                  chapter.id,
-                ).then(() => {
-                  showToast(
-                    getString('common.deleted', {
-                      name: chapter.name,
-                    }),
-                  );
-                  getUpdates();
-                });
-              }}
-              overview={item}
-              chapterCountLabel={getString('updatesScreen.updatesLower')}
-            />
-          )}
-          ListEmptyComponent={
+          empty={
             <EmptyView
               icon="(˘･_･˘)"
               description={getString('updatesScreen.emptyView')}
               theme={theme}
-            />
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={false}
-              onRefresh={() =>
-                backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' })
-              }
-              colors={[theme.onPrimary]}
-              progressBackgroundColor={theme.primary}
             />
           }
         />
@@ -179,18 +183,10 @@ const LastUpdateTime: React.FC<{
 );
 
 const styles = StyleSheet.create({
-  dateHeader: {
-    paddingBottom: 2,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
   lastUpdateTime: {
     fontSize: 12,
     fontStyle: 'italic',
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  listContainer: {
-    flexGrow: 1,
   },
 });

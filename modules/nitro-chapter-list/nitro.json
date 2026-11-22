@@ -9,6 +9,12 @@
     "androidCxxLibName": "NitroChapterList"
   },
   "autolinking": {
+    "GroupedChapterListStore": {
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridGroupedChapterListStore"
+      }
+    },
     "ChapterListStore": {
       "android": {
         "language": "kotlin",

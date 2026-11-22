@@ -1,8 +1,8 @@
 # nitro-chapter-list
 
-A native Android `RecyclerView` chapter list for the novel screen. It replaces the
-React-rendered list so scrolling, flinging and fast-scrubbing through 10,000+
-chapters does no JS work per frame.
+Native Android `RecyclerView` chapter lists for Novel, Downloads and Updates.
+Scrolling, flinging and fast-scrubbing through large lists do no JS work per
+frame once the rows are available.
 
 Android only.
 
@@ -17,9 +17,14 @@ split so another screen can reuse the list without the chapter parts:
 | `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterRowFormatter` (row text), `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                               |
 | root      | Entry points that Nitro and RN look up by name         | `HybridChapterListStore` (the Nitro store), `ChapterListStoreRegistry`, `ChapterListViewManager` (`LNChapterListView`), `NitroChapterListPackage`                                                                                                                                                                           |
 
-A new list type adds its own package with a `ListHostView` subclass, adapter,
-row view and Nitro store, plus a Fabric spec and view manager. It reuses `core`
-unchanged.
+Downloads and Updates share the `grouped` adapter and `LNGroupedChapterListView`.
+Their store receives a flat snapshot of section headings, novel groups and
+expanded chapter rows. RecyclerView recycles each chapter independently.
+Updates observes single-chapter groups and expanded groups through one database
+subscription. The grouped list also uses the core fast scroller, with exact
+offsets for its shorter headings and loading rows.
+
+The sections below describe the Novel screen's list.
 
 | Piece                                                      | Role                                                                                                                                                                                                 |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,10 +52,9 @@ than that does no JS work at all.
 
 ## Maintenance
 
-**Every change to how a chapter row looks or behaves on the novel screen is now
-Kotlin work** in `ChapterRowView.kt`, `ChapterListAdapter.kt` and
-`ChapterRowFormatter.kt`. `ChapterItem.tsx` still renders rows elsewhere in the
-app, so keep the two in step.
+Chapter rows share `ChapterRowView.kt`. The Novel screen binds them in
+`ChapterListAdapter.kt` and formats them with `ChapterRowFormatter.kt`.
+Downloads and Updates bind their rows in `GroupedChapterListAdapter.kt`.
 
 ### Row text
 
@@ -91,11 +95,11 @@ cd modules/nitro-chapter-list && npx nitrogen
 
 React Native codegen for `src/fabric` runs as part of the Android build.
 
-## Known differences from `ChapterItem`
+## Known differences from the former React rows
 
 - The subtitle is one string, so the reading-progress part uses the subtitle
-  colour. `ChapterItem` draws it in `outline`.
-- The gap between subtitle parts is the text `" •  "`. `ChapterItem` uses a 5dp
+  colour. The former React row drew it in `outline`.
+- The gap between subtitle parts is the text `" •  "`. The former React row used a 5dp
   margin before `"•  "`.
 - A chapter with no chapter number shows "Chapter " (empty number). JS shows
   i18n-js's missing-value placeholder.

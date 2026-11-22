@@ -34,8 +34,10 @@ target_sources(
   ../nitrogen/generated/android/NitroChapterListOnLoad.cpp
   # Shared Nitrogen C++ sources
   ../nitrogen/generated/shared/c++/HybridChapterListStoreSpec.cpp
+  ../nitrogen/generated/shared/c++/HybridGroupedChapterListStoreSpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridChapterListStoreSpec.cpp
+  ../nitrogen/generated/android/c++/JHybridGroupedChapterListStoreSpec.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

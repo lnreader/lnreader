@@ -19,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.margelo.nitro.nitrochapterlist.ChapterRow
+import com.margelo.nitro.nitrochapterlist.grouped.GroupedCoverView
 
 /** Colours (ARGB) and strings shared by every row; replaced as a whole on change. */
 data class ChapterListTheme(
@@ -30,7 +31,9 @@ data class ChapterListTheme(
   val onPrimary: Int = Color.WHITE,
   val rippleColor: Int = 0x1F000000,
   val surface: Int = Color.WHITE,
+  val surfaceVariant: Int = Color.LTGRAY,
   val selectedBackground: Int = 0x1F000000,
+  val chapterTitleTemplate: String = "Chapter %{num}",
   val deleteLabel: String = "Delete",
   val downloadA11yLabel: String = "Download",
   val deleteA11yLabel: String = "Delete",
@@ -43,12 +46,17 @@ data class ChapterListTheme(
  * [download button]. Mirrors itself in RTL.
  */
 @SuppressLint("ViewConstructor")
-class ChapterRowView(context: Context) : ViewGroup(context) {
-  enum class DownloadState { HIDDEN, DOWNLOAD, DOWNLOADING, DOWNLOADED }
+class ChapterRowView(context: Context, grouped: Boolean = false) : ViewGroup(context) {
+  enum class DownloadState { HIDDEN, DOWNLOAD, DOWNLOADING, DOWNLOADED, EXPANDED, COLLAPSED }
+
+  val cover = if (grouped) GroupedCoverView(context) else null
+  private val novelTitle = if (grouped) createText(14f) else null
 
   private val density = resources.displayMetrics.density
   private fun dp(value: Float) = Math.round(value * density)
 
+  private val coverSize = dp(40f)
+  private val coverMargin = dp(16f)
   private val rowHeight = dp(ROW_HEIGHT_DP)
   private val paddingH = dp(16f)
   private val buttonSize = dp(40f)
@@ -84,8 +92,10 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
 
   init {
     isClickable = true
-    isLongClickable = true
+    isLongClickable = !grouped
     isFocusable = true
+    cover?.let { addView(it) }
+    novelTitle?.let { addView(it) }
     addView(bookmark)
     addView(unreadDot)
     addView(title)
@@ -114,6 +124,7 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
       RippleDrawable(ColorStateList.valueOf(value.rippleColor), selectedLayer, ColorDrawable(Color.WHITE))
     downloadButton.background =
       RippleDrawable(ColorStateList.valueOf(value.rippleColor), null, ShapeDrawable(OvalShape()))
+    cover?.applyColors(value.surfaceVariant, value.onSurfaceVariant)
     bookmark.setColor(value.primary)
     unreadDot.setColor(value.primary)
     downloadSpinner.indeterminateTintList = ColorStateList.valueOf(value.outline)
@@ -136,6 +147,35 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     unreadDot.visibility = if (unread) VISIBLE else GONE
     bookmark.visibility = if (bookmarked) VISIBLE else GONE
     applyTextColors()
+  }
+
+  fun bindGroupedChapter(novelName: String, chapterTitle: String, unread: Boolean, bookmarked: Boolean) {
+    novelTitle?.apply {
+      text = novelName
+      visibility = VISIBLE
+    }
+    title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+    title.text = chapterTitle
+    subtitle.visibility = GONE
+    this.unread = unread
+    this.bookmarked = bookmarked
+    unreadDot.visibility = if (unread) VISIBLE else GONE
+    bookmark.visibility = if (bookmarked) VISIBLE else GONE
+    applyTextColors()
+  }
+
+  fun bindGroup(name: String, count: String, expanded: Boolean) {
+    novelTitle?.visibility = GONE
+    title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+    title.text = name
+    subtitle.text = count
+    subtitle.visibility = VISIBLE
+    unread = true
+    bookmarked = false
+    unreadDot.visibility = GONE
+    bookmark.visibility = GONE
+    applyTextColors()
+    bindDownloadState(if (expanded) DownloadState.EXPANDED else DownloadState.COLLAPSED)
   }
 
   /** Rows that aren't loaded yet: same size, no content. */
@@ -165,8 +205,9 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     downloadButton.visibility = if (state == DownloadState.HIDDEN) GONE else VISIBLE
     downloadSpinner.visibility = if (state == DownloadState.DOWNLOADING) VISIBLE else GONE
     downloadIcon.visibility =
-      if (state == DownloadState.DOWNLOAD || state == DownloadState.DOWNLOADED) VISIBLE else GONE
+      if (state == DownloadState.DOWNLOADING || state == DownloadState.HIDDEN) GONE else VISIBLE
     downloadButton.isClickable = state == DownloadState.DOWNLOAD || state == DownloadState.DOWNLOADED
+    downloadButton.isFocusable = downloadButton.isClickable
     when (state) {
       DownloadState.DOWNLOAD -> {
         downloadIcon.setGlyph(IconView.DOWNLOAD)
@@ -179,6 +220,11 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
         downloadButton.contentDescription = theme.deleteA11yLabel
       }
       DownloadState.DOWNLOADING -> downloadButton.contentDescription = theme.downloadingA11yLabel
+      DownloadState.EXPANDED, DownloadState.COLLAPSED -> {
+        downloadIcon.setGlyph(if (state == DownloadState.EXPANDED) IconView.CHEVRON_UP else IconView.CHEVRON_DOWN)
+        downloadIcon.setColor(theme.onSurfaceVariant)
+        downloadButton.contentDescription = null
+      }
       DownloadState.HIDDEN -> downloadButton.contentDescription = null
     }
     if ((previous == DownloadState.HIDDEN) != (state == DownloadState.HIDDEN)) requestLayout()
@@ -186,6 +232,7 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
 
   private fun applyTextColors() {
     val theme = theme ?: return
+    novelTitle?.setTextColor(if (unread) theme.onSurface else theme.outline)
     title.setTextColor(
       when {
         !unread -> theme.outline
@@ -207,6 +254,10 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     val exact = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
     var start = paddingH
     var end = width - paddingH
+    cover?.let {
+      it.measure(exactly(coverSize), exactly(coverSize))
+      start += coverSize + coverMargin
+    }
     if (bookmark.visibility != GONE) {
       val box = bookmark.boxSize + bookmarkPadding * 2
       bookmark.measure(exactly(box), exactly(box))
@@ -216,6 +267,7 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
       downloadButton.measure(exactly(buttonSize), exactly(buttonSize))
       end -= buttonSize
     }
+    novelTitle?.takeIf { it.visibility == VISIBLE }?.measure(exactly((end - start).coerceAtLeast(0)), exact)
     var titleStart = start
     if (unreadDot.visibility != GONE) {
       unreadDot.measure(exact, exact)
@@ -235,6 +287,10 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     var start = paddingH
     var end = width - paddingH
 
+    cover?.let {
+      place(it, start, (height - coverSize) / 2, width, rtl)
+      start += coverSize + coverMargin
+    }
     if (bookmark.visibility != GONE) {
       start += bookmarkMarginStart
       place(bookmark, start, (height - bookmark.measuredHeight) / 2, width, rtl)
@@ -248,14 +304,18 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
     val titleHeight = title.measuredHeight
     val subtitleHeight =
       if (subtitle.visibility != GONE) subtitleMarginTop + subtitle.measuredHeight else 0
-    val top = (height - titleHeight - subtitleHeight) / 2
+    val novel = novelTitle?.takeIf { it.visibility == VISIBLE }
+    val novelHeight = novel?.measuredHeight ?: 0
+    val top = (height - titleHeight - subtitleHeight - novelHeight) / 2
+    if (novel != null) place(novel, start, top, width, rtl)
+    val chapterTop = top + novelHeight
 
     var titleStart = start
     if (unreadDot.visibility != GONE) {
-      place(unreadDot, start, top + (titleHeight - unreadDot.measuredHeight) / 2, width, rtl)
+      place(unreadDot, start, chapterTop + (titleHeight - unreadDot.measuredHeight) / 2, width, rtl)
       titleStart += unreadDot.measuredWidth + dotMarginEnd
     }
-    place(title, titleStart, top, width, rtl)
+    place(title, titleStart, chapterTop, width, rtl)
     if (subtitle.visibility != GONE) {
       place(subtitle, start, top + titleHeight + subtitleMarginTop, width, rtl)
     }
@@ -271,6 +331,20 @@ class ChapterRowView(context: Context) : ViewGroup(context) {
   override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
     super.onInitializeAccessibilityNodeInfo(info)
     info.className = Button::class.java.name
+    when (downloadState) {
+      DownloadState.EXPANDED -> info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE)
+      DownloadState.COLLAPSED -> info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND)
+      else -> Unit
+    }
+  }
+
+  override fun performAccessibilityAction(action: Int, arguments: android.os.Bundle?): Boolean {
+    val expand = AccessibilityNodeInfo.ACTION_EXPAND
+    val collapse = AccessibilityNodeInfo.ACTION_COLLAPSE
+    if ((action == expand && downloadState == DownloadState.COLLAPSED) ||
+      (action == collapse && downloadState == DownloadState.EXPANDED)
+    ) return performClick()
+    return super.performAccessibilityAction(action, arguments)
   }
 
   /**

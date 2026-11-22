@@ -36,6 +36,7 @@ import {
   getDownloadedChapterIds,
   getUpdatedOverviewFromDb,
   getDetailedUpdatesFromDb,
+  getGroupedUpdateChaptersQuery,
   isChapterDownloaded,
   bookmarkChapter,
   bookmarkChapters,
@@ -1503,6 +1504,34 @@ describe('ChapterQueries', () => {
       const result = await getNextChapter(novelId, 0, '1', ['Scan A']);
       expect(result?.id).toBe(nextPageChapter1);
     });
+  });
+
+  it('loads only the requested update dates for each novel in newest-first order', async () => {
+    const db = getTestDb();
+    const novel = await insertTestNovel(db);
+    const other = await insertTestNovel(db);
+    const morning = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T09:00:00Z',
+    });
+    const evening = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T18:00:00Z',
+    });
+    await insertTestChapter(db, novel, { updatedTime: '2026-11-21T09:00:00Z' });
+    await insertTestChapter(db, other, { updatedTime: '2026-11-20T09:00:00Z' });
+    const otherUpdate = await insertTestChapter(db, other, {
+      updatedTime: '2026-11-19T09:00:00Z',
+    });
+
+    const rows = await getGroupedUpdateChaptersQuery([
+      [novel, '2026-11-20'],
+      [other, '2026-11-19'],
+    ]).all();
+
+    expect(rows.map(({ id, updateDate }) => [id, updateDate])).toEqual([
+      [evening, '2026-11-20'],
+      [morning, '2026-11-20'],
+      [otherUpdate, '2026-11-19'],
+    ]);
   });
 
   describe('getDownloadedChapters', () => {

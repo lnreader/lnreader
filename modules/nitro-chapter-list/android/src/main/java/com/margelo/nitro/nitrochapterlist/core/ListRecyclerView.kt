@@ -26,6 +26,10 @@ class ListRecyclerView(
   val rowHeight: Int,
 ) : RecyclerView(context) {
   val linearLayoutManager = LinearLayoutManager(context)
+  // Optional cumulative heights for lists with shorter section and loading rows.
+  var rowOffsets: IntArray? = null
+  private fun rowTop(index: Int): Int = rowOffsets?.getOrNull(index) ?: index * rowHeight
+
   private var nativeGestureStarted = false
   private var pendingSmoothScroll: Runnable? = null
 
@@ -42,7 +46,7 @@ class ListRecyclerView(
     get() = ((adapter?.itemCount ?: 0) - HEADER_COUNT).coerceAtLeast(0)
 
   val contentHeight: Int
-    get() = paddingTop + header.contentHeight + rowCount * rowHeight + paddingBottom
+    get() = paddingTop + header.contentHeight + rowTop(rowCount) + paddingBottom
 
   val maxScrollOffset: Int
     get() = (contentHeight - height).coerceAtLeast(0)
@@ -57,7 +61,7 @@ class ListRecyclerView(
     if (position == NO_POSITION) return 0
     val top = linearLayoutManager.getDecoratedTop(first)
     val itemStart =
-      if (position == 0) 0 else header.contentHeight + (position - HEADER_COUNT) * rowHeight
+      if (position == 0) 0 else header.contentHeight + rowTop(position - HEADER_COUNT)
     return paddingTop + itemStart - top
   }
 
@@ -70,10 +74,12 @@ class ListRecyclerView(
       return
     }
     val intoRows = target - headerHeight
-    val index = (intoRows / rowHeight).coerceAtMost(rowCount - 1)
+    val index = (rowOffsets?.binarySearch(intoRows)?.let { result ->
+      if (result >= 0) result else -result - 2
+    } ?: (intoRows / rowHeight)).coerceIn(0, rowCount - 1)
     linearLayoutManager.scrollToPositionWithOffset(
       index + HEADER_COUNT,
-      -(intoRows - index * rowHeight),
+      -(intoRows - rowTop(index)),
     )
   }
 
@@ -109,8 +115,9 @@ class ListRecyclerView(
 
   /** Offset that puts row [index] at [viewPosition] (0 top, 1 bottom) of the viewport. */
   fun offsetForIndex(index: Int, viewPosition: Float): Int {
-    val itemTop = paddingTop + header.contentHeight + index * rowHeight
-    return (itemTop - viewPosition * (height - paddingBottom - rowHeight)).roundToInt()
+    val itemTop = paddingTop + header.contentHeight + rowTop(index)
+    val itemHeight = rowTop(index + 1) - rowTop(index)
+    return (itemTop - viewPosition * (height - paddingBottom - itemHeight)).roundToInt()
   }
 
   /**

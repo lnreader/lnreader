@@ -28,6 +28,7 @@ import kotlin.math.roundToInt
 abstract class ListHostView(
   protected val reactContext: ThemedReactContext,
   rowHeight: Int,
+  private val emitsScrollEvents: Boolean = true,
 ) : FrameLayout(reactContext) {
   val header = HeaderContainer(reactContext)
   protected val recyclerView = ListRecyclerView(reactContext, header, rowHeight)
@@ -96,6 +97,14 @@ abstract class ListHostView(
 
   fun setRefreshing(value: Boolean) {
     swipeRefresh.isRefreshing = value
+  }
+
+  protected fun setRefreshEnabled(enabled: Boolean) {
+    swipeRefresh.isEnabled = enabled
+  }
+
+  protected fun setOnRefreshListener(listener: () -> Unit) {
+    swipeRefresh.setOnRefreshListener(listener)
   }
 
   fun setRefreshOffset(dp: Float) {
@@ -184,7 +193,7 @@ abstract class ListHostView(
 
   /** ScrollView-shaped `topScroll`, which Reanimated handles on the UI thread. */
   private fun dispatchScroll() {
-    if (id == NO_ID) return
+    if (!emitsScrollEvents || id == NO_ID) return
     val offset = recyclerView.computeVerticalScrollOffset()
     if (!scrollGate.shouldSend(offset)) return
     dispatchEvent(
