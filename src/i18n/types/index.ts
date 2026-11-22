@@ -701,6 +701,15 @@ export interface StringMap {
   'updatesScreen.unableToGetNovel': 'string';
   'updatesScreen.updatesLower': 'string';
   'updatesScreen.updatingLibrary': 'string';
+  'updatesScreen.viewUpcoming': 'string';
+  'upcomingScreen.categoriesDescription': 'string';
+  'upcomingScreen.emptyView': 'string';
+  'upcomingScreen.nextMonth': 'string';
+  'upcomingScreen.previousMonth': 'string';
+  'upcomingScreen.relativeTime.one': 'string';
+  'upcomingScreen.relativeTime.other': 'string';
+  'upcomingScreen.title': 'string';
+  'upcomingScreen.today': 'string';
   'onboardingScreen.welcome': 'string';
   'onboardingScreen.pickATheme': 'string';
   'onboardingScreen.ePaperOptimizationsDescription': 'string';

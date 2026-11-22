@@ -38,6 +38,7 @@ export const novel = sqliteTable(
       table.id,
       table.inLibrary,
     ),
+    index('NovelUpcomingIndex').on(table.inLibrary, table.nextUpdate),
   ],
 );
 

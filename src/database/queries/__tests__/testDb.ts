@@ -72,6 +72,7 @@ const MIGRATION_STATEMENTS = [
 )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS novel_path_plugin_unique ON Novel (path, pluginId)`,
   `CREATE INDEX IF NOT EXISTS NovelIndex ON Novel (pluginId, path, id, inLibrary)`,
+  `CREATE INDEX IF NOT EXISTS NovelUpcomingIndex ON Novel (inLibrary, nextUpdate)`,
   `CREATE TABLE IF NOT EXISTS NovelCategory (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	novelId integer NOT NULL,

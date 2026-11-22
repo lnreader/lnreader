@@ -31,6 +31,7 @@ import AniListTopNovels from '../screens/browse/discover/AniListTopNovels';
 import BrowseSettings from '../screens/browse/settings/BrowseSettings';
 import PluginDetailsScreen from '../screens/browse/PluginDetailsScreen';
 import WebviewScreen from '@screens/WebviewScreen/WebviewScreen';
+import UpcomingScreen from '@screens/upcoming/UpcomingScreen';
 import { RootStackParamList } from './types';
 import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
@@ -151,6 +152,7 @@ const MainNavigator = () => {
             <Stack.Screen name="SourceNovels" component={SourceNovels} />
             <Stack.Screen name="MigrateNovel" component={MigrateNovel} />
             <Stack.Screen name="WebviewScreen" component={WebviewScreen} />
+            <Stack.Screen name="Upcoming" component={UpcomingScreen} />
           </Stack.Navigator>
         </UpdateContextProvider>
       </LibraryContextProvider>

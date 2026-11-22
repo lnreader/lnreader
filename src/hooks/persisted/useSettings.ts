@@ -137,6 +137,8 @@ export interface LibrarySettings {
   lastUsedCategoryId?: number;
   globalUpdateExcludeCategoryIds?: number[];
   globalUpdateIncludeCategoryIds?: number[];
+  upcomingExcludeCategoryIds?: number[];
+  upcomingIncludeCategoryIds?: number[];
   sortOrder?: LibrarySortOrder;
   filter?: LibraryFilter;
   showDownloadBadges?: boolean;

@@ -821,7 +821,20 @@
     },
     "unableToGetNovel": "Unable to get novel",
     "updatesLower": "updates",
-    "updatingLibrary": "Updating library"
+    "updatingLibrary": "Updating library",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Welcome",

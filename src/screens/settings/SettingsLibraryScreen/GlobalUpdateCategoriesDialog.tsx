@@ -24,6 +24,8 @@ interface GlobalUpdateCategoriesDialogProps {
     excludedCategoryIds: number[],
   ) => void;
   onSave: () => void;
+  title?: string;
+  description?: string;
 }
 
 const categoryKey = (category: Category) => category.id.toString();
@@ -36,6 +38,10 @@ const GlobalUpdateCategoriesDialog = ({
   onCancel,
   onChange,
   onSave,
+  title = getString('generalSettingsScreen.globalUpdateCategories'),
+  description = getString(
+    'generalSettingsScreen.globalUpdateCategoriesDescription',
+  ),
 }: GlobalUpdateCategoriesDialogProps) => {
   const theme = useTheme();
 
@@ -102,12 +108,8 @@ const GlobalUpdateCategoriesDialog = ({
   return (
     <Dialog.Root visible={visible} onDismiss={onCancel}>
       <Dialog.Header>
-        <Dialog.Title>
-          {getString('generalSettingsScreen.globalUpdateCategories')}
-        </Dialog.Title>
-        <Dialog.Description>
-          {getString('generalSettingsScreen.globalUpdateCategoriesDescription')}
-        </Dialog.Description>
+        <Dialog.Title>{title}</Dialog.Title>
+        <Dialog.Description>{description}</Dialog.Description>
       </Dialog.Header>
       <Dialog.ScrollArea>
         <FlatList
