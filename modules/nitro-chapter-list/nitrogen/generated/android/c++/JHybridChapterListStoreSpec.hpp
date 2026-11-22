@@ -59,6 +59,7 @@ namespace margelo::nitro::nitrochapterlist {
     void updateRows(const std::vector<ChapterRow>& rows) override;
     void setSelected(const std::vector<double>& ids) override;
     void setDownloading(const std::vector<double>& ids) override;
+    void setHighlighted(std::optional<double> id) override;
 
   private:
     jni::global_ref<JHybridChapterListStoreSpec::JavaPart> _javaPart;

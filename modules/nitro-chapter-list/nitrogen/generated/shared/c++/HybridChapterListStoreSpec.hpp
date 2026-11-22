@@ -19,6 +19,7 @@ namespace margelo::nitro::nitrochapterlist { struct ChapterRow; }
 #include <string>
 #include "ChapterRow.hpp"
 #include <vector>
+#include <optional>
 
 namespace margelo::nitro::nitrochapterlist {
 
@@ -56,6 +57,7 @@ namespace margelo::nitro::nitrochapterlist {
       virtual void updateRows(const std::vector<ChapterRow>& rows) = 0;
       virtual void setSelected(const std::vector<double>& ids) = 0;
       virtual void setDownloading(const std::vector<double>& ids) = 0;
+      virtual void setHighlighted(std::optional<double> id) = 0;
 
     protected:
       // Hybrid Setup

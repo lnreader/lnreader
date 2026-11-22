@@ -101,5 +101,9 @@ namespace margelo::nitro::nitrochapterlist {
       return __array;
     }());
   }
+  void JHybridChapterListStoreSpec::setHighlighted(std::optional<double> id) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JDouble> /* id */)>("setHighlighted");
+    method(_javaPart, id.has_value() ? jni::JDouble::valueOf(id.value()) : nullptr);
+  }
 
 } // namespace margelo::nitro::nitrochapterlist

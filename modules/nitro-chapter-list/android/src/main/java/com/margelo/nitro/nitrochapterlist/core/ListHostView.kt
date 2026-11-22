@@ -21,14 +21,15 @@ import kotlin.math.roundToInt
  * [ListFastScroller] over the rows, gated ScrollView-shaped scroll events,
  * range requests for unloaded rows, and scroll commands.
  *
- * Subclasses supply the adapter (header at [ListRecyclerView.HEADER_COUNT] - 1,
- * rows of [rowHeight] px after it) and their own row events.
+ * Subclasses supply the adapter (the header item at position 0 when
+ * [headerCount] is 1, then rows of [rowHeight] px; rows from position 0 when
+ * headerless) and their own row events.
  */
 @SuppressLint("ViewConstructor")
 abstract class ListHostView(
   protected val reactContext: ThemedReactContext,
   rowHeight: Int,
-  private val emitsScrollEvents: Boolean = true,
+  emitsScrollEvents: Boolean = true,
 ) : FrameLayout(reactContext) {
   val header = HeaderContainer(reactContext)
   protected val recyclerView = ListRecyclerView(reactContext, header, rowHeight)
@@ -36,6 +37,13 @@ abstract class ListHostView(
   private val fastScroller = ListFastScroller(recyclerView)
   private val scrollGate = ScrollEventGate()
   private val rangeRequester = RangeRequester()
+
+  /** False: no `topScroll` events at all (JS doesn't listen). */
+  protected var emitsScrollEvents: Boolean = emitsScrollEvents
+    set(value) {
+      field = value
+      scrollGate.reset()
+    }
 
   // False while FrameLayout's constructor runs, before our fields exist.
   private var initialized = false
@@ -55,8 +63,10 @@ abstract class ListHostView(
     swipeRefresh.setOnRefreshListener { dispatch(ListEvent.REFRESH, Arguments.createMap()) }
     recyclerView.addOnScrollListener(
       object : RecyclerView.OnScrollListener() {
+        // Also called with 0, 0 after a layout changes the visible range.
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
           dispatchScroll()
+          onVisibleRangeChanged()
         }
       },
     )
@@ -81,6 +91,29 @@ abstract class ListHostView(
   fun setHeaderChild(child: View?) {
     header.setReactChild(child)
   }
+
+  /** 1 when position 0 is the header item, 0 when headerless. */
+  val headerCount: Int
+    get() = recyclerView.headerCount
+
+  /**
+   * Headerless lists have no header item: rows start at position 0 and the
+   * header's height never counts. The adapter must switch along with this.
+   */
+  protected fun setHasHeader(value: Boolean) {
+    val count = if (value) 1 else 0
+    if (recyclerView.metrics.headerCount == count) return
+    recyclerView.metrics.headerCount = count
+    onContentChanged()
+  }
+
+  protected var rowHeight: Int
+    get() = recyclerView.rowHeight
+    set(value) {
+      if (recyclerView.rowHeight == value) return
+      recyclerView.rowHeight = value
+      onContentChanged()
+    }
 
   // --- Props ---
 
@@ -111,10 +144,17 @@ abstract class ListHostView(
     swipeRefresh.setProgressViewOffset(dp)
   }
 
+  fun setContentPaddingTop(dp: Float) {
+    val px = toPx(dp)
+    if (recyclerView.paddingTop == px) return
+    recyclerView.setPadding(0, px, 0, recyclerView.paddingBottom)
+    onContentChanged()
+  }
+
   fun setContentPaddingBottom(dp: Float) {
     val px = toPx(dp)
     if (recyclerView.paddingBottom == px) return
-    recyclerView.setPadding(0, 0, 0, px)
+    recyclerView.setPadding(0, recyclerView.paddingTop, 0, px)
     onContentChanged()
   }
 
@@ -174,6 +214,14 @@ abstract class ListHostView(
     )
   }
 
+  /** Called after every scroll, and after layouts that change the visible rows. */
+  protected open fun onVisibleRangeChanged() {}
+
+  /** First and last (partly) visible row indices (header excluded), or -1. */
+  protected fun firstVisibleRow(): Int = recyclerView.firstVisibleRow()
+
+  protected fun lastVisibleRow(): Int = recyclerView.lastVisibleRow()
+
   /** Call when the row count or anything else affecting scroll metrics changes. */
   protected fun onContentChanged() {
     fastScroller.onContentChanged()
@@ -188,6 +236,7 @@ abstract class ListHostView(
   }
 
   protected fun dispatch(name: String, data: WritableMap) {
+    if (id == NO_ID) return
     dispatchEvent(ListEvent(surfaceId, id, name, data))
   }
 

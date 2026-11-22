@@ -15,6 +15,7 @@ jest.mock('@modules/nitro-chapter-list', () => {
       updateRows: jest.fn(),
       setSelected: jest.fn(),
       setDownloading: jest.fn(),
+      setHighlighted: jest.fn(),
     };
   });
 

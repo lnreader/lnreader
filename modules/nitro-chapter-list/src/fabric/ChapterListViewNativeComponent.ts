@@ -21,6 +21,9 @@ export type ChapterListColors = Readonly<{
   rippleColor: Int32;
   surface: Int32;
   selectedBackground: Int32;
+  /** Drawer variant: the highlighted (current) chapter's background and text. */
+  secondaryContainer: Int32;
+  onSecondaryContainer: Int32;
 }>;
 
 export type ChapterListStrings = Readonly<{
@@ -68,15 +71,28 @@ export type ChapterListScrollEvent = Readonly<{
 export type ChapterIdEvent = Readonly<{ id: Int32; position: Int32 }>;
 export type RequestRangeEvent = Readonly<{ start: Int32; end: Int32 }>;
 export type RefreshEvent = Readonly<{}>;
+/** Where the highlighted chapter is relative to the visible rows. */
+export type HighlightedVisibilityChangeEvent = Readonly<{
+  state: 'above' | 'visible' | 'below';
+}>;
 
 export interface NativeProps extends ViewProps {
   storeId: string;
   colors: ChapterListColors;
   strings: ChapterListStrings;
   rowFormat: ChapterRowFormat;
+  /**
+   * `novel`: the Novel screen's list (its single child is the header).
+   * `drawer`: the reader's chapter drawer: no child and no header item, name and
+   * date rows, the `setHighlighted` chapter highlighted, no scroll events.
+   */
+  variant?: WithDefault<'novel' | 'drawer', 'novel'>;
+  /** Row placed at the top before the first layout with rows; -1: the top. */
+  initialPosition?: WithDefault<Int32, -1>;
   isLocal?: WithDefault<boolean, false>;
   refreshing?: WithDefault<boolean, false>;
   refreshOffset?: WithDefault<Float, 0>;
+  contentPaddingTop?: WithDefault<Float, 0>;
   contentPaddingBottom?: WithDefault<Float, 0>;
   fastScrollTopInset?: WithDefault<Float, 0>;
   fastScrollBottomInset?: WithDefault<Float, 0>;
@@ -96,6 +112,8 @@ export interface NativeProps extends ViewProps {
   onDeletePress?: DirectEventHandler<ChapterIdEvent>;
   onRefresh?: DirectEventHandler<RefreshEvent>;
   onRequestRange?: DirectEventHandler<RequestRangeEvent>;
+  /** Drawer variant: sent when the highlighted chapter's visibility changes. */
+  onHighlightedVisibilityChange?: DirectEventHandler<HighlightedVisibilityChangeEvent>;
 }
 
 type ChapterListViewType = HostComponent<NativeProps>;
