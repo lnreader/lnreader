@@ -207,6 +207,8 @@ export interface StringMap {
   'browseScreen.listEmpty': 'string';
   'browseScreen.migration.cover': 'string';
   'browseScreen.migration.dialogMessage': 'string';
+  'browseScreen.migration.failed': 'string';
+  'browseScreen.migration.inProgress': 'string';
   'browseScreen.migration.keepCurrent': 'string';
   'browseScreen.migration.metadata': 'string';
   'browseScreen.migration.novelAlreadyInLibrary': 'string';
@@ -216,6 +218,9 @@ export interface StringMap {
   'browseScreen.migration.reviewTitle': 'string';
   'browseScreen.migration.selectSource': 'string';
   'browseScreen.migration.selectSourceDesc': 'string';
+  'browseScreen.migration.success': 'string';
+  'browseScreen.migration.unmatchedReadChapters.one': 'string';
+  'browseScreen.migration.unmatchedReadChapters.other': 'string';
   'browseScreen.migration.useDestination': 'string';
   'browseScreen.noSource': 'string';
   'browseScreen.noPlugins': 'string';

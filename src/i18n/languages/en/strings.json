@@ -237,6 +237,8 @@
     "migration": {
       "cover": "Cover",
       "dialogMessage": "Migrate %{url}?",
+      "failed": "Migration did not complete. Your novel was left unchanged.",
+      "inProgress": "A migration is already in progress",
       "keepCurrent": "Keep current",
       "metadata": "Novel details",
       "novelAlreadyInLibrary": "Novel already in library",
@@ -246,6 +248,11 @@
       "reviewTitle": "Review migration",
       "selectSource": "Select Source",
       "selectSourceDesc": "Select a Source To Migrate From",
+      "success": "Migration complete",
+      "unmatchedReadChapters": {
+        "one": "Migrated. %{count} read chapter had no match in the new source and stays unread.",
+        "other": "Migrated. %{count} read chapters had no match in the new source and stay unread."
+      },
       "useDestination": "Use destination source"
     },
     "noSource": "Your library does not have any novels from this source",
