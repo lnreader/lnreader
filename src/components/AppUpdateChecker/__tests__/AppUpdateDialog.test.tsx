@@ -1,12 +1,27 @@
-import {
-  fireEvent,
-  render as rtlRender,
-  screen,
-} from '@testing-library/react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { render } from '@test-utils';
 import * as Linking from 'expo-linking';
 
 import AppUpdateDialog from '../AppUpdateDialog';
+
+jest.mock('@screens/novel/NovelContext', () => ({}));
+
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = jest.requireActual('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: React.ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 
 jest.mock('@i18n/translations', () => ({
   getString: (key: string) =>
@@ -34,10 +49,6 @@ jest.mock('@hooks/persisted', () => ({
 jest.mock('expo-linking', () => ({
   openURL: jest.fn(),
 }));
-
-// Gesture Handler 3's ScrollView needs a GestureHandlerRootView ancestor.
-const render = (ui: React.ReactElement) =>
-  rtlRender(ui, { wrapper: GestureHandlerRootView });
 
 const release = {
   tag_name: 'v9.0.0',
