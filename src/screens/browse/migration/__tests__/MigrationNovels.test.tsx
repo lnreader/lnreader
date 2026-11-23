@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@test-utils';
 
 import { showToast } from '@utils/showToast';
 import { isMigrationPersisted } from '@services/migrate/verifyMigration';
@@ -10,6 +10,24 @@ let mockEnqueueResolves = false;
 let mockTarget: unknown;
 const mockPlugins = [{ id: 'to-plugin', name: 'Plugin', lang: 'en' }];
 
+jest.mock('@components/Context/LibraryContext');
+jest.mock('@services/plugin/fetch');
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = jest.requireActual('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: React.ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 jest.mock('@hooks/persisted', () => ({
   useFilteredInstalledPlugins: () => mockPlugins,
   useTheme: () => ({ isDark: false, onSurface: '#000' }),
