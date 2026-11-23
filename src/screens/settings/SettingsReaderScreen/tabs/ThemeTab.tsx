@@ -1,6 +1,10 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Ref } from 'react';
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  type ScrollViewInstance,
+} from 'react-native';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { List, ColorPreferenceItem, Button } from '@components/index';
@@ -10,7 +14,11 @@ import ColorPickerModal from '@components/ColorPickerModal/ColorPickerModal';
 import ReaderThemeSelector from '@screens/reader/components/ReaderBottomSheet/ReaderThemeSelector';
 import { presetReaderThemes } from '@utils/constants/readerConstants';
 
-const ThemeTab: React.FC = () => {
+interface ThemeTabProps {
+  scrollRef?: Ref<ScrollViewInstance>;
+}
+
+const ThemeTab = ({ scrollRef }: ThemeTabProps) => {
   const theme = useTheme();
   const readerSettings = useChapterReaderSettings();
   const readerBackgroundModal = useBoolean();
@@ -32,7 +40,8 @@ const ThemeTab: React.FC = () => {
 
   return (
     <>
-      <BottomSheetScrollView
+      <ScrollView
+        ref={scrollRef}
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
@@ -92,7 +101,7 @@ const ThemeTab: React.FC = () => {
         ) : null}
 
         <View style={styles.bottomSpacing} />
-      </BottomSheetScrollView>
+      </ScrollView>
 
       <Portal>
         <ColorPickerModal

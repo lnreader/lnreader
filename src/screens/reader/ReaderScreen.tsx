@@ -19,7 +19,7 @@ import {
   useChapterContext,
   useReaderChromeHidden,
 } from './ChapterContext';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Keyboard, Share, StyleSheet, View } from 'react-native';
@@ -128,7 +128,7 @@ export const ChapterContent = ({
     refetch,
   } = useChapterContext();
   const hidden = useReaderChromeHidden();
-  const readerSheetRef = useRef<BottomSheetModalMethods>(null);
+  const readerSheetRef = useRef<BottomSheetRef>(null);
   const theme = useTheme();
   const { pageReader = false, keepScreenOn } = useChapterGeneralSettings();
   const [bookmarked, setBookmarked] = useState<boolean>(

@@ -1,51 +1,37 @@
-import {
-  getBottomSheetLayout,
-  normalizeBottomSheetSnapPoints,
-} from '../layout';
+import { getBottomSheetMaxHeight, toBottomSheetDetents } from '../layout';
 
 describe('bottom sheet layout', () => {
   it('preserves the Material 3 top margin on compact windows', () => {
     expect(
-      getBottomSheetLayout({
-        bottom: 16,
-        height: 800,
-        top: 24,
-        width: 400,
-      }),
-    ).toEqual({
-      horizontalInset: 0,
-      maxHeight: 688,
-      topMargin: 72,
-    });
+      getBottomSheetMaxHeight({ bottom: 16, height: 800, top: 24, width: 400 }),
+    ).toBe(688);
   });
 
-  it('centers sheets at the 640dp max width on large windows', () => {
+  it('uses the smaller top margin on large windows', () => {
     expect(
-      getBottomSheetLayout({
+      getBottomSheetMaxHeight({
         bottom: 16,
         height: 800,
         top: 24,
         width: 1000,
       }),
-    ).toEqual({
-      horizontalInset: 180,
-      maxHeight: 704,
-      topMargin: 56,
-    });
+    ).toBe(704);
   });
 
-  it('sorts and clamps snap points without mutating the caller array', () => {
-    const snapPoints = [720, 320, 480];
+  it('converts snap points to sorted window fractions without mutating them', () => {
+    const snapPoints = [600, 200];
 
-    expect(normalizeBottomSheetSnapPoints(snapPoints, 600, 0)).toEqual([
-      320, 480, 600,
-    ]);
-    expect(snapPoints).toEqual([720, 320, 480]);
+    expect(toBottomSheetDetents(snapPoints, 700, 800)).toEqual([0.25, 0.75]);
+    expect(snapPoints).toEqual([600, 200]);
   });
 
-  it('extends snap points behind the navigation bar', () => {
-    expect(normalizeBottomSheetSnapPoints([400, 720], 600, 48)).toEqual([
-      448, 648,
-    ]);
+  it('clamps snap points to the available height', () => {
+    expect(toBottomSheetDetents([720], 400, 800)).toEqual([0.5]);
+  });
+
+  it('keeps at most three detents', () => {
+    expect(toBottomSheetDetents([100, 200, 300, 400], 800, 800)).toHaveLength(
+      3,
+    );
   });
 });

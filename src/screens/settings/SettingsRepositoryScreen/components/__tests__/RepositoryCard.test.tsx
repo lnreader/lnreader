@@ -81,10 +81,6 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('@gorhom/bottom-sheet', () => ({
-  BottomSheetModalProvider: ({ children }: { children: ReactNode }) => children,
-}));
-
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
   const createAnimatedComponent = (component: unknown) => component;

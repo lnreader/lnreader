@@ -1,4 +1,5 @@
 import React, {
+  Ref,
   RefObject,
   useCallback,
   useEffect,
@@ -6,15 +7,16 @@ import React, {
   useState,
 } from 'react';
 import {
+  ScrollView,
   StyleProp,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
   ViewStyle,
+  type ScrollViewInstance,
 } from 'react-native';
-import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TabDescriptor, TabView } from 'react-native-tab-view';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -37,22 +39,23 @@ import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
 import { showToast } from '@utils/showToast';
 import { getErrorMessage } from '@utils/error';
 import { RadioButton } from '@components/RadioButton/RadioButton';
-import {
-  BottomSheetView,
-  useBottomSheetScrollableCreator,
-} from '@gorhom/bottom-sheet';
-import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { getBottomSheetLayout } from '@components/BottomSheet/layout';
+import BottomSheet, {
+  BottomSheetRef,
+  useTabScrollables,
+} from '@components/BottomSheet/BottomSheet';
 import { TopTabBar } from '@components';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList } from '@legendapp/list/react-native';
+import { LegendList, LegendListRef } from '@legendapp/list/react-native';
 
 interface LibraryBottomSheetProps {
-  bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  bottomSheetRef: RefObject<BottomSheetRef | null>;
   style?: StyleProp<ViewStyle>;
 }
 
-const SHEET_HEIGHT = 520;
+const SNAP_POINTS = [520];
+
+interface RouteProps {
+  scrollRef: Ref<ScrollViewInstance>;
+}
 
 type FilterRow =
   | { type: 'filter'; key: LibraryFilterKey; label: string }
@@ -73,7 +76,7 @@ const genreState = (
     ? 'exclude'
     : undefined;
 
-const FirstRoute = () => {
+const FirstRoute = ({ scrollRef }: { scrollRef: Ref<LegendListRef> }) => {
   const theme = useTheme();
   const {
     filters,
@@ -82,7 +85,6 @@ const FirstRoute = () => {
     setLibrarySettings,
     downloadedOnlyMode = false,
   } = useLibrarySettings();
-  const BottomSheetLegendListScrollable = useBottomSheetScrollableCreator();
 
   const [libraryGenres, setLibraryGenres] = useState<LibraryGenre[]>([]);
   useEffect(() => {
@@ -189,6 +191,7 @@ const FirstRoute = () => {
   return (
     <View style={styles.flex}>
       <LegendList
+        ref={scrollRef}
         recycleItems
         estimatedItemSize={48}
         extraData={[
@@ -207,49 +210,42 @@ const FirstRoute = () => {
             : item.type
         }
         renderItem={renderItem}
-        renderScrollComponent={BottomSheetLegendListScrollable}
       />
     </View>
   );
 };
 
-const SecondRoute = () => {
+const SecondRoute = ({ scrollRef }: RouteProps) => {
   const theme = useTheme();
   const { sortOrder = LibrarySortOrder.DateAdded_DESC, setLibrarySettings } =
     useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
-      <LegendList
-        recycleItems
-        data={librarySortOrderList}
-        extraData={[sortOrder]}
-        estimatedItemSize={52}
-        keyExtractor={(item, index) => `sort_${index}_${item.ASC}`}
-        renderItem={({ item }) => (
-          <SortItem
-            label={item.label}
-            theme={theme}
-            status={
-              sortOrder === item.ASC
-                ? 'asc'
-                : sortOrder === item.DESC
-                ? 'desc'
-                : undefined
-            }
-            onPress={() =>
-              setLibrarySettings({
-                sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
-              })
-            }
-          />
-        )}
-      />
-    </View>
+    <ScrollView ref={scrollRef} style={styles.flex}>
+      {librarySortOrderList.map((item, index) => (
+        <SortItem
+          key={`sort_${index}_${item.ASC}`}
+          label={item.label}
+          theme={theme}
+          status={
+            sortOrder === item.ASC
+              ? 'asc'
+              : sortOrder === item.DESC
+              ? 'desc'
+              : undefined
+          }
+          onPress={() =>
+            setLibrarySettings({
+              sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
+            })
+          }
+        />
+      ))}
+    </ScrollView>
   );
 };
 
-const ThirdRoute = () => {
+const ThirdRoute = ({ scrollRef }: RouteProps) => {
   const theme = useTheme();
   const {
     showDownloadBadges = true,
@@ -261,7 +257,7 @@ const ThirdRoute = () => {
   } = useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
+    <ScrollView ref={scrollRef} style={styles.flex}>
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
         {getString('libraryScreen.bottomSheet.display.overlays')}
       </Text>
@@ -310,30 +306,18 @@ const ThirdRoute = () => {
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
         {getString('libraryScreen.bottomSheet.display.displayMode')}
       </Text>
-      <LegendList
-        recycleItems
-        estimatedItemSize={48}
-        data={displayModesList}
-        extraData={[displayMode]}
-        keyExtractor={item => `display_mode_${item.value}`}
-        renderItem={({ item }) => (
-          <RadioButton
-            label={item.label}
-            status={displayMode === item.value}
-            onPress={() => setLibrarySettings({ displayMode: item.value })}
-            theme={theme}
-          />
-        )}
-      />
-    </View>
+      {displayModesList.map(item => (
+        <RadioButton
+          key={`display_mode_${item.value}`}
+          label={item.label}
+          status={displayMode === item.value}
+          onPress={() => setLibrarySettings({ displayMode: item.value })}
+          theme={theme}
+        />
+      ))}
+    </ScrollView>
   );
 };
-
-const bottomSheetSceneMap = SceneMap({
-  first: FirstRoute,
-  second: SecondRoute,
-  third: ThirdRoute,
-});
 
 const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   bottomSheetRef,
@@ -343,13 +327,6 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   const { reduceAppAnimations = false } = useAppSettings();
 
   const layout = useWindowDimensions();
-  const { bottom, top } = useSafeAreaInsets();
-  const { maxHeight } = getBottomSheetLayout({
-    bottom,
-    height: layout.height,
-    top,
-    width: layout.width,
-  });
 
   const renderTabBar = useCallback(
     (props: any) => (
@@ -381,6 +358,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   );
 
   const [index, setIndex] = useState(0);
+
   const routes = useMemo(
     () => [
       { key: 'first', title: getString('common.filter') },
@@ -388,6 +366,23 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
       { key: 'third', title: getString('common.display') },
     ],
     [],
+  );
+
+  const { register, scrollableRef } = useTabScrollables(routes[index].key);
+
+  const renderScene = useCallback(
+    ({ route }: { route: { key: string } }) => {
+      const scrollRef = register(route.key);
+      switch (route.key) {
+        case 'first':
+          return <FirstRoute scrollRef={scrollRef} />;
+        case 'second':
+          return <SecondRoute scrollRef={scrollRef} />;
+        default:
+          return <ThirdRoute scrollRef={scrollRef} />;
+      }
+    },
+    [register],
   );
 
   const renderCommonOptions = useCallback(
@@ -407,19 +402,22 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   }, [renderCommonOptions]);
 
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[SHEET_HEIGHT]}>
-      <BottomSheetView style={styles.bottomSheetCtn}>
+    <BottomSheet
+      bottomSheetRef={bottomSheetRef}
+      snapPoints={SNAP_POINTS}
+      scrollableRef={scrollableRef}
+    >
+      <View style={styles.bottomSheetCtn}>
         <TabView
           animationEnabled={!reduceAppAnimations}
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
           renderTabBar={renderTabBar}
-          renderScene={bottomSheetSceneMap}
+          renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
-          style={{ height: Math.min(SHEET_HEIGHT, maxHeight) }}
         />
-      </BottomSheetView>
+      </View>
     </BottomSheet>
   );
 };

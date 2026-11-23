@@ -33,7 +33,7 @@ const baseTransform = {
 
 const baseTransformIgnorePatterns = [
   // 'node_modules/(?!(.pnpm/|@op-engineering|drizzle-orm|lodash-es|@babel/runtime))',
-  'node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|@material/material-color-utilities|@pchmn/expo-material3-theme|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|color|@op-engineering|drizzle-orm|lodash-es))',
+  'node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|@material/material-color-utilities|@pchmn/expo-material3-theme|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|color|@op-engineering|drizzle-orm|lodash-es|@lodev09/react-native-true-sheet))',
 ];
 
 module.exports = {

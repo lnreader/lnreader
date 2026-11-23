@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import {
   NavigationState,
   SceneRendererProps,
@@ -112,7 +112,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
 
   const layout = useWindowDimensions();
 
-  const bottomSheetRef = useRef<BottomSheetModalMethods | null>(null);
+  const bottomSheetRef = useRef<BottomSheetRef | null>(null);
 
   const [selectedCategoryId, setSelectedCategoryId] =
     useState(lastUsedCategoryId);

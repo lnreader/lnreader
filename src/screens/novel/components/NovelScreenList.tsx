@@ -18,7 +18,7 @@ import NovelBottomSheet from './NovelBottomSheet';
 import PageNavigationBottomSheet from './PageNavigationBottomSheet';
 import * as Haptics from 'expo-haptics';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import PagePaginationControl from './PagePaginationControl';
 import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
@@ -154,9 +154,9 @@ const NovelScreenList = ({
     [screenHeight],
   );
 
-  const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
-  const trackerSheetRef = useRef<BottomSheetModalMethods>(null);
-  const pageNavigationSheetRef = useRef<BottomSheetModalMethods>(null);
+  const novelBottomSheetRef = useRef<BottomSheetRef>(null);
+  const trackerSheetRef = useRef<BottomSheetRef>(null);
+  const pageNavigationSheetRef = useRef<BottomSheetRef>(null);
 
   // Derive selectedIds Set for O(1) lookups
   const selectedIds = useMemo(() => new Set(selected), [selected]);

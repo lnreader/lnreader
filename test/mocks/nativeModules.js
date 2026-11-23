@@ -106,3 +106,7 @@ jest.mock('@modules/native-zip-archive', () => ({
     remoteZip: jest.fn().mockResolvedValue(''),
   },
 }));
+
+jest.mock('@lodev09/react-native-true-sheet', () =>
+  jest.requireActual('@lodev09/react-native-true-sheet/mock'),
+);
