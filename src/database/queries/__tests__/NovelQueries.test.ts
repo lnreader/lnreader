@@ -201,16 +201,21 @@ describe('NovelQueries', () => {
 
     it('pins a custom update interval from the last release and can reset it', async () => {
       const testDb = getTestDb();
-      const novelId = await insertTestNovel(testDb, { inLibrary: true });
       const yesterday = toLocalDay(new Date()) - 1;
+      // A prediction for tomorrow, made under the old interval
+      const novelId = await insertTestNovel(testDb, {
+        inLibrary: true,
+        fetchInterval: 2,
+        nextUpdate: startOfLocalDay(yesterday + 2).toISOString(),
+      });
       await insertTestChapter(testDb, novelId, {
         updatedTime: startOfLocalDay(yesterday).toISOString(),
       });
 
-      const pinned = await setNovelFetchInterval(novelId, 3);
+      const pinned = await setNovelFetchInterval(novelId, 28);
       expect(pinned).toEqual({
-        fetchInterval: -3,
-        nextUpdate: startOfLocalDay(yesterday + 3).toISOString(),
+        fetchInterval: -28,
+        nextUpdate: startOfLocalDay(yesterday + 28).toISOString(),
       });
 
       const reset = await setNovelFetchInterval(novelId, 0);

@@ -77,7 +77,8 @@ export const setNovelFetchInterval = async (novelId: number, days: number) => {
   await dbManager.write(async tx => {
     await tx
       .update(novelSchema)
-      .set({ fetchInterval: days > 0 ? -days : 0 })
+      // A prediction made for the old interval would otherwise be kept while it's in the window
+      .set({ fetchInterval: days > 0 ? -days : 0, nextUpdate: null })
       .where(eq(novelSchema.id, novelId))
       .run();
   });

@@ -18,13 +18,10 @@ import type { UpcomingScreenProps } from '@navigators/types';
 import { useLiveQuery } from '@database/manager/liveQuery';
 import { getUpcomingNovelsQuery } from '@database/queries/LibraryQueries';
 import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
-import {
-  type Day,
-  startOfLocalDay,
-  toLocalDay,
-} from '@services/updates/releaseSchedule';
+import { type Day, startOfLocalDay } from '@services/updates/releaseSchedule';
 import GlobalUpdateCategoriesDialog from '@screens/settings/SettingsLibraryScreen/GlobalUpdateCategoriesDialog';
 import UpcomingCalendar from './components/UpcomingCalendar';
+import { useToday } from './useToday';
 import {
   addMonths,
   firstOfMonth,
@@ -55,7 +52,7 @@ const UpcomingScreen = ({ navigation }: UpcomingScreenProps) => {
     category => category.id !== BUILT_IN_CATEGORY_IDS.local,
   );
 
-  const [today] = useState(() => toLocalDay(new Date()));
+  const today = useToday();
   const [month, setMonth] = useState(() => firstOfMonth(today));
   const [calendarHeight, setCalendarHeight] = useState(0);
   const listRef = useRef<FlatList<UpcomingRow>>(null);

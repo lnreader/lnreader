@@ -225,6 +225,10 @@ const weekdayOfMonth = (days: Day[]): ReleasePattern | null => {
 
 const monthly = (days: Day[]): ReleasePattern | null => {
   const daysOfMonth = days.map(d => ymd(d).day);
+  // Month-ends fall within the day tolerance too, but their median can be the 30th
+  if (days.every(d => d === lastOfMonth(d))) {
+    return { kind: 'daysOfMonth', days: [31] };
+  }
   if (
     Math.max(...daysOfMonth) - Math.min(...daysOfMonth) <=
     DAY_OF_MONTH_TOLERANCE

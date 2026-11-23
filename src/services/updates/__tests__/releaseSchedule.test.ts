@@ -184,6 +184,15 @@ describe('computeNovelSchedule', () => {
     expect(nextUpdate('2020-02-05', chapters)).toBe('2020-02-29');
   });
 
+  it('follows month-ends that include 30-day months and a leap February', () => {
+    const chapters = chaptersOn(
+      // Their median day is the 30th, which isn't May's last day
+      days('2020-01-31', '2020-02-29', '2020-03-31', '2020-04-30'),
+      3,
+    );
+    expect(nextUpdate('2020-05-05', chapters)).toBe('2020-05-31');
+  });
+
   it('follows releases on two days of the month', () => {
     const chapters = chaptersOn(
       days(
