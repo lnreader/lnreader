@@ -2,6 +2,7 @@ import './mocks';
 
 import { NovelInfo } from '@database/types';
 import { createStore } from '@hooks/persisted/useNovel/store/createStore';
+import { getNovelById } from '@database/queries/NovelQueries';
 import { novelPersistence } from '@hooks/persisted/useNovel/store-helper/persistence';
 
 const defaultSort = 'positionAsc';
@@ -133,5 +134,21 @@ describe('useNovel store', () => {
       'plugin-id',
     );
     expect(store.getState().novel?.inLibrary).toBe(true);
+  });
+
+  it('shows the schedule worked out when a novel is followed', async () => {
+    jest.mocked(getNovelById).mockReturnValue({
+      fetchInterval: 3,
+      nextUpdate: '2026-11-25T00:00:00.000Z',
+    } as ReturnType<typeof getNovelById>);
+    const store = createNovelStore({ inLibrary: false });
+
+    await store.getState().actions.followNovel();
+
+    expect(store.getState().novel).toMatchObject({
+      inLibrary: true,
+      fetchInterval: 3,
+      nextUpdate: '2026-11-25T00:00:00.000Z',
+    });
   });
 });

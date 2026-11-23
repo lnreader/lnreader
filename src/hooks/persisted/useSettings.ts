@@ -88,6 +88,7 @@ export interface AppSettings {
   smartUpdateSkipCompleted: boolean;
   smartUpdateSkipUnstarted: boolean;
   smartUpdateSkipWithUnread: boolean;
+  smartUpdateSkipNotDue: boolean;
   automaticLibraryUpdateIntervalHours: AutomaticLibraryUpdateInterval;
   automaticBackupIntervalHours?: AutomaticBackupInterval;
   automaticBackupDirectoryUri?: string;
@@ -136,6 +137,8 @@ export interface LibrarySettings {
   lastUsedCategoryId?: number;
   globalUpdateExcludeCategoryIds?: number[];
   globalUpdateIncludeCategoryIds?: number[];
+  upcomingExcludeCategoryIds?: number[];
+  upcomingIncludeCategoryIds?: number[];
   sortOrder?: LibrarySortOrder;
   filter?: LibraryFilter;
   showDownloadBadges?: boolean;
@@ -297,6 +300,7 @@ const initialAppSettings: AppSettings = {
   smartUpdateSkipCompleted: false,
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
+  smartUpdateSkipNotDue: false,
   automaticLibraryUpdateIntervalHours: 0,
   automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,

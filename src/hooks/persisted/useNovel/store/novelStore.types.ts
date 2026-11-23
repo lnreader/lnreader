@@ -102,6 +102,10 @@ export interface NovelStoreDependencies {
     novelPath: string,
     pluginId: string,
   ) => Promise<boolean>;
+  /** The release schedule saved for a novel, which joining the library works out. */
+  readNovelSchedule?: (
+    novelId: number,
+  ) => Pick<NovelInfo, 'fetchInterval' | 'nextUpdate'> | undefined;
 }
 
 export type SetState = {

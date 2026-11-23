@@ -10,6 +10,7 @@ import {
   getLibraryNovelsFromDb,
   getLibraryNovelsForGlobalUpdate,
   getLibraryWithCategory,
+  getUpcomingNovelsQuery,
 } from '../LibraryQueries';
 import { TestDb } from './testDb';
 import { setupTestDatabase, teardownTestDatabase } from './setup';
@@ -680,6 +681,101 @@ describe('LibraryQueries', () => {
       const novels = await getLibraryWithCategory(undefined);
       expect(novels).toHaveLength(2);
       expect(novels.map(n => n.name).sort()).toEqual(['Novel 1', 'Novel 2']);
+    });
+  });
+
+  describe('getUpcomingNovelsQuery', () => {
+    const startOfToday = '2026-11-22T00:00:00.000Z';
+    const noFilter = { includedCategoryIds: [], excludedCategoryIds: [] };
+
+    it('lists library novels predicted from today on, soonest first', async () => {
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Next week',
+        nextUpdate: '2026-11-29T00:00:00.000Z',
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Today',
+        nextUpdate: startOfToday,
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Overdue',
+        nextUpdate: '2026-11-20T00:00:00.000Z',
+      });
+      await insertTestNovel(testDb, { inLibrary: true, name: 'Unpredicted' });
+      await insertTestNovel(testDb, {
+        inLibrary: false,
+        name: 'Not in library',
+        nextUpdate: startOfToday,
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        isLocal: true,
+        name: 'Local',
+        nextUpdate: startOfToday,
+      });
+
+      const novels = await getUpcomingNovelsQuery(noFilter, startOfToday).all();
+
+      expect(novels.map(novel => novel.name)).toEqual(['Today', 'Next week']);
+    });
+
+    it('hides novels whose status means they will not release again', async () => {
+      for (const status of [
+        'Ongoing',
+        'Unknown',
+        'Publishing Finished',
+        'Completed',
+        'Cancelled',
+        'On Hiatus',
+      ]) {
+        await insertTestNovel(testDb, {
+          inLibrary: true,
+          name: status,
+          status,
+          nextUpdate: startOfToday,
+        });
+      }
+
+      const novels = await getUpcomingNovelsQuery(noFilter, startOfToday).all();
+
+      expect(novels.map(novel => novel.name).sort()).toEqual([
+        'Ongoing',
+        'Publishing Finished',
+        'Unknown',
+      ]);
+    });
+
+    it('applies included categories and lets exclusions win', async () => {
+      const both = await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Both',
+        nextUpdate: startOfToday,
+      });
+      const included = await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Included',
+        nextUpdate: startOfToday,
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Uncategorized',
+        nextUpdate: startOfToday,
+      });
+      const reading = await insertTestCategory(testDb, { name: 'Reading' });
+      const dropped = await insertTestCategory(testDb, { name: 'Dropped' });
+      await insertTestNovelCategory(testDb, both, reading);
+      await insertTestNovelCategory(testDb, both, dropped);
+      await insertTestNovelCategory(testDb, included, reading);
+
+      const novels = await getUpcomingNovelsQuery(
+        { includedCategoryIds: [reading], excludedCategoryIds: [dropped] },
+        startOfToday,
+      ).all();
+
+      expect(novels.map(novel => novel.name)).toEqual(['Included']);
     });
   });
 });

@@ -467,6 +467,7 @@
     "refreshMetadataDescription": "Check for new cover and details when updating library",
     "smartUpdate": "Smart update",
     "smartUpdateSkipCompleted": "Skip entries with \"Completed\" status",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Skip unstarted entries",
     "smartUpdateSkipWithUnread": "Skip entries with unread chapter(s)",
     "sortOrder": "Sort Order",
@@ -520,6 +521,7 @@
       },
       "filters": {
         "completed": "Completed",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Downloaded",
         "started": "Started",
         "unread": "Unread"
@@ -628,6 +630,14 @@
       "title": "Title: %{title}"
     },
     "inLibaray": "In library",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Chapter Name",
       "chapterNumber": "Chapter Number",
@@ -816,9 +826,26 @@
     "newChapters": "new Chapters",
     "novelsUpdated": "%{num} novels updated",
     "searchbar": "Search updates",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Unable to get novel",
     "updatesLower": "updates",
-    "updatingLibrary": "Updating library"
+    "updatingLibrary": "Updating library",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Welcome",

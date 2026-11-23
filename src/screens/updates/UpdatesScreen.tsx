@@ -133,6 +133,11 @@ const UpdatesScreen = ({ navigation }: UpdateScreenProps) => {
         theme={theme}
         rightIcons={[
           {
+            iconName: 'calendar-month',
+            accessibilityLabel: getString('updatesScreen.viewUpcoming'),
+            onPress: () => navigation.navigate('Upcoming'),
+          },
+          {
             iconName: 'reload',
             onPress: () => backgroundTasks.enqueue({ name: 'UPDATE_LIBRARY' }),
           },
