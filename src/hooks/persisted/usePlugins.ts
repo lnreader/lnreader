@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { getLocales } from 'expo-localization';
-import { useMMKVObject } from 'react-native-mmkv';
+import { useMMKVNumber, useMMKVObject } from 'react-native-mmkv';
 
 import {
   fetchPlugins,
@@ -17,6 +17,7 @@ import {
   filterAvailablePlugins,
   filterInstalledPlugins,
   getLastUsedPluginId,
+  mergeAvailablePlugins,
   reconcileInstalledPluginUpdates,
 } from './pluginSelectors';
 
@@ -25,6 +26,7 @@ export const INSTALLED_PLUGINS = INSTALLED_PLUGINS_KEY;
 export const LANGUAGES_FILTER = 'LANGUAGES_FILTER';
 export const LAST_USED_PLUGIN = 'LAST_USED_PLUGIN';
 export const PINNED_PLUGINS = 'PINNED_PLUGINS';
+export const FAILED_REPOSITORY_COUNT = 'FAILED_PLUGIN_REPOSITORY_COUNT';
 
 const legacyFilteredPluginKeys = [
   'FILTERED_AVAILABLE_PLUGINS',
@@ -42,6 +44,17 @@ const readPluginList = (key: string) =>
 interface RefreshPluginsOptions {
   clearUnavailableUpdates?: boolean;
 }
+
+export interface RefreshPluginsResult {
+  failedRepositoryCount: number;
+}
+
+/** Number of enabled repositories that failed on the most recent refresh. */
+export const useFailedRepositoryCount = () => {
+  const [failedRepositoryCount = 0] = useMMKVNumber(FAILED_REPOSITORY_COUNT);
+
+  return failedRepositoryCount;
+};
 
 export const useInstalledPlugins = () => {
   const [installedPlugins = emptyPluginList] =
@@ -118,7 +131,9 @@ export const usePluginActions = () => {
   }, []);
 
   const refreshPlugins = useCallback(
-    async ({ clearUnavailableUpdates = false }: RefreshPluginsOptions = {}) => {
+    async ({
+      clearUnavailableUpdates = false,
+    }: RefreshPluginsOptions = {}): Promise<RefreshPluginsResult> => {
       legacyFilteredPluginKeys.forEach(key => MMKVStorage.remove(key));
 
       const installedPlugins = readPluginList(INSTALLED_PLUGINS);
@@ -127,11 +142,24 @@ export const usePluginActions = () => {
       if (lastUsedPluginId && typeof storedLastUsedPlugin !== 'string') {
         setMMKVObject(LAST_USED_PLUGIN, lastUsedPluginId);
       }
-      const fetchedPlugins = await fetchPlugins();
+      const {
+        plugins: fetchedPlugins,
+        failedRepositories,
+        complete,
+      } = await fetchPlugins();
+      const hasFailures = failedRepositories.length > 0;
+      // A failed repository with no cached listing would otherwise wipe its
+      // plugins from the list, so keep what we showed last time.
+      const availablePlugins = complete
+        ? fetchedPlugins
+        : mergeAvailablePlugins(
+            readPluginList(AVAILABLE_PLUGINS),
+            fetchedPlugins,
+          );
       const updatedInstalledPlugins = reconcileInstalledPluginUpdates(
         installedPlugins,
-        fetchedPlugins,
-        clearUnavailableUpdates,
+        availablePlugins,
+        clearUnavailableUpdates && !hasFailures,
       );
 
       if (
@@ -141,7 +169,10 @@ export const usePluginActions = () => {
       ) {
         setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
       }
-      setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
+      setMMKVObject(AVAILABLE_PLUGINS, availablePlugins);
+      MMKVStorage.set(FAILED_REPOSITORY_COUNT, failedRepositories.length);
+
+      return { failedRepositoryCount: failedRepositories.length };
     },
     [],
   );

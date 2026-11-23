@@ -261,6 +261,8 @@
     "plugins": "Plugins",
     "removeFromLibrary": "Removed from library",
     "repositories": "Repositories",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Search sources and plugins",
     "searchResults": "Search results",
     "selectNovel": "Select Novel",
