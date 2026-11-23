@@ -44,7 +44,7 @@ const FirstRoute = () => {
     <View style={styles.flex}>
       <LegendList
         recycleItems
-        estimatedItemSize={4}
+        estimatedItemSize={48}
         extraData={[filter]}
         data={libraryFilterList}
         keyExtractor={item => `filter_${item.filter}`}
@@ -79,7 +79,7 @@ const SecondRoute = () => {
         recycleItems
         data={librarySortOrderList}
         extraData={[sortOrder]}
-        estimatedItemSize={5}
+        estimatedItemSize={52}
         keyExtractor={(item, index) => `sort_${index}_${item.ASC}`}
         renderItem={({ item }) => (
           <SortItem
@@ -167,7 +167,7 @@ const ThirdRoute = () => {
       </Text>
       <LegendList
         recycleItems
-        estimatedItemSize={4}
+        estimatedItemSize={48}
         data={displayModesList}
         extraData={[displayMode]}
         keyExtractor={item => `display_mode_${item.value}`}
