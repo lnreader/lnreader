@@ -73,6 +73,18 @@
       ],
       "intentFilters": [
         {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": [
+            {
+              "mimeType": "application/epub+zip"
+            },
+            {
+              "mimeType": "application/epub"
+            }
+          ]
+        },
+        {
           "action": "SEND",
           "category": ["DEFAULT"],
           "data": [
