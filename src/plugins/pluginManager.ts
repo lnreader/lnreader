@@ -260,8 +260,6 @@ const fetchPlugins = async (): Promise<FetchPluginsResult> => {
       return;
     }
 
-    // eslint-disable-next-line no-console
-    console.warn(`Failed to fetch plugin repository ${url}`, result.reason);
     failedRepositories.push(url);
     const cached = previousCache[url];
     if (cached) {

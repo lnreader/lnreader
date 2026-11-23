@@ -92,7 +92,6 @@ describe('fetchPlugins', () => {
     const onlinePlugin = { id: 'online', name: 'Online' } as PluginItem;
     const cachedPlugin = { id: 'cached', name: 'Cached' } as PluginItem;
     let fetchSpy: jest.SpyInstance;
-    let warnSpy: jest.SpyInstance;
 
     beforeEach(() => {
       jest.mocked(getEnabledRepositoriesFromDb).mockResolvedValueOnce([
@@ -106,12 +105,10 @@ describe('fetchPlugins', () => {
             ? ({ ok: true, json: async () => [onlinePlugin] } as Response)
             : Promise.reject(new TypeError('Network request failed')),
         );
-      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
       fetchSpy.mockRestore();
-      warnSpy.mockRestore();
     });
 
     it('falls back to its cached listing and reports it as failed', async () => {
