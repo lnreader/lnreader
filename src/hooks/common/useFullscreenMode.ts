@@ -9,7 +9,7 @@ import {
 import Color from 'color';
 import {
   setNavigationBarStyle,
-  setStatusBarColor,
+  setStatusBarStyle,
 } from '@theme/utils/setBarColor';
 import { NavigationBar } from 'expo-navigation-bar';
 
@@ -24,7 +24,7 @@ const useFullscreenMode = () => {
       StatusBar.setHidden(true);
       NavigationBar.setHidden(true);
     } else {
-      setStatusBarColor(Color(backgroundColor));
+      setStatusBarStyle(Color(backgroundColor));
       setNavigationBarStyle(Color(backgroundColor).isDark());
     }
   }, [backgroundColor, fullScreenMode]);
@@ -39,7 +39,7 @@ const useFullscreenMode = () => {
        * But in hexa, ##xxxxxx00 could be another color
        */
 
-      setStatusBarColor(theme);
+      setStatusBarStyle(theme);
       setNavigationBarStyle(theme.isDark);
     }
   }, [fullScreenMode, theme]);
@@ -56,7 +56,7 @@ const useFullscreenMode = () => {
     const unsubscribe = addListener('beforeRemove', () => {
       StatusBar.setHidden(false);
       NavigationBar.setHidden(false);
-      setStatusBarColor(theme);
+      setStatusBarStyle(theme);
       setNavigationBarStyle(theme.isDark);
     });
 

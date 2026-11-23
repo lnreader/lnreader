@@ -49,7 +49,7 @@ export default function useTimeTracking(
         flushElapsedTime();
         lastUserInteractionRef.current = Date.now();
       } else if (
-        appState.match(/inactive|background/) &&
+        appState?.match(/inactive|background/) &&
         nextState === 'active'
       ) {
         // Reset the start timestamp when the app comes back and the TTS isn't on

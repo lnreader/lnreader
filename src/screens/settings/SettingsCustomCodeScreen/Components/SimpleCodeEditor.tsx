@@ -19,6 +19,7 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  type HostInstance,
 } from 'react-native';
 import Color from 'color';
 import { refractor } from 'refractor/core';
@@ -85,7 +86,7 @@ type PrismStylesheet = Record<string, React.CSSProperties>;
 const stylesheetCache = new WeakMap<PrismStylesheet, RNStylesheet>();
 
 function cssToTextStyle(cssStyle: HLStyle): TextStyle {
-  const rn: TextStyle = {};
+  const rn: { -readonly [K in keyof TextStyle]: TextStyle[K] } = {};
 
   for (const [key, value] of Object.entries(cssStyle)) {
     switch (key) {
@@ -408,8 +409,8 @@ function HighlightedCode({
 
   const { height: viewportHeight } = useWindowDimensions();
 
-  const layerRef = useRef<View>(null);
-  const firstRowRef = useRef<View>(null);
+  const layerRef = useRef<HostInstance>(null);
+  const firstRowRef = useRef<HostInstance>(null);
   const lastScrollYRef = useRef<number | null>(null);
   const layerContentYRef = useRef<number | null>(null);
   const viewportHRef = useRef(viewportHeight);
@@ -682,7 +683,9 @@ export function SimpleCodeEditor({
     highlightMode === 'off'
       ? textStyle.color
       : highlightMode === 'combined'
-      ? Color(textStyle.color).alpha(0.4).string()
+      ? Color(textStyle.color as string | undefined)
+          .alpha(0.4)
+          .string()
       : 'rgba(0, 0, 0, 0.1)';
 
   return (

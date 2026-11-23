@@ -16,8 +16,12 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  type HostInstance,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getAvailableMenuWidth, getMenuPosition } from './layout';
@@ -55,7 +59,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   children,
   fullWidth,
 }) => {
-  const anchorRef = useRef<View>(null);
+  const anchorRef = useRef<HostInstance>(null);
 
   return (
     <>
@@ -78,7 +82,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
 };
 
 interface MenuPopupProps extends Omit<MenuProps, 'visible' | 'anchor'> {
-  anchorRef: React.RefObject<View | null>;
+  anchorRef: React.RefObject<HostInstance | null>;
 }
 
 const MenuPopup = ({
@@ -155,7 +159,8 @@ const MenuPopup = ({
       transparent
       visible
     >
-      <View style={styles.modal}>
+      {/* A native modal is its own root, outside the app's gesture root. */}
+      <GestureHandlerRootView style={styles.modal}>
         <Pressable
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
@@ -188,7 +193,7 @@ const MenuPopup = ({
             {children}
           </ScrollView>
         </Animated.View>
-      </View>
+      </GestureHandlerRootView>
     </NativeModal>
   );
 };
