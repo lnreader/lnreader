@@ -1,6 +1,8 @@
+/// <reference types="react-syntax-highlighter" />
 import React, {
   memo,
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
@@ -19,17 +21,17 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Color from 'color';
-import { PrismLight as Light } from 'react-syntax-highlighter';
-import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
-import js from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import { refractor } from 'refractor/core';
+import css from 'refractor/css';
+import js from 'refractor/javascript';
 import materialDark from 'react-syntax-highlighter/dist/esm/styles/prism/material-dark';
 import materialLight from 'react-syntax-highlighter/dist/esm/styles/prism/material-light';
 
 export const FONT_SIZE = 14;
 export const LINE_HEIGHT = Math.ceil(FONT_SIZE * 1.4);
 
-Light.registerLanguage('javascript', js);
-Light.registerLanguage('css', css);
+refractor.register(js);
+refractor.register(css);
 
 const LANG_MAP = {
   js: 'javascript',
@@ -80,20 +82,7 @@ interface HighlightedLineProps {
 
 type PrismStylesheet = Record<string, React.CSSProperties>;
 
-interface RendererProps {
-  rows: RendererNode[];
-  stylesheet: PrismStylesheet;
-}
-
 const stylesheetCache = new WeakMap<PrismStylesheet, RNStylesheet>();
-function Passthrough({
-  children,
-}: {
-  children?: React.ReactNode;
-  [_key: string]: unknown;
-}) {
-  return <>{children}</>;
-}
 
 function cssToTextStyle(cssStyle: HLStyle): TextStyle {
   const rn: TextStyle = {};
@@ -157,10 +146,6 @@ function getStylesForNode(
   return result;
 }
 
-function stripLineBreaks(value: string | number): string {
-  return String(value).replace(/\r?\n/g, '');
-}
-
 function renderInlineNodes(
   nodes: RendererNode[],
   rnStylesheet: RNStylesheet,
@@ -173,22 +158,19 @@ function renderInlineNodes(
     const key = `${keyPrefix}_${index}`;
 
     if (node.children?.length) {
+      const style: TextStyle = {
+        color: defaultColor,
+        includeFontPadding: false,
+        ...getStylesForNode(node, rnStylesheet),
+      };
+      // Nested tokens (e.g. template interpolations) inherit the enclosing
+      // token's color unless their own class overrides it.
       result.push(
-        <Text
-          key={key}
-          allowFontScaling={false}
-          style={[
-            {
-              color: defaultColor,
-              includeFontPadding: false,
-              ...getStylesForNode(node, rnStylesheet),
-            },
-          ]}
-        >
+        <Text key={key} allowFontScaling={false} style={style}>
           {renderInlineNodes(
             node.children,
             rnStylesheet,
-            defaultColor,
+            style.color ?? defaultColor,
             `${key}_c`,
           )}
         </Text>,
@@ -196,38 +178,59 @@ function renderInlineNodes(
     }
 
     if (node.value != null) {
-      result.push(stripLineBreaks(node.value));
+      result.push(String(node.value));
     }
   });
 
   return result;
 }
 
-function lineHighlightRenderer(raw: RendererProps): React.ReactNode {
-  const { rows, stylesheet } = raw;
-  const rnStylesheet = getRNStylesheet(stylesheet);
+// Lines remount whenever the virtualized window shifts, so tokenized output is
+// cached across mounts; React elements are immutable and safe to reuse.
+const HIGHLIGHT_CACHE_LIMIT = 2000;
+const highlightCache = new Map<string, React.ReactNode>();
+
+function highlightLine(
+  code: string,
+  mode: SupportedMode,
+  isDark: boolean,
+): React.ReactNode {
+  const key = `${isDark ? 'd' : 'l'}:${mode}:${code}`;
+  const cached = highlightCache.get(key);
+
+  if (cached !== undefined) {
+    highlightCache.delete(key);
+    highlightCache.set(key, cached);
+    return cached;
+  }
+
+  const rnStylesheet = getRNStylesheet(
+    (isDark ? materialDark : materialLight) as PrismStylesheet,
+  );
   const defaultColor =
     rnStylesheet['code[class*="language-"]']?.color ??
     rnStylesheet['pre[class*="language-"]']?.color ??
     '#abb2bf';
-  const result: React.ReactNode[] = [];
 
-  rows.forEach((row, rowIndex) => {
-    if (row.children?.length) {
-      result.push(
-        ...renderInlineNodes(
-          row.children,
-          rnStylesheet,
-          defaultColor,
-          `r_${rowIndex}`,
-        ),
-      );
-    } else if (row.value != null) {
-      result.push(stripLineBreaks(row.value));
-    }
-  });
+  let nodes: React.ReactNode;
+  try {
+    const tree = refractor.highlight(code, LANG_MAP[mode]);
+    nodes = renderInlineNodes(
+      tree.children as RendererNode[],
+      rnStylesheet,
+      defaultColor,
+    );
+  } catch {
+    nodes = code;
+  }
 
-  return result;
+  highlightCache.set(key, nodes);
+  if (highlightCache.size > HIGHLIGHT_CACHE_LIMIT) {
+    const oldest = highlightCache.keys().next().value;
+    if (oldest !== undefined) highlightCache.delete(oldest);
+  }
+
+  return nodes;
 }
 
 function shallowEqualTextStyle(a: TextStyle, b: TextStyle): boolean {
@@ -253,19 +256,7 @@ const HighlightedLine = memo(
         allowFontScaling={false}
         style={[textStyle, styles.codeLine, styles.withoutFontPadding]}
       >
-        {code.length === 0 ? (
-          '\u200B'
-        ) : (
-          <Light
-            language={LANG_MAP[mode]}
-            style={isDark ? materialDark : materialLight}
-            PreTag={Passthrough}
-            CodeTag={Passthrough}
-            renderer={lineHighlightRenderer}
-          >
-            {code}
-          </Light>
-        )}
+        {code.length === 0 ? '\u200B' : highlightLine(code, mode, !!isDark)}
       </Text>
     );
   },
@@ -285,9 +276,7 @@ export function useStableLineModels(value: string): LineModel[] {
   const nextIdRef = useRef(0);
 
   return useMemo(() => {
-    const newLines = value
-      .replace(/\r\n?/g, '\n')
-      .split('\n');
+    const newLines = value.replace(/\r\n?/g, '\n').split('\n');
     const previous = previousRef.current;
 
     if (!previous) {
@@ -398,7 +387,7 @@ const BOTTOM_OVERS = 8;
 const CHAR_MEASURE_STENCIL = 'WWWWWWWWWWWWWWWWWWWW';
 const GUTTER_WIDTH = 32;
 
-export function MemoizedHighlightedCode({
+function HighlightedCode({
   lines,
   value,
   mode,
@@ -409,9 +398,9 @@ export function MemoizedHighlightedCode({
   startLine = 0,
   scrollSink,
 }: MemoizedHighlightedCodeProps) {
-  // Never call a hook conditionally. Generating this for externally supplied
-  // lines is cheap and keeps the hook order valid.
-  const generatedLines = useStableLineModels(value ?? '');
+  // Never call a hook conditionally; with externally supplied lines, feed it an
+  // empty string so the text isn't split a second time on every keystroke.
+  const generatedLines = useStableLineModels(lines ? '' : value ?? '');
   const resolvedLines = lines ?? generatedLines;
 
   const opacityStyle = useMemo(() => extractOpacityStyle(style), [style]);
@@ -547,7 +536,7 @@ export function MemoizedHighlightedCode({
         setCorr(prev => (Math.abs(prev - residual) < 0.5 ? prev : residual));
       });
     });
-  }, [scrollSink, window.start, lines, cumSum]);
+  }, [scrollSink, window.start, resolvedLines.length, cumSum]);
 
   useEffect(() => {
     setLines?.(resolvedLines.length);
@@ -616,6 +605,8 @@ export function MemoizedHighlightedCode({
   );
 }
 
+export const MemoizedHighlightedCode = memo(HighlightedCode);
+
 const LineRenderer = memo(
   ({
     line,
@@ -680,6 +671,11 @@ export function SimpleCodeEditor({
 }: SimpleCodeEditorProps & Omit<MemoizedHighlightedCodeProps, 'hideCode'>) {
   const hideHighlight = highlightMode === 'off';
 
+  // The TextInput commits urgently; the highlight layer follows at lower
+  // priority so typing stays responsive on slow devices.
+  const deferredLines = useDeferredValue(lines);
+  const deferredValue = useDeferredValue(lines ? undefined : value);
+
   const textStyle = useMemo(() => extractTextStyle(style), [style]);
 
   const inputColor =
@@ -696,8 +692,8 @@ export function SimpleCodeEditor({
         style={[StyleSheet.absoluteFill, styles.highlightLayer]}
       >
         <MemoizedHighlightedCode
-          lines={lines}
-          value={value}
+          lines={deferredLines}
+          value={deferredValue}
           mode={mode}
           style={style}
           hideCode={hideHighlight}

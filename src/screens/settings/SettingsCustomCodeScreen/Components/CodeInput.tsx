@@ -73,9 +73,33 @@ const CodeInput = ({
     [theme],
   );
 
+  const topFieldStyle = React.useMemo(
+    () => [
+      codeFieldStyle,
+      styles.fontStyle,
+      styles.fakeTextInput,
+      styles.topField,
+    ],
+    [codeFieldStyle],
+  );
+  const editorStyle = React.useMemo(
+    () => [codeFieldStyle, styles.fontStyle, styles.codeField],
+    [codeFieldStyle],
+  );
+  const bottomFieldStyle = React.useMemo(
+    () => [
+      styles.fontStyle,
+      styles.fakeTextInput,
+      styles.bottomField,
+      codeFieldStyle,
+    ],
+    [codeFieldStyle],
+  );
+
   const startValue = language === 'js' ? START_JS_CODE : START_CSS_CODE;
 
-  const lines = useStableLineModels(code);
+  const deferredCode = React.useDeferredValue(code);
+  const lines = useStableLineModels(deferredCode);
   const startLines = useStableLineModels(startValue);
   const debounce = React.useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = React.useState<string | undefined>(undefined);
@@ -124,12 +148,7 @@ const CodeInput = ({
       </Animated.View>
 
       <MemoizedHighlightedCode
-        style={[
-          codeFieldStyle,
-          styles.fontStyle,
-          styles.fakeTextInput,
-          styles.topField,
-        ]}
+        style={topFieldStyle}
         isDark={theme.isDark}
         mode={language}
         lines={startLines}
@@ -146,18 +165,13 @@ const CodeInput = ({
         lines={lines}
         startLine={startLines.length}
         isDark={theme.isDark}
-        style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
+        style={editorStyle}
         scrollSink={scrollSink}
       />
       {language !== 'js' ? null : (
         <MemoizedHighlightedCode
           startLine={lines.length + startLines.length}
-          style={[
-            styles.fontStyle,
-            styles.fakeTextInput,
-            styles.bottomField,
-            codeFieldStyle,
-          ]}
+          style={bottomFieldStyle}
           mode={language}
           isDark={theme.isDark}
           value={END_JS_CODE}

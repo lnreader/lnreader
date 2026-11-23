@@ -185,6 +185,9 @@ importers:
       react-syntax-highlighter:
         specifier: ^16.1.1
         version: 16.1.1(react@19.2.3)
+      refractor:
+        specifier: ^5.0.0
+        version: 5.0.0
       sanitize-html:
         specifier: ^2.17.6
         version: 2.17.6
