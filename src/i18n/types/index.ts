@@ -64,6 +64,7 @@ export interface StringMap {
   'appearanceScreen.dateFormatDefault': 'string';
   'appearanceScreen.dynamicColors': 'string';
   'appearanceScreen.hideBackdrop': 'string';
+  'appearanceScreen.hideBackdropDescription': 'string';
   'appearanceScreen.lightTheme': 'string';
   'appearanceScreen.navbar': 'string';
   'appearanceScreen.novelInfo': 'string';
@@ -72,6 +73,7 @@ export interface StringMap {
   'appearanceScreen.relativeTimestampsDescription': 'string';
   'appearanceScreen.showHistoryInTheNav': 'string';
   'appearanceScreen.showUpdatesInTheNav': 'string';
+  'appearanceScreen.useFABDescription': 'string';
   'appearanceScreen.themeMode': 'string';
   'appearanceScreen.themeModeLight': 'string';
   'appearanceScreen.themeModeDark': 'string';

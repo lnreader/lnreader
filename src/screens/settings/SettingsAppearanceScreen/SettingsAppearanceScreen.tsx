@@ -310,12 +310,14 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
           </List.SubHeader>
           <SettingSwitch
             label={getString('appearanceScreen.hideBackdrop')}
+            description={getString('appearanceScreen.hideBackdropDescription')}
             value={hideBackdrop}
             onPress={() => setAppSettings({ hideBackdrop: !hideBackdrop })}
             theme={theme}
           />
           <SettingSwitch
             label={getString('advancedSettingsScreen.useFAB')}
+            description={getString('appearanceScreen.useFABDescription')}
             value={useFabForContinueReading}
             onPress={() =>
               setAppSettings({
