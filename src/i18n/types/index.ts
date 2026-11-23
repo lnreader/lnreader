@@ -230,6 +230,8 @@ export interface StringMap {
   'browseScreen.plugins': 'string';
   'browseScreen.removeFromLibrary': 'string';
   'browseScreen.repositories': 'string';
+  'browseScreen.repositoriesUnreachable': 'string';
+  'browseScreen.repositoriesUnreachableCached': 'string';
   'browseScreen.searchbar': 'string';
   'browseScreen.searchResults': 'string';
   'browseScreen.selectNovel': 'string';

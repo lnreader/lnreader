@@ -11,7 +11,6 @@ import { getEnabledRepositoriesFromDb } from '@database/queries/RepositoryQuerie
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
 import { newer } from '@utils/compareVersion';
 import NativeFile from '@modules/native-file';
-import { showToast } from '@utils/showToast';
 import { LEGACY_PLUGIN_STORAGE, PLUGIN_STORAGE } from '@utils/Storages';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import { INSTALLED_PLUGINS_KEY } from './constants';
@@ -211,23 +210,74 @@ const updatePlugin = async (plugin: PluginItem) => {
   return installPlugin(plugin);
 };
 
-const fetchPlugins = async (): Promise<PluginItem[]> => {
-  const allPlugins: PluginItem[] = [];
-  const allRepositories = await getEnabledRepositoriesFromDb();
+export const REPOSITORY_CACHE_KEY = 'PLUGIN_REPOSITORY_CACHE';
 
-  const repoPluginsRes = await Promise.allSettled(
-    allRepositories.map(({ url }) => fetch(url).then(res => res.json())),
+type RepositoryCache = Record<string, PluginItem[]>;
+
+export interface FetchPluginsResult {
+  plugins: PluginItem[];
+  /** URLs of enabled repositories that could not be fetched. */
+  failedRepositories: string[];
+  /** False when a failed repository had no cached listing to fall back on. */
+  complete: boolean;
+}
+
+const fetchRepository = async (url: string): Promise<PluginItem[]> => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`${url} responded with ${res.status}`);
+  }
+  const data: unknown = await res.json();
+  if (!Array.isArray(data)) {
+    throw new Error(`${url} did not return a plugin list`);
+  }
+  return data as PluginItem[];
+};
+
+/**
+ * Fetches every enabled repository. A repository that can't be reached
+ * (offline, GitHub outage) falls back to its last successful listing, so
+ * callers decide whether and how to surface the failure.
+ */
+const fetchPlugins = async (): Promise<FetchPluginsResult> => {
+  const allRepositories = await getEnabledRepositoriesFromDb();
+  const previousCache =
+    getMMKVObject<RepositoryCache>(REPOSITORY_CACHE_KEY) ?? {};
+  const nextCache: RepositoryCache = {};
+  const allPlugins: PluginItem[] = [];
+  const failedRepositories: string[] = [];
+  let complete = true;
+
+  const results = await Promise.allSettled(
+    allRepositories.map(({ url }) => fetchRepository(url)),
   );
 
-  repoPluginsRes.forEach(repoPlugins => {
-    if (repoPlugins.status === 'fulfilled') {
-      allPlugins.push(...repoPlugins.value);
+  results.forEach((result, index) => {
+    const { url } = allRepositories[index];
+    if (result.status === 'fulfilled') {
+      nextCache[url] = result.value;
+      allPlugins.push(...result.value);
+      return;
+    }
+
+    failedRepositories.push(url);
+    const cached = previousCache[url];
+    if (cached) {
+      nextCache[url] = cached;
+      allPlugins.push(...cached);
     } else {
-      showToast(repoPlugins.reason.toString());
+      complete = false;
     }
   });
 
-  return uniqBy(reverse(allPlugins), 'id');
+  // Only enabled repositories are kept, so disabled ones drop out of the cache.
+  setMMKVObject(REPOSITORY_CACHE_KEY, nextCache);
+
+  return {
+    plugins: uniqBy(reverse(allPlugins), 'id'),
+    failedRepositories,
+    complete,
+  };
 };
 
 const getPlugin = (pluginId: string) => {

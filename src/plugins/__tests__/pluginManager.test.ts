@@ -9,6 +9,7 @@ import {
   INSTALLED_PLUGINS_KEY,
   loadPlugin,
   reloadInstalledPlugins,
+  REPOSITORY_CACHE_KEY,
   getFilterSuggestions,
 } from '../pluginManager';
 import type { PluginItem } from '../types';
@@ -66,14 +67,92 @@ describe('fetchPlugins', () => {
       .mocked(getEnabledRepositoriesFromDb)
       .mockResolvedValueOnce([{ id: 1, url: repositoryUrl, enabled: true }]);
     const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
       json: async () => [plugin],
     } as Response);
 
-    await expect(fetchPlugins()).resolves.toEqual([plugin]);
+    await expect(fetchPlugins()).resolves.toEqual({
+      plugins: [plugin],
+      failedRepositories: [],
+      complete: true,
+    });
 
     expect(getEnabledRepositoriesFromDb).toHaveBeenCalledTimes(1);
     expect(fetchSpy).toHaveBeenCalledWith(repositoryUrl);
+    expect(setMMKVObject).toHaveBeenCalledWith(REPOSITORY_CACHE_KEY, {
+      [repositoryUrl]: [plugin],
+    });
     fetchSpy.mockRestore();
+  });
+
+  describe('when a repository cannot be reached', () => {
+    const onlineUrl = 'https://online.example.com/plugins.min.json';
+    const offlineUrl = 'https://offline.example.com/plugins.min.json';
+    const disabledUrl = 'https://disabled.example.com/plugins.min.json';
+    const onlinePlugin = { id: 'online', name: 'Online' } as PluginItem;
+    const cachedPlugin = { id: 'cached', name: 'Cached' } as PluginItem;
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.mocked(getEnabledRepositoriesFromDb).mockResolvedValueOnce([
+        { id: 1, url: onlineUrl, enabled: true },
+        { id: 2, url: offlineUrl, enabled: true },
+      ]);
+      fetchSpy = jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(async url =>
+          url === onlineUrl
+            ? ({ ok: true, json: async () => [onlinePlugin] } as Response)
+            : Promise.reject(new TypeError('Network request failed')),
+        );
+    });
+
+    afterEach(() => {
+      fetchSpy.mockRestore();
+    });
+
+    it('falls back to its cached listing and reports it as failed', async () => {
+      jest.mocked(getMMKVObject).mockReturnValueOnce({
+        [offlineUrl]: [cachedPlugin],
+        [disabledUrl]: [{ id: 'gone' }],
+      });
+
+      const result = await fetchPlugins();
+
+      expect(result.failedRepositories).toEqual([offlineUrl]);
+      expect(result.complete).toBe(true);
+      expect(result.plugins).toEqual(
+        expect.arrayContaining([onlinePlugin, cachedPlugin]),
+      );
+      expect(setMMKVObject).toHaveBeenCalledWith(REPOSITORY_CACHE_KEY, {
+        [onlineUrl]: [onlinePlugin],
+        [offlineUrl]: [cachedPlugin],
+      });
+    });
+
+    it('reports an incomplete result when nothing is cached', async () => {
+      jest.mocked(getMMKVObject).mockReturnValueOnce(undefined);
+
+      const result = await fetchPlugins();
+
+      expect(result).toEqual({
+        plugins: [onlinePlugin],
+        failedRepositories: [offlineUrl],
+        complete: false,
+      });
+    });
+
+    it('treats an error response as a failure', async () => {
+      fetchSpy.mockImplementation(
+        async () => ({ ok: false, status: 503 } as Response),
+      );
+      jest.mocked(getMMKVObject).mockReturnValueOnce(undefined);
+
+      const result = await fetchPlugins();
+
+      expect(result.failedRepositories).toEqual([onlineUrl, offlineUrl]);
+      expect(result.plugins).toEqual([]);
+    });
   });
 });
 
