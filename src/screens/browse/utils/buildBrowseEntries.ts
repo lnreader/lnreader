@@ -1,5 +1,6 @@
 import { PluginItem } from '@plugins/types';
 import { getString } from '@i18n/translations';
+import { compareStrings } from '@utils/compareStrings';
 import { getLocaleLanguageName } from '@utils/constants/languages';
 
 export type SourceEntry =
@@ -48,8 +49,8 @@ export const buildSourceEntries = ({
   const normalizedSearch = searchText.trim().toLocaleLowerCase();
   const sortedPlugins = [...installedPlugins].sort(
     (firstPlugin, secondPlugin) =>
-      firstPlugin.lang.localeCompare(secondPlugin.lang) ||
-      firstPlugin.name.localeCompare(secondPlugin.name),
+      compareStrings(firstPlugin.lang, secondPlugin.lang) ||
+      compareStrings(firstPlugin.name, secondPlugin.name),
   );
   const pinnedIds = new Set(pinnedPluginIds);
 
@@ -199,12 +200,12 @@ export const buildPluginEntries = ({
 }: BuildPluginEntriesOptions): PluginEntry[] => {
   const normalizedSearch = searchText.trim().toLocaleLowerCase();
   const installed = [...installedPlugins].sort((first, second) =>
-    first.name.localeCompare(second.name),
+    compareStrings(first.name, second.name),
   );
   const available = [...availablePlugins].sort(
     (first, second) =>
-      first.lang.localeCompare(second.lang) ||
-      first.name.localeCompare(second.name),
+      compareStrings(first.lang, second.lang) ||
+      compareStrings(first.name, second.name),
   );
 
   if (normalizedSearch) {
