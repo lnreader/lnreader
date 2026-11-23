@@ -32,14 +32,10 @@ export const filterAvailablePlugins = (
   const enabledLanguages = new Set(languagesFilter);
   const installedPluginIds = new Set(installedPlugins.map(plugin => plugin.id));
 
-  return availablePlugins
-    .filter(
-      plugin =>
-        enabledLanguages.has(plugin.lang) && !installedPluginIds.has(plugin.id),
-    )
-    .sort((firstPlugin, secondPlugin) =>
-      firstPlugin.name.localeCompare(secondPlugin.name),
-    );
+  return availablePlugins.filter(
+    plugin =>
+      enabledLanguages.has(plugin.lang) && !installedPluginIds.has(plugin.id),
+  );
 };
 
 export const reconcileInstalledPluginUpdates = (

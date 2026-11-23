@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -30,6 +30,7 @@ import {
   PluginEntry,
   PluginStatus,
 } from '../utils/buildBrowseEntries';
+import PluginsSkeletonLoading from '../loadingAnimation/PluginsSkeletonLoading';
 
 interface PluginsTabProps {
   navigation: BrowseScreenProps['navigation'];
@@ -147,7 +148,7 @@ const PluginRow = memo(
   },
 );
 
-export const PluginsTab = memo(
+const PluginsTabContent = memo(
   ({ navigation, searchText, theme }: PluginsTabProps) => {
     const installedPlugins = useInstalledPlugins();
     const availablePlugins = useFilteredAvailablePlugins();
@@ -403,6 +404,24 @@ export const PluginsTab = memo(
     );
   },
 );
+
+// The tab view mounts this scene synchronously on the tab press, so building
+// the plugin list would freeze the screen before anything is painted. Paint a
+// skeleton first and mount the list on the next frame.
+export const PluginsTab = memo((props: PluginsTabProps) => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return ready ? (
+    <PluginsTabContent {...props} />
+  ) : (
+    <PluginsSkeletonLoading theme={props.theme} />
+  );
+});
 
 const styles = StyleSheet.create({
   description: {
