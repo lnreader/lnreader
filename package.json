@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.14",
-    "@legendapp/list": "^3.3.3",
+    "@legendapp/list": "^3.7.3",
     "@noble/ciphers": "^2.2.0",
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",

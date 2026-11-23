@@ -29,6 +29,3 @@ onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
   - protobufjs
-
-patchedDependencies:
-  '@legendapp/list@3.3.3': patches/@legendapp__list@3.3.3.patch

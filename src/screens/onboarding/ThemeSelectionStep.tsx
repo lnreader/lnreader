@@ -144,6 +144,7 @@ export default function ThemeSelectionStep() {
       {/* Theme List */}
       <LegendList
         numColumns={3}
+        recycleItems={false}
         showsHorizontalScrollIndicator={false}
         data={availableThemes}
         extraData={[theme, ePaperOptimizations]}
