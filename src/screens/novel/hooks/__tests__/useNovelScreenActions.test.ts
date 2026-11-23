@@ -18,7 +18,7 @@ jest.mock('@hooks/persisted', () => ({
 
 jest.mock('@services/plugin/fetch', () => ({ resolveUrl: jest.fn() }));
 
-jest.mock('../../NovelContext', () => ({
+jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => ({
     bookmarkChapters: jest.fn(),
     deleteChapters: jest.fn(),
