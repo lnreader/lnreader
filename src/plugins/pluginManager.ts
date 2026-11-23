@@ -124,6 +124,38 @@ const initPlugin = (pluginId: string, rawCode: string) => {
 };
 
 const plugins: Record<string, Plugin | undefined> = {};
+/**
+ * Installed plugins' code, read at launch and compiled on first use. Compiling
+ * every installed plugin with `Function` held the splash screen even though a
+ * session usually touches only a few of them.
+ */
+const pendingPlugins = new Map<string, { code: string; item: PluginItem }>();
+
+/** Re-downloads of stored bundles that no longer compile, by plugin id. */
+const pluginRepairs = new Map<string, Promise<Plugin | undefined>>();
+
+const resolvePlugin = (pluginId: string) => {
+  const pending = pendingPlugins.get(pluginId);
+  if (!plugins[pluginId] && pending) {
+    pendingPlugins.delete(pluginId);
+    plugins[pluginId] = initPlugin(pluginId, pending.code);
+    if (!plugins[pluginId]) {
+      // The stored bundle no longer compiles; fetch it again, as launch used to.
+      const repair = installPlugin(pending.item)
+        .catch(() => undefined)
+        .finally(() => pluginRepairs.delete(pluginId));
+      pluginRepairs.set(pluginId, repair);
+    }
+  }
+  return plugins[pluginId];
+};
+
+/**
+ * For source actions, which can wait: resolves once a plugin whose stored
+ * bundle failed to compile on first use has been downloaded again.
+ */
+const waitForPluginRepair = async (pluginId: string) =>
+  pluginRepairs.get(pluginId) ?? plugins[pluginId];
 export { INSTALLED_PLUGINS_KEY } from './constants';
 const PLUGIN_FILES = ['custom.js', 'custom.css', 'index.js'] as const;
 
@@ -169,7 +201,7 @@ const installPlugin = async (
   if (!plugin) {
     return undefined;
   }
-  let currentPlugin = plugins[plugin.id];
+  let currentPlugin = resolvePlugin(plugin.id);
   if (!currentPlugin || newer(plugin.version, currentPlugin.version)) {
     // save plugin code;
     const pluginDir = `${PLUGIN_STORAGE}/${plugin.id}`;
@@ -189,6 +221,7 @@ const installPlugin = async (
     }
     await NativeFile.writeFile(pluginPath, rawCode);
     plugins[plugin.id] = plugin;
+    pendingPlugins.delete(plugin.id);
     currentPlugin = plugin;
   }
   return currentPlugin;
@@ -196,6 +229,7 @@ const installPlugin = async (
 
 const uninstallPlugin = async (_plugin: PluginItem) => {
   plugins[_plugin.id] = undefined;
+  pendingPlugins.delete(_plugin.id);
   store.getAllKeys().forEach(key => {
     if (key.startsWith(_plugin.id)) {
       store.remove(key);
@@ -235,15 +269,19 @@ const getPlugin = (pluginId: string) => {
     return undefined;
   }
 
-  return plugins[pluginId];
+  return resolvePlugin(pluginId);
 };
 
 const loadPlugin = async (pluginId: string) => {
   if (pluginId === LOCAL_PLUGIN_ID) {
     return undefined;
   }
-  if (plugins[pluginId]) {
+  if (resolvePlugin(pluginId)) {
     return plugins[pluginId];
+  }
+  const repair = pluginRepairs.get(pluginId);
+  if (repair) {
+    return repair;
   }
 
   const filePath = `${PLUGIN_STORAGE}/${pluginId}/index.js`;
@@ -281,8 +319,20 @@ const initializeInstalledPlugins = async () => {
         // A failed migration can still be recovered from the repository below.
       }
 
-      const installedPlugin = await loadPlugin(plugin.id);
-      if (!installedPlugin) {
+      if (plugins[plugin.id] || pendingPlugins.has(plugin.id)) {
+        return;
+      }
+      let code: string | undefined;
+      try {
+        code = await NativeFile.readFile(
+          `${PLUGIN_STORAGE}/${plugin.id}/index.js`,
+        );
+      } catch {
+        code = undefined;
+      }
+      if (code) {
+        pendingPlugins.set(plugin.id, { code, item: plugin });
+      } else {
         await installPlugin(plugin);
       }
     }),
@@ -296,6 +346,7 @@ const reloadInstalledPlugins = async (): Promise<string[]> => {
   Object.keys(plugins).forEach(pluginId => {
     plugins[pluginId] = undefined;
   });
+  pendingPlugins.clear();
 
   const results = await Promise.all(
     installedPlugins.map(async plugin => ({
@@ -318,6 +369,7 @@ const LOCAL_PLUGIN_ID = 'local';
 
 export {
   getPlugin,
+  waitForPluginRepair,
   loadPlugin,
   initializeInstalledPlugins,
   reloadInstalledPlugins,

@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { Plugin, PluginError } from '@plugins/types';
 import { downloadFile } from '@plugins/helpers/fetch';
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, waitForPluginRepair } from '@plugins/pluginManager';
 import { getString } from '@i18n/translations';
 import { getChapter } from '@database/queries/ChapterQueries';
 import { sleep } from '@utils/sleep';
@@ -76,7 +76,8 @@ const downloadChapter = async (chapterId: number) => {
   if (!novel) {
     throw new Error('Novel not found for chapter: ' + chapter.name);
   }
-  const plugin = getPlugin(novel.pluginId);
+  const plugin =
+    getPlugin(novel.pluginId) ?? (await waitForPluginRepair(novel.pluginId));
   if (!plugin) {
     throw new Error(getString('downloadScreen.pluginNotFound'));
   }

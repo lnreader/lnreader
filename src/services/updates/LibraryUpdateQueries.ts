@@ -1,6 +1,10 @@
 import { fetchNovel, fetchPage } from '../plugin/fetch';
 import { ChapterItem, SourceNovel } from '@plugins/types';
-import { getPlugin, LOCAL_PLUGIN_ID } from '@plugins/pluginManager';
+import {
+  getPlugin,
+  waitForPluginRepair,
+  LOCAL_PLUGIN_ID,
+} from '@plugins/pluginManager';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { downloadFile } from '@plugins/helpers/fetch';
 import type { BackgroundTaskEnqueuer } from '@services/backgroundTasks/contracts';
@@ -209,7 +213,7 @@ const updateNovel = async (
 
   // For paged novels: re-fetch the last known page and fetch any new pages
   if (novel.totalPages && novel.totalPages > 1) {
-    const plugin = getPlugin(pluginId);
+    const plugin = getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
     if (plugin?.parsePage) {
       // Re-fetch the last known page to check for new chapters
       if (oldTotalPages > 1) {

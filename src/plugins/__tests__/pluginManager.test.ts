@@ -10,6 +10,7 @@ import {
   loadPlugin,
   reloadInstalledPlugins,
   getFilterSuggestions,
+  waitForPluginRepair,
 } from '../pluginManager';
 import type { PluginItem } from '../types';
 
@@ -138,6 +139,53 @@ describe('initializeInstalledPlugins', () => {
     );
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(getPlugin('legacy')).toMatchObject({ id: 'legacy' });
+  });
+
+  it('compiles an installed plugin on first use instead of at launch', async () => {
+    const plugin = {
+      id: 'deferred',
+      name: 'Deferred plugin',
+      url: 'https://example.com/deferred.js',
+    } as PluginItem;
+    const globals = globalThis as { deferredPluginRuns?: number };
+    globals.deferredPluginRuns = 0;
+    jest.mocked(getMMKVObject).mockReturnValueOnce([plugin]);
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest
+      .mocked(NativeFile.readFile)
+      .mockResolvedValue(
+        `globalThis.deferredPluginRuns += 1;\n${pluginCode('deferred')}`,
+      );
+
+    await initializeInstalledPlugins();
+    expect(globals.deferredPluginRuns).toBe(0);
+
+    expect(getPlugin('deferred')).toMatchObject({ id: 'deferred' });
+    expect(getPlugin('deferred')).toMatchObject({ id: 'deferred' });
+    expect(globals.deferredPluginRuns).toBe(1);
+    delete globals.deferredPluginRuns;
+  });
+
+  it('lets source actions wait for a bundle that fails to compile on first use', async () => {
+    const plugin = {
+      id: 'broken',
+      name: 'Broken plugin',
+      url: 'https://example.com/broken.js',
+    } as PluginItem;
+    jest.mocked(getMMKVObject).mockReturnValueOnce([plugin]);
+    jest.mocked(NativeFile.exists).mockResolvedValue(true);
+    jest.mocked(NativeFile.readFile).mockResolvedValue('this is not { valid');
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      text: async () => pluginCode('broken'),
+    } as Response);
+
+    await initializeInstalledPlugins();
+
+    expect(getPlugin('broken')).toBeUndefined();
+    await expect(waitForPluginRepair('broken')).resolves.toMatchObject({
+      id: 'broken',
+    });
+    expect(getPlugin('broken')).toMatchObject({ id: 'broken' });
   });
 
   it('downloads a replacement when the installed bundle is missing', async () => {

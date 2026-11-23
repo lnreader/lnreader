@@ -6,7 +6,7 @@ import { useFilteredInstalledPlugins, useTheme } from '@hooks/persisted';
 import EmptyView from '@components/EmptyView';
 import MigrationNovelList from './MigrationNovelList';
 
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, waitForPluginRepair } from '@plugins/pluginManager';
 import { useLibraryNovels } from '@screens/library/hooks/useLibrary';
 import { Appbar, SafeAreaView } from '@components';
 import GlobalSearchSkeletonLoading from '../loadingAnimation/GlobalSearchSkeletonLoading';
@@ -50,7 +50,8 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
     filteredInstalledPlugins.map(async item => {
       if (isMounted.current === true) {
         try {
-          const source = getPlugin(item.id);
+          const source =
+            getPlugin(item.id) ?? (await waitForPluginRepair(item.id));
           if (!source) {
             throw new Error(`Unknown plugin: ${item.id}`);
           }

@@ -1,4 +1,4 @@
-import { getPlugin } from '@plugins/pluginManager';
+import { getPlugin, waitForPluginRepair } from '@plugins/pluginManager';
 import { isUrlAbsolute } from '@plugins/helpers/isAbsoluteUrl';
 import { ChapterItem } from '@plugins/types';
 
@@ -18,7 +18,7 @@ function formatChapters<T extends ChapterItem[] | undefined>(chapters: T): T {
 }
 
 export const fetchNovel = async (pluginId: string, novelPath: string) => {
-  const plugin = getPlugin(pluginId);
+  const plugin = getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
   if (!plugin) {
     throw new Error(`Unknown plugin: ${pluginId}`);
   }
@@ -30,7 +30,7 @@ export const fetchNovel = async (pluginId: string, novelPath: string) => {
 };
 
 export const fetchChapter = async (pluginId: string, chapterPath: string) => {
-  const plugin = getPlugin(pluginId);
+  const plugin = getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
   let chapterText = `Unknown plugin: ${pluginId}`;
   if (plugin) {
     chapterText = await plugin.parseChapter(chapterPath);
@@ -39,7 +39,7 @@ export const fetchChapter = async (pluginId: string, chapterPath: string) => {
 };
 
 export const fetchChapters = async (pluginId: string, novelPath: string) => {
-  const plugin = getPlugin(pluginId);
+  const plugin = getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
   if (!plugin) {
     throw new Error(`Unknown plugin: ${pluginId}`);
   }
@@ -52,7 +52,7 @@ export const fetchPage = async (
   novelPath: string,
   page: string,
 ) => {
-  const plugin = getPlugin(pluginId);
+  const plugin = getPlugin(pluginId) ?? (await waitForPluginRepair(pluginId));
 
   if (!plugin) {
     throw new Error(`Unknown plugin: ${pluginId}`);
