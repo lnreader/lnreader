@@ -141,7 +141,9 @@ const buildAdjacentChapterScript = (
 `;
 
 const { RNDeviceInfo } = NativeModules;
-const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
+const deviceInfoEmitter = new NativeEventEmitter<{
+  RNDeviceInfo_batteryLevelDidChange: [number];
+}>(RNDeviceInfo);
 
 /**
  * Last level seen, so a chapter can be rendered without the synchronous native

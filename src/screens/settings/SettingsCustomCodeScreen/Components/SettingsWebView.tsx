@@ -32,7 +32,9 @@ const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
 };
 
 const { RNDeviceInfo } = NativeModules;
-const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
+const deviceInfoEmitter = new NativeEventEmitter<{
+  RNDeviceInfo_batteryLevelDidChange: [number];
+}>(RNDeviceInfo);
 
 const assetsUriPrefix = __DEV__
   ? 'http://localhost:8081/assets'

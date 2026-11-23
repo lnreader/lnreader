@@ -4,6 +4,7 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   Text,
   View,
@@ -27,7 +28,7 @@ const WheelPicker = ({
   onChange,
   theme,
 }: WheelPickerProps) => {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   const onScrollEnd = ({
     nativeEvent,

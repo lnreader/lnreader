@@ -84,13 +84,13 @@ describe('ToggleButton', () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it('disabled: press does not call onPress', () => {
-    const onPress = jest.fn();
+  // Gesture Handler's native button drops presses itself, which the test
+  // renderer can't simulate, so check the disabled state it's given instead.
+  it('disabled: marks the button disabled', () => {
     render(
-      <ToggleButton icon="cog" selected={false} theme={mockTheme} onPress={onPress} disabled={true} />,
+      <ToggleButton icon="cog" selected={false} theme={mockTheme} onPress={jest.fn()} disabled={true} />,
     );
 
-    fireEvent.press(screen.getByTestId('icon'));
-    expect(onPress).not.toHaveBeenCalled();
+    expect(screen.getByTestId('icon')).toBeDisabled();
   });
 });

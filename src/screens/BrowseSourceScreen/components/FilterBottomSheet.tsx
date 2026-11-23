@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  type HostInstance,
 } from 'react-native';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
@@ -69,7 +70,7 @@ const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
   const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
-  const anchorRef = useRef<View>(null);
+  const anchorRef = useRef<HostInstance>(null);
 
   const [anchor, setAnchor] = useState<LayoutRectangle | null>(null);
 

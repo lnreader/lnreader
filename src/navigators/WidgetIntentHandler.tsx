@@ -106,7 +106,7 @@ export const openWidgetLink = async ({ target, params }: WidgetLink) => {
 let pendingLink: WidgetLink | null = null;
 let handledInitialUrl = false;
 
-const dispatchWidgetUrl = (url: string | null) => {
+const dispatchWidgetUrl = (url: string | null | undefined) => {
   const link = url ? parseWidgetUrl(url) : null;
   if (!link) {
     return;

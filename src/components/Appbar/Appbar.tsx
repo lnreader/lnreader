@@ -21,7 +21,7 @@ const Appbar: React.FC<AppbarProps> = ({
 }) => (
   <PaperAppbar.Header
     style={{ backgroundColor: theme.surface }}
-    statusBarHeight={StatusBar.currentHeight}
+    statusBarHeight={StatusBar.currentHeight ?? undefined}
     mode={mode}
   >
     {handleGoBack && (

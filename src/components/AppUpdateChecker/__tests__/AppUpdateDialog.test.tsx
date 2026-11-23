@@ -1,4 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render as rtlRender,
+  screen,
+} from '@testing-library/react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
 
 import AppUpdateDialog from '../AppUpdateDialog';
@@ -29,6 +34,10 @@ jest.mock('@hooks/persisted', () => ({
 jest.mock('expo-linking', () => ({
   openURL: jest.fn(),
 }));
+
+// Gesture Handler 3's ScrollView needs a GestureHandlerRootView ancestor.
+const render = (ui: React.ReactElement) =>
+  rtlRender(ui, { wrapper: GestureHandlerRootView });
 
 const release = {
   tag_name: 'v9.0.0',

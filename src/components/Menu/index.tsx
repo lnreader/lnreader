@@ -16,6 +16,7 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  type HostInstance,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -55,7 +56,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
   children,
   fullWidth,
 }) => {
-  const anchorRef = useRef<View>(null);
+  const anchorRef = useRef<HostInstance>(null);
 
   return (
     <>
@@ -78,7 +79,7 @@ const Menu: React.FC<MenuProps> & { Item: React.FC<MenuItemProps> } = ({
 };
 
 interface MenuPopupProps extends Omit<MenuProps, 'visible' | 'anchor'> {
-  anchorRef: React.RefObject<View | null>;
+  anchorRef: React.RefObject<HostInstance | null>;
 }
 
 const MenuPopup = ({

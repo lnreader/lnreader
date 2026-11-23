@@ -52,7 +52,8 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-image"
     ],
     "android": {
       "versionCode": 4196356,
@@ -74,7 +75,11 @@
         {
           "action": "SEND",
           "category": ["DEFAULT"],
-          "data": [{ "mimeType": "text/plain" }]
+          "data": [
+            {
+              "mimeType": "text/plain"
+            }
+          ]
         }
       ]
     },

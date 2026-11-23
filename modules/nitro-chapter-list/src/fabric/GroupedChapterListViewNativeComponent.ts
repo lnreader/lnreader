@@ -1,23 +1,22 @@
-import type { HostComponent, ViewProps } from 'react-native';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import type {
-  DirectEventHandler,
-  Int32,
-  WithDefault,
-} from 'react-native/Libraries/Types/CodegenTypes';
+import {
+  type CodegenTypes,
+  type HostComponent,
+  type ViewProps,
+  codegenNativeComponent,
+} from 'react-native';
 
 export type GroupedRowEvent = Readonly<{ key: string }>;
 
 export interface NativeProps extends ViewProps {
   storeId: string;
   colors: Readonly<{
-    onSurface: Int32;
-    onSurfaceVariant: Int32;
-    outline: Int32;
-    primary: Int32;
-    onPrimary: Int32;
-    rippleColor: Int32;
-    surfaceVariant: Int32;
+    onSurface: CodegenTypes.Int32;
+    onSurfaceVariant: CodegenTypes.Int32;
+    outline: CodegenTypes.Int32;
+    primary: CodegenTypes.Int32;
+    onPrimary: CodegenTypes.Int32;
+    rippleColor: CodegenTypes.Int32;
+    surfaceVariant: CodegenTypes.Int32;
   }>;
   strings: Readonly<{
     chapterTitleTemplate: string;
@@ -27,12 +26,12 @@ export interface NativeProps extends ViewProps {
     downloadingA11yLabel: string;
   }>;
   downloadingIds?: ReadonlyArray<string>;
-  refreshEnabled?: WithDefault<boolean, false>;
-  onRefresh?: DirectEventHandler<Readonly<{}>>;
-  onRowPress?: DirectEventHandler<GroupedRowEvent>;
-  onCoverPress?: DirectEventHandler<GroupedRowEvent>;
-  onDownloadPress?: DirectEventHandler<GroupedRowEvent>;
-  onDeletePress?: DirectEventHandler<GroupedRowEvent>;
+  refreshEnabled?: CodegenTypes.WithDefault<boolean, false>;
+  onRefresh?: CodegenTypes.DirectEventHandler<Readonly<{}>>;
+  onRowPress?: CodegenTypes.DirectEventHandler<GroupedRowEvent>;
+  onCoverPress?: CodegenTypes.DirectEventHandler<GroupedRowEvent>;
+  onDownloadPress?: CodegenTypes.DirectEventHandler<GroupedRowEvent>;
+  onDeletePress?: CodegenTypes.DirectEventHandler<GroupedRowEvent>;
 }
 
 export default codegenNativeComponent<NativeProps>(

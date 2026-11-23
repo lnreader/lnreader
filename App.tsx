@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import { enableFreeze } from 'react-native-screens';
 import { PropsWithChildren, Suspense, useEffect, useMemo } from 'react';
-import { StatusBar, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -105,7 +105,6 @@ const Application = () => {
           <SafeAreaProvider>
             <ThemedPaperProvider>
               <BottomSheetModalProvider>
-                <StatusBar translucent={true} backgroundColor="transparent" />
                 <Main />
                 <HiddenWebViewHost />
               </BottomSheetModalProvider>

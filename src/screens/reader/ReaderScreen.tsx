@@ -11,6 +11,7 @@ import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
 import { ErrorScreenV2 } from '@components';
 import { ChapterScreenProps } from '@navigators/types';
 import { getString } from '@i18n/translations';
+import { runWhenIdle } from '@utils/runWhenIdle';
 import KeepScreenAwake from './components/KeepScreenAwake';
 import {
   ChapterContextProvider,
@@ -20,13 +21,7 @@ import {
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useBackHandler } from '@hooks/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  InteractionManager,
-  Keyboard,
-  Share,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Keyboard, Share, StyleSheet, View } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
 import { EMPTY_READER_SEARCH_RESULT, ReaderSearchResult } from './types';
 import * as Linking from 'expo-linking';
@@ -60,10 +55,7 @@ const ReaderDrawerLayout = ({ route, navigation }: ChapterScreenProps) => {
     if (loading || drawerMounted) {
       return;
     }
-    const handle = InteractionManager.runAfterInteractions(() =>
-      setDrawerMounted(true),
-    );
-    return () => handle.cancel();
+    return runWhenIdle(() => setDrawerMounted(true));
   }, [drawerMounted, loading]);
 
   useBackHandler(() => {
