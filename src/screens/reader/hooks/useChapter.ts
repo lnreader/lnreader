@@ -675,6 +675,7 @@ export default function useChapter(
       loading,
       chapterText,
       documentChapter,
+      hiddenRef,
       setHidden,
       saveProgress,
       activateChapter,

@@ -5,6 +5,7 @@ import ReaderAppbar from './components/ReaderAppbar';
 import ReaderFooter from './components/ReaderFooter';
 
 import WebViewReader from './components/WebViewReader';
+import { buildReaderChromeScript } from './utils/buildReaderChromeScript';
 import ReaderBottomSheetV2 from './components/ReaderBottomSheet/ReaderBottomSheet';
 import ChapterDrawer from './components/ChapterDrawer';
 import ChapterLoadingScreen from './ChapterLoadingScreen/ChapterLoadingScreen';
@@ -122,6 +123,7 @@ export const ChapterContent = ({
     loading,
     error,
     webViewRef,
+    hiddenRef,
     hideHeader,
     refetch,
   } = useChapterContext();
@@ -133,6 +135,10 @@ export const ChapterContent = ({
     chapter.bookmark ?? false,
   );
   const [searchVisible, setSearchVisible] = useState(false);
+  const searchVisibleRef = useRef(searchVisible);
+  useEffect(() => {
+    searchVisibleRef.current = searchVisible;
+  }, [searchVisible]);
   const [searchResult, setSearchResult] = useState<ReaderSearchResult>(
     EMPTY_READER_SEARCH_RESULT,
   );
@@ -209,12 +215,9 @@ export const ChapterContent = ({
       return;
     }
 
-    webViewRef.current?.injectJavaScript(`
-      if (window.reader?.hidden) {
-        window.reader.hidden.val = ${searchVisible ? 'true' : 'false'};
-      }
-      true;
-    `);
+    webViewRef.current?.injectJavaScript(
+      buildReaderChromeScript(false, searchVisible),
+    );
   }, [hidden, searchVisible, webViewRef]);
 
   const scrollToStart = useCallback(() => {
@@ -298,6 +301,8 @@ export const ChapterContent = ({
         <ChapterLoadingScreen />
       ) : (
         <WebViewReader
+          hiddenRef={hiddenRef}
+          searchVisibleRef={searchVisibleRef}
           onPress={handleReaderPress}
           onTouchStart={handleReaderTouchStart}
           onSearchResult={setSearchResult}

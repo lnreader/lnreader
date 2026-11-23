@@ -1,4 +1,7 @@
 import React from 'react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
 import { act, render } from '@test-utils';
 import type { ChapterInfo, NovelInfo } from '@database/types';
 import WebViewReader, { CHAPTER_SWAP_TIMEOUT_MS } from '../WebViewReader';
@@ -145,6 +148,8 @@ jest.mock('../../ChapterContext', () => ({
 
 const novel = { id: 1, name: 'Novel', pluginId: 'demo' } as NovelInfo;
 const webViewRef = { current: null };
+const mockHidden = { current: true };
+const mockSearchVisible = { current: false };
 
 const makeChapter = (id: number, isDownloaded = false) =>
   ({
@@ -186,6 +191,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 // skip rendering the new chapter.
 const ui = () => (
   <WebViewReader
+    hiddenRef={mockHidden}
+    searchVisibleRef={mockSearchVisible}
     onPress={jest.fn()}
     onSearchResult={jest.fn()}
     searchTextRef={{ current: '' }}
@@ -367,4 +374,67 @@ describe('WebViewReader chapter changes', () => {
     expect(rebuilt.html).toContain('"progress":40');
     expect(rebuilt.html).not.toContain('Second chapter');
   });
+});
+
+// Runs the seekbar wrapper from the reader page against a page state.
+const seekbarClass = (pageReader: { hidden: { val: boolean } }): string => {
+  const index = readFileSync(
+    join(process.cwd(), 'assets/reader/js/index.js'),
+    'utf8',
+  );
+  const toolWrapper = index.slice(
+    index.indexOf('const ToolWrapper ='),
+    index.indexOf('const ImageModal ='),
+  );
+  return runInNewContext(`${toolWrapper}; ToolWrapper().class();`, {
+    reader: {
+      ...pageReader,
+      generalSettings: { val: { verticalSeekbar: false } },
+    },
+    van: { derive: (fn: () => boolean) => ({ val: fn() }) },
+    div: (attributes: object) => attributes,
+    Scrollbar: () => null,
+  }).trim();
+};
+
+describe('WebViewReader page reload', () => {
+  beforeEach(() => {
+    mockInstalledPlugins.length = 0;
+  });
+
+  afterEach(() => {
+    mockHidden.current = true;
+    mockSearchVisible.current = false;
+  });
+
+  it.each([
+    [false, false],
+    [true, false],
+    [false, true],
+    [true, true],
+  ])(
+    'sends the controls state to a reloaded page (hidden %s, search %s)',
+    (hidden, search) => {
+      const view = renderLoadedReader();
+      mockHidden.current = hidden;
+      mockSearchVisible.current = search;
+      const source = mockWebView.props!.source;
+
+      goToChapter(view, makeChapter(2, true), '<p>Second chapter</p>');
+      expect(mockWebView.props!.source).not.toBe(source);
+      mockInjectJavaScript.mockClear();
+      act(() => mockWebView.props!.onLoadEnd());
+
+      const page = { reader: { hidden: { val: true } } };
+      const chromeScripts = injected().filter(script =>
+        script.includes('reader.hidden.val'),
+      );
+      expect(chromeScripts).toHaveLength(1);
+      runInNewContext(chromeScripts[0], { window: page });
+      expect(page.reader.hidden.val).toBe(hidden || search);
+      expect(seekbarClass(page.reader)).toBe(
+        hidden || search ? 'hidden horizontal' : 'horizontal',
+      );
+    },
+  );
 });

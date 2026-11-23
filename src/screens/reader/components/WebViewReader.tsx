@@ -60,6 +60,7 @@ import {
   serializeForScript,
   shouldReloadShell,
 } from '../utils/readerShell';
+import { buildReaderChromeScript } from '../utils/buildReaderChromeScript';
 
 export type WebViewPostEvent = {
   type: string;
@@ -71,6 +72,8 @@ export type WebViewPostEvent = {
 };
 
 type WebViewReaderProps = {
+  hiddenRef: React.RefObject<boolean>;
+  searchVisibleRef: React.RefObject<boolean>;
   onPress(): void;
   onTouchStart?(): void;
   onSearchResult(result: ReaderSearchResult): void;
@@ -196,6 +199,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   onTouchStart,
   onSearchResult,
   searchTextRef,
+  searchVisibleRef,
+  hiddenRef,
 }) => {
   const {
     novel,
@@ -920,6 +925,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         }}
         onLoadEnd={() => {
           shellReadyRef.current = true;
+          // A reloaded page starts with its controls hidden, so send the
+          // app's controls state to it.
+          webViewRef.current?.injectJavaScript(
+            buildReaderChromeScript(
+              hiddenRef.current,
+              searchVisibleRef.current,
+            ),
+          );
           measureChapterShown('reload');
           afterChapterShown();
         }}
