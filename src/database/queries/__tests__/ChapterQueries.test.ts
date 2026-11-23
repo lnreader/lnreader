@@ -18,7 +18,7 @@ import {
   markAllChaptersRead,
   markAllChaptersUnread,
   getNovelChapters,
-  getAllNovelChaptersForBackup,
+  getAllNovelChapters,
   getUnreadNovelChapters,
   getAllUndownloadedChapters,
   getAllUndownloadedAndUnreadChapters,
@@ -152,8 +152,8 @@ describe('ChapterQueries', () => {
     });
   });
 
-  describe('getAllNovelChaptersForBackup', () => {
-    it('returns chapters beyond the 1000-row UI query limit', async () => {
+  describe('getAllNovelChapters', () => {
+    it('returns every chapter, beyond the 1000-row UI query limit', async () => {
       const testDb = getTestDb();
       // No Novel row is needed for this selector test. Keeping the id orphaned
       // also avoids running aggregate-stat triggers 1001 times during setup.
@@ -183,9 +183,9 @@ describe('ChapterQueries', () => {
         ),
       ).toBe(true);
 
-      const backupChapters = await getAllNovelChaptersForBackup(novelId);
-      expect(backupChapters).toHaveLength(1001);
-      expect(backupChapters.at(-1)?.name).toBe('Chapter 1001');
+      const allChapters = await getAllNovelChapters(novelId);
+      expect(allChapters).toHaveLength(1001);
+      expect(allChapters.at(-1)?.name).toBe('Chapter 1001');
     });
   });
 

@@ -8,7 +8,7 @@ import {
   getAllNovels,
   type RestoreNovelResult,
 } from '@database/queries/NovelQueries';
-import { getAllNovelChaptersForBackup } from '@database/queries/ChapterQueries';
+import { getAllNovelChapters } from '@database/queries/ChapterQueries';
 import {
   _restoreCategory,
   getAllNovelCategories,
@@ -281,7 +281,7 @@ export const prepareBackupData = async (
     await getAllNovels().then(async novels => {
       for (const novel of novels) {
         try {
-          const chapters = await getAllNovelChaptersForBackup(novel.id);
+          const chapters = await getAllNovelChapters(novel.id);
           const backedUpChapters = options.downloadedFiles
             ? chapters
             : chapters.map(chapter => ({
