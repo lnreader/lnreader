@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, FlatListProps } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { useFilteredInstalledPlugins, useTheme } from '@hooks/persisted';
@@ -12,6 +12,13 @@ import { Appbar, SafeAreaView } from '@components';
 import GlobalSearchSkeletonLoading from '../loadingAnimation/GlobalSearchSkeletonLoading';
 import { MigrateNovelScreenProps } from '@navigators/types';
 import { NovelItem } from '@plugins/types';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import {
+  isMigrationPersisted,
+  type MigrationTarget,
+} from '@services/migrate/verifyMigration';
+import { getString } from '@i18n/translations';
+import { showToast } from '@utils/showToast';
 
 export interface SourceSearchResult {
   id: string;
@@ -24,6 +31,8 @@ export interface SourceSearchResult {
 
 const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
   const { novel } = route.params;
+  const [pendingMigration, setPendingMigration] = useState<MigrationTarget>();
+  const [enqueuedTarget, setEnqueuedTarget] = useState<MigrationTarget>();
   const theme = useTheme();
 
   const isMounted = React.useRef(true);
@@ -34,6 +43,69 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
   const { library } = useLibraryNovels();
 
   const filteredInstalledPlugins = useFilteredInstalledPlugins();
+
+  const pendingToNovelPath = pendingMigration?.toNovelPath;
+  const pendingPluginId = pendingMigration?.pluginId;
+  const isMigrationQueued = useBackgroundTasks(
+    useCallback(
+      tasks =>
+        tasks.some(
+          item =>
+            item.task.name === 'MIGRATE_NOVEL' &&
+            item.task.data.fromNovel.id === novel.id &&
+            item.task.data.pluginId === pendingPluginId &&
+            item.task.data.toNovelPath === pendingToNovelPath,
+        ),
+      [novel.id, pendingPluginId, pendingToNovelPath],
+    ),
+  );
+
+  const unsubscribeFocusRef = useRef<(() => void) | undefined>(undefined);
+  useEffect(() => () => unsubscribeFocusRef.current?.(), []);
+
+  const handleMigrationAborted = useCallback((target: MigrationTarget) => {
+    // A late abort of an earlier migration must not touch a newer one.
+    setPendingMigration(current => (current === target ? undefined : current));
+  }, []);
+
+  const handleMigrationBlocked = useCallback(() => {
+    showToast(getString('browseScreen.migration.inProgress'));
+  }, []);
+
+  useEffect(() => {
+    // Only a task confirmed as queued and since gone has finished. Before that
+    // notification permission may still be requested, so only an already
+    // persisted migration counts as finished.
+    if (!pendingMigration || isMigrationQueued) {
+      return;
+    }
+    if (
+      enqueuedTarget !== pendingMigration &&
+      !isMigrationPersisted(pendingMigration)
+    ) {
+      return;
+    }
+
+    // The task left the queue: close only if the migration really persisted.
+    setEnqueuedTarget(undefined);
+    setPendingMigration(undefined);
+    if (isMigrationPersisted(pendingMigration)) {
+      showToast(getString('browseScreen.migration.success'));
+      // A novel previewed from the results may be on top: close this screen
+      // once it is focused again instead of from underneath the preview.
+      if (navigation.isFocused()) {
+        navigation.pop(2);
+      } else {
+        unsubscribeFocusRef.current = navigation.addListener('focus', () => {
+          unsubscribeFocusRef.current?.();
+          unsubscribeFocusRef.current = undefined;
+          navigation.pop(2);
+        });
+      }
+    } else {
+      showToast(getString('browseScreen.migration.failed'));
+    }
+  }, [enqueuedTarget, isMigrationQueued, navigation, pendingMigration]);
 
   const getSearchResults = useCallback(async () => {
     setSearchResults(
@@ -116,6 +188,11 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
           theme={theme}
           library={library}
           navigation={navigation}
+          isMigrating={pendingMigration !== undefined}
+          onMigrationQueued={setPendingMigration}
+          onMigrationAborted={handleMigrationAborted}
+          onMigrationEnqueued={setEnqueuedTarget}
+          onMigrationBlocked={handleMigrationBlocked}
         />
       )}
     </>
