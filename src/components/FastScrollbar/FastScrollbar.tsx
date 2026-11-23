@@ -140,8 +140,7 @@ const FastScrollbar = ({
     }
   }, [awaitingItems, cancelPending, lastRequestedIndex]);
 
-  const scrollThumbY = useCallback(() => {
-    'worklet';
+  const scrollThumbY = useDerivedValue(() => {
     const range = Math.max(0, trackHeight.get() - THUMB_LENGTH);
     return (
       getScrollProgress(
@@ -152,7 +151,7 @@ const FastScrollbar = ({
         total.get(),
       ) * range
     );
-  }, [contentLength, loaded, scrollOffset, total, trackHeight, viewportLength]);
+  });
 
   const endSettle = useCallback(() => {
     'worklet';
@@ -160,7 +159,7 @@ const FastScrollbar = ({
       return;
     }
     cancelAnimation(settleTimer);
-    correction.set(dragY.get() - scrollThumbY());
+    correction.set(dragY.get() - scrollThumbY.get());
     correction.set(
       withTiming(0, {
         duration: SETTLE_CORRECTION_MS,
@@ -286,7 +285,7 @@ const FastScrollbar = ({
     if (dragging.get() || settling.get()) {
       return dragY.get();
     }
-    return scrollThumbY() + correction.get();
+    return scrollThumbY.get() + correction.get();
   });
 
   // FastScroller.show(): fade in over 500ms from the current alpha, unless
