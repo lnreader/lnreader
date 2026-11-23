@@ -247,8 +247,8 @@
       "selectSource": "Select Source",
       "selectSourceDesc": "Select a Source To Migrate From",
       "unmatchedReadChapters": {
-        "one": "Migrated. %{count} read chapter had no match in the new source and stays unread.",
-        "other": "Migrated. %{count} read chapters had no match in the new source and stay unread."
+        "one": "Migrated. %{count} read chapter had no match in the new source, so its read state was not transferred.",
+        "other": "Migrated. %{count} read chapters had no match in the new source, so their read state was not transferred."
       },
       "useDestination": "Use destination source"
     },
