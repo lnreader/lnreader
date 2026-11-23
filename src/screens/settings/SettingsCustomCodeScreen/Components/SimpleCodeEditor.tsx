@@ -403,7 +403,7 @@ function HighlightedCode({
 }: MemoizedHighlightedCodeProps) {
   // Never call a hook conditionally; with externally supplied lines, feed it an
   // empty string so the text isn't split a second time on every keystroke.
-  const generatedLines = useStableLineModels(lines ? '' : (value ?? ''));
+  const generatedLines = useStableLineModels(lines ? '' : value ?? '');
   const resolvedLines = lines ?? generatedLines;
 
   const opacityStyle = useMemo(() => extractOpacityStyle(style), [style]);
@@ -685,10 +685,10 @@ export function SimpleCodeEditor({
     highlightMode === 'off'
       ? textStyle.color
       : highlightMode === 'combined'
-        ? Color(textStyle.color as string | undefined)
-            .alpha(0.4)
-            .string()
-        : 'rgba(0, 0, 0, 0.1)';
+      ? Color(textStyle.color as string | undefined)
+          .alpha(0.4)
+          .string()
+      : 'rgba(0, 0, 0, 0.1)';
 
   return (
     <View style={[styles.container, containerStyle]}>
