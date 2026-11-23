@@ -31,11 +31,10 @@
       ],
       "expo-localization",
       [
-        "react-native-edge-to-edge",
+        "expo-navigation-bar",
         {
-          "android": {
-            "enforceNavigationBarContrast": false
-          }
+          "enforceContrast": false,
+          "style": "light"
         }
       ],
       "expo-web-browser",

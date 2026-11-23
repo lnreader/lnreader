@@ -8,10 +8,10 @@ import {
 } from '../persisted';
 import Color from 'color';
 import {
-  setNavigationBarTransparent,
+  setNavigationBarStyle,
   setStatusBarColor,
 } from '@theme/utils/setBarColor';
-import { SystemBars } from 'react-native-edge-to-edge';
+import { NavigationBar } from 'expo-navigation-bar';
 
 const useFullscreenMode = () => {
   const { addListener } = useNavigation();
@@ -22,16 +22,16 @@ const useFullscreenMode = () => {
   const setImmersiveMode = useCallback(() => {
     if (fullScreenMode) {
       StatusBar.setHidden(true);
-      SystemBars.setHidden(true);
+      NavigationBar.setHidden(true);
     } else {
       setStatusBarColor(Color(backgroundColor));
-      setNavigationBarTransparent(Color(backgroundColor).isDark());
+      setNavigationBarStyle(Color(backgroundColor).isDark());
     }
   }, [backgroundColor, fullScreenMode]);
 
   const showStatusAndNavBar = useCallback(() => {
     StatusBar.setHidden(false);
-    SystemBars.setHidden(false);
+    NavigationBar.setHidden(false);
 
     if (fullScreenMode) {
       /**
@@ -40,7 +40,7 @@ const useFullscreenMode = () => {
        */
 
       setStatusBarColor(theme);
-      setNavigationBarTransparent(theme.isDark);
+      setNavigationBarStyle(theme.isDark);
     }
   }, [fullScreenMode, theme]);
 
@@ -48,16 +48,16 @@ const useFullscreenMode = () => {
     setImmersiveMode();
     return () => {
       StatusBar.setHidden(false);
-      SystemBars.setHidden(false);
+      NavigationBar.setHidden(false);
     };
   }, [setImmersiveMode]);
 
   useEffect(() => {
     const unsubscribe = addListener('beforeRemove', () => {
       StatusBar.setHidden(false);
-      SystemBars.setHidden(false);
+      NavigationBar.setHidden(false);
       setStatusBarColor(theme);
-      setNavigationBarTransparent(theme.isDark);
+      setNavigationBarStyle(theme.isDark);
     });
 
     return unsubscribe;
