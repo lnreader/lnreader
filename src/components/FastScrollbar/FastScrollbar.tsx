@@ -4,6 +4,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
   Easing,
+  interpolateColor,
   runOnJS,
   runOnUI,
   scrollTo,
@@ -16,25 +17,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@hooks/persisted';
 import type { FastScrollMetrics } from './useFastScrollMetrics';
-import {
-  getScrollProgress,
-  getThumbLength,
-  progressToIndex,
-} from './fastScrollMath';
+import { getScrollProgress, progressToIndex } from './fastScrollMath';
 import { type MeasurableList, PendingScrub } from './PendingScrub';
 
-// Timings and sizes mirror androidx.recyclerview.widget.FastScroller.
+// Keep the appearance and timings in sync with the native ListFastScroller.
 const SHOW_DURATION_MS = 500;
 const HIDE_DURATION_MS = 500;
 const HIDE_DELAY_AFTER_VISIBLE_MS = 1500;
 const HIDE_DELAY_AFTER_DRAGGING_MS = 1200;
-const THICKNESS = 8;
+const THICKNESS = 12;
+const THUMB_LENGTH = 48;
+const EDGE_MARGIN = 8;
+const TOUCH_WIDTH = 32;
 const MINIMUM_RANGE = 50;
-// Deviations from RecyclerView, which has no minimum thumb length (the thumb
-// shrinks to a few pixels on lists with thousands of rows) and only accepts
-// touches inside the 8dp-wide thumb itself.
-const MIN_THUMB_LENGTH = 48;
-const TOUCH_WIDTH = 24;
 // Native scroll offsets are rounded to whole pixels.
 const SETTLE_TOLERANCE = 1.5;
 const SETTLE_TIMEOUT_MS = 500;
@@ -120,16 +115,15 @@ const FastScrollbar = ({
     loaded.set(loadedCount);
   }, [itemCount, loadedCount, total, loaded]);
 
-  const thumbLength = useDerivedValue(() =>
-    getThumbLength(
-      trackHeight.get(),
-      contentLength.get(),
-      viewportLength.get(),
-      loaded.get(),
-      total.get(),
-      MIN_THUMB_LENGTH,
-    ),
-  );
+  const canFastScroll = useDerivedValue(() => {
+    const viewport = viewportLength.get();
+    return (
+      viewport > 0 &&
+      contentLength.get() >= 2 * viewport &&
+      trackHeight.get() >= MINIMUM_RANGE &&
+      total.get() > 0
+    );
+  });
 
   const [pending] = useState(() => new PendingScrub(INITIAL_TARGET));
   // Worklets must capture plain functions, not the class instance.
@@ -146,9 +140,8 @@ const FastScrollbar = ({
     }
   }, [awaitingItems, cancelPending, lastRequestedIndex]);
 
-  const scrollThumbY = useCallback(() => {
-    'worklet';
-    const range = Math.max(0, trackHeight.get() - thumbLength.get());
+  const scrollThumbY = useDerivedValue(() => {
+    const range = Math.max(0, trackHeight.get() - THUMB_LENGTH);
     return (
       getScrollProgress(
         scrollOffset.get(),
@@ -158,15 +151,7 @@ const FastScrollbar = ({
         total.get(),
       ) * range
     );
-  }, [
-    contentLength,
-    loaded,
-    scrollOffset,
-    thumbLength,
-    total,
-    trackHeight,
-    viewportLength,
-  ]);
+  });
 
   const endSettle = useCallback(() => {
     'worklet';
@@ -174,7 +159,7 @@ const FastScrollbar = ({
       return;
     }
     cancelAnimation(settleTimer);
-    correction.set(dragY.get() - scrollThumbY());
+    correction.set(dragY.get() - scrollThumbY.get());
     correction.set(
       withTiming(0, {
         duration: SETTLE_CORRECTION_MS,
@@ -300,7 +285,7 @@ const FastScrollbar = ({
     if (dragging.get() || settling.get()) {
       return dragY.get();
     }
-    return scrollThumbY() + correction.get();
+    return scrollThumbY.get() + correction.get();
   });
 
   // FastScroller.show(): fade in over 500ms from the current alpha, unless
@@ -362,30 +347,31 @@ const FastScrollbar = ({
   );
 
   useAnimatedReaction(
-    () => scrollOffset.get(),
+    () => ({ offset: scrollOffset.get(), available: canFastScroll.get() }),
     (current, previous) => {
-      if (previous === null || current === previous || dragging.get()) {
+      if (!current.available) {
+        if (opacity.get() > 0 || fadeInEndsAt.get() > 0) {
+          hideAt.set(-1);
+          opacity.set(0);
+          fadeInEndsAt.set(0);
+        }
+        return;
+      }
+      if (!previous || current.offset === previous.offset || dragging.get()) {
         return;
       }
       if (settling.get()) {
         const target = settleOffset.get();
-        if (target >= 0 && Math.abs(current - target) <= SETTLE_TOLERANCE) {
+        if (
+          target >= 0 &&
+          Math.abs(current.offset - target) <= SETTLE_TOLERANCE
+        ) {
           endSettle();
         }
         return;
       }
-      const scrollable =
-        contentLength.get() > viewportLength.get() &&
-        trackHeight.get() >= MINIMUM_RANGE &&
-        total.get() > 0;
-      if (scrollable) {
-        show();
-        scheduleHide(HIDE_DELAY_AFTER_VISIBLE_MS);
-      } else if (opacity.get() > 0) {
-        hideAt.set(-1);
-        opacity.set(0);
-        fadeInEndsAt.set(0);
-      }
+      show();
+      scheduleHide(HIDE_DELAY_AFTER_VISIBLE_MS);
     },
   );
 
@@ -402,7 +388,7 @@ const FastScrollbar = ({
 
   // Hidden thumbs must not swallow touches meant for list rows underneath.
   useAnimatedReaction(
-    () => opacity.get() > 0.05,
+    () => canFastScroll.get() && opacity.get() > 0.05,
     (visible, wasVisible) => {
       if (visible !== wasVisible) {
         runOnJS(setInteractive)(visible);
@@ -416,6 +402,9 @@ const FastScrollbar = ({
         .minDistance(0)
         .shouldCancelWhenOutside(false)
         .onBegin(() => {
+          if (!canFastScroll.get()) {
+            return;
+          }
           const y = thumbY.get();
           cancelAnimation(settleTimer);
           startY.set(y);
@@ -430,7 +419,10 @@ const FastScrollbar = ({
           show();
         })
         .onUpdate(event => {
-          const range = Math.max(1, trackHeight.get() - thumbLength.get());
+          if (!dragging.get() || !canFastScroll.get()) {
+            return;
+          }
+          const range = trackHeight.get() - THUMB_LENGTH;
           const y = Math.min(
             Math.max(startY.get() + event.translationY, 0),
             range,
@@ -484,6 +476,7 @@ const FastScrollbar = ({
     [
       abandonPendingScrub,
       awaitingItems,
+      canFastScroll,
       contentLength,
       correction,
       dragY,
@@ -503,7 +496,6 @@ const FastScrollbar = ({
       show,
       startSettleTimer,
       startY,
-      thumbLength,
       thumbY,
       total,
       trackHeight,
@@ -525,21 +517,16 @@ const FastScrollbar = ({
     [trackHeight, hideAt, opacity, fadeInEndsAt],
   );
 
-  // One opacity for track and thumb together, and the rarely changing thumb
-  // length kept apart from the per-frame translate so layout props are not
-  // part of the hot path.
   const containerStyle = useAnimatedStyle(() => ({ opacity: opacity.get() }));
-  const thumbSizeStyle = useAnimatedStyle(() => ({
-    height: thumbLength.get(),
-  }));
   const thumbPositionStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: thumbY.get() }],
   }));
 
-  const thumbColor = theme.onSurfaceVariant;
-  const pressedThumbColor = theme.primary;
+  const { primary, onSurface } = theme;
   const barStyle = useAnimatedStyle(() => ({
-    backgroundColor: dragging.get() ? pressedThumbColor : thumbColor,
+    backgroundColor: dragging.get()
+      ? interpolateColor(0.3, [0, 1], [primary, onSurface], 'RGB', { gamma: 1 })
+      : primary,
   }));
 
   return (
@@ -552,14 +539,10 @@ const FastScrollbar = ({
       ]}
       onLayout={onLayout}
     >
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.track, { backgroundColor: theme.outlineVariant }]}
-      />
       <GestureDetector gesture={gesture}>
         <Animated.View
           testID="fast-scrollbar-thumb"
-          style={[styles.thumbTouchArea, thumbSizeStyle, thumbPositionStyle]}
+          style={[styles.thumbTouchArea, thumbPositionStyle]}
         >
           <Animated.View style={[styles.thumb, barStyle]} />
         </Animated.View>
@@ -578,24 +561,18 @@ const styles = StyleSheet.create({
     end: 0,
     width: TOUCH_WIDTH,
   },
-  track: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    end: 0,
-    width: THICKNESS,
-    borderRadius: THICKNESS / 2,
-  },
   thumbTouchArea: {
     position: 'absolute',
     top: 0,
     end: 0,
     width: TOUCH_WIDTH,
+    height: THUMB_LENGTH,
     alignItems: 'flex-end',
   },
   thumb: {
     flex: 1,
     width: THICKNESS,
+    marginEnd: EDGE_MARGIN,
     borderRadius: THICKNESS / 2,
   },
 });

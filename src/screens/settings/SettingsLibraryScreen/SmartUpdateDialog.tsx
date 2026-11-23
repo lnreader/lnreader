@@ -3,11 +3,15 @@ import type { SmartUpdateFilters } from '@hooks/persisted/useSettings';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 
+export interface SmartUpdateDialogFilters extends SmartUpdateFilters {
+  skipNotDue: boolean;
+}
+
 interface SmartUpdateDialogProps {
-  filters: SmartUpdateFilters;
+  filters: SmartUpdateDialogFilters;
   visible: boolean;
   onCancel: () => void;
-  onChange: (filters: SmartUpdateFilters) => void;
+  onChange: (filters: SmartUpdateDialogFilters) => void;
   onSave: () => void;
 }
 
@@ -55,6 +59,17 @@ const SmartUpdateDialog = ({
             onChange({
               ...filters,
               skipCompleted: !filters.skipCompleted,
+            })
+          }
+          theme={theme}
+        />
+        <Checkbox
+          label={getString('generalSettingsScreen.smartUpdateSkipNotDue')}
+          status={filters.skipNotDue}
+          onPress={() =>
+            onChange({
+              ...filters,
+              skipNotDue: !filters.skipNotDue,
             })
           }
           theme={theme}

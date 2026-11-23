@@ -11,6 +11,7 @@ export {
   useChapterReaderSettings,
 } from './useSettings';
 export {
+  useFailedRepositoryCount,
   useFilteredAvailablePlugins,
   useFilteredInstalledPlugins,
   useInstalledPlugins,

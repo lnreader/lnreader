@@ -1,8 +1,9 @@
 # nitro-chapter-list
 
-A native Android `RecyclerView` chapter list for the novel screen. It replaces the
-React-rendered list so scrolling, flinging and fast-scrubbing through 10,000+
-chapters does no JS work per frame.
+Native Android `RecyclerView` chapter lists for Novel, the reader's chapter
+drawer, Downloads and Updates.
+Scrolling, flinging and fast-scrubbing through large lists do no JS work per
+frame once the rows are available.
 
 Android only.
 
@@ -11,15 +12,22 @@ Android only.
 The Kotlin code (`android/src/main/java/com/margelo/nitro/nitrochapterlist`) is
 split so another screen can reuse the list without the chapter parts:
 
-| Package   | What                                                   | Files                                                                                                                                                                                                                                                                                                                       |
-| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `core`    | Generic native list host, knows nothing about chapters | `ListHostView` (SwipeRefreshLayout > RecyclerView, header item, events, commands), `ListHostViewManager` (hosting the React header child), `ListRecyclerView` (exact metrics, jumps), `ListFastScroller` (fork of androidx `FastScroller`, Apache 2.0), `HeaderContainer`, `ScrollEventGate`, `RangeRequester`, `ListEvent` |
-| `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterRowFormatter` (row text), `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                               |
-| root      | Entry points that Nitro and RN look up by name         | `HybridChapterListStore` (the Nitro store), `ChapterListStoreRegistry`, `ChapterListViewManager` (`LNChapterListView`), `NitroChapterListPackage`                                                                                                                                                                           |
+| Package   | What                                                   | Files                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core`    | Generic native list host, knows nothing about chapters | `ListHostView` (SwipeRefreshLayout > RecyclerView, optional header item, events, commands), `ListHostViewManager` (hosting the React header child), `ListRecyclerView` (exact metrics, jumps), `ListMetrics` (the offset maths, with or without a header), `HighlightVisibility`, `ListFastScroller` (fork of androidx `FastScroller`, Apache 2.0), `HeaderContainer`, `ScrollEventGate`, `RangeRequester`, `ListEvent` |
+| `chapter` | The chapter list on top of `core`                      | `ChapterListView`, `ChapterListAdapter`, `ChapterRowView`, `IconView`, `ChapterRowFormatter` (row text), `ChapterListModel` (rows, selection, downloading), `ChapterListPerf`                                                                                                                                                                                                                                           |
+| root      | Entry points that Nitro and RN look up by name         | `HybridChapterListStore` (the Nitro store), `ChapterListStoreRegistry`, `ChapterListViewManager` (`LNChapterListView`), `NitroChapterListPackage`                                                                                                                                                                                                                                                                       |
 
-A new list type adds its own package with a `ListHostView` subclass, adapter,
-row view and Nitro store, plus a Fabric spec and view manager. It reuses `core`
-unchanged.
+Downloads and Updates share the `grouped` adapter and `LNGroupedChapterListView`.
+Their store receives a flat snapshot of section headings, novel groups and
+expanded chapter rows. RecyclerView recycles each chapter independently.
+Updates observes single-chapter groups and expanded groups through one database
+subscription. The grouped list also uses the core fast scroller, with exact
+offsets for its shorter headings and loading rows.
+
+The reader's chapter drawer reuses `LNChapterListView` with `variant="drawer"`;
+see [Drawer variant](#drawer-variant). The sections below describe the Novel
+screen's list.
 
 | Piece                                                      | Role                                                                                                                                                                                                 |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -45,12 +53,63 @@ gated (`ScrollEventGate`). They go out on every change only up to
 crosses one of `scrollEventThresholds` (the scroll-to-top FAB). Scrolling deeper
 than that does no JS work at all.
 
+## Drawer variant
+
+`src/screens/reader/components/ChapterDrawer` renders `<NativeChapterList
+variant="drawer">` with its own `useChapterListStore` (the reader has its own
+`NovelContextProvider`, so it can't share the Novel screen's store). It reuses
+the view, adapter, model and formatter; only the props below differ.
+
+- **Headerless.** The drawer renders no React child. `ListHostView.setHasHeader(false)`
+  and `ChapterListAdapter.headerCount = 0` drop the header item, so rows start at
+  adapter position 0 and `ListMetrics` leaves the header out of every offset.
+  `HeaderContainer` may keep a height from before; headerless, it never counts.
+  The Novel screen keeps its header item at position 0.
+- **Rows** (`ChapterRowView(drawer = true)`): the chapter name on one line and
+  the release date when there is one, 12dp horizontal and 10dp vertical padding
+  inside a 2dp vertical margin, 14/20 and 12/16 text. No bookmark, unread dot,
+  download button, long press or selection. Every row has the same height,
+  `ChapterRowView.drawerRowHeight` (62dp at the default font scale; it follows
+  the font scale), so scroll metrics stay exact. The date goes through
+  `ChapterRowFormatter.releaseLabel`, the same path as the Novel subtitle's
+  date, so `dateFormat` and `relativeTimestamps` apply and the parity fixture
+  covers it. Unread rows use `onSurface` / `onSurfaceVariant`, read ones
+  `outline`.
+- **Highlight.** `ChapterListStore.setHighlighted(id?)` marks the current
+  chapter: a `secondaryContainer` background with `onSecondaryContainer` text.
+  It's a payload bind (`ChapterListModel.Payload.HIGHLIGHT`), so only the old
+  and the new row rebind. A chapter that isn't loaded yet is highlighted when
+  its batch arrives.
+- **`initialPosition`.** The row put at the top before the first layout that
+  has rows (applied once, after a whole prop update, since it depends on the
+  variant). The drawer passes `max(0, currentIndex - 2)`. Later chapter changes
+  scroll with `scrollToIndex`.
+- **`onHighlightedVisibilityChange({ state: 'above' | 'visible' | 'below' })`.**
+  Computed natively (`HighlightVisibility`) from the first and last visible
+  rows against the highlighted row's position, after scrolls, layouts and
+  model changes, and sent only when the state changes. Nothing is sent while
+  the highlighted row isn't loaded. The drawer's footer buttons use it.
+- **No scroll events.** The drawer variant never sends `topScroll`, and
+  pull-to-refresh is off. Once mounted, the only JS → native traffic is store
+  syncs when the data changes, plus scroll commands from the footer buttons.
+- **Batching** is the same as the Novel screen's (`useChapterBatchRequests`):
+  the item count is the full filtered total and placeholders call
+  `onRequestRange`, answered with `loadUpToBatch`. Reading progress re-creates
+  `chapters` continuously while the reader is open; the store diff turns that
+  into `updateRows` for the changed rows, never a `reset`.
+- **Swipe-to-close.** `react-native-drawer-layout` closes through a
+  gesture-handler pan, which sees touches at the root regardless of which view
+  handles them. `ListRecyclerView` only claims a gesture (and calls
+  `requestDisallowInterceptTouchEvent`) once it starts a vertical drag, or
+  on a touch that stops a fling, the same as the ScrollView the drawer used
+  before. Its `notifyNativeGestureStarted` cancels JS responder touches, which
+  the pan isn't.
+
 ## Maintenance
 
-**Every change to how a chapter row looks or behaves on the novel screen is now
-Kotlin work** in `ChapterRowView.kt`, `ChapterListAdapter.kt` and
-`ChapterRowFormatter.kt`. `ChapterItem.tsx` still renders rows elsewhere in the
-app, so keep the two in step.
+Chapter rows share `ChapterRowView.kt`. The Novel screen binds them in
+`ChapterListAdapter.kt` and formats them with `ChapterRowFormatter.kt`.
+Downloads and Updates bind their rows in `GroupedChapterListAdapter.kt`.
 
 ### Row text
 
@@ -91,17 +150,16 @@ cd modules/nitro-chapter-list && npx nitrogen
 
 React Native codegen for `src/fabric` runs as part of the Android build.
 
-## Known differences from `ChapterItem`
+## Known differences from the former React rows
 
 - The subtitle is one string, so the reading-progress part uses the subtitle
-  colour. `ChapterItem` draws it in `outline`.
-- The gap between subtitle parts is the text `" •  "`. `ChapterItem` uses a 5dp
+  colour. The former React row drew it in `outline`.
+- The gap between subtitle parts is the text `" •  "`. The former React row used a 5dp
   margin before `"•  "`.
 - A chapter with no chapter number shows "Chapter " (empty number). JS shows
   i18n-js's missing-value placeholder.
-- The fast scroller is a 12dp pill thumb in the theme's primary colour, inset
-  8dp from the edge, with no track. The JS `FastScrollbar` (Plugins tab) keeps
-  its old look.
+- The fast scroller uses a 48dp by 12dp pill thumb in the theme's primary
+  colour, inset 8dp from the edge. The Plugins tab uses the same style.
 
 ## Timing logs
 
@@ -113,12 +171,14 @@ React Native codegen for `src/fabric` runs as part of the Android build.
 
 ## Tests
 
-- JS: `src/components/NativeChapterList/__tests__` (store sync) and
-  `src/screens/novel/components/__tests__/NovelScreenList.test.tsx`. The global
-  mock is in `test/mocks/nitroChapterList.js`.
-- Kotlin: `android/src/test`: `ChapterListModelTest` (store bookkeeping and
-  notification ranges), `ChapterRowFormatterParityTest`, `ScrollEventGateTest`
-  and `RangeRequesterTest`. Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
+- JS: `src/components/NativeChapterList/__tests__` (store sync),
+  `src/screens/novel/components/__tests__/NovelScreenList.test.tsx` and
+  `src/screens/reader/components/ChapterDrawer/__tests__/ChapterDrawer.test.tsx`.
+  The global mock is in `test/mocks/nitroChapterList.js`.
+- Kotlin: `android/src/test`: `ChapterListModelTest` (store bookkeeping,
+  notification ranges, highlight), `ChapterRowFormatterParityTest`,
+  `ListMetricsTest` (offsets with and without a header),
+  `HighlightVisibilityTest`, `ScrollEventGateTest` and `RangeRequesterTest`. Run it with `./gradlew :nitro-chapter-list:testDebugUnitTest`
   from `android/`.
 
 ## Device checklist
@@ -131,6 +191,9 @@ Use a release build and a novel with 5,000+ chapters:
 - Header: every button works, pressing a header button and then dragging cancels
   the press, and the header resizes when the summary expands.
 - Theme switch, RTL, large font scale, TalkBack.
+- Reader drawer: open it on a chapter deep in the list (no visible jump), fling
+  and scrub, change chapters with it open (animated scroll, highlight moves),
+  the footer buttons, swipe-to-close over the list.
 - Jank: `adb shell dumpsys gfxinfo <package> framestats`, compared against a
   build without this module.
 

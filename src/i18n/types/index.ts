@@ -64,6 +64,7 @@ export interface StringMap {
   'appearanceScreen.dateFormatDefault': 'string';
   'appearanceScreen.dynamicColors': 'string';
   'appearanceScreen.hideBackdrop': 'string';
+  'appearanceScreen.hideBackdropDescription': 'string';
   'appearanceScreen.lightTheme': 'string';
   'appearanceScreen.navbar': 'string';
   'appearanceScreen.novelInfo': 'string';
@@ -72,6 +73,7 @@ export interface StringMap {
   'appearanceScreen.relativeTimestampsDescription': 'string';
   'appearanceScreen.showHistoryInTheNav': 'string';
   'appearanceScreen.showUpdatesInTheNav': 'string';
+  'appearanceScreen.useFABDescription': 'string';
   'appearanceScreen.themeMode': 'string';
   'appearanceScreen.themeModeLight': 'string';
   'appearanceScreen.themeModeDark': 'string';
@@ -230,6 +232,8 @@ export interface StringMap {
   'browseScreen.plugins': 'string';
   'browseScreen.removeFromLibrary': 'string';
   'browseScreen.repositories': 'string';
+  'browseScreen.repositoriesUnreachable': 'string';
+  'browseScreen.repositoriesUnreachableCached': 'string';
   'browseScreen.searchbar': 'string';
   'browseScreen.searchResults': 'string';
   'browseScreen.selectNovel': 'string';
@@ -406,6 +410,7 @@ export interface StringMap {
   'generalSettingsScreen.refreshMetadataDescription': 'string';
   'generalSettingsScreen.smartUpdate': 'string';
   'generalSettingsScreen.smartUpdateSkipCompleted': 'string';
+  'generalSettingsScreen.smartUpdateSkipNotDue': 'string';
   'generalSettingsScreen.smartUpdateSkipUnstarted': 'string';
   'generalSettingsScreen.smartUpdateSkipWithUnread': 'string';
   'generalSettingsScreen.sortOrder': 'string';
@@ -449,6 +454,7 @@ export interface StringMap {
   'libraryScreen.bottomSheet.display.unread': 'string';
   'libraryScreen.bottomSheet.display.unreadBadges': 'string';
   'libraryScreen.bottomSheet.filters.completed': 'string';
+  'libraryScreen.bottomSheet.filters.customUpdateFrequency': 'string';
   'libraryScreen.bottomSheet.filters.downloaded': 'string';
   'libraryScreen.bottomSheet.filters.started': 'string';
   'libraryScreen.bottomSheet.filters.unread': 'string';
@@ -531,6 +537,12 @@ export interface StringMap {
   'novelScreen.edit.summary': 'string';
   'novelScreen.edit.title': 'string';
   'novelScreen.inLibaray': 'string';
+  'novelScreen.nextUpdate.customInterval': 'string';
+  'novelScreen.nextUpdate.default': 'string';
+  'novelScreen.nextUpdate.expected': 'string';
+  'novelScreen.nextUpdate.expectedNull': 'string';
+  'novelScreen.nextUpdate.notApplicable': 'string';
+  'novelScreen.nextUpdate.soon': 'string';
   'novelScreen.jumpToChapterModal.chapterName': 'string';
   'novelScreen.jumpToChapterModal.chapterNumber': 'string';
   'novelScreen.jumpToChapterModal.description': 'string';
@@ -583,6 +595,8 @@ export interface StringMap {
   'readerScreen.bottomSheet.padding': 'string';
   'readerScreen.bottomSheet.pageReader': 'string';
   'readerScreen.bottomSheet.pageReaderDescription': 'string';
+  'readerScreen.bottomSheet.infiniteScroll': 'string';
+  'readerScreen.bottomSheet.infiniteScrollDescription': 'string';
   'readerScreen.bottomSheet.invertVolumeButtons': 'string';
   'readerScreen.bottomSheet.invertVolumeButtonsDescription': 'string';
   'readerScreen.bottomSheet.disableReaderAnimations': 'string';
@@ -612,7 +626,9 @@ export interface StringMap {
   'readerScreen.drawer.scrollToTop': 'string';
   'readerScreen.emptyChapterMessage': 'string';
   'readerScreen.finished': 'string';
+  'readerScreen.loadingNextChapter': 'string';
   'readerScreen.nextChapter': 'string';
+  'readerScreen.nextChapterLoadFailed': 'string';
   'readerScreen.noNextChapter': 'string';
   'readerScreen.noPreviousChapter': 'string';
   'readerScreen.searchMinLength': 'string';
@@ -691,9 +707,20 @@ export interface StringMap {
   'updatesScreen.newChapters': 'string';
   'updatesScreen.novelsUpdated': 'string';
   'updatesScreen.searchbar': 'string';
+  'updatesScreen.skippedNotInReleasePeriod.one': 'string';
+  'updatesScreen.skippedNotInReleasePeriod.other': 'string';
   'updatesScreen.unableToGetNovel': 'string';
   'updatesScreen.updatesLower': 'string';
   'updatesScreen.updatingLibrary': 'string';
+  'updatesScreen.viewUpcoming': 'string';
+  'upcomingScreen.categoriesDescription': 'string';
+  'upcomingScreen.emptyView': 'string';
+  'upcomingScreen.nextMonth': 'string';
+  'upcomingScreen.previousMonth': 'string';
+  'upcomingScreen.relativeTime.one': 'string';
+  'upcomingScreen.relativeTime.other': 'string';
+  'upcomingScreen.title': 'string';
+  'upcomingScreen.today': 'string';
   'onboardingScreen.welcome': 'string';
   'onboardingScreen.pickATheme': 'string';
   'onboardingScreen.ePaperOptimizationsDescription': 'string';

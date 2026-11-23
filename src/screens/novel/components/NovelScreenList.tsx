@@ -1,6 +1,6 @@
 import * as React from 'react';
 import NovelInfoHeader from './Info/NovelInfoHeader';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -27,17 +27,22 @@ import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
+import {
+  NOVEL_APPBAR_HEIGHT,
+  NOVEL_FAB_HEIGHT,
+  NOVEL_FAB_MARGIN,
+} from '../novelLayout';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
 import {
   buildChapterRowFormat,
   NativeChapterList,
   type NativeChapterListRef,
+  useChapterBatchRequests,
   useChapterListStore,
 } from '@components/NativeChapterList';
 import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
 import { getChapter } from '@database/queries/ChapterQueries';
-import { showToast } from '@utils/showToast';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
@@ -207,32 +212,12 @@ const NovelScreenList = ({
     [novel.id, pageIndex, novelSettings],
   );
 
-  // The furthest batch the native list has needed for this chapter set.
-  // Reloads (e.g. getChapters on refresh) drop back to the first batch
-  // and cancel in-flight loads, so it's requested again until it's loaded.
-  const neededBatch = useRef({ key: chapterSetKey, batch: -1 });
-  // A failed batch read is reported; the native list asks for the batch again
-  // when its placeholders bind after a few seconds (scrolling back to them).
-  const loadBatch = useCallback(
-    (batch: number) =>
-      loadUpToBatch(batch).catch((error: unknown) =>
-        showToast(error instanceof Error ? error.message : String(error)),
-      ),
-    [loadUpToBatch],
-  );
-  const requestUpTo = useCallback(
-    (index: number) => {
-      const needed = neededBatch.current;
-      if (needed.key !== chapterSetKey) {
-        needed.key = chapterSetKey;
-        needed.batch = -1;
-      }
-      const batch = Math.floor(index / CHAPTER_BATCH_SIZE);
-      needed.batch = Math.max(needed.batch, batch);
-      loadBatch(batch);
-    },
-    [chapterSetKey, loadBatch],
-  );
+  const requestUpTo = useChapterBatchRequests({
+    chapterSetKey,
+    fetching,
+    loadedBatch: batchInformation.batch,
+    loadUpToBatch,
+  });
 
   const rowFormat = useMemo(
     () =>
@@ -258,18 +243,6 @@ const NovelScreenList = ({
     (_start: number, end: number) => requestUpTo(end),
     [requestUpTo],
   );
-
-  const loadedBatch = batchInformation.batch;
-  useEffect(() => {
-    const needed = neededBatch.current;
-    if (
-      !fetching &&
-      needed.key === chapterSetKey &&
-      needed.batch > loadedBatch
-    ) {
-      loadBatch(needed.batch);
-    }
-  }, [chapterSetKey, fetching, loadedBatch, loadBatch]);
 
   // --- Stable callbacks ---
 
@@ -425,6 +398,10 @@ const NovelScreenList = ({
   }, [hasMultiplePages, pages, pageIndex, openPage, openPageNavDrawer, theme]);
 
   const showSkeleton = fetching && listChapters.length === 0;
+  const showContinue =
+    hasNovel &&
+    useFabForContinueReading &&
+    Boolean(lastRead || firstUnreadChapter);
 
   const listHeader = useMemo(
     () => (
@@ -489,8 +466,11 @@ const NovelScreenList = ({
         refreshing={updating}
         refreshOffset={topInset + 32}
         contentPaddingBottom={100 + bottomInset}
-        fastScrollTopInset={topInset + 56}
-        fastScrollBottomInset={bottomInset + 16}
+        fastScrollEnabled={listChapters.length > 0}
+        fastScrollTopInset={topInset + NOVEL_APPBAR_HEIGHT}
+        fastScrollBottomInset={
+          bottomInset + NOVEL_FAB_MARGIN + (showContinue ? NOVEL_FAB_HEIGHT : 0)
+        }
         batchSize={CHAPTER_BATCH_SIZE}
         scrollEventMaxOffset={HEADER_FADE_END}
         scrollEventThresholds={scrollEventThresholds}
@@ -525,10 +505,7 @@ const NovelScreenList = ({
             loading={loading}
             onContinue={onFabPress}
             onScrollToTop={scrollToTop}
-            showContinue={
-              useFabForContinueReading &&
-              Boolean(lastRead || firstUnreadChapter)
-            }
+            showContinue={showContinue}
             showScrollToTop={showScrollToTop}
             theme={theme}
           />

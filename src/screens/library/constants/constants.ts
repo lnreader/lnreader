@@ -14,6 +14,7 @@ export enum LibraryFilter {
   Completed = "status LIKE 'Completed'",
   DownloadedOnly = 'AND chaptersDownloaded > 0',
   Started = 'lastReadAt IS NOT NULL',
+  CustomUpdateFrequency = 'fetchInterval < 0',
 }
 
 export const libraryFilterList = [
@@ -32,6 +33,10 @@ export const libraryFilterList = [
   {
     label: getString('libraryScreen.bottomSheet.filters.completed'),
     filter: LibraryFilter.Completed,
+  },
+  {
+    label: getString('libraryScreen.bottomSheet.filters.customUpdateFrequency'),
+    filter: LibraryFilter.CustomUpdateFrequency,
   },
 ];
 

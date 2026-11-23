@@ -5,6 +5,8 @@ import m0001 from './20260612232322_normal_saracen/migration.sql';
 import m0002 from './20260719143427_long_moondragon/migration.sql';
 import m0003 from './20260727081855_calm_chimera/migration.sql';
 import m0004 from './20260811071655_parched_human_torch/migration.sql';
+import m0005 from './20261122113536_ancient_darkhawk/migration.sql';
+import m0006 from './20261122122157_open_dexter_bennett/migration.sql';
 
 export default {
   migrations: {
@@ -13,5 +15,7 @@ export default {
     '20260719143427_long_moondragon': m0002,
     '20260727081855_calm_chimera': m0003,
     '20260811071655_parched_human_torch': m0004,
+    '20261122113536_ancient_darkhawk': m0005,
+    '20261122122157_open_dexter_bennett': m0006,
   },
 };

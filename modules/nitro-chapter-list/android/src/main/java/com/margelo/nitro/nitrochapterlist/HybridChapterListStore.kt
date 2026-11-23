@@ -49,6 +49,11 @@ class HybridChapterListStore : HybridChapterListStoreSpec() {
     mainHandler.post { model.setSelected(copy) }
   }
 
+  override fun setHighlighted(id: Double?) {
+    val chapterId = id?.toInt()
+    mainHandler.post { model.setHighlighted(chapterId) }
+  }
+
   override fun setDownloading(ids: DoubleArray) {
     val copy = IntArray(ids.size) { ids[it].toInt() }
     mainHandler.post { model.setDownloading(copy) }

@@ -5,6 +5,7 @@ import { EmptyView } from '@components/index';
 import NovelList, { NovelListRenderItem } from '@components/NovelList';
 import LibraryNovelItem from './LibraryNovelItem';
 
+import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
 import { History, NovelInfo } from '@database/types';
 
 import { getString } from '@i18n/translations';
@@ -37,6 +38,7 @@ export const LibraryView: React.FC<Props> = ({
   const theme = useTheme();
   const { selectedIdsSet, hasSelection, toggleSelection } =
     useSelectionContext();
+  const isLocalCategory = categoryId === BUILT_IN_CATEGORY_IDS.local;
 
   const onNavigate = useCallback(
     (item: NovelInfo) => {
@@ -102,9 +104,6 @@ export const LibraryView: React.FC<Props> = ({
   );
 
   const onRefresh = useCallback(() => {
-    if (categoryId === 2) {
-      return;
-    }
     backgroundTasks.enqueue({
       name: 'UPDATE_LIBRARY',
       data: { categoryId, categoryName },
@@ -118,7 +117,7 @@ export const LibraryView: React.FC<Props> = ({
         icon="Σ(ಠ_ಠ)"
         description={getString('libraryScreen.emptyCategory')}
         actions={[
-          categoryId !== 2
+          !isLocalCategory
             ? {
                 iconName: 'compass-outline',
                 title: getString('browse'),
@@ -132,19 +131,20 @@ export const LibraryView: React.FC<Props> = ({
         ]}
       />
     ),
-    [theme, categoryId, navigation, pickAndImport],
+    [theme, isLocalCategory, navigation, pickAndImport],
   );
 
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={false}
-        onRefresh={onRefresh}
-        colors={[theme.onPrimary]}
-        progressBackgroundColor={theme.primary}
-      />
-    ),
-    [onRefresh, theme.onPrimary, theme.primary],
+    () =>
+      isLocalCategory ? undefined : (
+        <RefreshControl
+          refreshing={false}
+          onRefresh={onRefresh}
+          colors={[theme.onPrimary]}
+          progressBackgroundColor={theme.primary}
+        />
+      ),
+    [isLocalCategory, onRefresh, theme.onPrimary, theme.primary],
   );
 
   return (

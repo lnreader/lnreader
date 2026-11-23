@@ -1,5 +1,8 @@
 import { useMMKVObject } from 'react-native-mmkv';
-import { GENRE_TAXONOMY, TaxonomyNode } from '@screens/GenreStatsScreen/taxonomy';
+import {
+  GENRE_TAXONOMY,
+  TaxonomyNode,
+} from '@screens/GenreStatsScreen/taxonomy';
 
 const TAXONOMY_KEY = 'GENRE_TAXONOMY';
 

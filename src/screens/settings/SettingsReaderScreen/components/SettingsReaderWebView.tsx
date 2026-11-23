@@ -95,6 +95,7 @@ const SettingsReaderWebView = ({
   );
   const webViewCSS = `
   <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     :root {
       --StatusBar-currentHeight: ${StatusBar.currentHeight};

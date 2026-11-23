@@ -1,6 +1,11 @@
 import { getString } from '@i18n/translations';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  View,
+} from 'react-native';
 import CodeInput from './Components/CodeInput';
 import { showToast } from '@utils/showToast';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
@@ -51,6 +56,12 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
     const [showNameModal, setShowNameModal] = React.useState(false);
 
     const editorScrollSink = React.useRef<((y: number) => void) | null>(null);
+    const handleScroll = React.useCallback(
+      (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+        editorScrollSink.current?.(e.nativeEvent.contentOffset.y);
+      },
+      [],
+    );
 
     const save = React.useCallback(() => {
       setError({ code: false });
@@ -160,9 +171,7 @@ const SnippetEditor = React.forwardRef<SnippetEditorHandle, SnippetEditorProps>(
             bottomOffset={100}
             nestedScrollEnabled
             scrollEventThrottle={16}
-            onScroll={e => {
-              editorScrollSink.current?.(e.nativeEvent.contentOffset.y);
-            }}
+            onScroll={handleScroll}
             contentContainerStyle={styles.flexGrow}
           >
             <CodeInput

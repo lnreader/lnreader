@@ -1,4 +1,5 @@
 import { NitroModules } from 'react-native-nitro-modules';
+import type { GroupedChapterListStore } from './specs/GroupedChapterListStore.nitro';
 import type { ChapterListStore } from './specs/ChapterListStore.nitro';
 // Re-exported under another name: RN's codegen Babel plugin reserves a
 // `Commands` export for files that call codegenNativeCommands.
@@ -16,6 +17,7 @@ export type {
   ChapterListColors,
   ChapterRowFormat,
   ChapterListScrollEvent,
+  HighlightedVisibilityChangeEvent,
   ChapterListStrings,
   NativeProps as ChapterListViewNativeProps,
   RequestRangeEvent,
@@ -24,3 +26,12 @@ export type {
   ChapterListStore,
   ChapterRow,
 } from './specs/ChapterListStore.nitro';
+
+export { default as GroupedChapterListViewNativeComponent } from './fabric/GroupedChapterListViewNativeComponent';
+export type { GroupedRowEvent } from './fabric/GroupedChapterListViewNativeComponent';
+export type { GroupedChapterRow } from './specs/GroupedChapterListStore.nitro';
+
+export const createGroupedChapterListStore = (): GroupedChapterListStore =>
+  NitroModules.createHybridObject<GroupedChapterListStore>(
+    'GroupedChapterListStore',
+  );

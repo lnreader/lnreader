@@ -1,5 +1,10 @@
 import React, { memo, useRef, useState } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  type TextInputInstance,
+} from 'react-native';
 
 import IconButtonV2 from '../IconButtonV2/IconButtonV2';
 import { ThemeColors } from '../../theme/types';
@@ -47,7 +52,7 @@ const Searchbar: React.FC<SearcbarProps> = ({
   onLeftIconPress,
   theme,
 }) => {
-  const searchbarRef = useRef<TextInput>(null);
+  const searchbarRef = useRef<TextInputInstance>(null);
   const focusSearchbar = () => searchbarRef.current?.focus();
   const [extraMenu, showExtraMenu] = useState(false);
 

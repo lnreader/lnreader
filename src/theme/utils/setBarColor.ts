@@ -1,20 +1,17 @@
 import { StatusBar } from 'react-native';
 import { ThemeColors } from '@theme/types';
 import Color, { ColorInstance } from 'color';
-import { SystemBars } from 'react-native-edge-to-edge';
+import { NavigationBar } from 'expo-navigation-bar';
 
-export const setNavigationBarTransparent = (isDark: boolean) => {
-  SystemBars.setStyle({ navigationBar: isDark ? 'light' : 'dark' });
+export const setNavigationBarStyle = (isDark: boolean) => {
+  NavigationBar.setStyle(isDark ? 'light' : 'dark');
 };
 
-export const setStatusBarColor = (color: ThemeColors | ColorInstance) => {
-  if (color instanceof Color) {
-    // fullscreen reader mode
-    StatusBar.setBarStyle(color.isDark() ? 'light-content' : 'dark-content');
-    StatusBar.setBackgroundColor(color.hexa());
-  } else {
-    StatusBar.setTranslucent(true);
-    StatusBar.setBackgroundColor('transparent');
-    StatusBar.setBarStyle(color.isDark ? 'light-content' : 'dark-content');
-  }
+/**
+ * The app is edge-to-edge, so the status bar is always transparent and only
+ * its icon style follows the colour drawn behind it.
+ */
+export const setStatusBarStyle = (color: ThemeColors | ColorInstance) => {
+  const isDark = color instanceof Color ? color.isDark() : color.isDark;
+  StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 };

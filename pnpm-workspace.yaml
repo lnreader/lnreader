@@ -1,24 +1,10 @@
 allowBuilds:
+  '@parcel/watcher': false
   better-sqlite3: true
   esbuild: true
   msgpackr-extract: true
   protobufjs: true
   unrs-resolver: true
-
-minimumReleaseAgeExclude:
-  - '@expo/cli@56.1.14'
-  - '@expo/fingerprint@0.19.4'
-  - '@expo/inline-modules@0.0.11'
-  - '@expo/prebuild-config@56.0.15'
-  - '@expo/router-server@56.0.13'
-  - expo-asset@56.0.16
-  - expo-constants@56.0.17
-  - expo-modules-autolinking@56.0.15
-  - expo-modules-core@56.0.15
-  - expo-modules-jsi@56.0.8
-  - expo-server@56.0.5
-  - expo@56.0.9
-  - expo-clipboard@56.0.4
 
 nodeLinker: hoisted
 
@@ -29,6 +15,3 @@ onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
   - protobufjs
-
-patchedDependencies:
-  '@legendapp/list@3.3.3': patches/@legendapp__list@3.3.3.patch

@@ -4,7 +4,7 @@ import { LegendList } from '@legendapp/list/react-native';
 
 const renderItem = ({ item }: { item: string }) => <Text>{item}</Text>;
 
-describe('LegendList render lifecycle patch', () => {
+describe('LegendList render lifecycle', () => {
   it('does not update its container layer while rendering fresh data', () => {
     const consoleError = jest
       .spyOn(console, 'error')

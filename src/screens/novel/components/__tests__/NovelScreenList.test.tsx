@@ -208,7 +208,9 @@ const createStore = (overrides: Record<string, unknown> = {}) => {
     chapters: [baseChapter],
     deleteChapter: jest.fn(),
     fetching: false,
-    firstUnreadChapter: { ...baseChapter, id: 2 },
+    firstUnreadChapter: { ...baseChapter, id: 2 } as
+      | typeof baseChapter
+      | undefined,
     loading: false,
     novelSettings: { filter: [], showChapterTitles: false },
     pages: ['1', '2'],
@@ -489,6 +491,36 @@ describe('NovelScreenList native chapter list', () => {
     jest.clearAllMocks();
     mockDownloadingChapterIds = new Set<number>();
     mockDownloadingNovelIds = new Set<number>();
+  });
+
+  it('keeps fast scrolling off while the first chapter batch is loading', () => {
+    const store = createStore({
+      chapters: [],
+      fetching: true,
+      firstUnreadChapter: undefined,
+      batchInformation: { batch: 0, total: 3, totalChapters: 2500 },
+    });
+    const { list } = renderWithStore(store);
+
+    expect(list.props.fastScrollEnabled).toBe(false);
+  });
+
+  it('reserves extra space for the scrollbar when the reading button is visible', () => {
+    const store = createStore();
+    const { list, rerender } = renderWithStore(store);
+
+    expect(screen.getByTestId('continue-reading-fab')).toBeTruthy();
+    expect(list.props.fastScrollEnabled).toBe(true);
+    expect(list.props.fastScrollTopInset).toBe(64);
+    expect(list.props.fastScrollBottomInset).toBe(72);
+
+    store.state.firstUnreadChapter = undefined;
+    rerender([]);
+
+    expect(screen.queryByTestId('continue-reading-fab')).toBeNull();
+    expect(
+      screen.getByTestId('native-chapter-list').props.fastScrollBottomInset,
+    ).toBe(16);
   });
 
   it('sizes the native list to the total chapter count and sends loaded rows', () => {

@@ -1,0 +1,1 @@
+CREATE INDEX `NovelUpcomingIndex` ON `Novel` (`inLibrary`,`nextUpdate`);

@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  LayoutRectangle,
   Pressable,
+  ScrollView,
+  StyleProp,
   StyleSheet,
   Text,
   View,
+  ViewStyle,
   useWindowDimensions,
+  type HostInstance,
 } from 'react-native';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@hooks/persisted';
 import {
@@ -22,8 +28,14 @@ import { Button, Menu } from '@components/index';
 import { Checkbox } from '@components/Checkbox/Checkbox';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useBoolean } from '@hooks';
-import { TextInput, overlay } from 'react-native-paper';
-import { addMultiTextValues, getValueFor } from './filterUtils';
+import { useKeyboardHeight } from '@hooks/common/useKeyboardHeight';
+import { Portal, TextInput, overlay } from 'react-native-paper';
+import {
+  addMultiTextValues,
+  getEstimatedSuggestionsHeight,
+  getSuggestionPlacement,
+  getValueFor,
+} from './filterUtils';
 import { getString } from '@i18n/translations';
 import { ThemeColors } from '@theme/types';
 import Switch from '@components/Switch/Switch';
@@ -34,40 +46,119 @@ const insertOrRemoveIntoArray = (array: string[], val: string): string[] =>
 
 type SelectedFilters = FilterToValues<Filters>;
 
-interface FilterSuggestionListProps {
-  theme: ThemeColors;
-  suggestions: FilterOption[];
+interface FilterSuggestionOverlayProps {
+  children: React.ReactNode;
   onSelect: (option: FilterOption) => void;
+  style?: StyleProp<ViewStyle>;
+  suggestions: FilterOption[];
+  theme: ThemeColors;
+  visible: boolean;
 }
 
-const FilterSuggestionList: React.FC<FilterSuggestionListProps> = ({
-  theme,
-  suggestions,
+/**
+ * Anchors a suggestion list to a text field and renders it in a portal, so the
+ * list is not painted behind the FlatList cells that follow the field.
+ */
+const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
+  children,
   onSelect,
-}) => (
-  <View
-    style={[
-      styles.suggestionsContainer,
-      {
-        backgroundColor: theme.surfaceVariant,
-        borderColor: theme.outlineVariant,
+  style,
+  suggestions,
+  theme,
+  visible,
+}) => {
+  const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const anchorRef = useRef<HostInstance>(null);
+
+  const [anchor, setAnchor] = useState<LayoutRectangle | null>(null);
+
+  const measureAnchor = useCallback(() => {
+    anchorRef.current?.measureInWindow((x, y, width, height) => {
+      if (width > 0 && height > 0) {
+        setAnchor({ x, y, width, height });
+      }
+    });
+  }, []);
+
+  // The list is shown after the field has settled, but the anchor can still
+  // move (sheet snap, keyboard, chip row) while the list is open.
+  useEffect(() => {
+    if (visible) {
+      measureAnchor();
+    }
+  }, [measureAnchor, visible, keyboardHeight, screenHeight, screenWidth]);
+
+  const placement =
+    anchor &&
+    getSuggestionPlacement({
+      anchor,
+      contentHeight: getEstimatedSuggestionsHeight(suggestions.length),
+      // The window does not shrink when the keyboard opens, so clamp the list
+      // to the area above the IME instead of the navigation bar.
+      insets: {
+        ...insets,
+        bottom: Math.max(insets.bottom, keyboardHeight),
       },
-    ]}
-  >
-    {suggestions.map(option => (
-      <Pressable
-        key={option.value}
-        onPress={() => onSelect(option)}
-        android_ripple={{ color: theme.rippleColor }}
-        style={styles.suggestionItem}
+      screen: { height: screenHeight, width: screenWidth },
+    });
+
+  return (
+    <>
+      <View
+        collapsable={false}
+        onLayout={visible ? measureAnchor : undefined}
+        ref={anchorRef}
+        style={style}
       >
-        <Text numberOfLines={1} style={{ color: theme.onSurfaceVariant }}>
-          {option.label}
-        </Text>
-      </Pressable>
-    ))}
-  </View>
-);
+        {children}
+      </View>
+      {visible && placement ? (
+        <Portal>
+          <View pointerEvents="box-none" style={styles.suggestionOverlayHost}>
+            <View
+              accessibilityRole="menu"
+              style={[
+                styles.suggestionOverlay,
+                {
+                  backgroundColor: theme.surfaceVariant,
+                  borderColor: theme.outlineVariant,
+                  left: placement.left,
+                  top: placement.top,
+                  width: placement.width,
+                },
+              ]}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+                style={{ maxHeight: placement.maxHeight }}
+              >
+                {suggestions.map(option => (
+                  <Pressable
+                    key={option.value}
+                    accessibilityRole="menuitem"
+                    onPress={() => onSelect(option)}
+                    android_ripple={{ color: theme.rippleColor }}
+                    style={styles.suggestionItem}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={{ color: theme.onSurfaceVariant }}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Portal>
+      ) : null}
+    </>
+  );
+};
 
 interface MultiTextFilterProps {
   label: string;
@@ -76,6 +167,7 @@ interface MultiTextFilterProps {
   pluginId: string;
   filterKey: string;
   autocomplete?: boolean;
+  registerDismiss: (dismiss: () => void) => () => void;
   theme: ThemeColors;
 }
 
@@ -86,6 +178,7 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
   pluginId,
   filterKey,
   autocomplete,
+  registerDismiss,
   theme,
 }) => {
   const [input, setInput] = useState('');
@@ -104,6 +197,11 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
     filterKey,
     autocomplete ? input : '',
     option => commit(option.value),
+  );
+
+  useEffect(
+    () => registerDismiss(field.dismiss),
+    [field.dismiss, registerDismiss],
   );
 
   return (
@@ -152,7 +250,12 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
           ))}
         </View>
       ) : null}
-      <View style={styles.multiTextField}>
+      <FilterSuggestionOverlay
+        visible={field.isVisible}
+        suggestions={field.suggestions}
+        onSelect={field.select}
+        theme={theme}
+      >
         <TextInput
           testID="multiTextInput"
           style={styles.textInput}
@@ -197,14 +300,7 @@ const MultiTextFilter: React.FC<MultiTextFilterProps> = ({
             />
           }
         />
-        {field.isVisible && (
-          <FilterSuggestionList
-            theme={theme}
-            suggestions={field.suggestions}
-            onSelect={field.select}
-          />
-        )}
-      </View>
+      </FilterSuggestionOverlay>
     </View>
   );
 };
@@ -214,6 +310,7 @@ interface FilterItemProps {
   filter: Filters[string];
   filterKey: keyof Filters;
   pluginId: string;
+  registerDismiss: (dismiss: () => void) => () => void;
   selectedFilters: SelectedFilters;
   setSelectedFilters: React.Dispatch<React.SetStateAction<SelectedFilters>>;
 }
@@ -223,6 +320,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
   filter,
   filterKey,
   pluginId,
+  registerDismiss,
   selectedFilters,
   setSelectedFilters,
 }) => {
@@ -251,6 +349,11 @@ const FilterItem: React.FC<FilterItemProps> = ({
     },
   );
 
+  useEffect(
+    () => registerDismiss(field.dismiss),
+    [field.dismiss, registerDismiss],
+  );
+
   if (filter.type === FilterTypes.TextInput) {
     const value = getValueFor<(typeof filter)['type']>(
       filter,
@@ -259,7 +362,13 @@ const FilterItem: React.FC<FilterItemProps> = ({
 
     return (
       <View style={styles.textContainer}>
-        <View style={{ width: screenWidth - 48, position: 'relative' }}>
+        <FilterSuggestionOverlay
+          visible={field.isVisible}
+          suggestions={field.suggestions}
+          onSelect={field.select}
+          style={{ width: screenWidth - 48 }}
+          theme={theme}
+        >
           <TextInput
             style={styles.flex}
             mode="outlined"
@@ -291,14 +400,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
               ? { value, onFocus: field.onFocus, onBlur: field.onBlur }
               : { defaultValue: value })}
           />
-          {field.isVisible && (
-            <FilterSuggestionList
-              theme={theme}
-              suggestions={field.suggestions}
-              onSelect={field.select}
-            />
-          )}
-        </View>
+        </FilterSuggestionOverlay>
       </View>
     );
   }
@@ -549,6 +651,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
         pluginId={pluginId}
         filterKey={filterKey}
         autocomplete={filter.autocomplete}
+        registerDismiss={registerDismiss}
         theme={theme}
         onChange={next =>
           setSelectedFilters(prevState => ({
@@ -583,8 +686,25 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
   // Reset remounts the list so fields with local drafts (e.g. MultiText) clear.
   const [resetVersion, setResetVersion] = useState(0);
 
+  // Suggestions are portaled above the sheet, so they must close whenever the
+  // field that anchors them moves or the sheet goes away.
+  const dismissers = useRef(new Set<() => void>());
+  const registerDismiss = useCallback((dismiss: () => void) => {
+    dismissers.current.add(dismiss);
+    return () => {
+      dismissers.current.delete(dismiss);
+    };
+  }, []);
+  const dismissSuggestions = useCallback(() => {
+    dismissers.current.forEach(dismiss => dismiss());
+  }, []);
+
   return (
-    <BottomSheet bottomSheetRef={filterSheetRef} snapPoints={[400, 600]}>
+    <BottomSheet
+      bottomSheetRef={filterSheetRef}
+      onChange={dismissSuggestions}
+      snapPoints={[400, 600]}
+    >
       <View style={styles.flex}>
         <View
           style={[
@@ -618,12 +738,14 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             `filter${item[0]}-${resetVersion}`
           }
           keyboardShouldPersistTaps="handled"
+          onScrollBeginDrag={dismissSuggestions}
           renderItem={({ item }: { item: [string, Filters[string]] }) => (
             <FilterItem
               theme={theme}
               filter={item[1]}
               filterKey={item[0]}
               pluginId={pluginId}
+              registerDismiss={registerDismiss}
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
             />
@@ -688,21 +810,21 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingHorizontal: 24,
   },
+  suggestionOverlayHost: StyleSheet.absoluteFill,
+  suggestionOverlay: {
+    borderRadius: 4,
+    borderWidth: 1,
+    elevation: 4,
+    overflow: 'hidden',
+    position: 'absolute',
+    shadowColor: '#000',
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
   suggestionItem: {
     paddingHorizontal: 12,
     paddingVertical: 10,
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    zIndex: 1,
-    elevation: 4,
-    borderBottomLeftRadius: 4,
-    borderBottomRightRadius: 4,
-    borderWidth: 1,
-    borderTopWidth: 0,
   },
   switchContainer: {
     alignItems: 'center',
@@ -729,7 +851,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingHorizontal: 24,
   },
-  multiTextField: { position: 'relative' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   chip: {
     alignItems: 'center',

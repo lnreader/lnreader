@@ -60,11 +60,7 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
 
   const colorScheme = Appearance.getColorScheme() ?? 'light';
   const actualThemeMode: Exclude<ThemeMode, 'system'> =
-    themeMode !== 'system'
-      ? themeMode
-      : colorScheme === 'unspecified'
-      ? 'light'
-      : colorScheme;
+    themeMode !== 'system' ? themeMode : colorScheme;
   const availableThemes = useMemo(() => {
     const themes = actualThemeMode === 'light' ? lightThemes : darkThemes;
     if (!isDynamicThemeAvailable) {
@@ -310,12 +306,14 @@ const AppearanceSettings = ({ navigation }: AppearanceSettingsScreenProps) => {
           </List.SubHeader>
           <SettingSwitch
             label={getString('appearanceScreen.hideBackdrop')}
+            description={getString('appearanceScreen.hideBackdropDescription')}
             value={hideBackdrop}
             onPress={() => setAppSettings({ hideBackdrop: !hideBackdrop })}
             theme={theme}
           />
           <SettingSwitch
             label={getString('advancedSettingsScreen.useFAB')}
+            description={getString('appearanceScreen.useFABDescription')}
             value={useFabForContinueReading}
             onPress={() =>
               setAppSettings({

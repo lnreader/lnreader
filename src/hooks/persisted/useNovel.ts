@@ -1,4 +1,4 @@
-import NativeFile from '@modules/native-file'
+import NativeFile from '@modules/native-file';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
 import {

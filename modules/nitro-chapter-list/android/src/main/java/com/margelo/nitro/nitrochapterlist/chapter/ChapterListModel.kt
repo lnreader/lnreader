@@ -3,7 +3,7 @@ package com.margelo.nitro.nitrochapterlist.chapter
 import com.margelo.nitro.nitrochapterlist.ChapterRow
 
 /**
- * Position-indexed chapter rows plus selection and downloading state.
+ * Position-indexed chapter rows plus selection, downloading and highlighted state.
  *
  * Main-thread only: [HybridChapterListStore] copies JS input and applies it here
  * on the main thread, so adapters can read without locking. Every mutation
@@ -21,6 +21,7 @@ class ChapterListModel {
   object Payload {
     val SELECTION = Any()
     val DOWNLOADING = Any()
+    val HIGHLIGHT = Any()
   }
 
   var count: Int = 0
@@ -34,6 +35,10 @@ class ChapterListModel {
   private val positions = HashMap<Int, Int>()
   private var selected = HashSet<Int>()
   private var downloading = HashSet<Int>()
+
+  /** The highlighted chapter (the reader's current chapter), or null. */
+  var highlightedId: Int? = null
+    private set
   private val listeners = ArrayList<Listener>()
 
   fun addListener(listener: Listener) {
@@ -51,6 +56,25 @@ class ChapterListModel {
   fun isSelected(id: Int): Boolean = selected.contains(id)
 
   fun isDownloading(id: Int): Boolean = downloading.contains(id)
+
+  fun isHighlighted(id: Int): Boolean = highlightedId == id
+
+  /** Position of the highlighted chapter, or -1 when none or not loaded. */
+  val highlightedPosition: Int
+    get() = highlightedId?.let { positionOf(it) } ?: -1
+
+  /** Only the previous and the new highlighted rows rebind ([Payload.HIGHLIGHT]). */
+  fun setHighlighted(id: Int?) {
+    if (id == highlightedId) return
+    val previous = highlightedPosition
+    highlightedId = id
+    val next = highlightedPosition
+    val changed = IntArray(2)
+    var changedCount = 0
+    if (previous >= 0) changed[changedCount++] = previous
+    if (next >= 0) changed[changedCount++] = next
+    dispatchChanged(changed, changedCount, Payload.HIGHLIGHT)
+  }
 
   fun reset(totalCount: Int) {
     count = totalCount.coerceAtLeast(0)

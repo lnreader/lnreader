@@ -8,10 +8,10 @@ import {
 } from '../persisted';
 import Color from 'color';
 import {
-  setNavigationBarTransparent,
-  setStatusBarColor,
+  setNavigationBarStyle,
+  setStatusBarStyle,
 } from '@theme/utils/setBarColor';
-import { SystemBars } from 'react-native-edge-to-edge';
+import { NavigationBar } from 'expo-navigation-bar';
 
 const useFullscreenMode = () => {
   const { addListener } = useNavigation();
@@ -22,16 +22,16 @@ const useFullscreenMode = () => {
   const setImmersiveMode = useCallback(() => {
     if (fullScreenMode) {
       StatusBar.setHidden(true);
-      SystemBars.setHidden(true);
+      NavigationBar.setHidden(true);
     } else {
-      setStatusBarColor(Color(backgroundColor));
-      setNavigationBarTransparent(Color(backgroundColor).isDark());
+      setStatusBarStyle(Color(backgroundColor));
+      setNavigationBarStyle(Color(backgroundColor).isDark());
     }
   }, [backgroundColor, fullScreenMode]);
 
   const showStatusAndNavBar = useCallback(() => {
     StatusBar.setHidden(false);
-    SystemBars.setHidden(false);
+    NavigationBar.setHidden(false);
 
     if (fullScreenMode) {
       /**
@@ -39,8 +39,8 @@ const useFullscreenMode = () => {
        * But in hexa, ##xxxxxx00 could be another color
        */
 
-      setStatusBarColor(theme);
-      setNavigationBarTransparent(theme.isDark);
+      setStatusBarStyle(theme);
+      setNavigationBarStyle(theme.isDark);
     }
   }, [fullScreenMode, theme]);
 
@@ -48,16 +48,16 @@ const useFullscreenMode = () => {
     setImmersiveMode();
     return () => {
       StatusBar.setHidden(false);
-      SystemBars.setHidden(false);
+      NavigationBar.setHidden(false);
     };
   }, [setImmersiveMode]);
 
   useEffect(() => {
     const unsubscribe = addListener('beforeRemove', () => {
       StatusBar.setHidden(false);
-      SystemBars.setHidden(false);
-      setStatusBarColor(theme);
-      setNavigationBarTransparent(theme.isDark);
+      NavigationBar.setHidden(false);
+      setStatusBarStyle(theme);
+      setNavigationBarStyle(theme.isDark);
     });
 
     return unsubscribe;

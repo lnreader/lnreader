@@ -61,7 +61,7 @@ const NovelList: React.FC<NovelListProps> = props => {
   const layout = useNovelCoverLayoutValue();
   const { displayMode, numColumns } = layout;
   const isListView = displayMode === DisplayModes.List;
-  const { data, inSource, ...listProps } = props;
+  const { data, inSource, recycleItems = false, ...listProps } = props;
 
   const extendedNovelList = useMemo(
     () => extendNovelList(data, inSource, numColumns),
@@ -81,6 +81,7 @@ const NovelList: React.FC<NovelListProps> = props => {
         estimatedItemSize={layout.coverHeight}
         {...listProps}
         data={extendedNovelList}
+        recycleItems={recycleItems}
       />
     </NovelCoverLayoutProvider>
   );

@@ -223,7 +223,7 @@ const BrowseALScreen = ({ navigation }: BrowseALScreenProps) => {
               <View style={styles.paddingVertical}>
                 <ActivityIndicator color={theme.primary} />
               </View>
-            ) : null
+            ) : undefined
           }
         />
       )}

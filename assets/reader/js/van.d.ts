@@ -23,6 +23,7 @@ export type PropValueOrDerived =
 
 export type Props = Record<string, PropValueOrDerived> & {
   class?: PropValueOrDerived;
+  is?: string;
 };
 
 export type PropsWithKnownKeys<ElementType> = Partial<{
@@ -56,13 +57,16 @@ declare function state<T>(initVal: T): State<T>;
 export interface Van {
   readonly state: typeof state;
   readonly derive: <T>(f: () => T) => State<T>;
-  readonly add: (dom: Element, ...children: readonly ChildDom[]) => Element;
+  readonly add: <T extends Element | DocumentFragment>(
+    dom: T,
+    ...children: readonly ChildDom[]
+  ) => T;
   readonly tags: Tags &
     ((namespaceURI: string) => Readonly<Record<string, TagFunc<Element>>>);
   readonly hydrate: <T extends Node>(
     dom: T,
     f: (dom: T) => T | null | undefined,
-  ) => T;
+  ) => void;
 }
 
 declare global {

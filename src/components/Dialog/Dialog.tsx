@@ -12,6 +12,7 @@ import {
   ViewProps,
   ViewStyle,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Color from 'color';
 
@@ -63,7 +64,10 @@ const DialogRoot = ({
       transparent
       visible={visible}
     >
-      <View style={[styles.modal, { backgroundColor: backdropColor }]}>
+      {/* A native modal is its own root, outside the app's gesture root. */}
+      <GestureHandlerRootView
+        style={[styles.modal, { backgroundColor: backdropColor }]}
+      >
         <Pressable
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
@@ -99,7 +103,7 @@ const DialogRoot = ({
             </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
-      </View>
+      </GestureHandlerRootView>
     </NativeModal>
   );
 };

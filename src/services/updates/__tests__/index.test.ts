@@ -7,6 +7,8 @@ import { getMMKVObject } from '@utils/mmkv/mmkv';
 import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
 import { updateNovel } from '../LibraryUpdateQueries';
 import { updateLibrary } from '../index';
+import { showToast } from '@utils/showToast';
+import { startOfLocalDay, toLocalDay } from '../releaseSchedule';
 
 jest.mock('@database/queries/LibraryQueries', () => ({
   getLibraryNovelsForGlobalUpdate: jest.fn(),
@@ -177,6 +179,42 @@ describe('updateLibrary', () => {
       },
     );
   });
+
+  it('skips novels not expected to release by tomorrow and reports how many', async () => {
+    const today = toLocalDay(new Date());
+    const dueOn = (days: number) => startOfLocalDay(today + days).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryNovels.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Overdue'), nextUpdate: dueOn(-3) },
+      { ...novel(2, 'source-a', 'Tomorrow'), nextUpdate: dueOn(1) },
+      { ...novel(3, 'source-b', 'Next week'), nextUpdate: dueOn(7) },
+      { ...novel(4, 'source-c', 'Unpredicted'), nextUpdate: null },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel.mock.calls.map(([, , id]) => id).sort()).toEqual([
+      1, 2, 4,
+    ]);
+    expect(showToast).toHaveBeenCalledWith(
+      '1 novel skipped because no release was expected today',
+    );
+  });
+
+  it('checks every novel in a category update even when prediction is on', async () => {
+    const farAway = startOfLocalDay(toLocalDay(new Date()) + 20).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryWithCategory.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Later'), nextUpdate: farAway },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({ categoryId: 2 }, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel).toHaveBeenCalledTimes(1);
+  });
+
   it('chunks each download task immediately without changing its identity', async () => {
     mockedGetMMKVObject.mockReturnValue({ downloadNewChapters: true });
     const novelId = 7;

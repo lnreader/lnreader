@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, StatusBar, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import * as Clipboard from 'expo-clipboard';
 import DeviceInfo from 'react-native-device-info';
@@ -89,7 +89,6 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     <SafeAreaView
       style={[styles.mainCtn, { backgroundColor: theme.background }]}
     >
-      <StatusBar translucent={true} backgroundColor="transparent" />
       <View style={styles.errorInfoCtn}>
         <Text style={[styles.errorTitle, { color: theme.onSurface }]}>
           {fallbackGetString(

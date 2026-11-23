@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import type { LegendListRenderItemProps } from '@legendapp/list/react-native';
 import { AnimatedLegendList } from '@legendapp/list/reanimated';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { Button, EmptyView, IconButtonV2 } from '@components';
 import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
 import {
+  useFailedRepositoryCount,
   useFilteredAvailablePlugins,
   useInstalledPlugins,
   usePluginActions,
@@ -28,6 +30,7 @@ import {
   PluginEntry,
   PluginStatus,
 } from '../utils/buildBrowseEntries';
+import PluginsSkeletonLoading from '../loadingAnimation/PluginsSkeletonLoading';
 
 interface PluginsTabProps {
   navigation: BrowseScreenProps['navigation'];
@@ -145,11 +148,12 @@ const PluginRow = memo(
   },
 );
 
-export const PluginsTab = memo(
+const PluginsTabContent = memo(
   ({ navigation, searchText, theme }: PluginsTabProps) => {
     const installedPlugins = useInstalledPlugins();
     const availablePlugins = useFilteredAvailablePlugins();
     const { installPlugin, refreshPlugins, updatePlugin } = usePluginActions();
+    const failedRepositoryCount = useFailedRepositoryCount();
     const [refreshing, setRefreshing] = useState(false);
     const [pendingPluginIds, setPendingPluginIds] = useState<Set<string>>(
       () => new Set(),
@@ -312,7 +316,10 @@ export const PluginsTab = memo(
     const refresh = useCallback(async () => {
       setRefreshing(true);
       try {
-        await refreshPlugins();
+        const { failedRepositoryCount: failedCount } = await refreshPlugins();
+        if (failedCount) {
+          showToast(getString('browseScreen.repositoriesUnreachable'));
+        }
       } catch (error) {
         showToast(error instanceof Error ? error.message : String(error));
       } finally {
@@ -322,6 +329,31 @@ export const PluginsTab = memo(
 
     return (
       <View style={styles.listContainer}>
+        {failedRepositoryCount > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            disabled={refreshing}
+            onPress={refresh}
+            style={[
+              styles.repositoryNotice,
+              { backgroundColor: theme.surfaceVariant },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="cloud-off-outline"
+              size={18}
+              color={theme.onSurfaceVariant}
+            />
+            <Text
+              style={[
+                styles.repositoryNoticeText,
+                { color: theme.onSurfaceVariant },
+              ]}
+            >
+              {getString('browseScreen.repositoriesUnreachableCached')}
+            </Text>
+          </Pressable>
+        ) : null}
         <AnimatedLegendList
           data={entries}
           estimatedItemSize={64}
@@ -373,6 +405,24 @@ export const PluginsTab = memo(
   },
 );
 
+// The tab view mounts this scene synchronously on the tab press, so building
+// the plugin list would freeze the screen before anything is painted. Paint a
+// skeleton first and mount the list on the next frame.
+export const PluginsTab = memo((props: PluginsTabProps) => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return ready ? (
+    <PluginsTabContent {...props} />
+  ) : (
+    <PluginsSkeletonLoading theme={props.theme} />
+  );
+});
+
 const styles = StyleSheet.create({
   description: {
     fontSize: 12,
@@ -383,6 +433,18 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+  },
+  repositoryNotice: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  repositoryNoticeText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
   },
   details: {
     flex: 1,
