@@ -90,7 +90,6 @@ export default function useChapter(
   const [error, setError] = useState<string>();
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
-  const { setImmersiveMode, showStatusAndNavBar } = useFullscreenMode();
 
   const { onUserInteraction, isTTSReadingRef } = useTimeTracking(
     chapter.id,
@@ -110,6 +109,8 @@ export default function useChapter(
   const adjacentChapterRef = useRef<AdjacentChapters>(NO_ADJACENT_CHAPTERS);
   const excludedScanlatorsRef = useRef(novelSettings?.excludedScanlators);
   const hiddenRef = useRef(hidden);
+  const { setImmersiveMode, showStatusAndNavBar } =
+    useFullscreenMode(hiddenRef);
   /** Increments on every load so a superseded load can never publish state. */
   const loadIdRef = useRef(0);
   /** Increments on every adjacent lookup so only the latest one publishes. */
