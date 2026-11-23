@@ -107,6 +107,7 @@ export default function useChapter(
     inactivityTimeoutMs,
     timeTrackingEnabled,
     increaseTimeSpent,
+    isFocused,
   );
 
   /**
