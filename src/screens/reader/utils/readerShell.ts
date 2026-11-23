@@ -10,6 +10,9 @@ export type ChapterPayload = {
   strings: {
     finished: string;
     noNextChapter: string;
+    loadingNextChapter: string;
+    nextChapterLoadFailed: string;
+    retry: string;
     removeText: string;
     replaceText: string;
   };
@@ -33,6 +36,9 @@ export const buildChapterPayload = ({
   strings: {
     finished: `${getString('readerScreen.finished')}: ${chapter.name.trim()}`,
     noNextChapter: getString('readerScreen.noNextChapter'),
+    loadingNextChapter: getString('readerScreen.loadingNextChapter'),
+    nextChapterLoadFailed: getString('readerScreen.nextChapterLoadFailed'),
+    retry: getString('common.retry'),
     removeText: getString('common.remove'),
     replaceText: getString('customCodeSettings.replace'),
   },

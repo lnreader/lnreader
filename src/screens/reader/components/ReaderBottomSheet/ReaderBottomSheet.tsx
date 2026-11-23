@@ -147,6 +147,14 @@ const navigationPreferences: GeneralPreference[] = [
   },
 ];
 
+const scrollModePreferences: GeneralPreference[] = [
+  {
+    key: 'infiniteScroll',
+    label: 'infiniteScroll',
+    description: 'infiniteScrollDescription',
+  },
+];
+
 const pagedModePreferences: GeneralPreference[] = [
   {
     key: 'pageReaderInvertVolumeButtons',
@@ -204,8 +212,10 @@ const GeneralTab: React.FC = React.memo(() => {
           return (
             <React.Fragment key={item.key}>
               {renderPreference(item)}
-              {settings.pageReader &&
-                pagedModePreferences.map(renderPreference)}
+              {(settings.pageReader
+                ? pagedModePreferences
+                : scrollModePreferences
+              ).map(renderPreference)}
             </React.Fragment>
           );
         }

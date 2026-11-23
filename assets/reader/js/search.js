@@ -328,8 +328,15 @@ window.readerSearch = new (function () {
     }
 
     requestAnimationFrame(() => {
-      match.scrollIntoView({
-        block: 'center',
+      const center =
+        window.scrollY +
+        match.getBoundingClientRect().top -
+        (reader.layoutHeight - match.offsetHeight) / 2;
+      // Centering a match near the start of an appended chapter would put the
+      // top of the screen in the previous one, which then becomes current and
+      // clears the search.
+      window.scrollTo({
+        top: Math.max(center, reader.chapterTop),
         behavior: reader.scrollBehavior(),
       });
     });

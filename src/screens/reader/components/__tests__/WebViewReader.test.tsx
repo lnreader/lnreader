@@ -160,10 +160,15 @@ const setContext = (chapter: ChapterInfo, chapterText: string) => {
   mockContext = {
     novel,
     chapter,
+    documentChapter: chapter,
     chapterText,
     webViewRef,
     navigateChapter: jest.fn(),
     saveProgress: mockSaveProgress,
+    activateChapter: jest.fn(),
+    loadChapterAfter: jest.fn(),
+    getRebuildTarget: () => undefined,
+    dropChapters: jest.fn(),
     nextChapter: undefined,
     prevChapter: undefined,
     onUserInteraction: jest.fn(),
@@ -250,15 +255,11 @@ describe('WebViewReader chapter changes', () => {
     expect(injected()[0]).toContain('setPlaybackState');
   });
 
-  it('drops progress saved for the chapter that was replaced', () => {
-    const view = renderLoadedReader();
-    goToChapter(view, makeChapter(2), '<p>Second chapter</p>');
+  it('saves progress to the chapter the page names', () => {
+    renderLoadedReader();
 
     post({ type: 'save', data: 90, chapterId: 1 });
-    expect(mockSaveProgress).not.toHaveBeenCalled();
-
-    post({ type: 'save', data: 20, chapterId: 2 });
-    expect(mockSaveProgress).toHaveBeenCalledWith(20);
+    expect(mockSaveProgress).toHaveBeenCalledWith(90, 1);
   });
 
   it('reloads the page for plugins that ship custom.js', () => {
@@ -319,5 +320,51 @@ describe('WebViewReader chapter changes', () => {
 
     expect(mockWebView.props!.source).not.toBe(source);
     expect(mockWebView.props!.source.html).toContain('Second chapter');
+  });
+
+  it('keeps the page when infinite scrolling makes another chapter current', () => {
+    const view = renderLoadedReader();
+    const source = mockWebView.props!.source;
+
+    mockContext = { ...mockContext, chapter: makeChapter(2) };
+    view.rerender(ui());
+
+    expect(mockWebView.props!.source).toBe(source);
+    expect(injected().some(s => s.includes('setChapter('))).toBe(false);
+  });
+
+  it('replaces the page when returning to its chapter after infinite scrolling moved on', () => {
+    const view = renderLoadedReader();
+
+    mockContext = { ...mockContext, chapter: makeChapter(2) };
+    view.rerender(ui());
+    goToChapter(view, makeChapter(1), '<p>First chapter</p>');
+
+    expect(injected().some(s => s.includes('setChapter('))).toBe(true);
+  });
+
+  it('rebuilds the page from the chapter being read at its live progress', () => {
+    const view = renderLoadedReader();
+    const source = mockWebView.props!.source;
+    const active = { ...makeChapter(3), progress: 40 };
+
+    // Plugins that ship custom.js make any chapter change load a new page.
+    mockInstalledPlugins.push({ id: 'demo', customJS: 'https://x/c.js' });
+    goToChapter(view, makeChapter(2), '<p>Second chapter</p>');
+    mockContext = {
+      ...mockContext,
+      getRebuildTarget: () => ({
+        chapter: active,
+        html: '<p>Third chapter</p>',
+      }),
+    };
+    post({ type: 'chapter-swap-failed', chapterId: 2 });
+    view.rerender(ui());
+
+    const rebuilt = mockWebView.props!.source;
+    expect(rebuilt).not.toBe(source);
+    expect(rebuilt.html).toContain('Third chapter');
+    expect(rebuilt.html).toContain('"progress":40');
+    expect(rebuilt.html).not.toContain('Second chapter');
   });
 });

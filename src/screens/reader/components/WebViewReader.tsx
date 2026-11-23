@@ -63,10 +63,10 @@ import {
 export type WebViewPostEvent = {
   type: string;
   data?: unknown;
+  chapterId?: number;
   autoStartTTS?: boolean;
   index?: number;
   total?: number;
-  chapterId?: number;
 };
 
 type WebViewReaderProps = {
@@ -118,6 +118,7 @@ const toNativeTtsSettings = (
  * rebuilding the HTML would reload the WebView and lose the reading position.
  */
 const buildAdjacentChapterScript = (
+  chapterName?: string,
   nextChapter?: ChapterInfo,
   prevChapter?: ChapterInfo,
 ) => `
@@ -125,6 +126,12 @@ const buildAdjacentChapterScript = (
     nextChapter,
     prevChapter,
     strings: {
+      // Infinite scrolling changes the chapter being read without rebuilding
+      // the document the original string was baked into.
+      ...(chapterName && {
+        finished:
+          getString('readerScreen.finished') + ': ' + chapterName.trim(),
+      }),
       nextChapter: getString('readerScreen.nextChapter', {
         name: nextChapter?.name,
       }),
@@ -190,9 +197,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const {
     novel,
     chapter,
+    documentChapter,
     chapterText: html,
     navigateChapter,
     saveProgress,
+    activateChapter,
+    loadChapterAfter,
+    getRebuildTarget,
+    dropChapters,
     nextChapter,
     prevChapter,
     webViewRef,
@@ -206,7 +218,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const chapterReaderSettings = useMemo(
     () => readReaderSettings(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapter.id],
+    [documentChapter.id],
   );
 
   const plugin = getPlugin(novel?.pluginId);
@@ -214,7 +226,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     () => hasPluginCustomJS(plugin?.id),
     // Re-checked per chapter, as a plugin update can add or drop its script.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugin?.id, chapter.id],
+    [plugin?.id, documentChapter.id],
   );
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
@@ -423,12 +435,16 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   }, [chapter.id, runTtsCommand]);
 
   useEffect(() => {
-    const script = buildAdjacentChapterScript(nextChapter, prevChapter);
+    const script = buildAdjacentChapterScript(
+      chapter.name,
+      nextChapter,
+      prevChapter,
+    );
     // Kept for onLoadEnd: an update that lands before the document is ready is
     // dropped by the WebView, so it is replayed once the page has loaded.
     adjacentChapterScriptRef.current = script;
     webViewRef.current?.injectJavaScript(script);
-  }, [nextChapter, prevChapter, webViewRef]);
+  }, [chapter.name, nextChapter, prevChapter, webViewRef]);
 
   useEffect(() => {
     const mmkvListener = MMKVStorage.addOnValueChangedListener(key => {
@@ -500,7 +516,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     () =>
       buildShellKey({
         plugin,
-        isDownloaded: chapter.isDownloaded,
+        isDownloaded: documentChapter.isDownloaded,
         pluginCustomJS,
         readerDir,
         theme,
@@ -508,7 +524,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         customCSS,
       }),
     [
-      chapter.isDownloaded,
+      documentChapter.isDownloaded,
       customCSS,
       customJS,
       plugin,
@@ -534,7 +550,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   const [shell, setShell] = useState(() =>
     createShell(
       buildChapterPayload({
-        chapter,
+        chapter: documentChapter,
         novel,
         html: processedHtml,
         nextChapterScreenVisible: false,
@@ -544,7 +560,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   /** Set once the page has loaded; injected scripts are dropped before that. */
   const shellReadyRef = useRef(false);
   const displayedChapterRef = useRef({
-    chapterId: chapter.id,
+    chapter: documentChapter,
     html: processedHtml,
   });
   const pendingSwapRef = useRef<{
@@ -571,8 +587,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
    */
   useEffect(() => {
     const displayed = displayedChapterRef.current;
+    // Compared by identity: returning to the chapter infinite scrolling moved
+    // on from must still replace the chapters appended below it.
     const chapterChanged =
-      displayed.chapterId !== chapter.id || displayed.html !== processedHtml;
+      displayed.chapter !== documentChapter || displayed.html !== processedHtml;
     const swapFailed = failedSwaps !== handledFailedSwapsRef.current;
     handledFailedSwapsRef.current = failedSwaps;
 
@@ -590,25 +608,44 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
       return;
     }
 
-    const payload = buildChapterPayload({
-      chapter,
+    const swapPayload = buildChapterPayload({
+      chapter: documentChapter,
       novel,
       html: processedHtml,
       nextChapterScreenVisible: nextChapterScreenVisible.current,
     });
     displayedChapterRef.current = {
-      chapterId: chapter.id,
+      chapter: documentChapter,
       html: processedHtml,
     };
     clearPendingSwap();
 
     if (reload) {
+      // Infinite scrolling may have carried the reader past the chapter the
+      // page was built for, so the new page starts from the chapter being
+      // read, at the progress reached so far.
+      const rebuildTarget = getRebuildTarget();
+      const payload =
+        rebuildTarget && rebuildTarget.chapter.id !== documentChapter.id
+          ? buildChapterPayload({
+              chapter: rebuildTarget.chapter,
+              novel,
+              html: applyTextModifications(
+                rebuildTarget.html,
+                readerSettingsRef.current.removeText,
+                readerSettingsRef.current.replaceText,
+              ),
+              nextChapterScreenVisible: nextChapterScreenVisible.current,
+            })
+          : rebuildTarget
+          ? { ...swapPayload, chapter: rebuildTarget.chapter }
+          : swapPayload;
       shellReadyRef.current = false;
       setShell(createShell(payload));
       return;
     }
 
-    const chapterId = chapter.id;
+    const chapterId = documentChapter.id;
     pendingSwapRef.current = {
       chapterId,
       timeout: setTimeout(() => {
@@ -618,11 +655,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         }
       }, CHAPTER_SWAP_TIMEOUT_MS),
     };
-    webViewRef.current?.injectJavaScript(buildSetChapterScript(payload));
+    webViewRef.current?.injectJavaScript(buildSetChapterScript(swapPayload));
     // `createShell` only reads values that are dependencies already.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    chapter,
+    documentChapter,
+    getRebuildTarget,
     clearPendingSwap,
     failedSwaps,
     novel,
@@ -752,13 +790,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               ${
                 shell.customJS
                   ? `<script id="ln-custom-js">
-              function fn(){
-                let html = document.querySelector('#LNReader-chapter').innerHTML;
+              function fn(lnTarget = document.querySelector('#LNReader-chapter')){
+                let html = lnTarget.innerHTML;
                 ${shell.customJS}
-                document.querySelector('#LNReader-chapter').innerHTML = html;
+                lnTarget.innerHTML = html;
               }
               window.lnApplyCustomJS = fn;
-              document.addEventListener('DOMContentLoaded', fn);
+              document.addEventListener('DOMContentLoaded', () => fn());
               </script>`
                   : ''
               }
@@ -806,6 +844,43 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
         })();
       `);
       }, 300);
+    }
+  };
+
+  const sourceRef = useRef(source);
+  useEffect(() => {
+    sourceRef.current = source;
+  }, [source]);
+
+  /**
+   * Answers infinite scrolling's request for the chapter after `chapterId`.
+   * The answer is dropped if the document was rebuilt in the meantime.
+   */
+  const appendChapterAfter = async (chapterId: number) => {
+    const requestSource = sourceRef.current;
+    const inject = (call: string, ...args: unknown[]) => {
+      if (sourceRef.current === requestSource) {
+        webViewRef.current?.injectJavaScript(
+          `window.continuousScroll?.${call}(${args
+            .map(arg => JSON.stringify(arg))
+            .join(', ')}); true;`,
+        );
+      }
+    };
+    try {
+      const next = await loadChapterAfter(chapterId);
+      if (!next) {
+        inject('end', chapterId);
+        return;
+      }
+      const { removeText, replaceText } = readerSettingsRef.current;
+      inject('append', {
+        afterChapterId: chapterId,
+        chapter: next.chapter,
+        html: applyTextModifications(next.html, removeText, replaceText),
+      });
+    } catch (e) {
+      inject('fail', chapterId, e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -921,22 +996,36 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               navigateChapter('PREV');
               break;
             case 'save':
-              // A save can still arrive from the chapter that was just
-              // replaced; it must not land on the current one.
-              if (
-                event.chapterId !== undefined &&
-                event.chapterId !== chapter.id
-              ) {
-                break;
-              }
+              // Saved to the chapter the page names, which infinite scrolling
+              // makes different from the current one; ids from a replaced
+              // document are unknown to `saveProgress` and ignored.
               if (event.data && typeof event.data === 'number') {
-                saveProgress(event.data);
+                saveProgress(event.data, event.chapterId);
+              }
+              break;
+            case 'chapter-change':
+              if (typeof event.chapterId === 'number') {
+                activateChapter(event.chapterId);
+              }
+              break;
+            case 'continuous-next':
+              if (typeof event.chapterId === 'number') {
+                void appendChapterAfter(event.chapterId);
+              }
+              break;
+            case 'chapters-dropped':
+              if (Array.isArray(event.data)) {
+                dropChapters(
+                  event.data.filter(
+                    (id): id is number => typeof id === 'number',
+                  ),
+                );
               }
               break;
             case 'chapter-shown':
               if (
-                event.chapterId !== chapter.id ||
-                pendingSwapRef.current?.chapterId !== chapter.id
+                event.chapterId !== documentChapter.id ||
+                pendingSwapRef.current?.chapterId !== documentChapter.id
               ) {
                 break;
               }
@@ -945,7 +1034,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               afterChapterShown();
               break;
             case 'chapter-swap-failed':
-              if (event.chapterId === chapter.id) {
+              if (event.chapterId === documentChapter.id) {
                 clearPendingSwap();
                 setFailedSwaps(count => count + 1);
               }

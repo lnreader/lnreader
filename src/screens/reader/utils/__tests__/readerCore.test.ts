@@ -239,6 +239,35 @@ describe('reader.setChapter', () => {
     page.close();
   });
 
+  it('drops the chapters infinite scrolling appended', async () => {
+    const page = await loadReader();
+    const { continuousScroll, document } = page.window as ReaderWindow & {
+      continuousScroll: any;
+    };
+    continuousScroll.status.val = 'loading';
+    continuousScroll.append({
+      afterChapterId: 1,
+      chapter: makeChapter(2, 0),
+      html: '<p>Appended chapter</p>',
+    });
+    expect(page.window.reader.segments).toHaveLength(2);
+    continuousScroll.status.val = 'loading';
+
+    await page.setChapter(5, 0, '<p>Fifth chapter</p>');
+
+    expect(
+      document.querySelectorAll(
+        '.LNReader-chapter-continued, .continuous-chapter-divider',
+      ),
+    ).toHaveLength(0);
+    expect(page.window.reader.segments).toHaveLength(1);
+    expect(page.window.reader.segments[0].chapter.id).toBe(5);
+    expect(page.window.reader.chapterElement).toBe(page.chapterElement());
+    expect(page.chapterElement().innerHTML).toBe('<p>Fifth chapter</p>');
+    expect(continuousScroll.status.val).toBe('idle');
+    page.close();
+  });
+
   it('never saves progress of the replaced chapter under the new one', async () => {
     const page = await loadReader({ pageReader: true });
     page.window.reader.setAdjacentChapters({
