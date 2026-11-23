@@ -39,6 +39,7 @@ import NativeFile from '@modules/native-file';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 import useTimeTracking from './useTimeTracking';
 import { useEventListener } from 'expo';
+import { useIsFocused } from '@react-navigation/native';
 
 type AdjacentChapters = [
   nextChapter: ChapterInfo | undefined,
@@ -47,6 +48,13 @@ type AdjacentChapters = [
 
 /** Stable identity so resetting the adjacent chapters never renders twice. */
 const NO_ADJACENT_CHAPTERS: AdjacentChapters = [undefined, undefined];
+
+/**
+ * The reader that turned the volume buttons on. A novel link leaves the reader
+ * mounted under a second one, so a reader that goes away must not turn them
+ * off for the reader that is in front again.
+ */
+let volumeButtonsOwner: object | null = null;
 
 export default function useChapter(
   webViewRef: RefObject<WebView | null>,
@@ -90,6 +98,8 @@ export default function useChapter(
   const [error, setError] = useState<string>();
   const { tracker } = useTracker();
   const { trackedNovel, updateAllTrackedNovels } = useTrackedNovel(novel.id);
+  // False while a linked novel covers the reader.
+  const isFocused = useIsFocused();
 
   const { onUserInteraction, isTTSReadingRef } = useTimeTracking(
     chapter.id,
@@ -147,6 +157,10 @@ export default function useChapter(
   const volumeDownDelta = pageReaderInvertVolumeButtons ? -1 : 1;
 
   const turnPage = (pageDelta: number, scrollDirection: number) => {
+    // Every mounted reader gets the key events.
+    if (!isFocused) {
+      return;
+    }
     webViewRef.current?.injectJavaScript(`(()=>{
       const isPaged = ${Boolean(pageReader)};
       if (isPaged && window.pageReader) {
@@ -175,9 +189,19 @@ export default function useChapter(
   });
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+    const owner = {};
+    volumeButtonsOwner = owner;
     NativeVolumeButtonListener.setActive(useVolumeButtons);
-    return () => NativeVolumeButtonListener.setActive(false);
-  }, [useVolumeButtons]);
+    return () => {
+      if (volumeButtonsOwner === owner) {
+        volumeButtonsOwner = null;
+        NativeVolumeButtonListener.setActive(false);
+      }
+    };
+  }, [isFocused, useVolumeButtons]);
 
   /**
    * Reads the chapter from local storage, falling back to the plugin when it
@@ -443,7 +467,7 @@ export default function useChapter(
 
   const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (!autoScroll) {
+    if (!autoScroll || !isFocused) {
       return undefined;
     }
 
@@ -462,7 +486,7 @@ export default function useChapter(
         scrollInterval.current = null;
       }
     };
-  }, [autoScroll, autoScrollInterval, autoScrollOffset, webViewRef]);
+  }, [autoScroll, autoScrollInterval, autoScrollOffset, isFocused, webViewRef]);
 
   const updateTracker = useCallback(
     (chapterName: string) => {
