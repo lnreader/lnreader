@@ -811,11 +811,10 @@ let positionRestored = false;
 let chapterGeneration = 0;
 
 function calculatePages(behavior = 'instant') {
-  reader.refresh();
-
   if (reader.generalSettings.val.pageReader) {
     pageReader.repaginate(reader.chapter.progress / 100);
   } else {
+    reader.refresh();
     restoredScrollTop =
       (reader.chapterHeight * reader.chapter.progress) / 100 -
       reader.layoutHeight;
@@ -980,15 +979,36 @@ function showChapter(
   document.dispatchEvent(
     new CustomEvent('ln:chapter-change', { detail: { chapter, novel } }),
   );
-  // Measuring forces a synchronous layout, so the position is restored before
-  // the new markup is ever painted at the previous chapter's scroll offset.
-  positionRestored = true;
-  calculatePages();
-  document.fonts.ready.then(correctReadingPosition);
-  requestAnimationFrame(() => {
-    if (generation === chapterGeneration) {
-      reader.post({ type: 'chapter-shown', chapterId: chapter.id });
+  const finishSwap = () => {
+    if (generation !== chapterGeneration) {
+      return;
     }
+    try {
+      positionRestored = true;
+      calculatePages();
+      document.fonts.ready.then(correctReadingPosition);
+      requestAnimationFrame(() => {
+        if (generation === chapterGeneration) {
+          reader.post({ type: 'chapter-shown', chapterId: chapter.id });
+        }
+      });
+    } catch (e) {
+      reportChapterSwapFailure(chapter.id, e);
+    }
+  };
+  if (reader.generalSettings.val.pageReader) {
+    finishSwap();
+  } else {
+    // Measure after VanJS flushes its chapter UI updates, still before paint.
+    queueMicrotask(finishSwap);
+  }
+}
+
+function reportChapterSwapFailure(chapterId, error) {
+  reader.post({
+    type: 'chapter-swap-failed',
+    chapterId,
+    error: String(error?.message ?? error),
   });
 }
 
@@ -997,11 +1017,7 @@ reader.setChapter = payload => {
   try {
     showChapter(payload);
   } catch (e) {
-    reader.post({
-      type: 'chapter-swap-failed',
-      chapterId: payload?.chapter?.id,
-      error: String(e?.message ?? e),
-    });
+    reportChapterSwapFailure(payload?.chapter?.id, e);
   }
 };
 

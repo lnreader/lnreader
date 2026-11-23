@@ -53,7 +53,12 @@ const settle = (window: ReaderWindow, ms = 40) =>
 const loadReader = async ({
   pageReader = false,
   customJS = '',
-}: { pageReader?: boolean; customJS?: string } = {}) => {
+  bionicReading = false,
+}: {
+  pageReader?: boolean;
+  customJS?: string;
+  bionicReading?: boolean;
+} = {}) => {
   const posted: Posted[] = [];
   const scrollCalls: number[] = [];
   const listenerCount = { value: 0 };
@@ -74,7 +79,11 @@ const loadReader = async ({
         var initialPageReaderConfig = { nextChapterScreenVisible: false };
         var initialReaderConfig = ${JSON.stringify({
           readerSettings: { theme: '#000', fontFamily: '', tts: {} },
-          chapterGeneralSettings: { pageReader, TTSEnable: true },
+          chapterGeneralSettings: {
+            pageReader,
+            bionicReading,
+            TTSEnable: true,
+          },
           novel: { id: 1, name: 'Novel' },
           chapter,
           batteryLevel: 1,
@@ -191,6 +200,21 @@ const restoredTop = (progress: number) =>
   (CHAPTER_HEIGHT * progress) / 100 - VIEWPORT.height;
 
 describe('reader.setChapter', () => {
+  it('bolds word prefixes without changing HTML tags, attributes, comments, or entities', async () => {
+    const page = await loadReader({ bionicReading: true });
+
+    await page.setChapter(
+      2,
+      0,
+      '<p title="chapter title">First &amp; second <!-- keep comment --> <em>third</em> &#169; fourth</p>',
+    );
+
+    expect(page.chapterElement().innerHTML).toBe(
+      '<p title="chapter title"><b>Fir</b>st &amp; <b>seco</b>nd <!-- keep comment --> <em><b>thi</b>rd</em> © <b>four</b>th</p>',
+    );
+    page.close();
+  });
+
   it('replaces the chapter and restores its reading position', async () => {
     const page = await loadReader();
     expect(page.scrollCalls.at(-1)).toBe(restoredTop(50));
@@ -319,6 +343,28 @@ describe('reader.setChapter', () => {
     expect(page.posted).toContainEqual(
       expect.objectContaining({ type: 'chapter-swap-failed' }),
     );
+    page.close();
+  });
+
+  it('reports a failed scroll restore without marking the chapter shown', async () => {
+    const page = await loadReader();
+    const refresh = page.window.reader.refresh;
+    page.window.reader.refresh = () => {
+      page.window.reader.refresh = refresh;
+      throw new Error('Layout failed');
+    };
+
+    await page.setChapter(2, 30, '<p>Second chapter</p>');
+
+    expect(page.posted).toContainEqual({
+      type: 'chapter-swap-failed',
+      chapterId: 2,
+      error: 'Layout failed',
+    });
+    expect(page.posted).not.toContainEqual({
+      type: 'chapter-shown',
+      chapterId: 2,
+    });
     page.close();
   });
 

@@ -244,7 +244,10 @@ describe('WebViewReader chapter changes', () => {
     expect(injected()).toEqual([]);
 
     post({ type: 'chapter-shown', chapterId: 3 });
-    expect(injected().join('\n')).toContain('setPlaybackState');
+    expect(mockInjectJavaScript).toHaveBeenCalledTimes(1);
+    expect(injected()[0]).toContain('reader.batteryLevel.val');
+    expect(injected()[0]).toContain('setAdjacentChapters');
+    expect(injected()[0]).toContain('setPlaybackState');
   });
 
   it('drops progress saved for the chapter that was replaced', () => {

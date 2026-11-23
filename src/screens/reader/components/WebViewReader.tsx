@@ -772,13 +772,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
    * whether the page was just loaded or the chapter swapped into it.
    */
   const afterChapterShown = () => {
-    webViewRef.current?.injectJavaScript(
-      `if (window.reader && window.reader.batteryLevel) {
-      window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
-    }`,
-    );
-    webViewRef.current?.injectJavaScript(adjacentChapterScriptRef.current);
+    const searchText = searchTextRef.current.trim();
     webViewRef.current?.injectJavaScript(`
+      if (window.reader?.batteryLevel) {
+        window.reader.batteryLevel.val = ${lastKnownBatteryLevel};
+      }
+      ${adjacentChapterScriptRef.current}
       window.tts?.setPlaybackState?.(${JSON.stringify(ttsState)});
       window.tts?.setSleepTimerState?.(${JSON.stringify(sleepTimer)});
       ${
@@ -786,15 +785,13 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           ? `window.tts?.setActiveIndex?.(${ttsProgress.index});`
           : ''
       }
+      ${
+        searchText
+          ? `window.readerSearch?.search(${JSON.stringify(searchText)});`
+          : ''
+      }
       true;
     `);
-
-    const searchText = searchTextRef.current.trim();
-    if (searchText) {
-      webViewRef.current?.injectJavaScript(
-        `window.readerSearch?.search(${JSON.stringify(searchText)}); true;`,
-      );
-    }
 
     if (autoStartTTSRef.current) {
       autoStartTTSRef.current = false;
