@@ -71,16 +71,3 @@ export const reconcileInstalledPluginUpdates = (
     };
   });
 };
-
-/** Fresh plugins win; previous entries are kept only for ids not fetched. */
-export const mergeAvailablePlugins = (
-  previousPlugins: readonly PluginItem[],
-  fetchedPlugins: readonly PluginItem[],
-) => {
-  const fetchedIds = new Set(fetchedPlugins.map(plugin => plugin.id));
-
-  return [
-    ...fetchedPlugins,
-    ...previousPlugins.filter(plugin => !fetchedIds.has(plugin.id)),
-  ];
-};

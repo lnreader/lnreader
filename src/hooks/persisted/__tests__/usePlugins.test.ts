@@ -4,7 +4,6 @@ import {
   filterAvailablePlugins,
   filterInstalledPlugins,
   getLastUsedPluginId,
-  mergeAvailablePlugins,
   reconcileInstalledPluginUpdates,
 } from '../pluginSelectors';
 
@@ -58,14 +57,6 @@ describe('plugin selectors', () => {
     expect(getLastUsedPluginId(englishPlugin.id)).toBe(englishPlugin.id);
     expect(getLastUsedPluginId(englishPlugin)).toBe(englishPlugin.id);
     expect(getLastUsedPluginId(undefined)).toBeUndefined();
-  });
-
-  it('keeps previously listed plugins that a refresh could not fetch', () => {
-    const updatedEnglish = { ...englishPlugin, version: '2.0.0' };
-
-    expect(
-      mergeAvailablePlugins([englishPlugin, spanishPlugin], [updatedEnglish]),
-    ).toEqual([updatedEnglish, spanishPlugin]);
   });
 
   it('clears stale update flags when an installed plugin is no longer available', () => {

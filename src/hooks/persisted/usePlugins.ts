@@ -17,7 +17,6 @@ import {
   filterAvailablePlugins,
   filterInstalledPlugins,
   getLastUsedPluginId,
-  mergeAvailablePlugins,
   reconcileInstalledPluginUpdates,
 } from './pluginSelectors';
 
@@ -147,19 +146,12 @@ export const usePluginActions = () => {
         failedRepositories,
         complete,
       } = await fetchPlugins();
-      const hasFailures = failedRepositories.length > 0;
-      // A failed repository with no cached listing would otherwise wipe its
-      // plugins from the list, so keep what we showed last time.
-      const availablePlugins = complete
-        ? fetchedPlugins
-        : mergeAvailablePlugins(
-            readPluginList(AVAILABLE_PLUGINS),
-            fetchedPlugins,
-          );
       const updatedInstalledPlugins = reconcileInstalledPluginUpdates(
         installedPlugins,
-        availablePlugins,
-        clearUnavailableUpdates && !hasFailures,
+        fetchedPlugins,
+        // An unreachable repository with no cached listing may still provide
+        // these updates, so only clear them once every repository is accounted for.
+        clearUnavailableUpdates && complete,
       );
 
       if (
@@ -169,7 +161,7 @@ export const usePluginActions = () => {
       ) {
         setMMKVObject(INSTALLED_PLUGINS, updatedInstalledPlugins);
       }
-      setMMKVObject(AVAILABLE_PLUGINS, availablePlugins);
+      setMMKVObject(AVAILABLE_PLUGINS, fetchedPlugins);
       MMKVStorage.set(FAILED_REPOSITORY_COUNT, failedRepositories.length);
 
       return { failedRepositoryCount: failedRepositories.length };
