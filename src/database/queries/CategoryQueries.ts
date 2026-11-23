@@ -21,19 +21,20 @@ const normalizeCategoryName = (categoryName: string): string => {
 };
 
 /**
- * Get all categories with their novel IDs using Drizzle ORM
+ * Query for all categories with their novel IDs. Selectable as a live query:
+ * the aggregate is aliased so raw result rows expose `novelIds`.
  */
-export const getCategoriesFromDb = async (): Promise<
-  (CategoryRow & { novelIds: string | null })[]
-> => {
-  return await dbManager
+export const getCategoriesQuery = () =>
+  dbManager
     .select({
       id: categorySchema.id,
       name: categorySchema.name,
       sort: categorySchema.sort,
       novelIds: sql<
         string | null
-      >`GROUP_CONCAT(${novelCategorySchema.novelId} ORDER BY ${novelCategorySchema.novelId})`,
+      >`GROUP_CONCAT(${novelCategorySchema.novelId} ORDER BY ${novelCategorySchema.novelId})`.as(
+        'novelIds',
+      ),
     })
     .from(categorySchema)
     .leftJoin(
@@ -41,9 +42,14 @@ export const getCategoriesFromDb = async (): Promise<
       eq(novelCategorySchema.categoryId, categorySchema.id),
     )
     .groupBy(categorySchema.id, categorySchema.name, categorySchema.sort)
-    .orderBy(categorySchema.sort)
-    .all();
-};
+    .orderBy(categorySchema.sort);
+
+/**
+ * Get all categories with their novel IDs using Drizzle ORM
+ */
+export const getCategoriesFromDb = async (): Promise<
+  (CategoryRow & { novelIds: string | null })[]
+> => getCategoriesQuery().all();
 
 /**
  * Get categories with novel count for the specified novels

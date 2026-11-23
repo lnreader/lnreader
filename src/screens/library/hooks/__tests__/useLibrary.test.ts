@@ -30,6 +30,7 @@ jest.mock('@database/queries/LibraryQueries', () => ({
 
 jest.mock('@database/queries/CategoryQueries', () => ({
   getCategoriesFromDb: jest.fn().mockResolvedValue([]),
+  getCategoriesQuery: jest.fn(() => ({ query: 'categories' })),
 }));
 
 jest.mock('@database/queries/NovelQueries', () => ({
@@ -82,8 +83,26 @@ const mockSwitchNovelToLibraryQuery =
     typeof switchNovelToLibraryQuery
   >;
 
+const liveQueryCall = (table: string) => {
+  const call = mockUseLiveQuery.mock.calls.find(
+    ([, fireOn]) => fireOn[0].table === table,
+  );
+  if (!call) {
+    throw new Error(`No live query on ${table}`);
+  }
+  return call as unknown as [
+    unknown,
+    { table: string }[],
+    (rows: unknown[]) => void,
+  ];
+};
+const categoriesLiveQuery = () => liveQueryCall('Category');
+const libraryLiveQuery = () => liveQueryCall('Novel');
+
 describe('useLibrary', () => {
   beforeEach(() => {
+    mockUseLiveQuery.mockReturnValue([]);
+    mockUseLiveQuery.mockClear();
     mockGetNovelByPath.mockClear();
     mockSwitchNovelToLibraryQuery.mockClear();
     mockUseLibrarySettings.mockReturnValue({
@@ -100,15 +119,88 @@ describe('useLibrary', () => {
     } as NovelInfo);
   });
 
-  it('updates the library when the reactive Novel query changes', () => {
-    let onLibraryChange: ((novels: NovelInfo[]) => void) | undefined;
-    mockUseLiveQuery.mockImplementation((_query, fireOn, callback) => {
-      expect(fireOn).toEqual([{ table: 'Novel' }]);
-      onLibraryChange = callback as (novels: NovelInfo[]) => void;
-      return [];
+  it('updates the categories when the reactive category tables change', () => {
+    const { result } = renderHook(useLibrary);
+    const [, fireOn, onCategoriesChange] = categoriesLiveQuery();
+    expect(fireOn).toEqual([{ table: 'Category' }, { table: 'NovelCategory' }]);
+
+    act(() =>
+      onCategoriesChange([
+        { id: 1, name: 'Default', sort: 1, novelIds: null },
+        { id: 2, name: 'Local', sort: 2, novelIds: null },
+        { id: 3, name: 'Reading', sort: 3, novelIds: '7,9' },
+      ]),
+    );
+
+    expect(result.current.categories.map(category => category.id)).toEqual([
+      2, 3,
+    ]);
+    expect(result.current.categories[1].novelIds).toEqual([7, 9]);
+  });
+
+  it('ignores a manual category refresh that a live update overtook', async () => {
+    let resolveRefresh: (rows: never[]) => void = () => undefined;
+    mockGetCategoriesFromDb.mockReturnValueOnce(
+      new Promise(resolve => {
+        resolveRefresh = resolve;
+      }),
+    );
+    const { result } = renderHook(useLibrary);
+    const [, , onCategoriesChange] = categoriesLiveQuery();
+
+    let refresh: Promise<void> = Promise.resolve();
+    act(() => {
+      refresh = result.current.refreshCategories();
+    });
+    act(() =>
+      onCategoriesChange([
+        { id: 3, name: 'Reading', sort: 1, novelIds: '7' },
+        { id: 4, name: 'Later', sort: 2, novelIds: null },
+      ]),
+    );
+    await act(async () => {
+      resolveRefresh([]);
+      await refresh;
     });
 
+    expect(result.current.categories.map(category => category.id)).toEqual([
+      3, 4,
+    ]);
+  });
+
+  it('applies a manual category refresh when no live update overtook it', async () => {
+    mockGetCategoriesFromDb.mockResolvedValueOnce([
+      { id: 3, name: 'Reading', sort: 1, novelIds: '7' },
+    ] as Awaited<ReturnType<typeof getCategoriesFromDb>>);
     const { result } = renderHook(useLibrary);
+
+    await act(async () => {
+      await result.current.refreshCategories();
+    });
+
+    expect(result.current.categories.map(category => category.id)).toEqual([3]);
+  });
+
+  it('keeps the default category when it holds novels', () => {
+    const { result } = renderHook(useLibrary);
+    const [, , onCategoriesChange] = categoriesLiveQuery();
+
+    act(() =>
+      onCategoriesChange([
+        { id: 1, name: 'Default', sort: 1, novelIds: '4' },
+        { id: 3, name: 'Reading', sort: 2, novelIds: '7' },
+      ]),
+    );
+
+    expect(result.current.categories.map(category => category.id)).toEqual([
+      1, 3,
+    ]);
+  });
+
+  it('updates the library when the reactive Novel query changes', () => {
+    const { result } = renderHook(useLibrary);
+    const [, libraryFireOn, onLibraryChange] = libraryLiveQuery();
+    expect(libraryFireOn).toEqual([{ table: 'Novel' }]);
     const updatedNovel = {
       id: 1,
       name: 'Updated novel',
@@ -117,7 +209,7 @@ describe('useLibrary', () => {
       chaptersDownloaded: 0,
     } as NovelInfo;
 
-    act(() => onLibraryChange?.([updatedNovel]));
+    act(() => onLibraryChange([updatedNovel]));
 
     expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
       'name ASC',

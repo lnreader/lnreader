@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { getCategoriesFromDb } from '@database/queries/CategoryQueries';
+import {
+  getCategoriesFromDb,
+  getCategoriesQuery,
+} from '@database/queries/CategoryQueries';
 import {
   getLibraryNovelsFromDb,
   getLibraryNovelsQuery,
@@ -42,6 +45,31 @@ const countRestoreTasks = (tasks: QueuedBackgroundTask[]) =>
 
 // type Library = Category & { novels: LibraryNovelInfo[] };
 export type ExtendedCategory = Category & { novelIds: number[] };
+type CategoryRowWithNovelIds = Awaited<
+  ReturnType<typeof getCategoriesFromDb>
+>[number];
+
+const toExtendedCategories = (
+  rows: CategoryRowWithNovelIds[],
+): ExtendedCategory[] => {
+  const categories = rows.map((c, i) => ({
+    ...c,
+    sort: c.sort ?? i,
+    novelIds: (c.novelIds ?? '').split(',').map(Number),
+  }));
+
+  return categories.filter(cat => {
+    if (cat.id !== 1) {
+      return true;
+    }
+
+    const hasUserCategories = categories.length > 2;
+    const hasNovels = cat.novelIds.length > 0 && cat.novelIds[0] !== 0;
+
+    return !hasUserCategories || hasNovels;
+  });
+};
+
 export type PendingLibraryAddition = {
   initialCategoryIds: number[];
 };
@@ -99,27 +127,24 @@ export const useLibrary = (): UseLibraryReturnType => {
   );
   useLiveQuery(libraryQuery, [{ table: 'Novel' }], setLibrary);
 
+  const categoriesQuery = useMemo(() => getCategoriesQuery(), []);
+  const categoriesVersion = useRef(0);
+  useLiveQuery(
+    categoriesQuery,
+    [{ table: 'Category' }, { table: 'NovelCategory' }],
+    rows => {
+      categoriesVersion.current += 1;
+      setCategories(toExtendedCategories(rows));
+    },
+  );
+
   const refreshCategories = useCallback(async () => {
-    const dbCategories = await getCategoriesFromDb();
-
-    const res = dbCategories.map((c, i) => ({
-      ...c,
-      sort: c.sort ?? i,
-      novelIds: (c.novelIds ?? '').split(',').map(Number),
-    }));
-
-    const filteredCategories = res.filter(cat => {
-      if (cat.id !== 1) {
-        return true;
-      }
-
-      const hasUserCategories = res.length > 2;
-      const hasNovels = cat.novelIds.length > 0 && cat.novelIds[0] !== 0;
-
-      return !hasUserCategories || hasNovels;
-    });
-
-    setCategories(filteredCategories);
+    const version = categoriesVersion.current;
+    const rows = await getCategoriesFromDb();
+    // A live update that landed meanwhile is newer than this read.
+    if (version === categoriesVersion.current) {
+      setCategories(toExtendedCategories(rows));
+    }
   }, []);
 
   const getLibrary = useCallback(async () => {
