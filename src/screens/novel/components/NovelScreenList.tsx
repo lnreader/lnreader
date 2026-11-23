@@ -27,6 +27,11 @@ import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
+import {
+  NOVEL_APPBAR_HEIGHT,
+  NOVEL_FAB_HEIGHT,
+  NOVEL_FAB_MARGIN,
+} from '../novelLayout';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
 import {
@@ -393,6 +398,10 @@ const NovelScreenList = ({
   }, [hasMultiplePages, pages, pageIndex, openPage, openPageNavDrawer, theme]);
 
   const showSkeleton = fetching && listChapters.length === 0;
+  const showContinue =
+    hasNovel &&
+    useFabForContinueReading &&
+    Boolean(lastRead || firstUnreadChapter);
 
   const listHeader = useMemo(
     () => (
@@ -457,8 +466,11 @@ const NovelScreenList = ({
         refreshing={updating}
         refreshOffset={topInset + 32}
         contentPaddingBottom={100 + bottomInset}
-        fastScrollTopInset={topInset + 56}
-        fastScrollBottomInset={bottomInset + 16}
+        fastScrollEnabled={listChapters.length > 0}
+        fastScrollTopInset={topInset + NOVEL_APPBAR_HEIGHT}
+        fastScrollBottomInset={
+          bottomInset + NOVEL_FAB_MARGIN + (showContinue ? NOVEL_FAB_HEIGHT : 0)
+        }
         batchSize={CHAPTER_BATCH_SIZE}
         scrollEventMaxOffset={HEADER_FADE_END}
         scrollEventThresholds={scrollEventThresholds}
@@ -493,10 +505,7 @@ const NovelScreenList = ({
             loading={loading}
             onContinue={onFabPress}
             onScrollToTop={scrollToTop}
-            showContinue={
-              useFabForContinueReading &&
-              Boolean(lastRead || firstUnreadChapter)
-            }
+            showContinue={showContinue}
             showScrollToTop={showScrollToTop}
             theme={theme}
           />

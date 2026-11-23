@@ -94,6 +94,7 @@ export interface NativeProps extends ViewProps {
   refreshOffset?: WithDefault<Float, 0>;
   contentPaddingTop?: WithDefault<Float, 0>;
   contentPaddingBottom?: WithDefault<Float, 0>;
+  fastScrollEnabled?: WithDefault<boolean, true>;
   fastScrollTopInset?: WithDefault<Float, 0>;
   fastScrollBottomInset?: WithDefault<Float, 0>;
   /** `onRequestRange` asks for whole batches of this many chapters. */

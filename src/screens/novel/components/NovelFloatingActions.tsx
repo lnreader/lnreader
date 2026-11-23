@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { AnimatedFAB } from 'react-native-paper';
 import { ThemeColors } from '@theme/types';
+import { NOVEL_FAB_HEIGHT, NOVEL_FAB_MARGIN } from '../novelLayout';
 
 interface NovelFloatingActionsProps {
   bottomInset: number;
@@ -73,13 +74,14 @@ export default memo(NovelFloatingActions);
 
 const styles = StyleSheet.create({
   continue: {
-    bottom: 16,
-    margin: 16,
+    bottom: NOVEL_FAB_MARGIN,
+    height: NOVEL_FAB_HEIGHT,
+    margin: NOVEL_FAB_MARGIN,
     position: 'absolute',
     right: 0,
   },
   scrollToTop: {
-    bottom: 16,
+    bottom: NOVEL_FAB_MARGIN,
     position: 'absolute',
   },
 });

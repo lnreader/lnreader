@@ -126,6 +126,10 @@ class ChapterListViewManager :
     view.fastScrollTopInset = value
   }
 
+  override fun setFastScrollEnabled(view: ChapterListView, value: Boolean) {
+    view.setFastScrollEnabled(value)
+  }
+
   override fun setFastScrollBottomInset(view: ChapterListView, value: Float) {
     view.fastScrollBottomInset = value
   }

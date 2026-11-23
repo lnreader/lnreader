@@ -65,6 +65,7 @@ interface NativeChapterListProps {
   refreshOffset?: number;
   contentPaddingTop?: number;
   contentPaddingBottom: number;
+  fastScrollEnabled?: boolean;
   fastScrollTopInset: number;
   fastScrollBottomInset: number;
   batchSize: number;
@@ -117,6 +118,7 @@ const NativeChapterList = ({
   refreshOffset = 0,
   contentPaddingTop = 0,
   contentPaddingBottom,
+  fastScrollEnabled = true,
   fastScrollTopInset,
   fastScrollBottomInset,
   batchSize,
@@ -229,6 +231,7 @@ const NativeChapterList = ({
       refreshOffset={refreshOffset}
       contentPaddingTop={contentPaddingTop}
       contentPaddingBottom={contentPaddingBottom}
+      fastScrollEnabled={fastScrollEnabled}
       fastScrollTopInset={fastScrollTopInset}
       fastScrollBottomInset={fastScrollBottomInset}
       batchSize={batchSize}

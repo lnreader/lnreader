@@ -26,7 +26,6 @@ import android.view.MotionEvent
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -35,13 +34,13 @@ import kotlin.math.roundToInt
  * 1500ms after scrolling or 1200ms after dragging, thumb-only grab, pressed
  * state, RTL), except:
  *
- * - the thumb is at least [minThumbLength] long (upstream shrinks it to ~2px on
- *   10,000 rows), and its position maps over the track minus the thumb;
+ * - the thumb has a fixed [thumbLength] and appears when there is at least one
+ *   viewport of scrollable content beyond the visible area;
  * - the grab area is [touchWidth] wide, wider than the drawn thumb;
  * - dragging maps the thumb position to an absolute offset, and jumps
  *   (scrollToPositionWithOffset) instead of scrollBy when the step is more than
  *   a screen, so scrubbing never lays out the rows in between;
- * - [topInset]/[bottomInset] keep the track clear of the app bar;
+ * - [topInset]/[bottomInset] keep the thumb clear of overlay controls;
  * - the look: a [thickness]-wide pill thumb with fully round ends, inset
  *   [edgeMargin] from the edge, and no visible track.
  */
@@ -51,7 +50,7 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   private val density = recyclerView.resources.displayMetrics.density
   private val thickness = (THICKNESS_DP * density).roundToInt()
   private val edgeMargin = (EDGE_MARGIN_DP * density).roundToInt()
-  private val minThumbLength = (MIN_THUMB_LENGTH_DP * density).roundToInt()
+  private val thumbLength = (THUMB_LENGTH_DP * density).roundToInt()
   private val touchWidth = (TOUCH_WIDTH_DP * density).roundToInt()
   private val minimumRange = (MINIMUM_RANGE_DP * density).roundToInt()
 
@@ -75,14 +74,22 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
       requestRedraw()
     }
 
+  var enabled = true
+    set(value) {
+      if (field == value) return
+      field = value
+      if (!value) {
+        needScrollbar = false
+        setState(STATE_HIDDEN)
+      }
+    }
+
   private var recyclerViewWidth = 0
   private var recyclerViewHeight = 0
   private var thumbTop = 0
-  private var thumbLength = 0
   private var grabOffset = 0f
   private var needScrollbar = false
   private var state = STATE_HIDDEN
-  private var dragging = false
 
   private val showHideAnimator = ValueAnimator.ofFloat(0f, 1f)
   private var animationState = ANIMATION_STATE_OUT
@@ -193,7 +200,7 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
       setState(STATE_HIDDEN)
       return
     }
-    if (animationState != ANIMATION_STATE_OUT && needScrollbar) {
+    if (this.state != STATE_HIDDEN && animationState != ANIMATION_STATE_OUT && needScrollbar) {
       drawVerticalScrollbar(canvas)
     }
   }
@@ -213,20 +220,20 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
     get() = max(trackTop, recyclerViewHeight - bottomInset)
 
   private fun updateScrollPosition() {
-    val contentLength = recyclerView.computeVerticalScrollRange()
-    val visibleLength = recyclerViewHeight
+    val maxOffset = recyclerView.maxScrollOffset
     val trackLength = trackBottom - trackTop
-    needScrollbar = contentLength - visibleLength > 0 && trackLength >= minimumRange
+    needScrollbar = enabled && recyclerViewHeight > 0 &&
+      maxOffset >= recyclerViewHeight && trackLength >= minimumRange
     if (!needScrollbar) {
       if (state != STATE_HIDDEN) setState(STATE_HIDDEN)
       return
     }
-    val naturalLength = (trackLength.toLong() * visibleLength / contentLength).toInt()
-    thumbLength = min(trackLength, max(minThumbLength, naturalLength))
-    if (!dragging) {
-      val maxOffset = contentLength - visibleLength
+    val travel = trackLength - thumbLength
+    if (state == STATE_DRAGGING) {
+      thumbTop = thumbTop.coerceIn(trackTop, trackTop + travel)
+    } else {
       val fraction = recyclerView.computeVerticalScrollOffset().toFloat() / maxOffset
-      thumbTop = trackTop + ((trackLength - thumbLength) * fraction.coerceIn(0f, 1f)).roundToInt()
+      thumbTop = trackTop + (travel * fraction.coerceIn(0f, 1f)).roundToInt()
     }
     if (state == STATE_HIDDEN || state == STATE_VISIBLE) setState(STATE_VISIBLE)
   }
@@ -252,7 +259,6 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
       MotionEvent.ACTION_DOWN -> if (isPointInsideThumb(me.x, me.y)) startDrag(me.y)
       MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
         if (state == STATE_DRAGGING) {
-          dragging = false
           setState(STATE_VISIBLE)
         }
       MotionEvent.ACTION_MOVE ->
@@ -268,7 +274,6 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
   private fun startDrag(y: Float) {
     recyclerView.stopScroll()
     grabOffset = y - thumbTop
-    dragging = true
     setState(STATE_DRAGGING)
   }
 
@@ -345,7 +350,7 @@ class ListFastScroller(private val recyclerView: ListRecyclerView) :
 
     const val THICKNESS_DP = 12f
     const val EDGE_MARGIN_DP = 8f
-    const val MIN_THUMB_LENGTH_DP = 48f
+    const val THUMB_LENGTH_DP = 48f
     // From the edge: covers the inset, the thumb and a little beyond it.
     const val TOUCH_WIDTH_DP = 32f
     const val MINIMUM_RANGE_DP = 50f

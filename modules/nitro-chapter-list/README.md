@@ -158,9 +158,8 @@ React Native codegen for `src/fabric` runs as part of the Android build.
   margin before `"•  "`.
 - A chapter with no chapter number shows "Chapter " (empty number). JS shows
   i18n-js's missing-value placeholder.
-- The fast scroller is a 12dp pill thumb in the theme's primary colour, inset
-  8dp from the edge, with no track. The JS `FastScrollbar` (Plugins tab) keeps
-  its old look.
+- The fast scroller uses a 48dp by 12dp pill thumb in the theme's primary
+  colour, inset 8dp from the edge. The Plugins tab uses the same style.
 
 ## Timing logs
 

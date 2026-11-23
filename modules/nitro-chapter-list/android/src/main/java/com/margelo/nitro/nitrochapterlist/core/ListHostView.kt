@@ -165,6 +165,10 @@ abstract class ListHostView(
       fastScroller.onContentChanged()
     }
 
+  fun setFastScrollEnabled(enabled: Boolean) {
+    fastScroller.enabled = enabled
+  }
+
   var fastScrollBottomInset: Float = 0f
     set(dp) {
       field = dp
