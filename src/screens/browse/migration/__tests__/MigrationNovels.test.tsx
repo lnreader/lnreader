@@ -383,4 +383,12 @@ describe('MigrationNovels', () => {
     expect(showToast).toHaveBeenCalledWith('Migration complete');
     expect(navigation.pop).toHaveBeenCalledWith(2);
   });
+
+  it('stays locked for a migration of this novel queued before the screen was opened', async () => {
+    mockTasks.push(migrationTask);
+    renderScreen();
+
+    expect(await screen.findByText('migrating')).toBeTruthy();
+    expect(showToast).not.toHaveBeenCalled();
+  });
 });

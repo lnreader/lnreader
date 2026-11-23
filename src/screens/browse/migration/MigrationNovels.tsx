@@ -60,6 +60,19 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
     ),
   );
 
+  // Survives leaving and re-entering the screen, unlike the local pending state.
+  const isSourceMigrating = useBackgroundTasks(
+    useCallback(
+      tasks =>
+        tasks.some(
+          item =>
+            item.task.name === 'MIGRATE_NOVEL' &&
+            item.task.data.fromNovel.id === novel.id,
+        ),
+      [novel.id],
+    ),
+  );
+
   const unsubscribeFocusRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => () => unsubscribeFocusRef.current?.(), []);
 
@@ -188,7 +201,7 @@ const MigrationNovels = ({ navigation, route }: MigrateNovelScreenProps) => {
           theme={theme}
           library={library}
           navigation={navigation}
-          isMigrating={pendingMigration !== undefined}
+          isMigrating={pendingMigration !== undefined || isSourceMigrating}
           onMigrationQueued={setPendingMigration}
           onMigrationAborted={handleMigrationAborted}
           onMigrationEnqueued={setEnqueuedTarget}
