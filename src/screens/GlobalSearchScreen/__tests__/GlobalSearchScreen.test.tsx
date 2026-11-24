@@ -164,6 +164,10 @@ jest.mock('@utils/showToast', () => ({
   showToast: jest.fn(),
 }));
 
+jest.mock('@services/backgroundTasks', () => ({
+  backgroundTasks: { enqueue: jest.fn() },
+}));
+
 jest.mock('../hooks/useGlobalSearch', () => ({
   useGlobalSearch: () => ({ searchResults: [], progress: 0 }),
 }));
