@@ -16,6 +16,7 @@ import {
 import BottomSheet, {
   BottomSheetRef,
 } from '@components/BottomSheet/BottomSheet';
+import { useMeasureInWindow } from '@components/BottomSheet/measureInWindow';
 import { TrueSheetOverlay } from '@lodev09/react-native-true-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -77,13 +78,15 @@ const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
 
   const [anchor, setAnchor] = useState<LayoutRectangle | null>(null);
 
+  const measureInWindow = useMeasureInWindow();
+
   const measureAnchor = useCallback(() => {
-    anchorRef.current?.measureInWindow((x, y, width, height) => {
+    measureInWindow(anchorRef.current, (x, y, width, height) => {
       if (width > 0 && height > 0) {
         setAnchor({ x, y, width, height });
       }
     });
-  }, []);
+  }, [measureInWindow]);
 
   // The list is shown after the field has settled, but the anchor can still
   // move (sheet snap, keyboard, chip row) while the list is open.

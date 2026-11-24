@@ -8,12 +8,23 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type HostInstance,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import { runWhenIdle } from '@utils/runWhenIdle';
 import { getBottomSheetMaxHeight, toBottomSheetDetents } from './layout';
+import {
+  MeasureInWindow,
+  MeasureInWindowContext,
+  measureNodeInWindow,
+} from './measureInWindow';
 
 export interface BottomSheetRef {
   present: () => void;
@@ -85,6 +96,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   scrollableRef,
 }) => {
   const sheetRef = useRef<TrueSheet>(null);
+  const contentRef = useRef<HostInstance>(null);
   const { bottom, top } = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const theme = useTheme();
@@ -107,6 +119,32 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       },
     }),
     [animated],
+  );
+
+  // The sheet is centred and anchored to the bottom of the window, and its
+  // content fills the sheet, so the content's size gives its real origin.
+  const measureInSheet = useCallback<MeasureInWindow>(
+    (node, callback) => {
+      const content = contentRef.current;
+      if (!node || !content) {
+        measureNodeInWindow(node, callback);
+        return;
+      }
+      content.measureInWindow(
+        (contentX, contentY, contentWidth, contentHeight) => {
+          node.measureInWindow((x, y, nodeWidth, nodeHeight) => {
+            const screen = Dimensions.get('screen');
+            callback(
+              x - contentX + (width - contentWidth) / 2,
+              y - contentY + (screen.height - contentHeight),
+              nodeWidth,
+              nodeHeight,
+            );
+          });
+        },
+      );
+    },
+    [width],
   );
 
   const detents = useMemo(
@@ -138,7 +176,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       onDidDismiss={() => onChange?.(-1)}
     >
       {/* The sheet's container extends behind the navigation bar. */}
-      <View style={[styles.flex, { paddingBottom: bottom }]}>{children}</View>
+      <View ref={contentRef} style={[styles.flex, { paddingBottom: bottom }]}>
+        <MeasureInWindowContext.Provider value={measureInSheet}>
+          {children}
+        </MeasureInWindowContext.Provider>
+      </View>
     </TrueSheet>
   );
 };
