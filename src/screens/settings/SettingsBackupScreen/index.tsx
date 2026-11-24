@@ -21,6 +21,7 @@ import {
   type BackupOptions,
 } from '@services/backup/options';
 import { BackupOptionsDialog } from './Components/BackupOptions';
+import { SyncSettingsSection } from './Components/SyncSettingsSection';
 import AutomaticBackupDialog, {
   AUTOMATIC_BACKUP_LABELS,
 } from './Components/AutomaticBackupDialog';
@@ -141,6 +142,10 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
       />
       <ScrollView style={styles.paddingBottom}>
         <List.Section>
+          <SyncSettingsSection
+            theme={theme}
+            openGoogleDriveModal={openGoogleDriveModal}
+          />
           <List.SubHeader theme={theme}>
             {getString('backupScreen.remoteBackup')}
           </List.SubHeader>

@@ -42,6 +42,7 @@
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",
     "@preeternal/react-native-cookie-manager": "^6.3.3",
+    "@react-native-community/netinfo": "^11.5.2",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-native-vector-icons/common": "^13.0.1",
     "@react-native-vector-icons/material-design-icons": "^13.1.2",

@@ -23,6 +23,7 @@ import {
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { useMMKVObject } from 'react-native-mmkv';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 // type Library = Category & { novels: LibraryNovelInfo[] };
 export type ExtendedCategory = Category & { novelIds: number[] };
@@ -162,6 +163,8 @@ export const useLibrary = (): UseLibraryReturnType => {
         pluginId,
         categoryIds,
       );
+
+      driveSyncManager.notifySyncDirty();
 
       // Important to get correct chapters count
       // Count is set by sql trigger

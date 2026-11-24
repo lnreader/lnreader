@@ -6,6 +6,14 @@ export interface DriveFile {
   name: string;
   description?: string;
   createdTime?: string;
+  modifiedTime?: string;
+}
+
+export interface DriveAppDataFile {
+  id: string;
+  name: string;
+  modifiedTime: string;
+  size?: string;
 }
 
 export interface DriveReponse {
@@ -24,6 +32,7 @@ export interface DriveRequestParams {
   uploadType?: string; // only for upload
   addParents?: string;
   removeParents?: string;
+  spaces?: string;
 }
 
 export interface DriveCreateRequestData {

@@ -98,6 +98,17 @@ export interface StringMap {
   'backupScreen.backupRestoredSummary.other': 'string';
   'backupScreen.backupRestoredWithWarnings.one': 'string';
   'backupScreen.backupRestoredWithWarnings.other': 'string';
+  'backupScreen.sync.title': 'string';
+  'backupScreen.sync.enableSync': 'string';
+  'backupScreen.sync.enableSyncSummary': 'string';
+  'backupScreen.sync.wifiOnly': 'string';
+  'backupScreen.sync.syncNow': 'string';
+  'backupScreen.sync.syncing': 'string';
+  'backupScreen.sync.lastSynced': 'string';
+  'backupScreen.sync.syncOffline': 'string';
+  'backupScreen.sync.authRequired': 'string';
+  'backupScreen.sync.syncError': 'string';
+  'backupScreen.sync.syncComplete': 'string';
   'backupScreen.savingBackup': 'string';
   'backupScreen.categoriesRestored': 'string';
   'backupScreen.categoriesRestoredWithErrors': 'string';

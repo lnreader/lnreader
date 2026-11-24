@@ -103,6 +103,13 @@ export interface AppSettings {
   timeTrackingEnabled: boolean;
   /** The timeout after which to consider the user inactive and not track time */
   inactivityTimeoutMs?: number;
+
+  /**
+   * Cloud sync settings
+   */
+  driveSyncEnabled?: boolean;
+  driveSyncWifiOnly?: boolean;
+  driveSyncLastTime?: number;
 }
 
 export interface BrowseSettings {
@@ -296,6 +303,12 @@ const initialAppSettings: AppSettings = {
    */
   timeTrackingEnabled: true,
   inactivityTimeoutMs: 5 * 60 * 1000, // 5 minutes
+
+  /**
+   * Cloud sync settings
+   */
+  driveSyncEnabled: false,
+  driveSyncWifiOnly: true,
 };
 
 const initialBrowseSettings: BrowseSettings = {

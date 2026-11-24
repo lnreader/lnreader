@@ -109,6 +109,19 @@
       "one": "Restored %{count} novel with warnings: %{warnings}",
       "other": "Restored %{count} novels with warnings: %{warnings}"
     },
+    "sync": {
+      "title": "Automated Cloud Synchronization",
+      "enableSync": "Google Drive Sync",
+      "enableSyncSummary": "Automatically synchronize library and reading progress across devices via private Google Drive storage",
+      "wifiOnly": "Sync over Wi-Fi only",
+      "syncNow": "Sync now",
+      "syncing": "Syncing...",
+      "lastSynced": "Last synced: %{time}",
+      "syncOffline": "Sync paused (Offline)",
+      "authRequired": "Google Drive sign-in required. Tap to connect",
+      "syncError": "Sync failed. Tap Sync now to retry",
+      "syncComplete": "Sync completed successfully"
+    },
     "savingBackup": "Saving Backup",
     "categoriesRestored": "Restored %{count} categories",
     "categoriesRestoredWithErrors": "Restored %{count} categories (%{failedCount} failed)",
