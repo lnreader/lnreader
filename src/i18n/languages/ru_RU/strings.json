@@ -32,7 +32,7 @@
     "importStaticFiles": "Импорт файлов статики",
     "novelInsertFailed": "ошибка вставки главы",
     "networking": "Сеть",
-    "useFAB": "Использовать плавающую кнопку действия вместо основной кнопки",
+    "useFAB": "Floating reading button",
     "userAgent": "User Agent",
     "recreateDBIndexes": "Пересоздать индексы базы данных",
     "recreateDBIndexesToast": "Индексы базы данных пересозданы",
@@ -66,7 +66,8 @@
     "dateFormat": "Формат даты",
     "dateFormatDefault": "По умолчанию (%{date})",
     "dynamicColors": "Динамически",
-    "hideBackdrop": "Скрыть фон",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Светлая тема",
     "navbar": "Панель навигации",
     "novelInfo": "Информация о новелле",
@@ -75,6 +76,7 @@
     "relativeTimestampsDescription": "\"Сегодня\" вместо \"%{date}\"",
     "showHistoryInTheNav": "Показать историю в навигации",
     "showUpdatesInTheNav": "Показать историю в навигации",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Тема оформления",
     "themeModeLight": "Светлая",
     "themeModeDark": "Тёмная",
@@ -261,6 +263,8 @@
     "plugins": "Расширения",
     "removeFromLibrary": "Удалено из библиотеки",
     "repositories": "Репозитории",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Поиск источника",
     "searchResults": "Результаты поиска",
     "selectNovel": "Выбрать новеллу",
@@ -463,6 +467,7 @@
     "refreshMetadataDescription": "Проверять наличие новой обложки и описания при обновлении библиотеки",
     "smartUpdate": "Умное обновление",
     "smartUpdateSkipCompleted": "Пропускать завершённые серии",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Пропускать не начатые серии",
     "smartUpdateSkipWithUnread": "Пропускать серии с непрочитанными главами",
     "sortOrder": "Порядок сортировки",
@@ -516,6 +521,7 @@
       },
       "filters": {
         "completed": "Завершено",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Загружено",
         "started": "Начато",
         "unread": "Не прочитано"
@@ -624,6 +630,14 @@
       "title": "Название: %{title}"
     },
     "inLibaray": "В библиотеке",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Название главы",
       "chapterNumber": "Номер главы",
@@ -685,6 +699,8 @@
       "padding": "Отступ",
       "pageReader": "Постраничное чтение (экспериментально)",
       "pageReaderDescription": "Разделить главу на страницы вместо прокрутки. Экспериментальная — может разбить форматирование в некоторых романах",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Инвертировать кнопки громкости",
       "invertVolumeButtonsDescription": "Поменять кнопки громкости вверх и вниз на предыдущую и следующую страницу",
       "disableReaderAnimations": "Disable reader animations",
@@ -717,7 +733,9 @@
     },
     "emptyChapterMessage": "<h2>Глава не может быть загружена</h2><p>Не было найдено доступного контента для чтения. Проверьте главу в WebView; если она загружается там, <a href='%{reportUrl}'>сообщите об ошибке плагина</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Завершено",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "%{name}Следующий: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Следующей главы нет",
     "noPreviousChapter": "Предыдущей главы нет",
     "searchMinLength": "Введите не менее %{count} символов для поиска",
@@ -808,9 +826,26 @@
     "newChapters": "новые главы",
     "novelsUpdated": "%{num} Новеллы обновлены",
     "searchbar": "Поиск в обновлениях",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Невозможно получить новеллу",
     "updatesLower": "обновлено",
-    "updatingLibrary": "Обновление библиотеки"
+    "updatingLibrary": "Обновление библиотеки",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Добро пожаловать",
