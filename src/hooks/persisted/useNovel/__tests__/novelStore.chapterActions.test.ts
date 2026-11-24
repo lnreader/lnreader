@@ -166,6 +166,13 @@ const createHarness = (overrides: Partial<TestState> = {}) => {
   };
 };
 
+// Bulk writes are wrapped to track them; the rest are the harness's own.
+const expectChapterDeps = (harness: ReturnType<typeof createHarness>) =>
+  expect.objectContaining({
+    markChapterRead: harness.chapterDeps.markChapterRead,
+    markChaptersRead: expect.any(Function),
+  }) as ChapterActionsDependencies;
+
 describe('novelStore.chapterActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -274,6 +281,100 @@ describe('novelStore.chapterActions', () => {
     expect(harness.getState().chapters.map(ch => ch.id)).toEqual([1, 2, 3]);
   });
 
+  describe('batch reads overlapping a bulk chapter write', () => {
+    // Stands in for the database: what an unloaded chapter looks like when
+    // its batch is read.
+    let storedUnread: boolean;
+    let finishWrite: () => void;
+
+    const setup = () => {
+      storedUnread = true;
+      const harness = createHarness({
+        batchInformation: { batch: 0, total: 1 },
+      });
+      harness.chapterDeps.markChaptersRead.mockImplementation(
+        () =>
+          new Promise<void>(resolve => {
+            finishWrite = () => {
+              storedUnread = false;
+              resolve();
+            };
+          }),
+      );
+      jest
+        .mocked(markChaptersReadAction)
+        .mockImplementation((ids, _mutate, deps) => {
+          void deps!.markChaptersRead(ids);
+        });
+      return harness;
+    };
+
+    it('waits for a pending write before reading the batch', async () => {
+      const harness = setup();
+      harness.bootstrapService.loadUpToBatch.mockImplementation(
+        async params => {
+          params.onBatchLoaded(1, [makeChapter(2, { unread: storedUnread })]);
+        },
+      );
+
+      harness.actions.markChaptersRead([1, 2]);
+      const load = harness.actions.loadUpToBatch(1);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(harness.bootstrapService.loadUpToBatch).not.toHaveBeenCalled();
+
+      finishWrite();
+      await load;
+
+      expect(harness.getState().chapters.map(ch => ch.unread)).toEqual([
+        true,
+        false,
+      ]);
+    });
+
+    it('reads the batch again when a write starts during the read', async () => {
+      const harness = setup();
+      harness.bootstrapService.loadUpToBatch.mockImplementation(
+        async params => {
+          const chapter = makeChapter(2, { unread: storedUnread });
+          if (harness.bootstrapService.loadUpToBatch.mock.calls.length === 1) {
+            harness.actions.markChaptersRead([1, 2]);
+            finishWrite();
+          }
+          params.onBatchLoaded(1, [chapter]);
+        },
+      );
+
+      await harness.actions.loadUpToBatch(1);
+
+      expect(harness.bootstrapService.loadUpToBatch).toHaveBeenCalledTimes(2);
+      expect(harness.getState().chapters.map(ch => ch.id)).toEqual([1, 2]);
+      expect(harness.getState().chapters[1].unread).toBe(false);
+    });
+
+    it('getNextChapterBatch reads again when a write starts during the read', async () => {
+      const harness = setup();
+      harness.bootstrapService.getNextChapterBatch.mockImplementation(
+        async () => {
+          const chapter = makeChapter(2, { unread: storedUnread });
+          if (
+            harness.bootstrapService.getNextChapterBatch.mock.calls.length === 1
+          ) {
+            harness.actions.markChaptersRead([1, 2]);
+            finishWrite();
+          }
+          return { batch: 1, chapters: [chapter] };
+        },
+      );
+
+      await harness.actions.getNextChapterBatch();
+
+      expect(
+        harness.bootstrapService.getNextChapterBatch,
+      ).toHaveBeenCalledTimes(2);
+      expect(harness.getState().chapters[1].unread).toBe(false);
+    });
+  });
+
   it('loadUpToBatch coalesces overlapping in-flight targets', async () => {
     const harness = createHarness();
     harness.bootstrapService.loadUpToBatch.mockImplementation(async params => {
@@ -380,7 +481,7 @@ describe('novelStore.chapterActions', () => {
     expect(bookmarkChaptersAction).toHaveBeenCalledWith(
       [1],
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(harness.getState().chapters[0].bookmark).toBe(false);
     expect(harness.set).not.toHaveBeenCalled();
@@ -401,7 +502,7 @@ describe('novelStore.chapterActions', () => {
     expect(markChapterReadAction).toHaveBeenCalledWith(
       1,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(harness.getState().chapters[0].unread).toBe(false);
   });
@@ -460,41 +561,41 @@ describe('novelStore.chapterActions', () => {
       3,
       mockNovel,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(markChaptersReadAction).toHaveBeenCalledWith(
       [1],
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(markPreviousChaptersUnreadAction).toHaveBeenCalledWith(
       3,
       mockNovel,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(markChaptersUnreadAction).toHaveBeenCalledWith(
       [1],
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(updateChapterProgressAction).toHaveBeenCalledWith(
       1,
       50,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(deleteChapterAction).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1 }),
       mockNovel,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     expect(deleteChaptersAction).toHaveBeenCalledWith(
       [1],
       mockNovel,
       expect.any(Function),
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
   });
   it('increaseTimeSpent delegates to the low-level action with dependencies', () => {
@@ -506,7 +607,7 @@ describe('novelStore.chapterActions', () => {
     expect(increaseTimeSpentAction).toHaveBeenCalledWith(
       1,
       200,
-      harness.chapterDeps,
+      expectChapterDeps(harness),
     );
     // Persisted only: the chapter list is not rebuilt for reading time.
     expect(harness.getState().chapters).toBe(chaptersBefore);
