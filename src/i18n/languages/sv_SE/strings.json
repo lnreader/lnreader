@@ -32,7 +32,7 @@
     "importStaticFiles": "Importera statiska filer",
     "novelInsertFailed": "boken infogade inte",
     "networking": "Nätverk",
-    "useFAB": "Använd FAB istället för knapp",
+    "useFAB": "Floating reading button",
     "userAgent": "Webbläsare",
     "recreateDBIndexes": "Återskapa DB-index",
     "recreateDBIndexesToast": "Omarbetade DB-index",
@@ -66,7 +66,8 @@
     "dateFormat": "Datumformat",
     "dateFormatDefault": "Standard (%{date})",
     "dynamicColors": "Dynamisk",
-    "hideBackdrop": "Dölj bakgrund",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Ljust tema",
     "navbar": "Navigeringsfält",
     "novelInfo": "Roman info",
@@ -75,6 +76,7 @@
     "relativeTimestampsDescription": "\"Idag\" istället för \"%{date}\"",
     "showHistoryInTheNav": "Visa historik i navigatorn",
     "showUpdatesInTheNav": "Visa uppdateringar i navigatorn",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Temaläge",
     "themeModeLight": "Ljust",
     "themeModeDark": "Mörkt",
@@ -261,6 +263,8 @@
     "plugins": "Tillägg",
     "removeFromLibrary": "Borttaget från biblioteket",
     "repositories": "Utvecklingskataloger",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Sök källor och plugins",
     "searchResults": "Sökresultat",
     "selectNovel": "Välj roman",
@@ -463,6 +467,7 @@
     "refreshMetadataDescription": "Sök efter nya omslag och detaljer vid uppdatering av bibliotek",
     "smartUpdate": "Smart uppdatering",
     "smartUpdateSkipCompleted": "Hoppa över romaner med \"Avslutad\" status",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Hoppa över opåbörjade romaner",
     "smartUpdateSkipWithUnread": "Hoppa över romaner med olästa kapitel",
     "sortOrder": "Sorteringsordning",
@@ -516,6 +521,7 @@
       },
       "filters": {
         "completed": "Slutförd",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Nerladdat",
         "started": "Påbörjad",
         "unread": "Olästa"
@@ -624,6 +630,14 @@
       "title": "Titel: %{title}"
     },
     "inLibaray": "I bibliotek",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Kapitel namn",
       "chapterNumber": "Kapitel nummer",
@@ -685,6 +699,8 @@
       "padding": "Stoppning",
       "pageReader": "Sidvis läsning (Experimentell)",
       "pageReaderDescription": "Dela upp kapitlet i sidor i stället för skrollning. Experimentellt — kan bryta formatering i vissa romaner",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
       "disableReaderAnimations": "Disable reader animations",
@@ -717,7 +733,9 @@
     },
     "emptyChapterMessage": "<h2>Kapitel kunde inte laddas</h2><p>Inget läsbart innehåll hittades. Kontrollera kapitlet i WebVy; om det laddas där, <a href='%{reportUrl}'>rapportera tilläggets problem</a>.</p><p><a href='%{refreshUrl}'>Uppdatera kapitlet</a></p><p>Tillägg: %{pluginId}<br>Roman: %{novelName}<br>Kapitel: %chapterName}</p>",
     "finished": "Slutförd",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "Nästa: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Det finns inget nästa kapitel",
     "noPreviousChapter": "Det finns inget föregående kapitel",
     "searchMinLength": "Ange minst %{count} tecken för att söka",
@@ -808,9 +826,26 @@
     "newChapters": "nya kapitel",
     "novelsUpdated": "%{num} romaner uppdaterade",
     "searchbar": "Sök uppdateringar",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Det går inte att hämta romanen",
     "updatesLower": "uppdateringar",
-    "updatingLibrary": "Uppdaterar bibliotek"
+    "updatingLibrary": "Uppdaterar bibliotek",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Välkommen",
