@@ -3,13 +3,10 @@ import { useCallback, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { FAB } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import {
-  TabView,
-  type TabBarProps,
-  type TabDescriptor,
-} from 'react-native-tab-view';
+import { type TabBarProps, type TabDescriptor } from 'react-native-tab-view';
 
 import { Appbar, SafeAreaView, TopTabBar } from '@components/index';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 import BottomSheet, {
   BottomSheetRef,
   useTabScrollables,
@@ -158,7 +155,7 @@ const SettingsReaderScreen = () => {
         scrollableRef={scrollableRef}
       >
         <View style={styles.bottomSheetContent}>
-          <TabView
+          <SheetTabView
             commonOptions={tabOptions}
             navigationState={{ index: tabIndex, routes }}
             renderTabBar={renderTabBar}
@@ -166,9 +163,7 @@ const SettingsReaderScreen = () => {
             onIndexChange={setTabIndex}
             initialLayout={{ width: screenWidth }}
             lazy
-            lazyPreloadDistance={0}
             animationEnabled={!reduceAppAnimations}
-            swipeEnabled={false}
           />
         </View>
       </BottomSheet>

@@ -12,7 +12,8 @@ import {
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import color from 'color';
 
-import { TabView, TabViewProps } from 'react-native-tab-view';
+import { TabViewProps } from 'react-native-tab-view';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 import BottomSheet, {
   BottomSheetRef,
 } from '@components/BottomSheet/BottomSheet';
@@ -275,7 +276,7 @@ const ChaptersSettingsSheet = ({
         scrollableRef={filtersScrollRef}
       >
         <View style={styles.contentContainer}>
-          <TabView
+          <SheetTabView
             animationEnabled={!reduceAppAnimations}
             commonOptions={{
               label: renderLabel,

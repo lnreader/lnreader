@@ -21,7 +21,7 @@ import {
   useChapterGeneralSettings,
   useTheme,
 } from '@hooks/persisted';
-import { TabView } from 'react-native-tab-view';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 import { getString } from '@i18n/translations';
 
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
@@ -297,7 +297,7 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
       snapPoints={SNAP_POINTS}
       scrollableRef={scrollableRef}
     >
-      <TabView
+      <SheetTabView
         animationEnabled={!reduceAppAnimations}
         commonOptions={{
           label: renderLabel,

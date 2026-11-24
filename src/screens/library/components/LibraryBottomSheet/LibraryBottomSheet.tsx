@@ -16,7 +16,8 @@ import {
   ViewStyle,
   type ScrollViewInstance,
 } from 'react-native';
-import { TabDescriptor, TabView } from 'react-native-tab-view';
+import { TabDescriptor } from 'react-native-tab-view';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -408,7 +409,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
       scrollableRef={scrollableRef}
     >
       <View style={styles.bottomSheetCtn}>
-        <TabView
+        <SheetTabView
           animationEnabled={!reduceAppAnimations}
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
