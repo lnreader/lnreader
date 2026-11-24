@@ -32,7 +32,7 @@
     "importStaticFiles": "Impor File Statis",
     "novelInsertFailed": "memasukkan novel gagal",
     "networking": "Jaringan",
-    "useFAB": "Gunakan FAB daripada tombol",
+    "useFAB": "Floating reading button",
     "userAgent": "Agen Pengguna",
     "recreateDBIndexes": "Buat ulang indeks DB",
     "recreateDBIndexesToast": "Indeks DB telah dibuat ulang",
@@ -66,7 +66,8 @@
     "dateFormat": "Format tanggal",
     "dateFormatDefault": "Bawaan (%{date})",
     "dynamicColors": "Dinamis",
-    "hideBackdrop": "Sembunyikan latar",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Tema Terang",
     "navbar": "Bilah Navigasi",
     "novelInfo": "Info novel",
@@ -75,6 +76,7 @@
     "relativeTimestampsDescription": "\"Hari ini\" daripada \"%{date}\"",
     "showHistoryInTheNav": "Tampilkan riwayat di navigasi",
     "showUpdatesInTheNav": "Tampilkan pembaruan di navigasi",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Mode tema",
     "themeModeLight": "Terang",
     "themeModeDark": "Gelap",
@@ -261,6 +263,8 @@
     "plugins": "Plugin",
     "removeFromLibrary": "Dihapus dari pustaka",
     "repositories": "Repositori",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Cari sumber",
     "searchResults": "Hasil pencarian",
     "selectNovel": "Pilih Novel",
@@ -463,6 +467,7 @@
     "refreshMetadataDescription": "Periksa sampul dan detail baru saat memperbarui perpustakaan",
     "smartUpdate": "Pembaruan cerdas",
     "smartUpdateSkipCompleted": "Lewati entri dengan status \"Selesai\"",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Lewati entri yang belum dimulai",
     "smartUpdateSkipWithUnread": "Lewati entri dengan bab yang belum dibaca",
     "sortOrder": "Sortir Urutan",
@@ -516,6 +521,7 @@
       },
       "filters": {
         "completed": "Sudah selesai",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Diunduh",
         "started": "Sudah dimulai",
         "unread": "Belum dibaca"
@@ -624,6 +630,14 @@
       "title": "Judul: %{title}"
     },
     "inLibaray": "Di koleksi",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Nama Bab",
       "chapterNumber": "Nomor Bab",
@@ -685,6 +699,8 @@
       "padding": "Jarak",
       "pageReader": "Pembaca halaman (Eksperimental)",
       "pageReaderDescription": "Bagi bab menjadi beberapa halaman, bukan menggulir. Eksperimental — dapat merusak format pada beberapa novel",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Balikkan tombol volume",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
       "disableReaderAnimations": "Disable reader animations",
@@ -717,7 +733,9 @@
     },
     "emptyChapterMessage": "<h2>Bab tidak dapat dimuat</h2><p>Tidak ada konten yang dapat dibaca. Periksa bab tersebut di WebView; jika berhasil dimuat di sana, <a href='%{reportUrl}'>laporkan masalah plugin</a>.</p><p><a href='%{refreshUrl}'>Muat ulang bab</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Bab: %{chapterName}</p>",
     "finished": "Selesai",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "Berikutnya: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Tidak ada bab berikutnya",
     "noPreviousChapter": "Tidak ada bab sebelumnya",
     "searchMinLength": "Masukkan setidaknya %{count} karakter untuk mencari",
@@ -808,9 +826,26 @@
     "newChapters": "Bab baru",
     "novelsUpdated": "%{num} novel diperbarui",
     "searchbar": "Cari di pembaruan",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Tidak dapat mengambil novel",
     "updatesLower": "Pembaruan",
-    "updatingLibrary": "Memperbarui pustaka"
+    "updatingLibrary": "Memperbarui pustaka",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Selamat datang",
