@@ -1,8 +1,14 @@
-import React, { memo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import React, { memo, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { ThemeColors } from '@theme/types';
 import useLoadingColors from '@utils/useLoadingColors';
-import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
 
 const SKELETON_ROWS = [
   { header: 96 },
@@ -21,79 +27,67 @@ interface Props {
   theme: ThemeColors;
 }
 
+// This mounts in the same commit as the tab press, so it uses plain views and
+// a single UI-thread pulse rather than one gradient shimmer per placeholder.
 const PluginsSkeletonLoading: React.FC<Props> = ({ theme }) => {
-  const { width } = useWindowDimensions();
-  const textWidth = Math.max(80, width - 168);
-  const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
-  const shimmerColors = [backgroundColor, highlightColor, backgroundColor];
+  const [, backgroundColor, disableLoadingAnimations] = useLoadingColors(theme);
+  const opacity = useSharedValue(1);
 
-  const renderRow = (
-    { header }: (typeof SKELETON_ROWS)[number],
-    index: number,
-  ) => (
-    <View key={`pluginsLoading${index}`}>
-      {header ? (
-        <View style={styles.headerRow}>
-          <ShimmerPlaceholder
-            style={styles.rounded}
-            shimmerColors={shimmerColors}
-            height={16}
-            width={header}
-            stopAutoRun={disableLoadingAnimations}
-          />
-        </View>
-      ) : null}
-      <View style={styles.pluginRow}>
-        <ShimmerPlaceholder
-          style={styles.icon}
-          shimmerColors={shimmerColors}
-          height={44}
-          width={44}
-          stopAutoRun={disableLoadingAnimations}
-        />
-        <View style={styles.details}>
-          <ShimmerPlaceholder
-            style={[styles.rounded, styles.name]}
-            shimmerColors={shimmerColors}
-            height={14}
-            width={textWidth * 0.7}
-            stopAutoRun={disableLoadingAnimations}
-          />
-          <ShimmerPlaceholder
-            style={styles.rounded}
-            shimmerColors={shimmerColors}
-            height={12}
-            width={textWidth * 0.4}
-            stopAutoRun={disableLoadingAnimations}
-          />
-        </View>
-        <ShimmerPlaceholder
-          style={styles.button}
-          shimmerColors={shimmerColors}
-          height={24}
-          width={24}
-          stopAutoRun={disableLoadingAnimations}
-        />
-      </View>
-    </View>
-  );
+  useEffect(() => {
+    if (!disableLoadingAnimations) {
+      opacity.value = withRepeat(withTiming(0.4, { duration: 800 }), -1, true);
+    }
+    return () => {
+      cancelAnimation(opacity);
+      opacity.value = 1;
+    };
+  }, [disableLoadingAnimations, opacity]);
+
+  const pulseStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  const block = { backgroundColor };
 
   return (
-    <View testID="plugins-skeleton" style={styles.container}>
-      {SKELETON_ROWS.map(renderRow)}
-    </View>
+    <Animated.View
+      testID="plugins-skeleton"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.container, pulseStyle]}
+    >
+      {SKELETON_ROWS.map(({ header }, index) => (
+        <View key={`pluginsLoading${index}`}>
+          {header ? (
+            <View style={styles.headerRow}>
+              <View style={[styles.text, block, { width: header }]} />
+            </View>
+          ) : null}
+          <View style={styles.pluginRow}>
+            <View style={[styles.icon, block]} />
+            <View style={styles.details}>
+              <View style={[styles.text, styles.name, block]} />
+              <View style={[styles.text, styles.description, block]} />
+            </View>
+            <View style={[styles.button, block]} />
+          </View>
+        </View>
+      ))}
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
     borderRadius: 12,
+    height: 24,
     marginHorizontal: 8,
+    width: 24,
   },
   container: {
     flex: 1,
     overflow: 'hidden',
+  },
+  description: {
+    height: 12,
+    width: '40%',
   },
   details: {
     flex: 1,
@@ -106,9 +100,12 @@ const styles = StyleSheet.create({
   },
   icon: {
     borderRadius: 4,
+    height: 44,
+    width: 44,
   },
   name: {
     marginBottom: 6,
+    width: '70%',
   },
   pluginRow: {
     alignItems: 'center',
@@ -117,8 +114,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
-  rounded: {
+  text: {
     borderRadius: 6,
+    height: 14,
   },
 });
 
