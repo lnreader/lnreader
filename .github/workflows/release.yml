@@ -31,10 +31,12 @@ jobs:
   release-android:
     name: Build Draft Release
     if: >-
-      github.ref == 'refs/heads/master' &&
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
       github.actor_id == vars.RELEASE_ACTOR_ID &&
       github.triggering_actor == vars.RELEASE_ACTOR_LOGIN
     environment: release
+    env:
+      RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
 
@@ -121,13 +123,13 @@ jobs:
             git commit -m "chore: Release v$RELEASE_VERSION"
           fi
 
-          git fetch origin master
+          git fetch origin "$RELEASE_BRANCH"
           REMOTE_VERSION="$(
             node -e "
               const { execFileSync } = require('child_process');
               const contents = execFileSync(
                 'git',
-                ['show', 'origin/master:package.json'],
+                ['show', 'origin/' + process.env.RELEASE_BRANCH + ':package.json'],
                 { encoding: 'utf8' },
               );
               process.stdout.write(JSON.parse(contents).version);
@@ -135,8 +137,8 @@ jobs:
           )"
 
           if [ "$REMOTE_VERSION" = "$RELEASE_VERSION" ]; then
-            echo "Release commit is already on master; resuming from it"
-            git checkout --detach origin/master
+            echo "Release commit is already on $RELEASE_BRANCH; resuming from it"
+            git checkout --detach "origin/$RELEASE_BRANCH"
             echo "RELEASE_ALREADY_PUSHED=true" >> "$GITHUB_ENV"
           else
             echo "RELEASE_ALREADY_PUSHED=false" >> "$GITHUB_ENV"
@@ -215,9 +217,9 @@ jobs:
       - name: Push Release Commit
         run: |
           if [ "$RELEASE_ALREADY_PUSHED" = "true" ]; then
-            echo "Release commit is already on master"
+            echo "Release commit is already on $RELEASE_BRANCH"
           else
-            git push origin HEAD:master
+            git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
           fi
 
       - name: Create Draft GitHub Release
