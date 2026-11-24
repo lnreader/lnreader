@@ -83,6 +83,7 @@ const loadReader = async ({
             pageReader,
             bionicReading,
             TTSEnable: true,
+            verticalSeekbar: true,
           },
           novel: { id: 1, name: 'Novel' },
           chapter,
@@ -198,6 +199,51 @@ const loadReader = async ({
 
 const restoredTop = (progress: number) =>
   (CHAPTER_HEIGHT * progress) / 100 - VIEWPORT.height;
+
+describe('reader seekbar', () => {
+  it('reaches 100 percent when the chapter-ending controls are in view', async () => {
+    const { window, scrollCalls, close } = await loadReader();
+    const { document } = window;
+    const { Event } = document.defaultView!;
+    window.reader.setAdjacentChapters({
+      nextChapter: makeChapter(2, 0),
+      strings: { nextChapter: 'Next chapter' },
+    });
+    const documentHeight = CHAPTER_HEIGHT + 160;
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      value: documentHeight,
+    });
+    window.scrollTo({ top: restoredTop(100) });
+    window.dispatchEvent(new Event('scroll'));
+    await settle(window);
+
+    expect(document.getElementById('reader-percentage')?.textContent).toBe(
+      '98%',
+    );
+
+    const slider = document.getElementById('scrollbar-slider')!;
+    Object.defineProperty(slider, 'clientHeight', { value: 100 });
+    const thumb = document.getElementById('scrollbar-thumb-wrapper')!;
+    thumb.dispatchEvent(new Event('touchstart'));
+    thumb.dispatchEvent(
+      Object.assign(new Event('touchmove'), {
+        changedTouches: [{ clientY: 100 }],
+      }),
+    );
+    thumb.dispatchEvent(new Event('touchend'));
+    window.dispatchEvent(new Event('scroll'));
+    await settle(window);
+
+    expect(scrollCalls.at(-1)).toBe(documentHeight - VIEWPORT.height);
+    expect(document.getElementById('reader-percentage')?.textContent).toBe(
+      '100%',
+    );
+    const nextButton =
+      document.querySelector<HTMLButtonElement>('.next-button');
+    expect(nextButton?.textContent).toBe('Next chapter');
+    close();
+  });
+});
 
 describe('reader.setChapter', () => {
   it('bolds word prefixes without changing HTML tags, attributes, comments, or entities', async () => {

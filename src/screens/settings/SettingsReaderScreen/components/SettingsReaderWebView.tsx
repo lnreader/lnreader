@@ -1,5 +1,5 @@
 import { StatusBar, StyleSheet } from 'react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import WebView from 'react-native-webview';
 
 import {
@@ -76,7 +76,6 @@ const SettingsReaderWebView = ({
     'unread': 1,
     'updatedTime': null,
   };
-  const [hidden, setHidden] = useState(true);
   const batteryLevel = useBatteryLevel();
   const readerSettings = useChapterReaderSettings();
   const chapterGeneralSettings = useChapterGeneralSettings();
@@ -95,6 +94,8 @@ const SettingsReaderWebView = ({
   );
   const webViewCSS = `
   <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/pageReader.css">
+  <link rel="stylesheet" href="${assetsUriPrefix}/css/toolWrapper.css">
   <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     :root {
@@ -171,12 +172,9 @@ const SettingsReaderWebView = ({
         const event: WebViewPostEvent = JSON.parse(ev.nativeEvent.data);
         switch (event.type) {
           case 'hide':
-            if (hidden) {
-              webViewRef.current?.injectJavaScript('reader.hidden.val = true');
-            } else {
-              webViewRef.current?.injectJavaScript('reader.hidden.val = false');
-            }
-            setHidden(!hidden);
+            webViewRef.current?.injectJavaScript(
+              'reader.hidden.val = !reader.hidden.val; true;',
+            );
             break;
           case 'tts-queue': {
             const payload = event.data as
