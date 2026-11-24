@@ -32,7 +32,7 @@
     "importStaticFiles": "Nhập Tập tin Tĩnh",
     "novelInsertFailed": "lỗi khi thêm truyện",
     "networking": "Mạng",
-    "useFAB": "Sử dụng nút nổi",
+    "useFAB": "Floating reading button",
     "userAgent": "Tác nhân Người dùng",
     "recreateDBIndexes": "Tạo lại index DB",
     "recreateDBIndexesToast": "Đã tạo lại index DB",
@@ -66,7 +66,8 @@
     "dateFormat": "Định dạng thời gian",
     "dateFormatDefault": "Mặc định (%{date})",
     "dynamicColors": "Linh hoạt",
-    "hideBackdrop": "Ẩn bóng",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Màu sáng",
     "navbar": "Thanh điều hướng",
     "novelInfo": "Thông tin truyện",
@@ -75,6 +76,7 @@
     "relativeTimestampsDescription": "\"Hôm nay\" thay vì \"%{date}\"",
     "showHistoryInTheNav": "Hiển thị mục lịch sử",
     "showUpdatesInTheNav": "Hiển thị mục cập nhật",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Chế độ chủ đề",
     "themeModeLight": "Sáng",
     "themeModeDark": "Tối",
@@ -261,6 +263,8 @@
     "plugins": "Plugin",
     "removeFromLibrary": "Đã xóa khỏi thư viện",
     "repositories": "Nguồn lưu trữ",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Tìm nguồn truyện",
     "searchResults": "Kết quả tìm kiếm",
     "selectNovel": "Chọn truyện",
@@ -463,6 +467,7 @@
     "refreshMetadataDescription": "Kiểm tra ảnh bìa và mô tả khi cập nhật thự viện",
     "smartUpdate": "Cập nhật thông minh",
     "smartUpdateSkipCompleted": "Bỏ qua các mục có trạng thái \"Đã hoàn thành\"",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Bỏ qua các mục chưa bắt đầu",
     "smartUpdateSkipWithUnread": "Bỏ qua các mục với chương chưa đọc",
     "sortOrder": "Thứ tự sắp xếp",
@@ -516,6 +521,7 @@
       },
       "filters": {
         "completed": "Đã hoàn thành",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Đã tải về",
         "started": "Đã bắt đầu",
         "unread": "Chưa đọc"
@@ -624,6 +630,14 @@
       "title": "Tiêu đề: %{title}"
     },
     "inLibaray": "Trong thư viện",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Tên Chương",
       "chapterNumber": "Chương Số",
@@ -685,6 +699,8 @@
       "padding": "Khoảng đệm",
       "pageReader": "Đọc phân trang (Thử nghiệm)",
       "pageReaderDescription": "Phân chương ra thành trang thay vì cuộn. Thử nghiệm - có thể làm hỏng format một số truyện",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Đảo nút âm lượng",
       "invertVolumeButtonsDescription": "Đảo nút tăng và giảm âm lượng cho trang trước và sau",
       "disableReaderAnimations": "Disable reader animations",
@@ -717,7 +733,9 @@
     },
     "emptyChapterMessage": "<h2>Chương không tải được</h2><p>Không có nội dung đọc được tìm thấy. Kiểm tra chương trong WebView; nếu tải được ở đấy, <a href='%{reportUrl}'>báo cáo vấn đề plugin</a>.</p><p><a href='%{refreshUrl}'>Tải lại chương</a></p><p>Plugin: %{pluginId}<br>Truyện: %{novelName}<br>Chương: %{chapterName}</p>",
     "finished": "Đã xong",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "Tiếp: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Không có chương kế tiếp",
     "noPreviousChapter": "Không có chương kế tiếp",
     "searchMinLength": "Nhập ít nhất %{count} chương để tìm kiếm",
@@ -808,9 +826,26 @@
     "newChapters": "chương mới",
     "novelsUpdated": "%{num} truyện được cập nhật",
     "searchbar": "Tìm kiếm bản cập nhật",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Không thể lấy được truyện",
     "updatesLower": "cập nhập",
-    "updatingLibrary": "Đang cập nhật thư viện"
+    "updatingLibrary": "Đang cập nhật thư viện",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Xin chào",
