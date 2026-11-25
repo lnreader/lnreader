@@ -164,6 +164,7 @@ const SettingsReaderScreen = () => {
             initialLayout={{ width: screenWidth }}
             lazy
             animationEnabled={!reduceAppAnimations}
+            swipeEnabled={false}
           />
         </View>
       </BottomSheet>

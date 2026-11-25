@@ -9,13 +9,16 @@ import React, {
   useState,
 } from 'react';
 import {
-  Dimensions,
   StyleSheet,
   View,
   useWindowDimensions,
   type HostInstance,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaFrame,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import { runWhenIdle } from '@utils/runWhenIdle';
@@ -99,6 +102,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   const contentRef = useRef<HostInstance>(null);
   const { bottom, top } = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
+  const frame = useSafeAreaFrame();
   const theme = useTheme();
   const { reduceAppAnimations = false } = useAppSettings();
   const animated = !reduceAppAnimations;
@@ -121,8 +125,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     [animated],
   );
 
-  // The sheet is centred and anchored to the bottom of the window, and its
-  // content fills the sheet, so the content's size gives its real origin.
+  // The sheet is centred and anchored to the bottom of the app's window, and
+  // its content fills the sheet, so the content's size gives its real origin.
+  // The root frame tracks the window in split-screen, unlike the screen size.
   const measureInSheet = useCallback<MeasureInWindow>(
     (node, callback) => {
       const content = contentRef.current;
@@ -133,10 +138,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       content.measureInWindow(
         (contentX, contentY, contentWidth, contentHeight) => {
           node.measureInWindow((x, y, nodeWidth, nodeHeight) => {
-            const screen = Dimensions.get('screen');
             callback(
-              x - contentX + (width - contentWidth) / 2,
-              y - contentY + (screen.height - contentHeight),
+              x - contentX + frame.x + (frame.width - contentWidth) / 2,
+              y - contentY + frame.y + frame.height - contentHeight,
               nodeWidth,
               nodeHeight,
             );
@@ -144,7 +148,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         },
       );
     },
-    [width],
+    [frame.height, frame.width, frame.x, frame.y],
   );
 
   const detents = useMemo(
@@ -175,12 +179,15 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       onDidPresent={event => onChange?.(event.nativeEvent.index)}
       onDidDismiss={() => onChange?.(-1)}
     >
-      {/* The sheet's container extends behind the navigation bar. */}
-      <View ref={contentRef} style={[styles.flex, { paddingBottom: bottom }]}>
-        <MeasureInWindowContext.Provider value={measureInSheet}>
-          {children}
-        </MeasureInWindowContext.Provider>
-      </View>
+      {/* The native sheet lives outside the app's gesture handler root, and
+          its container extends behind the navigation bar. */}
+      <GestureHandlerRootView style={styles.flex}>
+        <View ref={contentRef} style={[styles.flex, { paddingBottom: bottom }]}>
+          <MeasureInWindowContext.Provider value={measureInSheet}>
+            {children}
+          </MeasureInWindowContext.Provider>
+        </View>
+      </GestureHandlerRootView>
     </TrueSheet>
   );
 };

@@ -1,12 +1,14 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Animated,
+  I18nManager,
   LayoutChangeEvent,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type {
   NavigationState,
   Route,
@@ -30,16 +32,24 @@ interface SheetTabViewProps<T extends Route> {
   renderLazyPlaceholder?: (props: { route: T }) => ReactNode;
   initialLayout?: { width?: number; height?: number };
   animationEnabled?: boolean;
+  /** Swipe horizontally across the content to move to the adjacent tab. */
+  swipeEnabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
 const INDICATOR_DURATION = 200;
+// Leaves short or diagonal drags to the sheet and its vertical lists.
+const SWIPE_ACTIVE_OFFSET = 20;
+const SWIPE_FAIL_OFFSET = 15;
+const SWIPE_DISTANCE = 64;
+const SWIPE_VELOCITY = 500;
 
 /**
  * A tab view for native bottom sheets. react-native-tab-view's pager is a
  * Compose view on Android, and its composition stays bound to the first window
  * the sheet was shown in, so it stops switching pages after the sheet is
- * dismissed once. This keeps every visited tab mounted and toggles visibility.
+ * dismissed once. This keeps every visited tab mounted and toggles visibility,
+ * and switches tabs on a horizontal swipe instead of a draggable pager.
  */
 function SheetTabView<T extends Route>({
   navigationState,
@@ -51,6 +61,7 @@ function SheetTabView<T extends Route>({
   renderLazyPlaceholder,
   initialLayout,
   animationEnabled = true,
+  swipeEnabled = true,
   style,
 }: SheetTabViewProps<T>) {
   const { index, routes } = navigationState;
@@ -99,6 +110,31 @@ function SheetTabView<T extends Route>({
     [index, onIndexChange, routes],
   );
 
+  const swipe = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(swipeEnabled && routes.length > 1)
+        .activeOffsetX([-SWIPE_ACTIVE_OFFSET, SWIPE_ACTIVE_OFFSET])
+        .failOffsetY([-SWIPE_FAIL_OFFSET, SWIPE_FAIL_OFFSET])
+        .runOnJS(true)
+        .withTestId('sheet-tab-swipe')
+        .onEnd(({ translationX, velocityX }) => {
+          const towardsStart =
+            translationX > SWIPE_DISTANCE || velocityX > SWIPE_VELOCITY;
+          const towardsEnd =
+            translationX < -SWIPE_DISTANCE || velocityX < -SWIPE_VELOCITY;
+          if (towardsStart === towardsEnd) {
+            return;
+          }
+          const step = (towardsEnd ? 1 : -1) * (I18nManager.isRTL ? -1 : 1);
+          const next = routes[index + step];
+          if (next) {
+            jumpTo(next.key);
+          }
+        }),
+    [index, jumpTo, routes, swipeEnabled],
+  );
+
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const { height, width } = event.nativeEvent.layout;
     setLayout(prev =>
@@ -119,26 +155,28 @@ function SheetTabView<T extends Route>({
   return (
     <View onLayout={handleLayout} style={[styles.container, style]}>
       {renderTabBar({ ...sceneProps, navigationState, options })}
-      <View style={styles.scenes}>
-        {routes.map((route, i) => {
-          const focused = i === index;
-          const mounted = !lazy || focused || visited.has(route.key);
-          return (
-            <View
-              key={route.key}
-              accessibilityElementsHidden={!focused}
-              importantForAccessibility={
-                focused ? 'auto' : 'no-hide-descendants'
-              }
-              style={[styles.scene, !focused && styles.hidden]}
-            >
-              {mounted
-                ? renderScene({ ...sceneProps, route })
-                : renderLazyPlaceholder?.({ route })}
-            </View>
-          );
-        })}
-      </View>
+      <GestureDetector gesture={swipe}>
+        <View style={styles.scenes}>
+          {routes.map((route, i) => {
+            const focused = i === index;
+            const mounted = !lazy || focused || visited.has(route.key);
+            return (
+              <View
+                key={route.key}
+                accessibilityElementsHidden={!focused}
+                importantForAccessibility={
+                  focused ? 'auto' : 'no-hide-descendants'
+                }
+                style={[styles.scene, !focused && styles.hidden]}
+              >
+                {mounted
+                  ? renderScene({ ...sceneProps, route })
+                  : renderLazyPlaceholder?.({ route })}
+              </View>
+            );
+          })}
+        </View>
+      </GestureDetector>
     </View>
   );
 }

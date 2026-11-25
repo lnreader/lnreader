@@ -1,7 +1,12 @@
 import '../../__tests__/mocks';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { fireEvent, render, screen } from '@test-utils';
+import { act, fireEvent, render, screen } from '@test-utils';
+import { State } from 'react-native-gesture-handler';
+import {
+  fireGestureHandler,
+  getByGestureTestId,
+} from 'react-native-gesture-handler/jest-utils';
 
 import SheetTabView from '../SheetTabView';
 
@@ -31,11 +36,20 @@ const routes = [
 
 const mountedScenes: string[] = [];
 
-const Harness = ({ lazy }: { lazy?: boolean }) => {
-  const [index, setIndex] = useState(0);
+const Harness = ({
+  initialIndex = 0,
+  lazy,
+  swipeEnabled,
+}: {
+  initialIndex?: number;
+  lazy?: boolean;
+  swipeEnabled?: boolean;
+}) => {
+  const [index, setIndex] = useState(initialIndex);
   return (
     <SheetTabView
       lazy={lazy}
+      swipeEnabled={swipeEnabled}
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderTabBar={({ jumpTo }) => (
@@ -91,5 +105,49 @@ describe('SheetTabView', () => {
     expect(
       screen.getByTestId('scene-Sort', { includeHiddenElements: true }),
     ).toBeTruthy();
+  });
+
+  const swipe = (translationX: number) =>
+    act(() => {
+      fireGestureHandler(getByGestureTestId('sheet-tab-swipe'), [
+        { state: State.BEGAN, translationX: 0, velocityX: 0 },
+        { state: State.ACTIVE, translationX: translationX / 2, velocityX: 0 },
+        { state: State.END, translationX, velocityX: 0 },
+      ]);
+    });
+
+  it('moves to the next tab when swiping left', () => {
+    render(<Harness />);
+
+    swipe(-120);
+    expect(screen.getByTestId('scene-Sort')).toBeTruthy();
+  });
+
+  it('moves to the previous tab when swiping right', () => {
+    render(<Harness initialIndex={1} />);
+
+    swipe(120);
+    expect(screen.getByTestId('scene-Filter')).toBeTruthy();
+  });
+
+  it('stays on the first tab when swiping right from it', () => {
+    render(<Harness />);
+
+    swipe(120);
+    expect(screen.getByTestId('scene-Filter')).toBeTruthy();
+  });
+
+  it('ignores short swipes', () => {
+    render(<Harness />);
+
+    swipe(-30);
+    expect(screen.getByTestId('scene-Filter')).toBeTruthy();
+  });
+
+  it('ignores swipes when swiping is disabled', () => {
+    render(<Harness swipeEnabled={false} />);
+
+    swipe(-120);
+    expect(screen.getByTestId('scene-Filter')).toBeTruthy();
   });
 });
