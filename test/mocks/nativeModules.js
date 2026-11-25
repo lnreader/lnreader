@@ -110,3 +110,13 @@ jest.mock('@modules/native-zip-archive', () => ({
 jest.mock('@lodev09/react-native-true-sheet', () =>
   jest.requireActual('@lodev09/react-native-true-sheet/mock'),
 );
+
+jest.mock('@expo/ui/jetpack-compose', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    Host: ({ children }) => React.createElement(View, null, children),
+    TriStateCheckbox: ({ state }) =>
+      React.createElement(View, { testID: `checkbox-${state}` }),
+  };
+});
