@@ -16,6 +16,19 @@ import {
   deleteAllHistory,
 } from '../HistoryQueries';
 
+const getLastReadAt = (novelId: number) =>
+  (
+    getTestDb().sqlite.executeSync(
+      'SELECT lastReadAt FROM Novel WHERE id = ?',
+      [novelId],
+    ).rows[0] as { lastReadAt: string | null }
+  ).lastReadAt;
+
+const hasUpdateTrigger = () =>
+  getTestDb().sqlite.executeSync(
+    "SELECT name FROM sqlite_master WHERE type = 'trigger' AND name = 'update_novel_stats_on_update'",
+  ).rows.length === 1;
+
 describe('HistoryQueries', () => {
   beforeEach(() => {
     const testDb = setupTestDatabase();
@@ -122,6 +135,23 @@ describe('HistoryQueries', () => {
       expect(history.map(item => item.novelId)).not.toContain(novelId1);
       expect(history.map(item => item.novelId)).toContain(novelId2);
     });
+
+    it("should reset only the selected novel's lastReadAt", async () => {
+      const testDb = getTestDb();
+
+      const novelId1 = await insertTestNovel(testDb, { inLibrary: true });
+      const novelId2 = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId1);
+      const chapterId2 = await insertTestChapter(testDb, novelId2);
+
+      await insertHistory(chapterId1);
+      await insertHistory(chapterId2);
+      await deleteNovelHistory(novelId1);
+
+      expect(getLastReadAt(novelId1)).toBeNull();
+      expect(getLastReadAt(novelId2)).not.toBeNull();
+      expect(hasUpdateTrigger()).toBe(true);
+    });
   });
 
   describe('deleteAllHistory', () => {
@@ -140,6 +170,23 @@ describe('HistoryQueries', () => {
 
       const history = await getHistoryFromDb();
       expect(history).toEqual([]);
+    });
+
+    it('should reset lastReadAt and keep novel stats tracking reads', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId);
+      const chapterId2 = await insertTestChapter(testDb, novelId);
+
+      await insertHistory(chapterId1);
+      await deleteAllHistory();
+
+      expect(getLastReadAt(novelId)).toBeNull();
+      expect(hasUpdateTrigger()).toBe(true);
+
+      await insertHistory(chapterId2);
+      expect(getLastReadAt(novelId)).not.toBeNull();
     });
   });
 });

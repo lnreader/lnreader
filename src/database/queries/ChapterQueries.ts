@@ -228,7 +228,7 @@ export const markChaptersUnread = async (
  * themselves. Uses `writeRaw` because Drizzle's op-sqlite transaction can
  * commit the DROP before an async body finishes.
  */
-const withoutChapterUpdateTrigger = async (
+export const withoutChapterUpdateTrigger = async (
   fn: (tx: Transaction) => Promise<void>,
 ): Promise<void> => {
   try {
