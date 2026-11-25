@@ -19,6 +19,7 @@ export const initialAppSettings = {
   smartUpdateSkipCompleted: false,
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
+  smartUpdateSkipNotDue: false,
   automaticLibraryUpdateIntervalHours: 0,
   automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,
@@ -68,6 +69,7 @@ export const initialChapterGeneralSettings = {
   TTSEnable: true,
   pageReaderInvertVolumeButtons: false,
   pageReaderDisableAnimation: false,
+  infiniteScroll: false,
 };
 
 export const initialChapterReaderSettings = {

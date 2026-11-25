@@ -9,6 +9,7 @@ export enum FilterTypes {
   CheckboxGroup = 'Checkbox',
   Switch = 'Switch',
   ExcludableCheckboxGroup = 'XCheckbox',
+  MultiText = 'MultiText',
 }
 
 interface FilterValueMap {
@@ -20,6 +21,7 @@ interface FilterValueMap {
     include?: string[];
     exclude?: string[];
   };
+  [FilterTypes.MultiText]: string[];
 }
 
 type WithOptions =
@@ -31,7 +33,7 @@ type OptionsOf<T extends FilterTypes> = T extends WithOptions
   ? { options: readonly FilterOption[] }
   : object;
 
-type WithAutocomplete = FilterTypes.TextInput;
+type WithAutocomplete = FilterTypes.TextInput | FilterTypes.MultiText;
 
 type AutocompleteOf<T extends FilterTypes> = T extends WithAutocomplete
   ? { autocomplete?: boolean }
@@ -88,6 +90,7 @@ const valueCheck: FilterValueCheckMap = {
     v,
   ): v is { include?: string[]; exclude?: string[] } =>
     !!v && typeof v === 'object' && !Array.isArray(v),
+  [FilterTypes.MultiText]: (v): v is string[] => Array.isArray(v),
 };
 
 export const isFilterValue = <T extends FilterTypes>(

@@ -12,10 +12,11 @@ import {
   ViewProps,
   ViewStyle,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Color from 'color';
 
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 
 import Button from '../Button/Button';
 
@@ -48,13 +49,14 @@ const DialogRoot = ({
   testID = 'dialog',
 }: DialogRootProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const backdropColor = Color(theme.scrim ?? '#000000')
     .alpha(0.32)
     .string();
 
   return (
     <NativeModal
-      animationType="fade"
+      animationType={reduceAppAnimations ? 'none' : 'fade'}
       hardwareAccelerated
       navigationBarTranslucent
       onRequestClose={onDismiss}
@@ -62,7 +64,10 @@ const DialogRoot = ({
       transparent
       visible={visible}
     >
-      <View style={[styles.modal, { backgroundColor: backdropColor }]}>
+      {/* A native modal is its own root, outside the app's gesture root. */}
+      <GestureHandlerRootView
+        style={[styles.modal, { backgroundColor: backdropColor }]}
+      >
         <Pressable
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
@@ -98,7 +103,7 @@ const DialogRoot = ({
             </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
-      </View>
+      </GestureHandlerRootView>
     </NativeModal>
   );
 };

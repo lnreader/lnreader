@@ -13,6 +13,7 @@ import ExportNovelAsEpubButton from './ExportNovelAsEpubButton';
 import { NovelInfo } from '@database/types';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { MaterialDesignIconName } from '@type/icon';
+import { NOVEL_APPBAR_HEIGHT } from '../novelLayout';
 
 const NovelAppbarAction = memo(
   ({
@@ -248,7 +249,7 @@ const NovelAppbar = ({
       exiting={SlideOutUp.duration(250)}
       style={headerOpacityStyle}
     >
-      <Appbar.Header theme={headerTheme}>
+      <Appbar.Header style={styles.header} theme={headerTheme}>
         <Appbar.BackAction onPress={goBack} />
 
         {hideActions ? null : (
@@ -300,6 +301,9 @@ const NovelAppbar = ({
 };
 
 const styles = StyleSheet.create({
+  header: {
+    height: NOVEL_APPBAR_HEIGHT,
+  },
   row: {
     flexDirection: 'row',
     position: 'absolute',

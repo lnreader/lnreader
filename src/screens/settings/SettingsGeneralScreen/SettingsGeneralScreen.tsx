@@ -22,6 +22,7 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
     chapterDownloadCooldownMs,
     disableHapticFeedback,
     disableLoadingAnimations,
+    reduceAppAnimations = false,
     inactivityTimeoutMs,
     setAppSettings,
     timeTrackingEnabled,
@@ -33,6 +34,7 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('generalSettings')}
         handleGoBack={navigation.goBack}
         theme={theme}
@@ -84,6 +86,17 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
             value={disableHapticFeedback}
             onPress={() =>
               setAppSettings({ disableHapticFeedback: !disableHapticFeedback })
+            }
+            theme={theme}
+          />
+          <SettingSwitch
+            label={getString('generalSettingsScreen.reduceAppAnimations')}
+            description={getString(
+              'generalSettingsScreen.reduceAppAnimationsDesc',
+            )}
+            value={reduceAppAnimations}
+            onPress={() =>
+              setAppSettings({ reduceAppAnimations: !reduceAppAnimations })
             }
             theme={theme}
           />

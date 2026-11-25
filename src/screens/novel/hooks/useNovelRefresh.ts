@@ -4,7 +4,7 @@ import { BackgroundTaskEnqueuer } from '@services/backgroundTasks';
 import { updateNovel } from '@services/updates/LibraryUpdateQueries';
 import { getString } from '@i18n/translations';
 import { showToast } from '@utils/showToast';
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
 
 interface UseNovelRefreshOptions {
   novel: NovelInfo | undefined;
@@ -22,7 +22,7 @@ export const useNovelRefresh = ({
   reloadNovel,
 }: UseNovelRefreshOptions) => {
   const [updating, setUpdating] = useState(false);
-  const { refetchLibrary } = useLibraryContext();
+  const { refetchLibrary } = useLibraryActions();
 
   const refresh = useCallback(async () => {
     if (!novel || updating) {
@@ -35,6 +35,7 @@ export const useNovelRefresh = ({
         downloadNewChapters,
         refreshNovelMetadata,
         enqueue,
+        manual: true,
       });
       await Promise.all([
         reloadNovel(),

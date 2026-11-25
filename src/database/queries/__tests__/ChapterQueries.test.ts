@@ -33,8 +33,10 @@ import {
   getNextChapter,
   getDownloadedChapters,
   getNovelDownloadedChapters,
+  getDownloadedChapterIds,
   getUpdatedOverviewFromDb,
   getDetailedUpdatesFromDb,
+  getGroupedUpdateChaptersQuery,
   isChapterDownloaded,
   bookmarkChapter,
   bookmarkChapters,
@@ -275,6 +277,79 @@ describe('ChapterQueries', () => {
       const novelId = await insertTestNovel(testDb, { inLibrary: true });
 
       await expect(markAllChaptersRead(novelId)).resolves.not.toThrow();
+    });
+
+    it('should update chaptersUnread for every selected novel and keep the update trigger', async () => {
+      const testDb = getTestDb();
+      const getChaptersUnread = (id: number) =>
+        testDb.sqlite.executeSync(
+          'SELECT chaptersUnread FROM Novel WHERE id = ?',
+          [id],
+        ).rows[0]?.chaptersUnread;
+
+      const novelA = await insertTestNovel(testDb, { inLibrary: true });
+      const novelB = await insertTestNovel(testDb, { inLibrary: true });
+      const untouched = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelA, {
+        unread: true,
+      });
+      await insertTestChapter(testDb, novelA, { unread: true });
+      await insertTestChapter(testDb, novelB, { unread: true });
+      await insertTestChapter(testDb, untouched, { unread: true });
+
+      await markAllChaptersRead([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(0);
+      expect(getChaptersUnread(novelB)).toBe(0);
+      expect(getChaptersUnread(untouched)).toBe(1);
+      const untouchedChapters = await getNovelChapters(untouched);
+      expect(untouchedChapters.every(c => c.unread === true)).toBe(true);
+
+      await markAllChaptersUnread([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(2);
+      expect(getChaptersUnread(novelB)).toBe(1);
+
+      await testDb.drizzleDb
+        .update(chapterSchema)
+        .set({ unread: false })
+        .where(eq(chapterSchema.id, chapterId))
+        .run();
+
+      expect(getChaptersUnread(novelA)).toBe(1);
+    });
+
+    it('should roll back and keep the update trigger when a statement fails', async () => {
+      const testDb = getTestDb();
+      const getTriggers = () =>
+        (
+          testDb.sqlite.executeSync(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name",
+          ).rows as { name: string }[]
+        ).map(row => row.name);
+      const triggersBefore = getTriggers();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { unread: true });
+      testDb.sqlite.executeSync(
+        "CREATE TRIGGER fail_novel_update BEFORE UPDATE ON Novel BEGIN SELECT RAISE(ABORT, 'forced failure'); END",
+      );
+
+      try {
+        await expect(markAllChaptersRead(novelId)).rejects.toThrow();
+        await expect(markAllChaptersUnread(novelId)).rejects.toThrow();
+      } finally {
+        testDb.sqlite.executeSync('DROP TRIGGER fail_novel_update');
+      }
+
+      expect(getTriggers()).toEqual(triggersBefore);
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+    });
+
+    it('should handle an empty selection', async () => {
+      await expect(markAllChaptersRead([])).resolves.not.toThrow();
+      await expect(markAllChaptersUnread([])).resolves.not.toThrow();
     });
   });
 
@@ -1504,6 +1579,34 @@ describe('ChapterQueries', () => {
     });
   });
 
+  it('loads only the requested update dates for each novel in newest-first order', async () => {
+    const db = getTestDb();
+    const novel = await insertTestNovel(db);
+    const other = await insertTestNovel(db);
+    const morning = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T09:00:00Z',
+    });
+    const evening = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T18:00:00Z',
+    });
+    await insertTestChapter(db, novel, { updatedTime: '2026-11-21T09:00:00Z' });
+    await insertTestChapter(db, other, { updatedTime: '2026-11-20T09:00:00Z' });
+    const otherUpdate = await insertTestChapter(db, other, {
+      updatedTime: '2026-11-19T09:00:00Z',
+    });
+
+    const rows = await getGroupedUpdateChaptersQuery([
+      [novel, '2026-11-20'],
+      [other, '2026-11-19'],
+    ]).all();
+
+    expect(rows.map(({ id, updateDate }) => [id, updateDate])).toEqual([
+      [evening, '2026-11-20'],
+      [morning, '2026-11-20'],
+      [otherUpdate, '2026-11-19'],
+    ]);
+  });
+
   describe('getDownloadedChapters', () => {
     it('should return all downloaded chapters with novel info', async () => {
       const testDb = getTestDb();
@@ -1520,6 +1623,21 @@ describe('ChapterQueries', () => {
       expect(result.length).toBeGreaterThanOrEqual(1);
       expect(result[0].isDownloaded).toBe(true);
       expect(result[0].pluginId).toBe('test-plugin');
+    });
+  });
+
+  describe('getDownloadedChapterIds', () => {
+    it("returns only the novel's downloaded chapter ids", async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      const downloaded = await insertTestChapter(testDb, novelId, {
+        isDownloaded: true,
+      });
+      await insertTestChapter(testDb, novelId, { isDownloaded: false });
+      await insertTestChapter(testDb, otherNovelId, { isDownloaded: true });
+
+      expect(await getDownloadedChapterIds(novelId)).toEqual([downloaded]);
     });
   });
 

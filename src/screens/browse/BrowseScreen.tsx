@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { TabView, type TabBarProps } from 'react-native-tab-view';
 
 import { useSearch } from '@hooks';
-import { useTheme } from '@hooks/persisted';
+import { useAppSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
+import { runWhenIdle } from '@utils/runWhenIdle';
 
 import { SafeAreaView, SearchbarV2, TopTabBar } from '@components';
 import { BrowseScreenProps } from '@navigators/types';
@@ -23,6 +24,7 @@ const routes: BrowseRoute[] = [
 
 const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const { searchText, setSearchText, clearSearchbar } = useSearch();
   const layout = useWindowDimensions();
 
@@ -61,6 +63,10 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
   );
 
   const [index, setIndex] = React.useState(0);
+  // Mounting the Plugins tab on its first tap freezes the tab switch, so mount
+  // it offscreen once the Browse screen has settled instead.
+  const [preloadPlugins, setPreloadPlugins] = useState(false);
+  useEffect(() => runWhenIdle(() => setPreloadPlugins(true), 1000), []);
   const openPlugins = useCallback(() => setIndex(1), []);
   const navigationState = useMemo(() => ({ index, routes }), [index]);
   const initialLayout = useMemo(
@@ -143,13 +149,14 @@ const BrowseScreen = ({ navigation }: BrowseScreenProps) => {
         menuButtons={menuButtons}
       />
       <TabView<BrowseRoute>
+        animationEnabled={!reduceAppAnimations}
         navigationState={navigationState}
         initialLayout={initialLayout}
         renderScene={renderScene}
         onIndexChange={setIndex}
         renderTabBar={renderTabBar}
         lazy
-        lazyPreloadDistance={0}
+        lazyPreloadDistance={preloadPlugins ? 1 : 0}
         swipeEnabled={false}
       />
     </SafeAreaView>

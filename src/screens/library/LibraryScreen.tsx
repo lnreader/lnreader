@@ -100,7 +100,8 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   } = useLibraryContext();
 
   const { importNovel } = useImport();
-  const { useLibraryFAB = false } = useAppSettings();
+  const { reduceAppAnimations = false, useLibraryFAB = false } =
+    useAppSettings();
 
   const { isLoading: isHistoryLoading, history, error } = useHistory();
   const historyByNovelId = useMemo(() => {
@@ -429,13 +430,13 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   );
 
   const markAllRead = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersRead(id)));
+    await markAllChaptersRead(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
 
   const markAllUnread = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersUnread(id)));
+    await markAllChaptersUnread(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
@@ -517,6 +518,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
           />
         ) : categories.length ? (
           <TabView
+            animationEnabled={!reduceAppAnimations}
             commonOptions={{
               label: renderLabel,
             }}

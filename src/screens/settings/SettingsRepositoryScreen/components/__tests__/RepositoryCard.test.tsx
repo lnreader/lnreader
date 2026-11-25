@@ -27,6 +27,7 @@ jest.mock('@hooks/persisted/useTheme', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTheme: () => mockTheme,
 }));
 

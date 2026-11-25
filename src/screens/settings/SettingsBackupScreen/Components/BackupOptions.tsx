@@ -120,12 +120,14 @@ export const BackupOptionsList = ({
 };
 
 type BackupOptionsDialogProps = BackupOptionsListProps & {
+  automatic?: boolean;
   visible: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
 export const BackupOptionsDialog = ({
+  automatic,
   visible,
   options,
   onCancel,
@@ -139,9 +141,19 @@ export const BackupOptionsDialog = ({
     visible={visible}
   >
     <Dialog.Header>
-      <Dialog.Title>{getString('backupScreen.options.title')}</Dialog.Title>
+      <Dialog.Title>
+        {getString(
+          automatic
+            ? 'backupScreen.automaticBackupContents'
+            : 'backupScreen.options.title',
+        )}
+      </Dialog.Title>
       <Dialog.Description>
-        {getString('backupScreen.options.description')}
+        {getString(
+          automatic
+            ? 'backupScreen.automaticBackupContentsDescription'
+            : 'backupScreen.options.description',
+        )}
       </Dialog.Description>
     </Dialog.Header>
     <BackupOptionsList onChange={onChange} options={options} theme={theme} />
@@ -149,7 +161,7 @@ export const BackupOptionsDialog = ({
       <Dialog.Action title={getString('common.cancel')} onPress={onCancel} />
       <Dialog.Action
         disabled={!hasSelectedBackupOption(options)}
-        title={getString('common.backup')}
+        title={getString(automatic ? 'common.save' : 'common.backup')}
         onPress={onConfirm}
       />
     </Dialog.Actions>

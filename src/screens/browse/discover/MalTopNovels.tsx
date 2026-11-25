@@ -171,7 +171,7 @@ const BrowseMalScreen = ({ navigation }: BrowseMalScreenProps) => {
               <View style={styles.paddingVertical}>
                 <ActivityIndicator color={theme.primary} />
               </View>
-            ) : null
+            ) : undefined
           }
         />
       )}

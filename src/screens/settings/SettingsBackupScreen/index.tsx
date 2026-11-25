@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { Portal } from 'react-native-paper';
 import {
   DEFAULT_BACKUP_OPTIONS,
+  resolveBackupOptions,
   type BackupOptions,
 } from '@services/backup/options';
 import { BackupOptionsDialog } from './Components/BackupOptions';
@@ -33,12 +34,14 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
     automaticBackupIntervalHours = 0,
     automaticBackupDirectoryName,
     automaticBackupDirectoryUri,
+    automaticBackupOptions,
     lastAutomaticBackupAt,
     setAppSettings,
   } = useAppSettings();
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
     ...DEFAULT_BACKUP_OPTIONS,
   });
+  const [editingAutomaticBackup, setEditingAutomaticBackup] = useState(false);
   const {
     value: backupOptionsVisible,
     setFalse: closeBackupOptions,
@@ -93,7 +96,19 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
 
   const createLocalBackup = () => {
     setBackupOptions({ ...DEFAULT_BACKUP_OPTIONS });
+    setEditingAutomaticBackup(false);
     openBackupOptions();
+  };
+
+  const editAutomaticBackupOptions = () => {
+    setBackupOptions(resolveBackupOptions(automaticBackupOptions));
+    setEditingAutomaticBackup(true);
+    openBackupOptions();
+  };
+
+  const saveAutomaticBackupOptions = () => {
+    setAppSettings({ automaticBackupOptions: backupOptions });
+    closeBackupOptions();
   };
 
   const chooseLocalBackupDestination = async () => {
@@ -136,6 +151,7 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('common.backup')}
         handleGoBack={() => navigation.goBack()}
         theme={theme}
@@ -194,6 +210,11 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
             onPress={selectAutomaticBackupDirectory}
             theme={theme}
           />
+          <List.Item
+            title={getString('backupScreen.automaticBackupContents')}
+            onPress={editAutomaticBackupOptions}
+            theme={theme}
+          />
           {lastAutomaticBackupAt ? (
             <List.InfoItem
               title={getString('backupScreen.lastAutomaticBackup', {
@@ -215,9 +236,14 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
         closeModal={closeSelfHostModal}
       />
       <BackupOptionsDialog
+        automatic={editingAutomaticBackup}
         onCancel={closeBackupOptions}
         onChange={setBackupOptions}
-        onConfirm={chooseLocalBackupDestination}
+        onConfirm={
+          editingAutomaticBackup
+            ? saveAutomaticBackupOptions
+            : chooseLocalBackupDestination
+        }
         options={backupOptions}
         theme={theme}
         visible={backupOptionsVisible}

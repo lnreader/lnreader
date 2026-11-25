@@ -4,8 +4,11 @@ import {
 } from '@database/queries/LibraryQueries';
 import type { BackgroundTaskMetadata } from '@services/backgroundTasks/contracts';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
+import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
 import { updateNovel } from '../LibraryUpdateQueries';
 import { updateLibrary } from '../index';
+import { showToast } from '@utils/showToast';
+import { startOfLocalDay, toLocalDay } from '../releaseSchedule';
 
 jest.mock('@database/queries/LibraryQueries', () => ({
   getLibraryNovelsForGlobalUpdate: jest.fn(),
@@ -23,6 +26,10 @@ jest.mock('@utils/showToast', () => ({
 jest.mock('@utils/mmkv/mmkv', () => ({
   MMKVStorage: { set: jest.fn() },
   getMMKVObject: jest.fn(() => ({})),
+}));
+jest.mock('@services/widgets', () => ({
+  reportLibraryUpdateProgress: jest.fn(),
+  syncWidgets: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('@hooks/persisted/useUpdates', () => ({
   LAST_UPDATE_TIME: 'LAST_UPDATE_TIME',
@@ -133,6 +140,23 @@ describe('updateLibrary', () => {
     expect(mockedGetLibraryNovels).not.toHaveBeenCalled();
   });
 
+  it('reports progress to the home screen widgets and syncs them when done', async () => {
+    mockedGetLibraryNovels.mockResolvedValue([
+      novel(1, 'source-a', 'A One'),
+      novel(2, 'source-b', 'B One'),
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    const progress = jest.mocked(reportLibraryUpdateProgress).mock.calls;
+    expect(progress[0]).toEqual([true]);
+    expect(progress).toContainEqual([true, 0, 2]);
+    expect(progress).toContainEqual([true, 2, 2]);
+    expect(progress[progress.length - 1]).toEqual([false]);
+    expect(syncWidgets).toHaveBeenCalledTimes(1);
+  });
+
   it('passes smart update preferences to the global update query', async () => {
     mockedGetMMKVObject.mockReturnValue({
       smartUpdateSkipCompleted: true,
@@ -155,6 +179,42 @@ describe('updateLibrary', () => {
       },
     );
   });
+
+  it('skips novels not expected to release by tomorrow and reports how many', async () => {
+    const today = toLocalDay(new Date());
+    const dueOn = (days: number) => startOfLocalDay(today + days).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryNovels.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Overdue'), nextUpdate: dueOn(-3) },
+      { ...novel(2, 'source-a', 'Tomorrow'), nextUpdate: dueOn(1) },
+      { ...novel(3, 'source-b', 'Next week'), nextUpdate: dueOn(7) },
+      { ...novel(4, 'source-c', 'Unpredicted'), nextUpdate: null },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel.mock.calls.map(([, , id]) => id).sort()).toEqual([
+      1, 2, 4,
+    ]);
+    expect(showToast).toHaveBeenCalledWith(
+      '1 novel skipped because no release was expected today',
+    );
+  });
+
+  it('checks every novel in a category update even when prediction is on', async () => {
+    const farAway = startOfLocalDay(toLocalDay(new Date()) + 20).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryWithCategory.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Later'), nextUpdate: farAway },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({ categoryId: 2 }, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel).toHaveBeenCalledTimes(1);
+  });
+
   it('chunks each download task immediately without changing its identity', async () => {
     mockedGetMMKVObject.mockReturnValue({ downloadNewChapters: true });
     const novelId = 7;

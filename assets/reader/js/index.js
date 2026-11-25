@@ -1,5 +1,17 @@
 const { div, p, img, button, span } = van.tags;
 
+const seekbarEnd = () => {
+  const { chapterTop, chapterHeight, chapterElement, segments } = reader;
+  const chapterEnd = chapterTop + chapterHeight;
+  // The ending controls follow the last chapter in the document.
+  return segments[segments.length - 1].element === chapterElement
+    ? Math.max(
+        chapterEnd,
+        (document.scrollingElement ?? document.documentElement).scrollHeight,
+      )
+    : chapterEnd;
+};
+
 /**
  * Registers a callback for the scrolled-through ratio, coalesced to one call
  * per frame. Every scroll-driven indicator shares this: separate `scroll`
@@ -17,9 +29,13 @@ const onScrollRatio = (() => {
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
+      // Settles which chapter is current first: the ratio is relative to it.
+      continuousScroll.update();
+      const end = seekbarEnd();
+      const viewportBottom = window.scrollY + reader.layoutHeight;
       const ratio = Math.min(
         1,
-        (window.scrollY + reader.layoutHeight) / reader.chapterHeight,
+        (viewportBottom - reader.chapterTop) / (end - reader.chapterTop),
       );
       for (const callback of callbacks) {
         callback(ratio);
@@ -33,25 +49,63 @@ const onScrollRatio = (() => {
   return callback => callbacks.push(callback);
 })();
 
+/** Where infinite scrolling stands, shown below the last loaded chapter. */
+const ContinuousScrollStatus = () => {
+  switch (continuousScroll.status.val) {
+    case 'end':
+      return div(div({ class: 'info-text' }, reader.strings.noNextChapter));
+    case 'error':
+      return div(
+        div(
+          { class: 'info-text' },
+          [reader.strings.nextChapterLoadFailed, continuousScroll.errorMessage]
+            .filter(Boolean)
+            .join(': '),
+        ),
+        button(
+          {
+            class: 'next-button',
+            onclick: e => {
+              e.stopPropagation();
+              continuousScroll.retry();
+            },
+          },
+          reader.strings.retry,
+        ),
+      );
+    default:
+      return div(
+        div({ class: 'info-text' }, reader.strings.loadingNextChapter),
+      );
+  }
+};
+
 const ChapterEnding = () => {
   return () =>
-    reader.generalSettings.val.pageReader
+    // Subscribes to chapter swaps, which replace `reader.strings`.
+    reader.chapterVersion.val >= 0 && reader.generalSettings.val.pageReader
       ? div()
-      : div(div({ class: 'info-text' }, reader.strings.finished), () =>
-          // Reading `adjacentVersion` subscribes this binding to the adjacent
-          // chapters being pushed in after the chapter itself was rendered.
-          reader.adjacentVersion.val >= 0 && reader.nextChapter
-            ? button(
-                {
-                  class: 'next-button',
-                  onclick: e => {
-                    e.stopPropagation();
-                    reader.post({ type: 'next' });
+      : reader.generalSettings.val.infiniteScroll
+      ? ContinuousScrollStatus()
+      : div(() =>
+          div(
+            div({ class: 'info-text' }, reader.strings.finished),
+            // Reading `adjacentVersion` subscribes this binding to the adjacent
+            // chapters (and the chapter's strings) being pushed in after the
+            // chapter itself was rendered.
+            reader.adjacentVersion.val >= 0 && reader.nextChapter
+              ? button(
+                  {
+                    class: 'next-button',
+                    onclick: e => {
+                      e.stopPropagation();
+                      reader.post({ type: 'next' });
+                    },
                   },
-                },
-                reader.strings.nextChapter,
-              )
-            : div({ class: 'info-text' }, reader.strings.noNextChapter),
+                  reader.strings.nextChapter,
+                )
+              : div({ class: 'info-text' }, reader.strings.noNextChapter),
+          ),
         );
 };
 
@@ -62,9 +116,6 @@ const Scrollbar = () => {
   let lock = false;
   const percentage = van.state(0);
   const update = ratio => {
-    if (ratio === undefined) {
-      ratio = (window.scrollY + reader.layoutHeight) / reader.chapterHeight;
-    }
     if (ratio > 1) {
       ratio = 1;
     }
@@ -77,7 +128,14 @@ const Scrollbar = () => {
     percentage.val = parseInt(ratio * 100);
     if (lock) {
       window.scrollTo({
-        top: reader.chapterHeight * ratio - reader.layoutHeight,
+        // Kept inside the current chapter: the top of the screen crossing into
+        // the previous one would make that one current.
+        top: Math.max(
+          reader.chapterTop,
+          reader.chapterTop +
+            (seekbarEnd() - reader.chapterTop) * ratio -
+            reader.layoutHeight,
+        ),
         behavior: 'instant',
       });
     }
@@ -212,6 +270,11 @@ const ModalWrapper = () => {
       } else {
         hideImage();
       }
+    }
+  });
+  document.addEventListener('ln:chapter-change', () => {
+    if (imgSrc.val) {
+      hideImage();
     }
   });
   return div(ImageModal({ src: imgSrc }));
@@ -563,6 +626,15 @@ const TTSController = () => {
       innerHTML: nextParagraphIcon,
       onclick: runCommand(() => tts.next()),
     }),
+    button({
+      id: 'TTS-SleepTimer',
+      type: 'button',
+      class: 'tts-control-button tts-sleep-timer',
+      'aria-label': 'Set sleep timer',
+      innerHTML: sleepTimerIcon,
+      onclick: runCommand(() => reader.post({ type: 'tts-sleep-timer' })),
+    }),
+    span({ id: 'TTS-TimerStatus', 'aria-hidden': 'true' }),
     span({ id: 'TTS-Progress', 'aria-hidden': 'true' }),
   );
 };

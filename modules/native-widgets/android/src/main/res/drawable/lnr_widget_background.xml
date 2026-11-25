@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded widget surface for launchers below Android 12, where Glance's cornerRadius is ignored. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lnr_widget_bg" />
+    <corners android:radius="24dp" />
+</shape>

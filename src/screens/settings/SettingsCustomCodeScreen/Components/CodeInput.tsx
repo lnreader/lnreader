@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@hooks/persisted';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 import { getString } from '@i18n/translations';
 import {
   SimpleCodeEditor,
@@ -63,6 +64,7 @@ const CodeInput = ({
   scrollSink,
 }: CodeInputProps) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const codeFieldStyle = React.useMemo(
     () => ({
       color: theme.onBackground,
@@ -71,9 +73,33 @@ const CodeInput = ({
     [theme],
   );
 
+  const topFieldStyle = React.useMemo(
+    () => [
+      codeFieldStyle,
+      styles.fontStyle,
+      styles.fakeTextInput,
+      styles.topField,
+    ],
+    [codeFieldStyle],
+  );
+  const editorStyle = React.useMemo(
+    () => [codeFieldStyle, styles.fontStyle, styles.codeField],
+    [codeFieldStyle],
+  );
+  const bottomFieldStyle = React.useMemo(
+    () => [
+      styles.fontStyle,
+      styles.fakeTextInput,
+      styles.bottomField,
+      codeFieldStyle,
+    ],
+    [codeFieldStyle],
+  );
+
   const startValue = language === 'js' ? START_JS_CODE : START_CSS_CODE;
 
-  const lines = useStableLineModels(code);
+  const deferredCode = React.useDeferredValue(code);
+  const lines = useStableLineModels(deferredCode);
   const startLines = useStableLineModels(startValue);
   const debounce = React.useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = React.useState<string | undefined>(undefined);
@@ -109,7 +135,7 @@ const CodeInput = ({
             maxHeight: error ? 35 : 0,
             padding: error ? 8 : 0,
             transitionProperty: ['maxHeight', 'padding'],
-            transitionDuration: '150ms',
+            transitionDuration: reduceAppAnimations ? '0ms' : '150ms',
           },
         ]}
       >
@@ -122,12 +148,7 @@ const CodeInput = ({
       </Animated.View>
 
       <MemoizedHighlightedCode
-        style={[
-          codeFieldStyle,
-          styles.fontStyle,
-          styles.fakeTextInput,
-          styles.topField,
-        ]}
+        style={topFieldStyle}
         isDark={theme.isDark}
         mode={language}
         lines={startLines}
@@ -144,18 +165,13 @@ const CodeInput = ({
         lines={lines}
         startLine={startLines.length}
         isDark={theme.isDark}
-        style={[codeFieldStyle, styles.fontStyle, styles.codeField]}
+        style={editorStyle}
         scrollSink={scrollSink}
       />
       {language !== 'js' ? null : (
         <MemoizedHighlightedCode
           startLine={lines.length + startLines.length}
-          style={[
-            styles.fontStyle,
-            styles.fakeTextInput,
-            styles.bottomField,
-            codeFieldStyle,
-          ]}
+          style={bottomFieldStyle}
           mode={language}
           isDark={theme.isDark}
           value={END_JS_CODE}

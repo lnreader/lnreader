@@ -1,1 +1,27 @@
-{let e,t,r,o,n,l,s,f,i,h,w,a,d,u,_,c,S,g,y,b,m,v,j,x,O; s = Object.getPrototypeOf,i = {},h = s(f = {isConnected:1}),w = s(s),a = (e,t,r,o)=>(e ?? (setTimeout(r,o),new Set())).add(t),d = (e,t,o)=>{let n = r; r = t; try {return e(o);} catch (e){return console.error(e),o;} finally {r = n;}},u = e=>e.filter(e=>e.t?.isConnected),_ = e=>n = a(n,e,()=>{for (let e of n){e.o = u(e.o),e.l = u(e.l);}n = l;},1e3),c = {get val(){return r?.i?.add(this),this.rawVal;},get oldVal(){return r?.i?.add(this),this.h;},set val(o){r?.u?.add(this),o !== this.rawVal && (this.rawVal = o,this.o.length + this.l.length ? (t?.add(this),e = a(e,this,x)) : this.h = o);}},S = e=>({__proto__:c,rawVal:e,h:e,o:[],l:[]}),g = (e,t)=>{let r = {i:new Set(),u:new Set()},n = {f:e},l = o; o = []; let s = d(e,r,t); s = (s ?? document).nodeType ? s : new Text(s); for (let e of r.i){r.u.has(e) || (_(e),e.o.push(n));} for (let e of o){e.t = s;} return o = l,n.t = s;},y = (e,t = S(),r)=>{let n = {i:new Set(),u:new Set()},l = {f:e,s:t}; l.t = r ?? o?.push(l) ?? f,t.val = d(e,n,t.rawVal); for (let e of n.i){n.u.has(e) || (_(e),e.l.push(l));} return t;},b = (e,...t)=>{for (let r of t.flat(1 / 0)){let t = s(r ?? 0),o = t === c ? g(()=>r.val) : t === w ? g(r) : r; o != l && e.append(o);} return e;},m = (e,t,...r)=>{let [o,...n] = s(r[0] ?? 0) === h ? r : [{},...r],f = e ? document.createElementNS(e,t) : document.createElement(t); for (let [e,r] of Object.entries(o)){let o = t=>t ? Object.getOwnPropertyDescriptor(t,e) ?? o(s(t)) : l,n = t + ',' + e,h = i[n] ?? (i[n] = o(s(f))?.set ?? 0),a = e.startsWith('on') ? (t,r)=>{let o = e.slice(2); f.removeEventListener(o,r),f.addEventListener(o,t);} : h ? h.bind(f) : f.setAttribute.bind(f,e),d = s(r ?? 0); e.startsWith('on') || d === w && (r = y(r),d = c),d === c ? g(()=>(a(r.val,r.h),f)) : a(r);} return b(f,n);},v = e=>({get:(t,r)=>m.bind(l,e,r)}),j = (e,t)=>t ? t !== e && e.replaceWith(t) : e.remove(),x = ()=>{let r = 0,o = [...e].filter(e=>e.rawVal !== e.h); do {t = new Set(); for (let e of new Set(o.flatMap(e=>e.l = u(e.l)))){y(e.f,e.s,e.t),e.t = l;}} while (++r < 100 && (o = [...t]).length); let n = [...e].filter(e=>e.rawVal !== e.h); e = l; for (let e of new Set(n.flatMap(e=>e.o = u(e.o)))){j(e.t,g(e.f,e.t)),e.t = l;} for (let e of n){e.h = e.rawVal;}},O = {tags:new Proxy(e=>new Proxy(m,v(e)),v()),hydrate:(e,t)=>j(e,g(t,e)),add:b,state:S,derive:y},window.van = O;}
+// VanJS 1.6.2 (MIT), from https://github.com/vanjs-org/van/blob/1.6.2/public/van-1.6.2.nomodule.min.js
+// prettier-ignore
+{let e,t,r,o,s,l,n,i,f,h,w,a,u,d,c,_,S,g,y,b,m,v,j,x,O;n=Object.getPrototypeOf,f={},h=n(i={isConnected:1}),w=n(n),a=(e,t,r,o)=>(e??(o?setTimeout(r,o):queueMicrotask(r),new Set)).add(t),u=(e,t,o)=>{let s=r;r=t;try{return e(o)}catch(e){return console.error(e),o}finally{r=s}},d=e=>e.filter(e=>e.t?.isConnected),c=e=>s=a(s,e,()=>{for(let e of s)e.o=d(e.o),e.l=d(e.l);s=l},1e3),_={get val(){return r?.i?.add(this),this.rawVal},get oldVal(){return r?.i?.add(this),this.h},set val(o){r?.u?.add(this),o!==this.rawVal&&(this.rawVal=o,this.o.length+this.l.length?(t?.add(this),e=a(e,this,x)):this.h=o)}},S=e=>({__proto__:_,rawVal:e,h:e,o:[],l:[]}),g=(e,t)=>{let r={i:new Set,u:new Set},s={f:e},l=o;o=[];let n=u(e,r,t);n=(n??document).nodeType?n:new Text(n);for(let e of r.i)r.u.has(e)||(c(e),e.o.push(s));for(let e of o)e.t=n;return o=l,s.t=n},y=(e,t=S(),r)=>{let s={i:new Set,u:new Set},l={f:e,s:t};l.t=r??o?.push(l)??i,t.val=u(e,s,t.rawVal);for(let e of s.i)s.u.has(e)||(c(e),e.l.push(l));return t},b=(e,...t)=>{for(let r of t.flat(1/0)){let t=n(r??0),o=t===_?g(()=>r.val):t===w?g(r):r;o!=l&&e.append(o)}return e},m=(e,t,...r)=>{let[{is:o,...s},...i]=n(r[0]??0)===h?r:[{},...r],a=e?document.createElementNS(e,t,{is:o}):document.createElement(t,{is:o});for(let[r,i]of Object.entries(s)){let s=e=>e&&(Object.getOwnPropertyDescriptor(e,r)??s(n(e))),h=e||o||t.includes("-")?s(n(a))?.set:f[t+","+r]??=s(n(a))?.set??0,u=r.startsWith("on"),d=u?(e,t)=>{let o=r.slice(2);a.removeEventListener(o,t),a.addEventListener(o,e)}:h?h.bind(a):a.setAttribute.bind(a,r),c=n(i??0);u||c===w&&(i=y(i,l,a),c=_),c===_?g(()=>(d(i.val,i.h),a)):d(i)}return b(a,i)},v=e=>({get:(t,r)=>m.bind(l,e,r)}),j=(e,t)=>t?t!==e&&e.replaceWith(t):e.remove(),x=()=>{let r=100,o=[...e].filter(e=>e.rawVal!==e.h);do{t=new Set;for(let e of new Set(o.flatMap(e=>e.l=d(e.l))))y(e.f,e.s,e.t),e.t=l}while(--r&&(o=[...t]).length);let s=[...e].filter(e=>e.rawVal!==e.h);e=l;for(let e of new Set(s.flatMap(e=>e.o=d(e.o))))j(e.t,g(e.f,e.t)),e.t=l;for(let e of s)e.h=e.rawVal},O={tags:new Proxy(e=>new Proxy(m,v(e)),v()),hydrate:(e,t)=>j(e,g(t,e)),add:b,state:S,derive:y},window.van=O;}
+
+/*
+MIT License
+
+Copyright (c) 2023 VanJS (Vanilla JavaScript)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/

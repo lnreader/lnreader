@@ -112,6 +112,7 @@ const SettingsCustomCode = ({ navigation }: CustomCodeSettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('common.custom_code')}
         handleGoBack={() => {
           Keyboard.dismiss();

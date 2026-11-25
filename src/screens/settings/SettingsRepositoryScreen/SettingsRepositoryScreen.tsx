@@ -59,7 +59,10 @@ const SettingsBrowseScreen = ({
         } else {
           await createRepository(repositoryUrl);
         }
-        refreshPlugins();
+        const { failedRepositoryCount } = await refreshPlugins();
+        if (failedRepositoryCount) {
+          showToast(getString('browseScreen.repositoriesUnreachable'));
+        }
       }
     },
     [refreshPlugins],
@@ -69,9 +72,12 @@ const SettingsBrowseScreen = ({
     async (repository: Repository) => {
       try {
         await setRepositoryEnabled(repository.id, !repository.enabled);
-        await refreshPlugins({
+        const { failedRepositoryCount } = await refreshPlugins({
           clearUnavailableUpdates: repository.enabled,
         });
+        if (failedRepositoryCount) {
+          showToast(getString('browseScreen.repositoriesUnreachable'));
+        }
       } catch (error) {
         showToast(error instanceof Error ? error.message : String(error));
       }
@@ -100,6 +106,7 @@ const SettingsBrowseScreen = ({
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('browseScreen.repositories')}
         handleGoBack={() => {
           if (navigation.canGoBack()) {

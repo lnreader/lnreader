@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScrollView } from 'react-native';
 
 import { Dialog, RadioButton } from '@components';
 
@@ -26,20 +27,22 @@ const FontPickerModal: React.FC<FontPickerModalProps> = ({
       <Dialog.Title>
         {getString('readerScreen.bottomSheet.fontStyle')}
       </Dialog.Title>
-      <Dialog.List>
-        {readerFonts.map(item => (
-          <RadioButton
-            key={item.fontFamily}
-            status={currentFont === item.fontFamily}
-            onPress={() =>
-              setChapterReaderSettings({ fontFamily: item.fontFamily })
-            }
-            label={item.name}
-            labelStyle={{ fontFamily: item.fontFamily }}
-            theme={theme}
-          />
-        ))}
-      </Dialog.List>
+      <Dialog.ScrollArea>
+        <ScrollView>
+          {readerFonts.map(item => (
+            <RadioButton
+              key={item.fontFamily}
+              status={currentFont === item.fontFamily}
+              onPress={() =>
+                setChapterReaderSettings({ fontFamily: item.fontFamily })
+              }
+              label={item.name}
+              labelStyle={{ fontFamily: item.fontFamily }}
+              theme={theme}
+            />
+          ))}
+        </ScrollView>
+      </Dialog.ScrollArea>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss}>
           {getString('common.ok')}

@@ -18,6 +18,7 @@ const NavigationTab: React.FC = () => {
     pageReader = false,
     pageReaderInvertVolumeButtons = false,
     pageReaderDisableAnimation = false,
+    infiniteScroll = false,
     autoScroll = false,
     autoScrollInterval = 10,
     autoScrollOffset = null,
@@ -108,6 +109,19 @@ const NavigationTab: React.FC = () => {
           }
           theme={theme}
         />
+        <SettingSwitch
+          label={getString('readerScreen.bottomSheet.disableReaderAnimations')}
+          description={getString(
+            'readerScreen.bottomSheet.disableReaderAnimationsDescription',
+          )}
+          value={pageReaderDisableAnimation}
+          onPress={() =>
+            setChapterGeneralSettings({
+              pageReaderDisableAnimation: !pageReaderDisableAnimation,
+            })
+          }
+          theme={theme}
+        />
       </View>
 
       <View style={styles.section}>
@@ -121,6 +135,19 @@ const NavigationTab: React.FC = () => {
           onPress={() => setChapterGeneralSettings({ pageReader: !pageReader })}
           theme={theme}
         />
+        {!pageReader && (
+          <SettingSwitch
+            label={getString('readerScreen.bottomSheet.infiniteScroll')}
+            description={getString(
+              'readerScreen.bottomSheet.infiniteScrollDescription',
+            )}
+            value={infiniteScroll}
+            onPress={() =>
+              setChapterGeneralSettings({ infiniteScroll: !infiniteScroll })
+            }
+            theme={theme}
+          />
+        )}
         {pageReader && (
           <>
             <SettingSwitch
@@ -132,21 +159,6 @@ const NavigationTab: React.FC = () => {
               onPress={() =>
                 setChapterGeneralSettings({
                   pageReaderInvertVolumeButtons: !pageReaderInvertVolumeButtons,
-                })
-              }
-              theme={theme}
-            />
-            <SettingSwitch
-              label={getString(
-                'readerScreen.bottomSheet.disablePageTransitions',
-              )}
-              description={getString(
-                'readerScreen.bottomSheet.disablePageTransitionsDescription',
-              )}
-              value={pageReaderDisableAnimation}
-              onPress={() =>
-                setChapterGeneralSettings({
-                  pageReaderDisableAnimation: !pageReaderDisableAnimation,
                 })
               }
               theme={theme}

@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputInstance,
+} from 'react-native';
 
 import { IconButtonV2 } from '@components';
 import { ThemeColors } from '@theme/types';
@@ -28,7 +35,7 @@ const ReaderSearchbar = ({
   resetSearchResult,
   resetSearch,
 }: ReaderSearchbarProps) => {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { searchChapterText, clearChapterSearch, navigateChapterSearch } =
     useChapterContext();

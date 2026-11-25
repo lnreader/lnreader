@@ -16,7 +16,7 @@ this repo is the reader app itself.
 pnpm install
 ```
 
-- Node >= 22.11.0, pnpm (see `packageManager` in `package.json`, currently pnpm@11.20.0).
+- Node >= 22.13.0, pnpm (see `packageManager` in `package.json`, currently pnpm@11.20.0).
 - This is a React Native/Expo app targeting Android; there is no web or iOS
   build target maintained here. Building/running the app requires an Android
   SDK and a device/emulator, which is generally not available in an agent

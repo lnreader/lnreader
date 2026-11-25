@@ -1,4 +1,3 @@
-import React from 'react';
 import { View } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import {
@@ -7,20 +6,19 @@ import {
   ScrollSink,
 } from '../SimpleCodeEditor';
 
-// The real Prism bundles are ESM under dist/esm and the renderer output is
-// irrelevant for the windowing behavior under test.
-jest.mock('react-syntax-highlighter', () => {
-  const MockLight = Object.assign(
-    ({ children }: { children?: React.ReactNode }) => children,
-    { registerLanguage: jest.fn() },
-  );
-  return { PrismLight: MockLight };
-});
-jest.mock('react-syntax-highlighter/dist/esm/languages/prism/css', () => ({}));
-jest.mock(
-  'react-syntax-highlighter/dist/esm/languages/prism/javascript',
-  () => ({}),
-);
+// refractor and the Prism styles are ESM and the token output is irrelevant
+// for the windowing behavior under test.
+jest.mock('refractor/core', () => ({
+  refractor: {
+    register: jest.fn(),
+    highlight: (code: string) => ({
+      type: 'root',
+      children: [{ type: 'text', value: code }],
+    }),
+  },
+}));
+jest.mock('refractor/css', () => ({}));
+jest.mock('refractor/javascript', () => ({}));
 jest.mock(
   'react-syntax-highlighter/dist/esm/styles/prism/material-dark',
   () => ({}),

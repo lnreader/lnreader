@@ -12,6 +12,7 @@ final class HybridTtsSession : HybridTtsSessionSpec() {
         initialIndex: Double,
         metadata: TtsMetadata,
         settings: TtsSettings,
+        options: TtsLoadOptions,
     ): Promise<Unit> {
         return MainThreadPromise.run {
             TtsPlaybackStore.load(
@@ -19,6 +20,7 @@ final class HybridTtsSession : HybridTtsSessionSpec() {
                 initialIndex.toInt(),
                 metadata,
                 settings,
+                options,
             )
         }
     }
@@ -47,6 +49,12 @@ final class HybridTtsSession : HybridTtsSessionSpec() {
     override fun updateSettings(settings: TtsSettings): Promise<Unit> =
         MainThreadPromise.run { TtsPlaybackStore.updateSettings(settings) }
 
+    override fun setSleepTimer(config: TtsSleepTimerConfig): Promise<Unit> =
+        MainThreadPromise.run { TtsPlaybackStore.setSleepTimer(config) }
+
+    override fun cancelSleepTimer(): Promise<Unit> =
+        MainThreadPromise.run(TtsPlaybackStore::cancelSleepTimer)
+
     override fun addOnStateChangedListener(
         listener: (state: TtsPlaybackState) -> Unit,
     ): ListenerSubscription {
@@ -63,5 +71,11 @@ final class HybridTtsSession : HybridTtsSessionSpec() {
         listener: (message: String) -> Unit,
     ): ListenerSubscription {
         return ListenerSubscription(TtsPlaybackStore.addErrorListener(listener))
+    }
+
+    override fun addOnSleepTimerChangedListener(
+        listener: (state: TtsSleepTimerState) -> Unit,
+    ): ListenerSubscription {
+        return ListenerSubscription(TtsPlaybackStore.addSleepTimerListener(listener))
     }
 }

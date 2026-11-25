@@ -1,0 +1,60 @@
+{
+  "name": "nitro-chapter-list",
+  "version": "0.0.1",
+  "description": "Native RecyclerView chapter list for LNReader",
+  "main": "lib/index",
+  "module": "lib/index",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/fix-prefab.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "nitro.json",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\""
+  },
+  "keywords": [
+    "react-native",
+    "nitro",
+    "recyclerview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LNReader/lnreader"
+  },
+  "author": "LNReader",
+  "license": "MIT",
+  "homepage": "https://github.com/LNReader/lnreader#readme",
+  "codegenConfig": {
+    "name": "NitroChapterListSpec",
+    "type": "components",
+    "jsSrcsDir": "src/fabric",
+    "android": {
+      "javaPackageName": "com.margelo.nitro.nitrochapterlist"
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "nitrogen": "*",
+    "react": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-nitro-modules": "*",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": "*"
+  }
+}

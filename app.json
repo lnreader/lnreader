@@ -31,11 +31,10 @@
       ],
       "expo-localization",
       [
-        "react-native-edge-to-edge",
+        "expo-navigation-bar",
         {
-          "android": {
-            "enforceNavigationBarContrast": false
-          }
+          "enforceContrast": false,
+          "style": "light"
         }
       ],
       "expo-web-browser",
@@ -53,7 +52,8 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-image"
     ],
     "android": {
       "versionCode": 4196356,
@@ -73,9 +73,25 @@
       ],
       "intentFilters": [
         {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": [
+            {
+              "mimeType": "application/epub+zip"
+            },
+            {
+              "mimeType": "application/epub"
+            }
+          ]
+        },
+        {
           "action": "SEND",
           "category": ["DEFAULT"],
-          "data": [{ "mimeType": "text/plain" }]
+          "data": [
+            {
+              "mimeType": "text/plain"
+            }
+          ]
         }
       ]
     },

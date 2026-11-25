@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget surface below Android 12 (lnr_widget_background); matches WidgetTheme's fallback palette. -->
+    <color name="lnr_widget_bg">#FFF4F2FA</color>
+</resources>

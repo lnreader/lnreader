@@ -30,6 +30,7 @@ jest.mock('@modules/native-file', () => ({
     ExternalCachesDirectoryPath: '/mock/caches',
     writeFile: jest.fn(),
     readFile: jest.fn(() => ''),
+    fileSize: jest.fn(() => Promise.resolve(0)),
     copyFile: jest.fn(),
     copyFileToDirectory: jest.fn(() =>
       Promise.resolve({ uri: '/mock/export.epub', size: 1 }),
@@ -72,8 +73,19 @@ jest.mock('@modules/native-share-receiver', () => ({
   __esModule: true,
   default: {
     getInitialSharedText: jest.fn(async () => null),
+    takeOpenedEpubs: jest.fn(async () => []),
+    stageOpenedEpub: jest.fn(),
     addListener: jest.fn(() => ({ remove: jest.fn() })),
     removeListeners: jest.fn(),
+  },
+}));
+
+jest.mock('@modules/native-widgets', () => ({
+  __esModule: true,
+  default: {
+    hasWidgets: jest.fn().mockResolvedValue(false),
+    setSnapshot: jest.fn().mockResolvedValue(),
+    setLibraryUpdateState: jest.fn().mockResolvedValue(),
   },
 }));
 
@@ -82,6 +94,14 @@ jest.mock('@modules/native-zip-archive', () => ({
   default: {
     zip: jest.fn().mockResolvedValue(),
     unzip: jest.fn().mockResolvedValue(),
+    readEntry: jest.fn().mockResolvedValue(null),
+    openArchive: jest.fn().mockResolvedValue(1),
+    closeArchive: jest.fn().mockResolvedValue(),
+    archiveEntryExists: jest.fn().mockResolvedValue(false),
+    archiveEntrySize: jest.fn().mockResolvedValue(0),
+    readArchiveDir: jest.fn().mockResolvedValue([]),
+    readArchiveFile: jest.fn().mockResolvedValue(''),
+    extractArchiveFile: jest.fn().mockResolvedValue(),
     remoteUnzip: jest.fn().mockResolvedValue(),
     remoteZip: jest.fn().mockResolvedValue(''),
   },

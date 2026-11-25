@@ -1,0 +1,3 @@
+{
+  "ignorePatterns": "/src/i18n/languages/*/strings.json\n!/src/i18n/languages/en/strings.json"
+}

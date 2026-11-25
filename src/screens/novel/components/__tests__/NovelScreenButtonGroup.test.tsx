@@ -8,14 +8,21 @@ import {
 import NovelScreenButtonGroup from '../NovelScreenButtonGroup/NovelScreenButtonGroup';
 import { NovelInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
+import { startOfLocalDay, toLocalDay } from '@services/updates/releaseSchedule';
 
 const mockSetNovel = jest.fn();
 const mockUpdateNovelCategories = jest.fn();
 const mockGetCategoriesWithCount = jest.fn();
 const mockRefetchLibrary = jest.fn();
+const mockSetNovelFetchInterval = jest.fn();
+
+jest.mock('@services/updates/novelSchedule', () => ({
+  setNovelFetchInterval: (...args: unknown[]) =>
+    mockSetNovelFetchInterval(...args),
+}));
 
 jest.mock('@components/Context/LibraryContext', () => ({
-  useLibraryContext: () => ({
+  useLibraryActions: () => ({
     refetchLibrary: mockRefetchLibrary,
   }),
 }));
@@ -35,6 +42,7 @@ jest.mock('@i18n/translations', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
+  useAppSettings: () => ({ reduceAppAnimations: false }),
   useTracker: () => ({ tracker: undefined }),
   useTrackedNovel: () => ({ trackedNovel: undefined }),
   useTheme: () =>
@@ -150,5 +158,88 @@ describe('NovelScreenButtonGroup', () => {
     expect(mockSetNovel).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, inLibrary: true }),
     );
+  });
+
+  describe('next update button', () => {
+    const dueIn = (days: number) =>
+      startOfLocalDay(toLocalDay(new Date()) + days).toISOString();
+    const renderWith = (novel: NovelInfo) =>
+      render(
+        <NovelScreenButtonGroup
+          novel={novel}
+          theme={theme}
+          handleTrackerSheet={jest.fn()}
+          handleFollowNovel={jest.fn()}
+        />,
+      );
+
+    it('shows Soon for a novel due today and explains the prediction', () => {
+      renderWith({ ...baseNovel, fetchInterval: 7, nextUpdate: dueIn(0) });
+
+      fireEvent.press(screen.getByText('novelScreen.nextUpdate.soon'));
+
+      expect(
+        screen.getByText('novelScreen.nextUpdate.expected'),
+      ).toBeOnTheScreen();
+    });
+
+    it('shows the days until a later update', () => {
+      renderWith({ ...baseNovel, fetchInterval: 7, nextUpdate: dueIn(3) });
+
+      expect(screen.getByText('time.days')).toBeOnTheScreen();
+    });
+
+    it('shows N/A for a completed novel and says there is no prediction', () => {
+      renderWith({
+        ...baseNovel,
+        status: 'Completed',
+        fetchInterval: 7,
+        nextUpdate: dueIn(3),
+      });
+
+      fireEvent.press(screen.getByText('novelScreen.nextUpdate.notApplicable'));
+
+      expect(
+        screen.getByText('novelScreen.nextUpdate.expectedNull'),
+      ).toBeOnTheScreen();
+    });
+
+    it('pins a custom update frequency picked in the dialog', async () => {
+      const nextUpdate = dueIn(3);
+      mockSetNovelFetchInterval.mockResolvedValue({
+        fetchInterval: -3,
+        nextUpdate,
+      });
+      renderWith({ ...baseNovel, fetchInterval: 7, nextUpdate: dueIn(5) });
+
+      fireEvent.press(screen.getByText('time.days'));
+      fireEvent.press(screen.getByText('3'));
+      fireEvent.press(screen.getByText('common.ok'));
+
+      await waitFor(() =>
+        expect(mockSetNovelFetchInterval).toHaveBeenCalledWith(1, 3),
+      );
+      await waitFor(() =>
+        expect(mockSetNovel).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 1, fetchInterval: -3, nextUpdate }),
+        ),
+      );
+    });
+
+    it('leaves the interval alone when the dialog is cancelled', () => {
+      renderWith({ ...baseNovel, fetchInterval: -5, nextUpdate: dueIn(2) });
+
+      fireEvent.press(screen.getByText('time.days'));
+      fireEvent.press(screen.getByText('3'));
+      fireEvent.press(screen.getByText('common.cancel'));
+
+      expect(mockSetNovelFetchInterval).not.toHaveBeenCalled();
+    });
+
+    it('is hidden for novels outside the library', () => {
+      renderWith({ ...baseNovel, inLibrary: false, nextUpdate: dueIn(0) });
+
+      expect(screen.queryByText('novelScreen.nextUpdate.soon')).toBeNull();
+    });
   });
 });

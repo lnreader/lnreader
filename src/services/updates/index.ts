@@ -20,6 +20,9 @@ import type {
   BackgroundTaskEnqueuer,
   TaskProgressUpdater,
 } from '@services/backgroundTasks/contracts';
+import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
+import { getString } from '@i18n/translations';
+import { isDueForUpdate, toLocalDay } from './releaseSchedule';
 
 const UPDATE_SOURCE_CONCURRENCY = 3;
 
@@ -88,6 +91,7 @@ const updateLibrary = async (
     isRunning: true,
     progress: 0,
   }));
+  reportLibraryUpdateProgress(true);
 
   const {
     downloadNewChapters,
@@ -95,6 +99,7 @@ const updateLibrary = async (
     smartUpdateSkipCompleted,
     smartUpdateSkipUnstarted,
     smartUpdateSkipWithUnread,
+    smartUpdateSkipNotDue,
   } = getMMKVObject<AppSettings>(APP_SETTINGS) || {};
   const smartUpdateFilters = {
     skipCompleted: Boolean(smartUpdateSkipCompleted),
@@ -107,15 +112,25 @@ const updateLibrary = async (
     enqueue: tasks => enqueueDownloadTasks(enqueue, tasks),
   };
 
+  let skippedNotDue = 0;
   try {
     let libraryNovels: DBNovelInfo[] = [];
     if (categoryId) {
+      // Updating one category is a deliberate "check everything"
       libraryNovels = await getLibraryWithCategory(categoryId, true);
     } else {
       libraryNovels = await getLibraryNovelsForGlobalUpdate(
         getGlobalUpdateCategoryFilters(),
         smartUpdateFilters,
       );
+      if (smartUpdateSkipNotDue) {
+        const today = toLocalDay(new Date());
+        const dueNovels = libraryNovels.filter(novel =>
+          isDueForUpdate(novel.nextUpdate, today),
+        );
+        skippedNotDue = libraryNovels.length - dueNovels.length;
+        libraryNovels = dueNovels;
+      }
     }
 
     if (libraryNovels.length > 0) {
@@ -125,6 +140,7 @@ const updateLibrary = async (
       const activeNovels = new Map<string, string>();
       let completedNovels = 0;
       let nextSourceQueue = 0;
+      let reportedNovels = -1;
 
       const publishProgress = () => {
         setMeta(meta => ({
@@ -132,6 +148,14 @@ const updateLibrary = async (
           progressText: [...activeNovels.values()].join('\n') || undefined,
           progress: completedNovels / libraryNovels.length,
         }));
+        if (completedNovels !== reportedNovels) {
+          reportedNovels = completedNovels;
+          reportLibraryUpdateProgress(
+            true,
+            completedNovels,
+            libraryNovels.length,
+          );
+        }
       };
 
       const updateSourceQueue = async (sourceQueue: DBNovelInfo[]) => {
@@ -178,8 +202,15 @@ const updateLibrary = async (
       if (rejectedSource?.status === 'rejected') {
         throw rejectedSource.reason;
       }
-    } else {
+    } else if (!skippedNotDue) {
       showToast("There's no novel to be updated");
+    }
+    if (skippedNotDue) {
+      showToast(
+        getString('updatesScreen.skippedNotInReleasePeriod', {
+          count: skippedNotDue,
+        }),
+      );
     }
   } finally {
     setMeta(meta => ({
@@ -188,6 +219,8 @@ const updateLibrary = async (
       progressText: undefined,
       isRunning: false,
     }));
+    reportLibraryUpdateProgress(false);
+    await syncWidgets();
   }
 };
 

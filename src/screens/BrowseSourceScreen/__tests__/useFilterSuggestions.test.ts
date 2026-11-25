@@ -323,4 +323,23 @@ describe('useFilterSuggestions', () => {
     act(() => result.current.onFocus());
     expect(result.current.isVisible).toBe(true);
   });
+
+  it('hides the list when dismissed externally and reopens on edit', async () => {
+    mockGetFilterSuggestions.mockResolvedValue([
+      { label: 'Abc', value: 'Abc' },
+    ]);
+
+    const { result } = renderSuggestions('ab');
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
+    act(() => result.current.onFocus());
+    expect(result.current.isVisible).toBe(true);
+
+    act(() => result.current.dismiss());
+    expect(result.current.isVisible).toBe(false);
+
+    act(() => result.current.onEdit());
+    expect(result.current.isVisible).toBe(true);
+  });
 });

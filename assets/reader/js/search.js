@@ -328,7 +328,17 @@ window.readerSearch = new (function () {
     }
 
     requestAnimationFrame(() => {
-      match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const center =
+        window.scrollY +
+        match.getBoundingClientRect().top -
+        (reader.layoutHeight - match.offsetHeight) / 2;
+      // Centering a match near the start of an appended chapter would put the
+      // top of the screen in the previous one, which then becomes current and
+      // clears the search.
+      window.scrollTo({
+        top: Math.max(center, reader.chapterTop),
+        behavior: reader.scrollBehavior(),
+      });
     });
   };
 
@@ -373,6 +383,21 @@ window.readerSearch = new (function () {
     }
 
     this.focus(Math.max(0, Math.min(preferredIndex, this.matches.length - 1)));
+  };
+
+  /**
+   * Forgets the search without touching the DOM, for when the chapter markup
+   * (and every highlight in it) is about to be replaced anyway.
+   */
+  this.reset = () => {
+    this.cancelPendingSearch();
+    this.query = '';
+    this.matches = [];
+    this.index = -1;
+    this.total = 0;
+    this.isTruncated = false;
+    this.cachedSegments = null;
+    this.isValidState = true;
   };
 
   this.invalidateCache = () => {

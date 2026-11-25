@@ -1,4 +1,5 @@
 import NativeBackgroundTasks from '@modules/native-background-tasks';
+import { setMMKVObject } from '@utils/mmkv/mmkv';
 import { showToast } from '@utils/showToast';
 import { BackgroundTaskQueue } from '../BackgroundTaskQueue';
 import { executeBackgroundTask } from '../executeTask';
@@ -14,6 +15,7 @@ jest.mock('@modules/native-background-tasks', () => ({
     fail: jest.fn(),
     getTask: jest.fn(),
     getTasks: jest.fn().mockResolvedValue([]),
+    postWarning: jest.fn(),
     updateProgress: jest.fn().mockResolvedValue(undefined),
   },
 }));
@@ -94,6 +96,32 @@ describe('BackgroundTaskQueue completion notifications', () => {
       'Failed: Invalid backup',
       false,
     );
+  });
+
+  it('lets work finish if Android cannot post a warning', async () => {
+    jest
+      .mocked(NativeBackgroundTasks.postWarning)
+      .mockRejectedValueOnce(new Error('Could not post notification'));
+    jest
+      .mocked(executeBackgroundTask)
+      .mockImplementationOnce(
+        async (_task, _updateProgress, _enqueue, context) => {
+          await context.postWarning('Backup warning', 'Could not copy a cover');
+        },
+      );
+
+    await new BackgroundTaskQueue().run('restore-3', task);
+
+    expect(NativeBackgroundTasks.postWarning).toHaveBeenCalledWith(
+      'restore-3',
+      'Backup warning',
+      'Could not copy a cover',
+    );
+    expect(NativeBackgroundTasks.complete).toHaveBeenCalledWith(
+      'restore-3',
+      'Completed',
+    );
+    expect(NativeBackgroundTasks.fail).not.toHaveBeenCalled();
   });
 
   it('shows queued feedback when the task must wait in its lane', async () => {
@@ -262,5 +290,89 @@ describe('BackgroundTaskQueue completion notifications', () => {
         state: 'queued',
       }),
     ]);
+  });
+});
+
+describe('BackgroundTaskQueue subscriptions', () => {
+  const downloadTask = {
+    name: 'DOWNLOAD_CHAPTER' as const,
+    data: {
+      novelName: 'Example Novel',
+      novelId: 42,
+      pluginId: 'source-a',
+      chapters: [
+        { chapterId: 7, chapterName: 'Chapter 7' },
+        { chapterId: 8, chapterName: 'Chapter 8' },
+      ],
+    },
+  };
+
+  beforeEach(() => {
+    mockStoredTasks = [];
+    jest.clearAllMocks();
+  });
+
+  it('notifies subscribers of progress without persisting or rebuilding the download index', async () => {
+    const queue = new BackgroundTaskQueue();
+    const listener = jest.fn();
+    const snapshots: unknown[] = [];
+    const downloadIndexes: unknown[] = [];
+    let finishTask!: () => void;
+
+    jest
+      .mocked(executeBackgroundTask)
+      .mockImplementation(async (_task, updateProgress) => {
+        snapshots.push(queue.getSnapshot());
+        downloadIndexes.push(queue.getDownloadIndex());
+        jest.mocked(setMMKVObject).mockClear();
+        listener.mockClear();
+
+        updateProgress(meta => ({ ...meta, progress: 0.5 }));
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(setMMKVObject).not.toHaveBeenCalled();
+        snapshots.push(queue.getSnapshot());
+        downloadIndexes.push(queue.getDownloadIndex());
+        await new Promise<void>(resolve => {
+          finishTask = resolve;
+        });
+      });
+
+    queue.subscribe(listener);
+    const run = queue.run('download-1', downloadTask);
+    await Promise.resolve();
+
+    expect(snapshots[1]).not.toBe(snapshots[0]);
+    expect(snapshots[1]).toEqual([
+      expect.objectContaining({
+        id: 'download-1',
+        meta: expect.objectContaining({ progress: 0.5 }),
+      }),
+    ]);
+    expect(downloadIndexes[1]).toBe(downloadIndexes[0]);
+    expect(queue.getDownloadIndex()).toEqual({
+      chapterIds: new Set([7, 8]),
+      novelIds: new Set([42]),
+    });
+
+    finishTask();
+    await run;
+
+    expect(queue.getDownloadIndex()).toEqual({
+      chapterIds: new Set(),
+      novelIds: new Set(),
+    });
+    expect(mockStoredTasks).toEqual([]);
+  });
+
+  it('stops notifying a listener once it unsubscribes', async () => {
+    const queue = new BackgroundTaskQueue();
+    const listener = jest.fn();
+    jest.mocked(executeBackgroundTask).mockResolvedValue(undefined);
+
+    queue.subscribe(listener)();
+    await queue.run('restore-1', task);
+
+    expect(listener).not.toHaveBeenCalled();
   });
 });

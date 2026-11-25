@@ -1,7 +1,7 @@
 import { Button, TextInput } from '@components';
 import { Row } from '@components/Common';
 import { ToggleButton } from '@components/Common/ToggleButton';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, type ScrollViewInstance } from 'react-native';
 import { getString } from '@i18n/translations';
 import React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -72,7 +72,7 @@ const CodeRoute = ({
 
   const keyboardHeight = useKeyboardHeight();
 
-  const scrollViewRef = React.useRef<ScrollView>(null);
+  const scrollViewRef = React.useRef<ScrollViewInstance>(null);
   const editorScrollSink = React.useRef<((y: number) => void) | null>(null);
 
   const maxHeightScrollView = useAnimatedStyle(() => {
