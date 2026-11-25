@@ -67,12 +67,20 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+const mockNovelInfoHeader = jest.fn();
 jest.mock('../Info/NovelInfoHeader', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () =>
-    React.createElement(Text, { testID: 'novel-info-header' }, 'hdr');
+  return (props: unknown) => {
+    mockNovelInfoHeader(props);
+    return React.createElement(Text, { testID: 'novel-info-header' }, 'hdr');
+  };
 });
+
+const mockUseSaveNovelCover = jest.fn((_novel: unknown) => jest.fn());
+jest.mock('../../hooks/useSaveNovelCover', () => ({
+  useSaveNovelCover: (novel: unknown) => mockUseSaveNovelCover(novel),
+}));
 
 jest.mock('../PagePaginationControl', () => {
   const React = require('react');
@@ -254,7 +262,7 @@ const listRef = { current: { scrollToOffset: jest.fn() } };
 const headerOpacity = { set: jest.fn() };
 const onRefresh = jest.fn();
 
-const renderList = () =>
+const renderList = (routeCover?: string) =>
   render(
     <NovelScreenList
       headerOpacity={headerOpacity as any}
@@ -264,6 +272,7 @@ const renderList = () =>
         name: 'Route Novel',
         path: '/novel/test',
         pluginId: 'plugin.test',
+        cover: routeCover,
       }}
       selected={[]}
       setSelected={jest.fn()}
@@ -278,6 +287,42 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
     mockDownloadingChapterIds = new Set<number>();
     mockDownloadingNovelIds = new Set<number>();
     mockDownloadQueue = [];
+  });
+
+  describe('cover fallback', () => {
+    const routeCover = 'https://example.com/browse-cover.jpg';
+    const lastHeaderCover = () => mockNovelInfoHeader.mock.lastCall?.[0].cover;
+    const lastSavedNovel = () => mockUseSaveNovelCover.mock.lastCall?.[0];
+
+    it('shows the browse cover before details load', () => {
+      wireStoreSelectors(createStore({ novel: undefined }));
+
+      renderList(routeCover);
+
+      expect(lastHeaderCover()).toBe(routeCover);
+      expect(lastSavedNovel()).toBeUndefined();
+    });
+
+    it('keeps showing and saving the browse cover when details have none', () => {
+      wireStoreSelectors(createStore());
+
+      renderList(routeCover);
+
+      expect(lastHeaderCover()).toBe(routeCover);
+      expect(lastSavedNovel()).toEqual({ ...baseNovel, cover: routeCover });
+    });
+
+    it('prefers the details cover when present', () => {
+      const detailsCover = 'https://example.com/details-cover.jpg';
+      wireStoreSelectors(
+        createStore({ novel: { ...baseNovel, cover: detailsCover } }),
+      );
+
+      renderList(routeCover);
+
+      expect(lastHeaderCover()).toBe(detailsCover);
+      expect(lastSavedNovel()).toEqual({ ...baseNovel, cover: detailsCover });
+    });
   });
 
   it('uses novelStore selector actions', () => {

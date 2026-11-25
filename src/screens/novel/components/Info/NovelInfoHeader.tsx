@@ -17,7 +17,6 @@ import {
   NovelGenres,
 } from './NovelInfoComponents';
 import { Row } from '@components/Common';
-import { isMissingNovelCover } from '@components/NovelCoverImage';
 import ReadButton from './ReadButton';
 import NovelSummary from '../NovelSummary/NovelSummary';
 import NovelScreenButtonGroup from '../NovelScreenButtonGroup/NovelScreenButtonGroup';
@@ -51,8 +50,8 @@ import {
 interface NovelInfoHeaderProps {
   hasDownloadedChapters: boolean;
   deleteDownloadSnackbar?: UseBooleanReturnType;
+  cover: string | null | undefined;
   fetching: boolean;
-  fallbackCover?: string | null;
   filter?: ChapterFilterKey[];
   firstUnreadChapter?: ChapterInfo;
   isLoading: boolean;
@@ -89,8 +88,8 @@ const showNotAvailable = () => {
 const NovelInfoHeader = ({
   hasDownloadedChapters,
   deleteDownloadSnackbar,
+  cover,
   fetching,
-  fallbackCover,
   filter = [],
   firstUnreadChapter,
   isLoading = false,
@@ -119,12 +118,10 @@ const NovelInfoHeader = ({
   const coverSource = useMemo(() => {
     const imageRequestInit = getPlugin(novel.pluginId)?.imageRequestInit;
     return {
-      uri:
-        (isMissingNovelCover(novel.cover) ? fallbackCover : novel.cover) ??
-        undefined,
+      uri: cover ?? undefined,
       headers: imageRequestInit?.headers,
     };
-  }, [novel.pluginId, novel.cover, fallbackCover]);
+  }, [novel.pluginId, cover]);
 
   const novelStatus = useMemo(
     () => (novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined),
