@@ -25,6 +25,7 @@ import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
 import NativeFile from '@modules/native-file';
+import type { Transaction } from '@op-engineering/op-sqlite';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
@@ -219,59 +220,78 @@ export const markChaptersUnread = async (
   });
 };
 
+/**
+ * Runs bulk chapter updates with the per-row update trigger suspended.
+ *
+ * The trigger recounts a novel's chapters once per changed row, which is
+ * quadratic for large novels; callers must fix the affected aggregates
+ * themselves. Uses `writeRaw` because Drizzle's op-sqlite transaction can
+ * commit the DROP before an async body finishes.
+ */
+const withoutChapterUpdateTrigger = async (
+  fn: (tx: Transaction) => Promise<void>,
+): Promise<void> => {
+  try {
+    await dbManager.writeRaw(async tx => {
+      await tx.execute('DROP TRIGGER IF EXISTS update_novel_stats_on_update');
+      await fn(tx);
+      await tx.execute(createNovelTriggerQueryUpdate);
+    });
+  } catch (error) {
+    // A rollback normally restores the trigger. If the transaction was ended
+    // from outside the write queue, the DROP may already be committed.
+    await dbManager
+      .writeRaw(async tx => {
+        await tx.execute(createNovelTriggerQueryUpdate);
+      })
+      .catch(() => {});
+    throw error;
+  }
+};
+
+const toIdList = (novelIds: number | number[]) =>
+  Array.isArray(novelIds) ? novelIds : [novelIds];
+const placeholders = (ids: number[]) => ids.map(() => '?').join(', ');
+
 export const markAllChaptersRead = async (
   novelIds: number | number[],
 ): Promise<void> => {
-  const ids = Array.isArray(novelIds) ? novelIds : [novelIds];
+  const ids = toIdList(novelIds);
   if (!ids.length) {
     return;
   }
-  await dbManager.write(async tx => {
-    // The update trigger recounts a novel's chapters once per changed row,
-    // which is quadratic for large novels. Only chaptersUnread changes here,
-    // so bypass the trigger and set it directly.
-    await tx.run(
-      sql.raw('DROP TRIGGER IF EXISTS update_novel_stats_on_update'),
+  await withoutChapterUpdateTrigger(async tx => {
+    await tx.execute(
+      `UPDATE Chapter SET unread = 0 WHERE novelId IN (${placeholders(ids)})`,
+      ids,
     );
-    await tx
-      .update(chapterSchema)
-      .set({ unread: false })
-      .where(inArray(chapterSchema.novelId, ids))
-      .run();
-    await tx
-      .update(novelSchema)
-      .set({ chaptersUnread: 0 })
-      .where(inArray(novelSchema.id, ids))
-      .run();
-    await tx.run(sql.raw(createNovelTriggerQueryUpdate));
+    await tx.execute(
+      `UPDATE Novel SET chaptersUnread = 0 WHERE id IN (${placeholders(ids)})`,
+      ids,
+    );
   });
 };
 
 export const markAllChaptersUnread = async (
   novelIds: number | number[],
 ): Promise<void> => {
-  const ids = Array.isArray(novelIds) ? novelIds : [novelIds];
+  const ids = toIdList(novelIds);
   if (!ids.length) {
     return;
   }
-  await dbManager.write(async tx => {
-    // See markAllChaptersRead for why the update trigger is bypassed.
-    await tx.run(
-      sql.raw('DROP TRIGGER IF EXISTS update_novel_stats_on_update'),
+  await withoutChapterUpdateTrigger(async tx => {
+    await tx.execute(
+      `UPDATE Chapter SET unread = 1, progress = 0 WHERE novelId IN (${placeholders(
+        ids,
+      )})`,
+      ids,
     );
-    await tx
-      .update(chapterSchema)
-      .set({ unread: true, progress: 0 })
-      .where(inArray(chapterSchema.novelId, ids))
-      .run();
-    await tx
-      .update(novelSchema)
-      .set({
-        chaptersUnread: sql`(SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id)`,
-      })
-      .where(inArray(novelSchema.id, ids))
-      .run();
-    await tx.run(sql.raw(createNovelTriggerQueryUpdate));
+    await tx.execute(
+      `UPDATE Novel
+       SET chaptersUnread = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id)
+       WHERE id IN (${placeholders(ids)})`,
+      ids,
+    );
   });
 };
 

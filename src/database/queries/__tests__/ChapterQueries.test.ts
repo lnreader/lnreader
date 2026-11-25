@@ -319,6 +319,34 @@ describe('ChapterQueries', () => {
       expect(getChaptersUnread(novelA)).toBe(1);
     });
 
+    it('should roll back and keep the update trigger when a statement fails', async () => {
+      const testDb = getTestDb();
+      const getTriggers = () =>
+        (
+          testDb.sqlite.executeSync(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name",
+          ).rows as { name: string }[]
+        ).map(row => row.name);
+      const triggersBefore = getTriggers();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { unread: true });
+      testDb.sqlite.executeSync(
+        "CREATE TRIGGER fail_novel_update BEFORE UPDATE ON Novel BEGIN SELECT RAISE(ABORT, 'forced failure'); END",
+      );
+
+      try {
+        await expect(markAllChaptersRead(novelId)).rejects.toThrow();
+        await expect(markAllChaptersUnread(novelId)).rejects.toThrow();
+      } finally {
+        testDb.sqlite.executeSync('DROP TRIGGER fail_novel_update');
+      }
+
+      expect(getTriggers()).toEqual(triggersBefore);
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+    });
+
     it('should handle an empty selection', async () => {
       await expect(markAllChaptersRead([])).resolves.not.toThrow();
       await expect(markAllChaptersUnread([])).resolves.not.toThrow();
