@@ -22,6 +22,7 @@ import {
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 const getAllDownloadsProgressKey = (tasks: QueuedBackgroundTask[]) =>
   getDownloadProgressKey(tasks);
@@ -39,7 +40,6 @@ const countRestoreTasks = (tasks: QueuedBackgroundTask[]) =>
       t?.task?.name || (t as unknown as BackgroundTask)?.name,
     ),
   ).length;
-import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 // type Library = Category & { novels: LibraryNovelInfo[] };
 export type ExtendedCategory = Category & { novelIds: number[] };
