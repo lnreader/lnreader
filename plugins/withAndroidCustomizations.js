@@ -98,24 +98,9 @@ const SYSTEM_BAR_ATTRIBUTES = [
   'android:windowLightNavigationBar',
 ];
 
-/**
- * The splash background is dark for release and debug builds, so its bar
- * icons default to light. The preview variant, whose splash is light,
- * overrides this resource in its own `values`.
- */
-const SPLASH_LIGHT_SYSTEM_BARS_RESOURCE = 'lnreaderSplashLightSystemBars';
-
-const boolResourceFile = (
-  value,
-  splashValue,
-) => `<?xml version="1.0" encoding="utf-8"?>
+const boolResourceFile = value => `<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>${
-  splashValue === undefined
-    ? ''
-    : `
-  <bool name="${SPLASH_LIGHT_SYSTEM_BARS_RESOURCE}">${splashValue}</bool>`
-}
+  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>
 </resources>
 `;
 
@@ -131,14 +116,14 @@ const withLightSystemBarsResources = config =>
         'res',
       );
 
-      for (const [dir, value, splashValue] of [
-        ['values', true, false],
+      for (const [dir, value] of [
+        ['values', true],
         ['values-night', false],
       ]) {
         fs.mkdirSync(path.join(resDir, dir), { recursive: true });
         fs.writeFileSync(
           path.join(resDir, dir, 'lnreader_system_bars.xml'),
-          boolResourceFile(value, splashValue),
+          boolResourceFile(value),
         );
       }
 
@@ -146,6 +131,9 @@ const withLightSystemBarsResources = config =>
     },
   ]);
 
+/**
+ * Every variant's splash background is dark, so its bar icons are always light.
+ */
 const SPLASH_THEME_GROUP = {
   name: 'Theme.App.SplashScreen',
   parent: 'Theme.SplashScreen',
@@ -165,12 +153,7 @@ const withSystemBarStyles = config =>
       );
       config.modResults = AndroidConfig.Styles.assignStylesValue(
         config.modResults,
-        {
-          add: true,
-          parent: SPLASH_THEME_GROUP,
-          name,
-          value: `@bool/${SPLASH_LIGHT_SYSTEM_BARS_RESOURCE}`,
-        },
+        { add: true, parent: SPLASH_THEME_GROUP, name, value: 'false' },
       );
     }
 
