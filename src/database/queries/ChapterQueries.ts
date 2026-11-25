@@ -219,23 +219,59 @@ export const markChaptersUnread = async (
   });
 };
 
-export const markAllChaptersRead = async (novelId: number): Promise<void> => {
+export const markAllChaptersRead = async (
+  novelIds: number | number[],
+): Promise<void> => {
+  const ids = Array.isArray(novelIds) ? novelIds : [novelIds];
+  if (!ids.length) {
+    return;
+  }
   await dbManager.write(async tx => {
+    // The update trigger recounts a novel's chapters once per changed row,
+    // which is quadratic for large novels. Only chaptersUnread changes here,
+    // so bypass the trigger and set it directly.
+    await tx.run(
+      sql.raw('DROP TRIGGER IF EXISTS update_novel_stats_on_update'),
+    );
     await tx
       .update(chapterSchema)
       .set({ unread: false })
-      .where(eq(chapterSchema.novelId, novelId))
+      .where(inArray(chapterSchema.novelId, ids))
       .run();
+    await tx
+      .update(novelSchema)
+      .set({ chaptersUnread: 0 })
+      .where(inArray(novelSchema.id, ids))
+      .run();
+    await tx.run(sql.raw(createNovelTriggerQueryUpdate));
   });
 };
 
-export const markAllChaptersUnread = async (novelId: number): Promise<void> => {
+export const markAllChaptersUnread = async (
+  novelIds: number | number[],
+): Promise<void> => {
+  const ids = Array.isArray(novelIds) ? novelIds : [novelIds];
+  if (!ids.length) {
+    return;
+  }
   await dbManager.write(async tx => {
+    // See markAllChaptersRead for why the update trigger is bypassed.
+    await tx.run(
+      sql.raw('DROP TRIGGER IF EXISTS update_novel_stats_on_update'),
+    );
     await tx
       .update(chapterSchema)
       .set({ unread: true, progress: 0 })
-      .where(eq(chapterSchema.novelId, novelId))
+      .where(inArray(chapterSchema.novelId, ids))
       .run();
+    await tx
+      .update(novelSchema)
+      .set({
+        chaptersUnread: sql`(SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id)`,
+      })
+      .where(inArray(novelSchema.id, ids))
+      .run();
+    await tx.run(sql.raw(createNovelTriggerQueryUpdate));
   });
 };
 

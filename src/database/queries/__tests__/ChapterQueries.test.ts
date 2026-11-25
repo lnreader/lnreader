@@ -278,6 +278,51 @@ describe('ChapterQueries', () => {
 
       await expect(markAllChaptersRead(novelId)).resolves.not.toThrow();
     });
+
+    it('should update chaptersUnread for every selected novel and keep the update trigger', async () => {
+      const testDb = getTestDb();
+      const getChaptersUnread = (id: number) =>
+        testDb.sqlite.executeSync(
+          'SELECT chaptersUnread FROM Novel WHERE id = ?',
+          [id],
+        ).rows[0]?.chaptersUnread;
+
+      const novelA = await insertTestNovel(testDb, { inLibrary: true });
+      const novelB = await insertTestNovel(testDb, { inLibrary: true });
+      const untouched = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelA, {
+        unread: true,
+      });
+      await insertTestChapter(testDb, novelA, { unread: true });
+      await insertTestChapter(testDb, novelB, { unread: true });
+      await insertTestChapter(testDb, untouched, { unread: true });
+
+      await markAllChaptersRead([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(0);
+      expect(getChaptersUnread(novelB)).toBe(0);
+      expect(getChaptersUnread(untouched)).toBe(1);
+      const untouchedChapters = await getNovelChapters(untouched);
+      expect(untouchedChapters.every(c => c.unread === true)).toBe(true);
+
+      await markAllChaptersUnread([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(2);
+      expect(getChaptersUnread(novelB)).toBe(1);
+
+      await testDb.drizzleDb
+        .update(chapterSchema)
+        .set({ unread: false })
+        .where(eq(chapterSchema.id, chapterId))
+        .run();
+
+      expect(getChaptersUnread(novelA)).toBe(1);
+    });
+
+    it('should handle an empty selection', async () => {
+      await expect(markAllChaptersRead([])).resolves.not.toThrow();
+      await expect(markAllChaptersUnread([])).resolves.not.toThrow();
+    });
   });
 
   describe('markAllChaptersUnread', () => {
