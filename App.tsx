@@ -3,7 +3,6 @@ import { enableFreeze } from 'react-native-screens';
 import { PropsWithChildren, Suspense, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   MD3DarkTheme,
@@ -27,6 +26,10 @@ import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 import { useAppSettings } from '@hooks/persisted';
+import {
+  hideSplashScreen,
+  hideSplashScreenEventually,
+} from '@utils/splashScreen';
 
 enableFreeze(true);
 const sqliteAdapters = __DEV__ && opSqliteAdapter ? [opSqliteAdapter] : [];
@@ -77,9 +80,13 @@ const Application = () => {
   const { ready: servicesReady, error: servicesError } =
     useInitializeAppServices(Boolean(databaseReady));
 
+  // On success the splash stays up until the library has loaded (see
+  // `HideSplashWhenLibraryReady`), so the first frame shown is the real one.
   useEffect(() => {
-    if ((databaseReady && servicesReady) || databaseError || servicesError) {
-      SplashScreen.hideAsync();
+    if (databaseError || servicesError) {
+      hideSplashScreen();
+    } else if (databaseReady && servicesReady) {
+      hideSplashScreenEventually();
     }
   }, [databaseReady, databaseError, servicesReady, servicesError]);
 

@@ -48,6 +48,8 @@ import WidgetIntentHandler, {
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
+import { hideSplashScreen, whenSplashScreenHidden } from '@utils/splashScreen';
+import HideSplashWhenLibraryReady from './HideSplashWhenLibraryReady';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { driveSyncManager } from '@services/sync/driveSyncManager';
 
@@ -67,15 +69,24 @@ const MainNavigator = () => {
   const [isOnboarded] = useMMKVBoolean('IS_ONBOARDED');
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setStatusBarStyle(theme);
-      setNavigationBarStyle(theme.isDark);
-    }, 500);
+    let cancelled = false;
+    whenSplashScreenHidden().then(() => {
+      if (!cancelled) {
+        setStatusBarStyle(theme);
+        setNavigationBarStyle(theme.isDark);
+      }
+    });
 
     return () => {
-      clearTimeout(timer);
+      cancelled = true;
     };
   }, [theme]);
+
+  useEffect(() => {
+    if (!isOnboarded) {
+      hideSplashScreen();
+    }
+  }, [isOnboarded]);
 
   useEffect(() => {
     if (updateLibraryOnLaunch) {
@@ -137,6 +148,7 @@ const MainNavigator = () => {
       <ShareIntentHandler />
       <WidgetIntentHandler />
       <LibraryContextProvider>
+        <HideSplashWhenLibraryReady />
         <UpdateContextProvider>
           <AppUpdateChecker />
           <Stack.Navigator
