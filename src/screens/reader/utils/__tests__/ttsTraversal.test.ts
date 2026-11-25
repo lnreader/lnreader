@@ -242,6 +242,19 @@ describe('reader TTS traversal', () => {
     );
   });
 
+  it('starts a new queue after the app stops speech', () => {
+    const tts = loadTtsTraversal(
+      element('div', element('p', text('First paragraph'))),
+    );
+    tts.setPlaybackState('playing');
+
+    // The app stopped speech, for example when a link opened a novel.
+    tts.setPlaybackState('idle');
+
+    // Play resumes a started queue, which the native player no longer has.
+    expect(tts.started).toBe(false);
+  });
+
   it('does not reattach from stale progress after the native session stops', () => {
     const tts = loadTtsTraversal(
       element('div', element('p', text('First paragraph'))),

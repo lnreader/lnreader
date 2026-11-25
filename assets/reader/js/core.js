@@ -500,7 +500,9 @@ window.tts = new (function () {
       this.initializeQueueFromChapter();
     }
     this.reading = state === 'playing';
-    if (state === 'error') {
+    // Idle means the native player has no queue for this page: the app
+    // stopped speech, or another reader took it. Play must send a new queue.
+    if (state === 'error' || state === 'idle') {
       this.reset();
       return;
     }
