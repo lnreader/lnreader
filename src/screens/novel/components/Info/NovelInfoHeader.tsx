@@ -17,6 +17,7 @@ import {
   NovelGenres,
 } from './NovelInfoComponents';
 import { Row } from '@components/Common';
+import { isMissingNovelCover } from '@components/NovelCoverImage';
 import ReadButton from './ReadButton';
 import NovelSummary from '../NovelSummary/NovelSummary';
 import NovelScreenButtonGroup from '../NovelScreenButtonGroup/NovelScreenButtonGroup';
@@ -51,6 +52,7 @@ interface NovelInfoHeaderProps {
   hasDownloadedChapters: boolean;
   deleteDownloadSnackbar?: UseBooleanReturnType;
   fetching: boolean;
+  fallbackCover?: string | null;
   filter?: ChapterFilterKey[];
   firstUnreadChapter?: ChapterInfo;
   isLoading: boolean;
@@ -88,6 +90,7 @@ const NovelInfoHeader = ({
   hasDownloadedChapters,
   deleteDownloadSnackbar,
   fetching,
+  fallbackCover,
   filter = [],
   firstUnreadChapter,
   isLoading = false,
@@ -116,10 +119,12 @@ const NovelInfoHeader = ({
   const coverSource = useMemo(() => {
     const imageRequestInit = getPlugin(novel.pluginId)?.imageRequestInit;
     return {
-      uri: novel.cover ?? undefined,
+      uri:
+        (isMissingNovelCover(novel.cover) ? fallbackCover : novel.cover) ??
+        undefined,
       headers: imageRequestInit?.headers,
     };
-  }, [novel.pluginId, novel.cover]);
+  }, [novel.pluginId, novel.cover, fallbackCover]);
 
   const novelStatus = useMemo(
     () => (novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined),
@@ -190,6 +195,7 @@ const NovelInfoHeader = ({
       >
         <NovelInfoContainer>
           <NovelThumbnail
+            recyclingKey={`${novel.pluginId}:${novel.path}`}
             source={coverSource}
             theme={theme}
             setCustomNovelCover={

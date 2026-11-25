@@ -411,6 +411,7 @@ const NovelScreenList = ({
           deleteDownloadSnackbar={deleteDownloadSnackbar}
           fetching={fetching}
           filter={filter}
+          fallbackCover={routeBaseNovel.cover}
           firstUnreadChapter={firstUnreadChapter}
           isLoading={loading}
           lastRead={lastRead}
@@ -432,6 +433,7 @@ const NovelScreenList = ({
       deleteDownloadSnackbar,
       fetching,
       filter,
+      routeBaseNovel.cover,
       firstUnreadChapter,
       loading,
       lastRead,
