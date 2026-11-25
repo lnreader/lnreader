@@ -1,7 +1,8 @@
 import { ChapterOrderKey } from '@database/constants';
 import {
   DisplayModes,
-  LibraryFilter,
+  LibraryFilters,
+  LibraryGenreFilter,
   LibrarySortOrder,
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
@@ -140,7 +141,10 @@ export interface LibrarySettings {
   upcomingExcludeCategoryIds?: number[];
   upcomingIncludeCategoryIds?: number[];
   sortOrder?: LibrarySortOrder;
-  filter?: LibraryFilter;
+  /** @deprecated Legacy single SQL filter; read only to migrate to `libraryFilters`. */
+  filter?: string;
+  libraryFilters?: LibraryFilters;
+  genreFilter?: LibraryGenreFilter;
   showDownloadBadges?: boolean;
   showUnreadBadges?: boolean;
   showContinueReadingButton?: boolean;

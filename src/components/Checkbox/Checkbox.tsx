@@ -90,6 +90,65 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   </Pressable>
 );
 
+interface TriStateCheckboxProps {
+  label: string;
+  status?: 'include' | 'exclude';
+  onPress: () => void;
+  disabled?: boolean;
+  theme: ThemeColors;
+}
+
+/** Unset → include (checked) → exclude (crossed), as used for library filters. */
+export const TriStateCheckbox = ({
+  label,
+  status,
+  onPress,
+  disabled,
+  theme,
+}: TriStateCheckboxProps) => (
+  <Pressable
+    accessibilityLabel={label}
+    accessibilityRole="checkbox"
+    accessibilityState={{
+      checked: status === 'exclude' ? 'mixed' : status === 'include',
+      disabled,
+    }}
+    android_ripple={{ color: theme.rippleColor }}
+    style={[styles.pressable, styles.triStatePressable]}
+    onPress={onPress}
+    disabled={disabled}
+  >
+    <MaterialCommunityIcons
+      name={
+        status === 'exclude'
+          ? 'close-box'
+          : status === 'include'
+          ? 'checkbox-marked'
+          : 'checkbox-blank-outline'
+      }
+      color={
+        disabled
+          ? theme.onSurfaceDisabled
+          : status
+          ? theme.primary
+          : theme.onSurfaceVariant
+      }
+      size={24}
+      style={styles.triStateIcon}
+    />
+    <View style={styles.textContainer}>
+      <Text
+        style={[
+          styles.defaultLabel,
+          { color: disabled ? theme.onSurfaceDisabled : theme.onSurface },
+        ]}
+      >
+        {label}
+      </Text>
+    </View>
+  </Pressable>
+);
+
 interface SortItemProps {
   label: string;
   status?: string;
@@ -136,6 +195,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   sortItem: { paddingVertical: 16, paddingStart: 64 },
+  // Matches the 36dp touch target of react-native-paper's Checkbox.
+  triStateIcon: { margin: 6 },
+  triStatePressable: { minHeight: 48 },
   textContainer: {
     flex: 1,
     justifyContent: 'center',

@@ -11,7 +11,11 @@ import { useLiveQuery } from '@database/manager/liveQuery';
 import { Category, NovelInfo } from '@database/types';
 
 import { useLibrarySettings } from '@hooks/persisted';
-import { LibrarySortOrder } from '../constants/constants';
+import {
+  LibraryFilters,
+  LibrarySortOrder,
+  resolveLibraryFilters,
+} from '../constants/constants';
 import {
   getNovelByPath,
   switchNovelToLibraryQuery,
@@ -67,7 +71,8 @@ export type UseLibraryReturnType = {
 
 export const useLibrary = (): UseLibraryReturnType => {
   const {
-    filter,
+    filter: legacyFilter,
+    libraryFilters,
     sortOrder = LibrarySortOrder.DateAdded_DESC,
     downloadedOnlyMode = false,
     promptForCategoryOnAdd = false,
@@ -91,6 +96,16 @@ export const useLibrary = (): UseLibraryReturnType => {
   >(undefined);
   const [pendingLibraryAddition, setPendingLibraryAddition] =
     useState<PendingLibraryAddition>();
+
+  // Settings objects change identity on any library setting change (e.g. the
+  // last used category), so key on content to avoid re-subscribing the query.
+  const filtersKey = JSON.stringify(
+    resolveLibraryFilters(libraryFilters, legacyFilter),
+  );
+  const filter = useMemo(
+    () => JSON.parse(filtersKey) as LibraryFilters,
+    [filtersKey],
+  );
 
   const libraryQuery = useMemo(
     () =>

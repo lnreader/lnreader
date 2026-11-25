@@ -121,7 +121,7 @@ describe('useLibrary', () => {
 
     expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
       'name ASC',
-      undefined,
+      {},
       '',
       false,
     );

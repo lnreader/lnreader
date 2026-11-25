@@ -13,6 +13,8 @@ import {
   ne,
   gte,
   asc,
+  lt,
+  type SQL,
 } from 'drizzle-orm';
 import { dbManager } from '@database/db';
 import { novelSchema, novelCategorySchema } from '@database/schema';
@@ -22,6 +24,10 @@ import type {
   SmartUpdateFilters,
 } from '@hooks/persisted/useSettings';
 import { NovelStatus } from '@plugins/types';
+import type {
+  LibraryFilterKey,
+  LibraryFilters,
+} from '@screens/library/constants/constants';
 
 const smartUpdateConditions = ({
   skipCompleted,
@@ -35,12 +41,44 @@ const smartUpdateConditions = ({
   skipCompleted ? ne(novelSchema.status, 'Completed') : undefined,
 ];
 
+const isDownloaded = () =>
+  or(
+    gt(novelSchema.chaptersDownloaded, castInt(0)),
+    eq(novelSchema.isLocal, true),
+  )!;
+
+const libraryFilterConditions: Record<LibraryFilterKey, () => SQL> = {
+  downloaded: isDownloaded,
+  unread: () => isNull(novelSchema.lastReadAt),
+  started: () => isNotNull(novelSchema.lastReadAt),
+  completed: () => like(novelSchema.status, 'Completed'),
+  customUpdateFrequency: () => lt(novelSchema.fetchInterval, castInt(0)),
+};
+
+const libraryFilterSql = (
+  filters: LibraryFilters | undefined,
+  downloadedOnlyMode: boolean | undefined,
+) =>
+  Object.entries(filters ?? {}).map(([key, state]) => {
+    const filterKey = key as LibraryFilterKey;
+    // Downloaded-only mode already forces this filter on.
+    if (filterKey === 'downloaded' && downloadedOnlyMode) {
+      return undefined;
+    }
+    const condition = libraryFilterConditions[filterKey]?.();
+    if (!condition || (state !== 'include' && state !== 'exclude')) {
+      return undefined;
+    }
+    // COALESCE so rows where the condition is NULL (e.g. NULL status) survive exclusion.
+    return state === 'include' ? condition : sql`COALESCE(${condition}, 0) = 0`;
+  });
+
 /**
  * Get library novels with optional filtering and sorting using Drizzle ORM
  */
 export const getLibraryNovelsQuery = (
   sortOrder?: string,
-  filter?: string,
+  filters?: LibraryFilters,
   searchText?: string,
   downloadedOnlyMode?: boolean,
   excludeLocalNovels?: boolean,
@@ -52,13 +90,8 @@ export const getLibraryNovelsQuery = (
       and(
         eq(novelSchema.inLibrary, true),
         excludeLocalNovels ? eq(novelSchema.isLocal, false) : undefined,
-        filter ? sql.raw(filter) : undefined,
-        downloadedOnlyMode
-          ? or(
-              gt(novelSchema.chaptersDownloaded, castInt(0)),
-              eq(novelSchema.isLocal, true),
-            )
-          : undefined,
+        ...libraryFilterSql(filters, downloadedOnlyMode),
+        downloadedOnlyMode ? isDownloaded() : undefined,
         searchText ? like(novelSchema.name, `%${searchText}%`) : undefined,
       ),
     )
@@ -77,14 +110,14 @@ export const getLibraryNovelsQuery = (
 
 export const getLibraryNovelsFromDb = (
   sortOrder?: string,
-  filter?: string,
+  filters?: LibraryFilters,
   searchText?: string,
   downloadedOnlyMode?: boolean,
   excludeLocalNovels?: boolean,
 ) =>
   getLibraryNovelsQuery(
     sortOrder,
-    filter,
+    filters,
     searchText,
     downloadedOnlyMode,
     excludeLocalNovels,

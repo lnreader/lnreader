@@ -56,6 +56,11 @@ import { useLibraryContext } from '@components/Context/LibraryContext';
 import xor from 'lodash-es/xor';
 import { SelectionContext } from './SelectionContext';
 import { getLibraryCategoryIndex } from './constants/constants';
+import {
+  getLibraryGenreOptions,
+  hasGenreFilter,
+  matchesGenreFilter,
+} from './utils/genreFilter';
 
 type State = NavigationState<{
   key: string;
@@ -95,9 +100,24 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       downloadedOnlyMode,
       incognitoMode,
       lastUsedCategoryId,
+      genreFilter,
       setLibrarySettings,
     },
   } = useLibraryContext();
+
+  // Filtered here rather than in SQL: genres are normalized in JS, and
+  // `library` also backs the "in library" lookup used by browse screens.
+  const visibleLibrary = useMemo(
+    () =>
+      hasGenreFilter(genreFilter)
+        ? library.filter(novel => matchesGenreFilter(novel.genres, genreFilter))
+        : library,
+    [genreFilter, library],
+  );
+  const genreOptions = useMemo(
+    () => getLibraryGenreOptions(library, genreFilter),
+    [genreFilter, library],
+  );
 
   const { importNovel } = useImport();
   const { reduceAppAnimations = false, useLibraryFAB = false } =
@@ -160,8 +180,8 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   const currentNovels = useMemo(() => {
     if (!categories.length) return [];
     const idsSet = new Set(categories[index].novelIds);
-    return library.filter(l => idsSet.has(l.id));
-  }, [categories, index, library]);
+    return visibleLibrary.filter(l => idsSet.has(l.id));
+  }, [categories, index, visibleLibrary]);
 
   useBackHandler(() => {
     if (selectedNovelIds.length) {
@@ -258,7 +278,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       };
     }) => {
       const idsSet = new Set(route.novelIds);
-      const unfilteredNovels = library.filter(l => idsSet.has(l.id));
+      const unfilteredNovels = visibleLibrary.filter(l => idsSet.has(l.id));
 
       const novels = searchLower
         ? unfilteredNovels.filter(
@@ -296,7 +316,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       );
     },
     [
-      library,
+      visibleLibrary,
       historyByNovelId,
       showContinueReadingButton,
       navigation,
@@ -571,6 +591,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       />
       <LibraryBottomSheet
         bottomSheetRef={bottomSheetRef}
+        genreOptions={genreOptions}
         style={bottomSheetStyle}
       />
       <Portal>

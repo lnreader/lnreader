@@ -8,37 +8,75 @@ export const getLibraryCategoryIndex = (
   return index === -1 ? 0 : index;
 };
 
-export enum LibraryFilter {
-  Downloaded = '(chaptersDownloaded > 0 OR isLocal = 1)',
-  Unread = 'lastReadAt IS NULL',
-  Completed = "status LIKE 'Completed'",
-  DownloadedOnly = 'AND chaptersDownloaded > 0',
-  Started = 'lastReadAt IS NOT NULL',
-  CustomUpdateFrequency = 'fetchInterval < 0',
+export type LibraryFilterKey =
+  | 'downloaded'
+  | 'unread'
+  | 'started'
+  | 'completed'
+  | 'customUpdateFrequency';
+
+export type LibraryFilterState = 'include' | 'exclude';
+
+export type LibraryFilters = Partial<
+  Record<LibraryFilterKey, LibraryFilterState>
+>;
+
+/** Genre keys are normalized with `normalizeGenre`, so "Sci-fi" and "Sci fi" match. */
+export interface LibraryGenreFilter {
+  include: string[];
+  exclude: string[];
 }
 
-export const libraryFilterList = [
+export const libraryFilterList: { label: string; key: LibraryFilterKey }[] = [
   {
     label: getString('libraryScreen.bottomSheet.filters.downloaded'),
-    filter: LibraryFilter.Downloaded,
+    key: 'downloaded',
   },
   {
     label: getString('libraryScreen.bottomSheet.filters.unread'),
-    filter: LibraryFilter.Unread,
+    key: 'unread',
   },
   {
     label: getString('libraryScreen.bottomSheet.filters.started'),
-    filter: LibraryFilter.Started,
+    key: 'started',
   },
   {
     label: getString('libraryScreen.bottomSheet.filters.completed'),
-    filter: LibraryFilter.Completed,
+    key: 'completed',
   },
   {
     label: getString('libraryScreen.bottomSheet.filters.customUpdateFrequency'),
-    filter: LibraryFilter.CustomUpdateFrequency,
+    key: 'customUpdateFrequency',
   },
 ];
+
+/** Older versions persisted a single raw SQL clause as `filter`. */
+const legacyLibraryFilterKeys: Record<string, LibraryFilterKey> = {
+  '(chaptersDownloaded > 0 OR isLocal = 1)': 'downloaded',
+  'lastReadAt IS NULL': 'unread',
+  'lastReadAt IS NOT NULL': 'started',
+  "status LIKE 'Completed'": 'completed',
+  'fetchInterval < 0': 'customUpdateFrequency',
+};
+
+export const resolveLibraryFilters = (
+  libraryFilters: LibraryFilters | undefined,
+  legacyFilter: string | undefined,
+): LibraryFilters => {
+  if (libraryFilters) {
+    return libraryFilters;
+  }
+  const legacyKey = legacyFilter
+    ? legacyLibraryFilterKeys[legacyFilter]
+    : undefined;
+  return legacyKey ? { [legacyKey]: 'include' } : {};
+};
+
+/** Cycles unset → include → exclude → unset, like Mihon's library filters. */
+export const nextLibraryFilterState = (
+  state: LibraryFilterState | undefined,
+): LibraryFilterState | undefined =>
+  state === undefined ? 'include' : state === 'include' ? 'exclude' : undefined;
 
 // NIL: Novels in Library
 export enum LibrarySortOrder {

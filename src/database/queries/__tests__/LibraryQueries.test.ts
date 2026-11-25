@@ -87,24 +87,82 @@ describe('LibraryQueries', () => {
       expect(novel[0].lastUpdatedAt).toBe('2026-07-28 10:00:00');
     });
 
-    it('should filter novels by raw SQL filter', async () => {
+    it('should include and exclude novels by status filters', async () => {
       await insertTestNovel(testDb, {
         inLibrary: true,
-        name: 'Novel A',
-        author: 'Author One',
+        name: 'Completed Started',
+        status: 'Completed',
+        lastReadAt: '2026-01-01 10:00:00',
       });
       await insertTestNovel(testDb, {
         inLibrary: true,
-        name: 'Novel B',
-        author: 'Author Two',
+        name: 'Completed Unstarted',
+        status: 'Completed',
       });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Ongoing Started',
+        status: 'Ongoing',
+        lastReadAt: '2026-01-01 10:00:00',
+      });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'No Status',
+        status: null,
+      });
+
+      const names = async (
+        filters: Parameters<typeof getLibraryNovelsFromDb>[1],
+      ) => (await getLibraryNovelsFromDb('name ASC', filters)).map(n => n.name);
+
+      expect(await names({ completed: 'include' })).toEqual([
+        'Completed Started',
+        'Completed Unstarted',
+      ]);
+      // A NULL status must not be dropped by an exclusion.
+      expect(await names({ completed: 'exclude' })).toEqual([
+        'No Status',
+        'Ongoing Started',
+      ]);
+      expect(await names({ completed: 'include', started: 'exclude' })).toEqual(
+        ['Completed Unstarted'],
+      );
+    });
+
+    it('should exclude downloaded and local novels', async () => {
+      const downloadedId = await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Downloaded',
+      });
+      await insertTestChapter(testDb, downloadedId, { isDownloaded: true });
+      await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Local',
+        isLocal: true,
+      });
+      await insertTestNovel(testDb, { inLibrary: true, name: 'Remote' });
+
+      const novels = await getLibraryNovelsFromDb(undefined, {
+        downloaded: 'exclude',
+      });
+      expect(novels.map(n => n.name)).toEqual(['Remote']);
+    });
+
+    it('should ignore a downloaded exclusion in downloaded-only mode', async () => {
+      const downloadedId = await insertTestNovel(testDb, {
+        inLibrary: true,
+        name: 'Downloaded',
+      });
+      await insertTestChapter(testDb, downloadedId, { isDownloaded: true });
+      await insertTestNovel(testDb, { inLibrary: true, name: 'Remote' });
 
       const novels = await getLibraryNovelsFromDb(
         undefined,
-        "author = 'Author One'",
+        { downloaded: 'exclude' },
+        undefined,
+        true,
       );
-      expect(novels).toHaveLength(1);
-      expect(novels[0].name).toBe('Novel A');
+      expect(novels.map(n => n.name)).toEqual(['Downloaded']);
     });
 
     it('should filter by search text', async () => {
@@ -227,6 +285,7 @@ describe('LibraryQueries', () => {
         name: 'A Good Remote Story',
         author: 'Author Two',
         isLocal: false,
+        status: 'Completed',
       });
       await insertTestChapter(testDb, novel1Id, { isDownloaded: true });
 
@@ -238,7 +297,7 @@ describe('LibraryQueries', () => {
         isLocal: false,
       });
 
-      // Novel 3: Downloaded but not matching author filter
+      // Novel 3: Not downloaded and not completed
       await insertTestNovel(testDb, {
         inLibrary: true,
         name: 'Downloaded Book',
@@ -248,7 +307,7 @@ describe('LibraryQueries', () => {
 
       const novels1 = await getLibraryNovelsFromDb(
         'name ASC', // sortOrder
-        "author = 'Author Two'", // filter
+        { completed: 'include' }, // filters
         'Remote', // searchText
         true, // downloadedOnlyMode
         true, // excludeLocalNovels
@@ -256,7 +315,7 @@ describe('LibraryQueries', () => {
       expect(novels1).toHaveLength(1);
       expect(novels1[0].name).toBe('A Good Remote Story');
 
-      // Test Case 2: Filter by local novels with downloaded chapters by Author One
+      // Test Case 2: Filter by local novels with downloaded chapters that are not completed
       const novel2Id = await insertTestNovel(testDb, {
         inLibrary: true,
         name: 'An Old Local Story',
@@ -275,13 +334,13 @@ describe('LibraryQueries', () => {
 
       const novels2 = await getLibraryNovelsFromDb(
         'name DESC',
-        "author = 'Author One'",
+        { completed: 'exclude' },
         'Local',
         true,
         false, // Include local novels
       );
 
-      // Both are local, by Author One, and have downloaded chapters.
+      // Both are local, not completed, and have downloaded chapters.
       // Sorted DESC, so 'The Great Local Novel' comes first.
       expect(novels2.map(n => n.name)).toEqual([
         'The Great Local Novel',
@@ -291,7 +350,7 @@ describe('LibraryQueries', () => {
       // Test Case 3: Combination leading to empty results
       const novels3 = await getLibraryNovelsFromDb(
         'name ASC',
-        "author = 'NonExistent'",
+        { completed: 'include' },
         'Novel',
         false,
         false,
@@ -302,10 +361,9 @@ describe('LibraryQueries', () => {
     it('should return empty array if no novels match filters', async () => {
       await insertTestNovel(testDb, { inLibrary: true, name: 'Novel A' });
 
-      const novels = await getLibraryNovelsFromDb(
-        undefined,
-        "author = 'NonExistent'",
-      );
+      const novels = await getLibraryNovelsFromDb(undefined, {
+        completed: 'include',
+      });
       expect(novels).toHaveLength(0);
     });
 

@@ -7,19 +7,28 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
+import { TabDescriptor, TabView } from 'react-native-tab-view';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
+import {
+  Checkbox,
+  SortItem,
+  TriStateCheckbox,
+} from '@components/Checkbox/Checkbox';
 import {
   DisplayModes,
   displayModesList,
-  LibraryFilter,
+  LibraryFilterKey,
   libraryFilterList,
+  LibraryFilterState,
+  LibraryGenreFilter,
   LibrarySortOrder,
   librarySortOrderList,
+  nextLibraryFilterState,
+  resolveLibraryFilters,
 } from '@screens/library/constants/constants';
+import type { LibraryGenreOption } from '@screens/library/utils/genreFilter';
 import { RadioButton } from '@components/RadioButton/RadioButton';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
@@ -29,40 +38,150 @@ import { LegendList } from '@legendapp/list/react-native';
 
 interface LibraryBottomSheetProps {
   bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  genreOptions: LibraryGenreOption[];
   style?: StyleProp<ViewStyle>;
 }
 
-const FirstRoute = () => {
+type FilterListItem =
+  | { type: 'header'; key: string; label: string }
+  | { type: 'status'; key: LibraryFilterKey; label: string }
+  | { type: 'genre'; key: string; label: string };
+
+const genreStateOf = (
+  genreFilter: LibraryGenreFilter,
+  key: string,
+): LibraryFilterState | undefined =>
+  genreFilter.include.includes(key)
+    ? 'include'
+    : genreFilter.exclude.includes(key)
+    ? 'exclude'
+    : undefined;
+
+const withGenreState = (
+  genreFilter: LibraryGenreFilter,
+  key: string,
+  state: LibraryFilterState | undefined,
+): LibraryGenreFilter => ({
+  include: [
+    ...genreFilter.include.filter(k => k !== key),
+    ...(state === 'include' ? [key] : []),
+  ],
+  exclude: [
+    ...genreFilter.exclude.filter(k => k !== key),
+    ...(state === 'exclude' ? [key] : []),
+  ],
+});
+
+const emptyGenreFilter: LibraryGenreFilter = { include: [], exclude: [] };
+
+const FilterRoute = ({
+  genreOptions,
+}: {
+  genreOptions: LibraryGenreOption[];
+}) => {
   const theme = useTheme();
   const {
-    filter,
+    filter: legacyFilter,
+    libraryFilters,
+    genreFilter = emptyGenreFilter,
     setLibrarySettings,
     downloadedOnlyMode = false,
   } = useLibrarySettings();
+  const filters = resolveLibraryFilters(libraryFilters, legacyFilter);
+
+  const data = useMemo<FilterListItem[]>(
+    () => [
+      ...(genreOptions.length
+        ? [
+            {
+              type: 'header' as const,
+              key: 'status',
+              label: getString('libraryScreen.bottomSheet.filters.status'),
+            },
+          ]
+        : []),
+      ...libraryFilterList.map(item => ({
+        type: 'status' as const,
+        key: item.key,
+        label: item.label,
+      })),
+      ...(genreOptions.length
+        ? [
+            {
+              type: 'header' as const,
+              key: 'genres',
+              label: getString('libraryScreen.bottomSheet.filters.genres'),
+            },
+            ...genreOptions.map(option => ({
+              type: 'genre' as const,
+              key: option.key,
+              label: option.label,
+            })),
+          ]
+        : []),
+    ],
+    [genreOptions],
+  );
+
+  const renderItem = ({ item }: { item: FilterListItem }) => {
+    if (item.type === 'header') {
+      return (
+        <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
+          {item.label}
+        </Text>
+      );
+    }
+    if (item.type === 'status') {
+      const isForcedByDownloadedOnly =
+        item.key === 'downloaded' && downloadedOnlyMode;
+      return (
+        <TriStateCheckbox
+          label={item.label}
+          theme={theme}
+          status={isForcedByDownloadedOnly ? 'include' : filters[item.key]}
+          disabled={isForcedByDownloadedOnly}
+          onPress={() => {
+            const nextState = nextLibraryFilterState(filters[item.key]);
+            const { [item.key]: _removed, ...rest } = filters;
+            setLibrarySettings({
+              filter: undefined,
+              libraryFilters: nextState
+                ? { ...rest, [item.key]: nextState }
+                : rest,
+            });
+          }}
+        />
+      );
+    }
+    const state = genreStateOf(genreFilter, item.key);
+    return (
+      <TriStateCheckbox
+        label={item.label}
+        theme={theme}
+        status={state}
+        onPress={() =>
+          setLibrarySettings({
+            genreFilter: withGenreState(
+              genreFilter,
+              item.key,
+              nextLibraryFilterState(state),
+            ),
+          })
+        }
+      />
+    );
+  };
 
   return (
     <View style={styles.flex}>
       <LegendList
         recycleItems
         estimatedItemSize={48}
-        extraData={[filter]}
-        data={libraryFilterList}
-        keyExtractor={item => `filter_${item.filter}`}
-        renderItem={({ item }) => (
-          <Checkbox
-            label={item.label}
-            theme={theme}
-            status={filter === item.filter}
-            onPress={() =>
-              setLibrarySettings({
-                filter: filter === item.filter ? undefined : item.filter,
-              })
-            }
-            disabled={
-              item.filter === LibraryFilter.Downloaded && downloadedOnlyMode
-            }
-          />
-        )}
+        extraData={[filters, genreFilter, downloadedOnlyMode]}
+        data={data}
+        keyExtractor={item => `${item.type}_${item.key}`}
+        getItemType={item => item.type}
+        renderItem={renderItem}
       />
     </View>
   );
@@ -184,14 +303,9 @@ const ThirdRoute = () => {
   );
 };
 
-const bottomSheetSceneMap = SceneMap({
-  first: FirstRoute,
-  second: SecondRoute,
-  third: ThirdRoute,
-});
-
 const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   bottomSheetRef,
+  genreOptions,
   style,
 }) => {
   const theme = useTheme();
@@ -228,6 +342,22 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
     ],
   );
 
+  const renderScene = useCallback(
+    ({ route }: { route: { key: string } }) => {
+      switch (route.key) {
+        case 'first':
+          return <FilterRoute genreOptions={genreOptions} />;
+        case 'second':
+          return <SecondRoute />;
+        case 'third':
+          return <ThirdRoute />;
+        default:
+          return null;
+      }
+    },
+    [genreOptions],
+  );
+
   const [index, setIndex] = useState(0);
   const routes = useMemo(
     () => [
@@ -262,7 +392,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
           renderTabBar={renderTabBar}
-          renderScene={bottomSheetSceneMap}
+          renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
           style={styles.tabView}
