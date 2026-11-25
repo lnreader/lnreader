@@ -38,7 +38,6 @@ const DRAWABLE_RESOURCE_NAMES = [
   'splash_icon',
   'splashscreen_logo',
 ];
-const ANDROID_DENSITIES = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
 
 /**
  * `AppTheme` inherits `android:windowBackground` from
@@ -99,9 +98,24 @@ const SYSTEM_BAR_ATTRIBUTES = [
   'android:windowLightNavigationBar',
 ];
 
-const boolResourceFile = value => `<?xml version="1.0" encoding="utf-8"?>
+/**
+ * The splash background is dark for release and debug builds, so its bar
+ * icons default to light. The preview variant, whose splash is light,
+ * overrides this resource in its own `values`.
+ */
+const SPLASH_LIGHT_SYSTEM_BARS_RESOURCE = 'lnreaderSplashLightSystemBars';
+
+const boolResourceFile = (
+  value,
+  splashValue,
+) => `<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>
+  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>${
+  splashValue === undefined
+    ? ''
+    : `
+  <bool name="${SPLASH_LIGHT_SYSTEM_BARS_RESOURCE}">${splashValue}</bool>`
+}
 </resources>
 `;
 
@@ -117,14 +131,14 @@ const withLightSystemBarsResources = config =>
         'res',
       );
 
-      for (const [dir, value] of [
-        ['values', true],
+      for (const [dir, value, splashValue] of [
+        ['values', true, false],
         ['values-night', false],
       ]) {
         fs.mkdirSync(path.join(resDir, dir), { recursive: true });
         fs.writeFileSync(
           path.join(resDir, dir, 'lnreader_system_bars.xml'),
-          boolResourceFile(value),
+          boolResourceFile(value, splashValue),
         );
       }
 
@@ -132,10 +146,6 @@ const withLightSystemBarsResources = config =>
     },
   ]);
 
-/**
- * The splash background is dark in both system modes, so its bar icons are
- * always light.
- */
 const SPLASH_THEME_GROUP = {
   name: 'Theme.App.SplashScreen',
   parent: 'Theme.SplashScreen',
@@ -155,7 +165,12 @@ const withSystemBarStyles = config =>
       );
       config.modResults = AndroidConfig.Styles.assignStylesValue(
         config.modResults,
-        { add: true, parent: SPLASH_THEME_GROUP, name, value: 'false' },
+        {
+          add: true,
+          parent: SPLASH_THEME_GROUP,
+          name,
+          value: `@bool/${SPLASH_LIGHT_SYSTEM_BARS_RESOURCE}`,
+        },
       );
     }
 
@@ -209,21 +224,23 @@ const removeGeneratedIconResources = resDir => {
   }
 };
 
-const installVariantSplashIcons = resDir => {
-  for (const density of ANDROID_DENSITIES) {
-    const drawableDir = path.join(resDir, `drawable-${density}`);
-    const sourcePath = path.join(drawableDir, 'splash_icon.png');
-    const splashPath = path.join(drawableDir, 'splashscreen_logo.png');
-    const nightDrawableDir = path.join(resDir, `drawable-night-${density}`);
-    const nightSplashPath = path.join(
-      nightDrawableDir,
-      'splashscreen_logo.png',
-    );
+/**
+ * Each variant ships its splash icon as a vector so it stays sharp at any
+ * density. It replaces the PNGs expo-splash-screen generates (removed above),
+ * and is copied to `drawable-night` so the main source set's night resource
+ * cannot outrank a variant's unqualified one.
+ */
+const installVariantSplashIcon = resDir => {
+  const drawableDir = path.join(resDir, 'drawable');
+  const splashPath = path.join(drawableDir, 'splashscreen_logo.xml');
+  const nightDrawableDir = path.join(resDir, 'drawable-night');
 
-    fs.renameSync(sourcePath, splashPath);
-    fs.mkdirSync(nightDrawableDir, { recursive: true });
-    fs.copyFileSync(splashPath, nightSplashPath);
-  }
+  fs.renameSync(path.join(drawableDir, 'splash_icon.xml'), splashPath);
+  fs.mkdirSync(nightDrawableDir, { recursive: true });
+  fs.copyFileSync(
+    splashPath,
+    path.join(nightDrawableDir, 'splashscreen_logo.xml'),
+  );
 };
 
 const withAndroidVariantAssets = config =>
@@ -251,7 +268,7 @@ const withAndroidVariantAssets = config =>
         removeGeneratedIconResources(targetResDir);
         fs.mkdirSync(targetResDir, { recursive: true });
         fs.cpSync(sourceResDir, targetResDir, { recursive: true });
-        installVariantSplashIcons(targetResDir);
+        installVariantSplashIcon(targetResDir);
       }
 
       return config;
