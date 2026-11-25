@@ -34,7 +34,7 @@ const DiscoverCard: React.FC<Props> = ({
       android_ripple={{ color: theme.rippleColor }}
     >
       <View style={[styles.flexRow, styles.mainAction]}>
-        <Image source={icon} style={styles.icon} />
+        <Image source={icon} style={styles.icon} fadeDuration={0} />
         <View style={styles.details}>
           <Text style={[styles.name, { color: theme.onSurface }]}>
             {trackerName}
