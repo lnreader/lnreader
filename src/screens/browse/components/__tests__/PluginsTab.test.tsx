@@ -56,6 +56,7 @@ jest.mock('@components', () => ({
 }));
 
 const navigation = { navigate: jest.fn() } as never;
+const hidden = { includeHiddenElements: true };
 
 describe('PluginsTab', () => {
   it('shows a skeleton until the plugin list is mounted', async () => {
@@ -67,11 +68,13 @@ describe('PluginsTab', () => {
       />,
     );
 
-    expect(screen.getByTestId('plugins-skeleton')).toBeOnTheScreen();
+    expect(screen.getByTestId('plugins-skeleton', hidden)).toBeOnTheScreen();
     expect(screen.queryByTestId('fast-scrollbar-thumb')).not.toBeOnTheScreen();
 
     await waitFor(() =>
-      expect(screen.queryByTestId('plugins-skeleton')).not.toBeOnTheScreen(),
+      expect(
+        screen.queryByTestId('plugins-skeleton', hidden),
+      ).not.toBeOnTheScreen(),
     );
     expect(screen.getByTestId('fast-scrollbar-thumb')).toBeOnTheScreen();
   });
