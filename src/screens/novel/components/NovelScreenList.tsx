@@ -24,7 +24,6 @@ import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
 import { useCustomNovelCover } from '../hooks/useCustomNovelCover';
 import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
-import { isMissingNovelCover } from '@components/NovelCoverImage';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
@@ -358,17 +357,9 @@ const NovelScreenList = ({
     novel.id === 'NO_ID' ? undefined : novel,
     setNovel,
   );
-  // Plugins may omit the cover on the details page; keep showing (and saving)
-  // the one the browse list already had.
-  const displayedCover = isMissingNovelCover(novel.cover)
-    ? routeBaseNovel.cover
-    : novel.cover;
-  const novelWithDisplayedCover = useMemo(
-    () =>
-      fetchedNovel ? { ...fetchedNovel, cover: displayedCover } : undefined,
-    [fetchedNovel, displayedCover],
+  const saveNovelCover = useSaveNovelCover(
+    novel.id === 'NO_ID' ? undefined : novel,
   );
-  const saveNovelCover = useSaveNovelCover(novelWithDisplayedCover);
 
   const onFabPress = useCallback(() => {
     const chapter = lastRead ?? firstUnreadChapter;
@@ -420,7 +411,6 @@ const NovelScreenList = ({
           deleteDownloadSnackbar={deleteDownloadSnackbar}
           fetching={fetching}
           filter={filter}
-          cover={displayedCover}
           firstUnreadChapter={firstUnreadChapter}
           isLoading={loading}
           lastRead={lastRead}
@@ -442,7 +432,6 @@ const NovelScreenList = ({
       deleteDownloadSnackbar,
       fetching,
       filter,
-      displayedCover,
       firstUnreadChapter,
       loading,
       lastRead,

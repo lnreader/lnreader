@@ -50,7 +50,6 @@ import {
 interface NovelInfoHeaderProps {
   hasDownloadedChapters: boolean;
   deleteDownloadSnackbar?: UseBooleanReturnType;
-  cover: string | null | undefined;
   fetching: boolean;
   filter?: ChapterFilterKey[];
   firstUnreadChapter?: ChapterInfo;
@@ -88,7 +87,6 @@ const showNotAvailable = () => {
 const NovelInfoHeader = ({
   hasDownloadedChapters,
   deleteDownloadSnackbar,
-  cover,
   fetching,
   filter = [],
   firstUnreadChapter,
@@ -118,10 +116,10 @@ const NovelInfoHeader = ({
   const coverSource = useMemo(() => {
     const imageRequestInit = getPlugin(novel.pluginId)?.imageRequestInit;
     return {
-      uri: cover ?? undefined,
+      uri: novel.cover ?? undefined,
       headers: imageRequestInit?.headers,
     };
-  }, [novel.pluginId, cover]);
+  }, [novel.pluginId, novel.cover]);
 
   const novelStatus = useMemo(
     () => (novel.id !== 'NO_ID' ? novel.status ?? undefined : undefined),
