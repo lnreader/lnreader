@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import Color from 'color';
+import { StyleSheet } from 'react-native';
 
 import { defaultCover } from '@plugins/helpers/constants';
 import type { ThemeColors } from '@theme/types';
@@ -7,9 +9,27 @@ import NovelCoverImage, { isMissingNovelCover } from '../NovelCoverImage';
 jest.mock('@react-native-vector-icons/material-design-icons', () => 'Icon');
 
 const theme = {
-  onSurfaceVariant: '#404040',
-  surfaceVariant: '#d0d0d0',
+  isDark: false,
+  background: '#EDE2FF',
+  onSurfaceVariant: '#4A454E',
+  surfaceVariant: '#E9DFEB',
 } as ThemeColors;
+
+const darkTheme = {
+  ...theme,
+  isDark: true,
+  background: '#111129',
+  onSurfaceVariant: '#CCC4CE',
+} as ThemeColors;
+
+const expectPlaceholder = (background: string, iconColor: string) => {
+  const cover = screen.getByTestId('novel-cover');
+  const fill = Color(StyleSheet.flatten(cover.props.style).backgroundColor);
+
+  expect(fill.contrast(Color(background))).toBeGreaterThanOrEqual(1.35);
+  expect(fill.contrast(Color(iconColor))).toBeGreaterThanOrEqual(4.5);
+  expect(cover.props.children.props.color).toBe(iconColor);
+};
 
 describe('NovelCoverImage', () => {
   it('identifies empty and legacy fallback covers as missing', () => {
@@ -19,22 +39,20 @@ describe('NovelCoverImage', () => {
     expect(isMissingNovelCover('https://example.com/cover.webp')).toBe(false);
   });
 
-  it('shows the themed placeholder when a cover is missing', () => {
+  it('shows the light placeholder when a cover is missing', () => {
     render(
       <NovelCoverImage testID="novel-cover" theme={theme} uri={undefined} />,
     );
 
-    expect(screen.getByTestId('novel-cover')).toHaveStyle({
-      backgroundColor: theme.surfaceVariant,
-    });
     expect(screen.getByTestId('novel-cover').props.source).toBeUndefined();
+    expectPlaceholder(theme.background, theme.onSurfaceVariant);
   });
 
-  it('replaces a cover with the placeholder when loading fails', () => {
+  it('shows the dark placeholder when loading fails in dark mode', () => {
     render(
       <NovelCoverImage
         testID="novel-cover"
-        theme={theme}
+        theme={darkTheme}
         uri="https://example.com/broken.webp"
       />,
     );
@@ -51,10 +69,8 @@ describe('NovelCoverImage', () => {
       nativeEvent: { error: 'Failed to load image' },
     });
 
-    expect(screen.getByTestId('novel-cover')).toHaveStyle({
-      backgroundColor: theme.surfaceVariant,
-    });
     expect(screen.getByTestId('novel-cover').props.source).toBeUndefined();
+    expectPlaceholder(darkTheme.background, darkTheme.onSurfaceVariant);
   });
 
   it('preserves request bodies through the React Native compatibility path', () => {
