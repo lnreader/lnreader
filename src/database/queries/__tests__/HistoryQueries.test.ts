@@ -188,5 +188,36 @@ describe('HistoryQueries', () => {
       await insertHistory(chapterId2);
       expect(getLastReadAt(novelId)).not.toBeNull();
     });
+
+    it('should roll back and keep the update trigger when clearing fails', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId);
+      const chapterId2 = await insertTestChapter(testDb, novelId);
+      await insertHistory(chapterId1);
+
+      // Fails only the stats fix-up that runs while the trigger is suspended.
+      testDb.sqlite.executeSync(
+        `CREATE TRIGGER fail_novel_update BEFORE UPDATE ON Novel
+         WHEN NOT EXISTS (SELECT 1 FROM sqlite_master WHERE name = 'update_novel_stats_on_update')
+         BEGIN SELECT RAISE(ABORT, 'forced failure'); END`,
+      );
+      try {
+        await expect(deleteAllHistory()).rejects.toThrow();
+        await expect(deleteNovelHistory(novelId)).rejects.toThrow();
+      } finally {
+        testDb.sqlite.executeSync('DROP TRIGGER fail_novel_update');
+      }
+
+      expect((await getHistoryFromDb()).map(item => item.id)).toEqual([
+        chapterId1,
+      ]);
+      expect(hasUpdateTrigger()).toBe(true);
+
+      testDb.sqlite.executeSync('UPDATE Novel SET lastReadAt = NULL');
+      await insertHistory(chapterId2);
+      expect(getLastReadAt(novelId)).not.toBeNull();
+    });
   });
 });
