@@ -87,6 +87,81 @@ const withWindowBackgroundStyle = config =>
     return config;
   });
 
+/**
+ * Bar icon styles that match the backgrounds above: dark icons over the light
+ * window, light icons over the dark one. Without this the bars keep one fixed
+ * style from launch until JS applies the app theme, which leaves them
+ * low-contrast over whichever background does not match.
+ */
+const LIGHT_SYSTEM_BARS_RESOURCE = 'lnreaderLightSystemBars';
+const SYSTEM_BAR_ATTRIBUTES = [
+  'android:windowLightStatusBar',
+  'android:windowLightNavigationBar',
+];
+
+const boolResourceFile = value => `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>
+</resources>
+`;
+
+const withLightSystemBarsResources = config =>
+  withDangerousMod(config, [
+    'android',
+    config => {
+      const resDir = path.join(
+        config.modRequest.platformProjectRoot,
+        'app',
+        'src',
+        'main',
+        'res',
+      );
+
+      for (const [dir, value] of [
+        ['values', true],
+        ['values-night', false],
+      ]) {
+        fs.mkdirSync(path.join(resDir, dir), { recursive: true });
+        fs.writeFileSync(
+          path.join(resDir, dir, 'lnreader_system_bars.xml'),
+          boolResourceFile(value),
+        );
+      }
+
+      return config;
+    },
+  ]);
+
+/**
+ * The splash background is dark in both system modes, so its bar icons are
+ * always light.
+ */
+const SPLASH_THEME_GROUP = {
+  name: 'Theme.App.SplashScreen',
+  parent: 'Theme.SplashScreen',
+};
+
+const withSystemBarStyles = config =>
+  withAndroidStyles(config, config => {
+    for (const name of SYSTEM_BAR_ATTRIBUTES) {
+      config.modResults = AndroidConfig.Styles.assignStylesValue(
+        config.modResults,
+        {
+          add: true,
+          parent: AndroidConfig.Styles.getAppThemeGroup(),
+          name,
+          value: `@bool/${LIGHT_SYSTEM_BARS_RESOURCE}`,
+        },
+      );
+      config.modResults = AndroidConfig.Styles.assignStylesValue(
+        config.modResults,
+        { add: true, parent: SPLASH_THEME_GROUP, name, value: 'false' },
+      );
+    }
+
+    return config;
+  });
+
 const withBuildGradleCustomizations = config =>
   withAppBuildGradle(config, config => {
     const { contents } = config.modResults;
@@ -230,5 +305,7 @@ module.exports = config => {
   config = withFontWeightAdjustmentDisabled(config);
   config = withWindowBackgroundColors(config);
   config = withWindowBackgroundStyle(config);
+  config = withLightSystemBarsResources(config);
+  config = withSystemBarStyles(config);
   return withAndroidVariantAssets(config);
 };
