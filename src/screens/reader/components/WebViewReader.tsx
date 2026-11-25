@@ -219,15 +219,6 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
   } = useChapterContext();
   const theme = useTheme();
   const openNovelLink = useNovelLinkNavigation(novel);
-  const linkHandlers = () =>
-    createReaderLinkHandlers({
-      openNovel: openNovelLink,
-      openExternal: url => {
-        void Linking.openURL(url).catch(() => undefined);
-      },
-      inject: script => webViewRef.current?.injectJavaScript(script),
-      refresh: refetch,
-    });
   // Custom code snippets apply from the next chapter on, like before chapters
   // were swapped into the loaded page.
   const chapterReaderSettings = useMemo(
@@ -275,6 +266,23 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     cancelTtsTransition();
     runTtsCommand('stop');
   }, [cancelTtsTransition, runTtsCommand]);
+
+  const linkHandlers = () =>
+    createReaderLinkHandlers({
+      openNovel: url => {
+        if (!openNovelLink(url)) {
+          return false;
+        }
+        // The linked novel covers this reader, so its speech stops.
+        stopTts();
+        return true;
+      },
+      openExternal: url => {
+        void Linking.openURL(url).catch(() => undefined);
+      },
+      inject: script => webViewRef.current?.injectJavaScript(script),
+      refresh: refetch,
+    });
 
   useEffect(
     () => () => {

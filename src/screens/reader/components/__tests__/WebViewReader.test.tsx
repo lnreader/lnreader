@@ -100,9 +100,10 @@ jest.mock('@plugins/pluginManager', () => {
   };
 });
 
+const mockTtsCommand = jest.fn();
 jest.mock('../../hooks/useTtsSession', () => {
   const session = {
-    command: jest.fn(),
+    command: (command: string) => mockTtsCommand(command),
     cancelSleepTimer: jest.fn(),
     loadQueue: jest.fn(),
     loadAndPlay: jest.fn(),
@@ -473,6 +474,21 @@ describe('WebViewReader links', () => {
       mockWebView.props!.onOpenWindow({ nativeEvent: { targetUrl: url } }),
     );
     expect(mockOpenNovel).toHaveBeenCalledTimes(3);
+  });
+
+  it('stops speech only when a link opens a novel', () => {
+    renderLoadedReader();
+    mockTtsCommand.mockClear();
+
+    post({
+      type: 'link',
+      data: { url: 'https://example.com/', target: '_blank' },
+    });
+    expect(mockTtsCommand).not.toHaveBeenCalled();
+
+    mockOpenNovel.mockReturnValue(true);
+    post({ type: 'link', data: { url: 'https://royalroad.com/fiction/123' } });
+    expect(mockTtsCommand).toHaveBeenCalledWith('stop');
   });
 
   it('ignores a browser error for a link that no app can open', async () => {
