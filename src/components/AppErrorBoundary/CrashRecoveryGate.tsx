@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
 
 import { getPendingCrash } from '@services/crashLogs';
+import { hideSplashScreen } from '@utils/splashScreen';
 import { ErrorFallback } from './AppErrorBoundary';
 
 const CrashRecoveryGate = ({ children }: PropsWithChildren) => {
@@ -12,7 +12,7 @@ const CrashRecoveryGate = ({ children }: PropsWithChildren) => {
       .then(crash => {
         setPendingCrash(crash);
         if (crash) {
-          SplashScreen.hideAsync();
+          hideSplashScreen();
         }
       })
       .catch(() => setPendingCrash(null));
