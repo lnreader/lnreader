@@ -17,7 +17,7 @@ import { useLibrary } from '../useLibrary';
 
 jest.mock('@hooks/persisted', () => ({
   useLibrarySettings: jest.fn(() => ({
-    filter: undefined,
+    filters: {},
     sortOrder: 'name ASC',
     downloadedOnlyMode: false,
   })),
@@ -87,7 +87,7 @@ describe('useLibrary', () => {
     mockGetNovelByPath.mockClear();
     mockSwitchNovelToLibraryQuery.mockClear();
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
     } as ReturnType<typeof useLibrarySettings>);
@@ -121,11 +121,48 @@ describe('useLibrary', () => {
 
     expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
       'name ASC',
-      undefined,
+      {},
       '',
       false,
     );
     expect(result.current.library).toEqual([updatedNovel]);
+  });
+
+  it('passes the saved filters to the query and narrows the library by genre', () => {
+    const filters = { downloaded: 'include', completed: 'exclude' } as const;
+    mockUseLibrarySettings.mockReturnValue({
+      filters,
+      includedGenres: ['horror'],
+      excludedGenres: ['harem'],
+      sortOrder: 'name ASC',
+      downloadedOnlyMode: false,
+    } as unknown as ReturnType<typeof useLibrarySettings>);
+    let onLibraryChange: ((novels: NovelInfo[]) => void) | undefined;
+    mockUseLiveQuery.mockImplementation((_query, _fireOn, callback) => {
+      onLibraryChange = callback as (novels: NovelInfo[]) => void;
+      return [];
+    });
+
+    const { result } = renderHook(useLibrary);
+    const novel = (id: number, genres: string | null) =>
+      ({ id, name: `Novel ${id}`, genres } as NovelInfo);
+
+    act(() =>
+      onLibraryChange?.([
+        novel(1, 'Horror, Mystery'),
+        novel(2, ' horror ,Harem'),
+        novel(3, 'Psychological Horror'),
+        novel(4, null),
+      ]),
+    );
+
+    expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
+      'name ASC',
+      filters,
+      '',
+      false,
+    );
+    expect(result.current.library.map(n => n.id)).toEqual([1]);
   });
 
   it('stops loading and exposes database errors', async () => {
@@ -152,7 +189,7 @@ describe('useLibrary', () => {
 
   it('waits for category selection before adding a novel', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       defaultCategoryId: 3,
@@ -188,7 +225,7 @@ describe('useLibrary', () => {
 
   it('only confirms a pending library addition once', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       promptForCategoryOnAdd: true,
@@ -219,7 +256,7 @@ describe('useLibrary', () => {
 
   it('does not add a novel when category selection is cancelled', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       promptForCategoryOnAdd: true,

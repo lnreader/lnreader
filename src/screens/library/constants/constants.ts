@@ -8,7 +8,61 @@ export const getLibraryCategoryIndex = (
   return index === -1 ? 0 : index;
 };
 
-export enum LibraryFilter {
+export type LibraryFilterKey =
+  | 'downloaded'
+  | 'unread'
+  | 'started'
+  | 'completed'
+  | 'customUpdateFrequency';
+
+/** A filter that is not set is off. */
+export type LibraryFilterState = 'include' | 'exclude';
+
+export type LibraryFilters = Partial<
+  Record<LibraryFilterKey, LibraryFilterState>
+>;
+
+export const libraryFilterList: { label: string; key: LibraryFilterKey }[] = [
+  {
+    label: getString('libraryScreen.bottomSheet.filters.downloaded'),
+    key: 'downloaded',
+  },
+  {
+    label: getString('libraryScreen.bottomSheet.filters.unread'),
+    key: 'unread',
+  },
+  {
+    label: getString('libraryScreen.bottomSheet.filters.started'),
+    key: 'started',
+  },
+  {
+    label: getString('libraryScreen.bottomSheet.filters.completed'),
+    key: 'completed',
+  },
+  {
+    label: getString('libraryScreen.bottomSheet.filters.customUpdateFrequency'),
+    key: 'customUpdateFrequency',
+  },
+];
+
+export const nextLibraryFilterState = (
+  state?: LibraryFilterState,
+): LibraryFilterState | undefined => {
+  switch (state) {
+    case undefined:
+      return 'include';
+    case 'include':
+      return 'exclude';
+    default:
+      return undefined;
+  }
+};
+
+/**
+ * The single filter older versions stored as a raw SQL fragment under
+ * `filter`; kept only to carry an existing install's choice over.
+ */
+export enum LegacyLibraryFilter {
   Downloaded = '(chaptersDownloaded > 0 OR isLocal = 1)',
   Unread = 'lastReadAt IS NULL',
   Completed = "status LIKE 'Completed'",
@@ -17,28 +71,28 @@ export enum LibraryFilter {
   CustomUpdateFrequency = 'fetchInterval < 0',
 }
 
-export const libraryFilterList = [
-  {
-    label: getString('libraryScreen.bottomSheet.filters.downloaded'),
-    filter: LibraryFilter.Downloaded,
-  },
-  {
-    label: getString('libraryScreen.bottomSheet.filters.unread'),
-    filter: LibraryFilter.Unread,
-  },
-  {
-    label: getString('libraryScreen.bottomSheet.filters.started'),
-    filter: LibraryFilter.Started,
-  },
-  {
-    label: getString('libraryScreen.bottomSheet.filters.completed'),
-    filter: LibraryFilter.Completed,
-  },
-  {
-    label: getString('libraryScreen.bottomSheet.filters.customUpdateFrequency'),
-    filter: LibraryFilter.CustomUpdateFrequency,
-  },
-];
+const legacyLibraryFilterKeys = new Map<string, LibraryFilterKey>([
+  [LegacyLibraryFilter.Downloaded, 'downloaded'],
+  [LegacyLibraryFilter.Unread, 'unread'],
+  [LegacyLibraryFilter.Completed, 'completed'],
+  [LegacyLibraryFilter.DownloadedOnly, 'downloaded'],
+  [LegacyLibraryFilter.Started, 'started'],
+  [LegacyLibraryFilter.CustomUpdateFrequency, 'customUpdateFrequency'],
+]);
+
+/** Saved filters, falling back to the legacy single filter as an include. */
+export const resolveLibraryFilters = (
+  filters?: LibraryFilters,
+  legacyFilter?: string,
+): LibraryFilters => {
+  if (filters) {
+    return filters;
+  }
+  const key = legacyFilter
+    ? legacyLibraryFilterKeys.get(legacyFilter)
+    : undefined;
+  return key ? { [key]: 'include' } : {};
+};
 
 // NIL: Novels in Library
 export enum LibrarySortOrder {

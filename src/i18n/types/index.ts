@@ -456,6 +456,7 @@ export interface StringMap {
   'libraryScreen.bottomSheet.filters.completed': 'string';
   'libraryScreen.bottomSheet.filters.customUpdateFrequency': 'string';
   'libraryScreen.bottomSheet.filters.downloaded': 'string';
+  'libraryScreen.bottomSheet.filters.genres': 'string';
   'libraryScreen.bottomSheet.filters.started': 'string';
   'libraryScreen.bottomSheet.filters.unread': 'string';
   'libraryScreen.bottomSheet.sortOrders.alphabetically': 'string';

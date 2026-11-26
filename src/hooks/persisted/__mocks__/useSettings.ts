@@ -48,6 +48,7 @@ export const defaultLibrarySettings = {
   showContinueReadingButton: false,
   novelsPerRow: 3,
   sortOrder: 'DateAdded_DESC',
+  filters: {},
 };
 
 export const initialChapterGeneralSettings = {

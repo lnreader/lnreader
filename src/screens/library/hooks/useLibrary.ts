@@ -12,6 +12,7 @@ import { Category, NovelInfo } from '@database/types';
 
 import { useLibrarySettings } from '@hooks/persisted';
 import { LibrarySortOrder } from '../constants/constants';
+import { filterNovelsByGenres } from '../utils/genres';
 import {
   getNovelByPath,
   switchNovelToLibraryQuery,
@@ -67,13 +68,25 @@ export type UseLibraryReturnType = {
 
 export const useLibrary = (): UseLibraryReturnType => {
   const {
-    filter,
+    filters,
+    includedGenres,
+    excludedGenres,
     sortOrder = LibrarySortOrder.DateAdded_DESC,
     downloadedOnlyMode = false,
     promptForCategoryOnAdd = false,
   } = useLibrarySettings();
 
-  const [library, setLibrary] = useState<NovelInfo[]>([]);
+  const [unfilteredLibrary, setLibrary] = useState<NovelInfo[]>([]);
+  // Genres are matched here rather than in SQL: each is a name inside a
+  // comma-separated column whose spelling and spacing vary by source.
+  const library = useMemo(
+    () =>
+      filterNovelsByGenres(unfilteredLibrary, {
+        included: includedGenres,
+        excluded: excludedGenres,
+      }),
+    [excludedGenres, includedGenres, unfilteredLibrary],
+  );
   const [categories, setCategories] = useState<ExtendedCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<unknown>();
@@ -94,8 +107,8 @@ export const useLibrary = (): UseLibraryReturnType => {
 
   const libraryQuery = useMemo(
     () =>
-      getLibraryNovelsQuery(sortOrder, filter, searchText, downloadedOnlyMode),
-    [downloadedOnlyMode, filter, searchText, sortOrder],
+      getLibraryNovelsQuery(sortOrder, filters, searchText, downloadedOnlyMode),
+    [downloadedOnlyMode, filters, searchText, sortOrder],
   );
   useLiveQuery(libraryQuery, [{ table: 'Novel' }], setLibrary);
 
@@ -135,7 +148,7 @@ export const useLibrary = (): UseLibraryReturnType => {
         refreshCategories(),
         getLibraryNovelsFromDb(
           sortOrder,
-          filter,
+          filters,
           searchText,
           downloadedOnlyMode,
         ),
@@ -157,7 +170,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       hasLoadedRef.current = true;
       setIsLoading(false);
     }
-  }, [downloadedOnlyMode, filter, refreshCategories, searchText, sortOrder]);
+  }, [downloadedOnlyMode, filters, refreshCategories, searchText, sortOrder]);
 
   const libraryLookup = useMemo(() => {
     const set = new Set<string>();
@@ -186,7 +199,7 @@ export const useLibrary = (): UseLibraryReturnType => {
       await refreshCategories();
       const novels = await getLibraryNovelsFromDb(
         sortOrder,
-        filter,
+        filters,
         searchText,
         downloadedOnlyMode,
       );
@@ -195,7 +208,7 @@ export const useLibrary = (): UseLibraryReturnType => {
 
       return result !== undefined;
     },
-    [downloadedOnlyMode, filter, refreshCategories, searchText, sortOrder],
+    [downloadedOnlyMode, filters, refreshCategories, searchText, sortOrder],
   );
 
   const switchNovelToLibrary = useCallback(

@@ -1,8 +1,10 @@
 import { ChapterOrderKey } from '@database/constants';
 import {
   DisplayModes,
-  LibraryFilter,
+  LegacyLibraryFilter,
+  LibraryFilters,
   LibrarySortOrder,
+  resolveLibraryFilters,
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import { useMMKVObject } from 'react-native-mmkv';
@@ -140,7 +142,12 @@ export interface LibrarySettings {
   upcomingExcludeCategoryIds?: number[];
   upcomingIncludeCategoryIds?: number[];
   sortOrder?: LibrarySortOrder;
-  filter?: LibraryFilter;
+  /** @deprecated Read through `filters`, which falls back to it. */
+  filter?: LegacyLibraryFilter;
+  filters?: LibraryFilters;
+  /** Normalized genre names; see `normalizeGenreName`. */
+  includedGenres?: string[];
+  excludedGenres?: string[];
   showDownloadBadges?: boolean;
   showUnreadBadges?: boolean;
   showContinueReadingButton?: boolean;
@@ -429,8 +436,16 @@ export const useLibrarySettings = () => {
   const setLibrarySettings = (value: Partial<LibrarySettings>) =>
     setSettings({ ...librarySettings, ...value });
 
+  const storedFilters = librarySettings?.filters;
+  const legacyFilter = librarySettings?.filter;
+  const filters = useMemo(
+    () => resolveLibraryFilters(storedFilters, legacyFilter),
+    [storedFilters, legacyFilter],
+  );
+
   return {
     ...{ ...defaultLibrarySettings, ...librarySettings },
+    filters,
     setLibrarySettings,
   };
 };
