@@ -34,6 +34,8 @@ import {
   LibraryGenre,
 } from '@screens/library/utils/genres';
 import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
+import { showToast } from '@utils/showToast';
+import { getErrorMessage } from '@utils/error';
 import { RadioButton } from '@components/RadioButton/RadioButton';
 import {
   BottomSheetView,
@@ -91,7 +93,11 @@ const FirstRoute = () => {
           setLibraryGenres(buildLibraryGenres(novels));
         }
       })
-      .catch(() => {});
+      .catch(error => {
+        if (active) {
+          showToast(getErrorMessage(error));
+        }
+      });
     return () => {
       active = false;
     };
