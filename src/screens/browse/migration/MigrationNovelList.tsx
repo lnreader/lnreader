@@ -8,6 +8,7 @@ import { MigrateNovelScreenProps } from '@navigators/types';
 import { NovelInfo } from '@database/types';
 import { ThemeColors } from '@theme/types';
 import { SourceSearchResult } from './MigrationNovels';
+import type { MigrationTarget } from '@services/migrate/verifyMigration';
 import { NovelItem } from '@plugins/types';
 import {
   backgroundTasks,
@@ -21,6 +22,11 @@ interface MigrationNovelListProps {
   theme: ThemeColors;
   library: NovelInfo[];
   navigation: MigrateNovelScreenProps['navigation'];
+  isMigrating: boolean;
+  onMigrationQueued: (target: MigrationTarget) => void;
+  onMigrationAborted: (target: MigrationTarget) => void;
+  onMigrationEnqueued: (target: MigrationTarget) => void;
+  onMigrationBlocked: () => void;
 }
 
 interface SelectedNovel {
@@ -40,6 +46,11 @@ const MigrationNovelList = ({
   theme,
   library,
   navigation,
+  isMigrating,
+  onMigrationQueued,
+  onMigrationAborted,
+  onMigrationEnqueued,
+  onMigrationBlocked,
 }: MigrationNovelListProps) => {
   const pluginId = data.id;
   const [selectedNovel, setSelectedNovel] = useState<SelectedNovel>();
@@ -65,6 +76,10 @@ const MigrationNovelList = ({
   );
 
   const showModal = (path: string, name: string) => {
+    if (isMigrating) {
+      onMigrationBlocked();
+      return;
+    }
     if (inLibrary(path)) {
       showToast(getString('browseScreen.migration.novelAlreadyInLibrary'));
     } else {
@@ -76,17 +91,31 @@ const MigrationNovelList = ({
   const hideMigrateNovelDialog = () => setSelectedNovel(undefined);
 
   const migrateSelectedNovel = () => {
-    if (!selectedNovel) return;
+    if (!selectedNovel || isMigrating) return;
 
-    backgroundTasks.enqueue({
-      name: 'MIGRATE_NOVEL',
-      data: {
-        pluginId,
-        fromNovel,
-        toNovelPath: selectedNovel.path,
-        options: migrationOptions,
-      },
-    });
+    const target: MigrationTarget = {
+      fromNovelId: fromNovel.id,
+      pluginId,
+      toNovelPath: selectedNovel.path,
+    };
+    onMigrationQueued(target);
+    backgroundTasks
+      .enqueue({
+        name: 'MIGRATE_NOVEL',
+        data: {
+          pluginId,
+          fromNovel,
+          toNovelPath: selectedNovel.path,
+          options: migrationOptions,
+        },
+      })
+      .then(queued => {
+        if (queued) {
+          onMigrationEnqueued(target);
+        } else {
+          onMigrationAborted(target);
+        }
+      });
     hideMigrateNovelDialog();
   };
 

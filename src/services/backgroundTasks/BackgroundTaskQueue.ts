@@ -99,10 +99,14 @@ export class BackgroundTaskQueue {
     return queue;
   }
 
-  enqueue = (tasks: BackgroundTask | BackgroundTask[]) => {
-    for (const task of Array.isArray(tasks) ? tasks : [tasks]) {
-      this.enqueueOne(task, true).catch(() => undefined);
-    }
+  /** Resolves to whether every task was queued; it never rejects. */
+  enqueue = async (tasks: BackgroundTask | BackgroundTask[]) => {
+    const results = await Promise.all(
+      (Array.isArray(tasks) ? tasks : [tasks]).map(task =>
+        this.enqueueOne(task, true).catch(() => false),
+      ),
+    );
+    return results.every(Boolean);
   };
 
   private enqueueSilently = (tasks: BackgroundTask | BackgroundTask[]) => {
@@ -221,16 +225,25 @@ export class BackgroundTaskQueue {
     }
   }
 
-  private async enqueueOne(task: BackgroundTask, showQueuedToast: boolean) {
+  private async enqueueOne(
+    task: BackgroundTask,
+    showQueuedToast: boolean,
+  ): Promise<boolean> {
     this.notificationPermissionRequest ??= askForPostNotificationsPermission();
-    await this.notificationPermissionRequest;
+    try {
+      await this.notificationPermissionRequest;
+    } catch {
+      // The answer is not needed to run a task, so a failing request must not
+      // keep it from being queued; the next enqueue asks again.
+      this.notificationPermissionRequest = undefined;
+    }
 
     const current = this.getSnapshot();
     if (
       !allowsDuplicateTask(task) &&
       current.some(item => item.task.name === task.name)
     ) {
-      return;
+      return false;
     }
 
     const pending: QueuedBackgroundTask = {
@@ -255,7 +268,7 @@ export class BackgroundTaskQueue {
       if (this.interruptedTasks.get(pending.id) === 'cancel') {
         this.interruptedTasks.delete(pending.id);
         await NativeBackgroundTasks.cancel(id);
-        return;
+        return false;
       }
       const latest = this.getSnapshot().filter(item => item.id !== pending.id);
       if (!latest.some(item => item.id === id)) {
@@ -267,6 +280,7 @@ export class BackgroundTaskQueue {
           getString('notifications.taskQueued', { task: pending.meta.name }),
         );
       }
+      return true;
     } catch (error) {
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));
       showToast(
@@ -274,6 +288,7 @@ export class BackgroundTaskQueue {
           error instanceof Error ? error.message : String(error)
         }`,
       );
+      return false;
     }
   }
 

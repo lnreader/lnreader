@@ -1,6 +1,7 @@
 import NativeBackgroundTasks from '@modules/native-background-tasks';
 import { setMMKVObject } from '@utils/mmkv/mmkv';
 import { showToast } from '@utils/showToast';
+import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
 import { BackgroundTaskQueue } from '../BackgroundTaskQueue';
 import { executeBackgroundTask } from '../executeTask';
 
@@ -170,6 +171,42 @@ describe('BackgroundTaskQueue completion notifications', () => {
 
     expect(NativeBackgroundTasks.enqueue).toHaveBeenCalled();
     expect(showToast).not.toHaveBeenCalled();
+  });
+
+  it('still queues a task when the notification permission request fails', async () => {
+    jest
+      .mocked(askForPostNotificationsPermission)
+      .mockRejectedValueOnce(new Error('No activity'));
+
+    new BackgroundTaskQueue().enqueue(task);
+    await new Promise(resolve => setImmediate(resolve));
+
+    expect(NativeBackgroundTasks.enqueue).toHaveBeenCalled();
+  });
+
+  it('asks for the notification permission again after a failed request', async () => {
+    jest
+      .mocked(askForPostNotificationsPermission)
+      .mockRejectedValueOnce(new Error('No activity'));
+    const queue = new BackgroundTaskQueue();
+
+    await queue.enqueue(task);
+    await queue.enqueue(task);
+
+    expect(askForPostNotificationsPermission).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports whether every task was queued', async () => {
+    const queue = new BackgroundTaskQueue();
+
+    await expect(queue.enqueue(task)).resolves.toBe(true);
+    await expect(queue.enqueue(task)).resolves.toBe(false);
+
+    mockStoredTasks = [];
+    jest
+      .mocked(NativeBackgroundTasks.enqueue)
+      .mockRejectedValueOnce(new Error('native failure'));
+    await expect(new BackgroundTaskQueue().enqueue(task)).resolves.toBe(false);
   });
 
   it('cancels only the selected task', async () => {
