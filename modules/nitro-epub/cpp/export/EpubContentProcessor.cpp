@@ -8,6 +8,7 @@
 #include <regex>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
 #include <unordered_set>
 
 namespace margelo::nitro::nitroepub {
@@ -140,6 +141,26 @@ void removeUnsafeContent(pugi::xml_node node) {
   }
 }
 
+bool hasLeadingHeading(pugi::xml_node root) {
+  for (pugi::xml_node node = root.first_child(); node;
+       node = node.first_child()) {
+    const std::string name = lowercase(node.name());
+    if (name.size() == 2 && name[0] == 'h' && name[1] >= '1' &&
+        name[1] <= '6') {
+      return node.find_node([](const pugi::xml_node& child) {
+        return child.type() == pugi::node_pcdata &&
+               std::string_view(child.value()).find_first_not_of(" \t\r\n") !=
+                   std::string_view::npos;
+      });
+    }
+    if (name != "div" && name != "section" && name != "article" &&
+        name != "header") {
+      return false;
+    }
+  }
+  return false;
+}
+
 std::string serializeChildren(const pugi::xml_node& root) {
   std::ostringstream output;
   for (const pugi::xml_node& child : root.children()) {
@@ -255,6 +276,9 @@ std::string prepareChapterBody(
   pugi::xml_node root = document.child("root");
   removeUnsafeContent(root);
   processImages(root, zip, knownAssets, assets);
+  if (!chapter.title.empty() && !hasLeadingHeading(root)) {
+    root.prepend_child("h1").text().set(chapter.title.c_str());
+  }
   return serializeChildren(root);
 }
 
