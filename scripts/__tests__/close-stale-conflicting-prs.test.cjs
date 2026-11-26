@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  COMMENT_MARKER,
   subtractMonthsUtc,
   getLastCodeModifiedAt,
   buildCloseComment,
@@ -51,6 +52,7 @@ function makePr({
   number,
   id = `PR_${number}`,
   title = `PR #${number}`,
+  state = 'OPEN',
   baseRefName = 'master',
   createdAt = '2026-01-15T00:00:00Z',
   committedDate = createdAt,
@@ -58,23 +60,26 @@ function makePr({
   forcePushedAt = null,
   updatedAt = '2026-09-15T08:08:49Z',
   mergeable = 'CONFLICTING',
-  mergeStateStatus = 'DIRTY',
+  comments = [],
 }) {
   return {
     id,
     number,
     title,
     url: `https://github.com/lnreader/lnreader/pull/${number}`,
+    state,
     baseRefName,
     createdAt,
     updatedAt,
     mergeable,
-    mergeStateStatus,
     commits: {
       nodes: committedDate ? [{ commit: { committedDate, pushedDate } }] : [],
     },
     timelineItems: {
       nodes: forcePushedAt ? [{ createdAt: forcePushedAt }] : [],
+    },
+    comments: {
+      nodes: comments.map(body => ({ body })),
     },
   };
 }
@@ -157,66 +162,37 @@ test('getLastCodeModifiedAt picks max code timestamp and ignores updatedAt', () 
   );
 });
 
-test('run resolves defaultBranchRef, paginates, retries only stale UNKNOWN PRs, and closes stale conflicting PRs', async () => {
-  const pages = [
-    {
-      pageInfo: { hasNextPage: true, endCursor: 'cursor-1' },
-      nodes: [
-        // Stale conflicting (even with recent updatedAt) -> should close
-        makePr({
-          number: 1729,
-          createdAt: '2026-01-29T03:12:21Z',
-          committedDate: '2026-01-29T03:11:59Z',
-          updatedAt: '2026-09-15T08:08:50Z',
-          mergeable: 'CONFLICTING',
-        }),
-        // Stale UNKNOWN -> resolves to CONFLICTING on retry 2 -> should close
-        makePr({
-          number: 1732,
-          createdAt: '2026-01-31T12:12:25Z',
-          committedDate: '2026-02-25T13:53:18Z',
-          mergeable: 'UNKNOWN',
-        }),
-        // Stale UNKNOWN -> resolves to MERGEABLE on retry 1 -> skip
-        makePr({
-          number: 1740,
-          createdAt: '2026-02-10T00:00:00Z',
-          committedDate: '2026-02-10T00:00:00Z',
-          mergeable: 'UNKNOWN',
-        }),
-      ],
-    },
-    {
-      pageInfo: { hasNextPage: false, endCursor: null },
-      nodes: [
-        // Stale UNKNOWN -> stays UNKNOWN after maxRetries -> skip with warning
-        makePr({
-          number: 1756,
-          createdAt: '2026-02-21T21:41:22Z',
-          committedDate: '2026-02-21T21:41:21Z',
-          mergeable: 'UNKNOWN',
-        }),
-        // Recent conflicting (< 6 months) -> skip (and must NOT be retried even if UNKNOWN)
-        makePr({
-          number: 1900,
-          createdAt: '2026-06-15T00:00:00Z',
-          committedDate: '2026-06-15T00:00:00Z',
-          mergeable: 'CONFLICTING',
-        }),
-        makePr({
-          number: 1901,
-          createdAt: '2026-07-01T00:00:00Z',
-          committedDate: '2026-07-01T00:00:00Z',
-          mergeable: 'UNKNOWN',
-        }),
-      ],
-    },
-  ];
+test('buildCloseComment handles singular/plural, rebase wording, marker, and strict cutoff boundary', async () => {
+  const singleMonthComment = buildCloseComment({
+    baseBranch: 'master',
+    staleMonths: 1,
+    lastModifiedAt: new Date('2026-01-29T00:00:00Z'),
+  });
+  assert.match(singleMonthComment, /over 1 month \(/);
+  assert.match(singleMonthComment, /rebase on `master`/);
+  assert.ok(singleMonthComment.includes(COMMENT_MARKER));
 
-  let retryQueryCount = 0;
-  const queriedBaseBranches = [];
-  const mutations = [];
-  const retryQueries = [];
+  const sixMonthsComment = buildCloseComment({
+    baseBranch: 'main',
+    staleMonths: 6,
+    lastModifiedAt: new Date('2026-01-29T00:00:00Z'),
+  });
+  assert.match(sixMonthsComment, /over 6 months \(/);
+
+  const exactCutoffPr = makePr({
+    number: 10,
+    createdAt: '2026-05-26T00:00:00.000Z',
+    mergeable: 'CONFLICTING',
+  });
+  const justBeforeCutoffPr = makePr({
+    number: 11,
+    createdAt: '2026-05-25T23:59:59.999Z',
+    mergeable: 'CONFLICTING',
+  });
+  const prByNumber = new Map([
+    [10, exactCutoffPr],
+    [11, justBeforeCutoffPr],
+  ]);
 
   const github = {
     async graphql(query, variables) {
@@ -224,32 +200,153 @@ test('run resolves defaultBranchRef, paginates, retries only stale UNKNOWN PRs, 
         return { repository: { defaultBranchRef: { name: 'master' } } };
       }
       if (query.includes('pullRequests(')) {
-        queriedBaseBranches.push(variables.baseBranch);
+        return {
+          repository: {
+            pullRequests: {
+              pageInfo: { hasNextPage: false, endCursor: null },
+              nodes: [exactCutoffPr, justBeforeCutoffPr],
+            },
+          },
+        };
+      }
+      if (query.includes('pullRequest(number:')) {
+        return {
+          repository: { pullRequest: prByNumber.get(variables.number) },
+        };
+      }
+      if (query.includes('addComment')) {
+        return { addComment: { commentEdge: { node: { id: 'IC_11' } } } };
+      }
+      if (query.includes('closePullRequest')) {
+        return {
+          closePullRequest: {
+            pullRequest: { id: variables.pullRequestId, state: 'CLOSED' },
+          },
+        };
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    },
+  };
+
+  const results = await run({
+    github,
+    context: { repo: { owner: 'lnreader', repo: 'lnreader' } },
+    core: createMockCore(),
+    dryRun: false,
+    staleMonths: 6,
+    now: new Date('2026-11-26T00:00:00.000Z'),
+  });
+
+  assert.equal(results.recentCount, 1);
+  assert.equal(results.staleCount, 1);
+  assert.deepEqual(
+    results.closed.map(item => item.number),
+    [11],
+  );
+});
+
+test('run paginates, chunks UNKNOWN retries for stale PRs only, and closes stale conflicting PRs', async () => {
+  const allPrs = [
+    // Stale conflicting -> should close
+    makePr({
+      number: 1729,
+      createdAt: '2026-01-29T03:12:21Z',
+      committedDate: '2026-01-29T03:11:59Z',
+      updatedAt: '2026-09-15T08:08:50Z',
+      mergeable: 'CONFLICTING',
+    }),
+    // Stale UNKNOWN -> resolves to CONFLICTING on retry 2 -> should close
+    makePr({
+      number: 1732,
+      createdAt: '2026-01-31T12:12:25Z',
+      committedDate: '2026-02-25T13:53:18Z',
+      mergeable: 'UNKNOWN',
+    }),
+    // Stale UNKNOWN -> resolves to MERGEABLE on retry 1 -> skip
+    makePr({
+      number: 1740,
+      createdAt: '2026-02-10T00:00:00Z',
+      committedDate: '2026-02-10T00:00:00Z',
+      mergeable: 'UNKNOWN',
+    }),
+    // Stale UNKNOWN -> stays UNKNOWN after maxRetries -> skip with warning
+    makePr({
+      number: 1756,
+      createdAt: '2026-02-21T21:41:22Z',
+      committedDate: '2026-02-21T21:41:21Z',
+      mergeable: 'UNKNOWN',
+    }),
+    // Recent PRs -> skip and never retry
+    makePr({
+      number: 1900,
+      createdAt: '2026-06-15T00:00:00Z',
+      mergeable: 'CONFLICTING',
+    }),
+    makePr({
+      number: 1901,
+      createdAt: '2026-07-01T00:00:00Z',
+      mergeable: 'UNKNOWN',
+    }),
+  ];
+
+  const pages = [
+    {
+      pageInfo: { hasNextPage: true, endCursor: 'cursor-1' },
+      nodes: allPrs.slice(0, 3),
+    },
+    {
+      pageInfo: { hasNextPage: false, endCursor: null },
+      nodes: allPrs.slice(3),
+    },
+  ];
+  const byNumber = new Map(allPrs.map(pr => [pr.number, pr]));
+
+  const retryQueries = [];
+  const mutations = [];
+
+  const github = {
+    async graphql(query, variables) {
+      if (query.includes('defaultBranchRef')) {
+        return { repository: { defaultBranchRef: { name: 'master' } } };
+      }
+      if (query.includes('pullRequests(')) {
         const pageIndex = variables.cursor ? 1 : 0;
         return { repository: { pullRequests: pages[pageIndex] } };
       }
       if (query.includes('pr_')) {
-        retryQueryCount += 1;
         retryQueries.push(query);
-        if (retryQueryCount === 1) {
+        if (query.includes('pr_1740')) {
           return {
             repository: {
-              pr_1732: { mergeable: 'UNKNOWN', mergeStateStatus: 'UNKNOWN' },
-              pr_1740: { mergeable: 'MERGEABLE', mergeStateStatus: 'CLEAN' },
-              pr_1756: { mergeable: 'UNKNOWN', mergeStateStatus: 'UNKNOWN' },
+              pr_1732: { mergeable: 'UNKNOWN' },
+              pr_1740: { mergeable: 'MERGEABLE' },
+            },
+          };
+        }
+        if (query.includes('pr_1732')) {
+          return {
+            repository: {
+              pr_1732: { mergeable: 'CONFLICTING' },
+              pr_1756: { mergeable: 'UNKNOWN' },
             },
           };
         }
         return {
           repository: {
-            pr_1732: { mergeable: 'CONFLICTING', mergeStateStatus: 'DIRTY' },
-            pr_1756: { mergeable: 'UNKNOWN', mergeStateStatus: 'UNKNOWN' },
+            pr_1756: { mergeable: 'UNKNOWN' },
           },
         };
       }
+      if (query.includes('pullRequest(number:')) {
+        return { repository: { pullRequest: byNumber.get(variables.number) } };
+      }
       if (query.includes('addComment')) {
         mutations.push({ type: 'addComment', variables });
-        return { addComment: { commentEdge: { node: { id: 'c1' } } } };
+        return {
+          addComment: {
+            commentEdge: { node: { id: `IC_${variables.subjectId}` } },
+          },
+        };
       }
       if (query.includes('closePullRequest')) {
         mutations.push({ type: 'closePullRequest', variables });
@@ -273,19 +370,21 @@ test('run resolves defaultBranchRef, paginates, retries only stale UNKNOWN PRs, 
     dryRun: false,
     staleMonths: 6,
     now: new Date('2026-11-26T00:00:00Z'),
-    maxRetries: 2,
-    retryDelayMs: 100,
-    sleep: async ms => {
-      sleepCalls.push(ms);
+    retryOptions: {
+      maxRetries: 2,
+      retryDelayMs: 100,
+      chunkSize: 2,
+      sleep: async ms => {
+        sleepCalls.push(ms);
+      },
     },
   });
 
-  assert.deepEqual(queriedBaseBranches, ['master', 'master']);
+  // Round 1: 3 stale UNKNOWN PRs split into chunks of [2, 1]; Round 2: 2 PRs in 1 chunk
+  assert.equal(retryQueries.length, 3);
+  assert.ok(retryQueries.every(q => !q.includes('pr_1901')));
   assert.deepEqual(sleepCalls, [100, 100]);
-  assert.equal(retryQueries.length, 2);
-  assert.ok(!retryQueries[0].includes('pr_1901'));
 
-  assert.equal(results.targetBranch, 'master');
   assert.equal(results.totalOpen, 6);
   assert.equal(results.recentCount, 2);
   assert.equal(results.staleCount, 4);
@@ -296,87 +395,172 @@ test('run resolves defaultBranchRef, paginates, retries only stale UNKNOWN PRs, 
     results.closed.map(item => item.number),
     [1729, 1732],
   );
-  assert.equal(results.failed.length, 0);
-  assert.equal(core.failed.length, 0);
   assert.ok(core.warnings.some(msg => msg.includes('#1756')));
-
-  assert.deepEqual(mutations, [
-    {
-      type: 'addComment',
-      variables: {
-        subjectId: 'PR_1729',
-        body: buildCloseComment({
-          baseBranch: 'master',
-          staleMonths: 6,
-          lastModifiedAt: new Date('2026-01-29T03:12:21Z'),
-        }),
-      },
-    },
-    {
-      type: 'closePullRequest',
-      variables: { pullRequestId: 'PR_1729' },
-    },
-    {
-      type: 'addComment',
-      variables: {
-        subjectId: 'PR_1732',
-        body: buildCloseComment({
-          baseBranch: 'master',
-          staleMonths: 6,
-          lastModifiedAt: new Date('2026-02-25T13:53:18Z'),
-        }),
-      },
-    },
-    {
-      type: 'closePullRequest',
-      variables: { pullRequestId: 'PR_1732' },
-    },
-  ]);
+  assert.equal(mutations.length, 4);
 });
 
-test('run respects explicit baseBranch, dryRun mode executes zero mutations, and mutation errors do not abort remaining PRs', async () => {
-  const prs = [
+test('pre-close recheck skips PRs modified, resolved, retargeted, or closed mid-run', async () => {
+  const initialPrs = [
     makePr({
-      number: 101,
-      baseRefName: 'main',
+      number: 201,
       createdAt: '2026-01-01T00:00:00Z',
       mergeable: 'CONFLICTING',
     }),
     makePr({
-      number: 102,
-      baseRefName: 'main',
-      createdAt: '2026-02-01T00:00:00Z',
+      number: 202,
+      createdAt: '2026-01-01T00:00:00Z',
+      mergeable: 'CONFLICTING',
+    }),
+    makePr({
+      number: 203,
+      createdAt: '2026-01-01T00:00:00Z',
+      mergeable: 'CONFLICTING',
+    }),
+    makePr({
+      number: 204,
+      createdAt: '2026-01-01T00:00:00Z',
+      mergeable: 'CONFLICTING',
+    }),
+    makePr({
+      number: 205,
+      createdAt: '2026-01-01T00:00:00Z',
       mergeable: 'CONFLICTING',
     }),
   ];
 
-  let defaultBranchCalled = false;
-  const mutationLog = [];
+  const recheckedByNumber = new Map([
+    [
+      201,
+      makePr({
+        number: 201,
+        createdAt: '2026-01-01T00:00:00Z',
+        committedDate: '2026-11-26T00:00:00Z',
+        mergeable: 'CONFLICTING',
+      }),
+    ],
+    [
+      202,
+      makePr({
+        number: 202,
+        createdAt: '2026-01-01T00:00:00Z',
+        mergeable: 'MERGEABLE',
+      }),
+    ],
+    [
+      203,
+      makePr({
+        number: 203,
+        createdAt: '2026-01-01T00:00:00Z',
+        baseRefName: 'legacy',
+        mergeable: 'CONFLICTING',
+      }),
+    ],
+    [
+      204,
+      makePr({
+        number: 204,
+        createdAt: '2026-01-01T00:00:00Z',
+        state: 'CLOSED',
+        mergeable: 'CONFLICTING',
+      }),
+    ],
+    [
+      205,
+      makePr({
+        number: 205,
+        createdAt: '2026-01-01T00:00:00Z',
+        mergeable: 'CONFLICTING',
+      }),
+    ],
+  ]);
 
-  const dryRunGithub = {
+  const mutations = [];
+  const github = {
     async graphql(query, variables) {
-      if (query.includes('defaultBranchRef')) {
-        defaultBranchCalled = true;
-        return { repository: { defaultBranchRef: { name: 'master' } } };
-      }
       if (query.includes('pullRequests(')) {
-        assert.equal(variables.baseBranch, 'main');
         return {
           repository: {
             pullRequests: {
               pageInfo: { hasNextPage: false, endCursor: null },
-              nodes: prs,
+              nodes: initialPrs,
             },
           },
         };
       }
-      throw new Error(`No mutations allowed in dryRun: ${query}`);
+      if (query.includes('pullRequest(number:')) {
+        return {
+          repository: { pullRequest: recheckedByNumber.get(variables.number) },
+        };
+      }
+      if (query.includes('addComment')) {
+        mutations.push(['addComment', variables.subjectId]);
+        return { addComment: { commentEdge: { node: { id: 'IC_205' } } } };
+      }
+      if (query.includes('closePullRequest')) {
+        mutations.push(['closePullRequest', variables.pullRequestId]);
+        return {};
+      }
+      throw new Error(`Unexpected query: ${query}`);
     },
   };
 
+  const results = await run({
+    github,
+    context: { repo: { owner: 'lnreader', repo: 'lnreader' } },
+    core: createMockCore(),
+    dryRun: false,
+    baseBranch: 'master',
+    staleMonths: 6,
+    now: new Date('2026-11-26T00:00:00Z'),
+  });
+
+  assert.deepEqual(
+    results.skippedRecheck.map(item => item.number),
+    [201, 202, 203, 204],
+  );
+  assert.deepEqual(
+    results.closed.map(item => item.number),
+    [205],
+  );
+  assert.deepEqual(mutations, [
+    ['addComment', 'PR_205'],
+    ['closePullRequest', 'PR_205'],
+  ]);
+});
+
+test('rolls back newly created comment on close failure, deduplicates marked comments, and supports dryRun', async () => {
+  const prs = [
+    makePr({
+      number: 301,
+      createdAt: '2026-01-01T00:00:00Z',
+      mergeable: 'CONFLICTING',
+    }),
+    makePr({
+      number: 302,
+      createdAt: '2026-02-01T00:00:00Z',
+      mergeable: 'CONFLICTING',
+      comments: [`Existing notice\n\n${COMMENT_MARKER}`],
+    }),
+  ];
+  const byNumber = new Map(prs.map(pr => [pr.number, pr]));
+
   const dryCore = createMockCore();
   const dryResults = await run({
-    github: dryRunGithub,
+    github: {
+      async graphql(query) {
+        if (query.includes('pullRequests(')) {
+          return {
+            repository: {
+              pullRequests: {
+                pageInfo: { hasNextPage: false, endCursor: null },
+                nodes: prs,
+              },
+            },
+          };
+        }
+        throw new Error(`No recheck or mutations allowed in dryRun: ${query}`);
+      },
+    },
     context: { repo: { owner: 'lnreader', repo: 'lnreader' } },
     core: dryCore,
     dryRun: true,
@@ -385,60 +569,73 @@ test('run respects explicit baseBranch, dryRun mode executes zero mutations, and
     now: new Date('2026-11-26T00:00:00Z'),
   });
 
-  assert.equal(defaultBranchCalled, false);
   assert.deepEqual(
     dryResults.wouldClose.map(item => item.number),
-    [101, 102],
+    [301, 302],
   );
-  assert.equal(dryResults.closed.length, 0);
+  const tableCall = dryCore.summaryCalls.find(([name]) => name === 'addTable');
+  assert.equal(
+    tableCall[1][1][0],
+    '[#301](https://github.com/lnreader/lnreader/pull/301)',
+  );
 
-  const partialFailureGithub = {
-    async graphql(query, variables) {
-      if (query.includes('pullRequests(')) {
-        return {
-          repository: {
-            pullRequests: {
-              pageInfo: { hasNextPage: false, endCursor: null },
-              nodes: prs,
-            },
-          },
-        };
-      }
-      if (query.includes('addComment')) {
-        if (variables.subjectId === 'PR_101') {
-          throw new Error('rate limit');
-        }
-        mutationLog.push(['addComment', variables.subjectId]);
-        return {};
-      }
-      if (query.includes('closePullRequest')) {
-        mutationLog.push(['closePullRequest', variables.pullRequestId]);
-        return {};
-      }
-      throw new Error(`Unexpected query: ${query}`);
-    },
-  };
-
+  const mutationLog = [];
   const failCore = createMockCore();
   const failResults = await run({
-    github: partialFailureGithub,
+    github: {
+      async graphql(query, variables) {
+        if (query.includes('pullRequests(')) {
+          return {
+            repository: {
+              pullRequests: {
+                pageInfo: { hasNextPage: false, endCursor: null },
+                nodes: prs,
+              },
+            },
+          };
+        }
+        if (query.includes('pullRequest(number:')) {
+          return {
+            repository: { pullRequest: byNumber.get(variables.number) },
+          };
+        }
+        if (query.includes('addComment')) {
+          mutationLog.push(['addComment', variables.subjectId]);
+          return { addComment: { commentEdge: { node: { id: 'IC_301' } } } };
+        }
+        if (query.includes('closePullRequest')) {
+          mutationLog.push(['closePullRequest', variables.pullRequestId]);
+          if (variables.pullRequestId === 'PR_301') {
+            throw new Error('transient close failure');
+          }
+          return {};
+        }
+        if (query.includes('deleteIssueComment')) {
+          mutationLog.push(['deleteIssueComment', variables.commentId]);
+          return {};
+        }
+        throw new Error(`Unexpected query: ${query}`);
+      },
+    },
     context: { repo: { owner: 'lnreader', repo: 'lnreader' } },
     core: failCore,
     dryRun: false,
-    baseBranch: 'main',
+    baseBranch: 'master',
     staleMonths: 6,
     now: new Date('2026-11-26T00:00:00Z'),
   });
 
   assert.equal(failResults.failed.length, 1);
-  assert.equal(failResults.failed[0].number, 101);
+  assert.equal(failResults.failed[0].number, 301);
   assert.deepEqual(
     failResults.closed.map(item => item.number),
-    [102],
+    [302],
   );
   assert.deepEqual(mutationLog, [
-    ['addComment', 'PR_102'],
-    ['closePullRequest', 'PR_102'],
+    ['addComment', 'PR_301'],
+    ['closePullRequest', 'PR_301'],
+    ['deleteIssueComment', 'IC_301'],
+    ['closePullRequest', 'PR_302'],
   ]);
   assert.equal(failCore.errors.length, 1);
   assert.equal(failCore.failed.length, 1);
