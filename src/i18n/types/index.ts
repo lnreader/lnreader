@@ -439,6 +439,8 @@ export interface StringMap {
   'historyScreen.resetAllChapters': 'string';
   'historyScreen.searchbar': 'string';
   'library': 'string';
+  'libraryScreen.removeSelectedTitle': 'string';
+  'libraryScreen.removeSelectedMessage': 'string';
   'libraryScreen.bottomSheet.display.badges': 'string';
   'libraryScreen.bottomSheet.display.comfortable': 'string';
   'libraryScreen.bottomSheet.display.compact': 'string';
