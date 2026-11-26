@@ -62,7 +62,9 @@ body {
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 40px;
-  padding-top: var(--StatusBar-currentHeight);
+  padding-top: calc(
+    var(--StatusBar-currentHeight, 0px) + var(--reader-top-status-height, 0px)
+  );
 
   font-size: var(--readerSettings-textSize);
   background-color: var(--readerSettings-theme);
@@ -184,7 +186,21 @@ td {
   z-index: 9999999;
 }
 
-#reader-footer {
+.reader-status-at-top {
+  --reader-top-status-height: 1.6rem;
+}
+
+#reader-top-status {
+  position: fixed;
+  top: var(--StatusBar-currentHeight, 0px);
+  inset-inline: 0;
+  z-index: 9999999;
+  box-sizing: border-box;
+  height: var(--reader-top-status-height, 0px);
+  line-height: 1.2rem;
+}
+
+.reader-status-row {
   display: flex;
   flex: 3;
   padding: 0.2rem 2rem;
@@ -224,11 +240,7 @@ td {
 mark.lnreader-search-match {
   border-radius: 2px;
   color: inherit;
-  background-color: color-mix(
-    in srgb,
-    var(--theme-tertiary) 55%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--theme-tertiary) 55%, transparent);
 }
 
 mark.lnreader-search-match-active {

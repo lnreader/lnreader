@@ -709,6 +709,7 @@
       "removeExtraSpacingDescription": "Collapse extra blank lines between paragraphs",
       "scrollAmount": "Scroll amount (screen height by default)",
       "showBatteryAndTime": "Battery & time",
+      "batteryAndTimeAtTop": "Show battery and time at the top",
       "showBatteryAndTimeDescription": "Show battery level and clock over the reading screen",
       "showProgressPercentage": "Reading progress",
       "showProgressPercentageDescription": "Show the percentage read at the bottom of the screen",

@@ -200,6 +200,35 @@ const loadReader = async ({
 const restoredTop = (progress: number) =>
   (CHAPTER_HEIGHT * progress) / 100 - VIEWPORT.height;
 
+it('moves battery and time independently of reading progress', async () => {
+  const page = await loadReader();
+  const { reader, document } = page.window;
+  reader.generalSettings.val = {
+    ...reader.generalSettings.val,
+    showBatteryAndTime: true,
+    showScrollPercentage: true,
+  };
+  await settle(page.window);
+
+  const topStatus = document.querySelector('#reader-top-status');
+  const bottomBattery = document.querySelector('#reader-battery');
+  const progress = document.querySelector('#reader-percentage');
+  expect(topStatus?.classList.contains('d-none')).toBe(true);
+  expect(bottomBattery?.classList.contains('hidden')).toBe(false);
+
+  reader.generalSettings.val = {
+    ...reader.generalSettings.val,
+    batteryAndTimeAtTop: true,
+  };
+  await settle(page.window);
+
+  expect(topStatus?.classList.contains('d-none')).toBe(false);
+  expect(topStatus?.textContent).toContain('100%');
+  expect(bottomBattery?.classList.contains('hidden')).toBe(true);
+  expect(progress?.classList.contains('hidden')).toBe(false);
+  page.close();
+});
+
 describe('reader seekbar', () => {
   it('reaches 100 percent when the chapter-ending controls are in view', async () => {
     const { window, scrollCalls, close } = await loadReader();
