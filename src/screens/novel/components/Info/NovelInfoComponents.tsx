@@ -10,6 +10,7 @@ import { ThemeColors } from '@theme/types';
 import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { parseGenres } from '../../utils/genres';
+import { useBackHandler } from '@hooks/common/useBackHandler';
 import { useAppSettings } from '@hooks/persisted/useSettings';
 
 interface CoverImageProps {
@@ -115,6 +116,15 @@ const NovelThumbnail = ({
 }: NovelThumbnailProps) => {
   const [expanded, setExpanded] = useState(false);
   const { top, right } = useSafeAreaInsets();
+
+  useBackHandler(() => {
+    if (!expanded) {
+      return false;
+    }
+
+    setExpanded(false);
+    return true;
+  });
 
   return (
     <Pressable
