@@ -13,7 +13,7 @@ describe('ttsControllerPosition helpers', () => {
     it('passes valid fractions through', () => {
       expect(
         normalizeTtsControllerPosition({ x: 0.44727, y: 0.25171 }),
-      ).toEqual({ x: 0.4473, y: 0.2517 });
+      ).toEqual({ x: 0.44727, y: 0.25171 });
     });
 
     it.each([
@@ -218,6 +218,45 @@ describe('floating TTS button position in the reader page', () => {
     page.touch(page.dragHandle, 'touchend', 30, 410);
 
     expect(page.savedPositions()).toEqual([]);
+  });
+
+  it('does not save when the finger jitters on the drag handle', async () => {
+    const page = await loadPage({ savedPosition: { x: 0.8, y: 0.25 } });
+    await page.toggle();
+    page.drag(page.dragHandle, [80, 210], [81, 210]);
+
+    expect(page.savedPositions()).toEqual([]);
+    await page.toggle();
+    expect(page.position()).toEqual({ left: '320px', top: '200px' });
+  });
+
+  it.each(['dragHandle', 'bubble'] as const)(
+    'keeps the saved position when a %s touch is cancelled',
+    async control => {
+      const page = await loadPage({ savedPosition: { x: 0.1, y: 0.25 } });
+      if (control === 'dragHandle') {
+        await page.toggle();
+      }
+      page.touch(page[control], 'touchstart', 50, 210);
+      page.touch(page[control], 'touchmove', 60, 410);
+      page.touch(page[control], 'touchcancel', 60, 410);
+      page.window.document.dispatchEvent(
+        new page.window.CustomEvent('ln:chapter-change'),
+      );
+
+      expect(page.savedPositions()).toEqual([]);
+      expect(page.position()).toEqual({ left: '40px', top: '200px' });
+    },
+  );
+
+  it('keeps a drag that the app does not send back', async () => {
+    const page = await loadPage({ savedPosition: { x: 0.1, y: 0.25 } });
+    page.drag(page.bubble, [50, 210], [210, 410]);
+    page.window.document.dispatchEvent(
+      new page.window.CustomEvent('ln:chapter-change'),
+    );
+
+    expect(page.position()).toEqual({ left: '200px', top: '400px' });
   });
 
   it('re-applies the saved position when a chapter is swapped in', async () => {

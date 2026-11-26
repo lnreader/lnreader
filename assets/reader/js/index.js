@@ -382,9 +382,9 @@ const TTSController = () => {
   let lastTop = 0;
 
   /**
-   * Margin kept around the controller, matching the clamping below. The
-   * position is persisted as its left and top in viewport fractions, so it
-   * does not depend on the controller's size.
+   * Margin kept around the controller. The position is persisted as its left
+   * and top in viewport fractions, so it does not depend on the controller's
+   * size.
    */
   const TTS_POSITION_MARGIN = 8;
 
@@ -409,29 +409,34 @@ const TTSController = () => {
     return controllerElement;
   };
 
+  const placeController = (left, top, width, height) => {
+    const clamp = (value, max) =>
+      Math.min(
+        Math.max(TTS_POSITION_MARGIN, max - TTS_POSITION_MARGIN),
+        Math.max(TTS_POSITION_MARGIN, value),
+      );
+    const placed = {
+      left: clamp(left, window.innerWidth - width),
+      top: clamp(top, window.innerHeight - height),
+    };
+    controllerElement.style.left = `${placed.left}px`;
+    controllerElement.style.top = `${placed.top}px`;
+    controllerElement.style.right = 'auto';
+    controllerElement.style.bottom = 'auto';
+    return placed;
+  };
+
   const applyControllerPosition = position => {
     const element = resolveControllerElement();
     if (!element) {
       return;
     }
-    const maxLeft = Math.max(
-      TTS_POSITION_MARGIN,
-      window.innerWidth - element.offsetWidth - TTS_POSITION_MARGIN,
+    placeController(
+      position.x * window.innerWidth,
+      position.y * window.innerHeight,
+      element.offsetWidth,
+      element.offsetHeight,
     );
-    const maxTop = Math.max(
-      TTS_POSITION_MARGIN,
-      window.innerHeight - element.offsetHeight - TTS_POSITION_MARGIN,
-    );
-    element.style.left = `${Math.min(
-      maxLeft,
-      Math.max(TTS_POSITION_MARGIN, position.x * window.innerWidth),
-    )}px`;
-    element.style.top = `${Math.min(
-      maxTop,
-      Math.max(TTS_POSITION_MARGIN, position.y * window.innerHeight),
-    )}px`;
-    element.style.right = 'auto';
-    element.style.bottom = 'auto';
   };
 
   const restoreControllerPosition = () => {
@@ -444,13 +449,13 @@ const TTSController = () => {
 
   const persistControllerPosition = () => {
     const round = value => Math.round(value * 10000) / 10000;
-    reader.post({
-      type: 'tts-position',
-      data: {
-        x: round(lastLeft / window.innerWidth),
-        y: round(lastTop / window.innerHeight),
-      },
-    });
+    const position = {
+      x: round(lastLeft / window.innerWidth),
+      y: round(lastTop / window.innerHeight),
+    };
+    const settings = reader.readerSettings.val;
+    settings.tts = { ...settings.tts, controllerPosition: position };
+    reader.post({ type: 'tts-position', data: position });
   };
 
   const stopEvent = e => {
@@ -459,40 +464,31 @@ const TTSController = () => {
   };
 
   const setControllerPosition = touch => {
-    const maxLeft = Math.max(
-      8,
-      window.innerWidth - controllerElement.offsetWidth - 8,
+    const placed = placeController(
+      touch.clientX - dragOffsetX,
+      touch.clientY - dragOffsetY,
+      controllerElement.offsetWidth,
+      controllerElement.offsetHeight,
     );
-    const maxTop = Math.max(
-      8,
-      window.innerHeight - controllerElement.offsetHeight - 8,
-    );
-    const left = Math.min(maxLeft, Math.max(8, touch.clientX - dragOffsetX));
-    const top = Math.min(maxTop, Math.max(8, touch.clientY - dragOffsetY));
-    lastLeft = left;
-    lastTop = top;
+    lastLeft = placed.left;
+    lastTop = placed.top;
+  };
 
-    controllerElement.style.left = `${left}px`;
-    controllerElement.style.top = `${top}px`;
-    controllerElement.style.right = 'auto';
-    controllerElement.style.bottom = 'auto';
+  const dragController = touch => {
+    if (
+      !moved &&
+      Math.hypot(touch.clientX - dragStartX, touch.clientY - dragStartY) < 6
+    ) {
+      return false;
+    }
+    moved = true;
+    setControllerPosition(touch);
+    return true;
   };
 
   const clampControllerToViewport = () => {
     const bounds = controllerElement.getBoundingClientRect();
-    const maxLeft = Math.max(8, window.innerWidth - bounds.width - 8);
-    const maxTop = Math.max(8, window.innerHeight - bounds.height - 8);
-
-    controllerElement.style.left = `${Math.min(
-      maxLeft,
-      Math.max(8, bounds.left),
-    )}px`;
-    controllerElement.style.top = `${Math.min(
-      maxTop,
-      Math.max(8, bounds.top),
-    )}px`;
-    controllerElement.style.right = 'auto';
-    controllerElement.style.bottom = 'auto';
+    placeController(bounds.left, bounds.top, bounds.width, bounds.height);
   };
 
   const repositionController = () => {
@@ -526,6 +522,8 @@ const TTSController = () => {
     const bounds = controllerElement.getBoundingClientRect();
     dragOffsetX = touch.clientX - bounds.left;
     dragOffsetY = touch.clientY - bounds.top;
+    dragStartX = touch.clientX;
+    dragStartY = touch.clientY;
     moved = false;
     controllerElement.classList.add('active');
     controllerElement.style.transition = 'none';
@@ -534,9 +532,9 @@ const TTSController = () => {
   const moveDrag = e => {
     stopEvent(e);
     const touch = e.changedTouches[0];
-
-    moved = true;
-    setControllerPosition(touch);
+    if (!dragController(touch)) {
+      return;
+    }
 
     const newHoverElement = document
       .elementsFromPoint(touch.clientX, touch.clientY)
@@ -556,7 +554,7 @@ const TTSController = () => {
     controllerElement.classList.remove('active');
     controllerElement.style.transition = '';
 
-    if (moved) {
+    if (moved && e.type === 'touchend') {
       persistControllerPosition();
     }
     if (moved && hoverElement && reader.generalSettings.val.TTSEnable) {
@@ -568,20 +566,9 @@ const TTSController = () => {
   };
 
   const startBubbleDrag = e => {
-    if (!collapsed.val) {
-      return;
+    if (collapsed.val) {
+      startDrag(e);
     }
-    stopEvent(e);
-    controllerElement ??= document.getElementById('TTS-Controller');
-    const touch = e.changedTouches[0];
-    const bounds = controllerElement.getBoundingClientRect();
-    dragOffsetX = touch.clientX - bounds.left;
-    dragOffsetY = touch.clientY - bounds.top;
-    dragStartX = touch.clientX;
-    dragStartY = touch.clientY;
-    moved = false;
-    controllerElement.classList.add('active');
-    controllerElement.style.transition = 'none';
   };
 
   const moveBubbleDrag = e => {
@@ -589,15 +576,7 @@ const TTSController = () => {
       return;
     }
     stopEvent(e);
-    const touch = e.changedTouches[0];
-    if (
-      !moved &&
-      Math.hypot(touch.clientX - dragStartX, touch.clientY - dragStartY) < 6
-    ) {
-      return;
-    }
-    moved = true;
-    setControllerPosition(touch);
+    dragController(e.changedTouches[0]);
   };
 
   const finishBubbleDrag = () => {
@@ -627,9 +606,6 @@ const TTSController = () => {
       return;
     }
     stopEvent(e);
-    if (moved) {
-      persistControllerPosition();
-    }
     lastBubbleTouchEnd = Date.now();
     finishBubbleDrag();
   };

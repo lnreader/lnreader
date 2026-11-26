@@ -20,9 +20,9 @@ const isViewportFraction = (n: unknown): n is number =>
   typeof n === 'number' && n >= 0 && n <= 1;
 
 /**
- * Coerce a posted value into a storable position, rounded so storage stays
- * tidy. Anything that is not a pair of numbers within [0, 1] is rejected so a
- * corrupt payload can never pin the button off-screen.
+ * Validate a posted value as a storable position. Anything that is not a pair
+ * of numbers within [0, 1] is rejected so a corrupt payload can never pin the
+ * button off-screen.
  */
 export const normalizeTtsControllerPosition = (
   value: unknown,
@@ -34,8 +34,7 @@ export const normalizeTtsControllerPosition = (
   if (!isViewportFraction(x) || !isViewportFraction(y)) {
     return undefined;
   }
-  const round = (n: number) => Math.round(n * 10000) / 10000;
-  return { x: round(x), y: round(y) };
+  return { x, y };
 };
 
 /**
