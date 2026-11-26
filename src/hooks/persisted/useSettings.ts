@@ -145,7 +145,7 @@ export interface LibrarySettings {
   /** @deprecated Read through `filters`, which falls back to it. */
   filter?: LegacyLibraryFilter;
   filters?: LibraryFilters;
-  /** Normalized genre names; see `normalizeGenreName`. */
+  /** Genre keys; see `getGenreKey`. */
   includedGenres?: string[];
   excludedGenres?: string[];
   showDownloadBadges?: boolean;
@@ -429,6 +429,11 @@ const defaultLibrarySettings: LibrarySettings = {
   sortOrder: LibrarySortOrder.DateAdded_DESC,
 };
 
+const useValueMemo = <T>(value: T): T => {
+  const serialized = JSON.stringify(value);
+  return useMemo(() => JSON.parse(serialized) as T, [serialized]);
+};
+
 export const useLibrarySettings = () => {
   const [librarySettings, setSettings] =
     useMMKVObject<LibrarySettings>(LIBRARY_SETTINGS);
@@ -436,16 +441,17 @@ export const useLibrarySettings = () => {
   const setLibrarySettings = (value: Partial<LibrarySettings>) =>
     setSettings({ ...librarySettings, ...value });
 
-  const storedFilters = librarySettings?.filters;
-  const legacyFilter = librarySettings?.filter;
-  const filters = useMemo(
-    () => resolveLibraryFilters(storedFilters, legacyFilter),
-    [storedFilters, legacyFilter],
+  const filters = useValueMemo(
+    resolveLibraryFilters(librarySettings?.filters, librarySettings?.filter),
   );
+  const includedGenres = useValueMemo(librarySettings?.includedGenres ?? []);
+  const excludedGenres = useValueMemo(librarySettings?.excludedGenres ?? []);
 
   return {
     ...{ ...defaultLibrarySettings, ...librarySettings },
     filters,
+    includedGenres,
+    excludedGenres,
     setLibrarySettings,
   };
 };

@@ -7,7 +7,7 @@ import {
   insertTestCategory,
 } from './testData';
 import {
-  getLibraryGenresFromDb,
+  getLibraryNovelKeysFromDb,
   getLibraryNovelsFromDb,
   getLibraryNovelsForGlobalUpdate,
   getLibraryWithCategory,
@@ -433,30 +433,31 @@ describe('LibraryQueries', () => {
     });
   });
 
-  describe('getLibraryGenresFromDb', () => {
-    it('counts the library novels sharing each genres value', async () => {
+  describe('getLibraryNovelKeysFromDb', () => {
+    it('should identify every saved novel and no other', async () => {
       await insertTestNovel(testDb, {
         inLibrary: true,
-        genres: 'Action, Horror',
+        pluginId: 'a',
+        path: '/completed',
+        status: 'Completed',
       });
       await insertTestNovel(testDb, {
         inLibrary: true,
-        genres: 'Action, Horror',
+        pluginId: 'b',
+        path: '/ongoing',
+        status: 'Ongoing',
       });
-      await insertTestNovel(testDb, { inLibrary: true, genres: 'Romance' });
-      await insertTestNovel(testDb, { inLibrary: true, genres: '' });
-      await insertTestNovel(testDb, { inLibrary: true, genres: null });
-      await insertTestNovel(testDb, { inLibrary: false, genres: 'Harem' });
+      await insertTestNovel(testDb, { inLibrary: false, path: '/cached' });
 
-      const rows = await getLibraryGenresFromDb();
-      expect(
-        [...rows].sort((a, b) =>
-          (a.genres ?? '').localeCompare(b.genres ?? ''),
-        ),
-      ).toEqual([
-        { genres: 'Action, Horror', novelCount: 2 },
-        { genres: 'Romance', novelCount: 1 },
-      ]);
+      const keys = await getLibraryNovelKeysFromDb();
+
+      expect(keys).toHaveLength(2);
+      expect(keys).toEqual(
+        expect.arrayContaining([
+          { pluginId: 'a', path: '/completed' },
+          { pluginId: 'b', path: '/ongoing' },
+        ]),
+      );
     });
   });
 

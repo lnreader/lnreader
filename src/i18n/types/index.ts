@@ -290,6 +290,7 @@ export interface StringMap {
   'common.downloads': 'string';
   'common.edit': 'string';
   'common.example': 'string';
+  'common.excludedItem': 'string';
   'common.filter': 'string';
   'common.globally': 'string';
   'common.install': 'string';

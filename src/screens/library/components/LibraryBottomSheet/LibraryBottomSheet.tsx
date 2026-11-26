@@ -32,7 +32,7 @@ import {
   buildLibraryGenres,
   LibraryGenre,
 } from '@screens/library/utils/genres';
-import { getLibraryGenresFromDb } from '@database/queries/LibraryQueries';
+import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
 import { RadioButton } from '@components/RadioButton/RadioButton';
 import {
   BottomSheetView,
@@ -53,10 +53,8 @@ type FilterRow =
   | { type: 'genresHeader' }
   | { type: 'genre'; genre: LibraryGenre };
 
-const NO_GENRES: string[] = [];
-
 const checkboxStatus = (state?: LibraryFilterState) =>
-  state === 'include' ? true : state === 'exclude' ? 'indeterminate' : false;
+  state === 'include' ? true : state === 'exclude' ? 'excluded' : false;
 
 const genreState = (
   name: string,
@@ -73,8 +71,8 @@ const FirstRoute = () => {
   const theme = useTheme();
   const {
     filters,
-    includedGenres = NO_GENRES,
-    excludedGenres = NO_GENRES,
+    includedGenres,
+    excludedGenres,
     setLibrarySettings,
     downloadedOnlyMode = false,
   } = useLibrarySettings();
@@ -83,10 +81,10 @@ const FirstRoute = () => {
   const [libraryGenres, setLibraryGenres] = useState<LibraryGenre[]>([]);
   useEffect(() => {
     let active = true;
-    getLibraryGenresFromDb()
-      .then(rows => {
+    getNovelsWithGenresFromDb()
+      .then(novels => {
         if (active) {
-          setLibraryGenres(buildLibraryGenres(rows));
+          setLibraryGenres(buildLibraryGenres(novels));
         }
       })
       .catch(() => {});
@@ -100,7 +98,7 @@ const FirstRoute = () => {
     // Keep a selected genre that no novel has any more, so it can be cleared.
     for (const name of [...includedGenres, ...excludedGenres]) {
       if (!genres.some(genre => genre.name === name)) {
-        genres.push({ name, label: name, novelCount: 0 });
+        genres.push({ name, label: name });
       }
     }
     return [
@@ -167,7 +165,7 @@ const FirstRoute = () => {
       case 'genre':
         return (
           <Checkbox
-            label={`${item.genre.label} (${item.genre.novelCount})`}
+            label={item.genre.label}
             theme={theme}
             status={checkboxStatus(
               genreState(item.genre.name, includedGenres, excludedGenres),

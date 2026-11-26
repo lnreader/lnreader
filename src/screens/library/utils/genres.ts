@@ -1,24 +1,4 @@
-/**
- * Sources spell the same genre differently ("Slice of Life", " slice of life"),
- * so genres are compared by this key rather than by their raw text.
- */
-export const normalizeGenreName = (genre: string): string =>
-  genre.trim().replace(/\s+/g, ' ').toLowerCase();
-
-/** Splits a novel's comma-separated `genres` column into normalized names. */
-export const parseGenres = (genres?: string | null): Set<string> => {
-  const names = new Set<string>();
-  if (!genres) {
-    return names;
-  }
-  for (const part of genres.split(',')) {
-    const name = normalizeGenreName(part);
-    if (name) {
-      names.add(name);
-    }
-  }
-  return names;
-};
+import { getGenreKey, parseGenres } from '@screens/novel/utils/genres';
 
 export interface GenreFilter {
   included?: string[];
@@ -34,7 +14,7 @@ export const filterNovelsByGenres = <T extends { genres?: string | null }>(
     return novels;
   }
   return novels.filter(novel => {
-    const genres = parseGenres(novel.genres);
+    const genres = new Set(parseGenres(novel.genres).map(getGenreKey));
     return (
       included.every(genre => genres.has(genre)) &&
       !excluded.some(genre => genres.has(genre))
@@ -43,62 +23,33 @@ export const filterNovelsByGenres = <T extends { genres?: string | null }>(
 };
 
 export interface LibraryGenre {
-  /** Normalized name, as stored in the filter settings. */
+  /** Genre key, as stored in the filter settings. */
   name: string;
-  /** The spelling most novels use. */
+  /** The most common spelling, or the first seen on a tie. */
   label: string;
-  novelCount: number;
 }
 
-/**
- * Builds the genre list from the library's distinct `genres` values, each with
- * how many novels carry it.
- */
 export const buildLibraryGenres = (
-  rows: { genres: string | null; novelCount: number }[],
+  novels: { genres: string | null }[],
 ): LibraryGenre[] => {
-  const genres = new Map<
-    string,
-    { novelCount: number; spellings: Map<string, number> }
-  >();
+  const genres = new Map<string, Map<string, number>>();
 
-  for (const row of rows) {
-    if (!row.genres) {
-      continue;
-    }
-    const seen = new Set<string>();
-    for (const part of row.genres.split(',')) {
-      const spelling = part.trim().replace(/\s+/g, ' ');
-      const name = normalizeGenreName(spelling);
+  for (const novel of novels) {
+    for (const spelling of parseGenres(novel.genres)) {
+      const name = getGenreKey(spelling);
       if (!name) {
         continue;
       }
-      let genre = genres.get(name);
-      if (!genre) {
-        genre = { novelCount: 0, spellings: new Map() };
-        genres.set(name, genre);
-      }
-      genre.spellings.set(
-        spelling,
-        (genre.spellings.get(spelling) ?? 0) + row.novelCount,
-      );
-      // A novel listing a genre twice still counts once.
-      if (!seen.has(name)) {
-        seen.add(name);
-        genre.novelCount += row.novelCount;
-      }
+      const spellings = genres.get(name) ?? new Map<string, number>();
+      spellings.set(spelling, (spellings.get(spelling) ?? 0) + 1);
+      genres.set(name, spellings);
     }
   }
 
-  return Array.from(genres, ([name, { novelCount, spellings }]) => {
-    let label = name;
-    let labelCount = -1;
-    for (const [spelling, count] of spellings) {
-      if (count > labelCount) {
-        label = spelling;
-        labelCount = count;
-      }
-    }
-    return { name, label, novelCount };
-  }).sort((a, b) => a.label.localeCompare(b.label));
+  return Array.from(genres, ([name, spellings]) => ({
+    name,
+    label: Array.from(spellings).reduce((best, next) =>
+      next[1] > best[1] ? next : best,
+    )[0],
+  })).sort((a, b) => a.label.localeCompare(b.label));
 };

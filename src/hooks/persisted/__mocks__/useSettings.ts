@@ -49,6 +49,8 @@ export const defaultLibrarySettings = {
   novelsPerRow: 3,
   sortOrder: 'DateAdded_DESC',
   filters: {},
+  includedGenres: [],
+  excludedGenres: [],
 };
 
 export const initialChapterGeneralSettings = {

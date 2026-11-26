@@ -14,7 +14,6 @@ import {
   gte,
   lt,
   asc,
-  count,
   SQL,
 } from 'drizzle-orm';
 import { dbManager } from '@database/db';
@@ -123,20 +122,13 @@ export const getLibraryNovelsFromDb = (
     excludeLocalNovels,
   ).all();
 
-/** Each distinct `genres` value in the library, with how many novels use it. */
-export const getLibraryGenresFromDb = () =>
+export const getLibraryNovelKeysQuery = () =>
   dbManager
-    .select({ genres: novelSchema.genres, novelCount: count() })
+    .select({ pluginId: novelSchema.pluginId, path: novelSchema.path })
     .from(novelSchema)
-    .where(
-      and(
-        eq(novelSchema.inLibrary, true),
-        isNotNull(novelSchema.genres),
-        ne(novelSchema.genres, ''),
-      ),
-    )
-    .groupBy(novelSchema.genres)
-    .all();
+    .where(eq(novelSchema.inLibrary, true));
+
+export const getLibraryNovelKeysFromDb = () => getLibraryNovelKeysQuery().all();
 
 const inCategories = (categoryIds: number[]) =>
   dbManager

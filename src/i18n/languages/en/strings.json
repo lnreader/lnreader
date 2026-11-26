@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Edit",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globally",
     "install": "Install",
