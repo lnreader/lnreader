@@ -1090,15 +1090,28 @@ describe('ChapterQueries', () => {
       expect(result[0].unread).toBe(true);
     });
 
-    it('returns unread chapters in reading order', async () => {
+    it('limits the results in numeric page and chapter order', async () => {
       const testDb = getTestDb();
       const novelId = await insertTestNovel(testDb, { inLibrary: true });
-      await insertTestChapter(testDb, novelId, { position: 5, unread: true });
-      await insertTestChapter(testDb, novelId, { position: 2, unread: true });
+      await insertTestChapter(testDb, novelId, {
+        page: '10',
+        position: 0,
+        unread: true,
+      });
+      const later = await insertTestChapter(testDb, novelId, {
+        page: '2',
+        position: 5,
+        unread: true,
+      });
+      const earlier = await insertTestChapter(testDb, novelId, {
+        page: '2',
+        position: 2,
+        unread: true,
+      });
 
-      const result = await getAllUndownloadedAndUnreadChapters(novelId);
+      const result = await getAllUndownloadedAndUnreadChapters(novelId, 2);
 
-      expect(result.map(chapter => chapter.position)).toEqual([2, 5]);
+      expect(result.map(chapter => chapter.id)).toEqual([earlier, later]);
     });
   });
 

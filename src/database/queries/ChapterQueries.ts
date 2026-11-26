@@ -638,6 +638,7 @@ export const getAllUndownloadedChapters = async (
  */
 export const getAllUndownloadedAndUnreadChapters = async (
   novelId: number,
+  limit?: number,
 ): Promise<ChapterInfo[]> =>
   dbManager
     .select()
@@ -649,7 +650,12 @@ export const getAllUndownloadedAndUnreadChapters = async (
         eq(chapterSchema.unread, true),
       ),
     )
-    .orderBy(asc(castInt(chapterSchema.page)), asc(chapterSchema.position))
+    .orderBy(
+      asc(castInt(chapterSchema.page)),
+      asc(chapterSchema.position),
+      asc(chapterSchema.id),
+    )
+    .limit(limit ?? -1)
     .all();
 
 export const getChapter = async (chapterId: number) =>

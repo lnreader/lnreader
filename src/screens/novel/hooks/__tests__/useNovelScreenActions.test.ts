@@ -3,6 +3,8 @@ import { useNovelScreenActions } from '../useNovelScreenActions';
 
 const mockDeleteChapters = jest.fn();
 const mockGetDownloaded = jest.fn();
+const mockGetUndownloadedAndUnread = jest.fn();
+const mockDownloadChapters = jest.fn();
 const mockShowToast = jest.fn();
 
 jest.mock('@utils/showToast', () => ({
@@ -10,7 +12,8 @@ jest.mock('@utils/showToast', () => ({
 }));
 
 jest.mock('@database/queries/ChapterQueries', () => ({
-  getAllUndownloadedAndUnreadChapters: jest.fn(),
+  getAllUndownloadedAndUnreadChapters: (...args: unknown[]) =>
+    mockGetUndownloadedAndUnread(...args),
   getAllUndownloadedChapters: jest.fn(),
   getChaptersByIds: jest.fn(),
   getNovelDownloadedChapters: (...args: unknown[]) =>
@@ -18,7 +21,7 @@ jest.mock('@database/queries/ChapterQueries', () => ({
 }));
 
 jest.mock('@hooks/persisted', () => ({
-  useDownload: () => ({ downloadChapters: jest.fn() }),
+  useDownload: () => ({ downloadChapters: mockDownloadChapters }),
 }));
 
 jest.mock('@services/plugin/fetch', () => ({ resolveUrl: jest.fn() }));
@@ -38,10 +41,9 @@ const novel = { id: 1, name: 'Novel', pluginId: 'p', isLocal: false } as any;
 const ch = (id: number) => ({ id, isDownloaded: true } as any);
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-const setup = (chapters: any[] = [], withNovel = true) =>
+const setup = (withNovel = true) =>
   renderHook(() =>
     useNovelScreenActions({
-      chapters,
       clearSelection: jest.fn(),
       novel: withNovel ? novel : undefined,
       selectedIds: [],
@@ -55,7 +57,7 @@ describe('deleteDownloadedChapters', () => {
   it('deletes every downloaded chapter, not only the ones loaded on screen', async () => {
     mockGetDownloaded.mockResolvedValue([ch(1), ch(2), ch(900), ch(1500)]);
 
-    setup([ch(1), ch(2)]).deleteDownloadedChapters();
+    setup().deleteDownloadedChapters();
     await flush();
 
     expect(mockGetDownloaded).toHaveBeenCalledWith(1);
@@ -82,10 +84,24 @@ describe('deleteDownloadedChapters', () => {
   });
 
   it('does nothing without a novel', async () => {
-    setup([], false).deleteDownloadedChapters();
+    setup(false).deleteDownloadedChapters();
     await flush();
 
     expect(mockGetDownloaded).not.toHaveBeenCalled();
     expect(mockDeleteChapters).not.toHaveBeenCalled();
+  });
+});
+
+describe('downloadAvailableChapters', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('queues the first N unread and undownloaded chapters from the database', async () => {
+    const chapters = [{ id: 900 }, { id: 1500 }];
+    mockGetUndownloadedAndUnread.mockResolvedValue(chapters);
+
+    await setup().downloadAvailableChapters(2);
+
+    expect(mockGetUndownloadedAndUnread).toHaveBeenCalledWith(1, 2);
+    expect(mockDownloadChapters).toHaveBeenCalledWith(novel, chapters);
   });
 });
