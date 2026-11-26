@@ -28,7 +28,10 @@ import { useNovelScreenActions } from './hooks/useNovelScreenActions';
 import { useNovelRefresh } from './hooks/useNovelRefresh';
 import SetCategoryModal from './components/SetCategoriesModal';
 import { backgroundTasks } from '@services/backgroundTasks';
-import { getPageChapterIds } from '@database/queries/ChapterQueries';
+import {
+  getPageChapterIds,
+  getPageChapters,
+} from '@database/queries/ChapterQueries';
 
 const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novel = useNovelValue('novel');
@@ -41,7 +44,8 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   const { setNovel, refreshNovel } = useNovelActions();
 
   const theme = useTheme();
-  const { downloadNewChapters, refreshNovelMetadata } = useAppSettings();
+  const { downloadNewChapters, refreshNovelMetadata, defaultChapterSort } =
+    useAppSettings();
 
   const showNovelError = !novel && !loading && error;
 
@@ -57,6 +61,27 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
       novelSettings.excludedScanlators,
     );
   }, [novel, novelSettings, pageIndex, pages]);
+
+  const getUndownloadedChapters = useCallback(
+    async (limit: number) => {
+      if (!novel) {
+        return [];
+      }
+      const filter = novelSettings.filter.filter(
+        key => key !== 'not-downloaded',
+      );
+      return getPageChapters(
+        novel.id,
+        novelSettings.sort ?? defaultChapterSort,
+        [...filter, 'not-downloaded'],
+        pages[pageIndex],
+        undefined,
+        limit,
+        novelSettings.excludedScanlators,
+      );
+    },
+    [defaultChapterSort, novel, novelSettings, pageIndex, pages],
+  );
 
   const {
     selectedIds: selected,
@@ -92,7 +117,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     selectionActions,
     shareNovel,
   } = useNovelScreenActions({
-    chapters,
+    getUndownloadedChapters,
     clearSelection,
     novel,
     selectedIds: selected,

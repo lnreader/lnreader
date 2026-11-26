@@ -12,10 +12,12 @@ const mockGetPageChapterIds = jest.fn();
 const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
 const mockGetNovelDownloadedChapters = jest.fn();
+const mockGetPageChapters = jest.fn();
 let mockSnackbarVisible = false;
 
 jest.mock('@hooks/persisted', () => ({
   useAppSettings: () => ({
+    defaultChapterSort: 'positionAsc',
     downloadNewChapters: false,
     refreshNovelMetadata: false,
   }),
@@ -71,6 +73,7 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   getAllUndownloadedChapters: jest.fn().mockResolvedValue([]),
   getChaptersByIds: jest.fn().mockResolvedValue([]),
   getPageChapterIds: (...args: unknown[]) => mockGetPageChapterIds(...args),
+  getPageChapters: (...args: unknown[]) => mockGetPageChapters(...args),
   getNovelDownloadedChapters: (...args: unknown[]) =>
     mockGetNovelDownloadedChapters(...args),
   updateChapterProgressByIds: (...args: unknown[]) =>
@@ -83,12 +86,26 @@ jest.mock('../../../database/queries/NovelQueries', () => ({
 
 jest.mock('../components/NovelAppbar', () => {
   const React = require('react');
-  const { Text } = require('react-native');
-  return ({ hideActions }: { hideActions?: boolean }) =>
+  const { Pressable, Text } = require('react-native');
+  return ({
+    hideActions,
+    downloadChapters,
+  }: {
+    hideActions?: boolean;
+    downloadChapters: (amount: number) => void;
+  }) =>
     React.createElement(
-      Text,
-      { testID: 'novel-appbar' },
-      hideActions ? 'appbar-actions-hidden' : 'appbar',
+      React.Fragment,
+      null,
+      React.createElement(
+        Text,
+        { testID: 'novel-appbar' },
+        hideActions ? 'appbar-actions-hidden' : 'appbar',
+      ),
+      React.createElement(Pressable, {
+        testID: 'download-next-5',
+        onPress: () => downloadChapters(5),
+      }),
     );
 });
 
@@ -358,6 +375,39 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
     jest.clearAllMocks();
     mockGetPageChapterIds.mockResolvedValue([]);
     mockSnackbarVisible = false;
+  });
+
+  it('downloads the next undownloaded chapters of the open page, loaded or not', async () => {
+    const store = createStore({
+      novelSettings: {
+        filter: ['not-read'],
+        excludedScanlators: ['Group A'],
+        sort: 'positionDesc',
+      },
+    });
+    wireStoreSelectors(store);
+    const next = [{ id: 1201, isDownloaded: false }];
+    mockGetPageChapters.mockResolvedValue(next);
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    fireEvent.press(screen.getByTestId('download-next-5'));
+
+    await waitFor(() =>
+      expect(mockDownloadChapters).toHaveBeenCalledWith(baseNovel, next),
+    );
+    expect(mockGetPageChapters).toHaveBeenCalledWith(
+      7,
+      'positionDesc',
+      ['not-read', 'not-downloaded'],
+      '1',
+      undefined,
+      5,
+      ['Group A'],
+    );
   });
 
   it('deletes every downloaded chapter, not just the loaded ones, from the remove-from-library prompt', async () => {

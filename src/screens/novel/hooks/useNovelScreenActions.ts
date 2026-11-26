@@ -23,7 +23,8 @@ type SelectionAction = {
 };
 
 interface UseNovelScreenActionsOptions {
-  chapters: ChapterInfo[];
+  /** The first `limit` undownloaded chapters of the list, loaded or not. */
+  getUndownloadedChapters: (limit: number) => Promise<ChapterInfo[]>;
   clearSelection: () => void;
   novel?: NovelInfo;
   selectedIds: number[];
@@ -31,7 +32,7 @@ interface UseNovelScreenActionsOptions {
 }
 
 export const useNovelScreenActions = ({
-  chapters,
+  getUndownloadedChapters,
   clearSelection,
   novel,
   selectedIds,
@@ -53,22 +54,20 @@ export const useNovelScreenActions = ({
         return;
       }
 
-      let availableChapters = chapters;
+      let availableChapters: ChapterInfo[] = [];
       if (amount === 'all') {
         availableChapters = await getAllUndownloadedChapters(novel.id);
       } else if (amount === 'unread') {
         availableChapters = await getAllUndownloadedAndUnreadChapters(novel.id);
       } else if (isNumber(amount)) {
-        availableChapters = availableChapters
-          .filter(chapter => !chapter.isDownloaded)
-          .slice(0, amount);
+        availableChapters = await getUndownloadedChapters(amount);
       }
 
       if (availableChapters.length > 0) {
         downloadChapters(novel, availableChapters);
       }
     },
-    [chapters, downloadChapters, novel],
+    [downloadChapters, getUndownloadedChapters, novel],
   );
 
   const deleteDownloadedChapters = useCallback(() => {
