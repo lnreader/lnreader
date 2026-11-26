@@ -92,7 +92,6 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
     selectionActions,
     shareNovel,
   } = useNovelScreenActions({
-    chapters,
     clearSelection,
     novel,
     selectedIds: selected,

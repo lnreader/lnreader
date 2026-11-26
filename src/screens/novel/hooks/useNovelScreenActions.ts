@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import { Share } from 'react-native';
-import isNumber from 'lodash-es/isNumber';
 
 import {
   getAllUndownloadedAndUnreadChapters,
@@ -23,7 +22,6 @@ type SelectionAction = {
 };
 
 interface UseNovelScreenActionsOptions {
-  chapters: ChapterInfo[];
   clearSelection: () => void;
   novel?: NovelInfo;
   selectedIds: number[];
@@ -31,7 +29,6 @@ interface UseNovelScreenActionsOptions {
 }
 
 export const useNovelScreenActions = ({
-  chapters,
   clearSelection,
   novel,
   selectedIds,
@@ -53,22 +50,23 @@ export const useNovelScreenActions = ({
         return;
       }
 
-      let availableChapters = chapters;
-      if (amount === 'all') {
-        availableChapters = await getAllUndownloadedChapters(novel.id);
-      } else if (amount === 'unread') {
-        availableChapters = await getAllUndownloadedAndUnreadChapters(novel.id);
-      } else if (isNumber(amount)) {
-        availableChapters = availableChapters
-          .filter(chapter => !chapter.isDownloaded)
-          .slice(0, amount);
-      }
+      try {
+        const availableChapters =
+          amount === 'all'
+            ? await getAllUndownloadedChapters(novel.id)
+            : await getAllUndownloadedAndUnreadChapters(
+                novel.id,
+                amount === 'unread' ? undefined : amount,
+              );
 
-      if (availableChapters.length > 0) {
-        downloadChapters(novel, availableChapters);
+        if (availableChapters.length > 0) {
+          downloadChapters(novel, availableChapters);
+        }
+      } catch (error) {
+        showToast(getErrorMessage(error));
       }
     },
-    [chapters, downloadChapters, novel],
+    [downloadChapters, novel],
   );
 
   const deleteDownloadedChapters = useCallback(() => {
