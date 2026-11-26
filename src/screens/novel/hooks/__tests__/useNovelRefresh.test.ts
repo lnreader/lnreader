@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react-native';
 
 import { useNovelRefresh } from '../useNovelRefresh';
 import { updateNovel } from '@services/updates/LibraryUpdateQueries';
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
 import { NovelInfo } from '@database/types';
 
 jest.mock('@services/updates/LibraryUpdateQueries', () => ({
@@ -10,7 +10,7 @@ jest.mock('@services/updates/LibraryUpdateQueries', () => ({
 }));
 
 jest.mock('@components/Context/LibraryContext', () => ({
-  useLibraryContext: jest.fn(),
+  useLibraryActions: jest.fn(),
 }));
 
 jest.mock('@i18n/translations', () => ({
@@ -22,8 +22,8 @@ jest.mock('@utils/showToast', () => ({
 }));
 
 const mockUpdateNovel = updateNovel as jest.MockedFunction<typeof updateNovel>;
-const mockUseLibraryContext = useLibraryContext as jest.MockedFunction<
-  typeof useLibraryContext
+const mockUseLibraryActions = useLibraryActions as jest.MockedFunction<
+  typeof useLibraryActions
 >;
 
 const novel = {
@@ -45,9 +45,9 @@ describe('useNovelRefresh', () => {
     enqueue.mockClear();
     mockUpdateNovel.mockClear();
     mockUpdateNovel.mockResolvedValue(undefined);
-    mockUseLibraryContext.mockReturnValue({
+    mockUseLibraryActions.mockReturnValue({
       refetchLibrary,
-    } as unknown as ReturnType<typeof useLibraryContext>);
+    } as unknown as ReturnType<typeof useLibraryActions>);
   });
 
   it('refreshes the novel and library after updating a library novel', async () => {

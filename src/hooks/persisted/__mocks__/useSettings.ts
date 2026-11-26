@@ -19,6 +19,7 @@ export const initialAppSettings = {
   smartUpdateSkipCompleted: false,
   smartUpdateSkipUnstarted: false,
   smartUpdateSkipWithUnread: false,
+  smartUpdateSkipNotDue: false,
   automaticLibraryUpdateIntervalHours: 0,
   automaticBackupIntervalHours: 0,
   updateLibraryOnLaunch: false,
@@ -44,6 +45,7 @@ export const defaultLibrarySettings = {
   displayMode: 'comfortable',
   showDownloadBadges: true,
   showUnreadBadges: true,
+  showContinueReadingButton: false,
   novelsPerRow: 3,
   sortOrder: 'DateAdded_DESC',
 };
@@ -65,6 +67,9 @@ export const initialChapterGeneralSettings = {
   bionicReading: false,
   tapToScroll: false,
   TTSEnable: true,
+  pageReaderInvertVolumeButtons: false,
+  pageReaderDisableAnimation: false,
+  infiniteScroll: false,
 };
 
 export const initialChapterReaderSettings = {

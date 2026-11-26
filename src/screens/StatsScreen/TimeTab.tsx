@@ -4,7 +4,7 @@ import { LegendList } from '@legendapp/list/react-native';
 
 import { getString } from '@i18n/translations';
 
-import { NovelCoverImage } from '@components';
+import { EmptyView, NovelCoverImage } from '@components';
 
 import { getPlugin } from '@plugins/pluginManager';
 import { getUserAgent } from '@hooks/persisted/useUserAgent';
@@ -160,6 +160,19 @@ export const TimeTab: React.FC<TimeTabProps> = ({ stats, theme }) => {
       getItemType={item => item.type}
       keyExtractor={item => `${item.type}-${item.id}`}
       ListHeaderComponent={timeListHeader}
+      ListEmptyComponent={
+        <View style={styles.emptyState}>
+          <EmptyView
+            icon="(˘･_･˘)"
+            description={getString(
+              showingNovels
+                ? 'statsScreen.noNovelReadingTime'
+                : 'statsScreen.noCategoryReadingTime',
+            )}
+            theme={theme}
+          />
+        </View>
+      }
       recycleItems
       renderItem={renderTimeItem}
       showsVerticalScrollIndicator={false}
@@ -170,6 +183,9 @@ export const TimeTab: React.FC<TimeTabProps> = ({ stats, theme }) => {
 const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 16,
+  },
+  emptyState: {
+    paddingVertical: 24,
   },
   listContent: {
     paddingTop: 16,

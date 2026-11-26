@@ -33,8 +33,10 @@ import {
   getNextChapter,
   getDownloadedChapters,
   getNovelDownloadedChapters,
+  getDownloadedChapterIds,
   getUpdatedOverviewFromDb,
   getDetailedUpdatesFromDb,
+  getGroupedUpdateChaptersQuery,
   isChapterDownloaded,
   bookmarkChapter,
   bookmarkChapters,
@@ -276,6 +278,79 @@ describe('ChapterQueries', () => {
 
       await expect(markAllChaptersRead(novelId)).resolves.not.toThrow();
     });
+
+    it('should update chaptersUnread for every selected novel and keep the update trigger', async () => {
+      const testDb = getTestDb();
+      const getChaptersUnread = (id: number) =>
+        testDb.sqlite.executeSync(
+          'SELECT chaptersUnread FROM Novel WHERE id = ?',
+          [id],
+        ).rows[0]?.chaptersUnread;
+
+      const novelA = await insertTestNovel(testDb, { inLibrary: true });
+      const novelB = await insertTestNovel(testDb, { inLibrary: true });
+      const untouched = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId = await insertTestChapter(testDb, novelA, {
+        unread: true,
+      });
+      await insertTestChapter(testDb, novelA, { unread: true });
+      await insertTestChapter(testDb, novelB, { unread: true });
+      await insertTestChapter(testDb, untouched, { unread: true });
+
+      await markAllChaptersRead([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(0);
+      expect(getChaptersUnread(novelB)).toBe(0);
+      expect(getChaptersUnread(untouched)).toBe(1);
+      const untouchedChapters = await getNovelChapters(untouched);
+      expect(untouchedChapters.every(c => c.unread === true)).toBe(true);
+
+      await markAllChaptersUnread([novelA, novelB]);
+
+      expect(getChaptersUnread(novelA)).toBe(2);
+      expect(getChaptersUnread(novelB)).toBe(1);
+
+      await testDb.drizzleDb
+        .update(chapterSchema)
+        .set({ unread: false })
+        .where(eq(chapterSchema.id, chapterId))
+        .run();
+
+      expect(getChaptersUnread(novelA)).toBe(1);
+    });
+
+    it('should roll back and keep the update trigger when a statement fails', async () => {
+      const testDb = getTestDb();
+      const getTriggers = () =>
+        (
+          testDb.sqlite.executeSync(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name",
+          ).rows as { name: string }[]
+        ).map(row => row.name);
+      const triggersBefore = getTriggers();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, { unread: true });
+      testDb.sqlite.executeSync(
+        "CREATE TRIGGER fail_novel_update BEFORE UPDATE ON Novel BEGIN SELECT RAISE(ABORT, 'forced failure'); END",
+      );
+
+      try {
+        await expect(markAllChaptersRead(novelId)).rejects.toThrow();
+        await expect(markAllChaptersUnread(novelId)).rejects.toThrow();
+      } finally {
+        testDb.sqlite.executeSync('DROP TRIGGER fail_novel_update');
+      }
+
+      expect(getTriggers()).toEqual(triggersBefore);
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+    });
+
+    it('should handle an empty selection', async () => {
+      await expect(markAllChaptersRead([])).resolves.not.toThrow();
+      await expect(markAllChaptersUnread([])).resolves.not.toThrow();
+    });
   });
 
   describe('markAllChaptersUnread', () => {
@@ -290,6 +365,26 @@ describe('ChapterQueries', () => {
 
       const chapters = await getNovelChapters(novelId);
       expect(chapters.every(c => c.unread === true)).toBe(true);
+    });
+
+    it('should reset reading progress when marking all chapters unread (issue #1431)', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 96,
+      });
+      await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+      });
+
+      await markAllChaptersUnread(novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      expect(chapters.every(c => c.unread === true)).toBe(true);
+      expect(chapters.every(c => (c.progress ?? 0) === 0)).toBe(true);
     });
   });
 
@@ -495,6 +590,112 @@ describe('ChapterQueries', () => {
       expect(chapters).toHaveLength(1);
       expect(chapters[0].chapterNumber).toBe(1);
       expect(chapters[0].chapterNumber).not.toBeNull();
+    });
+
+    describe('library update (touchUpdatedTime)', () => {
+      const ISO = '2024-03-05T10:20:30.000Z';
+      const touch = { touchUpdatedTime: true };
+
+      it('fills an empty releaseTime without marking the chapter updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: '',
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('keeps the stored releaseTime when the incoming one is empty', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          releaseTime: ISO,
+          chapterNumber: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', releaseTime: '' }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.releaseTime).toBe(ISO);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('does not mark position/page/chapterNumber changes as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 7,
+          position: 5,
+          page: '3',
+        });
+
+        await insertChapters(
+          novelId,
+          [{ path: '/chapter/1', name: 'Chapter 1', chapterNumber: 1 }],
+          touch,
+        );
+
+        const [chapter] = await getNovelChapters(novelId);
+        expect(chapter.position).toBe(0);
+        expect(chapter.page).toBe('1');
+        expect(chapter.chapterNumber).toBe(1);
+        expect(chapter.updatedTime).toBeNull();
+      });
+
+      it('marks only new and renamed chapters as updated', async () => {
+        const testDb = getTestDb();
+        const novelId = await insertTestNovel(testDb, { inLibrary: true });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/1',
+          name: 'Chapter 1',
+          chapterNumber: 1,
+          position: 0,
+        });
+        await insertTestChapter(testDb, novelId, {
+          path: '/chapter/2',
+          name: 'Chapter 2 🔒',
+          chapterNumber: 2,
+          position: 1,
+        });
+
+        await insertChapters(
+          novelId,
+          [
+            { path: '/chapter/1', name: 'Chapter 1', releaseTime: ISO },
+            { path: '/chapter/2', name: 'Chapter 2' },
+            { path: '/chapter/3', name: 'Chapter 3' },
+          ],
+          touch,
+        );
+
+        const chapters = await getNovelChapters(novelId);
+        const updated = Object.fromEntries(
+          chapters.map(c => [c.path, c.updatedTime]),
+        );
+        expect(updated['/chapter/1']).toBeNull();
+        expect(updated['/chapter/2']).not.toBeNull();
+        expect(updated['/chapter/3']).not.toBeNull();
+      });
     });
   });
 
@@ -715,6 +916,39 @@ describe('ChapterQueries', () => {
       expect(chapter1?.unread).toBe(true);
       expect(chapter2?.unread).toBe(true);
       expect(chapter3?.unread).toBe(false);
+    });
+
+    it('should reset reading progress when marking previous chapters unread', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const chapterId1 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 80,
+        position: 0,
+      });
+      const chapterId2 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 100,
+        position: 1,
+      });
+      const chapterId3 = await insertTestChapter(testDb, novelId, {
+        unread: false,
+        progress: 45,
+        position: 2,
+      });
+
+      await markPreviousChaptersUnread(chapterId2, novelId);
+
+      const chapters = await getNovelChapters(novelId);
+      const chapter1 = chapters.find(c => c.id === chapterId1);
+      const chapter2 = chapters.find(c => c.id === chapterId2);
+      const chapter3 = chapters.find(c => c.id === chapterId3);
+      expect(chapter1?.unread).toBe(true);
+      expect(chapter2?.unread).toBe(true);
+      expect(chapter3?.unread).toBe(false);
+      expect(chapter1?.progress).toBe(0);
+      expect(chapter2?.progress).toBe(0);
+      expect(chapter3?.progress).toBe(45);
     });
   });
 
@@ -1008,6 +1242,114 @@ describe('ChapterQueries', () => {
     });
   });
 
+  describe('chapter neighbors', () => {
+    it('limits rows transferred by both neighbor lookups to one', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      for (let position = 0; position < 5; position++) {
+        await insertTestChapter(testDb, novelId, { position });
+      }
+      const client = testDb.sqlite as typeof testDb.sqlite & {
+        executeRawAsync: typeof testDb.sqlite.executeRaw;
+      };
+      const executeRaw = jest.spyOn(client, 'executeRawAsync');
+      try {
+        expect((await getNextChapter(novelId, 0, '1'))?.position).toBe(1);
+        expect((await getPrevChapter(novelId, 4, '1'))?.position).toBe(3);
+        expect(executeRaw).toHaveBeenCalledTimes(2);
+        for (const call of executeRaw.mock.calls) {
+          expect(call[0]).toMatch(/limit \?/i);
+          expect(call[1]?.at(-1)).toBe(1);
+        }
+        for (const result of executeRaw.mock.results) {
+          expect(await result.value).toHaveLength(1);
+        }
+      } finally {
+        executeRaw.mockRestore();
+      }
+    });
+
+    it('returns no neighbor before the first or after the last chapter', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      await insertTestChapter(testDb, novelId, { page: '1', position: 0 });
+      await insertTestChapter(testDb, novelId, { page: '2', position: 1 });
+
+      expect(await getPrevChapter(novelId, 0, '1')).toBeUndefined();
+      expect(await getNextChapter(novelId, 1, '2')).toBeUndefined();
+    });
+
+    it('breaks duplicate position ties by id in the navigation direction', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const firstId = await insertTestChapter(testDb, novelId, { position: 1 });
+      const secondId = await insertTestChapter(testDb, novelId, {
+        position: 1,
+      });
+
+      expect((await getNextChapter(novelId, 0, '1'))?.id).toBe(firstId);
+      expect((await getPrevChapter(novelId, 2, '1'))?.id).toBe(secondId);
+      expect(await getNextChapter(novelId, 1, '1')).toBeUndefined();
+      expect(await getPrevChapter(novelId, 1, '1')).toBeUndefined();
+    });
+
+    it('preserves numeric-looking page comparisons and integer page ordering', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const page1 = await insertTestChapter(testDb, novelId, { page: '1' });
+      const page02 = await insertTestChapter(testDb, novelId, { page: '02' });
+      const page2 = await insertTestChapter(testDb, novelId, { page: '2' });
+      const page10 = await insertTestChapter(testDb, novelId, { page: '10' });
+
+      // The cast parameter gives comparisons numeric affinity: '02' and '2'
+      // compare equally, and page 10 sorts after page 2.
+      expect((await getPrevChapter(novelId, 0, '2'))?.id).toBe(page1);
+      expect((await getPrevChapter(novelId, 0, '10'))?.id).toBe(page2);
+      expect((await getNextChapter(novelId, 0, '02'))?.id).toBe(page10);
+      expect((await getPrevChapter(novelId, 0, '02'))?.id).toBe(page1);
+      expect((await getNextChapter(novelId, 0, '1'))?.id).toBe(page02);
+    });
+
+    it('preserves integer-cast behavior for source-defined page labels', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      await insertTestChapter(testDb, novelId, {
+        page: 'Volume A',
+        position: 2,
+      });
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        page: 'Volume B',
+        position: 0,
+      });
+
+      // Labels cast to zero, so existing eligibility treats both as later
+      // pages and sorting resolves their equal page casts by position.
+      expect(await getPrevChapter(novelId, 1, 'Volume A')).toBeUndefined();
+      expect((await getNextChapter(novelId, 1, 'Volume A'))?.id).toBe(
+        chapterId,
+      );
+    });
+
+    it('skips excluded chapters at the previous page boundary', async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb);
+      const chapterId = await insertTestChapter(testDb, novelId, {
+        page: '1',
+        position: 0,
+        scanlator: null,
+      });
+      await insertTestChapter(testDb, novelId, {
+        page: '1',
+        position: 1,
+        scanlator: 'Excluded',
+      });
+
+      expect((await getPrevChapter(novelId, 0, '2', ['Excluded']))?.id).toBe(
+        chapterId,
+      );
+    });
+  });
+
   describe('getPrevChapter', () => {
     it('should return previous chapter in same page', async () => {
       const testDb = getTestDb();
@@ -1237,6 +1579,34 @@ describe('ChapterQueries', () => {
     });
   });
 
+  it('loads only the requested update dates for each novel in newest-first order', async () => {
+    const db = getTestDb();
+    const novel = await insertTestNovel(db);
+    const other = await insertTestNovel(db);
+    const morning = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T09:00:00Z',
+    });
+    const evening = await insertTestChapter(db, novel, {
+      updatedTime: '2026-11-20T18:00:00Z',
+    });
+    await insertTestChapter(db, novel, { updatedTime: '2026-11-21T09:00:00Z' });
+    await insertTestChapter(db, other, { updatedTime: '2026-11-20T09:00:00Z' });
+    const otherUpdate = await insertTestChapter(db, other, {
+      updatedTime: '2026-11-19T09:00:00Z',
+    });
+
+    const rows = await getGroupedUpdateChaptersQuery([
+      [novel, '2026-11-20'],
+      [other, '2026-11-19'],
+    ]).all();
+
+    expect(rows.map(({ id, updateDate }) => [id, updateDate])).toEqual([
+      [evening, '2026-11-20'],
+      [morning, '2026-11-20'],
+      [otherUpdate, '2026-11-19'],
+    ]);
+  });
+
   describe('getDownloadedChapters', () => {
     it('should return all downloaded chapters with novel info', async () => {
       const testDb = getTestDb();
@@ -1253,6 +1623,21 @@ describe('ChapterQueries', () => {
       expect(result.length).toBeGreaterThanOrEqual(1);
       expect(result[0].isDownloaded).toBe(true);
       expect(result[0].pluginId).toBe('test-plugin');
+    });
+  });
+
+  describe('getDownloadedChapterIds', () => {
+    it("returns only the novel's downloaded chapter ids", async () => {
+      const testDb = getTestDb();
+      const novelId = await insertTestNovel(testDb, { inLibrary: true });
+      const otherNovelId = await insertTestNovel(testDb, { inLibrary: true });
+      const downloaded = await insertTestChapter(testDb, novelId, {
+        isDownloaded: true,
+      });
+      await insertTestChapter(testDb, novelId, { isDownloaded: false });
+      await insertTestChapter(testDb, otherNovelId, { isDownloaded: true });
+
+      expect(await getDownloadedChapterIds(novelId)).toEqual([downloaded]);
     });
   });
 

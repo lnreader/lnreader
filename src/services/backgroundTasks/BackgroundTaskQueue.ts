@@ -15,7 +15,9 @@ import {
   ACTIVE_BACKGROUND_TASK_STATES,
   allowsDuplicateTask,
   createBackgroundTaskMetadata,
+  type DownloadIndex,
   fromNativeTaskRecord,
+  getDownloadIndex,
   getBackgroundTaskQueueName,
   willTaskWaitInQueue,
 } from './taskDefinitions';
@@ -27,6 +29,15 @@ const makeTemporaryId = () =>
 export class BackgroundTaskQueue {
   private interruptedTasks = new Map<string, 'pause' | 'cancel'>();
   private notificationPermissionRequest?: Promise<boolean>;
+  /**
+   * The queue lives in memory and MMKV is only its persistence. Subscribers
+   * used to observe the MMKV key instead, which made every one of them
+   * re-parse the whole queue (including each download's full chapter list) on
+   * every progress update.
+   */
+  private tasks?: QueuedBackgroundTask[];
+  private downloadIndex?: DownloadIndex;
+  private listeners = new Set<() => void>();
 
   constructor() {
     DeviceEventEmitter.addListener(
@@ -43,17 +54,47 @@ export class BackgroundTaskQueue {
     );
   }
 
-  getSnapshot() {
-    return (
-      getMMKVObject<QueuedBackgroundTask[]>(BACKGROUND_TASKS_STORE_KEY) || []
-    );
-  }
+  /**
+   * Returns the same array until the queue changes, so it can back
+   * `useSyncExternalStore`. Treat it as immutable.
+   */
+  getSnapshot = () => {
+    this.tasks ??=
+      getMMKVObject<QueuedBackgroundTask[]>(BACKGROUND_TASKS_STORE_KEY) || [];
+    return this.tasks;
+  };
+
+  /**
+   * Which chapters and novels have a download queued. Keeps its identity
+   * across progress updates, which leave the task payloads untouched.
+   */
+  getDownloadIndex = () => {
+    this.downloadIndex ??= getDownloadIndex(this.getSnapshot());
+    return this.downloadIndex;
+  };
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
 
   async refresh() {
-    const records = await NativeBackgroundTasks.getTasks();
-    const queue = records
-      .filter(record => ACTIVE_BACKGROUND_TASK_STATES.has(record.state))
-      .map(fromNativeTaskRecord);
+    const summaries = await NativeBackgroundTasks.getTasks();
+    const queue: QueuedBackgroundTask[] = [];
+
+    for (const summary of summaries) {
+      const record = await NativeBackgroundTasks.getTask(summary.id);
+      if (
+        record &&
+        ACTIVE_BACKGROUND_TASK_STATES.has(record.state) &&
+        record.payload
+      ) {
+        queue.push(fromNativeTaskRecord(record));
+      }
+    }
+
     this.store(queue);
     return queue;
   }
@@ -124,13 +165,15 @@ export class BackgroundTaskQueue {
   async run(taskId: string, task: BackgroundTask, checkpoint?: string) {
     const queue = this.getSnapshot();
     if (!queue.some(item => item.id === taskId)) {
-      queue.push({
-        id: taskId,
-        task,
-        state: 'running',
-        meta: createBackgroundTaskMetadata(task, true),
-      });
-      this.store(queue);
+      this.store([
+        ...queue,
+        {
+          id: taskId,
+          task,
+          state: 'running',
+          meta: createBackgroundTaskMetadata(task, true),
+        },
+      ]);
     }
 
     try {
@@ -140,6 +183,13 @@ export class BackgroundTaskQueue {
         this.enqueueSilently,
         {
           checkpoint,
+          postWarning: async (title, message) => {
+            try {
+              await NativeBackgroundTasks.postWarning(taskId, title, message);
+            } catch {
+              // Notification delivery must not interrupt background work.
+            }
+          },
           updateCheckpoint: value => {
             if (this.interruptedTasks.get(taskId) === 'cancel') {
               this.throwIfInterrupted(taskId);
@@ -233,12 +283,15 @@ export class BackgroundTaskQueue {
   ) {
     this.throwIfInterrupted(taskId);
 
-    const queue = this.getSnapshot();
+    const queue = [...this.getSnapshot()];
     const index = queue.findIndex(task => task.id === taskId);
     if (index < 0) return;
     const meta = transformer(queue[index].meta);
     queue[index] = { ...queue[index], meta, state: 'running' };
-    this.store(queue);
+    // Progress is not persisted: it would serialise the whole queue once per
+    // downloaded chapter, and after a restart it is read back from the native
+    // task records by refresh() anyway.
+    this.store(queue, false);
     NativeBackgroundTasks.updateProgress(
       taskId,
       meta.progress ?? -1,
@@ -271,7 +324,18 @@ export class BackgroundTaskQueue {
     this.interruptedTasks.delete(taskId);
   }
 
-  private store(tasks: QueuedBackgroundTask[]) {
-    setMMKVObject(BACKGROUND_TASKS_STORE_KEY, tasks);
+  private store(tasks: QueuedBackgroundTask[], persist = true) {
+    const previous = this.getSnapshot();
+    if (
+      tasks.length !== previous.length ||
+      tasks.some((item, index) => item.task !== previous[index].task)
+    ) {
+      this.downloadIndex = undefined;
+    }
+    this.tasks = tasks;
+    if (persist) {
+      setMMKVObject(BACKGROUND_TASKS_STORE_KEY, tasks);
+    }
+    this.listeners.forEach(listener => listener());
   }
 }

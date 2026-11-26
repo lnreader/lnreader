@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
+import Color from 'color';
 import ListView from './ListView';
 
 import { DisplayModes } from '@screens/library/constants/constants';
@@ -19,6 +20,7 @@ import { getString } from '@i18n/translations';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
 import NovelCoverImage from './NovelCoverImage';
 import { useNovelCoverLayout } from './NovelCoverLayoutContext';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 interface UnreadBadgeProps {
   showDownloadBadges: boolean;
@@ -55,12 +57,14 @@ interface INovelCover<TNovel> {
   theme: ThemeColors;
   isSelected: boolean;
   addSkeletonLoading?: boolean;
+  skeletonTint?: string;
   inActivity?: boolean;
   onLongPress: (item: TNovel) => void;
   hasSelection?: boolean;
   selectedNovelIds?: number[];
   globalSearch?: boolean;
   imageRequestInit?: ImageRequestInit;
+  onContinueReading?: () => void;
 }
 
 function isFromDB(
@@ -78,12 +82,14 @@ function NovelCover<
   theme,
   isSelected,
   addSkeletonLoading,
+  skeletonTint,
   inActivity,
   onLongPress,
   hasSelection,
   globalSearch,
   selectedNovelIds,
   imageRequestInit,
+  onContinueReading,
 }: INovelCover<TNovel>) {
   const selectionActive =
     hasSelection ?? (selectedNovelIds != null && selectedNovelIds.length > 0);
@@ -108,6 +114,25 @@ function NovelCover<
     [imageRequestInit],
   );
 
+  const continueReadingButton =
+    onContinueReading && !selectionActive ? (
+      <Pressable
+        accessibilityLabel={getString('novelScreen.continueReading')}
+        accessibilityRole="button"
+        android_ripple={{ color: theme.rippleColor }}
+        onPress={event => {
+          event.stopPropagation();
+          onContinueReading();
+        }}
+        style={[
+          styles.continueReadingButton,
+          { backgroundColor: Color(theme.primary).alpha(0.9).string() },
+        ]}
+      >
+        <MaterialCommunityIcons name="play" size={20} color={theme.onPrimary} />
+      </Pressable>
+    ) : null;
+
   if (item.completeRow) {
     if (!addSkeletonLoading) {
       return <></>;
@@ -116,6 +141,7 @@ function NovelCover<
       <SourceScreenSkeletonLoading
         theme={theme}
         completeRow={item.completeRow}
+        tintColor={skeletonTint}
       />
     );
   }
@@ -197,6 +223,13 @@ function NovelCover<
             width={coverWidth}
           />
         ) : null}
+        {continueReadingButton ? (
+          <View
+            style={[styles.continueReadingOverlay, { top: coverHeight - 40 }]}
+          >
+            {continueReadingButton}
+          </View>
+        ) : null}
       </Pressable>
     </View>
   ) : (
@@ -227,6 +260,7 @@ function NovelCover<
       onPress={selectionActive ? selectNovel : onPress}
       onLongPress={selectNovel}
       isSelected={isSelected}
+      continueReadingButton={continueReadingButton}
     />
   );
 }
@@ -372,6 +406,18 @@ const styles = StyleSheet.create({
     left: 4,
     position: 'absolute',
     right: 4,
+  },
+  continueReadingButton: {
+    alignItems: 'center',
+    borderRadius: 8,
+    height: 36,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: 36,
+  },
+  continueReadingOverlay: {
+    position: 'absolute',
+    right: 12,
   },
   downloadBadge: {
     borderBottomLeftRadius: 4,

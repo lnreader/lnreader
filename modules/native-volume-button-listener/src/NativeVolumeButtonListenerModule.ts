@@ -3,6 +3,8 @@ import { NativeModule, requireNativeModule } from 'expo-modules-core';
 type NativeVolumeButtonListenerEvents = {
   VolumeUp: () => void;
   VolumeDown: () => void;
+  PageUp: () => void;
+  PageDown: () => void;
 };
 
 declare class NativeVolumeButtonListenerModule extends NativeModule<NativeVolumeButtonListenerEvents> {

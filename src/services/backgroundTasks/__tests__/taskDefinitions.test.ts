@@ -1,5 +1,5 @@
 import type { NativeBackgroundTaskRecord } from '@modules/native-background-tasks';
-import type { BackgroundTask } from '../contracts';
+import type { BackgroundTask, QueuedBackgroundTask } from '../contracts';
 import {
   allowsDuplicateTask,
   createBackgroundTaskMetadata,
@@ -155,36 +155,49 @@ describe('background task definitions', () => {
     });
   });
 
-  it('derives progress keys only for the requested novel downloads', () => {
+  it('derives progress keys from task-level or chapter-level novel ids', () => {
     const createDownload = (
       id: string,
-      novelId: number,
+      taskNovelId?: number,
+      chapterNovelId?: number,
       progress?: number,
     ) => ({
       id,
       task: {
         name: 'DOWNLOAD_CHAPTER' as const,
         data: {
-          novelName: `Novel ${novelId}`,
-          novelId,
-          chapters: [{ chapterId: novelId, chapterName: 'Chapter 1' }],
+          novelName: `Novel ${taskNovelId ?? chapterNovelId}`,
+          ...(taskNovelId === undefined ? {} : { novelId: taskNovelId }),
+          chapters: [
+            {
+              chapterId: taskNovelId ?? chapterNovelId ?? 0,
+              chapterName: 'Chapter 1',
+              ...(chapterNovelId === undefined
+                ? {}
+                : { novelId: chapterNovelId }),
+            },
+          ],
         },
       },
       state: 'running' as const,
       meta: {
-        name: `Novel ${novelId}`,
+        name: `Novel ${taskNovelId ?? chapterNovelId}`,
         isRunning: true,
         progress,
         progressText: 'Chapter 1',
       },
     });
-    const tasks: (ReturnType<typeof createDownload> | BackgroundTask)[] = [
+    const tasks: (QueuedBackgroundTask | BackgroundTask)[] = [
       { name: 'UPDATE_LIBRARY' },
-      createDownload('first', 1, 0.5),
-      createDownload('second', 2),
+      createDownload('legacy', 1, undefined, 0.5),
+      createDownload('task-level', 2),
+      createDownload('chapter-level', undefined, 3),
     ];
 
-    expect(getDownloadProgressKey(tasks, 1)).toBe('first:running:0.5');
-    expect(getDownloadProgressKey(tasks, 2)).toBe('second:running:pending');
+    expect(getDownloadProgressKey(tasks, 1)).toBe('legacy:running:0.5');
+    expect(getDownloadProgressKey(tasks, 2)).toBe('task-level:running:pending');
+    expect(getDownloadProgressKey(tasks, 3)).toBe(
+      'chapter-level:running:pending',
+    );
   });
 });

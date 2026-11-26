@@ -21,19 +21,16 @@ import {
 } from '@components';
 import { TaskQueueScreenProps } from '@navigators/types';
 import {
-  BACKGROUND_TASKS_STORE_KEY,
   backgroundTasks,
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMMKVObject } from 'react-native-mmkv';
+import { useBackgroundTaskQueue } from '@hooks/persisted/useBackgroundTasks';
 
 const DownloadQueue = ({ navigation }: TaskQueueScreenProps) => {
   const theme = useTheme();
   const { bottom, right } = useSafeAreaInsets();
-  const [taskQueue] = useMMKVObject<QueuedBackgroundTask[]>(
-    BACKGROUND_TASKS_STORE_KEY,
-  );
+  const taskQueue = useBackgroundTaskQueue();
   const [isRunning, setIsRunning] = useState(backgroundTasks.isRunning);
   const [visible, setVisible] = useState(false);
   const [taskToCancel, setTaskToCancel] = useState<QueuedBackgroundTask>();

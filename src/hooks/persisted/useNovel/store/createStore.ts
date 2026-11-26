@@ -14,6 +14,7 @@ import { createInitialChapterSlice } from './novelStore.chapterState';
 import { createNovelStoreChapterActions } from './novelStore.chapterActions';
 import { createBootstrapService } from '../store-helper/bootstrapService';
 import { defaultChapterActionsDependencies } from './chapterActions';
+import { getNovelById } from '@database/queries/NovelQueries';
 
 interface Props {
   pluginId: string;
@@ -70,6 +71,15 @@ export function createStore({
     persistLastRead: chapter =>
       novelPersistence.writeLastRead(persistenceInput, chapter),
     switchNovelToLibrary,
+    readNovelSchedule: novelId => {
+      const saved = getNovelById(novelId);
+      return (
+        saved && {
+          fetchInterval: saved.fetchInterval,
+          nextUpdate: saved.nextUpdate,
+        }
+      );
+    },
   };
 
   const store = createZustandStore<NovelStoreState>()((set, get) => {

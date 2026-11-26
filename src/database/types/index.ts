@@ -14,6 +14,10 @@ export interface NovelInfo {
   inLibrary?: boolean | null;
   isLocal?: boolean | null;
   totalPages?: number | null;
+  /** 0 = not computed, > 0 = estimated days, < 0 = days set by the user. */
+  fetchInterval?: number | null;
+  /** Start of the local day the novel should next be checked for chapters. */
+  nextUpdate?: string | null;
 }
 
 export interface DBNovelInfo extends NovelInfo {

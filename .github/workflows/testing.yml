@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -48,4 +50,45 @@ jobs:
         run: pnpm generate:env:debug
 
       - name: Run Tests
-        run: pnpm run test
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != pull_request ]]; then
+            exec pnpm run test
+          fi
+
+          # Compare the PR merge commit to its base parent.
+          changed_files="$RUNNER_TEMP/jest-changed-files"
+          if ! git diff --no-renames --name-only -z HEAD^1 HEAD > "$changed_files"; then
+            echo 'Could not determine changed files. Running all tests.'
+            exec pnpm run test
+          fi
+
+          sources=()
+          while IFS= read -r -d '' file; do
+            if [[ "$file" == *.md && "$file" != */* ]]; then
+              continue
+            fi
+
+            case "$file" in
+              */__mocks__/*|src/database/queries/__tests__/setup.ts)
+                exec pnpm run test
+                ;;
+              src/*.js|src/*.jsx|src/*.ts|src/*.tsx)
+                # Deleted paths and symlinks cannot be looked up by Jest.
+                if [[ ! -f "$file" || -L "$file" ]]; then
+                  exec pnpm run test
+                fi
+                sources+=("$file")
+                ;;
+              *)
+                exec pnpm run test
+                ;;
+            esac
+          done < "$changed_files"
+
+          if (( ${#sources[@]} == 0 )); then
+            echo 'No test-related files changed.'
+            exit 0
+          fi
+
+          exec pnpm run test --findRelatedTests --passWithNoTests "${sources[@]}"

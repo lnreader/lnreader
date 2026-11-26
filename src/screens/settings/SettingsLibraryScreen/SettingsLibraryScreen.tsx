@@ -30,7 +30,9 @@ import DefaultChapterSortModal from '../components/DefaultChapterSortModal';
 import SettingSwitch from '../components/SettingSwitch';
 import DefaultCategoryDialog from './DefaultCategoryDialog';
 import GlobalUpdateCategoriesDialog from './GlobalUpdateCategoriesDialog';
-import SmartUpdateDialog from './SmartUpdateDialog';
+import SmartUpdateDialog, {
+  type SmartUpdateDialogFilters,
+} from './SmartUpdateDialog';
 import DisplayModeModal from './modals/DisplayModeModal';
 import GridSizeModal from './modals/GridSizeModal';
 import NovelBadgesModal from './modals/NovelBadgesModal';
@@ -70,6 +72,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
     showDownloadBadges = true,
     showNumberOfNovels = false,
     showUnreadBadges = true,
+    showContinueReadingButton = false,
     sortOrder = LibrarySortOrder.DateAdded_DESC,
     defaultCategoryId,
     promptForCategoryOnAdd = false,
@@ -86,6 +89,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
     smartUpdateSkipCompleted = false,
     smartUpdateSkipUnstarted = false,
     smartUpdateSkipWithUnread = false,
+    smartUpdateSkipNotDue = false,
     updateLibraryOnLaunch,
     useLibraryFAB,
   } = useAppSettings();
@@ -117,11 +121,13 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
   const [draftExcludedCategoryIds, setDraftExcludedCategoryIds] = useState<
     number[]
   >([]);
-  const [draftSmartUpdateFilters, setDraftSmartUpdateFilters] = useState({
-    skipCompleted: false,
-    skipUnstarted: false,
-    skipWithUnread: false,
-  });
+  const [draftSmartUpdateFilters, setDraftSmartUpdateFilters] =
+    useState<SmartUpdateDialogFilters>({
+      skipCompleted: false,
+      skipUnstarted: false,
+      skipWithUnread: false,
+      skipNotDue: false,
+    });
 
   const setDefaultCategory = (categoryId: number) => {
     setLibrarySettings({
@@ -166,6 +172,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
       skipCompleted: smartUpdateSkipCompleted,
       skipUnstarted: smartUpdateSkipUnstarted,
       skipWithUnread: smartUpdateSkipWithUnread,
+      skipNotDue: smartUpdateSkipNotDue,
     });
     smartUpdateDialog.setTrue();
   };
@@ -175,6 +182,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
       smartUpdateSkipCompleted: draftSmartUpdateFilters.skipCompleted,
       smartUpdateSkipUnstarted: draftSmartUpdateFilters.skipUnstarted,
       smartUpdateSkipWithUnread: draftSmartUpdateFilters.skipWithUnread,
+      smartUpdateSkipNotDue: draftSmartUpdateFilters.skipNotDue,
     });
     smartUpdateDialog.setFalse();
   };
@@ -210,6 +218,9 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
       : null,
     smartUpdateSkipCompleted
       ? getString('generalSettingsScreen.smartUpdateSkipCompleted')
+      : null,
+    smartUpdateSkipNotDue
+      ? getString('generalSettingsScreen.smartUpdateSkipNotDue')
       : null,
   ]
     .filter(Boolean)
@@ -249,6 +260,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('library')}
         handleGoBack={navigation.goBack}
         theme={theme}
@@ -276,6 +288,16 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
             title={getString('generalSettingsScreen.novelBadges')}
             description={badgeDescription}
             onPress={novelBadgesModal.setTrue}
+            theme={theme}
+          />
+          <SettingSwitch
+            label={getString('generalSettingsScreen.showContinueReadingButton')}
+            value={showContinueReadingButton}
+            onPress={() =>
+              setLibrarySettings({
+                showContinueReadingButton: !showContinueReadingButton,
+              })
+            }
             theme={theme}
           />
           <List.Item
@@ -314,6 +336,7 @@ const SettingsLibraryScreen = ({ navigation }: LibrarySettingsScreenProps) => {
           />
           <SettingSwitch
             label={getString('generalSettingsScreen.useFAB')}
+            description={getString('generalSettingsScreen.useFABDescription')}
             value={useLibraryFAB}
             onPress={() => setAppSettings({ useLibraryFAB: !useLibraryFAB })}
             theme={theme}

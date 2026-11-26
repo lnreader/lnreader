@@ -2,120 +2,99 @@ export interface FilterOption {
   readonly label: string;
   readonly value: string;
 }
+
 export enum FilterTypes {
   TextInput = 'Text',
   Picker = 'Picker',
   CheckboxGroup = 'Checkbox',
   Switch = 'Switch',
   ExcludableCheckboxGroup = 'XCheckbox',
+  MultiText = 'MultiText',
 }
 
-type SwitchFilter = {
-  type: FilterTypes.Switch;
-  /** Default value */
-  value: boolean;
-};
+interface FilterValueMap {
+  [FilterTypes.TextInput]: string;
+  [FilterTypes.Picker]: string;
+  [FilterTypes.Switch]: boolean;
+  [FilterTypes.CheckboxGroup]: string[];
+  [FilterTypes.ExcludableCheckboxGroup]: {
+    include?: string[];
+    exclude?: string[];
+  };
+  [FilterTypes.MultiText]: string[];
+}
 
-type TextFilter = {
-  type: FilterTypes.TextInput;
-  /** Default value */
-  value: string;
-};
+type WithOptions =
+  | FilterTypes.Picker
+  | FilterTypes.CheckboxGroup
+  | FilterTypes.ExcludableCheckboxGroup;
 
-type CheckboxFilter = {
-  type: FilterTypes.CheckboxGroup;
-  options: readonly FilterOption[];
-  /** Default value */
-  value: string[];
-};
-type PickerFilter = {
-  type: FilterTypes.Picker;
-  options: readonly FilterOption[];
-  /** Default value */
-  value: string;
-};
+type OptionsOf<T extends FilterTypes> = T extends WithOptions
+  ? { options: readonly FilterOption[] }
+  : object;
 
-type ExcludableCheckboxFilter = {
-  type: FilterTypes.ExcludableCheckboxGroup;
-  options: readonly FilterOption[];
-  value: { include?: string[]; exclude?: string[] };
-};
+type WithAutocomplete = FilterTypes.TextInput | FilterTypes.MultiText;
 
-export type Filters = Record<
-  string,
-  { label: string } & (
-    | PickerFilter
-    | CheckboxFilter
-    | TextFilter
-    | SwitchFilter
-    | ExcludableCheckboxFilter
-  )
->;
+type AutocompleteOf<T extends FilterTypes> = T extends WithAutocomplete
+  ? { autocomplete?: boolean }
+  : object;
+
+export type ValueOfFilter<T extends FilterTypes> = FilterValueMap[T];
+
+export type Filter<T extends FilterTypes = FilterTypes> = T extends FilterTypes
+  ? {
+      label: string;
+      type: T;
+      value: FilterValueMap[T];
+    } & OptionsOf<T> &
+      AutocompleteOf<T>
+  : never;
+
+export type Filters = Record<string, Filter<FilterTypes>>;
+
+export type FilterType<T extends { type: unknown }> = T extends {
+  type: infer K;
+}
+  ? K extends FilterTypes
+    ? K
+    : never
+  : never;
+
+export type FilterValueWithType<T extends FilterTypes> = {
+  type: T;
+  value: ValueOfFilter<T>;
+};
 
 export type FilterToValues<
-  T extends Record<string, { type: FilterTypes }> | undefined,
-> = T extends undefined
+  FilterObject extends Record<string, { type: FilterTypes }> | undefined,
+> = FilterObject extends undefined
   ? undefined
   : {
-      [K in keyof T]: Omit<
-        { type: NonNullable<T>[K]['type'] } & Filters[string],
-        'label' | 'options'
+      [K in keyof FilterObject]: FilterValueWithType<
+        FilterType<NonNullable<FilterObject>[K]>
       >;
     };
 
-export type ValueOfFilter<T extends FilterTypes> =
-  T extends FilterTypes.CheckboxGroup
-    ? CheckboxFilter['value']
-    : T extends FilterTypes.Picker
-    ? PickerFilter['value']
-    : T extends FilterTypes.Switch
-    ? SwitchFilter['value']
-    : T extends FilterTypes.TextInput
-    ? TextFilter['value']
-    : T extends FilterTypes.ExcludableCheckboxGroup
-    ? ExcludableCheckboxFilter['value']
-    : never;
+export type AnyFilterValue = ValueOfFilter<FilterTypes>;
 
-export const isPickerValue = (
-  q: FilterToValues<Filters>[string],
-): q is FilterToValues<{
-  [key: string]: { label: string } & PickerFilter;
-}>[string] => {
-  return q.type === FilterTypes.Picker && typeof q.value === 'string';
+type FilterValueCheckMap = {
+  [K in FilterTypes]: (v: unknown) => v is ValueOfFilter<K>;
 };
 
-export const isCheckboxValue = (
-  q: FilterToValues<Filters>[string],
-): q is FilterToValues<{
-  [key: string]: { label: string } & CheckboxFilter;
-}>[string] => {
-  return q.type === FilterTypes.CheckboxGroup && Array.isArray(q.value);
+const valueCheck: FilterValueCheckMap = {
+  [FilterTypes.TextInput]: (v): v is string => typeof v === 'string',
+  [FilterTypes.Picker]: (v): v is string => typeof v === 'string',
+  [FilterTypes.Switch]: (v): v is boolean => typeof v === 'boolean',
+  [FilterTypes.CheckboxGroup]: (v): v is string[] => Array.isArray(v),
+  [FilterTypes.ExcludableCheckboxGroup]: (
+    v,
+  ): v is { include?: string[]; exclude?: string[] } =>
+    !!v && typeof v === 'object' && !Array.isArray(v),
+  [FilterTypes.MultiText]: (v): v is string[] => Array.isArray(v),
 };
 
-export const isSwitchValue = (
+export const isFilterValue = <T extends FilterTypes>(
   q: FilterToValues<Filters>[string],
-): q is FilterToValues<{
-  [key: string]: { label: string } & SwitchFilter;
-}>[string] => {
-  return q.type === FilterTypes.Switch && typeof q.value === 'boolean';
-};
-
-export const isTextValue = (
-  q: FilterToValues<Filters>[string],
-): q is FilterToValues<{
-  [key: string]: { label: string } & TextFilter;
-}>[string] => {
-  return q.type === FilterTypes.TextInput && typeof q.value === 'string';
-};
-
-export const isXCheckboxValue = (
-  q: FilterToValues<Filters>[string],
-): q is FilterToValues<{
-  [key: string]: { label: string } & ExcludableCheckboxFilter;
-}>[string] => {
-  return (
-    q.type === FilterTypes.ExcludableCheckboxGroup &&
-    typeof q.value === 'object' &&
-    !Array.isArray(q.value)
-  );
-};
+  type: T,
+): q is FilterValueWithType<T> =>
+  q.type === type && valueCheck[type](q.value as ValueOfFilter<T>);

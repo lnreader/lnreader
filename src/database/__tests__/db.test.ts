@@ -809,6 +809,8 @@ describe('production migrations', () => {
         '20260719143427_long_moondragon',
         '20260727081855_calm_chimera',
         '20260811071655_parched_human_torch',
+        '20261122113536_ancient_darkhawk',
+        '20261122122157_open_dexter_bennett',
       ]);
     } finally {
       sqlite.close();

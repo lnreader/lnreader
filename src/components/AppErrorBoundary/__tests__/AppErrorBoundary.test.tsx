@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { fireEvent, render, screen, waitFor } from '@test-utils';
 import { ErrorFallback } from '../AppErrorBoundary';
+import { version } from '../../../../package.json';
 
 const mockShareCrashLogs = jest.fn();
 const mockRestartApplication = jest.fn();
@@ -25,8 +26,10 @@ jest.mock('@hooks/persisted', () => ({
 
 jest.mock('react-native-device-info', () => ({
   __esModule: true,
-  default: {},
+  default: { getBuildNumber: () => '42' },
 }));
+
+jest.mock('@env', () => ({ BUILD_TYPE: 'Debug', GIT_HASH: 'abc123' }));
 
 jest.mock('@screens/novel/NovelContext', () => ({
   NovelContextProvider: ({ children }: { children: ReactNode }) => children,
@@ -68,6 +71,14 @@ describe('ErrorFallback', () => {
     fireEvent.press(screen.getByText('Share crash logs'));
 
     await waitFor(() => expect(mockShareCrashLogs).toHaveBeenCalledWith(error));
+  });
+
+  it('shows version and build details on the error screen', () => {
+    render(<ErrorFallback error={new Error('boom')} resetError={jest.fn()} />);
+
+    expect(
+      screen.getByText(`Version: ${version} (42) · Debug · abc123`),
+    ).toBeTruthy();
   });
 
   it('uses the native restart flow', async () => {

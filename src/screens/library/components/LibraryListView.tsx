@@ -5,7 +5,8 @@ import { EmptyView } from '@components/index';
 import NovelList, { NovelListRenderItem } from '@components/NovelList';
 import LibraryNovelItem from './LibraryNovelItem';
 
-import { NovelInfo } from '@database/types';
+import { BUILT_IN_CATEGORY_IDS } from '@database/constants';
+import { History, NovelInfo } from '@database/types';
 
 import { getString } from '@i18n/translations';
 import { useTheme } from '@hooks/persisted';
@@ -19,6 +20,8 @@ interface Props {
   categoryId: number;
   categoryName: string;
   novels: NovelInfo[];
+  historyByNovelId: Map<number, History>;
+  showContinueReadingButton: boolean;
   navigation: LibraryScreenProps['navigation'];
   pickAndImport: () => void;
 }
@@ -29,16 +32,29 @@ export const LibraryView: React.FC<Props> = ({
   pickAndImport,
   navigation,
   novels,
+  historyByNovelId,
+  showContinueReadingButton,
 }) => {
   const theme = useTheme();
   const { selectedIdsSet, hasSelection, toggleSelection } =
     useSelectionContext();
+  const isLocalCategory = categoryId === BUILT_IN_CATEGORY_IDS.local;
 
   const onNavigate = useCallback(
     (item: NovelInfo) => {
       navigation.navigate('ReaderStack', {
         screen: 'Novel',
         params: item,
+      });
+    },
+    [navigation],
+  );
+
+  const onContinueReading = useCallback(
+    (item: NovelInfo, chapter: History) => {
+      navigation.navigate('ReaderStack', {
+        screen: 'Chapter',
+        params: { novel: item, chapter },
       });
     },
     [navigation],
@@ -54,6 +70,11 @@ export const LibraryView: React.FC<Props> = ({
     return map;
   }, [novels]);
 
+  const extraData = useMemo(
+    () => ({ selectedIdsSet, historyByNovelId }),
+    [selectedIdsSet, historyByNovelId],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: NovelInfo }) => (
       <LibraryNovelItem
@@ -63,6 +84,9 @@ export const LibraryView: React.FC<Props> = ({
         hasSelection={hasSelection}
         onSelect={toggleSelection}
         onNavigate={onNavigate}
+        onContinueReading={onContinueReading}
+        lastReadChapter={historyByNovelId.get(item.id)}
+        showContinueReadingButton={showContinueReadingButton}
         imageRequestInit={imageRequestInitMap.get(item.pluginId)}
       />
     ),
@@ -72,14 +96,14 @@ export const LibraryView: React.FC<Props> = ({
       hasSelection,
       toggleSelection,
       onNavigate,
+      onContinueReading,
+      historyByNovelId,
+      showContinueReadingButton,
       imageRequestInitMap,
     ],
   );
 
   const onRefresh = useCallback(() => {
-    if (categoryId === 2) {
-      return;
-    }
     backgroundTasks.enqueue({
       name: 'UPDATE_LIBRARY',
       data: { categoryId, categoryName },
@@ -93,7 +117,7 @@ export const LibraryView: React.FC<Props> = ({
         icon="Σ(ಠ_ಠ)"
         description={getString('libraryScreen.emptyCategory')}
         actions={[
-          categoryId !== 2
+          !isLocalCategory
             ? {
                 iconName: 'compass-outline',
                 title: getString('browse'),
@@ -107,26 +131,27 @@ export const LibraryView: React.FC<Props> = ({
         ]}
       />
     ),
-    [theme, categoryId, navigation, pickAndImport],
+    [theme, isLocalCategory, navigation, pickAndImport],
   );
 
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={false}
-        onRefresh={onRefresh}
-        colors={[theme.onPrimary]}
-        progressBackgroundColor={theme.primary}
-      />
-    ),
-    [onRefresh, theme.onPrimary, theme.primary],
+    () =>
+      isLocalCategory ? undefined : (
+        <RefreshControl
+          refreshing={false}
+          onRefresh={onRefresh}
+          colors={[theme.onPrimary]}
+          progressBackgroundColor={theme.primary}
+        />
+      ),
+    [isLocalCategory, onRefresh, theme.onPrimary, theme.primary],
   );
 
   return (
     <View style={styles.flex}>
       <NovelList
         data={novels}
-        extraData={selectedIdsSet}
+        extraData={extraData}
         renderItem={renderItem as NovelListRenderItem}
         ListEmptyComponent={listEmptyComponent}
         refreshControl={refreshControl}

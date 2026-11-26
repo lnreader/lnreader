@@ -7,7 +7,10 @@ import {
   initializeInstalledPlugins,
   installPlugin,
   INSTALLED_PLUGINS_KEY,
+  loadPlugin,
   reloadInstalledPlugins,
+  REPOSITORY_CACHE_KEY,
+  getFilterSuggestions,
 } from '../pluginManager';
 import type { PluginItem } from '../types';
 
@@ -64,14 +67,92 @@ describe('fetchPlugins', () => {
       .mocked(getEnabledRepositoriesFromDb)
       .mockResolvedValueOnce([{ id: 1, url: repositoryUrl, enabled: true }]);
     const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
       json: async () => [plugin],
     } as Response);
 
-    await expect(fetchPlugins()).resolves.toEqual([plugin]);
+    await expect(fetchPlugins()).resolves.toEqual({
+      plugins: [plugin],
+      failedRepositories: [],
+      complete: true,
+    });
 
     expect(getEnabledRepositoriesFromDb).toHaveBeenCalledTimes(1);
     expect(fetchSpy).toHaveBeenCalledWith(repositoryUrl);
+    expect(setMMKVObject).toHaveBeenCalledWith(REPOSITORY_CACHE_KEY, {
+      [repositoryUrl]: [plugin],
+    });
     fetchSpy.mockRestore();
+  });
+
+  describe('when a repository cannot be reached', () => {
+    const onlineUrl = 'https://online.example.com/plugins.min.json';
+    const offlineUrl = 'https://offline.example.com/plugins.min.json';
+    const disabledUrl = 'https://disabled.example.com/plugins.min.json';
+    const onlinePlugin = { id: 'online', name: 'Online' } as PluginItem;
+    const cachedPlugin = { id: 'cached', name: 'Cached' } as PluginItem;
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.mocked(getEnabledRepositoriesFromDb).mockResolvedValueOnce([
+        { id: 1, url: onlineUrl, enabled: true },
+        { id: 2, url: offlineUrl, enabled: true },
+      ]);
+      fetchSpy = jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(async url =>
+          url === onlineUrl
+            ? ({ ok: true, json: async () => [onlinePlugin] } as Response)
+            : Promise.reject(new TypeError('Network request failed')),
+        );
+    });
+
+    afterEach(() => {
+      fetchSpy.mockRestore();
+    });
+
+    it('falls back to its cached listing and reports it as failed', async () => {
+      jest.mocked(getMMKVObject).mockReturnValueOnce({
+        [offlineUrl]: [cachedPlugin],
+        [disabledUrl]: [{ id: 'gone' }],
+      });
+
+      const result = await fetchPlugins();
+
+      expect(result.failedRepositories).toEqual([offlineUrl]);
+      expect(result.complete).toBe(true);
+      expect(result.plugins).toEqual(
+        expect.arrayContaining([onlinePlugin, cachedPlugin]),
+      );
+      expect(setMMKVObject).toHaveBeenCalledWith(REPOSITORY_CACHE_KEY, {
+        [onlineUrl]: [onlinePlugin],
+        [offlineUrl]: [cachedPlugin],
+      });
+    });
+
+    it('reports an incomplete result when nothing is cached', async () => {
+      jest.mocked(getMMKVObject).mockReturnValueOnce(undefined);
+
+      const result = await fetchPlugins();
+
+      expect(result).toEqual({
+        plugins: [onlinePlugin],
+        failedRepositories: [offlineUrl],
+        complete: false,
+      });
+    });
+
+    it('treats an error response as a failure', async () => {
+      fetchSpy.mockImplementation(
+        async () => ({ ok: false, status: 503 } as Response),
+      );
+      jest.mocked(getMMKVObject).mockReturnValueOnce(undefined);
+
+      const result = await fetchPlugins();
+
+      expect(result.failedRepositories).toEqual([onlineUrl, offlineUrl]);
+      expect(result.plugins).toEqual([]);
+    });
   });
 });
 
@@ -181,5 +262,122 @@ describe('installPlugin', () => {
       'Directory could not be created',
     );
     expect(getPlugin('write-failure')).toBeUndefined();
+  });
+});
+
+describe('getFilterSuggestions', () => {
+  it('returns no suggestions for a plugin without the optional method', async () => {
+    jest
+      .mocked(NativeFile.readFile)
+      .mockResolvedValue(pluginCode('no-suggestions'));
+
+    await expect(
+      getFilterSuggestions('no-suggestions', 'genres', 'abc'),
+    ).resolves.toEqual([]);
+  });
+
+  it('delegates to the plugin method when present', async () => {
+    jest.mocked(NativeFile.readFile).mockResolvedValue(`exports.default = {
+      id: 'suggestions',
+      name: 'Suggestions',
+      version: '1.0.0',
+      site: 'https://example.com',
+      getFilterSuggestions: async (filterKey, query) => [
+        { label: filterKey + ':' + query, value: query },
+      ]
+    };`);
+
+    await expect(
+      getFilterSuggestions('suggestions', 'genres', 'abc'),
+    ).resolves.toEqual([{ label: 'genres:abc', value: 'abc' }]);
+  });
+});
+
+describe('@libs/pluginError bridge', () => {
+  it('exposes PluginError, createPluginError, httpError, checkResponse, assertNoChallenge, and isPluginError to plugins', async () => {
+    jest.mocked(NativeFile.readFile).mockResolvedValueOnce(`
+      const {
+        PluginError,
+        createPluginError,
+        httpError,
+        checkResponse,
+        assertNoChallenge,
+        isPluginError,
+      } = require('@libs/pluginError');
+
+      exports.default = {
+        id: 'plugin-error-bridge',
+        name: 'PluginError Bridge',
+        version: '1.0.0',
+        site: 'https://example.com',
+        popularNovels: async () => {
+          throw createPluginError(PluginError.EmptyContent, {
+            message: 'No novels found',
+          });
+        },
+        parseNovel: async mode => {
+          if (mode === 'search-404') {
+            checkResponse(
+              { ok: false, status: 404, url: 'https://example.com/s' },
+              { search: true },
+            );
+            return { name: 'empty-search', path: 's' };
+          }
+          if (mode === 'search-429') {
+            checkResponse(
+              { ok: false, status: 429, url: 'https://example.com/s' },
+              { search: true },
+            );
+          }
+          checkResponse(
+            { ok: false, status: 404, url: 'https://example.com/n' },
+            { notFoundCode: PluginError.NovelNotFound },
+          );
+        },
+        parseChapter: async mode => {
+          if (mode === '429') {
+            throw httpError(429);
+          }
+          if (mode === 'challenge') {
+            assertNoChallenge('<title>Just a moment...</title>');
+          }
+          return String(isPluginError(httpError(403)));
+        },
+      };
+    `);
+
+    const plugin = await loadPlugin('plugin-error-bridge');
+    expect(plugin).toBeDefined();
+
+    await expect(plugin!.popularNovels(1)).rejects.toMatchObject({
+      message: 'No novels found',
+      code: 'No readable content was found.',
+    });
+
+    await expect(plugin!.parseNovel('n')).rejects.toMatchObject({
+      status: 404,
+      code: 'Novel not found (404), it may have been removed from this source.',
+    });
+
+    await expect(plugin!.parseNovel('search-404')).resolves.toMatchObject({
+      name: 'empty-search',
+    });
+
+    await expect(plugin!.parseNovel('search-429')).rejects.toMatchObject({
+      status: 429,
+      code: 'Too many requests (429). Please try again later.',
+    });
+
+    await expect(plugin!.parseChapter('429')).rejects.toMatchObject({
+      status: 429,
+      code: 'Too many requests (429). Please try again later.',
+    });
+
+    await expect(plugin!.parseChapter('challenge')).rejects.toMatchObject({
+      status: 403,
+      code: 'Captcha error, please open in webview',
+    });
+
+    await expect(plugin!.parseChapter('ok')).resolves.toBe('true');
   });
 });

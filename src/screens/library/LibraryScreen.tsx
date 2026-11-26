@@ -47,7 +47,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
 import { Row } from '@components/Common';
 import { LibraryScreenProps } from '@navigators/types';
-import { NovelInfo } from '@database/types';
+import { History, NovelInfo } from '@database/types';
 import * as DocumentPicker from 'expo-document-picker';
 import { backgroundTasks } from '@services/backgroundTasks';
 import useImport from '@hooks/persisted/useImport';
@@ -91,6 +91,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     error: libraryError,
     settings: {
       showNumberOfNovels,
+      showContinueReadingButton = false,
       downloadedOnlyMode,
       incognitoMode,
       lastUsedCategoryId,
@@ -99,9 +100,15 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   } = useLibraryContext();
 
   const { importNovel } = useImport();
-  const { useLibraryFAB = false } = useAppSettings();
+  const { reduceAppAnimations = false, useLibraryFAB = false } =
+    useAppSettings();
 
   const { isLoading: isHistoryLoading, history, error } = useHistory();
+  const historyByNovelId = useMemo(() => {
+    const chapters = new Map<number, History>();
+    history.forEach(chapter => chapters.set(chapter.novelId, chapter));
+    return chapters;
+  }, [history]);
 
   const layout = useWindowDimensions();
 
@@ -282,12 +289,16 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
             novels={novels}
             pickAndImport={pickAndImport}
             navigation={navigation}
+            historyByNovelId={historyByNovelId}
+            showContinueReadingButton={showContinueReadingButton}
           />
         </>
       );
     },
     [
       library,
+      historyByNovelId,
+      showContinueReadingButton,
       navigation,
       pickAndImport,
       searchText,
@@ -419,13 +430,13 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   );
 
   const markAllRead = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersRead(id)));
+    await markAllChaptersRead(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
 
   const markAllUnread = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersUnread(id)));
+    await markAllChaptersUnread(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
@@ -507,6 +518,7 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
           />
         ) : categories.length ? (
           <TabView
+            animationEnabled={!reduceAppAnimations}
             commonOptions={{
               label: renderLabel,
             }}

@@ -3,6 +3,7 @@ package expo.modules.nativebackgroundtasks
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,10 @@ class NativeBackgroundTasksModule : Module() {
 
         AsyncFunction("getTasks") {
             runBlocking(Dispatchers.IO) {
-                dao.getAll().map(::toRecord)
+                dao.deleteOldTerminal(
+                    System.currentTimeMillis() - TERMINAL_TASK_RETENTION_MS,
+                )
+                dao.getActive().map(::toSummary)
             }
         }
 
@@ -70,11 +74,12 @@ class NativeBackgroundTasksModule : Module() {
         AsyncFunction("pause") { taskId: String ->
             runBlocking(Dispatchers.IO) {
                 requireTask(taskId)
-                dao.updateState(taskId, BackgroundTaskState.PAUSED, System.currentTimeMillis())
-                if (TaskExecutionRegistry.isActive(taskId)) {
-                    emitInterruption(taskId, "pause")
+                if (dao.markPaused(taskId, System.currentTimeMillis()) > 0) {
+                    if (TaskExecutionRegistry.isActive(taskId)) {
+                        emitInterruption(taskId, "pause")
+                    }
+                    dao.get(taskId)?.let { TaskNotificationFactory.update(appContext.reactContext!!, it) }
                 }
-                dao.get(taskId)?.let { TaskNotificationFactory.update(appContext.reactContext!!, it) }
             }
         }
 
@@ -84,8 +89,9 @@ class NativeBackgroundTasksModule : Module() {
                 if (TaskExecutionRegistry.isActive(taskId)) {
                     throw IllegalStateException("Task is still pausing; try resuming again shortly")
                 }
-                dao.updateState(taskId, BackgroundTaskState.QUEUED, System.currentTimeMillis())
-                BackgroundTaskScheduler.enqueue(appContext.reactContext!!, taskId)
+                if (dao.markQueued(taskId, System.currentTimeMillis()) > 0) {
+                    BackgroundTaskScheduler.enqueue(appContext.reactContext!!, taskId)
+                }
             }
         }
 
@@ -94,13 +100,18 @@ class NativeBackgroundTasksModule : Module() {
                 val task = requireTask(taskId)
                 val isRunning = task.state == BackgroundTaskState.RUNNING ||
                     TaskExecutionRegistry.isActive(taskId)
-                dao.updateState(taskId, BackgroundTaskState.CANCELLED, System.currentTimeMillis())
+                if (dao.markCancelled(taskId, System.currentTimeMillis()) == 0) {
+                    TaskNotificationFactory.dismiss(appContext.reactContext!!, taskId)
+                    return@runBlocking
+                }
                 if (isRunning) {
                     emitInterruption(taskId, "cancel")
                 }
                 BackgroundTaskScheduler.cancel(appContext.reactContext!!, taskId, isRunning)
-                dao.updateCheckpoint(taskId, null, System.currentTimeMillis())
                 TaskNotificationFactory.dismiss(appContext.reactContext!!, taskId)
+                if (!isRunning && task.state != BackgroundTaskState.QUEUED) {
+                    dao.deleteIfState(taskId, BackgroundTaskState.CANCELLED)
+                }
             }
         }
 
@@ -123,27 +134,29 @@ class NativeBackgroundTasksModule : Module() {
             }
         }
 
+        AsyncFunction("postWarning") Coroutine { taskId: String, title: String, message: String ->
+            val context = requireNotNull(appContext.reactContext).applicationContext
+            if (dao.getState(taskId) in BackgroundTaskState.active) {
+                TaskNotificationFactory.postWarning(context, taskId, title, message)
+                // Cancellation can dismiss the warning between the state check and posting it.
+                if (dao.getState(taskId) !in BackgroundTaskState.active) {
+                    TaskNotificationFactory.dismissWarning(context, taskId)
+                }
+            }
+        }
+
         AsyncFunction("complete") { taskId: String, completionText: String ->
             runBlocking(Dispatchers.IO) {
                 val now = System.currentTimeMillis()
                 dao.updateCheckpoint(taskId, null, now)
                 dao.updateProgress(taskId, null, completionText, now)
-                dao.finishRunning(taskId, BackgroundTaskState.SUCCEEDED, now)
                 TaskExecutionRegistry.complete(taskId, TaskExecutionResult.Success)
             }
         }
 
         AsyncFunction("fail") { taskId: String, error: String, shouldRetry: Boolean ->
             runBlocking(Dispatchers.IO) {
-                val currentState = dao.get(taskId)?.state
-                if (currentState !in listOf(BackgroundTaskState.PAUSED, BackgroundTaskState.CANCELLED)) {
-                    dao.updateProgress(taskId, null, error, System.currentTimeMillis())
-                    dao.finishRunning(
-                        taskId,
-                        if (shouldRetry) BackgroundTaskState.QUEUED else BackgroundTaskState.FAILED,
-                        System.currentTimeMillis(),
-                    )
-                }
+                dao.updateProgress(taskId, null, error, System.currentTimeMillis())
                 TaskExecutionRegistry.complete(taskId, TaskExecutionResult.Failure(error, shouldRetry))
             }
         }
@@ -179,22 +192,36 @@ class NativeBackgroundTasksModule : Module() {
     private suspend fun requireTask(taskId: String): BackgroundTaskEntity =
         dao.get(taskId) ?: throw IllegalArgumentException("Unknown background task: $taskId")
 
-    private fun toRecord(task: BackgroundTaskEntity): Map<String, Any?> = mapOf(
+    private fun toSummary(task: BackgroundTaskSummary): Map<String, Any?> = mapOf(
         "id" to task.id,
         "type" to task.type,
-        "payload" to task.payload,
         "title" to task.title,
         "description" to task.description,
         "state" to task.state,
         "progress" to task.progress,
         "progressText" to task.progressText,
-        "checkpoint" to task.checkpoint,
         "attempt" to task.attempt,
         "createdAt" to task.createdAt.toDouble(),
         "updatedAt" to task.updatedAt.toDouble(),
     )
 
+    private fun toRecord(task: BackgroundTaskEntity): Map<String, Any?> = mapOf(
+        "id" to task.id,
+        "type" to task.type,
+        "title" to task.title,
+        "description" to task.description,
+        "state" to task.state,
+        "progress" to task.progress,
+        "progressText" to task.progressText,
+        "attempt" to task.attempt,
+        "createdAt" to task.createdAt.toDouble(),
+        "updatedAt" to task.updatedAt.toDouble(),
+        "payload" to task.payload,
+        "checkpoint" to task.checkpoint,
+    )
+
     companion object {
+        private const val TERMINAL_TASK_RETENTION_MS = 24 * 60 * 60 * 1000L
         @Volatile
         private var reactContextRef: WeakReference<ReactApplicationContext>? = null
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { act, render, waitFor } from '@test-utils';
 import NativeShareReceiver from '@modules/native-share-receiver';
+import { backgroundTasks } from '@services/backgroundTasks';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
 import type { PluginItem } from '@plugins/types';
 import ShareIntentHandler, {
@@ -57,6 +58,10 @@ jest.mock('@utils/mmkv/mmkv', () => ({
   setMMKVObject: jest.fn(),
 }));
 
+jest.mock('@services/backgroundTasks', () => ({
+  backgroundTasks: { enqueue: jest.fn() },
+}));
+
 const testSource: PluginItem = {
   id: 'test-source',
   name: 'Test Source',
@@ -83,6 +88,57 @@ beforeEach(() => {
 });
 
 describe('ShareIntentHandler', () => {
+  it('stages an EPUB from the launch intent before queuing its import', async () => {
+    const source = 'content://downloads/42';
+    const file = {
+      uri: 'file:///cache/opened-epub.epub',
+      filename: 'Book.epub',
+    };
+    (NativeShareReceiver.takeOpenedEpubs as jest.Mock).mockResolvedValueOnce([
+      source,
+    ]);
+    (NativeShareReceiver.stageOpenedEpub as jest.Mock).mockResolvedValueOnce(
+      file,
+    );
+
+    render(<ShareIntentHandler />);
+
+    await waitFor(() =>
+      expect(backgroundTasks.enqueue).toHaveBeenCalledWith({
+        name: 'IMPORT_EPUB',
+        data: { files: [file] },
+      }),
+    );
+    expect(NativeShareReceiver.stageOpenedEpub).toHaveBeenCalledWith(source);
+  });
+
+  it('queues an EPUB opened while the app is running', async () => {
+    const source = 'content://downloads/43';
+    const file = {
+      uri: 'file:///cache/opened-warm.epub',
+      filename: 'Warm.epub',
+    };
+    render(<ShareIntentHandler />);
+
+    const [, listener] = (
+      NativeShareReceiver.addListener as jest.Mock
+    ).mock.calls.find(([eventName]) => eventName === 'EpubOpened')!;
+    (NativeShareReceiver.takeOpenedEpubs as jest.Mock).mockResolvedValueOnce([
+      source,
+    ]);
+    (NativeShareReceiver.stageOpenedEpub as jest.Mock).mockResolvedValueOnce(
+      file,
+    );
+
+    await act(async () => listener());
+
+    expect(backgroundTasks.enqueue).toHaveBeenCalledTimes(1);
+    expect(backgroundTasks.enqueue).toHaveBeenCalledWith({
+      name: 'IMPORT_EPUB',
+      data: { files: [file] },
+    });
+  });
+
   it('navigates to the novel on an initial share matching a plugin', async () => {
     (NativeShareReceiver.getInitialSharedText as jest.Mock).mockResolvedValue(
       NOVEL_URL,

@@ -7,7 +7,11 @@ import {
 import { StyleSheet, useWindowDimensions } from 'react-native';
 
 import { Appbar, IconButtonV2, SafeAreaView, TopTabBar } from '@components';
-import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
+import {
+  useAppSettings,
+  useChapterReaderSettings,
+  useTheme,
+} from '@hooks/persisted';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
 import SnippetEditor, { SnippetEditorHandle } from './SnippetEditor';
@@ -34,6 +38,7 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
   const isJS = route?.params?.isJS;
   const language = isJS === false ? 'css' : 'js';
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
   const { codeSnippetsCSS, codeSnippetsJS } = useChapterReaderSettings();
   const snippetName =
     snippetIndex !== undefined && snippetIndex >= 0
@@ -159,6 +164,7 @@ const CodeSnippetsScreen: React.FC<CodeSnippetsScreenProps> = ({
         />
       </Appbar>
       <TabView
+        animationEnabled={!reduceAppAnimations}
         collapsable={false}
         lazy
         navigationState={{ index, routes }}

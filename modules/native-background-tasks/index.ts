@@ -1,5 +1,6 @@
 import NativeBackgroundTasks, {
   NativeBackgroundTaskRecord,
+  NativeBackgroundTaskSummary,
 } from './src/NativeBackgroundTasksModule';
 export default NativeBackgroundTasks;
-export { NativeBackgroundTaskRecord };
+export { NativeBackgroundTaskRecord, NativeBackgroundTaskSummary };

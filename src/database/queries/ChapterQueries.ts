@@ -25,6 +25,7 @@ import { NOVEL_STORAGE } from '@utils/Storages';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
 import NativeFile from '@modules/native-file';
+import type { Transaction } from '@op-engineering/op-sqlite';
 import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
@@ -81,6 +82,53 @@ export const insertChapters = async (
       scanlator: scanlatorStr,
     };
   });
+
+  // Existing chapters only reach the Updates tab when renamed (e.g. a plugin
+  // drops its "🔒" locked marker once the chapter becomes free). Metadata
+  // changes (release time, position, page, number) never touch updatedTime.
+  let renamedPaths: string[] = [];
+  if (options?.touchUpdatedTime) {
+    const storedNames = new Map(
+      (
+        await dbManager
+          .select({ path: chapterSchema.path, name: chapterSchema.name })
+          .from(chapterSchema)
+          .where(eq(chapterSchema.novelId, novelId))
+          .all()
+      ).map(c => [c.path, c.name]),
+    );
+    renamedPaths = rows
+      .filter(
+        r => storedNames.has(r.path) && storedNames.get(r.path) !== r.name,
+      )
+      .map(r => r.path);
+  }
+
+  // Mark renames before the upsert: if the process dies in between, the next
+  // update still sees the old name and marks it again.
+  if (renamedPaths.length) {
+    await dbManager.write(async tx => {
+      for (let i = 0; i < renamedPaths.length; i += CHAPTER_ID_BATCH_SIZE) {
+        await tx
+          .update(chapterSchema)
+          .set({ updatedTime: nowSql })
+          .where(
+            and(
+              eq(chapterSchema.novelId, novelId),
+              inArray(
+                chapterSchema.path,
+                renamedPaths.slice(i, i + CHAPTER_ID_BATCH_SIZE),
+              ),
+            ),
+          )
+          .run();
+      }
+    });
+  }
+
+  // An empty incoming releaseTime keeps the stored one (best-effort dates).
+  const releaseTimeSql = sql`COALESCE(NULLIF(excluded.releaseTime, ''), ${chapterSchema.releaseTime})`;
+
   await dbManager.batch(rows, (tx, ph) =>
     tx
       .insert(chapterSchema)
@@ -97,20 +145,21 @@ export const insertChapters = async (
       })
       .onConflictDoUpdate({
         target: [chapterSchema.novelId, chapterSchema.path],
+        // updatedTime must stay out of this SET: naming it fires the per-row
+        // update_novel_stats_on_update trigger even when the value is unchanged.
         set: {
           page: sql`excluded.page`,
           position: sql`excluded.position`,
           name: sql`excluded.name`,
-          releaseTime: sql`excluded.releaseTime`,
+          releaseTime: releaseTimeSql,
           chapterNumber: sql`excluded.chapterNumber`,
           scanlator: sql`excluded.scanlator`,
-          ...(options?.touchUpdatedTime ? { updatedTime: nowSql } : {}),
         },
         where: sql`NOT (
           ${chapterSchema.page} IS excluded.page
           AND ${chapterSchema.position} IS excluded.position
           AND ${chapterSchema.name} IS excluded.name
-          AND ${chapterSchema.releaseTime} IS excluded.releaseTime
+          AND ${chapterSchema.releaseTime} IS ${releaseTimeSql}
           AND ${chapterSchema.chapterNumber} IS excluded.chapterNumber
           AND ${chapterSchema.scanlator} IS excluded.scanlator
         )`,
@@ -171,23 +220,78 @@ export const markChaptersUnread = async (
   });
 };
 
-export const markAllChaptersRead = async (novelId: number): Promise<void> => {
-  await dbManager.write(async tx => {
-    await tx
-      .update(chapterSchema)
-      .set({ unread: false })
-      .where(eq(chapterSchema.novelId, novelId))
-      .run();
+/**
+ * Runs bulk chapter updates with the per-row update trigger suspended.
+ *
+ * The trigger recounts a novel's chapters once per changed row, which is
+ * quadratic for large novels; callers must fix the affected aggregates
+ * themselves. Uses `writeRaw` because Drizzle's op-sqlite transaction can
+ * commit the DROP before an async body finishes.
+ */
+export const withoutChapterUpdateTrigger = async (
+  fn: (tx: Transaction) => Promise<void>,
+): Promise<void> => {
+  try {
+    await dbManager.writeRaw(async tx => {
+      await tx.execute('DROP TRIGGER IF EXISTS update_novel_stats_on_update');
+      await fn(tx);
+      await tx.execute(createNovelTriggerQueryUpdate);
+    });
+  } catch (error) {
+    // A rollback normally restores the trigger. If the transaction was ended
+    // from outside the write queue, the DROP may already be committed.
+    await dbManager
+      .writeRaw(async tx => {
+        await tx.execute(createNovelTriggerQueryUpdate);
+      })
+      .catch(() => {});
+    throw error;
+  }
+};
+
+const toIdList = (novelIds: number | number[]) =>
+  Array.isArray(novelIds) ? novelIds : [novelIds];
+const placeholders = (ids: number[]) => ids.map(() => '?').join(', ');
+
+export const markAllChaptersRead = async (
+  novelIds: number | number[],
+): Promise<void> => {
+  const ids = toIdList(novelIds);
+  if (!ids.length) {
+    return;
+  }
+  await withoutChapterUpdateTrigger(async tx => {
+    await tx.execute(
+      `UPDATE Chapter SET unread = 0 WHERE novelId IN (${placeholders(ids)})`,
+      ids,
+    );
+    await tx.execute(
+      `UPDATE Novel SET chaptersUnread = 0 WHERE id IN (${placeholders(ids)})`,
+      ids,
+    );
   });
 };
 
-export const markAllChaptersUnread = async (novelId: number): Promise<void> => {
-  await dbManager.write(async tx => {
-    await tx
-      .update(chapterSchema)
-      .set({ unread: true })
-      .where(eq(chapterSchema.novelId, novelId))
-      .run();
+export const markAllChaptersUnread = async (
+  novelIds: number | number[],
+): Promise<void> => {
+  const ids = toIdList(novelIds);
+  if (!ids.length) {
+    return;
+  }
+  await withoutChapterUpdateTrigger(async tx => {
+    await tx.execute(
+      `UPDATE Chapter SET unread = 1, progress = 0 WHERE novelId IN (${placeholders(
+        ids,
+      )})`,
+      ids,
+    );
+    await tx.execute(
+      `UPDATE Novel
+       SET chaptersUnread = (SELECT COUNT(*) FROM Chapter WHERE Chapter.novelId = Novel.id)
+       WHERE id IN (${placeholders(ids)})`,
+      ids,
+    );
   });
 };
 
@@ -387,7 +491,7 @@ export const markPreviousChaptersUnread = async (
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: true })
+      .set({ unread: true, progress: 0 })
       .where(
         and(
           lte(chapterSchema.id, chapterId),
@@ -785,7 +889,9 @@ export const getPrevChapter = async (
     .orderBy(
       desc(castInt(chapterSchema.page)),
       desc(castInt(chapterSchema.position)),
+      desc(chapterSchema.id),
     )
+    .limit(1)
     .get();
 };
 
@@ -814,7 +920,9 @@ export const getNextChapter = async (
     .orderBy(
       asc(castInt(chapterSchema.page)),
       asc(castInt(chapterSchema.position)),
+      asc(chapterSchema.id),
     )
+    .limit(1)
     .get();
 };
 
@@ -848,6 +956,23 @@ export const getDownloadedChapters = async () =>
     .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
     .where(eq(chapterSchema.isDownloaded, true))
     .all();
+
+/** Ids of a novel's downloaded chapters; cheap enough to run after every download. */
+export const getDownloadedChapterIds = async (
+  novelId: number,
+): Promise<number[]> => {
+  const rows = await dbManager
+    .select({ id: chapterSchema.id })
+    .from(chapterSchema)
+    .where(
+      and(
+        eq(chapterSchema.novelId, novelId),
+        eq(chapterSchema.isDownloaded, true),
+      ),
+    )
+    .all();
+  return rows.map(row => row.id);
+};
 
 export const getNovelDownloadedChapters = async (
   novelId: number,
@@ -924,6 +1049,35 @@ export const getDetailedUpdatesQuery = (
     )
     .orderBy(desc(chapterSchema.updatedTime))
     .limit(limit ?? -1);
+
+export const getGroupedUpdateChaptersQuery = (
+  groups: readonly (readonly [novelId: number, updateDate: string])[],
+) => {
+  const updateDate = sql<string>`DATE(${chapterSchema.updatedTime})`;
+  return (
+    dbManager
+      .select({
+        ...getColumns(chapterSchema),
+        pluginId: novelSchema.pluginId,
+        novelName: novelSchema.name,
+        novelPath: novelSchema.path,
+        novelCover: novelSchema.cover,
+        updateDate: updateDate.as('updateDate'),
+      })
+      // Keep the requested groups outermost so SQLite can seek chapters by novel.
+      .from(sql`json_each(${JSON.stringify(groups)}) AS requested`)
+      .crossJoin(chapterSchema)
+      .innerJoin(novelSchema, eq(novelSchema.id, chapterSchema.novelId))
+      .where(
+        and(
+          isNotNull(chapterSchema.updatedTime),
+          sql`${chapterSchema.novelId} = json_extract(requested.value, '$[0]')
+        AND ${updateDate} IS json_extract(requested.value, '$[1]')`,
+        ),
+      )
+      .orderBy(desc(chapterSchema.updatedTime))
+  );
+};
 
 export const getDetailedUpdatesFromDb = (
   novelId: number,

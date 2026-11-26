@@ -55,6 +55,7 @@ export type EpubExportData = {
 export type ChapterDownload = {
   chapterId: number;
   chapterName: string;
+  novelId?: number;
 };
 
 export type BackgroundTask =
@@ -113,6 +114,7 @@ export type TaskProgressUpdater = (
 export type BackgroundTaskExecutionContext = {
   checkpoint?: string;
   updateCheckpoint: (checkpoint: string) => Promise<void>;
+  postWarning: (title: string, message: string) => Promise<void>;
 };
 
 export type BackgroundTaskEnqueuer = (

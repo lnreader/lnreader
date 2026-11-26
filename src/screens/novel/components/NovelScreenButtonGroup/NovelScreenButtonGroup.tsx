@@ -13,7 +13,13 @@ import { useTrackedNovel, useTracker } from '@hooks/persisted';
 import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { MaterialDesignIconName } from '@type/icon';
 import { useNovelAction } from '@screens/novel/NovelContext';
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
+import {
+  daysUntilNextUpdate,
+  toLocalDay,
+} from '@services/updates/releaseSchedule';
+import { setNovelFetchInterval } from '@services/updates/novelSchedule';
+import NextUpdateDialog from './NextUpdateDialog';
 
 const NButton = ({
   onPress,
@@ -75,7 +81,7 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
   const { tracker } = useTracker();
   const { trackedNovel } = useTrackedNovel(novel.id);
   const setNovel = useNovelAction('setNovel');
-  const { refetchLibrary } = useLibraryContext();
+  const { refetchLibrary } = useLibraryActions();
 
   const followButtonColor = inLibrary ? theme.primary : theme.outline;
   const trackerButtonColor = trackedNovel ? theme.primary : theme.outline;
@@ -105,6 +111,26 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
     setTrue: showSetCategoryModal,
     setFalse: closeSetCategoryModal,
   } = useBoolean();
+  const nextUpdateDialog = useBoolean();
+
+  const showNextUpdate = inLibrary && !isLocal;
+  const fetchInterval = novel.fetchInterval ?? 0;
+  const daysUntilUpdate = showNextUpdate
+    ? daysUntilNextUpdate(novel, toLocalDay(new Date()))
+    : null;
+  let nextUpdateLabel = getString('novelScreen.nextUpdate.notApplicable');
+  if (daysUntilUpdate === 0) {
+    nextUpdateLabel = getString('novelScreen.nextUpdate.soon');
+  } else if (daysUntilUpdate !== null) {
+    nextUpdateLabel = getString('time.days', { count: daysUntilUpdate });
+  }
+  const handleIntervalChange = async (days: number) => {
+    if (novel.id === 'NO_ID') return;
+    const schedule = await setNovelFetchInterval(novel.id, days);
+    if (schedule) {
+      setNovel({ ...novel, ...schedule });
+    }
+  };
 
   return (
     <>
@@ -119,7 +145,15 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           )}
           color={followButtonColor}
         />
-
+        {showNextUpdate ? (
+          <Button
+            theme={theme}
+            onPress={nextUpdateDialog.setTrue}
+            icon="timer-sand-empty"
+            label={nextUpdateLabel}
+            color={fetchInterval < 0 ? theme.primary : undefined}
+          />
+        ) : null}
         {tracker ? (
           <Button
             theme={theme}
@@ -150,6 +184,15 @@ const NovelScreenButtonGroup: React.FC<NovelScreenButtonGroupProps> = ({
           />
         ) : null}
       </View>
+      {showNextUpdate && nextUpdateDialog.value ? (
+        <NextUpdateDialog
+          visible
+          onDismiss={nextUpdateDialog.setFalse}
+          daysUntilUpdate={daysUntilUpdate}
+          fetchInterval={fetchInterval}
+          onIntervalChange={handleIntervalChange}
+        />
+      ) : null}
       {novel.id !== 'NO_ID' && setCategoryModalVisible ? (
         <SetCategoryModal
           novelIds={[novel.id]}

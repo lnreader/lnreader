@@ -56,6 +56,8 @@ export interface NovelStoreChapterActions {
   deleteChapter: (chapter: ChapterInfo) => void;
   deleteChapters: (chapterIds: number[]) => void;
   refreshChapters: () => void;
+  /** Re-reads which loaded chapters are downloaded, without reloading the list. */
+  syncDownloadedChapters: () => Promise<void>;
   increaseTimeSpent: (chapterId: number, timeSpent: number) => void;
 }
 
@@ -100,6 +102,10 @@ export interface NovelStoreDependencies {
     novelPath: string,
     pluginId: string,
   ) => Promise<boolean>;
+  /** The release schedule saved for a novel, which joining the library works out. */
+  readNovelSchedule?: (
+    novelId: number,
+  ) => Pick<NovelInfo, 'fetchInterval' | 'nextUpdate'> | undefined;
 }
 
 export type SetState = {

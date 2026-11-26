@@ -47,6 +47,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
       ]}
       onPress={onPress}
       disabled={disabled}
+      accessibilityState={{ disabled }}
     >
       <MaterialCommunityIcons
         name={icon}

@@ -14,17 +14,18 @@ export const isPluginIssueReportUrl = (url: string): boolean =>
 export const isChapterRefreshUrl = (url: string): boolean =>
   url === CHAPTER_REFRESH_URL;
 
+const htmlEntities = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+
 const escapeHtml = (value: string): string =>
   value.replace(
     /[&<>"']/g,
-    character =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      }[character] as string),
+    character => htmlEntities[character as keyof typeof htmlEntities],
   );
 
 const getPluginIssueReportUrl = (
@@ -118,7 +119,7 @@ export const sanitizeChapterText = (
       reportUrl: escapeHtml(
         getPluginIssueReportUrl(pluginId, novelName, chapterName),
       ),
-      refreshUrl: escapeHtml(CHAPTER_REFRESH_URL),
+      refreshUrl: CHAPTER_REFRESH_URL,
     })
   );
 };

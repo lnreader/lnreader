@@ -1,21 +1,15 @@
 import * as React from 'react';
-import ChapterItem from './ChapterItem';
 import NovelInfoHeader from './Info/NovelInfoHeader';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChapterInfo, NovelInfo } from '@database/types';
 import { useAppSettings, useDownload, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import {
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  RefreshControl,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import {
   runOnJS,
   SharedValue,
   useAnimatedReaction,
+  useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,7 +19,6 @@ import PageNavigationBottomSheet from './PageNavigationBottomSheet';
 import * as Haptics from 'expo-haptics';
 import { ChapterListSkeleton } from '@components/Skeleton/Skeleton';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList, LegendListRef } from '@legendapp/list/react-native';
 import PagePaginationControl from './PagePaginationControl';
 import { useNovelActions, useNovelValue } from '../NovelContext';
 import { UseBooleanReturnType } from '@hooks/index';
@@ -34,11 +27,26 @@ import { useSaveNovelCover } from '../hooks/useSaveNovelCover';
 import { NovelScreenProps } from '@navigators/types';
 import { useDownloadReconciliation } from '../hooks/useDownloadReconciliation';
 import NovelFloatingActions from './NovelFloatingActions';
+import {
+  NOVEL_APPBAR_HEIGHT,
+  NOVEL_FAB_HEIGHT,
+  NOVEL_FAB_MARGIN,
+} from '../novelLayout';
 import { getDownloadProgressKey } from '@services/backgroundTasks/taskDefinitions';
+import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import {
+  buildChapterRowFormat,
+  NativeChapterList,
+  type NativeChapterListRef,
+  useChapterBatchRequests,
+  useChapterListStore,
+} from '@components/NativeChapterList';
+import { CHAPTER_BATCH_SIZE } from '@hooks/persisted/useNovel/types';
+import { getChapter } from '@database/queries/ChapterQueries';
 
 type NovelScreenListProps = {
   headerOpacity: SharedValue<number>;
-  listRef: React.RefObject<LegendListRef | null>;
+  listRef: React.RefObject<NativeChapterListRef | null>;
   navigation: Pick<NovelScreenProps['navigation'], 'navigate'>;
   selected: number[];
   setSelected: React.Dispatch<React.SetStateAction<number[]>>;
@@ -53,7 +61,14 @@ type NovelScreenListProps = {
   updating: boolean;
 };
 
-const chapterKeyExtractor = (item: ChapterInfo) => 'c' + item.id;
+const NO_CHAPTERS: ChapterInfo[] = [];
+const NO_IDS = new Set<number>();
+
+// The app bar fades in over the first 200dp of scroll; past that, JS only
+// needs to know when the offset crosses the scroll-to-top threshold, so the
+// native list stops sending scroll events in between.
+const HEADER_FADE_START = 50;
+const HEADER_FADE_END = 200;
 
 const NovelScreenList = ({
   headerOpacity,
@@ -79,9 +94,9 @@ const NovelScreenList = ({
   const {
     deleteChapter,
     setNovel,
-    getNextChapterBatch,
-    getChapters,
+    syncDownloadedChapters,
     openPage,
+    loadUpToBatch,
   } = useNovelActions();
 
   const routeNovel: Omit<NovelInfo, 'id'> & { id: 'NO_ID' } = {
@@ -95,6 +110,7 @@ const NovelScreenList = ({
   const {
     useFabForContinueReading,
     disableHapticFeedback,
+    reduceAppAnimations = false,
     dateFormat = 'default',
     relativeTimestamps = true,
   } = useAppSettings();
@@ -104,34 +120,39 @@ const NovelScreenList = ({
   const theme = useTheme();
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  const {
-    downloadQueue,
-    downloadingChapterIds,
-    downloadingNovelIds,
-    downloadChapter,
-  } = useDownload();
+  const { downloadingChapterIds, downloadingNovelIds, downloadChapter } =
+    useDownload();
 
   // Reconcile as chapters complete and once more when the queue settles so
   // downloaded state remains accurate after success, failure, or cancellation.
+  // Only the downloaded flags change; reloading the list here would drop it
+  // back to the first batch after every chapter.
   const isNovelDownloading =
     novel.id !== 'NO_ID' && downloadingNovelIds.has(novel.id);
-  const novelDownloadProgressKey = useMemo(
-    () =>
-      novel.id === 'NO_ID'
-        ? ''
-        : getDownloadProgressKey(downloadQueue, novel.id),
-    [downloadQueue, novel.id],
+  const novelId = novel.id;
+  const novelDownloadProgressKey = useBackgroundTasks(tasks =>
+    novelId === 'NO_ID' ? '' : getDownloadProgressKey(tasks, novelId),
   );
   useDownloadReconciliation(
     isNovelDownloading,
     novelDownloadProgressKey,
-    getChapters,
+    syncDownloadedChapters,
   );
 
   const [isFabExtended, setIsFabExtended] = useState(true);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  // Written on the UI thread by the native list's scroll events.
   const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: event => {
+      scrollOffset.set(event.contentOffset.y);
+    },
+  });
   const { height: screenHeight } = useWindowDimensions();
+  const scrollEventThresholds = useMemo(
+    () => [screenHeight / 2],
+    [screenHeight],
+  );
 
   const novelBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const trackerSheetRef = useRef<BottomSheetModalMethods>(null);
@@ -149,7 +170,13 @@ const NovelScreenList = ({
     () => scrollOffset.value,
     (currentOffset, previousOffset) => {
       headerOpacity.set(
-        currentOffset < 50 ? 0 : Math.min((currentOffset - 50) / 150, 1),
+        currentOffset < HEADER_FADE_START
+          ? 0
+          : Math.min(
+              (currentOffset - HEADER_FADE_START) /
+                (HEADER_FADE_END - HEADER_FADE_START),
+              1,
+            ),
       );
 
       if (previousOffset === null) {
@@ -171,11 +198,50 @@ const NovelScreenList = ({
     [headerOpacity, lastRead, screenHeight, useFabForContinueReading],
   );
 
-  const scrollHandler = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffset.value = event.nativeEvent.contentOffset.y;
-    },
-    [scrollOffset],
+  // --- Native list data ---
+
+  const hasNovel = novel.id !== 'NO_ID';
+  const listChapters = hasNovel ? chapters : NO_CHAPTERS;
+  const totalChapters = hasNovel
+    ? Math.max(batchInformation.totalChapters ?? 0, chapters.length)
+    : 0;
+
+  // Page, sort, filter and scanlator changes replace the chapter list.
+  const chapterSetKey = useMemo(
+    () => JSON.stringify([novel.id, pageIndex, novelSettings]),
+    [novel.id, pageIndex, novelSettings],
+  );
+
+  const requestUpTo = useChapterBatchRequests({
+    chapterSetKey,
+    fetching,
+    loadedBatch: batchInformation.batch,
+    loadUpToBatch,
+  });
+
+  const rowFormat = useMemo(
+    () =>
+      buildChapterRowFormat({
+        showChapterTitles,
+        dateFormat,
+        relativeTimestamps,
+      }),
+    [showChapterTitles, dateFormat, relativeTimestamps],
+  );
+
+  const storeId = useChapterListStore({
+    chapters: listChapters,
+    totalChapters,
+    dataKey: chapterSetKey,
+    selectedIds,
+    downloadingIds: hasNovel ? downloadingChapterIds : NO_IDS,
+    onStaleRows: (_start, end) => requestUpTo(end - 1),
+  });
+
+  // Unloaded rows ask for their range; loading a batch loads all before it.
+  const onRequestRange = useCallback(
+    (_start: number, end: number) => requestUpTo(end),
+    [requestUpTo],
   );
 
   // --- Stable callbacks ---
@@ -257,22 +323,35 @@ const NovelScreenList = ({
     [novel, downloadChapter],
   );
 
-  const refreshControlElement = useMemo(
-    () => (
-      <RefreshControl
-        progressViewOffset={topInset + 32}
-        onRefresh={onRefresh}
-        refreshing={updating}
-        colors={[theme.primary]}
-        progressBackgroundColor={theme.onPrimary}
-      />
-    ),
-    [onRefresh, updating, topInset, theme.primary, theme.onPrimary],
+  // Native rows carry their position, and loaded chapters are the start of
+  // the list, so a row is almost always chapters[position]. Rows native kept
+  // from before a reload may not be loaded in JS yet; read those from the DB.
+  const withChapter = useCallback(
+    (handler: (chapter: ChapterInfo) => void) =>
+      (id: number, position: number) => {
+        const chapter =
+          chapters[position]?.id === id
+            ? chapters[position]
+            : chapters.find(item => item.id === id);
+        if (chapter) {
+          handler(chapter);
+          return;
+        }
+        void getChapter(id).then(row => {
+          if (row) {
+            handler(row as ChapterInfo);
+          }
+        });
+      },
+    [chapters],
   );
 
   const scrollToTop = useCallback(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [listRef]);
+    listRef.current?.scrollToOffset({
+      offset: 0,
+      animated: !reduceAppAnimations,
+    });
+  }, [listRef, reduceAppAnimations]);
 
   const setCustomNovelCover = useCustomNovelCover(
     novel.id === 'NO_ID' ? undefined : novel,
@@ -318,10 +397,11 @@ const NovelScreenList = ({
     );
   }, [hasMultiplePages, pages, pageIndex, openPage, openPageNavDrawer, theme]);
 
-  const listEmptyComponent = useMemo(
-    () => (fetching ? <ChapterListSkeleton /> : null),
-    [fetching],
-  );
+  const showSkeleton = fetching && listChapters.length === 0;
+  const showContinue =
+    hasNovel &&
+    useFabForContinueReading &&
+    Boolean(lastRead || firstUnreadChapter);
 
   const listHeader = useMemo(
     () => (
@@ -344,6 +424,7 @@ const NovelScreenList = ({
           trackerSheetRef={trackerSheetRef}
         />
         {paginationControl}
+        {showSkeleton ? <ChapterListSkeleton /> : null}
       </>
     ),
     [
@@ -361,6 +442,7 @@ const NovelScreenList = ({
       theme,
       batchInformation.totalChapters,
       paginationControl,
+      showSkeleton,
     ],
   );
 
@@ -372,73 +454,35 @@ const NovelScreenList = ({
     [lastRead],
   );
 
-  const renderChapter = useCallback(
-    ({ item }: { item: ChapterInfo }) => {
-      if (novel.id === 'NO_ID') {
-        return null;
-      }
-      return (
-        <ChapterItem
-          chapter={item}
-          isDownloading={downloadingChapterIds.has(item.id)}
-          isBookmarked={!!item.bookmark}
-          isLocal={novel.isLocal ?? false}
-          theme={theme}
-          showChapterTitles={showChapterTitles}
-          isSelected={selectedIds.has(item.id)}
-          novelName={novel.name}
-          onDeleteChapter={handleDeleteChapter}
-          onDownloadChapter={handleDownloadChapter}
-          onSelectPress={onSelectPress}
-          onSelectLongPress={onSelectLongPress}
-          dateFormat={dateFormat}
-          relativeTimestamps={relativeTimestamps}
-        />
-      );
-    },
-    [
-      downloadingChapterIds,
-      handleDeleteChapter,
-      handleDownloadChapter,
-      novel,
-      onSelectLongPress,
-      onSelectPress,
-      selectedIds,
-      showChapterTitles,
-      theme,
-      dateFormat,
-      relativeTimestamps,
-    ],
-  );
-  const listExtraData = useMemo(
-    () => ({ downloadingChapterIds, selectedIds }),
-    [downloadingChapterIds, selectedIds],
-  );
-  const contentContainerStyle = useMemo(
-    () => ({ paddingBottom: 100 + bottomInset }),
-    [bottomInset],
-  );
-
   return (
     <>
-      <LegendList
+      <NativeChapterList
         ref={listRef}
-        estimatedItemSize={64}
-        data={chapters}
-        recycleItems
-        ListEmptyComponent={listEmptyComponent}
-        renderItem={renderChapter}
-        keyExtractor={chapterKeyExtractor}
-        extraData={listExtraData}
-        contentContainerStyle={contentContainerStyle}
-        refreshControl={refreshControlElement}
-        onEndReached={getNextChapterBatch}
-        onEndReachedThreshold={6}
+        storeId={storeId}
+        theme={theme}
+        rowFormat={rowFormat}
+        header={listHeader}
+        isLocal={novel.isLocal ?? false}
+        refreshing={updating}
+        refreshOffset={topInset + 32}
+        contentPaddingBottom={100 + bottomInset}
+        fastScrollEnabled={listChapters.length > 0}
+        fastScrollTopInset={topInset + NOVEL_APPBAR_HEIGHT}
+        fastScrollBottomInset={
+          bottomInset + NOVEL_FAB_MARGIN + (showContinue ? NOVEL_FAB_HEIGHT : 0)
+        }
+        batchSize={CHAPTER_BATCH_SIZE}
+        scrollEventMaxOffset={HEADER_FADE_END}
+        scrollEventThresholds={scrollEventThresholds}
         onScroll={scrollHandler}
-        //drawDistance={1000}
-        ListHeaderComponent={listHeader}
+        onRefresh={onRefresh}
+        onChapterPress={withChapter(onSelectPress)}
+        onChapterLongPress={withChapter(onSelectLongPress)}
+        onDownloadPress={withChapter(handleDownloadChapter)}
+        onDeletePress={withChapter(handleDeleteChapter)}
+        onRequestRange={onRequestRange}
       />
-      {novel.id !== 'NO_ID' ? (
+      {hasNovel ? (
         <>
           <NovelBottomSheet
             bottomSheetRef={novelBottomSheetRef}
@@ -461,10 +505,7 @@ const NovelScreenList = ({
             loading={loading}
             onContinue={onFabPress}
             onScrollToTop={scrollToTop}
-            showContinue={
-              useFabForContinueReading &&
-              Boolean(lastRead || firstUnreadChapter)
-            }
+            showContinue={showContinue}
             showScrollToTop={showScrollToTop}
             theme={theme}
           />

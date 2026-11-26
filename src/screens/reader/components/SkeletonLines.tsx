@@ -1,128 +1,110 @@
-import { memo, useMemo } from 'react';
+import { memo, useState } from 'react';
 import {
-  DimensionValue,
   StyleSheet,
   useWindowDimensions,
   View,
+  type LayoutChangeEvent,
 } from 'react-native';
-import { useAppSettings } from '@hooks/persisted/index';
-import ShimmerPlaceholder from '@components/Skeleton/ShimmerPlaceholder';
+import { MaskedView } from '@expo/ui/community/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { css, useReducedMotion } from 'react-native-reanimated';
+import { useAppSettings } from '@hooks/persisted';
 
-interface Props {
-  color?: string;
-  containerHeight: DimensionValue;
-  containerMargin?: DimensionValue;
-  containerWidth: DimensionValue;
-  highlightColor?: string;
+type Props = {
+  color: string;
+  highlightColor: string;
   lineHeight: number;
-  /**
-   * How many lines actually shimmer. Every shimmering line costs a gradient
-   * view plus an animation, and this placeholder is shown while the app is busy
-   * loading, so the lines below the fold are rendered as plain bars.
-   */
-  maxAnimatedLines?: number;
   textSize: number;
-  width?: DimensionValue;
-}
-
-const resolveDimension = (value: DimensionValue, available: number): number => {
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  const parsed = Number.parseFloat(String(value));
-  if (!Number.isFinite(parsed)) {
-    return available;
-  }
-  return String(value).endsWith('%') ? available * (parsed / 100) : parsed;
 };
 
+const sweep = css.keyframes({
+  from: { transform: [{ translateX: '-100%' }] },
+  to: { transform: [{ translateX: '100%' }] },
+});
+
 const SkeletonLines = ({
-  width,
+  color,
+  highlightColor,
   lineHeight,
   textSize,
-  containerWidth,
-  containerHeight,
-  containerMargin = 0,
-  color = '#ebebeb',
-  highlightColor = '#c5c5c5',
-  maxAnimatedLines = 12,
 }: Props) => {
   const { disableLoadingAnimations } = useAppSettings();
+  const reducedMotion = useReducedMotion();
   const window = useWindowDimensions();
-
-  const resolvedWidth = width
-    ? resolveDimension(width, window.width)
-    : window.width * 0.9;
-  const resolvedHeight = resolveDimension(containerHeight, window.height);
+  const [height, setHeight] = useState<number>();
   const rowHeight = Math.max(textSize, textSize * lineHeight);
-  const lineCount = Math.max(1, Math.floor((resolvedHeight - 10) / rowHeight));
-  const lines = useMemo(() => Array.from({ length: lineCount }), [lineCount]);
-  const styles = useMemo(
-    () =>
-      createStyleSheet(
-        containerWidth,
-        containerHeight,
-        containerMargin,
-        rowHeight - textSize,
-      ),
-    [containerHeight, containerMargin, containerWidth, rowHeight, textSize],
+  const lineCount = Math.max(
+    1,
+    Math.floor((height ?? window.height) / rowHeight),
   );
 
-  return (
+  const rows = (
     <View style={styles.container}>
-      {lines.map((_, index) => {
-        const lineWidth =
-          index % 5 === 4 ? resolvedWidth * 0.68 : resolvedWidth;
+      {Array.from({ length: lineCount }, (_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.line,
+            {
+              backgroundColor: color,
+              height: textSize,
+              marginBottom: rowHeight - textSize,
+              width: index % 5 === 4 ? '61.2%' : '90%',
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
 
-        if (disableLoadingAnimations || index >= maxAnimatedLines) {
-          return (
-            <View
-              key={`reader-line-skeleton-${index}`}
-              style={[
-                styles.line,
-                {
-                  backgroundColor: color,
-                  height: textSize,
-                  width: lineWidth,
-                },
-              ]}
-            />
-          );
-        }
+  const handleLayout = ({ nativeEvent }: LayoutChangeEvent) => {
+    setHeight(nativeEvent.layout.height);
+  };
 
-        return (
-          <ShimmerPlaceholder
-            key={`reader-line-skeleton-${index}`}
-            style={styles.line}
-            shimmerColors={[color, highlightColor, color]}
-            width={lineWidth}
-            height={textSize}
-          />
-        );
-      })}
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      onLayout={handleLayout}
+      style={styles.container}
+    >
+      {disableLoadingAnimations || reducedMotion ? (
+        rows
+      ) : (
+        <MaskedView style={styles.container} maskElement={rows}>
+          <View style={[styles.container, { backgroundColor: color }]}>
+            <Animated.View style={styles.sweep}>
+              <LinearGradient
+                colors={[color, highlightColor, color]}
+                locations={[0.25, 0.5, 0.75]}
+                start={[0, 0.5]}
+                end={[1, 0.5]}
+                style={StyleSheet.absoluteFill}
+              />
+            </Animated.View>
+          </View>
+        </MaskedView>
+      )}
     </View>
   );
 };
 
-const createStyleSheet = (
-  containerWidth: DimensionValue,
-  containerHeight: DimensionValue,
-  containerMargin: DimensionValue,
-  lineSpacing: number,
-) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: 'transparent',
-      height: containerHeight,
-      margin: containerMargin,
-      position: 'relative',
-      width: containerWidth,
-    },
-    line: {
-      borderRadius: 8,
-      marginBottom: Math.max(0, lineSpacing),
-    },
-  });
+const styles = css.create({
+  container: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  line: {
+    borderRadius: 8,
+    flexShrink: 0,
+  },
+  sweep: {
+    ...StyleSheet.absoluteFill,
+    animationName: sweep,
+    animationDuration: 1800,
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear',
+  },
+});
 
 export default memo(SkeletonLines);

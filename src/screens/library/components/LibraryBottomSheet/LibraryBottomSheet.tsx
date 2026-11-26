@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
 
-import { useLibrarySettings, useTheme } from '@hooks/persisted';
+import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import {
@@ -44,7 +44,7 @@ const FirstRoute = () => {
     <View style={styles.flex}>
       <LegendList
         recycleItems
-        estimatedItemSize={4}
+        estimatedItemSize={48}
         extraData={[filter]}
         data={libraryFilterList}
         keyExtractor={item => `filter_${item.filter}`}
@@ -79,7 +79,7 @@ const SecondRoute = () => {
         recycleItems
         data={librarySortOrderList}
         extraData={[sortOrder]}
-        estimatedItemSize={5}
+        estimatedItemSize={52}
         keyExtractor={(item, index) => `sort_${index}_${item.ASC}`}
         renderItem={({ item }) => (
           <SortItem
@@ -110,6 +110,7 @@ const ThirdRoute = () => {
     showDownloadBadges = true,
     showNumberOfNovels = false,
     showUnreadBadges = true,
+    showContinueReadingButton = false,
     displayMode = DisplayModes.Comfortable,
     setLibrarySettings,
   } = useLibrarySettings();
@@ -117,7 +118,7 @@ const ThirdRoute = () => {
   return (
     <View style={styles.flex}>
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
-        {getString('libraryScreen.bottomSheet.display.badges')}
+        {getString('libraryScreen.bottomSheet.display.overlays')}
       </Text>
       <Checkbox
         label={getString('libraryScreen.bottomSheet.display.downloadBadges')}
@@ -149,12 +150,24 @@ const ThirdRoute = () => {
         }
         theme={theme}
       />
+      <Checkbox
+        label={getString(
+          'libraryScreen.bottomSheet.display.continueReadingButton',
+        )}
+        status={showContinueReadingButton}
+        onPress={() =>
+          setLibrarySettings({
+            showContinueReadingButton: !showContinueReadingButton,
+          })
+        }
+        theme={theme}
+      />
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
         {getString('libraryScreen.bottomSheet.display.displayMode')}
       </Text>
       <LegendList
         recycleItems
-        estimatedItemSize={4}
+        estimatedItemSize={48}
         data={displayModesList}
         extraData={[displayMode]}
         keyExtractor={item => `display_mode_${item.value}`}
@@ -182,6 +195,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   style,
 }) => {
   const theme = useTheme();
+  const { reduceAppAnimations = false } = useAppSettings();
 
   const layout = useWindowDimensions();
 
@@ -244,6 +258,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
     <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
       <BottomSheetView style={styles.bottomSheetCtn}>
         <TabView
+          animationEnabled={!reduceAppAnimations}
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
           renderTabBar={renderTabBar}

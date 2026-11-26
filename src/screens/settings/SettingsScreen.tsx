@@ -12,6 +12,7 @@ const SettingsScreen = ({ navigation }: SettingsScreenProps) => {
   return (
     <SafeAreaView excludeTop>
       <Appbar
+        mode="small"
         title={getString('common.settings')}
         handleGoBack={navigation.goBack}
         theme={theme}

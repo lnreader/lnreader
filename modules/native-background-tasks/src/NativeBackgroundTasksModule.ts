@@ -1,21 +1,27 @@
 import { requireNativeModule } from 'expo-modules-core';
 
-export type NativeBackgroundTaskRecord = {
+export type NativeBackgroundTaskSummary = {
   id: string;
   type: string;
-  payload: string;
   title: string;
   description?: string;
   state: string;
   progress?: number;
   progressText?: string;
-  checkpoint?: string;
   attempt: number;
   createdAt: number;
   updatedAt: number;
 };
 
+export type NativeBackgroundTaskRecord = NativeBackgroundTaskSummary & {
+  payload: string;
+  checkpoint?: string;
+};
+
 type NativeBackgroundTasksModule = {
+  getTasks(): Promise<NativeBackgroundTaskSummary[]>;
+  getTask(taskId: string): Promise<NativeBackgroundTaskRecord | null>;
+
   enqueue(
     type: string,
     payload: string,
@@ -24,8 +30,6 @@ type NativeBackgroundTasksModule = {
     allowsDuplicates: boolean,
     queueName: string,
   ): Promise<string>;
-  getTasks(): Promise<NativeBackgroundTaskRecord[]>;
-  getTask(taskId: string): Promise<NativeBackgroundTaskRecord | null>;
   pause(taskId: string): Promise<void>;
   resume(taskId: string): Promise<void>;
   cancel(taskId: string): Promise<void>;
@@ -35,6 +39,7 @@ type NativeBackgroundTasksModule = {
     progressText: string,
   ): Promise<void>;
   updateCheckpoint(taskId: string, checkpoint: string): Promise<void>;
+  postWarning(taskId: string, title: string, message: string): Promise<void>;
   complete(taskId: string, completionText: string): Promise<void>;
   fail(taskId: string, error: string, shouldRetry: boolean): Promise<void>;
   scheduleLibraryUpdates(

@@ -301,6 +301,35 @@ describe('bootstrapService', () => {
     );
   });
 
+  it('preserves a single named custom page', async () => {
+    setupDbFirstSuccess();
+    mockGetCustomPages.mockReturnValue([{ page: 'Chapters' }] as ReturnType<
+      typeof getCustomPages
+    >);
+
+    const service = createBootstrapService();
+
+    const result = await service.bootstrapNovelAsync({
+      novel: mockNovel,
+      novelPath: NOVEL_PATH,
+      pluginId: PLUGIN_ID,
+      pageIndex: 0,
+      settingsSort,
+      settingsFilter,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.pages).toEqual(['Chapters']);
+    expect(mockGetChapterCount).toHaveBeenCalledWith(
+      mockNovel.id,
+      'Chapters',
+      settingsFilter,
+      undefined,
+    );
+  });
+
   it('clamps a persisted page index to the available pages', async () => {
     setupDbFirstSuccess();
     mockGetCustomPages.mockReturnValue([

@@ -99,7 +99,10 @@ const PluginDetailsScreen = ({
             )}`}
             accessible
             source={{ uri: plugin.iconUrl }}
-            style={[styles.heroIcon, { backgroundColor: theme.surfaceVariant }]}
+            style={[
+              styles.heroIcon,
+              { backgroundColor: theme.surfaceContainerHigh ?? theme.surface },
+            ]}
           />
           <Text style={[styles.pluginName, { color: theme.onSurface }]}>
             {plugin.name}

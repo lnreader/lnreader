@@ -3,7 +3,7 @@ import { useBoolean } from '@hooks/index';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { TextInput as RNTextInput, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type TextInputInstance } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 import { RemoveItem, ReplaceItem } from '../Components/ListItems';
 
@@ -24,8 +24,8 @@ const ReplaceItemModal = ({ showReplace = false }: ReplaceItemModalProps) => {
     [replaceText],
   );
 
-  const textRef = useRef<RNTextInput>(null);
-  const replaceTextRef = useRef<RNTextInput>(null);
+  const textRef = useRef<TextInputInstance>(null);
+  const replaceTextRef = useRef<TextInputInstance>(null);
 
   const [text, setText] = React.useState('');
   const [replacementText, setReplacementText] = React.useState('');

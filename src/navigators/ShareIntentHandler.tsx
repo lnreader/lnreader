@@ -3,7 +3,10 @@ import { createNavigationContainerRef } from '@react-navigation/native';
 import { useEventListener } from 'expo';
 
 import NativeShareReceiver from '@modules/native-share-receiver';
+import { getString } from '@i18n/translations';
+import { backgroundTasks } from '@services/backgroundTasks';
 import { resolveSharedUrl } from '@services/share/resolveSharedUrl';
+import { showToast } from '@utils/showToast';
 import { RootStackParamList } from './types';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -77,6 +80,41 @@ const ShareIntentHandler = () => {
       handleSharedText(text);
     }
   });
+
+  useEffect(() => {
+    if (!NativeShareReceiver.takeOpenedEpubs) {
+      return;
+    }
+
+    const reportFailure = (error: unknown) =>
+      showToast(
+        getString('advancedSettingsScreen.importFailed'),
+        error instanceof Error ? error.message : String(error),
+      );
+    const enqueueOpenedEpubs = async () => {
+      const uris = await NativeShareReceiver.takeOpenedEpubs?.();
+      for (const uri of uris ?? []) {
+        try {
+          const file = await NativeShareReceiver.stageOpenedEpub(uri);
+          backgroundTasks.enqueue({
+            name: 'IMPORT_EPUB',
+            data: { files: [file] },
+          });
+        } catch (error) {
+          reportFailure(error);
+        }
+      }
+    };
+    const receiveOpenedEpubs = () => {
+      void enqueueOpenedEpubs().catch(reportFailure);
+    };
+    const subscription = NativeShareReceiver.addListener(
+      'EpubOpened',
+      receiveOpenedEpubs,
+    );
+    receiveOpenedEpubs();
+    return () => subscription.remove();
+  }, []);
 
   return null;
 };

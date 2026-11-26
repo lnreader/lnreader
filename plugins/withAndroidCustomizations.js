@@ -5,6 +5,7 @@ const {
   withAndroidStyles,
   withAppBuildGradle,
   withDangerousMod,
+  withMainActivity,
 } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
@@ -37,7 +38,6 @@ const DRAWABLE_RESOURCE_NAMES = [
   'splash_icon',
   'splashscreen_logo',
 ];
-const ANDROID_DENSITIES = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
 
 /**
  * `AppTheme` inherits `android:windowBackground` from
@@ -82,6 +82,80 @@ const withWindowBackgroundStyle = config =>
         value: `@color/${WINDOW_BACKGROUND_RESOURCE}`,
       },
     );
+
+    return config;
+  });
+
+/**
+ * Bar icon styles that match the backgrounds above: dark icons over the light
+ * window, light icons over the dark one. Without this the bars keep one fixed
+ * style from launch until JS applies the app theme, which leaves them
+ * low-contrast over whichever background does not match.
+ */
+const LIGHT_SYSTEM_BARS_RESOURCE = 'lnreaderLightSystemBars';
+const SYSTEM_BAR_ATTRIBUTES = [
+  'android:windowLightStatusBar',
+  'android:windowLightNavigationBar',
+];
+
+const boolResourceFile = value => `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <bool name="${LIGHT_SYSTEM_BARS_RESOURCE}">${value}</bool>
+</resources>
+`;
+
+const withLightSystemBarsResources = config =>
+  withDangerousMod(config, [
+    'android',
+    config => {
+      const resDir = path.join(
+        config.modRequest.platformProjectRoot,
+        'app',
+        'src',
+        'main',
+        'res',
+      );
+
+      for (const [dir, value] of [
+        ['values', true],
+        ['values-night', false],
+      ]) {
+        fs.mkdirSync(path.join(resDir, dir), { recursive: true });
+        fs.writeFileSync(
+          path.join(resDir, dir, 'lnreader_system_bars.xml'),
+          boolResourceFile(value),
+        );
+      }
+
+      return config;
+    },
+  ]);
+
+/**
+ * Every variant's splash background is dark, so its bar icons are always light.
+ */
+const SPLASH_THEME_GROUP = {
+  name: 'Theme.App.SplashScreen',
+  parent: 'Theme.SplashScreen',
+};
+
+const withSystemBarStyles = config =>
+  withAndroidStyles(config, config => {
+    for (const name of SYSTEM_BAR_ATTRIBUTES) {
+      config.modResults = AndroidConfig.Styles.assignStylesValue(
+        config.modResults,
+        {
+          add: true,
+          parent: AndroidConfig.Styles.getAppThemeGroup(),
+          name,
+          value: `@bool/${LIGHT_SYSTEM_BARS_RESOURCE}`,
+        },
+      );
+      config.modResults = AndroidConfig.Styles.assignStylesValue(
+        config.modResults,
+        { add: true, parent: SPLASH_THEME_GROUP, name, value: 'false' },
+      );
+    }
 
     return config;
   });
@@ -133,21 +207,23 @@ const removeGeneratedIconResources = resDir => {
   }
 };
 
-const installVariantSplashIcons = resDir => {
-  for (const density of ANDROID_DENSITIES) {
-    const drawableDir = path.join(resDir, `drawable-${density}`);
-    const sourcePath = path.join(drawableDir, 'splash_icon.png');
-    const splashPath = path.join(drawableDir, 'splashscreen_logo.png');
-    const nightDrawableDir = path.join(resDir, `drawable-night-${density}`);
-    const nightSplashPath = path.join(
-      nightDrawableDir,
-      'splashscreen_logo.png',
-    );
+/**
+ * Each variant ships its splash icon as a vector so it stays sharp at any
+ * density. It replaces the PNGs expo-splash-screen generates (removed above),
+ * and is copied to `drawable-night` so the main source set's night resource
+ * cannot outrank a variant's unqualified one.
+ */
+const installVariantSplashIcon = resDir => {
+  const drawableDir = path.join(resDir, 'drawable');
+  const splashPath = path.join(drawableDir, 'splashscreen_logo.xml');
+  const nightDrawableDir = path.join(resDir, 'drawable-night');
 
-    fs.renameSync(sourcePath, splashPath);
-    fs.mkdirSync(nightDrawableDir, { recursive: true });
-    fs.copyFileSync(splashPath, nightSplashPath);
-  }
+  fs.renameSync(path.join(drawableDir, 'splash_icon.xml'), splashPath);
+  fs.mkdirSync(nightDrawableDir, { recursive: true });
+  fs.copyFileSync(
+    splashPath,
+    path.join(nightDrawableDir, 'splashscreen_logo.xml'),
+  );
 };
 
 const withAndroidVariantAssets = config =>
@@ -175,16 +251,61 @@ const withAndroidVariantAssets = config =>
         removeGeneratedIconResources(targetResDir);
         fs.mkdirSync(targetResDir, { recursive: true });
         fs.cpSync(sourceResDir, targetResDir, { recursive: true });
-        installVariantSplashIcons(targetResDir);
+        installVariantSplashIcon(targetResDir);
       }
 
       return config;
     },
   ]);
 
+/**
+ * Android's "Bold text" accessibility setting (`fontWeightAdjustment`) makes
+ * TextView draw glyphs heavier and wider, but React Native measures text
+ * without it. Text then overflows its measured box and the last letter or word
+ * is clipped everywhere. Drop the adjustment so drawing matches measurement.
+ */
+const FONT_WEIGHT_MARKER =
+  '// @generated by with-android-customizations: font weight';
+
+const FONT_WEIGHT_OVERRIDE = `  ${FONT_WEIGHT_MARKER}
+  override fun attachBaseContext(newBase: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      val config = Configuration(newBase.resources.configuration)
+      config.fontWeightAdjustment = 0
+      super.attachBaseContext(newBase.createConfigurationContext(config))
+    } else {
+      super.attachBaseContext(newBase)
+    }
+  }
+
+`;
+
+const withFontWeightAdjustmentDisabled = config =>
+  withMainActivity(config, config => {
+    let { contents } = config.modResults;
+
+    if (!contents.includes(FONT_WEIGHT_MARKER)) {
+      contents = contents
+        .replace(
+          'import android.os.Bundle',
+          'import android.content.Context\nimport android.content.res.Configuration\nimport android.os.Bundle',
+        )
+        .replace(
+          /(class MainActivity : ReactActivity\(\) \{\r?\n)/,
+          `$1${FONT_WEIGHT_OVERRIDE}`,
+        );
+      config.modResults.contents = contents;
+    }
+
+    return config;
+  });
+
 module.exports = config => {
   config = withBuildGradleCustomizations(config);
+  config = withFontWeightAdjustmentDisabled(config);
   config = withWindowBackgroundColors(config);
   config = withWindowBackgroundStyle(config);
+  config = withLightSystemBarsResources(config);
+  config = withSystemBarStyles(config);
   return withAndroidVariantAssets(config);
 };

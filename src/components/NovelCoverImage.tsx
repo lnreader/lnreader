@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import { Image, type ImageContentFit, type ImageProps } from 'expo-image';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import Color from 'color';
 
 import { defaultCover } from '@plugins/helpers/constants';
 import type { ImageRequestInit } from '@plugins/types';
 import type { ThemeColors } from '@theme/types';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 
 interface NovelCoverImageProps
   extends Pick<
@@ -40,6 +42,49 @@ export const isMissingNovelCover = (uri?: string | null) => {
   return !normalizedUri || normalizedUri === defaultCover;
 };
 
+const minTileContrast = 1.35;
+const minIconContrast = 4.5;
+
+type PlaceholderColors = { backgroundColor: string; iconColor: string };
+
+const placeholderColorsByTheme = new WeakMap<ThemeColors, PlaceholderColors>();
+
+const getPlaceholderColors = (theme: ThemeColors): PlaceholderColors => {
+  const cached = placeholderColorsByTheme.get(theme);
+  if (cached) return cached;
+
+  const background = Color(theme.background ?? theme.surfaceVariant);
+  const themeIcon = Color(theme.onSurfaceVariant);
+  const black = Color('#000');
+  const white = Color('#FFF');
+  const contrastingColor =
+    background.contrast(black) > background.contrast(white) ? black : white;
+  const fillTint =
+    background.contrast(themeIcon) >= minTileContrast
+      ? themeIcon
+      : contrastingColor;
+
+  // Use the smallest color shift that still separates the tile from the library.
+  let fill = background;
+  for (
+    let step = 1;
+    step <= 20 && background.contrast(fill) < minTileContrast;
+    step++
+  ) {
+    fill = Color(background.mix(fillTint, step / 20).hex());
+  }
+
+  const icon =
+    fill.contrast(themeIcon) >= minIconContrast
+      ? themeIcon
+      : fill.contrast(black) > fill.contrast(white)
+      ? black
+      : white;
+  const colors = { backgroundColor: fill.hex(), iconColor: icon.hex() };
+  placeholderColorsByTheme.set(theme, colors);
+  return colors;
+};
+
 const NovelCoverImage = ({
   iconSize = 32,
   onError,
@@ -57,6 +102,7 @@ const NovelCoverImage = ({
   testID,
   transition = 150,
 }: NovelCoverImageProps) => {
+  const { reduceAppAnimations = false } = useAppSettings();
   const normalizedUri = uri?.trim();
   const [failedUri, setFailedUri] = useState<string>();
   const showPlaceholder =
@@ -66,28 +112,29 @@ const NovelCoverImage = ({
     Boolean(requestInit?.method && requestInit.method.toUpperCase() !== 'GET');
 
   if (showPlaceholder) {
+    const { backgroundColor, iconColor } = getPlaceholderColors(theme);
     return (
       <View
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="image"
         accessible={accessible}
         onLayout={onLayout}
-        style={[
-          styles.placeholder,
-          { backgroundColor: theme.surfaceVariant },
-          style,
-        ]}
+        style={[styles.placeholder, { backgroundColor }, style]}
         testID={testID}
       >
         <MaterialCommunityIcons
-          color={theme.onSurfaceVariant}
+          color={iconColor}
           name="book-open-page-variant-outline"
           size={iconSize}
-          style={styles.icon}
         />
       </View>
     );
   }
+
+  const imageStyle = [
+    { backgroundColor: theme.surfaceContainerHigh ?? theme.surface },
+    style,
+  ];
 
   if (requiresReactNativeImage) {
     const source: ImageURISource = {
@@ -108,7 +155,7 @@ const NovelCoverImage = ({
         }}
         resizeMode={toReactNativeResizeMode(contentFit)}
         source={source}
-        style={[{ backgroundColor: theme.surfaceVariant }, style]}
+        style={imageStyle}
         testID={testID}
       />
     );
@@ -128,9 +175,9 @@ const NovelCoverImage = ({
       priority={priority}
       recyclingKey={recyclingKey ?? normalizedUri}
       source={{ headers: requestInit?.headers, uri: normalizedUri }}
-      style={[{ backgroundColor: theme.surfaceVariant }, style]}
+      style={imageStyle}
       testID={testID}
-      transition={transition}
+      transition={reduceAppAnimations ? 0 : transition}
     />
   );
 };
@@ -147,9 +194,6 @@ const toReactNativeResizeMode = (
     : contentFit;
 
 const styles = StyleSheet.create({
-  icon: {
-    opacity: 0.45,
-  },
   placeholder: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -271,10 +271,15 @@ export const createNovelStoreActions = ({
         if (!inner.novel) {
           return {};
         }
+        const inLibrary = !inner.novel.inLibrary;
+        const schedule = inLibrary
+          ? deps.readNovelSchedule?.(inner.novel.id)
+          : undefined;
         return {
           novel: {
             ...inner.novel,
-            inLibrary: !inner.novel.inLibrary,
+            ...schedule,
+            inLibrary,
           },
         };
       });

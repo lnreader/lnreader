@@ -30,6 +30,7 @@ export type RootStackParamList = {
     pluginId: string;
     isNovel?: boolean;
   };
+  Upcoming: undefined;
 };
 
 export type BottomNavigatorParamList = {
@@ -163,6 +164,10 @@ export type SourceNovelsScreenProps = NativeStackScreenProps<
 export type WebviewScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'WebviewScreen'
+>;
+export type UpcomingScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'Upcoming'
 >;
 export type SettingsScreenProps = CompositeScreenProps<
   NativeStackScreenProps<SettingsStackParamList, 'Settings'>,

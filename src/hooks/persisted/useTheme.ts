@@ -133,7 +133,7 @@ function transformThemeId(themeId: number, isDark: boolean): number {
 const getBaseTheme = (
   themeMode: string,
   themeId: number | undefined,
-  systemColorScheme: ColorSchemeName,
+  systemColorScheme: ColorSchemeName | null,
   dynamicTheme: Material3Theme,
 ): ThemeColors => {
   const isDark =
@@ -160,15 +160,14 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const [isAmoledBlack = false] = useMMKVBoolean('AMOLED_BLACK');
   const [customAccent] = useMMKVString('CUSTOM_ACCENT_COLOR');
 
-  const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(
-    Appearance.getColorScheme() ?? 'unspecified',
-  );
+  const [systemColorScheme, setSystemColorScheme] =
+    useState<ColorSchemeName | null>(Appearance.getColorScheme() ?? null);
   const [dynamicTheme, setDynamicTheme] = useState(getSystemDynamicTheme);
 
   useEffect(() => {
     const appearanceSubscription = Appearance.addChangeListener(
       ({ colorScheme }) => {
-        setSystemColorScheme(colorScheme);
+        setSystemColorScheme(colorScheme ?? null);
       },
     );
     const appStateSubscription = AppState.addEventListener('change', state => {

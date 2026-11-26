@@ -36,3 +36,8 @@ export const LibraryContextProvider = ({
 };
 
 export const useLibraryContext = jest.fn(() => defaultLibraryContext);
+export const useLibraryActions = jest.fn(() => ({
+  refetchLibrary: defaultLibraryContext.refetchLibrary,
+  refreshCategories: defaultLibraryContext.refreshCategories,
+  switchNovelToLibrary: defaultLibraryContext.switchNovelToLibrary,
+}));

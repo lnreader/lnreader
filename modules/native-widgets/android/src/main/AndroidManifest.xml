@@ -1,0 +1,89 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <application>
+    <receiver
+      android:name="expo.modules.nativewidgets.ContinueReadingWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_continue_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_continue_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.ContinueReadingMediumWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_continue_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_continue_medium_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.ContinueReadingLargeWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_continue_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_continue_large_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.NewChaptersWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_updates_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_updates_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.NewChaptersLargeWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_updates_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_updates_large_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.ReadingStatsWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_stats_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_stats_info" />
+    </receiver>
+
+    <receiver
+      android:name="expo.modules.nativewidgets.QuickActionsWidgetReceiver"
+      android:exported="false"
+      android:label="@string/lnr_widget_actions_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/lnr_widget_actions_info" />
+    </receiver>
+
+  </application>
+</manifest>

@@ -4,8 +4,11 @@ import {
 } from '@database/queries/LibraryQueries';
 import type { BackgroundTaskMetadata } from '@services/backgroundTasks/contracts';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
+import { reportLibraryUpdateProgress, syncWidgets } from '@services/widgets';
 import { updateNovel } from '../LibraryUpdateQueries';
 import { updateLibrary } from '../index';
+import { showToast } from '@utils/showToast';
+import { startOfLocalDay, toLocalDay } from '../releaseSchedule';
 
 jest.mock('@database/queries/LibraryQueries', () => ({
   getLibraryNovelsForGlobalUpdate: jest.fn(),
@@ -23,6 +26,10 @@ jest.mock('@utils/showToast', () => ({
 jest.mock('@utils/mmkv/mmkv', () => ({
   MMKVStorage: { set: jest.fn() },
   getMMKVObject: jest.fn(() => ({})),
+}));
+jest.mock('@services/widgets', () => ({
+  reportLibraryUpdateProgress: jest.fn(),
+  syncWidgets: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('@hooks/persisted/useUpdates', () => ({
   LAST_UPDATE_TIME: 'LAST_UPDATE_TIME',
@@ -133,6 +140,23 @@ describe('updateLibrary', () => {
     expect(mockedGetLibraryNovels).not.toHaveBeenCalled();
   });
 
+  it('reports progress to the home screen widgets and syncs them when done', async () => {
+    mockedGetLibraryNovels.mockResolvedValue([
+      novel(1, 'source-a', 'A One'),
+      novel(2, 'source-b', 'B One'),
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    const progress = jest.mocked(reportLibraryUpdateProgress).mock.calls;
+    expect(progress[0]).toEqual([true]);
+    expect(progress).toContainEqual([true, 0, 2]);
+    expect(progress).toContainEqual([true, 2, 2]);
+    expect(progress[progress.length - 1]).toEqual([false]);
+    expect(syncWidgets).toHaveBeenCalledTimes(1);
+  });
+
   it('passes smart update preferences to the global update query', async () => {
     mockedGetMMKVObject.mockReturnValue({
       smartUpdateSkipCompleted: true,
@@ -154,5 +178,168 @@ describe('updateLibrary', () => {
         skipWithUnread: true,
       },
     );
+  });
+
+  it('skips novels not expected to release by tomorrow and reports how many', async () => {
+    const today = toLocalDay(new Date());
+    const dueOn = (days: number) => startOfLocalDay(today + days).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryNovels.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Overdue'), nextUpdate: dueOn(-3) },
+      { ...novel(2, 'source-a', 'Tomorrow'), nextUpdate: dueOn(1) },
+      { ...novel(3, 'source-b', 'Next week'), nextUpdate: dueOn(7) },
+      { ...novel(4, 'source-c', 'Unpredicted'), nextUpdate: null },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({}, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel.mock.calls.map(([, , id]) => id).sort()).toEqual([
+      1, 2, 4,
+    ]);
+    expect(showToast).toHaveBeenCalledWith(
+      '1 novel skipped because no release was expected today',
+    );
+  });
+
+  it('checks every novel in a category update even when prediction is on', async () => {
+    const farAway = startOfLocalDay(toLocalDay(new Date()) + 20).toISOString();
+    mockedGetMMKVObject.mockReturnValue({ smartUpdateSkipNotDue: true });
+    mockedGetLibraryWithCategory.mockResolvedValue([
+      { ...novel(1, 'source-a', 'Later'), nextUpdate: farAway },
+    ]);
+    mockedUpdateNovel.mockResolvedValue(undefined);
+
+    await updateLibrary({ categoryId: 2 }, jest.fn(), jest.fn());
+
+    expect(mockedUpdateNovel).toHaveBeenCalledTimes(1);
+  });
+
+  it('chunks each download task immediately without changing its identity', async () => {
+    mockedGetMMKVObject.mockReturnValue({ downloadNewChapters: true });
+    const novelId = 7;
+    const chapters = Array.from({ length: 101 }, (_, index) => ({
+      chapterId: index + 1,
+      chapterName: `Chapter ${index + 1}`,
+      ...(index === 0 ? {} : { novelId }),
+    }));
+    const downloadTask = {
+      name: 'DOWNLOAD_CHAPTER' as const,
+      data: {
+        novelName: 'Example Novel',
+        novelId,
+        pluginId: 'source-a',
+        chapters,
+      },
+    };
+    const secondDownloadTask = {
+      name: 'DOWNLOAD_CHAPTER' as const,
+      data: {
+        novelName: 'Second Novel',
+        novelId: 8,
+        pluginId: 'source-a',
+        chapters: [
+          {
+            chapterId: 102,
+            chapterName: 'Chapter 102',
+            novelId: 8,
+          },
+        ],
+      },
+    };
+    const otherTask = {
+      name: 'UPDATE_LIBRARY' as const,
+      data: { categoryId: 4 },
+    };
+    mockedGetLibraryNovels.mockResolvedValue([
+      novel(1, 'source-a', 'Example Novel'),
+    ]);
+
+    let resolveUpdate!: () => void;
+    mockedUpdateNovel.mockImplementation(
+      async (_pluginId, _path, _novelId, options) => {
+        options.enqueue?.([downloadTask, secondDownloadTask, otherTask]);
+        await new Promise<void>(resolve => {
+          resolveUpdate = resolve;
+        });
+      },
+    );
+    const enqueue = jest.fn();
+
+    const updatePromise = updateLibrary({}, jest.fn(), enqueue);
+    await flushPromises();
+
+    expect(enqueue).toHaveBeenCalledTimes(4);
+    const enqueuedTasks = enqueue.mock.calls.map(([task]) => task);
+    const normalizedChapters = chapters.map(chapter => ({
+      ...chapter,
+      novelId,
+    }));
+    expect(enqueuedTasks[0]).toEqual({
+      ...downloadTask,
+      data: {
+        ...downloadTask.data,
+        chapters: normalizedChapters.slice(0, 100),
+      },
+    });
+    expect(enqueuedTasks[1]).toEqual({
+      ...downloadTask,
+      data: {
+        ...downloadTask.data,
+        chapters: normalizedChapters.slice(100),
+      },
+    });
+    expect(enqueuedTasks[2]).toEqual(secondDownloadTask);
+    expect(enqueuedTasks[3]).toBe(otherTask);
+
+    resolveUpdate();
+    await updatePromise;
+  });
+
+  it('waits for every source worker before finalizing after an interruption', async () => {
+    mockedGetLibraryNovels.mockResolvedValue([
+      novel(1, 'source-a', 'A One'),
+      novel(2, 'source-b', 'B One'),
+    ]);
+    let resolveSecondSource!: () => void;
+    const secondSource = new Promise<void>(resolve => {
+      resolveSecondSource = resolve;
+    });
+    mockedUpdateNovel.mockImplementation((_pluginId, _path, novelId) =>
+      novelId === 2 ? secondSource : Promise.resolve(),
+    );
+
+    let metadata: BackgroundTaskMetadata = {
+      name: 'Update library',
+      isRunning: false,
+      progress: undefined,
+      progressText: undefined,
+    };
+    let shouldInterrupt = true;
+    const setMeta = (
+      transform: (meta: BackgroundTaskMetadata) => BackgroundTaskMetadata,
+    ) => {
+      const nextMetadata = transform(metadata);
+      if (shouldInterrupt && nextMetadata.progressText === 'A One') {
+        shouldInterrupt = false;
+        throw new Error('interrupted');
+      }
+      metadata = nextMetadata;
+    };
+
+    const updatePromise = updateLibrary({}, setMeta, jest.fn());
+    await flushPromises();
+
+    expect(metadata).toMatchObject({
+      isRunning: true,
+      progress: 0,
+    });
+    resolveSecondSource();
+    await expect(updatePromise).rejects.toThrow('interrupted');
+    expect(metadata).toMatchObject({
+      isRunning: false,
+      progress: 1,
+      progressText: undefined,
+    });
   });
 });

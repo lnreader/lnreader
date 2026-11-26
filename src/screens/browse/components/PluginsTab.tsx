@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -7,13 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
-  LegendList,
-  LegendListRenderItemProps,
-} from '@legendapp/list/react-native';
+import type { LegendListRenderItemProps } from '@legendapp/list/react-native';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { Button, EmptyView, IconButtonV2 } from '@components';
+import { FastScrollbar, useFastScrollMetrics } from '@components/FastScrollbar';
 import {
+  useFailedRepositoryCount,
   useFilteredAvailablePlugins,
   useInstalledPlugins,
   usePluginActions,
@@ -29,6 +30,7 @@ import {
   PluginEntry,
   PluginStatus,
 } from '../utils/buildBrowseEntries';
+import PluginsSkeletonLoading from '../loadingAnimation/PluginsSkeletonLoading';
 
 interface PluginsTabProps {
   navigation: BrowseScreenProps['navigation'];
@@ -81,7 +83,10 @@ const PluginRow = memo(
         <View pointerEvents="none" style={styles.pluginMainContent}>
           <Image
             source={{ uri: plugin.iconUrl }}
-            style={[styles.icon, { backgroundColor: theme.surfaceVariant }]}
+            style={[
+              styles.icon,
+              { backgroundColor: theme.surfaceContainerHigh ?? theme.surface },
+            ]}
           />
           <View style={styles.details}>
             <Text
@@ -146,11 +151,12 @@ const PluginRow = memo(
   },
 );
 
-export const PluginsTab = memo(
+const PluginsTabContent = memo(
   ({ navigation, searchText, theme }: PluginsTabProps) => {
     const installedPlugins = useInstalledPlugins();
     const availablePlugins = useFilteredAvailablePlugins();
     const { installPlugin, refreshPlugins, updatePlugin } = usePluginActions();
+    const failedRepositoryCount = useFailedRepositoryCount();
     const [refreshing, setRefreshing] = useState(false);
     const [pendingPluginIds, setPendingPluginIds] = useState<Set<string>>(
       () => new Set(),
@@ -308,10 +314,15 @@ export const PluginsTab = memo(
       ],
     );
 
+    const fastScrollMetrics = useFastScrollMetrics();
+
     const refresh = useCallback(async () => {
       setRefreshing(true);
       try {
-        await refreshPlugins();
+        const { failedRepositoryCount: failedCount } = await refreshPlugins();
+        if (failedCount) {
+          showToast(getString('browseScreen.repositoriesUnreachable'));
+        }
       } catch (error) {
         showToast(error instanceof Error ? error.message : String(error));
       } finally {
@@ -320,53 +331,100 @@ export const PluginsTab = memo(
     }, [refreshPlugins]);
 
     return (
-      <LegendList
-        data={entries}
-        estimatedItemSize={64}
-        getItemType={item => item.type}
-        keyExtractor={item => item.key}
-        ListEmptyComponent={
-          <EmptyView
-            description={
-              searchText.trim()
-                ? getString('browseScreen.noSearchResults')
-                : getString('browseScreen.noPlugins')
-            }
-            actions={
-              searchText.trim()
-                ? undefined
-                : [
-                    {
-                      iconName: 'source-repository',
-                      onPress: openRepositories,
-                      title: getString('browseScreen.repositories'),
-                    },
-                    {
-                      iconName: 'tune',
-                      onPress: openBrowseSettings,
-                      title: getString('browseSettings'),
-                    },
-                  ]
-            }
-            theme={theme}
-          />
-        }
-        contentContainerStyle={!entries.length ? styles.emptyList : undefined}
-        recycleItems
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[theme.onPrimary]}
-            progressBackgroundColor={theme.primary}
-          />
-        }
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.listContainer}>
+        {failedRepositoryCount > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            disabled={refreshing}
+            onPress={refresh}
+            style={[
+              styles.repositoryNotice,
+              { backgroundColor: theme.surfaceVariant },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="cloud-off-outline"
+              size={18}
+              color={theme.onSurfaceVariant}
+            />
+            <Text
+              style={[
+                styles.repositoryNoticeText,
+                { color: theme.onSurfaceVariant },
+              ]}
+            >
+              {getString('browseScreen.repositoriesUnreachableCached')}
+            </Text>
+          </Pressable>
+        ) : null}
+        <AnimatedLegendList
+          data={entries}
+          estimatedItemSize={64}
+          getItemType={item => item.type}
+          keyExtractor={item => item.key}
+          ListEmptyComponent={
+            <EmptyView
+              description={
+                searchText.trim()
+                  ? getString('browseScreen.noSearchResults')
+                  : getString('browseScreen.noPlugins')
+              }
+              actions={
+                searchText.trim()
+                  ? undefined
+                  : [
+                      {
+                        iconName: 'source-repository',
+                        onPress: openRepositories,
+                        title: getString('browseScreen.repositories'),
+                      },
+                      {
+                        iconName: 'tune',
+                        onPress: openBrowseSettings,
+                        title: getString('browseSettings'),
+                      },
+                    ]
+              }
+              theme={theme}
+            />
+          }
+          contentContainerStyle={!entries.length ? styles.emptyList : undefined}
+          recycleItems
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={[theme.onPrimary]}
+              progressBackgroundColor={theme.primary}
+            />
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          {...fastScrollMetrics.listProps}
+        />
+        <FastScrollbar metrics={fastScrollMetrics} itemCount={entries.length} />
+      </View>
     );
   },
 );
+
+// The tab view mounts this scene synchronously on the tab press, so building
+// the plugin list would freeze the screen before anything is painted. Paint a
+// skeleton first and mount the list on the next frame.
+export const PluginsTab = memo((props: PluginsTabProps) => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return ready ? (
+    <PluginsTabContent {...props} />
+  ) : (
+    <PluginsSkeletonLoading theme={props.theme} />
+  );
+});
 
 const styles = StyleSheet.create({
   description: {
@@ -375,6 +433,21 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flexGrow: 1,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  repositoryNotice: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  repositoryNoticeText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
   },
   details: {
     flex: 1,

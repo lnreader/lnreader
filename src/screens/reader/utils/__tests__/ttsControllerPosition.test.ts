@@ -227,6 +227,7 @@ describe('floating TTS button position in the reader page', () => {
       previousParagraphIcon: '<svg></svg>',
       resumeIcon: '<svg></svg>',
       nextParagraphIcon: '<svg></svg>',
+      sleepTimerIcon: '<svg></svg>',
     };
 
     const source = readFileSync(

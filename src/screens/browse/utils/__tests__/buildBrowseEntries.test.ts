@@ -96,6 +96,33 @@ describe('buildPluginEntries', () => {
     ]);
   });
 
+  it('sorts available plugins by language then name without mutating input', () => {
+    const availablePlugins = [
+      plugin('zulu', 'Zulu'),
+      plugin('spanish', 'Alpha', 'Spanish'),
+      plugin('bravo', 'Bravo'),
+    ];
+
+    const entries = buildPluginEntries({
+      availablePlugins,
+      installedPlugins: [],
+      searchText: '',
+    });
+
+    expect(entries.map(entry => entry.key)).toEqual([
+      'available-language-English',
+      'available-bravo',
+      'available-zulu',
+      'available-language-Spanish',
+      'available-spanish',
+    ]);
+    expect(availablePlugins.map(item => item.id)).toEqual([
+      'zulu',
+      'spanish',
+      'bravo',
+    ]);
+  });
+
   it('returns no entries when a search has no matches', () => {
     expect(
       buildPluginEntries({

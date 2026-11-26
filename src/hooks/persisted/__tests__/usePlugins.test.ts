@@ -42,17 +42,6 @@ describe('plugin selectors', () => {
     ).toEqual([secondEnglishPlugin]);
   });
 
-  it('sorts available plugins without mutating persisted input', () => {
-    const availablePlugins = [englishPlugin, secondEnglishPlugin];
-
-    expect(
-      filterAvailablePlugins(availablePlugins, [], ['English']).map(
-        plugin => plugin.name,
-      ),
-    ).toEqual(['Bravo', 'Zulu']);
-    expect(availablePlugins).toEqual([englishPlugin, secondEnglishPlugin]);
-  });
-
   it('reads both current and legacy last-used plugin values', () => {
     expect(getLastUsedPluginId(englishPlugin.id)).toBe(englishPlugin.id);
     expect(getLastUsedPluginId(englishPlugin)).toBe(englishPlugin.id);

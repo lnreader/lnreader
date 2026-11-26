@@ -39,23 +39,9 @@ object TaskNotificationFactory {
 
     fun build(context: Context, task: BackgroundTaskEntity): Notification {
         ensureChannel(context)
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val contentIntent = launchIntent?.let {
-            PendingIntent.getActivity(
-                context,
-                notificationId(task.id),
-                it,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        }
 
         val toggleAction = if (task.state == BackgroundTaskState.PAUSED) ACTION_RESUME else ACTION_PAUSE
         val toggleLabel = if (task.state == BackgroundTaskState.PAUSED) "Resume" else "Pause"
-
-        val notificationIconId = context.resources.getIdentifier(
-            "notification_icon", "drawable", context.packageName
-        )
-        val icon = if (notificationIconId != 0) notificationIconId else android.R.drawable.ic_dialog_info
 
         val progressLines = task.progressText
             ?.lineSequence()
@@ -65,10 +51,10 @@ object TaskNotificationFactory {
         val contentText = progressLines.firstOrNull() ?: task.description
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(icon)
+            .setSmallIcon(notificationIcon(context))
             .setContentTitle(task.title)
             .setContentText(contentText)
-            .setContentIntent(contentIntent)
+            .setContentIntent(launchIntent(context, task.id))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(
                 if (task.state in listOf(BackgroundTaskState.SUCCEEDED, BackgroundTaskState.FAILED)) {
@@ -126,15 +112,58 @@ object TaskNotificationFactory {
 
     fun postTerminal(context: Context, task: BackgroundTaskEntity) {
         require(task.state in listOf(BackgroundTaskState.SUCCEEDED, BackgroundTaskState.FAILED))
+        dismissWarning(context, task.id)
         context.getSystemService(NotificationManager::class.java)
             .notify(terminalNotificationId(task.id), build(context, task))
     }
 
+    fun postWarning(context: Context, taskId: String, title: String, message: String) {
+        ensureChannel(context)
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(notificationIcon(context))
+            .setContentTitle(title)
+            .setContentText(message)
+            .setContentIntent(launchIntent(context, taskId))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .build()
+        context.getSystemService(NotificationManager::class.java)
+            .notify(warningTag(taskId), notificationId(taskId), notification)
+    }
+
+    fun dismissWarning(context: Context, taskId: String) {
+        context.getSystemService(NotificationManager::class.java)
+            .cancel(warningTag(taskId), notificationId(taskId))
+    }
+
     fun dismiss(context: Context, taskId: String) {
+        dismissWarning(context, taskId)
         context.getSystemService(NotificationManager::class.java).apply {
             cancel(notificationId(taskId))
             cancel(terminalNotificationId(taskId))
         }
+    }
+
+    private fun warningTag(taskId: String) = "background-task-warning:$taskId"
+
+    private fun notificationIcon(context: Context): Int {
+        val icon = context.resources.getIdentifier(
+            "notification_icon", "drawable", context.packageName
+        )
+        return if (icon != 0) icon else android.R.drawable.ic_dialog_info
+    }
+
+    private fun launchIntent(context: Context, taskId: String): PendingIntent? {
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: return null
+        return PendingIntent.getActivity(
+            context,
+            notificationId(taskId),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     private fun actionIntent(

@@ -31,6 +31,7 @@ const BrowseSettings = ({ navigation }: BrowseSettingsScreenProp) => {
   return (
     <>
       <Appbar
+        mode="small"
         title={getString('browseSettings')}
         handleGoBack={goBack}
         theme={theme}

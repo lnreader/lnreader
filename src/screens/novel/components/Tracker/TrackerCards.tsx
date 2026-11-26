@@ -17,7 +17,7 @@ export const AddTrackingCard: React.FC<AddTrackingCardProps> = ({
 
   return (
     <View style={styles.addCardContainer}>
-      <Image source={icon} style={styles.trackerIcon} />
+      <Image source={icon} style={styles.trackerIcon} fadeDuration={0} />
       <View style={styles.addCardPressableContainer}>
         <Pressable
           style={styles.rippleContainer}
@@ -84,7 +84,7 @@ export const TrackedItemCard: React.FC<TrackedItemCardProps> = ({
   return (
     <View style={[{ backgroundColor: theme.surface }, styles.cardContainer]}>
       <View style={[styles.titleContainer, { borderBottomColor: borderColor }]}>
-        <Image source={icon} style={styles.trackerIcon} />
+        <Image source={icon} style={styles.trackerIcon} fadeDuration={0} />
         <View style={styles.listItemContainer}>
           <Text
             style={[{ color: theme.onSurfaceVariant }, styles.listItem]}

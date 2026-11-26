@@ -9,7 +9,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useStore } from 'zustand';
 import { ReaderStackParamList } from '@navigators/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLibraryContext } from '@components/Context/LibraryContext';
+import { useLibraryActions } from '@components/Context/LibraryContext';
 import { useAppSettings } from '@hooks/persisted';
 import {
   NovelStoreActions,
@@ -55,7 +55,7 @@ export function NovelContextProvider({ children, route }: Props) {
   // after a plugin open).
   const { path = '', pluginId = '' } = params.novel ?? params;
 
-  const { switchNovelToLibrary } = useLibraryContext();
+  const { switchNovelToLibrary } = useLibraryActions();
   const { defaultChapterSort } = useAppSettings();
 
   const novelStore = useMemo(

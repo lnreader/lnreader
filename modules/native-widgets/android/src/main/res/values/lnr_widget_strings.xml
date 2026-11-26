@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lnr_widget_continue_label">Continue Reading</string>
+    <string name="lnr_widget_continue_description">Resume the novel you were reading with one tap</string>
+    <string name="lnr_widget_continue_list_description">Your last few novels in progress</string>
+    <string name="lnr_widget_updates_label">New Chapters</string>
+    <string name="lnr_widget_updates_description">Unread chapters found by the last library update</string>
+    <string name="lnr_widget_stats_label">Reading Stats</string>
+    <string name="lnr_widget_stats_description">Chapters read this week and your reading streak</string>
+    <string name="lnr_widget_actions_label">Quick Actions</string>
+    <string name="lnr_widget_actions_description">Search, random novel, downloads and library update</string>
+</resources>

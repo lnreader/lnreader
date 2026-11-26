@@ -17,26 +17,34 @@ class TaskActionReceiver : BroadcastReceiver() {
                 val task = dao.get(taskId) ?: return@launch
                 when (intent.action) {
                     TaskNotificationFactory.ACTION_PAUSE -> {
-                        dao.updateState(taskId, BackgroundTaskState.PAUSED, System.currentTimeMillis())
-                        if (TaskExecutionRegistry.isActive(taskId)) {
-                            NativeBackgroundTasksModule.emitInterruption(taskId, "pause")
+                        if (dao.markPaused(taskId, System.currentTimeMillis()) > 0) {
+                            if (TaskExecutionRegistry.isActive(taskId)) {
+                                NativeBackgroundTasksModule.emitInterruption(taskId, "pause")
+                            }
+                            dao.get(taskId)?.let { TaskNotificationFactory.update(context, it) }
                         }
-                        dao.get(taskId)?.let { TaskNotificationFactory.update(context, it) }
                     }
                     TaskNotificationFactory.ACTION_RESUME -> {
                         if (TaskExecutionRegistry.isActive(taskId)) return@launch
-                        dao.updateState(taskId, BackgroundTaskState.QUEUED, System.currentTimeMillis())
-                        BackgroundTaskScheduler.enqueue(context, taskId)
+                        if (dao.markQueued(taskId, System.currentTimeMillis()) > 0) {
+                            BackgroundTaskScheduler.enqueue(context, taskId)
+                        }
                     }
                     TaskNotificationFactory.ACTION_CANCEL -> {
                         val isRunning = task.state == BackgroundTaskState.RUNNING ||
                             TaskExecutionRegistry.isActive(taskId)
-                        dao.updateState(taskId, BackgroundTaskState.CANCELLED, System.currentTimeMillis())
+                        if (dao.markCancelled(taskId, System.currentTimeMillis()) == 0) {
+                            TaskNotificationFactory.dismiss(context, taskId)
+                            return@launch
+                        }
                         if (isRunning) {
                             NativeBackgroundTasksModule.emitInterruption(taskId, "cancel")
                         }
                         BackgroundTaskScheduler.cancel(context, taskId, isRunning)
                         TaskNotificationFactory.dismiss(context, taskId)
+                        if (!isRunning && task.state != BackgroundTaskState.QUEUED) {
+                            dao.deleteIfState(taskId, BackgroundTaskState.CANCELLED)
+                        }
                     }
                 }
             } finally {

@@ -3,6 +3,7 @@ import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
 import { dbManager } from '@database/db';
 import { chapterSchema, novelSchema } from '@database/schema';
+import { withoutChapterUpdateTrigger } from '@database/queries/ChapterQueries';
 
 /**
  * Get reading history from the database using Drizzle ORM.
@@ -58,25 +59,39 @@ export const deleteChapterHistory = async (
   });
 };
 
+// lastReadAt is the only novel stat that readTime feeds, and it is NULL once
+// a novel has no read chapters.
+const clearReadTime = (novelId?: number) =>
+  withoutChapterUpdateTrigger(async tx => {
+    if (novelId === undefined) {
+      await tx.execute(
+        'UPDATE Chapter SET readTime = NULL WHERE readTime IS NOT NULL',
+      );
+      await tx.execute(
+        'UPDATE Novel SET lastReadAt = NULL WHERE lastReadAt IS NOT NULL',
+      );
+    } else {
+      await tx.execute(
+        'UPDATE Chapter SET readTime = NULL WHERE novelId = ? AND readTime IS NOT NULL',
+        [novelId],
+      );
+      await tx.execute('UPDATE Novel SET lastReadAt = NULL WHERE id = ?', [
+        novelId,
+      ]);
+    }
+  });
+
 /**
  * Clear the reading history for every chapter belonging to a novel.
  */
 export const deleteNovelHistory = async (novelId: number): Promise<void> => {
-  await dbManager.write(async tx => {
-    await tx
-      .update(chapterSchema)
-      .set({ readTime: null })
-      .where(eq(chapterSchema.novelId, novelId))
-      .run();
-  });
+  await clearReadTime(novelId);
 };
 
 /**
  * Clear all reading history by setting readTime to NULL for all chapters.
  */
 export const deleteAllHistory = async (): Promise<void> => {
-  await dbManager.write(async tx => {
-    await tx.update(chapterSchema).set({ readTime: null }).run();
-  });
+  await clearReadTime();
   showToast(getString('historyScreen.deleted'));
 };

@@ -9,6 +9,7 @@ import { novelSchema, chapterSchema } from '@database/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import NativeFile from '@modules/native-file';
 import { insertChapters } from '@database/queries/ChapterQueries';
+import { updateNovelSchedule } from './novelSchedule';
 
 /**
  * Update novel metadata in the database including cover image.
@@ -76,6 +77,7 @@ const updateNovelTotalPages = async (novelId: number, totalPages: number) => {
 /**
  * Update or insert chapters for a novel.
  * Distinguishes between new chapters (triggers download) and existing chapters (updates metadata).
+ * Returns how many new chapters were inserted.
  */
 const updateNovelChapters = async (
   pluginId: string,
@@ -85,9 +87,9 @@ const updateNovelChapters = async (
   downloadNewChapters?: boolean,
   page?: string,
   enqueue?: BackgroundTaskEnqueuer,
-) => {
+): Promise<number> => {
   if (!chapters.length) {
-    return;
+    return 0;
   }
 
   const incomingPaths = Array.from(
@@ -156,22 +158,32 @@ const updateNovelChapters = async (
       });
     }
   }
+
+  return newPaths.length;
 };
 
 export interface UpdateNovelOptions {
   downloadNewChapters?: boolean;
   refreshNovelMetadata?: boolean;
   enqueue?: BackgroundTaskEnqueuer;
+  /** The user refreshed this novel, so its release schedule is always worked out again. */
+  manual?: boolean;
 }
 
-const getStoredTotalPages = async (novelId: number): Promise<number> => {
+const getStoredNovelCounts = async (novelId: number) => {
   const result = await dbManager
-    .select({ totalPages: novelSchema.totalPages })
+    .select({
+      totalPages: novelSchema.totalPages,
+      totalChapters: novelSchema.totalChapters,
+    })
     .from(novelSchema)
     .where(eq(novelSchema.id, novelId))
     .get();
 
-  return result?.totalPages ?? 0;
+  return {
+    totalPages: result?.totalPages ?? 0,
+    totalChapters: result?.totalChapters ?? 0,
+  };
 };
 
 /**
@@ -186,9 +198,12 @@ const updateNovel = async (
   if (pluginId === LOCAL_PLUGIN_ID) {
     return;
   }
-  const { downloadNewChapters, refreshNovelMetadata, enqueue } = options;
+  const { downloadNewChapters, refreshNovelMetadata, enqueue, manual } =
+    options;
 
-  const oldTotalPages = await getStoredTotalPages(novelId);
+  const { totalPages: oldTotalPages, totalChapters: oldTotalChapters } =
+    await getStoredNovelCounts(novelId);
+  let newChapters = 0;
 
   const novel = await fetchNovel(pluginId, novelPath);
 
@@ -197,7 +212,7 @@ const updateNovel = async (
   } else if (novel.totalPages) {
     await updateNovelTotalPages(novelId, novel.totalPages);
   }
-  await updateNovelChapters(
+  newChapters += await updateNovelChapters(
     pluginId,
     novel.name,
     novelId,
@@ -219,7 +234,7 @@ const updateNovel = async (
             novelPath,
             String(oldTotalPages),
           );
-          await updateNovelChapters(
+          newChapters += await updateNovelChapters(
             pluginId,
             novel.name,
             novelId,
@@ -235,7 +250,7 @@ const updateNovel = async (
       for (let page = oldTotalPages + 1; page <= novel.totalPages; page++) {
         try {
           const sourcePage = await fetchPage(pluginId, novelPath, String(page));
-          await updateNovelChapters(
+          newChapters += await updateNovelChapters(
             pluginId,
             novel.name,
             novelId,
@@ -248,6 +263,12 @@ const updateNovel = async (
       }
     }
   }
+
+  // A novel's first fetch is its back catalogue, not a release
+  await updateNovelSchedule(novelId, {
+    foundRelease: oldTotalChapters > 0 && newChapters > 0,
+    manual,
+  });
 };
 
 /**

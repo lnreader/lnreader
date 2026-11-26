@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import * as Clipboard from 'expo-clipboard';
+import DeviceInfo from 'react-native-device-info';
+import { BUILD_TYPE, GIT_HASH } from '@env';
+import { version } from '../../../package.json';
 import { getString } from '@i18n/translations';
 import { getErrorChainMessages } from '@utils/error';
 import { showToast } from '@utils/showToast';
@@ -35,6 +38,16 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   };
 
   const chainMessages = useMemo(() => getErrorChainMessages(error), [error]);
+  const versionDetails = [
+    `${fallbackGetString(
+      'aboutScreen.version',
+      'Version',
+    )}: ${version} (${DeviceInfo.getBuildNumber()})`,
+    BUILD_TYPE || 'Custom build',
+    GIT_HASH,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   const copyStackTrace = async () => {
     try {
@@ -76,7 +89,6 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     <SafeAreaView
       style={[styles.mainCtn, { backgroundColor: theme.background }]}
     >
-      <StatusBar translucent={true} backgroundColor="transparent" />
       <View style={styles.errorInfoCtn}>
         <Text style={[styles.errorTitle, { color: theme.onSurface }]}>
           {fallbackGetString(
@@ -91,39 +103,45 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           )}
         </Text>
         <Text
+          style={[styles.versionDetails, { color: theme.onSurfaceVariant }]}
+        >
+          {versionDetails}
+        </Text>
+        <ScrollView
           style={[
             styles.errorCtn,
             {
               backgroundColor: theme.surfaceVariant,
-              color: theme.onSurfaceVariant,
             },
           ]}
-          numberOfLines={20}
+          contentContainerStyle={styles.errorContent}
         >
-          {`${chainMessages.join('\n\nCaused by: ')}\n\n${error.stack}`}
-        </Text>
+          <Text style={[styles.errorText, { color: theme.onSurfaceVariant }]}>
+            {`${chainMessages.join('\n\nCaused by: ')}\n\n${error.stack}`}
+          </Text>
+        </ScrollView>
       </View>
       <List.Divider theme={theme} />
-      <Button
-        disabled={isSharing}
-        loading={isSharing}
-        onPress={handleShareCrashLogs}
-        title={fallbackGetString(
-          'errorBoundary.shareCrashLogs',
-          'Share crash logs',
-        )}
-        style={styles.shareButtonCtn}
-        mode="outlined"
-      />
-      <Button
-        onPress={handleRestart}
-        title={fallbackGetString(
-          'errorBoundary.restart',
-          'Restart the application',
-        )}
-        style={styles.buttonCtn}
-        mode="contained"
-      />
+      <View style={styles.actionsCtn}>
+        <Button
+          disabled={isSharing}
+          loading={isSharing}
+          onPress={handleShareCrashLogs}
+          title={fallbackGetString(
+            'errorBoundary.shareCrashLogs',
+            'Share crash logs',
+          )}
+          mode="outlined"
+        />
+        <Button
+          onPress={handleRestart}
+          title={fallbackGetString(
+            'errorBoundary.restart',
+            'Restart the application',
+          )}
+          mode="contained"
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -141,33 +159,40 @@ const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({ children }) => {
 export default AppErrorBoundary;
 
 const styles = StyleSheet.create({
-  buttonCtn: {
-    margin: 16,
-    marginBottom: 32,
-  },
-  shareButtonCtn: {
-    margin: 16,
-    marginBottom: 8,
+  actionsCtn: {
+    gap: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
   errorCtn: {
+    flex: 1,
     borderRadius: 8,
-    lineHeight: 20,
-    marginVertical: 16,
+    marginBottom: 16,
+  },
+  errorContent: {
     paddingHorizontal: 8,
     paddingVertical: 16,
   },
+  errorText: {
+    lineHeight: 20,
+  },
   errorDesc: {
     lineHeight: 20,
-    marginVertical: 8,
+    marginTop: 8,
   },
   errorInfoCtn: {
     flex: 1,
-    justifyContent: 'center',
     padding: 16,
+    paddingTop: 32,
   },
   errorTitle: {
     fontSize: 20,
     marginBottom: 8,
+    textAlign: 'center',
+  },
+  versionDetails: {
+    lineHeight: 24,
+    marginVertical: 16,
     textAlign: 'center',
   },
   mainCtn: {

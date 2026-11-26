@@ -5,6 +5,7 @@ import type {
   Placeholder,
 } from 'drizzle-orm';
 import { SQLitePreparedQuery } from 'drizzle-orm/sqlite-core';
+import type { Transaction } from '@op-engineering/op-sqlite';
 
 // Define the TransactionParameter type based on your DrizzleDb
 export type TransactionParameter = SQLiteTransaction<
@@ -288,4 +289,15 @@ export interface IDbManager {
    * (No specific documentation beyond this general description as per request)
    */
   write<T>(fn: (tx: TransactionParameter) => Promise<T>): Promise<T>;
+
+  /**
+   * Runs raw SQL in one SQLite transaction that commits only after `fn`
+   * resolves, rolls back if it throws, and rejects if the COMMIT itself
+   * fails. Use for hot bulk-write paths where building every statement
+   * through Drizzle is too slow.
+   *
+   * The transaction is held on the shared connection across awaits, so any
+   * statement issued outside the write queue while `fn` runs joins it.
+   */
+  writeRaw<T>(fn: (tx: Transaction) => Promise<T>): Promise<T>;
 }

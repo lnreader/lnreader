@@ -10,6 +10,7 @@ import { ThemeColors } from '@theme/types';
 import { getString } from '@i18n/translations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { parseGenres } from '../../utils/genres';
+import { useAppSettings } from '@hooks/persisted/useSettings';
 
 interface CoverImageProps {
   children: React.ReactNode;
@@ -19,6 +20,9 @@ interface CoverImageProps {
 }
 
 interface NovelThumbnailProps {
+  // Stable per novel so a cover URL swap (browse thumbnail -> details cover)
+  // cross-fades instead of expo-image blanking the view first.
+  recyclingKey: string;
   source: ImageSource;
   theme: ThemeColors;
   setCustomNovelCover: () => void | Promise<void>;
@@ -39,6 +43,7 @@ const NovelInfoContainer = ({ children }: { children: React.ReactNode }) => (
 const CoverImage = memo(
   ({ children, source, theme, hideBackdrop }: CoverImageProps) => {
     const [failedUri, setFailedUri] = useState<string>();
+    const { reduceAppAnimations = false } = useAppSettings();
     const overlayBg = useMemo(
       () => color(theme.background).alpha(0.7).string(),
       [theme.background],
@@ -91,6 +96,7 @@ const CoverImage = memo(
         onError={() => setFailedUri(source.uri)}
         source={source}
         style={styles.coverImage}
+        transition={reduceAppAnimations ? 0 : 150}
       >
         {content}
       </ImageBackground>
@@ -101,6 +107,7 @@ const CoverImage = memo(
 const GRADIENT_LOCATIONS = [0, 1] as const;
 
 const NovelThumbnail = ({
+  recyclingKey,
   source,
   theme,
   setCustomNovelCover,
@@ -117,6 +124,7 @@ const NovelThumbnail = ({
       {!expanded ? (
         <NovelCoverImage
           uri={source.uri}
+          recyclingKey={recyclingKey}
           theme={theme}
           iconSize={36}
           style={styles.novelThumbnail}

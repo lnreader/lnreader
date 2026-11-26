@@ -190,6 +190,7 @@ const NovelInfoHeader = ({
       >
         <NovelInfoContainer>
           <NovelThumbnail
+            recyclingKey={`${novel.pluginId}:${novel.path}`}
             source={coverSource}
             theme={theme}
             setCustomNovelCover={

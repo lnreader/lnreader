@@ -4,8 +4,8 @@ import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import {
-  setNavigationBarTransparent,
-  setStatusBarColor,
+  setNavigationBarStyle,
+  setStatusBarStyle,
 } from '@theme/utils/setBarColor';
 import { useAppSettings, usePluginActions, useTheme } from '@hooks/persisted';
 import { AppUpdateChecker } from '@components';
@@ -31,6 +31,7 @@ import AniListTopNovels from '../screens/browse/discover/AniListTopNovels';
 import BrowseSettings from '../screens/browse/settings/BrowseSettings';
 import PluginDetailsScreen from '../screens/browse/PluginDetailsScreen';
 import WebviewScreen from '@screens/WebviewScreen/WebviewScreen';
+import UpcomingScreen from '@screens/upcoming/UpcomingScreen';
 import { RootStackParamList } from './types';
 import { useMMKVBoolean } from 'react-native-mmkv';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
@@ -40,9 +41,15 @@ import ShareIntentHandler, {
   flushPendingShare,
   navigationRef,
 } from './ShareIntentHandler';
+import WidgetIntentHandler, {
+  flushPendingWidgetLink,
+  isWidgetUrl,
+} from './WidgetIntentHandler';
 import { LibraryContextProvider } from '@components/Context/LibraryContext';
 import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
+import { hideSplashScreen, whenSplashScreenHidden } from '@utils/splashScreen';
+import HideSplashWhenLibraryReady from './HideSplashWhenLibraryReady';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const MainNavigator = () => {
@@ -52,15 +59,24 @@ const MainNavigator = () => {
   const [isOnboarded] = useMMKVBoolean('IS_ONBOARDED');
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setStatusBarColor(theme);
-      setNavigationBarTransparent(theme.isDark);
-    }, 500);
+    let cancelled = false;
+    whenSplashScreenHidden().then(() => {
+      if (!cancelled) {
+        setStatusBarStyle(theme);
+        setNavigationBarStyle(theme.isDark);
+      }
+    });
 
     return () => {
-      clearTimeout(timer);
+      cancelled = true;
     };
   }, [theme]);
+
+  useEffect(() => {
+    if (!isOnboarded) {
+      hideSplashScreen();
+    }
+  }, [isOnboarded]);
 
   useEffect(() => {
     if (updateLibraryOnLaunch) {
@@ -81,7 +97,10 @@ const MainNavigator = () => {
   return (
     <NavigationContainer<RootStackParamList>
       ref={navigationRef}
-      onReady={flushPendingShare}
+      onReady={() => {
+        flushPendingShare();
+        flushPendingWidgetLink();
+      }}
       theme={{
         colors: {
           ...DefaultTheme.colors,
@@ -96,6 +115,8 @@ const MainNavigator = () => {
       }}
       linking={{
         prefixes: ['lnreader://'],
+        // Widget taps are routed by WidgetIntentHandler.
+        filter: url => !isWidgetUrl(url),
         config: {
           screens: {
             MoreStack: {
@@ -112,7 +133,9 @@ const MainNavigator = () => {
       }}
     >
       <ShareIntentHandler />
+      <WidgetIntentHandler />
       <LibraryContextProvider>
+        <HideSplashWhenLibraryReady />
         <UpdateContextProvider>
           <AppUpdateChecker />
           <Stack.Navigator
@@ -141,6 +164,7 @@ const MainNavigator = () => {
             <Stack.Screen name="SourceNovels" component={SourceNovels} />
             <Stack.Screen name="MigrateNovel" component={MigrateNovel} />
             <Stack.Screen name="WebviewScreen" component={WebviewScreen} />
+            <Stack.Screen name="Upcoming" component={UpcomingScreen} />
           </Stack.Navigator>
         </UpdateContextProvider>
       </LibraryContextProvider>

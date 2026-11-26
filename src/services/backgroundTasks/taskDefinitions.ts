@@ -34,7 +34,9 @@ export const getDownloadProgressKey = (
     .filter(
       task =>
         task.task.name === 'DOWNLOAD_CHAPTER' &&
-        (novelId === undefined || task.task.data.novelId === novelId),
+        (novelId === undefined ||
+          task.task.data.novelId === novelId ||
+          task.task.data.chapters.some(chapter => chapter.novelId === novelId)),
     )
     .map(
       task =>
@@ -43,6 +45,33 @@ export const getDownloadProgressKey = (
         }`,
     )
     .join('|');
+
+export type DownloadIndex = {
+  chapterIds: Set<number>;
+  novelIds: Set<number>;
+};
+
+export const getDownloadIndex = (
+  tasks: QueuedBackgroundTask[],
+): DownloadIndex => {
+  const chapterIds = new Set<number>();
+  const novelIds = new Set<number>();
+
+  for (const { task } of tasks) {
+    if (task?.name !== 'DOWNLOAD_CHAPTER') continue;
+    if (task.data.novelId !== undefined) {
+      novelIds.add(task.data.novelId);
+    }
+    for (const chapter of task.data.chapters) {
+      chapterIds.add(chapter.chapterId);
+      if (chapter.novelId !== undefined) {
+        novelIds.add(chapter.novelId);
+      }
+    }
+  }
+
+  return { chapterIds, novelIds };
+};
 
 export const getBackgroundTaskQueueName = (task: BackgroundTask) =>
   task.name === 'DOWNLOAD_CHAPTER'

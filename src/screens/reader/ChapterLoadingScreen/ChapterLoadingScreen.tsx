@@ -27,17 +27,14 @@ const ChapterLoadingScreen = () => {
       ];
     }
     return [
-      background.negate().darken(0.98).toString(),
-      background.negate().darken(0.92).toString(),
+      background.mix(color('#fff'), 0.08).hex(),
+      background.mix(color('#fff'), 0.14).hex(),
     ];
   }, [backgroundColor]);
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor, padding }]}>
       <SkeletonLines
-        containerMargin={padding}
-        containerHeight={'100%'}
-        containerWidth={'100%'}
         color={skeletonColor}
         highlightColor={highlightColor}
         textSize={textSize}
