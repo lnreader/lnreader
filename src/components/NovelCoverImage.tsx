@@ -131,6 +131,11 @@ const NovelCoverImage = ({
     );
   }
 
+  const imageStyle = [
+    { backgroundColor: theme.surfaceContainerHigh ?? theme.surface },
+    style,
+  ];
+
   if (requiresReactNativeImage) {
     const source: ImageURISource = {
       body: requestInit?.body,
@@ -150,7 +155,7 @@ const NovelCoverImage = ({
         }}
         resizeMode={toReactNativeResizeMode(contentFit)}
         source={source}
-        style={[{ backgroundColor: theme.surfaceVariant }, style]}
+        style={imageStyle}
         testID={testID}
       />
     );
@@ -170,7 +175,7 @@ const NovelCoverImage = ({
       priority={priority}
       recyclingKey={recyclingKey ?? normalizedUri}
       source={{ headers: requestInit?.headers, uri: normalizedUri }}
-      style={[{ backgroundColor: theme.surfaceVariant }, style]}
+      style={imageStyle}
       testID={testID}
       transition={reduceAppAnimations ? 0 : transition}
     />

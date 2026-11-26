@@ -83,7 +83,10 @@ const PluginRow = memo(
         <View pointerEvents="none" style={styles.pluginMainContent}>
           <Image
             source={{ uri: plugin.iconUrl }}
-            style={[styles.icon, { backgroundColor: theme.surfaceVariant }]}
+            style={[
+              styles.icon,
+              { backgroundColor: theme.surfaceContainerHigh ?? theme.surface },
+            ]}
           />
           <View style={styles.details}>
             <Text

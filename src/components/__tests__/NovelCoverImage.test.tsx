@@ -12,6 +12,7 @@ const theme = {
   isDark: false,
   background: '#EDE2FF',
   onSurfaceVariant: '#4A454E',
+  surfaceContainerHigh: '#E8E8E8',
   surfaceVariant: '#E9DFEB',
 } as ThemeColors;
 
@@ -20,6 +21,7 @@ const darkTheme = {
   isDark: true,
   background: '#111129',
   onSurfaceVariant: '#CCC4CE',
+  surfaceContainerHigh: '#302D36',
 } as ThemeColors;
 
 const expectPlaceholder = (background: string, iconColor: string) => {
@@ -64,6 +66,9 @@ describe('NovelCoverImage', () => {
         }),
       ]),
     );
+    expect(screen.getByTestId('novel-cover')).toHaveStyle({
+      backgroundColor: darkTheme.surfaceContainerHigh,
+    });
 
     fireEvent(screen.getByTestId('novel-cover'), 'error', {
       nativeEvent: { error: 'Failed to load image' },
@@ -92,6 +97,9 @@ describe('NovelCoverImage', () => {
       headers: { Referer: 'https://example.com' },
       method: 'POST',
       uri: 'https://example.com/cover',
+    });
+    expect(screen.getByTestId('novel-cover')).toHaveStyle({
+      backgroundColor: theme.surfaceContainerHigh,
     });
   });
 });
