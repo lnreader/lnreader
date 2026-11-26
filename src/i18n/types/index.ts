@@ -216,6 +216,8 @@ export interface StringMap {
   'browseScreen.migration.reviewTitle': 'string';
   'browseScreen.migration.selectSource': 'string';
   'browseScreen.migration.selectSourceDesc': 'string';
+  'browseScreen.migration.unmatchedReadChapters.one': 'string';
+  'browseScreen.migration.unmatchedReadChapters.other': 'string';
   'browseScreen.migration.useDestination': 'string';
   'browseScreen.noSource': 'string';
   'browseScreen.noPlugins': 'string';

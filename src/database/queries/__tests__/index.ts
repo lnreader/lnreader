@@ -81,7 +81,7 @@ export const testModules = {
       'clearUpdates',
       'getCustomPages',
       'getNovelChapters',
-      'getAllNovelChaptersForBackup',
+      'getAllNovelChapters',
       'getUnreadNovelChapters',
       'getAllUndownloadedChapters',
       'getAllUndownloadedAndUnreadChapters',
