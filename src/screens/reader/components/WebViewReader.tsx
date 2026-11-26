@@ -52,6 +52,7 @@ import {
   ChapterPayload,
   ReaderShellKey,
   buildChapterPayload,
+  buildReaderCustomScript,
   buildSetChapterScript,
   buildShellKey,
   isSameShellKey,
@@ -791,15 +792,9 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <script src="${pluginDir}/custom.js"></script>
               ${
                 shell.customJS
-                  ? `<script id="ln-custom-js">
-              function fn(lnTarget = document.querySelector('#LNReader-chapter')){
-                let html = lnTarget.innerHTML;
-                ${shell.customJS}
-                lnTarget.innerHTML = html;
-              }
-              window.lnApplyCustomJS = fn;
-              document.addEventListener('DOMContentLoaded', () => fn());
-              </script>`
+                  ? `<script id="ln-custom-js">${buildReaderCustomScript(
+                      shell.customJS,
+                    )}</script>`
                   : ''
               }
           </html>

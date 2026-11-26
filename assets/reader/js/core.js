@@ -961,7 +961,7 @@ window.continuousScroll = new (function () {
     document.body.insertBefore(divider, readerUI);
     document.body.insertBefore(element, readerUI);
     try {
-      window.fn?.(element);
+      window.lnApplyCustomJS?.(element, chapter);
     } catch (e) {
       console.error(e);
     }

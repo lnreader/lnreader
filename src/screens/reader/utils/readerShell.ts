@@ -135,6 +135,24 @@ export const shouldReloadShell = (
 export const serializeForScript = (value: unknown) =>
   JSON.stringify(value).replace(/</g, '\\u003c');
 
+export const buildReaderCustomScript = (customJS: string) => `
+  function fn(
+    lnTarget = document.querySelector('#LNReader-chapter'),
+    lnChapter = reader.chapter
+  ) {
+    let novelName = reader.novel.name;
+    let chapterName = lnChapter.name;
+    let sourceId = reader.novel.pluginId;
+    let chapterId = lnChapter.id;
+    let novelId = lnChapter.novelId;
+    let html = lnTarget.innerHTML;
+    ${customJS}
+    lnTarget.innerHTML = html;
+  }
+  window.lnApplyCustomJS = fn;
+  document.addEventListener('DOMContentLoaded', () => fn());
+`;
+
 export const buildSetChapterScript = (payload: ChapterPayload) => `
   (function () {
     if (window.reader && window.reader.setChapter) {
