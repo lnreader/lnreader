@@ -478,6 +478,8 @@ export interface StringMap {
   'moreScreen.downloadQueue': 'string';
   'moreScreen.incognitoMode': 'string';
   'moreScreen.incognitoModeDesc': 'string';
+  'novelScreen.coverDownloadError': 'string';
+  'novelScreen.coverDownloadHttpError': 'string';
   'novelScreen.addToLibaray': 'string';
   'novelScreen.bottomSheet.displays.chapterNumber': 'string';
   'novelScreen.bottomSheet.displays.sourceTitle': 'string';
