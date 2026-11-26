@@ -1,11 +1,10 @@
 import type { ChapterReaderSettings } from '@hooks/persisted/useSettings';
 
 /**
- * Floating TTS controller position, stored as fractions of the viewport so a
- * relocated button survives chapter reloads and orientation changes. The
- * in-page controller is rebuilt from scratch for every chapter (the WebView
- * source is regenerated per chapter), so without persistence the button always
- * falls back to its CSS default (`top: 50%; left: 20px`).
+ * Floating TTS controller position: its left and top as fractions of the
+ * viewport, so a relocated button is restored at the same spot whatever its
+ * size, in a newly loaded reader page and after orientation changes. Without a
+ * saved position the CSS default applies (`top: 50%; left: 20px`).
  */
 export interface TtsControllerPosition {
   /** Fraction of the viewport width, in the closed interval [0, 1]. */
@@ -17,11 +16,13 @@ export interface TtsControllerPosition {
 /** `reader.post` message type the page sends after the button is relocated. */
 export const TTS_CONTROLLER_POSITION_MESSAGE = 'tts-position';
 
+const isViewportFraction = (n: unknown): n is number =>
+  typeof n === 'number' && n >= 0 && n <= 1;
+
 /**
- * Coerce a posted value into a storable position. Out-of-range numbers are
- * clamped into [0, 1] and rounded so storage stays tidy; anything that is not
- * a pair of finite numbers (missing, NaN, Infinity, wrong type) is rejected
- * so a corrupt payload can never pin the button off-screen.
+ * Coerce a posted value into a storable position, rounded so storage stays
+ * tidy. Anything that is not a pair of numbers within [0, 1] is rejected so a
+ * corrupt payload can never pin the button off-screen.
  */
 export const normalizeTtsControllerPosition = (
   value: unknown,
@@ -30,17 +31,11 @@ export const normalizeTtsControllerPosition = (
     return undefined;
   }
   const { x, y } = value as Record<string, unknown>;
-  if (typeof x !== 'number' || !Number.isFinite(x)) {
-    return undefined;
-  }
-  if (typeof y !== 'number' || !Number.isFinite(y)) {
+  if (!isViewportFraction(x) || !isViewportFraction(y)) {
     return undefined;
   }
   const round = (n: number) => Math.round(n * 10000) / 10000;
-  return {
-    x: round(Math.min(1, Math.max(0, x))),
-    y: round(Math.min(1, Math.max(0, y))),
-  };
+  return { x: round(x), y: round(y) };
 };
 
 /**

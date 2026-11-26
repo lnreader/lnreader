@@ -383,9 +383,8 @@ const TTSController = () => {
 
   /**
    * Margin kept around the controller, matching the clamping below. The
-   * position is persisted as fractions of the movable range so a relocated
-   * button survives chapter reloads (every new chapter rebuilds this DOM
-   * from scratch) and orientation changes.
+   * position is persisted as its left and top in viewport fractions, so it
+   * does not depend on the controller's size.
    */
   const TTS_POSITION_MARGIN = 8;
 
@@ -415,14 +414,6 @@ const TTSController = () => {
     if (!element) {
       return;
     }
-    const spanX = Math.max(
-      1,
-      window.innerWidth - element.offsetWidth - TTS_POSITION_MARGIN * 2,
-    );
-    const spanY = Math.max(
-      1,
-      window.innerHeight - element.offsetHeight - TTS_POSITION_MARGIN * 2,
-    );
     const maxLeft = Math.max(
       TTS_POSITION_MARGIN,
       window.innerWidth - element.offsetWidth - TTS_POSITION_MARGIN,
@@ -431,16 +422,14 @@ const TTSController = () => {
       TTS_POSITION_MARGIN,
       window.innerHeight - element.offsetHeight - TTS_POSITION_MARGIN,
     );
-    lastLeft = Math.min(
+    element.style.left = `${Math.min(
       maxLeft,
-      Math.max(TTS_POSITION_MARGIN, TTS_POSITION_MARGIN + position.x * spanX),
-    );
-    lastTop = Math.min(
+      Math.max(TTS_POSITION_MARGIN, position.x * window.innerWidth),
+    )}px`;
+    element.style.top = `${Math.min(
       maxTop,
-      Math.max(TTS_POSITION_MARGIN, TTS_POSITION_MARGIN + position.y * spanY),
-    );
-    element.style.left = `${lastLeft}px`;
-    element.style.top = `${lastTop}px`;
+      Math.max(TTS_POSITION_MARGIN, position.y * window.innerHeight),
+    )}px`;
     element.style.right = 'auto';
     element.style.bottom = 'auto';
   };
@@ -450,27 +439,16 @@ const TTSController = () => {
     if (saved) {
       applyControllerPosition(saved);
     }
+    return saved;
   };
 
   const persistControllerPosition = () => {
-    const element = resolveControllerElement();
-    if (!element) {
-      return;
-    }
-    const spanX = Math.max(
-      1,
-      window.innerWidth - element.offsetWidth - TTS_POSITION_MARGIN * 2,
-    );
-    const spanY = Math.max(
-      1,
-      window.innerHeight - element.offsetHeight - TTS_POSITION_MARGIN * 2,
-    );
     const round = value => Math.round(value * 10000) / 10000;
     reader.post({
       type: 'tts-position',
       data: {
-        x: round((lastLeft - TTS_POSITION_MARGIN) / spanX),
-        y: round((lastTop - TTS_POSITION_MARGIN) / spanY),
+        x: round(lastLeft / window.innerWidth),
+        y: round(lastTop / window.innerHeight),
       },
     });
   };
@@ -501,20 +479,26 @@ const TTSController = () => {
   };
 
   const clampControllerToViewport = () => {
-    const element = resolveControllerElement();
-    if (!element) {
-      return;
-    }
-    const bounds = element.getBoundingClientRect();
+    const bounds = controllerElement.getBoundingClientRect();
     const maxLeft = Math.max(8, window.innerWidth - bounds.width - 8);
     const maxTop = Math.max(8, window.innerHeight - bounds.height - 8);
 
-    lastLeft = Math.min(maxLeft, Math.max(8, bounds.left));
-    lastTop = Math.min(maxTop, Math.max(8, bounds.top));
-    element.style.left = `${lastLeft}px`;
-    element.style.top = `${lastTop}px`;
-    element.style.right = 'auto';
-    element.style.bottom = 'auto';
+    controllerElement.style.left = `${Math.min(
+      maxLeft,
+      Math.max(8, bounds.left),
+    )}px`;
+    controllerElement.style.top = `${Math.min(
+      maxTop,
+      Math.max(8, bounds.top),
+    )}px`;
+    controllerElement.style.right = 'auto';
+    controllerElement.style.bottom = 'auto';
+  };
+
+  const repositionController = () => {
+    if (!restoreControllerPosition()) {
+      clampControllerToViewport();
+    }
   };
 
   const setCollapsed = value => {
@@ -532,7 +516,7 @@ const TTSController = () => {
     collapseButtonElement.innerHTML = collapsed.val
       ? textToSpeechIcon
       : minimizeIcon;
-    requestAnimationFrame(clampControllerToViewport);
+    requestAnimationFrame(repositionController);
   };
 
   const startDrag = e => {
@@ -650,13 +634,17 @@ const TTSController = () => {
     finishBubbleDrag();
   };
 
-  // The controller DOM is recreated for every chapter, so a relocated button
-  // is restored from the saved position after first paint. Resizes (rotation,
-  // split-screen) only clamp it into view; the saved fractions stay valid.
-  requestAnimationFrame(restoreControllerPosition);
+  // Chapters are swapped into the loaded page, so the saved position is
+  // re-applied on swaps, resizes and when TTS is switched on. Only drags save it.
+  van.derive(() => {
+    if (reader.generalSettings.val.TTSEnable) {
+      requestAnimationFrame(restoreControllerPosition);
+    }
+  });
+  document.addEventListener('ln:chapter-change', restoreControllerPosition);
   window.addEventListener('resize', () => {
     if (controllerElement) {
-      clampControllerToViewport();
+      repositionController();
     }
   });
 

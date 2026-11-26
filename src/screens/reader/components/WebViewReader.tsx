@@ -953,8 +953,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
             }
             case TTS_CONTROLLER_POSITION_MESSAGE: {
               // The floating TTS button was relocated. Persist the position
-              // so the next chapter (which rebuilds the page from scratch)
-              // restores it instead of falling back to the CSS default.
+              // so the page can restore it, including after it is reloaded.
               const position = normalizeTtsControllerPosition(event.data);
               if (position) {
                 const current =
