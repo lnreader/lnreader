@@ -118,11 +118,11 @@ export const insertNovelAndChapters = async (
   if (novelId) {
     if (sourceNovel.cover) {
       const novelDir = NOVEL_STORAGE + '/' + pluginId + '/' + novelId;
-      await NativeFile.mkdir(novelDir);
       const novelCoverPath = novelDir + '/cover.png';
       const novelCoverUri = 'file://' + novelCoverPath;
 
       try {
+        await NativeFile.mkdir(novelDir);
         await downloadFile(
           sourceNovel.cover,
           novelCoverPath,
@@ -134,8 +134,18 @@ export const insertNovelAndChapters = async (
             .where(eq(novelSchema.id, novelId))
             .run();
         });
-      } catch {
-        // Silently fail cover download
+      } catch (error) {
+        const httpStatus =
+          error instanceof Error
+            ? /^Failed to download: ([1-5]\d{2})$/.exec(error.message)?.[1]
+            : undefined;
+        showToast(
+          httpStatus
+            ? getString('novelScreen.coverDownloadHttpError', {
+                status: httpStatus,
+              })
+            : getString('novelScreen.coverDownloadError'),
+        );
       }
     }
     await insertChapters(novelId, sourceNovel.chapters);

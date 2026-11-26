@@ -555,6 +555,8 @@
     "incognitoModeDesc": "Pauses reading history"
   },
   "novelScreen": {
+    "coverDownloadError": "Could not save the cover image.",
+    "coverDownloadHttpError": "Could not download the cover image (HTTP %{status}).",
     "addToLibaray": "Add to library",
     "bottomSheet": {
       "displays": {

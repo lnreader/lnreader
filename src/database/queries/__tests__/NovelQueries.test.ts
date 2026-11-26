@@ -1,3 +1,6 @@
+import { downloadFile } from '@plugins/helpers/fetch';
+import { getString } from '@i18n/translations';
+import { showToast } from '@utils/showToast';
 /**
  * Tests for NovelQueries
  *
@@ -139,6 +142,34 @@ describe('NovelQueries', () => {
       expect(novelId).toBeDefined();
       const novel = await getNovelById(novelId!);
       expect(novel?.name).toBe('Test Novel');
+    });
+
+    it('reports a cover download failure and still inserts the novel', async () => {
+      jest
+        .mocked(downloadFile)
+        .mockRejectedValueOnce(new Error('Failed to download: 403'));
+
+      const novelId = await insertNovelAndChapters('test-plugin', {
+        id: undefined,
+        path: '/test/novel',
+        name: 'Test Novel',
+        cover: 'https://example.com/cover.png',
+        chapters: [{ path: '/chapter/1', name: 'Chapter 1' }],
+      });
+
+      expect(novelId).toBeDefined();
+      expect(await getNovelById(novelId!)).toMatchObject({
+        name: 'Test Novel',
+      });
+      expect(getString).toHaveBeenCalledWith(
+        'novelScreen.coverDownloadHttpError',
+        {
+          status: '403',
+        },
+      );
+      expect(showToast).toHaveBeenCalledWith(
+        'novelScreen.coverDownloadHttpError',
+      );
     });
 
     it('should handle conflict (onConflictDoNothing)', async () => {
