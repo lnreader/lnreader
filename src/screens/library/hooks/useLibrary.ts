@@ -342,13 +342,8 @@ export const useLibrary = (): UseLibraryReturnType => {
 
 export const useLibraryNovels = () => {
   const { sortOrder = LibrarySortOrder.DateAdded_DESC } = useLibrarySettings();
-  const [library, setLibrary] = useState<NovelInfo[]>([]);
+  const query = useMemo(() => getLibraryNovelsQuery(sortOrder), [sortOrder]);
+  const library = useLiveQuery(query, [{ table: 'Novel' }]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void getLibraryNovelsFromDb(sortOrder).then(setLibrary);
-    }, [sortOrder]),
-  );
-
-  return { library, setLibrary };
+  return { library };
 };
