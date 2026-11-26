@@ -57,6 +57,7 @@ interface INovelCover<TNovel> {
   theme: ThemeColors;
   isSelected: boolean;
   addSkeletonLoading?: boolean;
+  skeletonTint?: string;
   inActivity?: boolean;
   onLongPress: (item: TNovel) => void;
   hasSelection?: boolean;
@@ -81,6 +82,7 @@ function NovelCover<
   theme,
   isSelected,
   addSkeletonLoading,
+  skeletonTint,
   inActivity,
   onLongPress,
   hasSelection,
@@ -139,6 +141,7 @@ function NovelCover<
       <SourceScreenSkeletonLoading
         theme={theme}
         completeRow={item.completeRow}
+        tintColor={skeletonTint}
       />
     );
   }

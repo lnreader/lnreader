@@ -23,6 +23,7 @@ import { useLibraryContext } from '@components/Context/LibraryContext';
 
 const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
   const theme = useTheme();
+  const skeletonTint = theme.isDark ? theme.primary : undefined;
   const { pluginId, pluginName, site, showLatestNovels } = route.params;
   const imageRequestInit = getPlugin(pluginId)?.imageRequestInit;
 
@@ -143,7 +144,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
         theme={theme}
       />
       {isLoading || isSearching ? (
-        <SourceScreenSkeletonLoading theme={theme} />
+        <SourceScreenSkeletonLoading theme={theme} tintColor={skeletonTint} />
       ) : errorMessage || novelList.length === 0 ? (
         <ErrorScreenV2
           error={errorMessage || getString('sourceScreen.noResultsFound')}
@@ -168,7 +169,11 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
           ListFooterComponent={
             (hasNextPage && !searchText) ||
             (hasNextSearchPage && Boolean(searchText)) ? (
-              <SourceScreenSkeletonLoading theme={theme} completeRow={2} />
+              <SourceScreenSkeletonLoading
+                theme={theme}
+                completeRow={2}
+                tintColor={skeletonTint}
+              />
             ) : null
           }
           renderItem={({ item }) => {
@@ -186,6 +191,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
                   (hasNextPage && !searchText) ||
                   (hasNextSearchPage && Boolean(searchText))
                 }
+                skeletonTint={skeletonTint}
                 onLongPress={async () => {
                   setInActivity(prev => ({ ...prev, [item.path]: true }));
 

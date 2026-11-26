@@ -10,14 +10,16 @@ import { useDeviceOrientation } from '@hooks';
 interface Props {
   theme: ThemeColors;
   completeRow?: number;
+  tintColor?: string;
 }
 
 const SourceScreenSkeletonLoading: React.FC<Props> = ({
   theme,
   completeRow,
+  tintColor,
 }) => {
   const [highlightColor, backgroundColor, disableLoadingAnimations] =
-    useLoadingColors(theme);
+    useLoadingColors(theme, tintColor);
 
   const { displayMode = DisplayModes.Comfortable, novelsPerRow = 3 } =
     useLibrarySettings();
