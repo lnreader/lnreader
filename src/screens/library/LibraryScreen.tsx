@@ -430,13 +430,13 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
   );
 
   const markAllRead = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersRead(id)));
+    await markAllChaptersRead(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
 
   const markAllUnread = useCallback(async () => {
-    await Promise.all(selectedNovelIds.map(id => markAllChaptersUnread(id)));
+    await markAllChaptersUnread(selectedNovelIds);
     setSelectedNovelIds([]);
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);

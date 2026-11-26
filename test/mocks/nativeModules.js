@@ -73,6 +73,8 @@ jest.mock('@modules/native-share-receiver', () => ({
   __esModule: true,
   default: {
     getInitialSharedText: jest.fn(async () => null),
+    takeOpenedEpubs: jest.fn(async () => []),
+    stageOpenedEpub: jest.fn(),
     addListener: jest.fn(() => ({ remove: jest.fn() })),
     removeListeners: jest.fn(),
   },

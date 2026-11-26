@@ -33,8 +33,7 @@
       [
         "expo-navigation-bar",
         {
-          "enforceContrast": false,
-          "style": "light"
+          "enforceContrast": false
         }
       ],
       "expo-web-browser",
@@ -72,6 +71,18 @@
         "android.permission.POST_NOTIFICATIONS"
       ],
       "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": [
+            {
+              "mimeType": "application/epub+zip"
+            },
+            {
+              "mimeType": "application/epub"
+            }
+          ]
+        },
         {
           "action": "SEND",
           "category": ["DEFAULT"],

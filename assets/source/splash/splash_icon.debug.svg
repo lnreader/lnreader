@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288">
+  <defs>
+    <radialGradient id="ringShade" cx="144" cy="144" r="75.84" gradientUnits="userSpaceOnUse">
+      <stop offset="0.848" stop-color="#996412"></stop>
+      <stop offset="0.93" stop-color="#B87816"></stop>
+      <stop offset="1" stop-color="#B87816"></stop>
+    </radialGradient>
+    <radialGradient id="discShade" cx="144" cy="144" r="64.32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5E7C8"></stop>
+      <stop offset="0.78" stop-color="#F5E7C8"></stop>
+      <stop offset="1" stop-color="#E0D2B3"></stop>
+    </radialGradient>
+  </defs>
+  <g id="rings">
+    <circle id="ring_outer" cx="144" cy="144" r="96" fill="#4A3208"></circle>
+    <circle id="ring_middle" cx="144" cy="144" r="75.84" fill="url(#ringShade)"></circle>
+    <circle id="disc_inner" cx="144" cy="144" r="64.32" fill="url(#discShade)"></circle>
+  </g>
+  <g id="glyph">
+    <path id="glyph_path" fill="#4A3208" d="M109.44,107.14 L128.64,107.14 L128.64,113.28 L109.44,113.28 Z M105.6,118.66 L132.48,118.66 L132.48,125.18 L105.6,125.18 Z M109.44,130.94 L128.64,130.94 L128.64,137.09 L109.44,137.09 Z M109.44,143.23 L128.64,143.23 L128.64,149.38 L109.44,149.38 Z M107.9,155.52 L129.41,155.52 L129.41,181.63 L107.9,181.63 Z M114.82,161.66 L114.82,175.49 L122.5,175.49 L122.5,161.66 Z M153.98,105.6 L160.9,105.6 L160.9,133.25 L153.98,133.25 Z M136.32,114.05 L179.33,114.05 L179.33,120.19 L136.32,120.19 Z M140.16,127.1 L174.72,127.1 L174.72,133.25 L140.16,133.25 Z M134.78,139.39 L180.86,139.39 L180.86,153.22 L173.95,153.22 L173.95,145.54 L141.7,145.54 L141.7,153.22 L134.78,153.22 Z M147.84,144 L154.75,144 L154.75,157.82 C154.75,170.88 148.61,179.33 136.32,182.4 L133.63,176.26 C143.23,173.18 147.84,167.04 147.84,157.82 Z M160.9,144 L167.81,144 L167.81,174.72 L173.95,174.72 L175.1,166.27 L182.02,167.42 L180.48,181.63 L160.9,181.63 Z"></path>
+  </g></svg>

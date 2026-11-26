@@ -1,5 +1,17 @@
 const { div, p, img, button, span } = van.tags;
 
+const seekbarEnd = () => {
+  const { chapterTop, chapterHeight, chapterElement, segments } = reader;
+  const chapterEnd = chapterTop + chapterHeight;
+  // The ending controls follow the last chapter in the document.
+  return segments[segments.length - 1].element === chapterElement
+    ? Math.max(
+        chapterEnd,
+        (document.scrollingElement ?? document.documentElement).scrollHeight,
+      )
+    : chapterEnd;
+};
+
 /**
  * Registers a callback for the scrolled-through ratio, coalesced to one call
  * per frame. Every scroll-driven indicator shares this: separate `scroll`
@@ -19,10 +31,11 @@ const onScrollRatio = (() => {
       queued = false;
       // Settles which chapter is current first: the ratio is relative to it.
       continuousScroll.update();
+      const end = seekbarEnd();
+      const viewportBottom = window.scrollY + reader.layoutHeight;
       const ratio = Math.min(
         1,
-        (window.scrollY + reader.layoutHeight - reader.chapterTop) /
-          reader.chapterHeight,
+        (viewportBottom - reader.chapterTop) / (end - reader.chapterTop),
       );
       for (const callback of callbacks) {
         callback(ratio);
@@ -103,11 +116,6 @@ const Scrollbar = () => {
   let lock = false;
   const percentage = van.state(0);
   const update = ratio => {
-    if (ratio === undefined) {
-      ratio =
-        (window.scrollY + reader.layoutHeight - reader.chapterTop) /
-        reader.chapterHeight;
-    }
     if (ratio > 1) {
       ratio = 1;
     }
@@ -125,7 +133,7 @@ const Scrollbar = () => {
         top: Math.max(
           reader.chapterTop,
           reader.chapterTop +
-            reader.chapterHeight * ratio -
+            (seekbarEnd() - reader.chapterTop) * ratio -
             reader.layoutHeight,
         ),
         behavior: 'instant',

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Converted from assets/source/splash/splash_icon.debug.svg -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+  <group android:name="rings">
+    <path
+        android:name="ring_outer"
+        android:fillColor="#FF4A3208"
+        android:pathData="M144,48 A96,96 0 1,1 144,240 A96,96 0 1,1 144,48 Z" />
+    <path
+        android:name="ring_middle"
+        android:pathData="M144,68.16 A75.84,75.84 0 1,1 144,219.84 A75.84,75.84 0 1,1 144,68.16 Z">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:type="radial"
+            android:centerX="144"
+            android:centerY="144"
+            android:gradientRadius="75.84">
+          <item android:offset="0.848" android:color="#FF996412" />
+          <item android:offset="0.93" android:color="#FFB87816" />
+          <item android:offset="1" android:color="#FFB87816" />
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:name="disc_inner"
+        android:pathData="M144,79.68 A64.32,64.32 0 1,1 144,208.32 A64.32,64.32 0 1,1 144,79.68 Z">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:type="radial"
+            android:centerX="144"
+            android:centerY="144"
+            android:gradientRadius="64.32">
+          <item android:offset="0" android:color="#FFF5E7C8" />
+          <item android:offset="0.78" android:color="#FFF5E7C8" />
+          <item android:offset="1" android:color="#FFE0D2B3" />
+        </gradient>
+      </aapt:attr>
+    </path>
+  </group>
+  <group android:name="glyph">
+    <path
+        android:name="glyph_path"
+        android:fillColor="#FF4A3208"
+        android:pathData="M109.44,107.14 L128.64,107.14 L128.64,113.28 L109.44,113.28 Z M105.6,118.66 L132.48,118.66 L132.48,125.18 L105.6,125.18 Z M109.44,130.94 L128.64,130.94 L128.64,137.09 L109.44,137.09 Z M109.44,143.23 L128.64,143.23 L128.64,149.38 L109.44,149.38 Z M107.9,155.52 L129.41,155.52 L129.41,181.63 L107.9,181.63 Z M114.82,161.66 L114.82,175.49 L122.5,175.49 L122.5,161.66 Z M153.98,105.6 L160.9,105.6 L160.9,133.25 L153.98,133.25 Z M136.32,114.05 L179.33,114.05 L179.33,120.19 L136.32,120.19 Z M140.16,127.1 L174.72,127.1 L174.72,133.25 L140.16,133.25 Z M134.78,139.39 L180.86,139.39 L180.86,153.22 L173.95,153.22 L173.95,145.54 L141.7,145.54 L141.7,153.22 L134.78,153.22 Z M147.84,144 L154.75,144 L154.75,157.82 C154.75,170.88 148.61,179.33 136.32,182.4 L133.63,176.26 C143.23,173.18 147.84,167.04 147.84,157.82 Z M160.9,144 L167.81,144 L167.81,174.72 L173.95,174.72 L175.1,166.27 L182.02,167.42 L180.48,181.63 L160.9,181.63 Z" />
+  </group>
+</vector>
