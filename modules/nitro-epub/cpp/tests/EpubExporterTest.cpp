@@ -1,3 +1,4 @@
+#include "../export/EpubContentProcessor.hpp"
 #include "../export/EpubExporter.hpp"
 
 #include <cassert>
@@ -88,6 +89,25 @@ int main(int argc, char** argv) {
   const std::string firstName(bytes.begin() + 30,
                               bytes.begin() + 30 + nameLength);
   assert(firstName == "mimetype");
+
+  {
+    std::ofstream chapter(chapterPath);
+    chapter << "<p>Paragraph</p><h2>Subsection</h2>";
+  }
+  ZipWriter testZip(fixtureDirectory / "heading-test.zip");
+  std::unordered_map<std::string, EpubAsset> knownAssets;
+  std::vector<EpubAsset> assets;
+  const EpubArchiveChapter chapter{
+      "Chapter <One>", chapterPath.string(), "1", "2"};
+  assert(prepareChapterBody(chapter, testZip, knownAssets, assets) ==
+         "<h1>Chapter &lt;One&gt;</h1><p>Paragraph</p><h2>Subsection</h2>");
+
+  {
+    std::ofstream chapterFile(chapterPath);
+    chapterFile << "<div><h2><em>Source heading</em></h2><p>Text</p></div>";
+  }
+  assert(prepareChapterBody(chapter, testZip, knownAssets, assets) ==
+         "<div><h2><em>Source heading</em></h2><p>Text</p></div>");
 
   return 0;
 }
