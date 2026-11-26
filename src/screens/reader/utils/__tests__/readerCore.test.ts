@@ -200,6 +200,34 @@ const loadReader = async ({
 const restoredTop = (progress: number) =>
   (CHAPTER_HEIGHT * progress) / 100 - VIEWPORT.height;
 
+it('accepts a shorter horizontal swipe without treating diagonal scrolling as navigation', async () => {
+  const page = await loadReader();
+  const { reader, document } = page.window;
+  reader.generalSettings.val = {
+    ...reader.generalSettings.val,
+    swipeGestures: true,
+  };
+  const swipe = (endY: number) => {
+    for (const [type, screenX, screenY] of [
+      ['touchstart', 300, 250],
+      ['touchend', 180, endY],
+    ] as const) {
+      const event = document.createEvent('Event');
+      event.initEvent(type, true, true);
+      Object.defineProperty(event, 'changedTouches', {
+        value: [{ screenX, screenY }],
+      });
+      page.chapterElement().dispatchEvent(event);
+    }
+  };
+
+  swipe(335);
+  expect(page.posted).not.toContainEqual({ type: 'next' });
+  swipe(260);
+  expect(page.posted).toContainEqual({ type: 'next' });
+  page.close();
+});
+
 describe('reader seekbar', () => {
   it('reaches 100 percent when the chapter-ending controls are in view', async () => {
     const { window, scrollCalls, close } = await loadReader();

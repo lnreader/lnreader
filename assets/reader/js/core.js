@@ -1452,7 +1452,7 @@ window.addEventListener('load', () => {
     if (
       reader.generalSettings.val.swipeGestures &&
       Math.abs(diffX) > Math.abs(diffY) * 2 &&
-      Math.abs(diffX) > 180
+      Math.abs(diffX) > Math.min(120, reader.layoutWidth * 0.25)
     ) {
       if (diffX < 0 && this.initialX >= window.innerWidth / 2) {
         e.preventDefault();
