@@ -39,15 +39,72 @@ interface CreateNovelStoreChapterActionsParams {
   defaultChapterSort: ChapterOrderKey;
 }
 
+/** Thrown out of a batch read that a chapter write overlapped, to redo it. */
+const STALE_BATCH = Symbol('staleBatch');
+
 export const createNovelStoreChapterActions = ({
   set,
   get,
   bootstrapService,
-  chapterActionsDependencies,
+  chapterActionsDependencies: baseChapterActionsDependencies,
   chapterRequestCoordinator,
   transformChapters,
   defaultChapterSort,
 }: CreateNovelStoreChapterActionsParams): NovelStoreChapterActions => {
+  // Bulk chapter writes only patch the chapters already loaded and finish in
+  // the background (marking 1000+ chapters read can take seconds, the stats
+  // triggers run per row). A batch read that overlaps one would append rows as
+  // they were before the write, e.g. "select all" + mark read leaving every
+  // chapter past the first batch unread. Batch reads wait for these writes,
+  // and are redone when one starts while they run.
+  let chapterWriteVersion = 0;
+  const pendingChapterWrites = new Set<Promise<unknown>>();
+  const trackChapterWrite =
+    <Args extends unknown[]>(write: (...args: Args) => Promise<void>) =>
+    (...args: Args) => {
+      const promise = write(...args);
+      chapterWriteVersion += 1;
+      pendingChapterWrites.add(promise);
+      const untrack = () => {
+        pendingChapterWrites.delete(promise);
+      };
+      promise.then(untrack, untrack);
+      return promise;
+    };
+  const settleChapterWrites = async () => {
+    while (pendingChapterWrites.size > 0) {
+      await Promise.allSettled(pendingChapterWrites);
+    }
+    return chapterWriteVersion;
+  };
+  // Inherits rather than copies, so the untracked dependencies stay live.
+  const chapterActionsDependencies: ChapterActionsDependencies = Object.assign(
+    Object.create(baseChapterActionsDependencies),
+    {
+      bookmarkChapters: trackChapterWrite(
+        baseChapterActionsDependencies.bookmarkChapters,
+      ),
+      markChaptersRead: trackChapterWrite(
+        baseChapterActionsDependencies.markChaptersRead,
+      ),
+      markChaptersUnread: trackChapterWrite(
+        baseChapterActionsDependencies.markChaptersUnread,
+      ),
+      markPreviuschaptersRead: trackChapterWrite(
+        baseChapterActionsDependencies.markPreviuschaptersRead,
+      ),
+      markPreviousChaptersUnread: trackChapterWrite(
+        baseChapterActionsDependencies.markPreviousChaptersUnread,
+      ),
+      updateChapterProgressByIds: trackChapterWrite(
+        baseChapterActionsDependencies.updateChapterProgressByIds,
+      ),
+      deleteChapters: trackChapterWrite(
+        baseChapterActionsDependencies.deleteChapters,
+      ),
+    },
+  );
+
   let inflightNextChapterBatch:
     | { version: number; promise: Promise<void> }
     | undefined;
@@ -150,9 +207,8 @@ export const createNovelStoreChapterActions = ({
       ) {
         const nextTarget = request.pendingTargetBatch;
         request.pendingTargetBatch = null;
-        const state = get();
 
-        if (nextTarget <= state.batchInformation.batch) {
+        if (nextTarget <= get().batchInformation.batch) {
           continue;
         }
 
@@ -161,19 +217,34 @@ export const createNovelStoreChapterActions = ({
         await new Promise<void>(resolve => {
           runWhenIdle(() => resolve(), 1000);
         });
-        await bootstrapService.loadUpToBatch({
-          targetBatch: nextTarget,
-          novel: state.novel,
-          pages: state.pages,
-          pageIndex: state.pageIndex,
-          settingsSort: getSettingsSort(state.novelSettings),
-          settingsFilter: getSettingsFilter(state.novelSettings),
-          batchInformation: state.batchInformation,
-          onBatchLoaded: (batch, chapters) => {
-            appendBatch(request.version, batch, transformChapters(chapters));
-          },
-          excludedScanlators: state.novelSettings.excludedScanlators,
-        });
+        const writeVersion = await settleChapterWrites();
+        const state = get();
+        try {
+          await bootstrapService.loadUpToBatch({
+            targetBatch: nextTarget,
+            novel: state.novel,
+            pages: state.pages,
+            pageIndex: state.pageIndex,
+            settingsSort: getSettingsSort(state.novelSettings),
+            settingsFilter: getSettingsFilter(state.novelSettings),
+            batchInformation: state.batchInformation,
+            onBatchLoaded: (batch, chapters) => {
+              if (writeVersion !== chapterWriteVersion) {
+                throw STALE_BATCH;
+              }
+              appendBatch(request.version, batch, transformChapters(chapters));
+            },
+            excludedScanlators: state.novelSettings.excludedScanlators,
+          });
+        } catch (error) {
+          if (error !== STALE_BATCH) {
+            throw error;
+          }
+          request.pendingTargetBatch = Math.max(
+            request.pendingTargetBatch ?? nextTarget,
+            nextTarget,
+          );
+        }
       }
     })().finally(() => {
       if (inflightLoadUpToBatch === request) {
@@ -193,7 +264,6 @@ export const createNovelStoreChapterActions = ({
         return inflightNextChapterBatch.promise;
       }
 
-      const state = get();
       const request = {
         version,
         promise: Promise.resolve(),
@@ -206,28 +276,36 @@ export const createNovelStoreChapterActions = ({
         await new Promise<void>(resolve => {
           runWhenIdle(() => resolve(), 1000);
         });
-        const result = await bootstrapService.getNextChapterBatch({
-          novel: state.novel,
-          pages: state.pages,
-          pageIndex: state.pageIndex,
-          settingsSort: getSettingsSort(state.novelSettings),
-          settingsFilter: getSettingsFilter(state.novelSettings),
-          batchInformation: state.batchInformation,
-          excludedScanlators: state.novelSettings.excludedScanlators,
-        });
+        for (;;) {
+          const writeVersion = await settleChapterWrites();
+          const state = get();
+          const result = await bootstrapService.getNextChapterBatch({
+            novel: state.novel,
+            pages: state.pages,
+            pageIndex: state.pageIndex,
+            settingsSort: getSettingsSort(state.novelSettings),
+            settingsFilter: getSettingsFilter(state.novelSettings),
+            batchInformation: state.batchInformation,
+            excludedScanlators: state.novelSettings.excludedScanlators,
+          });
 
-        if (
-          !result ||
-          request.version !== chapterRequestCoordinator.current()
-        ) {
+          if (
+            !result ||
+            request.version !== chapterRequestCoordinator.current()
+          ) {
+            return;
+          }
+          if (writeVersion !== chapterWriteVersion) {
+            continue;
+          }
+
+          appendBatch(
+            request.version,
+            result.batch,
+            transformChapters(result.chapters),
+          );
           return;
         }
-
-        appendBatch(
-          request.version,
-          result.batch,
-          transformChapters(result.chapters),
-        );
       })().finally(() => {
         if (inflightNextChapterBatch === request) {
           inflightNextChapterBatch = undefined;

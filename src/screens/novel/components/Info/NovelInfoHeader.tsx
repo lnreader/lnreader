@@ -7,6 +7,7 @@ import { IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { showToast } from '@utils/showToast';
+import { getDownloadedChapterIds } from '@database/queries/ChapterQueries';
 
 import {
   CoverImage,
@@ -48,7 +49,6 @@ import {
 } from './NovelInfoSkeletons';
 
 interface NovelInfoHeaderProps {
-  hasDownloadedChapters: boolean;
   deleteDownloadSnackbar?: UseBooleanReturnType;
   fetching: boolean;
   filter?: ChapterFilterKey[];
@@ -85,7 +85,6 @@ const showNotAvailable = () => {
 };
 
 const NovelInfoHeader = ({
-  hasDownloadedChapters,
   deleteDownloadSnackbar,
   fetching,
   filter = [],
@@ -146,8 +145,14 @@ const NovelInfoHeader = ({
       return;
     }
     try {
+      const wasInLibrary = novel.inLibrary;
       await followNovel();
-      if (novel.inLibrary && hasDownloadedChapters) {
+      // Only the first chapter batch is loaded, so ask the database.
+      if (
+        wasInLibrary &&
+        novel.id !== 'NO_ID' &&
+        (await getDownloadedChapterIds(novel.id)).length > 0
+      ) {
         deleteDownloadSnackbar?.setTrue();
       } else {
         deleteDownloadSnackbar?.setFalse();
@@ -162,7 +167,7 @@ const NovelInfoHeader = ({
     isLoading,
     followNovel,
     novel.inLibrary,
-    hasDownloadedChapters,
+    novel.id,
     deleteDownloadSnackbar,
   ]);
 

@@ -1,4 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import NovelScreen from '../NovelScreen';
 
 const mockDownloadChapters = jest.fn();
@@ -6,9 +11,13 @@ const mockUpdateChapterProgressByIds = jest.fn();
 const mockGetPageChapterIds = jest.fn();
 const mockUseNovelValue = jest.fn();
 const mockUseNovelActions = jest.fn();
+const mockGetNovelDownloadedChapters = jest.fn();
+const mockGetPageChapters = jest.fn();
+let mockSnackbarVisible = false;
 
 jest.mock('@hooks/persisted', () => ({
   useAppSettings: () => ({
+    defaultChapterSort: 'positionAsc',
     downloadNewChapters: false,
     refreshNovelMetadata: false,
   }),
@@ -40,7 +49,7 @@ jest.mock('@services/backgroundTasks', () => ({
 
 jest.mock('@hooks', () => ({
   useBoolean: () => ({
-    value: false,
+    value: mockSnackbarVisible,
     setTrue: jest.fn(),
     setFalse: jest.fn(),
   }),
@@ -64,6 +73,9 @@ jest.mock('@database/queries/ChapterQueries', () => ({
   getAllUndownloadedChapters: jest.fn().mockResolvedValue([]),
   getChaptersByIds: jest.fn().mockResolvedValue([]),
   getPageChapterIds: (...args: unknown[]) => mockGetPageChapterIds(...args),
+  getPageChapters: (...args: unknown[]) => mockGetPageChapters(...args),
+  getNovelDownloadedChapters: (...args: unknown[]) =>
+    mockGetNovelDownloadedChapters(...args),
   updateChapterProgressByIds: (...args: unknown[]) =>
     mockUpdateChapterProgressByIds(...args),
 }));
@@ -74,12 +86,26 @@ jest.mock('../../../database/queries/NovelQueries', () => ({
 
 jest.mock('../components/NovelAppbar', () => {
   const React = require('react');
-  const { Text } = require('react-native');
-  return ({ hideActions }: { hideActions?: boolean }) =>
+  const { Pressable, Text } = require('react-native');
+  return ({
+    hideActions,
+    downloadChapters,
+  }: {
+    hideActions?: boolean;
+    downloadChapters: (amount: number) => void;
+  }) =>
     React.createElement(
-      Text,
-      { testID: 'novel-appbar' },
-      hideActions ? 'appbar-actions-hidden' : 'appbar',
+      React.Fragment,
+      null,
+      React.createElement(
+        Text,
+        { testID: 'novel-appbar' },
+        hideActions ? 'appbar-actions-hidden' : 'appbar',
+      ),
+      React.createElement(Pressable, {
+        testID: 'download-next-5',
+        onPress: () => downloadChapters(5),
+      }),
     );
 });
 
@@ -201,10 +227,23 @@ jest.mock('react-native-paper', () => {
         ),
       Content: ({ title }: any) => React.createElement(Text, null, title),
     },
-    Snackbar: ({ visible, children }: any) =>
-      visible ? React.createElement(React.Fragment, null, children) : null,
+    Snackbar: ({ visible, children, action }: any) =>
+      visible
+        ? React.createElement(
+            React.Fragment,
+            null,
+            children,
+            React.createElement(
+              Pressable,
+              { testID: 'snackbar-action', onPress: action.onPress },
+              React.createElement(Text, null, action.label),
+            ),
+          )
+        : null,
   };
 });
+
+jest.mock('../components/SetCategoriesModal', () => () => null);
 
 jest.mock('../components/JumpToChapterModal', () => {
   const React = require('react');
@@ -335,6 +374,62 @@ describe('NovelScreen (task 12 context boundary cutover)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetPageChapterIds.mockResolvedValue([]);
+    mockSnackbarVisible = false;
+  });
+
+  it('downloads the next undownloaded chapters of the open page, loaded or not', async () => {
+    const store = createStore({
+      novelSettings: {
+        filter: ['not-read'],
+        excludedScanlators: ['Group A'],
+        sort: 'positionDesc',
+      },
+    });
+    wireStoreSelectors(store);
+    const next = [{ id: 1201, isDownloaded: false }];
+    mockGetPageChapters.mockResolvedValue(next);
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    fireEvent.press(screen.getByTestId('download-next-5'));
+
+    await waitFor(() =>
+      expect(mockDownloadChapters).toHaveBeenCalledWith(baseNovel, next),
+    );
+    expect(mockGetPageChapters).toHaveBeenCalledWith(
+      7,
+      'positionDesc',
+      ['not-read', 'not-downloaded'],
+      '1',
+      undefined,
+      5,
+      ['Group A'],
+    );
+  });
+
+  it('deletes every downloaded chapter, not just the loaded ones, from the remove-from-library prompt', async () => {
+    mockSnackbarVisible = true;
+    const store = createStore();
+    wireStoreSelectors(store);
+    const downloadedIds = Array.from({ length: 1100 }, (_, index) => index + 1);
+    mockGetNovelDownloadedChapters.mockResolvedValue(
+      downloadedIds.map(id => ({ id, isDownloaded: true })),
+    );
+
+    render(
+      // @ts-expect-error narrowed test props
+      <NovelScreen navigation={navigation} route={route} />,
+    );
+
+    fireEvent.press(screen.getByTestId('snackbar-action'));
+
+    await waitFor(() =>
+      expect(store.state.deleteChapters).toHaveBeenCalledWith(downloadedIds),
+    );
+    expect(mockGetNovelDownloadedChapters).toHaveBeenCalledWith(7);
   });
 
   it('uses novelStore action selectors for selected unread workflow', () => {
