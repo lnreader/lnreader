@@ -14,6 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -39,6 +40,7 @@ import {
   useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
+import { getBottomSheetLayout } from '@components/BottomSheet/layout';
 import { TopTabBar } from '@components';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { LegendList } from '@legendapp/list/react-native';
@@ -47,6 +49,8 @@ interface LibraryBottomSheetProps {
   bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
   style?: StyleProp<ViewStyle>;
 }
+
+const SHEET_HEIGHT = 520;
 
 type FilterRow =
   | { type: 'filter'; key: LibraryFilterKey; label: string }
@@ -333,6 +337,13 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   const { reduceAppAnimations = false } = useAppSettings();
 
   const layout = useWindowDimensions();
+  const { bottom, top } = useSafeAreaInsets();
+  const { maxHeight } = getBottomSheetLayout({
+    bottom,
+    height: layout.height,
+    top,
+    width: layout.width,
+  });
 
   const renderTabBar = useCallback(
     (props: any) => (
@@ -390,7 +401,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   }, [renderCommonOptions]);
 
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
+    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[SHEET_HEIGHT]}>
       <BottomSheetView style={styles.bottomSheetCtn}>
         <TabView
           animationEnabled={!reduceAppAnimations}
@@ -400,7 +411,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
           renderScene={bottomSheetSceneMap}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
-          style={styles.tabView}
+          style={{ height: Math.min(SHEET_HEIGHT, maxHeight) }}
         />
       </BottomSheetView>
     </BottomSheet>
@@ -420,9 +431,6 @@ const styles = StyleSheet.create({
   tabBar: {
     borderBottomWidth: 1,
     elevation: 0,
-  },
-  tabView: {
-    height: 520,
   },
   flex: { flex: 1 },
 });
