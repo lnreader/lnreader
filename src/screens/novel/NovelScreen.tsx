@@ -38,7 +38,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   const novelSettings = useNovelValue('novelSettings');
   const pageIndex = useNovelValue('pageIndex');
   const pages = useNovelValue('pages');
-  const { setNovel, deleteChapters, refreshNovel } = useNovelActions();
+  const { setNovel, refreshNovel } = useNovelActions();
 
   const theme = useTheme();
   const { downloadNewChapters, refreshNovelMetadata } = useAppSettings();
@@ -125,13 +125,9 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   const snackbarAction = useMemo(
     () => ({
       label: getString('common.delete'),
-      onPress: () => {
-        deleteChapters(
-          chapters.filter(c => c.isDownloaded).map(chapter => chapter.id),
-        );
-      },
+      onPress: deleteDownloadedChapters,
     }),
-    [chapters, deleteChapters],
+    [deleteDownloadedChapters],
   );
 
   const styles = useMemo(() => createStyles(theme), [theme]);

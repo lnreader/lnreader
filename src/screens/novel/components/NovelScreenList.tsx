@@ -161,10 +161,6 @@ const NovelScreenList = ({
   // Derive selectedIds Set for O(1) lookups
   const selectedIds = useMemo(() => new Set(selected), [selected]);
   const isSelectionMode = selected.length > 0;
-  const hasDownloadedChapters = useMemo(
-    () => chapters.some(chapter => chapter.isDownloaded),
-    [chapters],
-  );
 
   useAnimatedReaction(
     () => scrollOffset.value,
@@ -407,7 +403,6 @@ const NovelScreenList = ({
     () => (
       <>
         <NovelInfoHeader
-          hasDownloadedChapters={hasDownloadedChapters}
           deleteDownloadSnackbar={deleteDownloadSnackbar}
           fetching={fetching}
           filter={filter}
@@ -428,7 +423,6 @@ const NovelScreenList = ({
       </>
     ),
     [
-      hasDownloadedChapters,
       deleteDownloadSnackbar,
       fetching,
       filter,
