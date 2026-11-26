@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import Color from 'color';
 
-import { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
 import { List, TopTabBar } from '@components';
 import {
@@ -284,24 +284,21 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
 
   return (
     <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[360, 600]}>
-      <BottomSheetView style={styles.flex}>
-        <TabView
-          animationEnabled={!reduceAppAnimations}
-          commonOptions={{
-            label: renderLabel,
-          }}
-          navigationState={{ index, routes }}
-          renderTabBar={renderTabBar}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          style={styles.tabView}
-          // Without this every tab is mounted at once – the TTS tab alone
-          // enumerates the device's engines and voices over the bridge.
-          lazy
-          renderLazyPlaceholder={renderLazyPlaceholder}
-        />
-      </BottomSheetView>
+      <TabView
+        animationEnabled={!reduceAppAnimations}
+        commonOptions={{
+          label: renderLabel,
+        }}
+        navigationState={{ index, routes }}
+        renderTabBar={renderTabBar}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        // Without this every tab is mounted at once – the TTS tab alone
+        // enumerates the device's engines and voices over the bridge.
+        lazy
+        renderLazyPlaceholder={renderLazyPlaceholder}
+      />
     </BottomSheet>
   );
 };
@@ -317,9 +314,6 @@ const styles = StyleSheet.create({
   tabBar: {
     borderBottomWidth: 0.5,
     elevation: 0,
-  },
-  tabView: {
-    height: 600,
   },
   flex: { flex: 1 },
 });
