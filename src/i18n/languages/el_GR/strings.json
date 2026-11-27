@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Επεξεργασία",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globally",
     "install": "Εγκατάσταση",
@@ -502,6 +503,8 @@
   },
   "library": "Βιβλιοθήκη",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Badges",
@@ -523,6 +526,7 @@
         "completed": "Ολοκληρώθηκε",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Κατεβασμένο",
+        "genres": "Genres",
         "started": "Ξεκίνησε",
         "unread": "Δε διαβάστηκε"
       },
