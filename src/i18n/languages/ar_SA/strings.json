@@ -333,6 +333,7 @@
     "downloads": "التنزيلات",
     "edit": "تعديل",
     "example": "مثال",
+    "excludedItem": "%{name}, excluded",
     "filter": "تصفية",
     "globally": "عالمياً",
     "install": "تثبيت",
@@ -502,6 +503,8 @@
   },
   "library": "المكتبة",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "الأوسمة",
@@ -523,6 +526,7 @@
         "completed": "مكتمل",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "منزل",
+        "genres": "Genres",
         "started": "بدأت",
         "unread": "غير مقروء"
       },
