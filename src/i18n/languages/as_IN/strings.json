@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "সম্পাদনা কৰক",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "বিশ্বব্যাপী",
     "install": "স্থাপন",
@@ -502,6 +503,8 @@
   },
   "library": "পুথিভঁৰাল",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "বেজসমূহ",
@@ -523,6 +526,7 @@
         "completed": "সম্পূৰ্ণ",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "ডাউনলোড কৰা",
+        "genres": "Genres",
         "started": "আৰম্ভ কৰা",
         "unread": "নপঢ়া"
       },
