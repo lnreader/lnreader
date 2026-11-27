@@ -97,7 +97,9 @@ describe('useTimeTracking', () => {
   });
 
   it('does not track time when time tracking is turned off', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, false, 60000, false, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, false, 60000, false, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(6000);
@@ -108,7 +110,9 @@ describe('useTimeTracking', () => {
   });
 
   it('does not track time when the user is inactive for too long', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, false, 60000, true, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, false, 60000, true, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(70000);
@@ -119,7 +123,9 @@ describe('useTimeTracking', () => {
   });
 
   it('resets inactivity timeout correctly', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, false, 60000, true, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, false, 60000, true, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(30000);
@@ -134,7 +140,9 @@ describe('useTimeTracking', () => {
   });
 
   it('tracks time accurately when the user interacts multiple times in quick succession', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, false, 60000, true, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, false, 60000, true, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(30000);
@@ -153,7 +161,9 @@ describe('useTimeTracking', () => {
   });
 
   it('tracks time accurately even when the user goes inactive for a while', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, false, 60000, true, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, false, 60000, true, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(30000);
@@ -179,7 +189,9 @@ describe('useTimeTracking', () => {
   });
 
   it('does not track time in incognito mode', () => {
-    const onUserInteraction = renderHook(() => useTimeTracking(1, true, 60000, true, increaseTimeSpent)).result.current.onUserInteraction;
+    const onUserInteraction = renderHook(() =>
+      useTimeTracking(1, true, 60000, true, increaseTimeSpent),
+    ).result.current.onUserInteraction;
 
     act(() => {
       jest.advanceTimersByTime(6000);
@@ -249,5 +261,47 @@ describe('useTimeTracking', () => {
 
     expect(increaseTimeSpent).toHaveBeenNthCalledWith(1, 1, 5000);
     expect(increaseTimeSpent).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not count the time another screen covers the reader', () => {
+    const { rerender, unmount } = renderHook(
+      ({ focused }: { focused: boolean }) =>
+        useTimeTracking(1, false, 60000, true, increaseTimeSpent, focused),
+      { initialProps: { focused: true } },
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    rerender({ focused: false });
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+    rerender({ focused: true });
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    unmount();
+
+    expect(increaseTimeSpent).toHaveBeenNthCalledWith(1, 1, 5000);
+    expect(increaseTimeSpent).toHaveBeenNthCalledWith(2, 1, 2000);
+    expect(increaseTimeSpent).toHaveBeenCalledTimes(2);
+  });
+
+  it('counts the time another screen covers the reader while TTS reads', () => {
+    const { result, rerender } = renderHook(
+      ({ focused }: { focused: boolean }) =>
+        useTimeTracking(1, false, 60000, true, increaseTimeSpent, focused),
+      { initialProps: { focused: true } },
+    );
+
+    result.current.isTTSReadingRef.current = true;
+    rerender({ focused: false });
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+    rerender({ focused: true });
+
+    expect(increaseTimeSpent).toHaveBeenCalledWith(1, 30000);
   });
 });

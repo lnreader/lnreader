@@ -3,6 +3,7 @@ import { AppState, AppStateStatus } from 'react-native';
 
 /**
  * Starts tracking time spent on the chapter and returns a callback to be called on user interaction (to prevent the inactivity timeout from being triggered).
+ * `focused` is false while another screen covers the reader.
  */
 export default function useTimeTracking(
   chapterId: number,
@@ -10,14 +11,20 @@ export default function useTimeTracking(
   inactivityTimeoutMs: number | undefined,
   turnedOn: boolean,
   increaseTimeSpent: (chapterId: number, elapsed: number) => void,
+  focused = true,
 ) {
   // eslint-disable-next-line react-hooks/purity
   const lastUserInteractionRef = useRef(Date.now());
   const isTTSReadingRef = useRef(false);
+  const focusedRef = useRef(focused);
 
   /** Increases the time spent on the current chapter since the last user interaction, as long as it was not too long ago */
   const flushElapsedTime = useCallback(() => {
-    const enabled = turnedOn && !incognitoMode;
+    // Like time in the background, covered time counts only while TTS reads.
+    const enabled =
+      turnedOn &&
+      !incognitoMode &&
+      (focusedRef.current || isTTSReadingRef.current);
     const isInactive =
       inactivityTimeoutMs !== undefined &&
       Date.now() - lastUserInteractionRef.current > inactivityTimeoutMs;
@@ -66,6 +73,16 @@ export default function useTimeTracking(
     const sub = AppState.addEventListener('change', handleChange);
     return () => sub.remove();
   }, [flushElapsedTime]);
+
+  // Flush the elapsed time when another screen covers the reader or goes away
+  useEffect(() => {
+    if (focusedRef.current === focused) {
+      return;
+    }
+    flushElapsedTime();
+    focusedRef.current = focused;
+    lastUserInteractionRef.current = Date.now();
+  }, [focused, flushElapsedTime]);
 
   // Flush the elapsed time when the chapter changes
   useEffect(() => {

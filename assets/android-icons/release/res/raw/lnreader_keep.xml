@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The background task notification factory looks up this icon by name. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/notification_icon" />

@@ -1,8 +1,10 @@
 import { ChapterOrderKey } from '@database/constants';
 import {
   DisplayModes,
-  LibraryFilter,
+  LegacyLibraryFilter,
+  LibraryFilters,
   LibrarySortOrder,
+  resolveLibraryFilters,
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import type { TtsControllerPosition } from '@screens/reader/utils/ttsControllerPosition';
@@ -141,7 +143,12 @@ export interface LibrarySettings {
   upcomingExcludeCategoryIds?: number[];
   upcomingIncludeCategoryIds?: number[];
   sortOrder?: LibrarySortOrder;
-  filter?: LibraryFilter;
+  /** @deprecated Read through `filters`, which falls back to it. */
+  filter?: LegacyLibraryFilter;
+  filters?: LibraryFilters;
+  /** Genre keys; see `getGenreKey`. */
+  includedGenres?: string[];
+  excludedGenres?: string[];
   showDownloadBadges?: boolean;
   showUnreadBadges?: boolean;
   showContinueReadingButton?: boolean;
@@ -429,6 +436,11 @@ const defaultLibrarySettings: LibrarySettings = {
   sortOrder: LibrarySortOrder.DateAdded_DESC,
 };
 
+const useValueMemo = <T>(value: T): T => {
+  const serialized = JSON.stringify(value);
+  return useMemo(() => JSON.parse(serialized) as T, [serialized]);
+};
+
 export const useLibrarySettings = () => {
   const [librarySettings, setSettings] =
     useMMKVObject<LibrarySettings>(LIBRARY_SETTINGS);
@@ -436,8 +448,17 @@ export const useLibrarySettings = () => {
   const setLibrarySettings = (value: Partial<LibrarySettings>) =>
     setSettings({ ...librarySettings, ...value });
 
+  const filters = useValueMemo(
+    resolveLibraryFilters(librarySettings?.filters, librarySettings?.filter),
+  );
+  const includedGenres = useValueMemo(librarySettings?.includedGenres ?? []);
+  const excludedGenres = useValueMemo(librarySettings?.excludedGenres ?? []);
+
   return {
     ...{ ...defaultLibrarySettings, ...librarySettings },
+    filters,
+    includedGenres,
+    excludedGenres,
     setLibrarySettings,
   };
 };

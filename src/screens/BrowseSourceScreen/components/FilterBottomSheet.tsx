@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  FlatList,
   LayoutRectangle,
   Pressable,
   ScrollView,
@@ -12,9 +13,11 @@ import {
   type HostInstance,
 } from 'react-native';
 
-import BottomSheet from '@components/BottomSheet/BottomSheet';
-import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import BottomSheet, {
+  BottomSheetRef,
+} from '@components/BottomSheet/BottomSheet';
+import { useMeasureInWindow } from '@components/BottomSheet/measureInWindow';
+import { TrueSheetOverlay } from '@lodev09/react-native-true-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@hooks/persisted';
@@ -29,7 +32,7 @@ import { Checkbox } from '@components/Checkbox/Checkbox';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useBoolean } from '@hooks';
 import { useKeyboardHeight } from '@hooks/common/useKeyboardHeight';
-import { Portal, TextInput, overlay } from 'react-native-paper';
+import { TextInput, overlay } from 'react-native-paper';
 import {
   addMultiTextValues,
   getEstimatedSuggestionsHeight,
@@ -56,8 +59,9 @@ interface FilterSuggestionOverlayProps {
 }
 
 /**
- * Anchors a suggestion list to a text field and renders it in a portal, so the
- * list is not painted behind the FlatList cells that follow the field.
+ * Anchors a suggestion list to a text field and renders it in a window-level
+ * overlay, so the list is not painted behind the FlatList cells that follow
+ * the field. A react-native-paper Portal would sit under the native sheet.
  */
 const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
   children,
@@ -74,13 +78,15 @@ const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
 
   const [anchor, setAnchor] = useState<LayoutRectangle | null>(null);
 
+  const measureInWindow = useMeasureInWindow();
+
   const measureAnchor = useCallback(() => {
-    anchorRef.current?.measureInWindow((x, y, width, height) => {
+    measureInWindow(anchorRef.current, (x, y, width, height) => {
       if (width > 0 && height > 0) {
         setAnchor({ x, y, width, height });
       }
     });
-  }, []);
+  }, [measureInWindow]);
 
   // The list is shown after the field has settled, but the anchor can still
   // move (sheet snap, keyboard, chip row) while the list is open.
@@ -115,7 +121,7 @@ const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
         {children}
       </View>
       {visible && placement ? (
-        <Portal>
+        <TrueSheetOverlay>
           <View pointerEvents="box-none" style={styles.suggestionOverlayHost}>
             <View
               accessibilityRole="menu"
@@ -154,7 +160,7 @@ const FilterSuggestionOverlay: React.FC<FilterSuggestionOverlayProps> = ({
               </ScrollView>
             </View>
           </View>
-        </Portal>
+        </TrueSheetOverlay>
       ) : null}
     </>
   );
@@ -665,8 +671,10 @@ const FilterItem: React.FC<FilterItemProps> = ({
   return <></>;
 };
 
+const SNAP_POINTS = [400, 600];
+
 interface BottomSheetProps {
-  filterSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  filterSheetRef: React.RefObject<BottomSheetRef | null>;
   filters: Filters;
   pluginId: string;
   setFilters: (filters?: SelectedFilters) => void;
@@ -685,6 +693,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
     useState<SelectedFilters>(filters);
   // Reset remounts the list so fields with local drafts (e.g. MultiText) clear.
   const [resetVersion, setResetVersion] = useState(0);
+  const listRef = useRef<FlatList<[string, Filters[string]]>>(null);
 
   // Suggestions are portaled above the sheet, so they must close whenever the
   // field that anchors them moves or the sheet goes away.
@@ -703,7 +712,8 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
     <BottomSheet
       bottomSheetRef={filterSheetRef}
       onChange={dismissSuggestions}
-      snapPoints={[400, 600]}
+      snapPoints={SNAP_POINTS}
+      scrollableRef={listRef}
     >
       <View style={styles.flex}>
         <View
@@ -730,7 +740,8 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
             mode="contained"
           />
         </View>
-        <BottomSheetFlatList
+        <FlatList
+          ref={listRef}
           data={
             filters && (Object.entries(filters) as [string, Filters[string]][])
           }
@@ -752,19 +763,6 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
           )}
         />
       </View>
-      {/*<BottomSheetFlatList
-        data={filters && Object.entries(filters)}
-        keyExtractor={(item: [string, unknown]) => 'filter' + item[0]}
-        renderItem={({ item }: { item: [string, Filters[string]] }) => (
-          <FilterItem
-            theme={theme}
-            filter={item[1]}
-            filterKey={item[0] as keyof Filters}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-          />
-        )}
-      />*/}
     </BottomSheet>
   );
 };

@@ -1,10 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { FAB } from 'react-native-paper';
+import { Button, FAB } from 'react-native-paper';
 import { ErrorScreenV2, SafeAreaView, SearchbarV2 } from '@components/index';
 import NovelList from '@components/NovelList';
 import NovelCover from '@components/NovelCover';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import FilterBottomSheet from './components/FilterBottomSheet';
 
 import { useSearch } from '@hooks';
@@ -14,7 +14,7 @@ import { useBrowseSource, useSearchSource } from './useBrowseSource';
 import { NovelItem } from '@plugins/types';
 import { getPlugin } from '@plugins/pluginManager';
 import { getString } from '@i18n/translations';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { NovelInfo } from '@database/types';
 import SourceScreenSkeletonLoading from '@screens/browse/loadingAnimation/SourceScreenSkeletonLoading';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,38 +27,44 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
   const { pluginId, pluginName, site, showLatestNovels } = route.params;
   const imageRequestInit = getPlugin(pluginId)?.imageRequestInit;
 
-  const {
-    isLoading,
-    novels,
-    hasNextPage,
-    fetchNextPage,
-    error,
-    filterValues,
-    setFilters,
-    clearFilters,
-    refetchNovels,
-  } = useBrowseSource(pluginId, showLatestNovels);
+  const browse = useBrowseSource(pluginId, showLatestNovels);
+  const search = useSearchSource(pluginId);
+  const submittedQuery = search.page?.params;
+  const { page, fetchNextPage, retryPage } = submittedQuery ? search : browse;
+  const error = page?.error;
+  const hasError = error !== undefined;
+  const canFetchNextPage =
+    page?.nextPage != null && !page.isLoading && !hasError;
+  const lastFetchDistanceRef = useRef(Infinity);
+  const lastScrolledNovelsRef = useRef<NovelItem[]>(null);
+  const lastOffsetYRef = useRef(-1);
 
-  const {
-    isSearching,
-    searchResults,
-    searchSource,
-    searchNextPage,
-    hasNextSearchPage,
-    clearSearchResults,
-    searchError,
-  } = useSearchSource(pluginId);
-  const novelList = searchResults.length > 0 ? searchResults : novels;
-  const errorMessage = error || searchError;
-
-  const { searchText, setSearchText, clearSearchbar } = useSearch();
-  const onChangeText = (text: string) => setSearchText(text);
+  const { searchText, setSearchText, clearSearchbar } = useSearch(
+    undefined,
+    false,
+  );
+  const resetScrollGate = () => {
+    lastFetchDistanceRef.current = Infinity;
+    lastScrolledNovelsRef.current = null;
+    lastOffsetYRef.current = -1;
+  };
+  const clearSearch = () => {
+    search.clearSearchResults();
+    resetScrollGate();
+  };
+  const onChangeText = (text: string) => {
+    setSearchText(text);
+    if (!text) {
+      clearSearch();
+    }
+  };
   const onSubmitEditing = () => {
-    searchSource(searchText);
+    resetScrollGate();
+    search.searchSource(searchText);
   };
   const handleClearSearchbar = () => {
     clearSearchbar();
-    clearSearchResults();
+    clearSearch();
   };
 
   const handleOpenWebView = async () => {
@@ -71,6 +77,10 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
 
   const { novelInLibrary, switchNovelToLibrary } = useLibraryContext();
   const [inActivity, setInActivity] = useState<Record<string, boolean>>({});
+  const listExtraData = useMemo(
+    () => ({ inActivity, novelInLibrary }),
+    [inActivity, novelInLibrary],
+  );
 
   const navigateToNovel = useCallback(
     (item: NovelItem | NovelInfo) =>
@@ -85,10 +95,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
   );
 
   const { bottom, right } = useSafeAreaInsets();
-  const filterSheetRef = useRef<BottomSheetModalMethods | null>(null);
-  const lastFetchDistanceRef = useRef(Infinity);
-  const lastContentHeightRef = useRef(0);
-  const lastOffsetYRef = useRef(-1);
+  const filterSheetRef = useRef<BottomSheetRef | null>(null);
   const handleScroll = (event: {
     nativeEvent: {
       contentOffset: { y: number };
@@ -102,32 +109,22 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
     const offsetMoved = contentOffset.y !== lastOffsetYRef.current;
     lastOffsetYRef.current = contentOffset.y;
 
-    // A page appended (the end moved away). Re-arm the gate so the next user
-    // scroll toward the end fetches again. Content-size-only events (offset
-    // unchanged) never fetch on their own — that is what turned the old
-    // onEndReached flow into a loop on sources that never return an empty
-    // page (measured: htmlparser2 hot on every frame).
-    if (contentSize.height !== lastContentHeightRef.current) {
-      lastContentHeightRef.current = contentSize.height;
-      if (offsetMoved) {
-        lastFetchDistanceRef.current = Infinity;
-      }
-    }
+    // Require movement for scroll-based prefetch. New results re-arm the gate
+    // on the next scroll.
     if (!offsetMoved) {
       return;
     }
+    if (page && page.novels !== lastScrolledNovelsRef.current) {
+      lastScrolledNovelsRef.current = page.novels;
+      lastFetchDistanceRef.current = Infinity;
+    }
     if (
+      canFetchNextPage &&
       distanceFromEnd < layoutMeasurement.height * 1.5 &&
       distanceFromEnd < lastFetchDistanceRef.current
     ) {
       lastFetchDistanceRef.current = distanceFromEnd;
-      if (searchText) {
-        if (hasNextSearchPage) {
-          searchNextPage();
-        }
-      } else if (hasNextPage) {
-        fetchNextPage();
-      }
+      fetchNextPage();
     }
   };
   return (
@@ -143,32 +140,45 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
         rightIcons={[{ iconName: 'earth', onPress: handleOpenWebView }]}
         theme={theme}
       />
-      {isLoading || isSearching ? (
+      {!page || (page.isLoading && page.novels.length === 0) ? (
         <SourceScreenSkeletonLoading theme={theme} tintColor={skeletonTint} />
-      ) : errorMessage || novelList.length === 0 ? (
+      ) : page.novels.length === 0 ? (
         <ErrorScreenV2
-          error={errorMessage || getString('sourceScreen.noResultsFound')}
-          actions={[
-            {
-              iconName: 'refresh',
-              title: getString('common.retry'),
-              onPress: () => {
-                if (searchText) {
-                  searchSource(searchText);
-                } else {
-                  refetchNovels();
-                }
-              },
-            },
-          ]}
+          error={error ?? getString('sourceScreen.noResultsFound')}
+          actions={
+            hasError
+              ? [
+                  {
+                    iconName: 'refresh',
+                    title: getString('common.retry'),
+                    onPress: retryPage,
+                  },
+                ]
+              : undefined
+          }
         />
       ) : (
         <NovelList
-          data={novelList}
-          inSource
+          data={page.novels}
+          extraData={listExtraData}
+          // Idle fillers could hide changes to the result count within a row.
+          inSource={page.isLoading}
           ListFooterComponent={
-            (hasNextPage && !searchText) ||
-            (hasNextSearchPage && Boolean(searchText)) ? (
+            hasError ? (
+              <View style={styles.pageError}>
+                <Text
+                  style={[
+                    styles.pageErrorText,
+                    { color: theme.onSurfaceVariant },
+                  ]}
+                >
+                  {error}
+                </Text>
+                <Button icon="refresh" onPress={retryPage}>
+                  {getString('common.retry')}
+                </Button>
+              </View>
+            ) : page.isLoading ? (
               <SourceScreenSkeletonLoading
                 theme={theme}
                 completeRow={2}
@@ -187,10 +197,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
                 inActivity={inActivity[item.path]}
                 onPress={() => navigateToNovel(item)}
                 isSelected={false}
-                addSkeletonLoading={
-                  (hasNextPage && !searchText) ||
-                  (hasNextSearchPage && Boolean(searchText))
-                }
+                addSkeletonLoading={page.isLoading}
                 skeletonTint={skeletonTint}
                 onLongPress={async () => {
                   setInActivity(prev => ({ ...prev, [item.path]: true }));
@@ -204,11 +211,15 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
               />
             );
           }}
+          // LegendList's zero threshold dispatches only for content shorter
+          // than the viewport. Scrollable lists use the scroll gate above.
+          onEndReachedThreshold={0}
+          onEndReached={canFetchNextPage ? fetchNextPage : undefined}
           onScroll={handleScroll}
           scrollEventThrottle={32}
         />
       )}
-      {!showLatestNovels && filterValues && !searchText ? (
+      {!showLatestNovels && browse.filterValues && !submittedQuery ? (
         <>
           <FAB
             icon={'filter-variant'}
@@ -227,10 +238,10 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
           />
           <FilterBottomSheet
             filterSheetRef={filterSheetRef}
-            filters={filterValues}
+            filters={browse.filterValues}
             pluginId={pluginId}
-            setFilters={setFilters}
-            clearFilters={clearFilters}
+            setFilters={browse.setFilters}
+            clearFilters={browse.clearFilters}
           />
         </>
       ) : null}
@@ -241,6 +252,13 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
 export default BrowseSourceScreen;
 
 const styles = StyleSheet.create({
+  pageError: {
+    alignItems: 'center',
+    padding: 16,
+  },
+  pageErrorText: {
+    textAlign: 'center',
+  },
   filterFab: {
     bottom: 0,
     margin: 16,

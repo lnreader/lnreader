@@ -100,7 +100,7 @@ const NovelCoverImage = ({
   priority,
   recyclingKey,
   testID,
-  transition = 150,
+  transition = { duration: 150, skipOnCacheHit: 'all' },
 }: NovelCoverImageProps) => {
   const { reduceAppAnimations = false } = useAppSettings();
   const normalizedUri = uri?.trim();

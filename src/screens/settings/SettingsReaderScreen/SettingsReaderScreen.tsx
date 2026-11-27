@@ -1,17 +1,16 @@
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useCallback, useRef, useState } from 'react';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from '@react-navigation/native';
 import { FAB } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import {
-  TabView,
-  type TabBarProps,
-  type TabDescriptor,
-} from 'react-native-tab-view';
+import { type TabBarProps, type TabDescriptor } from 'react-native-tab-view';
 
 import { Appbar, SafeAreaView, TopTabBar } from '@components/index';
-import BottomSheet from '@components/BottomSheet/BottomSheet';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
+import BottomSheet, {
+  BottomSheetRef,
+  useTabScrollables,
+} from '@components/BottomSheet/BottomSheet';
 import {
   useAppSettings,
   useChapterReaderSettings,
@@ -57,7 +56,7 @@ export type TextAlignments =
 const SettingsReaderScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
+  const bottomSheetRef = useRef<BottomSheetRef>(null);
   const { bottom, right } = useSafeAreaInsets();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [tabIndex, setTabIndex] = useState(0);
@@ -71,22 +70,23 @@ const SettingsReaderScreen = () => {
     bottomSheetRef.current?.present();
   };
 
+  const { register, scrollableRef } = useTabScrollables(routes[tabIndex].key);
+
   const renderTabContent = useCallback(
     ({ route }: { route: ReaderSettingsRoute }) => {
+      const scrollRef = register(route.key);
       switch (route.key) {
-        case 'display':
-          return <DisplayTab />;
         case 'theme':
-          return <ThemeTab />;
+          return <ThemeTab scrollRef={scrollRef} />;
         case 'navigation':
-          return <NavigationTab />;
+          return <NavigationTab scrollRef={scrollRef} />;
         case 'accessibility':
-          return <AccessibilityTab />;
+          return <AccessibilityTab scrollRef={scrollRef} />;
         default:
-          return <DisplayTab />;
+          return <DisplayTab scrollRef={scrollRef} />;
       }
     },
-    [],
+    [register],
   );
 
   const renderTabBar = useCallback(
@@ -152,9 +152,10 @@ const SettingsReaderScreen = () => {
       <BottomSheet
         bottomSheetRef={bottomSheetRef}
         snapPoints={[BOTTOM_SHEET_HEIGHT]}
+        scrollableRef={scrollableRef}
       >
         <View style={styles.bottomSheetContent}>
-          <TabView
+          <SheetTabView
             commonOptions={tabOptions}
             navigationState={{ index: tabIndex, routes }}
             renderTabBar={renderTabBar}
@@ -162,7 +163,6 @@ const SettingsReaderScreen = () => {
             onIndexChange={setTabIndex}
             initialLayout={{ width: screenWidth }}
             lazy
-            lazyPreloadDistance={0}
             animationEnabled={!reduceAppAnimations}
             swipeEnabled={false}
           />

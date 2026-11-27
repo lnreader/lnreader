@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -13,7 +13,8 @@ import {
 } from '@theme/utils/setBarColor';
 import { NavigationBar } from 'expo-navigation-bar';
 
-const useFullscreenMode = () => {
+/** `chromeHiddenRef`: whether the reader controls are hidden. */
+const useFullscreenMode = (chromeHiddenRef: RefObject<boolean>) => {
   const { addListener } = useNavigation();
   const { theme: backgroundColor } = useChapterReaderSettings();
   const { fullScreenMode } = useChapterGeneralSettings();
@@ -53,15 +54,38 @@ const useFullscreenMode = () => {
   }, [setImmersiveMode]);
 
   useEffect(() => {
-    const unsubscribe = addListener('beforeRemove', () => {
+    const showAppBars = () => {
       StatusBar.setHidden(false);
       NavigationBar.setHidden(false);
       setStatusBarStyle(theme);
       setNavigationBarStyle(theme.isDark);
-    });
+    };
+    // A screen pushed over the reader (a linked novel) does not remove it, so
+    // the bars must follow focus as well as removal.
+    const unsubscribers = [
+      addListener('beforeRemove', showAppBars),
+      addListener('blur', showAppBars),
+      addListener('focus', () => {
+        const chromeHidden = chromeHiddenRef.current;
+        // Without fullScreenMode this only recolours the bars.
+        if (chromeHidden || !fullScreenMode) {
+          setImmersiveMode();
+        }
+        if (!chromeHidden) {
+          showStatusAndNavBar();
+        }
+      }),
+    ];
 
-    return unsubscribe;
-  }, [addListener, theme]);
+    return () => unsubscribers.forEach(unsubscribe => unsubscribe());
+  }, [
+    addListener,
+    chromeHiddenRef,
+    fullScreenMode,
+    setImmersiveMode,
+    showStatusAndNavBar,
+    theme,
+  ]);
 
   return { setImmersiveMode, showStatusAndNavBar };
 };

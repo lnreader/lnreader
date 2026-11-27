@@ -25,7 +25,7 @@ import { filterColor } from '@theme/colors';
 import { ChapterInfo, NovelInfo as NovelData } from '@database/types';
 import { ThemeColors } from '@theme/types';
 import { NovelScreenProps } from '@navigators/types';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import { UseBooleanReturnType } from '@hooks';
 import { useAppSettings } from '@hooks/persisted';
 import { NovelStatus, PluginItem } from '@plugins/types';
@@ -57,12 +57,12 @@ interface NovelInfoHeaderProps {
   lastRead?: ChapterInfo;
   navigateToChapter: (chapter: ChapterInfo) => void;
   novel: NovelData | (Omit<NovelData, 'id'> & { id: 'NO_ID' });
-  novelBottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  novelBottomSheetRef: React.RefObject<BottomSheetRef | null>;
   setCustomNovelCover: () => Promise<void>;
   saveNovelCover: () => Promise<void>;
   theme: ThemeColors;
   totalChapters?: number;
-  trackerSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  trackerSheetRef: React.RefObject<BottomSheetRef | null>;
 }
 
 const STATUS_ICON_MAP = {
