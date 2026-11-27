@@ -208,18 +208,20 @@ export const createBootstrapService = (
           excludedScanlators,
         );
       } catch (error) {
-        if (!chapterCount) {
+        if (!chapterCount && (!isPartialSync || settingsFilter.length === 0)) {
           throw error;
         }
-        newChapters =
-          (await deps.getPageChaptersBatched(
-            novel.id,
-            settingsSort,
-            settingsFilter,
-            page,
-            0,
-            excludedScanlators,
-          )) || [];
+        if (chapterCount) {
+          newChapters =
+            (await deps.getPageChaptersBatched(
+              novel.id,
+              settingsSort,
+              settingsFilter,
+              page,
+              0,
+              excludedScanlators,
+            )) || [];
+        }
       }
     } else if (chapterCount) {
       newChapters =
