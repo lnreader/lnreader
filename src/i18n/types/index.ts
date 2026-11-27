@@ -607,6 +607,7 @@ export interface StringMap {
   'readerScreen.bottomSheet.removeExtraSpacingDescription': 'string';
   'readerScreen.bottomSheet.scrollAmount': 'string';
   'readerScreen.bottomSheet.showBatteryAndTime': 'string';
+  'readerScreen.bottomSheet.batteryAndTimeAtTop': 'string';
   'readerScreen.bottomSheet.showBatteryAndTimeDescription': 'string';
   'readerScreen.bottomSheet.showProgressPercentage': 'string';
   'readerScreen.bottomSheet.showProgressPercentageDescription': 'string';

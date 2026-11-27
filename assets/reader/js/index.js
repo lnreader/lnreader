@@ -302,27 +302,47 @@ const Footer = () => {
       hour12: false,
     });
   }, 10000);
+  const showTopStatus = van.derive(
+    () =>
+      reader.generalSettings.val.showBatteryAndTime &&
+      reader.generalSettings.val.batteryAndTimeAtTop === true,
+  );
+  const showBottomStatus = () =>
+    reader.generalSettings.val.showBatteryAndTime && !showTopStatus.val;
+  van.derive(() => {
+    document.documentElement.classList.toggle(
+      'reader-status-at-top',
+      showTopStatus.val,
+    );
+    reader.refresh();
+  });
+  const battery = () => Math.ceil(reader.batteryLevel.val * 100) + '%';
+  const topStatus = div(
+    {
+      id: 'reader-top-status',
+      class: () => (showTopStatus.val ? 'reader-status-row' : 'd-none'),
+    },
+    div({ class: 'reader-footer-item' }, battery),
+    div({ class: 'reader-footer-item' }, time),
+  );
   const wrapper = div(
     {
       id: 'reader-footer-wrapper',
       class: () =>
-        reader.generalSettings.val.showBatteryAndTime ||
-        reader.generalSettings.val.showScrollPercentage
+        showBottomStatus() || reader.generalSettings.val.showScrollPercentage
           ? ''
           : 'd-none',
     },
     div(
-      { id: 'reader-footer' },
+      { id: 'reader-footer', class: 'reader-status-row' },
 
       div(
         {
           id: 'reader-battery',
           class: () =>
-            `reader-footer-item ${
-              reader.generalSettings.val.showBatteryAndTime ? '' : 'hidden'
-            }`,
+            `reader-footer-item ${showBottomStatus() ? '' : 'hidden'}`,
         },
-        () => Math.ceil(reader.batteryLevel.val * 100) + '%',
+        battery,
       ),
       div(
         {
@@ -341,9 +361,7 @@ const Footer = () => {
         {
           id: 'reader-time',
           class: () =>
-            `reader-footer-item ${
-              reader.generalSettings.val.showBatteryAndTime ? '' : 'hidden'
-            }`,
+            `reader-footer-item ${showBottomStatus() ? '' : 'hidden'}`,
         },
         time,
       ),
@@ -362,7 +380,7 @@ const Footer = () => {
       `${wrapper.offsetHeight}px`,
     );
   });
-  return wrapper;
+  return [topStatus, wrapper];
 };
 
 const TTSController = () => {

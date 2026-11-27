@@ -20,6 +20,7 @@ const AccessibilityTab = ({ scrollRef }: AccessibilityTabProps) => {
     fullScreenMode = true,
     showScrollPercentage = true,
     showBatteryAndTime = false,
+    batteryAndTimeAtTop = false,
     keepScreenOn = true,
     bionicReading = false,
     setChapterGeneralSettings,
@@ -73,6 +74,18 @@ const AccessibilityTab = ({ scrollRef }: AccessibilityTabProps) => {
           }
           theme={theme}
         />
+        {showBatteryAndTime ? (
+          <SettingSwitch
+            label={getString('readerScreen.bottomSheet.batteryAndTimeAtTop')}
+            value={batteryAndTimeAtTop}
+            onPress={() =>
+              setChapterGeneralSettings({
+                batteryAndTimeAtTop: !batteryAndTimeAtTop,
+              })
+            }
+            theme={theme}
+          />
+        ) : null}
         <SettingSwitch
           label={getString('readerScreen.bottomSheet.keepScreenOn')}
           value={keepScreenOn}

@@ -156,7 +156,7 @@ const SettingsWebView = () => {
     () => `
   <style>
     :root {
-      --StatusBar-currentHeight: ${StatusBar.currentHeight};
+      --StatusBar-currentHeight: ${StatusBar.currentHeight ?? 0}px;
       --readerSettings-theme: ${settings.theme};
       --readerSettings-padding: ${settings.padding}px;
       --readerSettings-textSize: ${settings.textSize}px;
@@ -229,6 +229,9 @@ const SettingsWebView = () => {
                     },
                     swipeGestures: false,
                     showBatteryAndTime: ${generalSettings.showBatteryAndTime},
+                    batteryAndTimeAtTop: ${
+                      generalSettings.batteryAndTimeAtTop ?? false
+                    },
                     verticalSeekbar: ${generalSettings.verticalSeekbar},
                     bionicReading: ${generalSettings.bionicReading},
                   }
@@ -308,6 +311,7 @@ const SettingsWebView = () => {
       webViewCSS,
       generalSettings.showScrollPercentage,
       generalSettings.showBatteryAndTime,
+      generalSettings.batteryAndTimeAtTop,
       generalSettings.verticalSeekbar,
       generalSettings.bionicReading,
       generalSettings.pageReader,

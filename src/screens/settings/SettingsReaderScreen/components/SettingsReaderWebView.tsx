@@ -99,7 +99,7 @@ const SettingsReaderWebView = ({
   <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     :root {
-      --StatusBar-currentHeight: ${StatusBar.currentHeight};
+      --StatusBar-currentHeight: ${StatusBar.currentHeight ?? 0}px;
       --readerSettings-theme: ${readerSettings.theme};
       --readerSettings-padding: ${readerSettings.padding}px;
       --readerSettings-textSize: ${readerSettings.textSize}px;

@@ -212,6 +212,7 @@ export interface ChapterGeneralSettings {
   useVolumeButtons: boolean;
   volumeButtonsOffset: number | null;
   showBatteryAndTime: boolean;
+  batteryAndTimeAtTop?: boolean;
   autoScroll: boolean;
   autoScrollInterval: number;
   autoScrollOffset: number | null;
@@ -343,6 +344,7 @@ export const initialChapterGeneralSettings: ChapterGeneralSettings = {
   useVolumeButtons: false,
   volumeButtonsOffset: null,
   showBatteryAndTime: false,
+  batteryAndTimeAtTop: false,
   autoScroll: false,
   autoScrollInterval: 10,
   autoScrollOffset: null,
