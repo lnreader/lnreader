@@ -1,6 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
-import { Tts, type TtsSession } from '@modules/nitro-tts';
+import {
+  Tts,
+  type TtsPlaybackState,
+  type TtsSession,
+} from '@modules/nitro-tts';
 import { useTtsSession } from '../useTtsSession';
 
 const createDeferred = <T>() => {
@@ -170,6 +174,106 @@ describe('useTtsSession', () => {
     await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
     subscriptions.forEach(item => {
       expect(item.remove).toHaveBeenCalled();
+    });
+  });
+
+  describe('with two readers', () => {
+    // A reader under a linked novel stays mounted. Both hooks get the same
+    // native session, as on the device.
+    const renderTwoReaders = async () => {
+      const { result: covered, unmount: closeCovered } =
+        renderHook(useTtsSession);
+      const { result: front, unmount: closeFront } = renderHook(useTtsSession);
+      const session = await getNativeSession();
+      await waitFor(() =>
+        expect(session.addOnStateChangedListener).toHaveBeenCalledTimes(2),
+      );
+      const emit = (state: TtsPlaybackState, index = 0) =>
+        act(() => {
+          session.addOnStateChangedListener.mock.calls.forEach(([listener]) =>
+            listener(state),
+          );
+          session.addOnProgressChangedListener.mock.calls.forEach(
+            ([listener]) => listener({ index, total: 5, paragraphId: '' }),
+          );
+        });
+      return { covered, front, closeCovered, closeFront, session, emit };
+    };
+
+    const speak = (hook: { current: ReturnType<typeof useTtsSession> }) =>
+      act(async () => {
+        await hook.current.loadAndPlay(
+          ['Paragraph'],
+          0,
+          { novelName: 'Novel', chapterName: 'Chapter' },
+          { rate: 1, pitch: 1 },
+          true,
+        );
+      });
+
+    it('lets only the reader that loaded speech follow it', async () => {
+      const { covered, front, emit } = await renderTwoReaders();
+
+      await speak(front);
+      emit('loading', 4);
+
+      expect(front.current.state).toBe('loading');
+      expect(front.current.progress.index).toBe(4);
+      expect(covered.current.state).toBe('idle');
+      expect(covered.current.progress.index).toBe(0);
+    });
+
+    it('moves speech to the reader that loads it last', async () => {
+      const { covered, front, emit } = await renderTwoReaders();
+      await speak(covered);
+      emit('playing', 2);
+
+      await speak(front);
+
+      expect(covered.current.state).toBe('idle');
+      expect(covered.current.progress.index).toBe(0);
+      emit('playing', 3);
+      expect(front.current.state).toBe('playing');
+      expect(covered.current.state).toBe('idle');
+    });
+
+    it('lets only the owner stop or control speech', async () => {
+      const { covered, front, closeCovered, closeFront, session } =
+        await renderTwoReaders();
+      await speak(front);
+      session.play.mockClear();
+
+      act(() => {
+        covered.current.command('stop');
+        covered.current.command('play');
+        covered.current.seekTo(1);
+        covered.current.cancelSleepTimer();
+      });
+      closeCovered();
+      // The front reader's command passes after any that the covered one sent.
+      act(() => front.current.command('pause'));
+      await waitFor(() => expect(session.pause).toHaveBeenCalledTimes(1));
+
+      expect(session.stop).not.toHaveBeenCalled();
+      expect(session.play).not.toHaveBeenCalled();
+      expect(session.seekTo).not.toHaveBeenCalled();
+      expect(session.cancelSleepTimer).not.toHaveBeenCalled();
+
+      closeFront();
+      await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
+    });
+
+    it('gives stopped speech back to every reader', async () => {
+      const { covered, front, session } = await renderTwoReaders();
+      await speak(front);
+
+      act(() => front.current.command('stop'));
+      await waitFor(() => expect(session.stop).toHaveBeenCalledTimes(1));
+      act(() => covered.current.cancelSleepTimer());
+
+      await waitFor(() =>
+        expect(session.cancelSleepTimer).toHaveBeenCalledTimes(1),
+      );
     });
   });
 });
