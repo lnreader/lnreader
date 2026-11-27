@@ -1,14 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ThemeColors } from '@theme/types';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, Image } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  User,
+  isCancelledResponse,
+  isErrorWithCode,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { Button, Dialog, EmptyView } from '@components';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import * as Clipboard from 'expo-clipboard';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
-import { exists, getBackups, makeDir } from '@api/drive';
+import { DRIVE_ROOT_FOLDER_NAME, getBackups, makeDir } from '@api/drive';
 import { DriveFile } from '@api/drive/types';
 import { backgroundTasks } from '@services/backgroundTasks';
 import { useAppSettings } from '@hooks/persisted';
@@ -19,6 +25,11 @@ import {
   type BackupOptions,
 } from '@services/backup/options';
 import { BackupOptionsList } from './BackupOptions';
+
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
 
 enum BackupModal {
   UNAUTHORIZED,
@@ -72,17 +83,41 @@ function UnAuthorized({
   setBackupModal: (backupModal: BackupModal) => void;
   setUser: (user?: User | null) => void;
 }) {
-  const signIn = () => {
-    GoogleSignin.hasPlayServices()
-      .then(hasPlayServices => {
-        if (hasPlayServices) {
-          return GoogleSignin.signIn();
+  const signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      let response = await GoogleSignin.signIn();
+      if (isCancelledResponse(response)) {
+        return;
+      }
+      // Google's consent screen lets the user untick Drive access while still
+      // signing in; every Drive call would then fail with 403.
+      if (!response.data.scopes.includes(DRIVE_SCOPE)) {
+        const granted = await GoogleSignin.addScopes({ scopes: [DRIVE_SCOPE] });
+        if (!granted || isCancelledResponse(granted)) {
+          await GoogleSignin.signOut();
+          showToast(getString('backupScreen.drive.permissionRequired'));
+          return;
         }
-      })
-      .then(response => {
-        setUser(response?.data);
-        setBackupModal(BackupModal.AUTHORIZED);
-      });
+        response = granted;
+      }
+      setUser(response.data);
+      setBackupModal(BackupModal.AUTHORIZED);
+    } catch (error) {
+      if (
+        isErrorWithCode(error) &&
+        (error.code === statusCodes.SIGN_IN_CANCELLED ||
+          error.code === statusCodes.IN_PROGRESS)
+      ) {
+        return;
+      }
+      const message = isErrorWithCode(error)
+        ? `${error.message} (${error.code})`
+        : getErrorMessage(error);
+      showToast(
+        getString('backupScreen.drive.signInFailed', { error: message }),
+      );
+    }
   };
   return (
     <Button
@@ -110,19 +145,13 @@ function CreateBackup({
 
   const prepare = async () => {
     setFetching(true);
-    let rootFolder = await exists('LNReader', true, undefined, true);
-    if (!rootFolder) {
-      rootFolder = await makeDir('LNReader');
+    try {
+      const rootFolder = await makeDir(DRIVE_ROOT_FOLDER_NAME);
+      return await makeDir(backupName.trim() + '.backup', rootFolder.id);
+    } finally {
+      setFetching(false);
     }
-    const backupFolderName = backupName.trim() + '.backup';
-    let backupFolder = await exists(backupFolderName, true, rootFolder.id);
-    if (!backupFolder) {
-      backupFolder = await makeDir(backupFolderName, rootFolder.id);
-    }
-    setFetching(false);
-    return backupFolder;
   };
-
   return (
     <>
       <TextInput
@@ -149,16 +178,24 @@ function CreateBackup({
           }
           title={getString('common.ok')}
           onPress={() => {
-            prepare().then(folder => {
-              closeModal();
-              backgroundTasks.enqueue({
-                name: 'DRIVE_BACKUP',
-                data: {
-                  backupFolder: folder,
-                  options,
-                },
-              });
-            });
+            prepare()
+              .then(folder => {
+                closeModal();
+                backgroundTasks.enqueue({
+                  name: 'DRIVE_BACKUP',
+                  data: {
+                    backupFolder: folder,
+                    options,
+                  },
+                });
+              })
+              .catch(error =>
+                showToast(
+                  getString('backupScreen.drive.prepareFailed', {
+                    error: getErrorMessage(error),
+                  }),
+                ),
+              );
           }}
         />
         <Button
@@ -180,24 +217,54 @@ function RestoreBackup({
   closeModal: () => void;
 }) {
   const [backupList, setBackupList] = useState<DriveFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string>();
   const { dateFormat = 'default', relativeTimestamps = true } =
     useAppSettings();
   useEffect(() => {
-    exists('LNReader', true, undefined, true).then(rootFolder => {
-      if (rootFolder) {
-        getBackups(rootFolder.id, true).then(backups => setBackupList(backups));
-      }
-    });
+    let cancelled = false;
+    getBackups()
+      .then(backups => {
+        if (!cancelled) {
+          setBackupList(backups);
+        }
+      })
+      .catch(error => {
+        if (!cancelled) {
+          setLoadError(
+            getString('backupScreen.drive.loadBackupsFailed', {
+              error: getErrorMessage(error),
+            }),
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const emptyComponent = useCallback(() => {
+    if (loading) {
+      return (
+        <ActivityIndicator
+          style={styles.loading}
+          size="large"
+          color={theme.primary}
+        />
+      );
+    }
     return (
       <EmptyView
-        description={getString('backupScreen.noBackupFound')}
+        description={loadError ?? getString('backupScreen.noBackupFound')}
         theme={theme}
       />
     );
-  }, [theme]);
+  }, [theme, loading, loadError]);
 
   return (
     <>
@@ -256,12 +323,12 @@ export default function GoogleDriveModal({
   const [user, setUser] = useState<User | null | undefined>(null);
   useEffect(() => {
     GoogleSignin.configure({
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
+      scopes: [DRIVE_SCOPE],
     });
     const isSignedIn = GoogleSignin.hasPreviousSignIn();
     if (isSignedIn) {
       const localUser = GoogleSignin.getCurrentUser();
-      if (localUser) {
+      if (localUser?.scopes.includes(DRIVE_SCOPE)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(localUser);
         setBackupModal(BackupModal.AUTHORIZED);
@@ -364,6 +431,9 @@ const styles = StyleSheet.create({
   footerContainer: {
     flexDirection: 'row-reverse',
     marginTop: 24,
+  },
+  loading: {
+    marginVertical: 24,
   },
   loadingContent: {
     borderRadius: 16,
