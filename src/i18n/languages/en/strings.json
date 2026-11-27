@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Edit",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globally",
     "install": "Install",
@@ -523,6 +524,7 @@
         "completed": "Completed",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Downloaded",
+        "genres": "Genres",
         "started": "Started",
         "unread": "Unread"
       },

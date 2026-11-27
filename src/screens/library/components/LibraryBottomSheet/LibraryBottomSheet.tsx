@@ -1,4 +1,10 @@
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -8,6 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -15,14 +22,27 @@ import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import {
   DisplayModes,
   displayModesList,
-  LibraryFilter,
+  LibraryFilterKey,
   libraryFilterList,
+  LibraryFilterState,
   LibrarySortOrder,
   librarySortOrderList,
+  nextLibraryFilterState,
 } from '@screens/library/constants/constants';
+import {
+  buildLibraryGenres,
+  LibraryGenre,
+} from '@screens/library/utils/genres';
+import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
+import { showToast } from '@utils/showToast';
+import { getErrorMessage } from '@utils/error';
 import { RadioButton } from '@components/RadioButton/RadioButton';
-import { BottomSheetView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetView,
+  useBottomSheetScrollableCreator,
+} from '@gorhom/bottom-sheet';
 import BottomSheet from '@components/BottomSheet/BottomSheet';
+import { getBottomSheetLayout } from '@components/BottomSheet/layout';
 import { TopTabBar } from '@components';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { LegendList } from '@legendapp/list/react-native';
@@ -32,37 +52,162 @@ interface LibraryBottomSheetProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const SHEET_HEIGHT = 520;
+
+type FilterRow =
+  | { type: 'filter'; key: LibraryFilterKey; label: string }
+  | { type: 'genresHeader' }
+  | { type: 'genre'; genre: LibraryGenre };
+
+const checkboxStatus = (state?: LibraryFilterState) =>
+  state === 'include' ? true : state === 'exclude' ? 'excluded' : false;
+
+const genreState = (
+  name: string,
+  includedGenres: string[],
+  excludedGenres: string[],
+): LibraryFilterState | undefined =>
+  includedGenres.includes(name)
+    ? 'include'
+    : excludedGenres.includes(name)
+    ? 'exclude'
+    : undefined;
+
 const FirstRoute = () => {
   const theme = useTheme();
   const {
-    filter,
+    filters,
+    includedGenres,
+    excludedGenres,
     setLibrarySettings,
     downloadedOnlyMode = false,
   } = useLibrarySettings();
+  const BottomSheetLegendListScrollable = useBottomSheetScrollableCreator();
+
+  const [libraryGenres, setLibraryGenres] = useState<LibraryGenre[]>([]);
+  useEffect(() => {
+    let active = true;
+    getNovelsWithGenresFromDb()
+      .then(novels => {
+        if (active) {
+          setLibraryGenres(buildLibraryGenres(novels));
+        }
+      })
+      .catch(error => {
+        if (active) {
+          showToast(getErrorMessage(error));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const rows = useMemo<FilterRow[]>(() => {
+    const genres = [...libraryGenres];
+    // Keep a selected genre that no novel has any more, so it can be cleared.
+    for (const name of [...includedGenres, ...excludedGenres]) {
+      if (!genres.some(genre => genre.name === name)) {
+        genres.push({ name, label: name });
+      }
+    }
+    return [
+      ...libraryFilterList.map(
+        ({ key, label }): FilterRow => ({ type: 'filter', key, label }),
+      ),
+      ...(genres.length
+        ? [
+            { type: 'genresHeader' } as const,
+            ...genres.map((genre): FilterRow => ({ type: 'genre', genre })),
+          ]
+        : []),
+    ];
+  }, [excludedGenres, includedGenres, libraryGenres]);
+
+  const cycleGenre = (name: string) => {
+    const next = nextLibraryFilterState(
+      genreState(name, includedGenres, excludedGenres),
+    );
+    setLibrarySettings({
+      includedGenres:
+        next === 'include'
+          ? [...includedGenres, name]
+          : includedGenres.filter(genre => genre !== name),
+      excludedGenres:
+        next === 'exclude'
+          ? [...excludedGenres, name]
+          : excludedGenres.filter(genre => genre !== name),
+    });
+  };
+
+  const renderItem = ({ item }: { item: FilterRow }) => {
+    switch (item.type) {
+      case 'filter': {
+        const lockedByDownloadedOnly =
+          item.key === 'downloaded' && downloadedOnlyMode;
+        return (
+          <Checkbox
+            label={item.label}
+            theme={theme}
+            status={
+              lockedByDownloadedOnly ? true : checkboxStatus(filters[item.key])
+            }
+            onPress={() =>
+              setLibrarySettings({
+                filters: {
+                  ...filters,
+                  [item.key]: nextLibraryFilterState(filters[item.key]),
+                },
+              })
+            }
+            disabled={lockedByDownloadedOnly}
+          />
+        );
+      }
+      case 'genresHeader':
+        return (
+          <Text
+            style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}
+          >
+            {getString('libraryScreen.bottomSheet.filters.genres')}
+          </Text>
+        );
+      case 'genre':
+        return (
+          <Checkbox
+            label={item.genre.label}
+            theme={theme}
+            status={checkboxStatus(
+              genreState(item.genre.name, includedGenres, excludedGenres),
+            )}
+            onPress={() => cycleGenre(item.genre.name)}
+          />
+        );
+    }
+  };
 
   return (
     <View style={styles.flex}>
       <LegendList
         recycleItems
         estimatedItemSize={48}
-        extraData={[filter]}
-        data={libraryFilterList}
-        keyExtractor={item => `filter_${item.filter}`}
-        renderItem={({ item }) => (
-          <Checkbox
-            label={item.label}
-            theme={theme}
-            status={filter === item.filter}
-            onPress={() =>
-              setLibrarySettings({
-                filter: filter === item.filter ? undefined : item.filter,
-              })
-            }
-            disabled={
-              item.filter === LibraryFilter.Downloaded && downloadedOnlyMode
-            }
-          />
-        )}
+        extraData={[
+          filters,
+          includedGenres,
+          excludedGenres,
+          downloadedOnlyMode,
+        ]}
+        data={rows}
+        getItemType={item => item.type}
+        keyExtractor={item =>
+          item.type === 'filter'
+            ? `filter_${item.key}`
+            : item.type === 'genre'
+            ? `genre_${item.genre.name}`
+            : item.type
+        }
+        renderItem={renderItem}
+        renderScrollComponent={BottomSheetLegendListScrollable}
       />
     </View>
   );
@@ -198,6 +343,13 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   const { reduceAppAnimations = false } = useAppSettings();
 
   const layout = useWindowDimensions();
+  const { bottom, top } = useSafeAreaInsets();
+  const { maxHeight } = getBottomSheetLayout({
+    bottom,
+    height: layout.height,
+    top,
+    width: layout.width,
+  });
 
   const renderTabBar = useCallback(
     (props: any) => (
@@ -255,7 +407,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   }, [renderCommonOptions]);
 
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
+    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[SHEET_HEIGHT]}>
       <BottomSheetView style={styles.bottomSheetCtn}>
         <TabView
           animationEnabled={!reduceAppAnimations}
@@ -265,7 +417,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
           renderScene={bottomSheetSceneMap}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
-          style={styles.tabView}
+          style={{ height: Math.min(SHEET_HEIGHT, maxHeight) }}
         />
       </BottomSheetView>
     </BottomSheet>
@@ -285,9 +437,6 @@ const styles = StyleSheet.create({
   tabBar: {
     borderBottomWidth: 1,
     elevation: 0,
-  },
-  tabView: {
-    height: 520,
   },
   flex: { flex: 1 },
 });
