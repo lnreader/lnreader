@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button, FAB } from 'react-native-paper';
 import { ErrorScreenV2, SafeAreaView, SearchbarV2 } from '@components/index';
@@ -77,6 +77,10 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
 
   const { novelInLibrary, switchNovelToLibrary } = useLibraryContext();
   const [inActivity, setInActivity] = useState<Record<string, boolean>>({});
+  const listExtraData = useMemo(
+    () => ({ inActivity, novelInLibrary }),
+    [inActivity, novelInLibrary],
+  );
 
   const navigateToNovel = useCallback(
     (item: NovelItem | NovelInfo) =>
@@ -156,6 +160,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
       ) : (
         <NovelList
           data={page.novels}
+          extraData={listExtraData}
           // Idle fillers could hide changes to the result count within a row.
           inSource={page.isLoading}
           ListFooterComponent={
