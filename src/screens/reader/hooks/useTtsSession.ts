@@ -24,11 +24,31 @@ const initialSleepTimer: TtsSleepTimerState = {
   expired: false,
 };
 
+/**
+ * The hook that loaded the current speech. All sessions drive one native
+ * player, so a reader that a linked novel covers would otherwise follow and
+ * stop the speech of the reader in front. Speech that no hook owns is open to
+ * all of them, as with one reader.
+ */
+let speechOwner: object | null = null;
+const speechOwnerListeners = new Set<() => void>();
+
+const ownsSpeech = (owner: object) =>
+  speechOwner === null || speechOwner === owner;
+
+const takeSpeech = (owner: object) => {
+  if (speechOwner !== owner) {
+    speechOwner = owner;
+    speechOwnerListeners.forEach(listener => listener());
+  }
+};
+
 export const useTtsSession = () => {
   const sessionRef = useRef<TtsSession | null>(null);
   const sessionPromiseRef = useRef<Promise<TtsSession> | null>(null);
   const subscriptionsRef = useRef<{ remove(): void }[]>([]);
   const mountedRef = useRef(true);
+  const ownerRef = useRef({});
   const loadGenerationRef = useRef(0);
   const [state, setState] = useState<TtsPlaybackState>('idle');
   const [progress, setProgress] = useState<TtsProgress>(initialProgress);
@@ -48,11 +68,19 @@ export const useTtsSession = () => {
             return session;
           }
           sessionRef.current = session;
+          const owner = ownerRef.current;
+          const ifOwner =
+            <T>(update: (value: T) => void) =>
+            (value: T) => {
+              if (ownsSpeech(owner)) {
+                update(value);
+              }
+            };
           subscriptionsRef.current = [
-            session.addOnStateChangedListener(setState),
-            session.addOnProgressChangedListener(setProgress),
-            session.addOnErrorListener(setError),
-            session.addOnSleepTimerChangedListener(setSleepTimerState),
+            session.addOnStateChangedListener(ifOwner(setState)),
+            session.addOnProgressChangedListener(ifOwner(setProgress)),
+            session.addOnErrorListener(ifOwner(setError)),
+            session.addOnSleepTimerChangedListener(ifOwner(setSleepTimerState)),
           ];
           return session;
         })
@@ -66,6 +94,9 @@ export const useTtsSession = () => {
 
   const run = useCallback(
     async (operation: (session: TtsSession) => Promise<void>) => {
+      if (!ownsSpeech(ownerRef.current)) {
+        return false;
+      }
       try {
         setError(null);
         await operation(await ensureSession());
@@ -95,6 +126,7 @@ export const useTtsSession = () => {
         return false;
       }
       const loadGeneration = ++loadGenerationRef.current;
+      takeSpeech(ownerRef.current);
       let completed = false;
       const succeeded = await run(async session => {
         await session.load(
@@ -138,6 +170,10 @@ export const useTtsSession = () => {
 
   const command = useCallback(
     (nextCommand: TtsCommand) => {
+      if (nextCommand === 'stop' && speechOwner === ownerRef.current) {
+        // Stopped speech has no owner, so another reader can control it.
+        speechOwner = null;
+      }
       void run(session => {
         switch (nextCommand) {
           case 'next':
@@ -186,6 +222,17 @@ export const useTtsSession = () => {
   }, [run]);
 
   useEffect(() => {
+    const owner = ownerRef.current;
+    const onSpeechOwnerChange = () => {
+      if (speechOwner !== owner) {
+        // Another hook loaded speech, so this one shows none.
+        loadGenerationRef.current += 1;
+        setState('idle');
+        setProgress(initialProgress);
+        setSleepTimerState(initialSleepTimer);
+      }
+    };
+    speechOwnerListeners.add(onSpeechOwnerChange);
     void ensureSession().catch(cause => {
       if (mountedRef.current) {
         setError(cause instanceof Error ? cause.message : String(cause));
@@ -193,10 +240,14 @@ export const useTtsSession = () => {
     });
     return () => {
       mountedRef.current = false;
+      speechOwnerListeners.delete(onSpeechOwnerChange);
       subscriptionsRef.current.forEach(subscription => subscription.remove());
       subscriptionsRef.current = [];
-      if (sessionRef.current) {
+      if (sessionRef.current && ownsSpeech(owner)) {
         void sessionRef.current.stop();
+      }
+      if (speechOwner === owner) {
+        speechOwner = null;
       }
       sessionRef.current = null;
     };

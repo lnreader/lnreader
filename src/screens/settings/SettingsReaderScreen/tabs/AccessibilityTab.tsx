@@ -1,12 +1,20 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Ref } from 'react';
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  type ScrollViewInstance,
+} from 'react-native';
 import { useChapterGeneralSettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { List } from '@components/index';
 import SettingSwitch from '../../components/SettingSwitch';
 
-const AccessibilityTab: React.FC = () => {
+interface AccessibilityTabProps {
+  scrollRef?: Ref<ScrollViewInstance>;
+}
+
+const AccessibilityTab = ({ scrollRef }: AccessibilityTabProps) => {
   const theme = useTheme();
   const {
     fullScreenMode = true,
@@ -18,7 +26,8 @@ const AccessibilityTab: React.FC = () => {
   } = useChapterGeneralSettings();
 
   return (
-    <BottomSheetScrollView
+    <ScrollView
+      ref={scrollRef}
       style={styles.container}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.contentContainer}
@@ -90,7 +99,7 @@ const AccessibilityTab: React.FC = () => {
       </View>
 
       <View style={styles.bottomSpacing} />
-    </BottomSheetScrollView>
+    </ScrollView>
   );
 };
 

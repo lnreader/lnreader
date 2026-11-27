@@ -1,29 +1,27 @@
 import {
+  ScrollView,
   StyleProp,
   StyleSheet,
   Text,
   TextStyle,
   useWindowDimensions,
   View,
+  type ScrollViewInstance,
 } from 'react-native';
-import React, {
-  RefObject,
-  useMemo,
-  useState,
-  useCallback,
-  Suspense,
-} from 'react';
+import React, { Ref, RefObject, useState, useCallback, Suspense } from 'react';
 import Color from 'color';
 
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import BottomSheet from '@components/BottomSheet/BottomSheet';
+import BottomSheet, {
+  BottomSheetRef,
+  useTabScrollables,
+} from '@components/BottomSheet/BottomSheet';
 import { List, TopTabBar } from '@components';
 import {
   useAppSettings,
   useChapterGeneralSettings,
   useTheme,
 } from '@hooks/persisted';
-import { SceneMap, TabView } from 'react-native-tab-view';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 import { getString } from '@i18n/translations';
 
 import ReaderSheetPreferenceItem from './ReaderSheetPreferenceItem';
@@ -33,7 +31,6 @@ import ReaderTextAlignSelector from './ReaderTextAlignSelector';
 import ReaderValueChange from './ReaderValueChange';
 import ReaderFontPicker from './ReaderFontPicker';
 import TTSTab from './TTSTab';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { StringMap } from '@i18n/types';
 
 type TabViewLabelProps = {
@@ -48,10 +45,14 @@ type TabViewLabelProps = {
   style?: StyleProp<TextStyle | null>;
 };
 
-const ReaderTab: React.FC = React.memo(() => {
+interface TabProps {
+  scrollRef: Ref<ScrollViewInstance>;
+}
+
+const ReaderTab = React.memo(({ scrollRef }: TabProps) => {
   return (
     <Suspense fallback={<></>}>
-      <BottomSheetScrollView contentContainerStyle={styles.readerTab}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.readerTab}>
         <TextSizeSlider />
         <ReaderThemeSelector />
         <ReaderTextAlignSelector />
@@ -69,7 +70,7 @@ const ReaderTab: React.FC = React.memo(() => {
           unit="px"
         />
         <ReaderFontPicker />
-      </BottomSheetScrollView>
+      </ScrollView>
     </Suspense>
   );
 });
@@ -163,7 +164,7 @@ const pagedModePreferences: GeneralPreference[] = [
   },
 ];
 
-const GeneralTab: React.FC = React.memo(() => {
+const GeneralTab = React.memo(({ scrollRef }: TabProps) => {
   const theme = useTheme();
   const { setChapterGeneralSettings, ...settings } =
     useChapterGeneralSettings();
@@ -199,7 +200,7 @@ const GeneralTab: React.FC = React.memo(() => {
   // Two small fixed groups: virtualising them costs more to mount and measure
   // than simply drawing them, and this runs while the sheet is opening.
   return (
-    <BottomSheetScrollView>
+    <ScrollView ref={scrollRef}>
       <List.SubHeader theme={theme}>
         {getString('readerScreen.bottomSheet.display')}
       </List.SubHeader>
@@ -221,12 +222,12 @@ const GeneralTab: React.FC = React.memo(() => {
         }
         return renderPreference(item);
       })}
-    </BottomSheetScrollView>
+    </ScrollView>
   );
 });
 
 interface ReaderBottomSheetV2Props {
-  bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  bottomSheetRef: RefObject<BottomSheetRef | null>;
 }
 
 const routes = [
@@ -234,6 +235,8 @@ const routes = [
   { key: 'generalTab', title: getString('generalSettings') },
   { key: 'ttsTab', title: 'TTS' },
 ];
+
+const SNAP_POINTS = [360, 600];
 
 const renderLazyPlaceholder = () => <View style={styles.flex} />;
 
@@ -246,17 +249,23 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
 
   const tabHeaderColor = theme.surfaceContainerLow ?? theme.surface;
 
-  const renderScene = useMemo(
-    () =>
-      SceneMap({
-        readerTab: ReaderTab,
-        generalTab: GeneralTab,
-        ttsTab: TTSTab,
-      }),
-    [],
-  );
-
   const [index, setIndex] = useState(0);
+  const { register, scrollableRef } = useTabScrollables(routes[index].key);
+
+  const renderScene = useCallback(
+    ({ route }: { route: { key: string } }) => {
+      const scrollRef = register(route.key);
+      switch (route.key) {
+        case 'readerTab':
+          return <ReaderTab scrollRef={scrollRef} />;
+        case 'generalTab':
+          return <GeneralTab scrollRef={scrollRef} />;
+        default:
+          return <TTSTab scrollRef={scrollRef} />;
+      }
+    },
+    [register],
+  );
 
   const renderTabBar = useCallback(
     (props: any) => (
@@ -283,8 +292,12 @@ const ReaderBottomSheetV2: React.FC<ReaderBottomSheetV2Props> = ({
   }, []);
 
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[360, 600]}>
-      <TabView
+    <BottomSheet
+      bottomSheetRef={bottomSheetRef}
+      snapPoints={SNAP_POINTS}
+      scrollableRef={scrollableRef}
+    >
+      <SheetTabView
         animationEnabled={!reduceAppAnimations}
         commonOptions={{
           label: renderLabel,

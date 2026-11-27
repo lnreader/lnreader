@@ -1,13 +1,23 @@
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, {
+  Ref,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
+  ScrollView,
   StyleProp,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
   ViewStyle,
+  type ScrollViewInstance,
 } from 'react-native';
-import { SceneMap, TabDescriptor, TabView } from 'react-native-tab-view';
+import { TabDescriptor } from 'react-native-tab-view';
+import SheetTabView from '@components/BottomSheet/SheetTabView';
 
 import { useAppSettings, useLibrarySettings, useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
@@ -15,96 +25,228 @@ import { Checkbox, SortItem } from '@components/Checkbox/Checkbox';
 import {
   DisplayModes,
   displayModesList,
-  LibraryFilter,
+  LibraryFilterKey,
   libraryFilterList,
+  LibraryFilterState,
   LibrarySortOrder,
   librarySortOrderList,
+  nextLibraryFilterState,
 } from '@screens/library/constants/constants';
+import {
+  buildLibraryGenres,
+  LibraryGenre,
+} from '@screens/library/utils/genres';
+import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
+import { showToast } from '@utils/showToast';
+import { getErrorMessage } from '@utils/error';
 import { RadioButton } from '@components/RadioButton/RadioButton';
-import { BottomSheetView } from '@gorhom/bottom-sheet';
-import BottomSheet from '@components/BottomSheet/BottomSheet';
+import BottomSheet, {
+  BottomSheetRef,
+  useTabScrollables,
+} from '@components/BottomSheet/BottomSheet';
 import { TopTabBar } from '@components';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { LegendList } from '@legendapp/list/react-native';
+import { LegendList, LegendListRef } from '@legendapp/list/react-native';
 
 interface LibraryBottomSheetProps {
-  bottomSheetRef: RefObject<BottomSheetModalMethods | null>;
+  bottomSheetRef: RefObject<BottomSheetRef | null>;
   style?: StyleProp<ViewStyle>;
 }
 
-const FirstRoute = () => {
+const SNAP_POINTS = [520];
+
+interface RouteProps {
+  scrollRef: Ref<ScrollViewInstance>;
+}
+
+type FilterRow =
+  | { type: 'filter'; key: LibraryFilterKey; label: string }
+  | { type: 'genresHeader' }
+  | { type: 'genre'; genre: LibraryGenre };
+
+const checkboxStatus = (state?: LibraryFilterState) =>
+  state === 'include' ? true : state === 'exclude' ? 'excluded' : false;
+
+const genreState = (
+  name: string,
+  includedGenres: string[],
+  excludedGenres: string[],
+): LibraryFilterState | undefined =>
+  includedGenres.includes(name)
+    ? 'include'
+    : excludedGenres.includes(name)
+    ? 'exclude'
+    : undefined;
+
+const FirstRoute = ({ scrollRef }: { scrollRef: Ref<LegendListRef> }) => {
   const theme = useTheme();
   const {
-    filter,
+    filters,
+    includedGenres,
+    excludedGenres,
     setLibrarySettings,
     downloadedOnlyMode = false,
   } = useLibrarySettings();
 
-  return (
-    <View style={styles.flex}>
-      <LegendList
-        recycleItems
-        estimatedItemSize={48}
-        extraData={[filter]}
-        data={libraryFilterList}
-        keyExtractor={item => `filter_${item.filter}`}
-        renderItem={({ item }) => (
+  const [libraryGenres, setLibraryGenres] = useState<LibraryGenre[]>([]);
+  useEffect(() => {
+    let active = true;
+    getNovelsWithGenresFromDb()
+      .then(novels => {
+        if (active) {
+          setLibraryGenres(buildLibraryGenres(novels));
+        }
+      })
+      .catch(error => {
+        if (active) {
+          showToast(getErrorMessage(error));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const rows = useMemo<FilterRow[]>(() => {
+    const genres = [...libraryGenres];
+    // Keep a selected genre that no novel has any more, so it can be cleared.
+    for (const name of [...includedGenres, ...excludedGenres]) {
+      if (!genres.some(genre => genre.name === name)) {
+        genres.push({ name, label: name });
+      }
+    }
+    return [
+      ...libraryFilterList.map(
+        ({ key, label }): FilterRow => ({ type: 'filter', key, label }),
+      ),
+      ...(genres.length
+        ? [
+            { type: 'genresHeader' } as const,
+            ...genres.map((genre): FilterRow => ({ type: 'genre', genre })),
+          ]
+        : []),
+    ];
+  }, [excludedGenres, includedGenres, libraryGenres]);
+
+  const cycleGenre = (name: string) => {
+    const next = nextLibraryFilterState(
+      genreState(name, includedGenres, excludedGenres),
+    );
+    setLibrarySettings({
+      includedGenres:
+        next === 'include'
+          ? [...includedGenres, name]
+          : includedGenres.filter(genre => genre !== name),
+      excludedGenres:
+        next === 'exclude'
+          ? [...excludedGenres, name]
+          : excludedGenres.filter(genre => genre !== name),
+    });
+  };
+
+  const renderItem = ({ item }: { item: FilterRow }) => {
+    switch (item.type) {
+      case 'filter': {
+        const lockedByDownloadedOnly =
+          item.key === 'downloaded' && downloadedOnlyMode;
+        return (
           <Checkbox
             label={item.label}
             theme={theme}
-            status={filter === item.filter}
+            status={
+              lockedByDownloadedOnly ? true : checkboxStatus(filters[item.key])
+            }
             onPress={() =>
               setLibrarySettings({
-                filter: filter === item.filter ? undefined : item.filter,
+                filters: {
+                  ...filters,
+                  [item.key]: nextLibraryFilterState(filters[item.key]),
+                },
               })
             }
-            disabled={
-              item.filter === LibraryFilter.Downloaded && downloadedOnlyMode
-            }
+            disabled={lockedByDownloadedOnly}
           />
-        )}
+        );
+      }
+      case 'genresHeader':
+        return (
+          <Text
+            style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}
+          >
+            {getString('libraryScreen.bottomSheet.filters.genres')}
+          </Text>
+        );
+      case 'genre':
+        return (
+          <Checkbox
+            label={item.genre.label}
+            theme={theme}
+            status={checkboxStatus(
+              genreState(item.genre.name, includedGenres, excludedGenres),
+            )}
+            onPress={() => cycleGenre(item.genre.name)}
+          />
+        );
+    }
+  };
+
+  return (
+    <View style={styles.flex}>
+      <LegendList
+        ref={scrollRef}
+        recycleItems
+        estimatedItemSize={48}
+        extraData={[
+          filters,
+          includedGenres,
+          excludedGenres,
+          downloadedOnlyMode,
+        ]}
+        data={rows}
+        getItemType={item => item.type}
+        keyExtractor={item =>
+          item.type === 'filter'
+            ? `filter_${item.key}`
+            : item.type === 'genre'
+            ? `genre_${item.genre.name}`
+            : item.type
+        }
+        renderItem={renderItem}
       />
     </View>
   );
 };
 
-const SecondRoute = () => {
+const SecondRoute = ({ scrollRef }: RouteProps) => {
   const theme = useTheme();
   const { sortOrder = LibrarySortOrder.DateAdded_DESC, setLibrarySettings } =
     useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
-      <LegendList
-        recycleItems
-        data={librarySortOrderList}
-        extraData={[sortOrder]}
-        estimatedItemSize={52}
-        keyExtractor={(item, index) => `sort_${index}_${item.ASC}`}
-        renderItem={({ item }) => (
-          <SortItem
-            label={item.label}
-            theme={theme}
-            status={
-              sortOrder === item.ASC
-                ? 'asc'
-                : sortOrder === item.DESC
-                ? 'desc'
-                : undefined
-            }
-            onPress={() =>
-              setLibrarySettings({
-                sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
-              })
-            }
-          />
-        )}
-      />
-    </View>
+    <ScrollView ref={scrollRef} style={styles.flex}>
+      {librarySortOrderList.map((item, index) => (
+        <SortItem
+          key={`sort_${index}_${item.ASC}`}
+          label={item.label}
+          theme={theme}
+          status={
+            sortOrder === item.ASC
+              ? 'asc'
+              : sortOrder === item.DESC
+              ? 'desc'
+              : undefined
+          }
+          onPress={() =>
+            setLibrarySettings({
+              sortOrder: sortOrder === item.ASC ? item.DESC : item.ASC,
+            })
+          }
+        />
+      ))}
+    </ScrollView>
   );
 };
 
-const ThirdRoute = () => {
+const ThirdRoute = ({ scrollRef }: RouteProps) => {
   const theme = useTheme();
   const {
     showDownloadBadges = true,
@@ -116,7 +258,7 @@ const ThirdRoute = () => {
   } = useLibrarySettings();
 
   return (
-    <View style={styles.flex}>
+    <ScrollView ref={scrollRef} style={styles.flex}>
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
         {getString('libraryScreen.bottomSheet.display.overlays')}
       </Text>
@@ -165,30 +307,18 @@ const ThirdRoute = () => {
       <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
         {getString('libraryScreen.bottomSheet.display.displayMode')}
       </Text>
-      <LegendList
-        recycleItems
-        estimatedItemSize={48}
-        data={displayModesList}
-        extraData={[displayMode]}
-        keyExtractor={item => `display_mode_${item.value}`}
-        renderItem={({ item }) => (
-          <RadioButton
-            label={item.label}
-            status={displayMode === item.value}
-            onPress={() => setLibrarySettings({ displayMode: item.value })}
-            theme={theme}
-          />
-        )}
-      />
-    </View>
+      {displayModesList.map(item => (
+        <RadioButton
+          key={`display_mode_${item.value}`}
+          label={item.label}
+          status={displayMode === item.value}
+          onPress={() => setLibrarySettings({ displayMode: item.value })}
+          theme={theme}
+        />
+      ))}
+    </ScrollView>
   );
 };
-
-const bottomSheetSceneMap = SceneMap({
-  first: FirstRoute,
-  second: SecondRoute,
-  third: ThirdRoute,
-});
 
 const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   bottomSheetRef,
@@ -229,6 +359,7 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   );
 
   const [index, setIndex] = useState(0);
+
   const routes = useMemo(
     () => [
       { key: 'first', title: getString('common.filter') },
@@ -236,6 +367,23 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
       { key: 'third', title: getString('common.display') },
     ],
     [],
+  );
+
+  const { register, scrollableRef } = useTabScrollables(routes[index].key);
+
+  const renderScene = useCallback(
+    ({ route }: { route: { key: string } }) => {
+      const scrollRef = register(route.key);
+      switch (route.key) {
+        case 'first':
+          return <FirstRoute scrollRef={scrollRef} />;
+        case 'second':
+          return <SecondRoute scrollRef={scrollRef} />;
+        default:
+          return <ThirdRoute scrollRef={scrollRef} />;
+      }
+    },
+    [register],
   );
 
   const renderCommonOptions = useCallback(
@@ -255,19 +403,22 @@ const LibraryBottomSheet: React.FC<LibraryBottomSheetProps> = ({
   }, [renderCommonOptions]);
 
   return (
-    <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={[520]}>
-      <BottomSheetView style={styles.bottomSheetCtn}>
-        <TabView
+    <BottomSheet
+      bottomSheetRef={bottomSheetRef}
+      snapPoints={SNAP_POINTS}
+      scrollableRef={scrollableRef}
+    >
+      <View style={styles.bottomSheetCtn}>
+        <SheetTabView
           animationEnabled={!reduceAppAnimations}
           commonOptions={commonOptions}
           navigationState={{ index, routes }}
           renderTabBar={renderTabBar}
-          renderScene={bottomSheetSceneMap}
+          renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
-          style={styles.tabView}
         />
-      </BottomSheetView>
+      </View>
     </BottomSheet>
   );
 };
@@ -285,9 +436,6 @@ const styles = StyleSheet.create({
   tabBar: {
     borderBottomWidth: 1,
     elevation: 0,
-  },
-  tabView: {
-    height: 520,
   },
   flex: { flex: 1 },
 });

@@ -1,10 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button, FAB } from 'react-native-paper';
 import { ErrorScreenV2, SafeAreaView, SearchbarV2 } from '@components/index';
 import NovelList from '@components/NovelList';
 import NovelCover from '@components/NovelCover';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetRef } from '@components/BottomSheet/BottomSheet';
 import FilterBottomSheet from './components/FilterBottomSheet';
 
 import { useSearch } from '@hooks';
@@ -77,6 +77,10 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
 
   const { novelInLibrary, switchNovelToLibrary } = useLibraryContext();
   const [inActivity, setInActivity] = useState<Record<string, boolean>>({});
+  const listExtraData = useMemo(
+    () => ({ inActivity, novelInLibrary }),
+    [inActivity, novelInLibrary],
+  );
 
   const navigateToNovel = useCallback(
     (item: NovelItem | NovelInfo) =>
@@ -91,7 +95,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
   );
 
   const { bottom, right } = useSafeAreaInsets();
-  const filterSheetRef = useRef<BottomSheetModalMethods | null>(null);
+  const filterSheetRef = useRef<BottomSheetRef | null>(null);
   const handleScroll = (event: {
     nativeEvent: {
       contentOffset: { y: number };
@@ -156,6 +160,7 @@ const BrowseSourceScreen = ({ route, navigation }: BrowseSourceScreenProps) => {
       ) : (
         <NovelList
           data={page.novels}
+          extraData={listExtraData}
           // Idle fillers could hide changes to the result count within a row.
           inSource={page.isLoading}
           ListFooterComponent={

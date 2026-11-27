@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Edit",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globally",
     "install": "Install",
@@ -502,6 +503,8 @@
   },
   "library": "Library",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Badges",
@@ -523,6 +526,7 @@
         "completed": "Completed",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Downloaded",
+        "genres": "Genres",
         "started": "Started",
         "unread": "Unread"
       },

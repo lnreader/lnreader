@@ -1,4 +1,8 @@
 import React from 'react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
+import * as Linking from 'expo-linking';
 import { act, render } from '@test-utils';
 import type { ChapterInfo, NovelInfo } from '@database/types';
 import WebViewReader, { CHAPTER_SWAP_TIMEOUT_MS } from '../WebViewReader';
@@ -7,6 +11,8 @@ type WebViewProps = {
   source: { html: string; baseUrl?: string };
   onLoadEnd(): void;
   onMessage(event: { nativeEvent: { data: string } }): void;
+  onShouldStartLoadWithRequest(request: { url: string }): boolean;
+  onOpenWindow(event: { nativeEvent: { targetUrl: string } }): void;
 };
 
 const mockInjectJavaScript = jest.fn();
@@ -94,9 +100,10 @@ jest.mock('@plugins/pluginManager', () => {
   };
 });
 
+const mockTtsCommand = jest.fn();
 jest.mock('../../hooks/useTtsSession', () => {
   const session = {
-    command: jest.fn(),
+    command: (command: string) => mockTtsCommand(command),
     cancelSleepTimer: jest.fn(),
     loadQueue: jest.fn(),
     loadAndPlay: jest.fn(),
@@ -128,6 +135,16 @@ jest.mock('../../utils/sanitizeChapterText', () => ({
   isPluginIssueReportUrl: () => false,
 }));
 
+const mockOpenNovel = jest.fn((_url: string) => false);
+jest.mock('../../hooks/useNovelLinkNavigation', () => ({
+  __esModule: true,
+  default: () => mockOpenNovel,
+}));
+
+jest.mock('expo-linking', () => ({
+  openURL: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock('../../utils/ttsQueue', () => ({
   buildTtsQueueFromHtml: () => [],
 }));
@@ -145,6 +162,8 @@ jest.mock('../../ChapterContext', () => ({
 
 const novel = { id: 1, name: 'Novel', pluginId: 'demo' } as NovelInfo;
 const webViewRef = { current: null };
+const mockHidden = { current: true };
+const mockSearchVisible = { current: false };
 
 const makeChapter = (id: number, isDownloaded = false) =>
   ({
@@ -186,6 +205,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 // skip rendering the new chapter.
 const ui = () => (
   <WebViewReader
+    hiddenRef={mockHidden}
+    searchVisibleRef={mockSearchVisible}
     onPress={jest.fn()}
     onSearchResult={jest.fn()}
     searchTextRef={{ current: '' }}
@@ -366,5 +387,122 @@ describe('WebViewReader chapter changes', () => {
     expect(rebuilt.html).toContain('Third chapter');
     expect(rebuilt.html).toContain('"progress":40');
     expect(rebuilt.html).not.toContain('Second chapter');
+  });
+});
+
+// Runs the seekbar wrapper from the reader page against a page state.
+const seekbarClass = (pageReader: { hidden: { val: boolean } }): string => {
+  const index = readFileSync(
+    join(process.cwd(), 'assets/reader/js/index.js'),
+    'utf8',
+  );
+  const toolWrapper = index.slice(
+    index.indexOf('const ToolWrapper ='),
+    index.indexOf('const ImageModal ='),
+  );
+  return runInNewContext(`${toolWrapper}; ToolWrapper().class();`, {
+    reader: {
+      ...pageReader,
+      generalSettings: { val: { verticalSeekbar: false } },
+    },
+    van: { derive: (fn: () => boolean) => ({ val: fn() }) },
+    div: (attributes: object) => attributes,
+    Scrollbar: () => null,
+  }).trim();
+};
+
+describe('WebViewReader page reload', () => {
+  beforeEach(() => {
+    mockInstalledPlugins.length = 0;
+  });
+
+  afterEach(() => {
+    mockHidden.current = true;
+    mockSearchVisible.current = false;
+  });
+
+  it.each([
+    [false, false],
+    [true, false],
+    [false, true],
+    [true, true],
+  ])(
+    'sends the controls state to a reloaded page (hidden %s, search %s)',
+    (hidden, search) => {
+      const view = renderLoadedReader();
+      mockHidden.current = hidden;
+      mockSearchVisible.current = search;
+      const source = mockWebView.props!.source;
+
+      goToChapter(view, makeChapter(2, true), '<p>Second chapter</p>');
+      expect(mockWebView.props!.source).not.toBe(source);
+      mockInjectJavaScript.mockClear();
+      act(() => mockWebView.props!.onLoadEnd());
+
+      const page = { reader: { hidden: { val: true } } };
+      const chromeScripts = injected().filter(script =>
+        script.includes('reader.hidden.val'),
+      );
+      expect(chromeScripts).toHaveLength(1);
+      runInNewContext(chromeScripts[0], { window: page });
+      expect(page.reader.hidden.val).toBe(hidden || search);
+      expect(seekbarClass(page.reader)).toBe(
+        hidden || search ? 'hidden horizontal' : 'horizontal',
+      );
+    },
+  );
+});
+
+describe('WebViewReader links', () => {
+  beforeEach(() => {
+    mockInstalledPlugins.length = 0;
+    mockOpenNovel.mockReset().mockReturnValue(false);
+  });
+
+  it('sends page messages, load requests, and new windows to novel navigation', () => {
+    renderLoadedReader();
+    mockOpenNovel.mockReturnValue(true);
+    const url = 'https://royalroad.com/fiction/123';
+
+    post({ type: 'link', data: { url } });
+
+    expect(mockOpenNovel).toHaveBeenCalledWith(url);
+    expect(mockWebView.props!.onShouldStartLoadWithRequest({ url })).toBe(
+      false,
+    );
+    act(() =>
+      mockWebView.props!.onOpenWindow({ nativeEvent: { targetUrl: url } }),
+    );
+    expect(mockOpenNovel).toHaveBeenCalledTimes(3);
+  });
+
+  it('stops speech only when a link opens a novel', () => {
+    renderLoadedReader();
+    mockTtsCommand.mockClear();
+
+    post({
+      type: 'link',
+      data: { url: 'https://example.com/', target: '_blank' },
+    });
+    expect(mockTtsCommand).not.toHaveBeenCalled();
+
+    mockOpenNovel.mockReturnValue(true);
+    post({ type: 'link', data: { url: 'https://royalroad.com/fiction/123' } });
+    expect(mockTtsCommand).toHaveBeenCalledWith('stop');
+  });
+
+  it('ignores a browser error for a link that no app can open', async () => {
+    jest
+      .mocked(Linking.openURL)
+      .mockRejectedValueOnce(new Error('unsupported'));
+    renderLoadedReader();
+
+    await act(async () =>
+      mockWebView.props!.onOpenWindow({
+        nativeEvent: { targetUrl: 'unknown:example' },
+      }),
+    );
+
+    expect(Linking.openURL).toHaveBeenCalledWith('unknown:example');
   });
 });

@@ -1,6 +1,12 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Pressable, View, StyleSheet, Text, ScrollView } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import React, { Ref, useEffect, useState, useCallback, useMemo } from 'react';
+import {
+  Pressable,
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  type ScrollViewInstance,
+} from 'react-native';
 import { Dialog, List, Slider } from '@components';
 import { getLocales } from 'expo-localization';
 import { Tts, TtsEngine, TtsVoice } from '@modules/nitro-tts';
@@ -289,7 +295,11 @@ const EnginePickerModal: React.FC<EnginePickerModalProps> = ({
   );
 };
 
-const TTSTab: React.FC = () => {
+interface TTSTabProps {
+  scrollRef?: Ref<ScrollViewInstance>;
+}
+
+const TTSTab = ({ scrollRef }: TTSTabProps) => {
   const theme = useTheme();
   const { TTSEnable = true, setChapterGeneralSettings } =
     useChapterGeneralSettings();
@@ -335,7 +345,8 @@ const TTSTab: React.FC = () => {
 
   return (
     <>
-      <BottomSheetScrollView
+      <ScrollView
+        ref={scrollRef}
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
@@ -441,7 +452,7 @@ const TTSTab: React.FC = () => {
         </View>
 
         <View style={styles.bottomSpacing} />
-      </BottomSheetScrollView>
+      </ScrollView>
 
       <EnginePickerModal
         visible={engineModalVisible}

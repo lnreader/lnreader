@@ -1,12 +1,19 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  ToastAndroid,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import { Portal } from 'react-native-paper';
 
-import BottomSheet from '@components/BottomSheet/BottomSheet';
+import BottomSheet, {
+  BottomSheetRef,
+} from '@components/BottomSheet/BottomSheet';
 import { useTracker, useTrackedNovel } from '@hooks/persisted';
 import { TrackerName, UserListStatus } from '@services/Trackers';
 import { NovelInfo } from '@database/types';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { TrackerMetadata } from '@hooks/persisted/useTracker';
 import { getStatusLabel, getTrackerIcon } from './constants';
 import { AddTrackingCard, TrackedItemCard } from './TrackerCards';
@@ -16,7 +23,7 @@ import SetTrackScoreDialog from './SetTrackScoreDialog';
 import SetTrackChaptersDialog from './SetTrackChaptersDialog';
 
 interface TrackSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  bottomSheetRef: React.RefObject<BottomSheetRef | null>;
   novel: NovelInfo;
 }
 
@@ -31,6 +38,7 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
   } = useTrackedNovel(novel.id);
 
   const authenticatedTrackers = getAuthenticatedTrackers();
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   const [activeTracker, setActiveTracker] = useState<TrackerMetadata | null>(
     null,
@@ -165,8 +173,12 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
 
   return (
     <>
-      <BottomSheet bottomSheetRef={bottomSheetRef} snapPoints={snapPoints}>
-        <ScrollView style={styles.contentContainer}>
+      <BottomSheet
+        bottomSheetRef={bottomSheetRef}
+        snapPoints={snapPoints}
+        scrollableRef={scrollRef}
+      >
+        <ScrollView ref={scrollRef} style={styles.contentContainer}>
           {authenticatedTrackers.map(tracker => {
             const trackerIcon = getTrackerIcon(tracker.name);
             const trackedNovel = getTrackedNovel(tracker.name);

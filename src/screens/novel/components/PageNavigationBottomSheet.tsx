@@ -1,21 +1,19 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, View, Pressable, Text } from 'react-native';
 import {
-  BottomSheetView,
-  useBottomSheetScrollableCreator,
-} from '@gorhom/bottom-sheet';
-import {
   LegendList,
+  LegendListRef,
   LegendListRenderItemProps,
 } from '@legendapp/list/react-native';
 import color from 'color';
 
-import BottomSheet from '@components/BottomSheet/BottomSheet';
+import BottomSheet, {
+  BottomSheetRef,
+} from '@components/BottomSheet/BottomSheet';
 import { ThemeColors } from '@theme/types';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 interface PageNavigationBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModalMethods | null>;
+  bottomSheetRef: React.RefObject<BottomSheetRef | null>;
   theme: ThemeColors;
   pages: string[];
   pageIndex: number;
@@ -29,7 +27,7 @@ export default function PageNavigationBottomSheet({
   pageIndex,
   openPage,
 }: PageNavigationBottomSheetProps) {
-  const BottomSheetLegendListScrollable = useBottomSheetScrollableCreator();
+  const listRef = useRef<LegendListRef>(null);
 
   const renderItem = ({ item, index }: LegendListRenderItemProps<string>) => {
     const isSelected = index === pageIndex;
@@ -77,9 +75,11 @@ export default function PageNavigationBottomSheet({
     <BottomSheet
       bottomSheetRef={bottomSheetRef}
       snapPoints={[Math.min(400, pages.length * 56 + 100)]}
+      scrollableRef={listRef}
     >
-      <BottomSheetView style={styles.contentContainer}>
+      <View style={styles.contentContainer}>
         <LegendList
+          ref={listRef}
           data={pages}
           recycleItems
           extraData={pageIndex}
@@ -87,9 +87,8 @@ export default function PageNavigationBottomSheet({
           keyExtractor={(item, index) => `page_${index}_${item}`}
           estimatedItemSize={56}
           contentContainerStyle={styles.listContent}
-          renderScrollComponent={BottomSheetLegendListScrollable}
         />
-      </BottomSheetView>
+      </View>
     </BottomSheet>
   );
 }

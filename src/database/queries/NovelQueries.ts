@@ -1,5 +1,17 @@
 import * as DocumentPicker from 'expo-document-picker';
-import { eq, and, sql, inArray, ne, getColumns, is, SQL } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  or,
+  like,
+  desc,
+  sql,
+  inArray,
+  ne,
+  getColumns,
+  is,
+  SQL,
+} from 'drizzle-orm';
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import type { Scalar, Transaction } from '@op-engineering/op-sqlite';
 
@@ -170,6 +182,31 @@ export const getNovelByPath = (
   );
   return res;
 };
+
+/**
+ * Finds a stored novel by its path or a longer path below it, library entries
+ * first. Shared URLs store a site's long form ("fiction/1/title") while browse
+ * results use the short one ("fiction/1"), so both can name one novel.
+ */
+export const getNovelByPathPrefix = (
+  novelPath: string,
+  pluginId: string,
+): DBNovelInfo | undefined =>
+  dbManager.getSync(
+    dbManager
+      .select()
+      .from(novelSchema)
+      .where(
+        and(
+          eq(novelSchema.pluginId, pluginId),
+          or(
+            eq(novelSchema.path, novelPath),
+            like(novelSchema.path, `${novelPath}/%`),
+          ),
+        ),
+      )
+      .orderBy(desc(novelSchema.inLibrary), novelSchema.id),
+  );
 
 /**
  * Toggles a novel's presence in the library.
