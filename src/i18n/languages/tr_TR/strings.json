@@ -333,6 +333,7 @@
     "downloads": "İndirilenler",
     "edit": "Düzenle",
     "example": "Örnek",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filtre",
     "globally": "global olarak",
     "install": "Yükle",
@@ -502,6 +503,8 @@
   },
   "library": "Kitaplık",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Rozetler",
@@ -523,6 +526,7 @@
         "completed": "Tamamlanmış",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "İndirilen",
+        "genres": "Genres",
         "started": "Başlanmış",
         "unread": "Okunmamış"
       },
