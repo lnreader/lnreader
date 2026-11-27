@@ -333,6 +333,7 @@
     "downloads": "Загрузки",
     "edit": "Изменить",
     "example": "Образец",
+    "excludedItem": "%{name}, excluded",
     "filter": "Фильтр",
     "globally": "глобально",
     "install": "Установить",
@@ -502,6 +503,8 @@
   },
   "library": "Библиотека",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Значки",
@@ -523,6 +526,7 @@
         "completed": "Завершено",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Загружено",
+        "genres": "Genres",
         "started": "Начато",
         "unread": "Не прочитано"
       },
