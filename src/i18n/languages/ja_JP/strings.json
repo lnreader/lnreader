@@ -333,6 +333,7 @@
     "downloads": "ダウンロード",
     "edit": "編集",
     "example": "例",
+    "excludedItem": "%{name}, excluded",
     "filter": "絞り込み",
     "globally": "世界的に",
     "install": "インストール",
@@ -502,6 +503,8 @@
   },
   "library": "ライブラリ",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "バッジ",
@@ -523,6 +526,7 @@
         "completed": "完成",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "ダウンロード",
+        "genres": "Genres",
         "started": "読み始めた",
         "unread": "未読"
       },
