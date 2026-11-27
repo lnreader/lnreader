@@ -333,6 +333,7 @@
     "downloads": "Nedladdningar",
     "edit": "Redigera",
     "example": "Exempel",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globalt",
     "install": "Installera",
@@ -502,6 +503,8 @@
   },
   "library": "Bibliotek",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Märken",
@@ -523,6 +526,7 @@
         "completed": "Slutförd",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Nerladdat",
+        "genres": "Genres",
         "started": "Påbörjad",
         "unread": "Olästa"
       },
