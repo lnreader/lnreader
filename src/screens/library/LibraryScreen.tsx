@@ -23,6 +23,7 @@ import {
 import {
   SearchbarV2,
   Button,
+  ConfirmationDialog,
   EmptyView,
   ErrorScreenV2,
   SafeAreaView,
@@ -36,6 +37,8 @@ import { Actionbar } from '@components/Actionbar/Actionbar';
 import { useAppSettings, useHistory, useTheme } from '@hooks/persisted';
 import { useSearch, useBackHandler, useBoolean } from '@hooks';
 import { getString } from '@i18n/translations';
+import { getErrorMessage } from '@utils/error';
+import { showToast } from '@utils/showToast';
 import { FAB, Portal } from 'react-native-paper';
 import {
   markAllChaptersRead,
@@ -441,10 +444,20 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
     refetchLibrary();
   }, [selectedNovelIds, refetchLibrary]);
 
+  const {
+    value: confirmRemoval,
+    setTrue: showRemovalConfirmation,
+    setFalse: closeRemovalConfirmation,
+  } = useBoolean();
+
   const deleteSelected = useCallback(async () => {
-    await removeNovelsFromLibrary(selectedNovelIds);
-    setSelectedNovelIds([]);
-    refetchLibrary();
+    try {
+      await removeNovelsFromLibrary(selectedNovelIds);
+      setSelectedNovelIds([]);
+      refetchLibrary();
+    } catch (error) {
+      showToast(getErrorMessage(error));
+    }
   }, [selectedNovelIds, refetchLibrary]);
 
   const actionbarActions = useMemo(
@@ -452,9 +465,9 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
       { icon: 'label-outline' as const, onPress: showSetCategoryModal },
       { icon: 'check' as const, onPress: markAllRead },
       { icon: 'check-outline' as const, onPress: markAllUnread },
-      { icon: 'delete-outline' as const, onPress: deleteSelected },
+      { icon: 'delete-outline' as const, onPress: showRemovalConfirmation },
     ],
-    [showSetCategoryModal, markAllRead, markAllUnread, deleteSelected],
+    [showSetCategoryModal, markAllRead, markAllUnread, showRemovalConfirmation],
   );
 
   const navigationState = useMemo(
@@ -562,6 +575,16 @@ const LibraryScreen = ({ navigation }: LibraryScreenProps) => {
           onPress={handleFABPress}
         />
       ) : null}
+      <ConfirmationDialog
+        visible={confirmRemoval && hasSelection}
+        title={getString('libraryScreen.removeSelectedTitle')}
+        message={getString('libraryScreen.removeSelectedMessage', {
+          count: selectedNovelIds.length,
+        })}
+        confirmLabel={getString('common.remove')}
+        onConfirm={deleteSelected}
+        onDismiss={closeRemovalConfirmation}
+      />
       <SetCategoryModal
         novelIds={selectedNovelIds}
         closeModal={closeSetCategoryModal}
