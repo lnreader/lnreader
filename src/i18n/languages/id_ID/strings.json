@@ -333,6 +333,7 @@
     "downloads": "Unduhan",
     "edit": "Ubah",
     "example": "Contoh",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "menyeluruh",
     "install": "Pasang",
@@ -502,6 +503,8 @@
   },
   "library": "Koleksi",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Lencana",
@@ -523,6 +526,7 @@
         "completed": "Sudah selesai",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Diunduh",
+        "genres": "Genres",
         "started": "Sudah dimulai",
         "unread": "Belum dibaca"
       },
