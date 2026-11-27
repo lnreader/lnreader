@@ -30,6 +30,7 @@ import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
 import { createNovelTriggerQueryUpdate } from '@database/queryStrings/triggers';
+import { notifyChapterStateChanged } from '@services/sync/syncDirtyNotifier';
 
 const CHAPTER_ID_BATCH_SIZE = 500;
 const chunkChapterIds = (chapterIds: number[]) =>
@@ -176,6 +177,7 @@ export const markChapterRead = async (chapterId: number): Promise<void> => {
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markChaptersRead = async (chapterIds: number[]): Promise<void> => {
@@ -192,6 +194,7 @@ export const markChaptersRead = async (chapterIds: number[]): Promise<void> => {
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const markChapterUnread = async (chapterId: number): Promise<void> => {
@@ -202,6 +205,7 @@ export const markChapterUnread = async (chapterId: number): Promise<void> => {
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markChaptersUnread = async (
@@ -220,6 +224,7 @@ export const markChaptersUnread = async (
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 /**
@@ -275,6 +280,7 @@ export const markAllChaptersRead = async (
       ids,
     );
   });
+  notifyChapterStateChanged();
 };
 
 export const markAllChaptersUnread = async (
@@ -299,6 +305,7 @@ export const markAllChaptersUnread = async (
       ids,
     );
   });
+  notifyChapterStateChanged();
 };
 
 const deleteDownloadedFiles = async (
@@ -427,6 +434,7 @@ export const updateChapterProgress = async (
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const updateChapterProgressByIds = async (
@@ -446,6 +454,7 @@ export const updateChapterProgressByIds = async (
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const bookmarkChapter = async (chapterId: number): Promise<void> => {
@@ -459,6 +468,7 @@ export const bookmarkChapter = async (chapterId: number): Promise<void> => {
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const bookmarkChapters = async (chapterIds: number[]): Promise<void> => {
@@ -478,6 +488,7 @@ export const bookmarkChapters = async (chapterIds: number[]): Promise<void> => {
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const markPreviuschaptersRead = async (
@@ -496,6 +507,7 @@ export const markPreviuschaptersRead = async (
       )
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markPreviousChaptersUnread = async (
@@ -518,6 +530,7 @@ export const markPreviousChaptersUnread = async (
       )
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const clearUpdates = async (): Promise<void> => {

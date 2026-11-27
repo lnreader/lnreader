@@ -13,8 +13,10 @@ import {
   DRIVE_SYNC_DIRTY,
   DRIVE_SYNC_DIRTY_TOKEN,
   DRIVE_SYNC_WATERMARKS,
+  DRIVE_SYNC_PARTIAL_NOVELS,
   type SyncDevicePayload,
 } from './types';
+import { registerSyncDirtyListener } from './syncDirtyNotifier';
 import type { DriveFile } from '@api/drive/types';
 
 const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
@@ -25,11 +27,65 @@ interface Watermarks {
 
 let currentStatus: SyncStatus = SyncStatus.IDLE;
 const statusListeners = new Set<(status: SyncStatus) => void>();
+const dataMergedListeners = new Set<() => void>();
 let isSyncing = false;
 let inFlightSync: Promise<void> | null = null;
 let lastSyncError: unknown;
 let scheduledSync: ReturnType<typeof setTimeout> | undefined;
 let netInfoUnsubscribe: (() => void) | null = null;
+let hasPendingPull = false;
+
+const getPartialNovelKey = (pluginId: string, path: string): string =>
+  `${pluginId}:::${path}`;
+
+const getPartialSyncedNovels = (): Record<string, true> =>
+  getMMKVObject<Record<string, true>>(DRIVE_SYNC_PARTIAL_NOVELS) ?? {};
+
+const markPartialSyncedNovels = (
+  novels: Array<{ pluginId: string; path: string }>,
+): void => {
+  if (!novels.length) return;
+  const current = getPartialSyncedNovels();
+  for (const novel of novels) {
+    current[getPartialNovelKey(novel.pluginId, novel.path)] = true;
+  }
+  setMMKVObject(DRIVE_SYNC_PARTIAL_NOVELS, current);
+};
+
+export const isPartialSyncedNovel = (
+  pluginId: string,
+  path: string,
+): boolean => {
+  const current = getPartialSyncedNovels();
+  return Boolean(current[getPartialNovelKey(pluginId, path)]);
+};
+
+export const clearPartialSyncedNovel = (
+  pluginId: string,
+  path: string,
+): void => {
+  const current = getPartialSyncedNovels();
+  const key = getPartialNovelKey(pluginId, path);
+  if (current[key]) {
+    delete current[key];
+    setMMKVObject(DRIVE_SYNC_PARTIAL_NOVELS, current);
+  }
+};
+
+export const addDataMergedListener = (listener: () => void): (() => void) => {
+  dataMergedListeners.add(listener);
+  return () => dataMergedListeners.delete(listener);
+};
+
+const emitDataMerged = (): void => {
+  for (const listener of dataMergedListeners) {
+    try {
+      listener();
+    } catch {
+      // listener error ignored
+    }
+  }
+};
 
 const isNetworkAllowedForState = (
   state: { isConnected?: boolean | null; type?: string },
@@ -52,13 +108,17 @@ const ensureNetworkRetryListener = (): void => {
   if (typeof NetInfo.addEventListener !== 'function') return;
   netInfoUnsubscribe = NetInfo.addEventListener(state => {
     const { enabled, wifiOnly } = getSyncSettings();
-    if (!enabled || !isSyncDirty()) {
+    if (!enabled || (!isSyncDirty() && !hasPendingPull)) {
       clearNetworkRetryListener();
       return;
     }
     if (isNetworkAllowedForState(state, wifiOnly)) {
       clearNetworkRetryListener();
-      void flushPendingSync();
+      if (hasPendingPull) {
+        void triggerStartupPull();
+      } else {
+        void flushPendingSync();
+      }
     }
   });
 };
@@ -319,17 +379,18 @@ export const flushPendingSync = async (): Promise<void> => {
 export const triggerStartupPull = async (): Promise<void> => {
   const { enabled, wifiOnly } = getSyncSettings();
   if (!enabled) {
+    hasPendingPull = false;
     clearNetworkRetryListener();
     return;
   }
 
   const allowed = await checkNetworkAllowsSync(wifiOnly);
   if (!allowed) {
-    if (isSyncDirty()) {
-      ensureNetworkRetryListener();
-    }
+    hasPendingPull = true;
+    ensureNetworkRetryListener();
     return;
   }
+  hasPendingPull = false;
   clearNetworkRetryListener();
 
   const authOk = await checkGoogleAuth();
@@ -363,6 +424,7 @@ export const triggerStartupPull = async (): Promise<void> => {
       const watermarks = pruneStaleWatermarks(getWatermarks());
       setMMKVObject(DRIVE_SYNC_WATERMARKS, watermarks);
 
+      let didMergePeerData = false;
       for (const file of files) {
         if (file.name === myFileName) continue;
         if (
@@ -386,12 +448,20 @@ export const triggerStartupPull = async (): Promise<void> => {
         ) {
           const payload = await getMedia<SyncDevicePayload>(file.id);
           if (payload && payload.version === 1) {
-            await mergeRemoteSyncPayload(payload);
+            const mergeResult = await mergeRemoteSyncPayload(payload);
+            if (mergeResult?.importedNovels?.length) {
+              markPartialSyncedNovels(mergeResult.importedNovels);
+            }
+            didMergePeerData = true;
             if (remoteModifiedTime) {
               setPeerWatermark(peerDeviceId, remoteModifiedTime);
             }
           }
         }
+      }
+
+      if (didMergePeerData) {
+        emitDataMerged();
       }
 
       if (isSyncDirty()) {
@@ -461,6 +531,8 @@ export const syncNow = async (): Promise<void> => {
   }
 };
 
+registerSyncDirtyListener(notifySyncDirty);
+
 export const driveSyncManager = {
   getDeviceId: getSyncDeviceId,
   getStatus: getSyncStatus,
@@ -472,4 +544,7 @@ export const driveSyncManager = {
   triggerStartupPull,
   syncNow,
   addSyncStatusListener,
+  addDataMergedListener,
+  isPartialSyncedNovel,
+  clearPartialSyncedNovel,
 };

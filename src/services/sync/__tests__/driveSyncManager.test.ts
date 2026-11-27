@@ -530,6 +530,38 @@ describe('driveSyncManager', () => {
     expect(driveSyncManager.getStatus()).toBe(SyncStatus.IDLE);
   });
 
+  it('retries skipped startup pull when network reconnects even if not dirty', async () => {
+    mockNetInfoFetch.mockResolvedValue({
+      isConnected: false,
+      type: 'none',
+    });
+
+    await triggerStartupPull();
+
+    expect(driveSyncManager.getStatus()).toBe(SyncStatus.OFFLINE);
+    expect(isSyncDirty()).toBe(false);
+    expect(mockNetInfoAddEventListener).toHaveBeenCalledTimes(1);
+    expect(netInfoListener).not.toBeNull();
+
+    mockNetInfoFetch.mockResolvedValue({
+      isConnected: true,
+      type: 'wifi',
+    });
+    mockDriveList.mockResolvedValue({ files: [] });
+
+    netInfoListener?.({ isConnected: true, type: 'wifi' });
+
+    await Promise.resolve();
+    await Promise.resolve();
+    await new Promise(resolve => {
+      jest.useRealTimers();
+      setTimeout(resolve, 20);
+    });
+
+    expect(mockDriveList).toHaveBeenCalledTimes(1);
+    expect(driveSyncManager.getStatus()).toBe(SyncStatus.IDLE);
+  });
+
   it('rejects syncNow when the Drive API request fails', async () => {
     mockDriveList.mockRejectedValue(new Error('Drive list error: 403'));
 

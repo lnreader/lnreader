@@ -1,10 +1,4 @@
-import {
-  composeCSS,
-  composeJS,
-  safeApplyRegex,
-  applyTextModifications,
-  CodeSnippet,
-} from '../customCode';
+import { composeCSS, composeJS, safeApplyRegex, applyTextModifications, CodeSnippet } from '../customCode';
 
 describe('composeCSS', () => {
   it('returns empty string for empty array', () => {
@@ -95,22 +89,14 @@ describe('safeApplyRegex', () => {
   });
 
   it('returns original text when regex pattern itself is invalid', () => {
-    const match = [
-      '/(unmatched(/g',
-      '(unmatched(',
-      'g',
-    ] as unknown as RegExpMatchArray;
+    const match = ['/(unmatched(/g', '(unmatched(', 'g'] as unknown as RegExpMatchArray;
     const result = safeApplyRegex(match, 'test', 'replacement');
     expect(result).toBe('test');
   });
 
   it('handles all valid flags: g, m, i, y, u, v, s, d', () => {
     const text = 'Line1\nline2\nLINE3\nline4';
-    const match = [
-      '/^line.*/gim',
-      '^line.*',
-      'gim',
-    ] as unknown as RegExpMatchArray;
+    const match = ['/^line.*/gim', '^line.*', 'gim'] as unknown as RegExpMatchArray;
     const result = safeApplyRegex(match, text, 'MATCH');
     expect(result).toBe('MATCH\nMATCH\nMATCH\nMATCH');
   });
@@ -140,24 +126,17 @@ describe('applyTextModifications', () => {
   });
 
   it('replaces text matching regex patterns from replaceText keys', () => {
-    const result = applyTextModifications('foo123bar456baz', [], {
-      '/\\d+/g': '#',
-    });
+    const result = applyTextModifications('foo123bar456baz', [], { '/\\d+/g': '#' });
     expect(result).toBe('foo#bar#baz');
   });
 
   it('apply order: removeText first, then replaceText', () => {
-    const result = applyTextModifications('x hello x world x', ['x '], {
-      world: 'earth',
-    });
+    const result = applyTextModifications('x hello x world x', ['x '], { world: 'earth' });
     expect(result).toBe('hello earth x');
   });
 
   it('empty text key in replaceText is skipped', () => {
-    const result = applyTextModifications('hello world', [], {
-      '': 'x',
-      hello: 'hi',
-    });
+    const result = applyTextModifications('hello world', [], { '': 'x', hello: 'hi' });
     expect(result).toBe('hi world');
   });
 
@@ -167,9 +146,7 @@ describe('applyTextModifications', () => {
   });
 
   it('regex in removeText and literal in replaceText coexist correctly', () => {
-    const result = applyTextModifications('abc123def', ['/\\d+/g'], {
-      def: 'xyz',
-    });
+    const result = applyTextModifications('abc123def', ['/\\d+/g'], { def: 'xyz' });
     expect(result).toBe('abcxyz');
   });
 });

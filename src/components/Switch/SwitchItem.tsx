@@ -43,10 +43,7 @@ const SwitchItem: React.FC<SwitchItemProps> = ({
     <View style={styles.labelContainer}>
       <Text style={[{ color: theme.onSurface }, styles.label]}>{label}</Text>
       {description ? (
-        <Text
-          numberOfLines={descriptionNumberOfLines}
-          style={[styles.description, { color: theme.onSurfaceVariant }]}
-        >
+        <Text numberOfLines={descriptionNumberOfLines} style={[styles.description, { color: theme.onSurfaceVariant }]}>
           {description}
         </Text>
       ) : null}

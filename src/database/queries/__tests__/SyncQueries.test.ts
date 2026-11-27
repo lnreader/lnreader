@@ -892,5 +892,45 @@ describe('SyncQueries', () => {
       expect(afterNewer?.progress).toBe(50);
       expect(afterNewer?.bookmark).toBe(true);
     });
+
+    it('strips device-local cover paths on export and merge', async () => {
+      const testDb = getTestDb();
+
+      await insertTestNovel(testDb, {
+        pluginId: 'plugin-test',
+        path: '/novel-local-cover',
+        name: 'Local Cover Novel',
+        cover: 'file:///data/user/0/app/files/cover.jpg',
+        inLibrary: true,
+      });
+
+      const exported = await queryActiveSyncEntities();
+      expect(exported.novels[0].cover).toBeNull();
+
+      await mergeRemoteSyncPayload({
+        version: 1,
+        deviceId: 'device-b',
+        lastUpdated: Date.now(),
+        novels: [
+          {
+            pluginId: 'plugin-test',
+            path: '/novel-remote-local-cover',
+            name: 'Remote Local Cover',
+            cover: 'file:///storage/emulated/0/cover.png',
+            inLibrary: true,
+            categoryNames: [],
+          },
+        ],
+        chapters: [],
+        categories: [],
+      });
+
+      const inserted = await testDb.drizzleDb
+        .select()
+        .from(novelSchema)
+        .where(eq(novelSchema.path, '/novel-remote-local-cover'))
+        .get();
+      expect(inserted?.cover).toBeNull();
+    });
   });
 });

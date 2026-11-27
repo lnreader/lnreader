@@ -144,6 +144,12 @@ export const useLibrary = (): UseLibraryReturnType => {
     setCategories(filteredCategories);
   }, []);
 
+  useEffect(() => {
+    return driveSyncManager.addDataMergedListener(() => {
+      void refreshCategories();
+    });
+  }, [refreshCategories]);
+
   const getLibrary = useCallback(async () => {
     const requestId = ++loadRequestIdRef.current;
     if (!hasLoadedRef.current || hasErrorRef.current || searchText) {

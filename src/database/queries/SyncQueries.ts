@@ -23,6 +23,18 @@ export interface ActiveSyncEntities {
   categories: SyncCategoryEntry[];
 }
 
+export interface MergeSyncResult {
+  importedNovels: Array<{ pluginId: string; path: string }>;
+}
+
+const sanitizeRemoteCover = (cover?: string | null): string | null => {
+  if (!cover) return null;
+  if (cover.startsWith('file://') || cover.startsWith('/')) {
+    return null;
+  }
+  return cover;
+};
+
 /**
  * Queries active entities to be synchronized to Google Drive.
  * Restricts chapters to active states (read, in-progress, bookmarked, or with readTime).
@@ -66,7 +78,7 @@ export const queryActiveSyncEntities =
       pluginId: novel.pluginId,
       path: novel.path,
       name: novel.name,
-      cover: novel.cover ?? null,
+      cover: sanitizeRemoteCover(novel.cover),
       author: novel.author ?? null,
       status: novel.status ?? null,
       inLibrary: Boolean(novel.inLibrary),
@@ -159,7 +171,9 @@ const isTimestampNewer = (
  */
 export const mergeRemoteSyncPayload = async (
   payload: SyncDevicePayload,
-): Promise<void> => {
+): Promise<MergeSyncResult> => {
+  const importedNovels: Array<{ pluginId: string; path: string }> = [];
+
   await dbManager.write(async tx => {
     // 1. Reconcile novels & categories
     const novelIdMap = new Map<string, number>();
@@ -184,6 +198,7 @@ export const mergeRemoteSyncPayload = async (
       const isNovelInLibrary = existingNovel
         ? Boolean(existingNovel.inLibrary)
         : true;
+      const remoteCover = sanitizeRemoteCover(remoteNovel.cover);
 
       if (!existingNovel) {
         // Novel does not exist locally: insert with inLibrary = true
@@ -193,7 +208,7 @@ export const mergeRemoteSyncPayload = async (
             pluginId: remoteNovel.pluginId,
             path: remoteNovel.path,
             name: remoteNovel.name,
-            cover: remoteNovel.cover ?? null,
+            cover: remoteCover,
             author: remoteNovel.author ?? null,
             status: remoteNovel.status ?? 'Unknown',
             inLibrary: true,
@@ -202,6 +217,10 @@ export const mergeRemoteSyncPayload = async (
           .returning({ id: novelSchema.id })
           .get();
         novelId = inserted.id;
+        importedNovels.push({
+          pluginId: remoteNovel.pluginId,
+          path: remoteNovel.path,
+        });
       } else {
         // Novel exists locally: PRESERVE local.inLibrary unmodified!
         novelId = existingNovel.id;
@@ -220,8 +239,8 @@ export const mergeRemoteSyncPayload = async (
         ) {
           updates.status = remoteNovel.status;
         }
-        if (!existingNovel.cover && remoteNovel.cover) {
-          updates.cover = remoteNovel.cover;
+        if (!existingNovel.cover && remoteCover) {
+          updates.cover = remoteCover;
         }
 
         if (Object.keys(updates).length > 0) {
@@ -441,4 +460,6 @@ export const mergeRemoteSyncPayload = async (
       }
     }
   });
+
+  return { importedNovels };
 };
