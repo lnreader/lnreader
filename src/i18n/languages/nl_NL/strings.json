@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Bewerk",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globaal",
     "install": "Installeer",
@@ -502,6 +503,8 @@
   },
   "library": "Bibliotheek",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Badges",
@@ -523,6 +526,7 @@
         "completed": "Voltooid",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Gedownload",
+        "genres": "Genres",
         "started": "Gestart",
         "unread": "Ongelezen"
       },
