@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Upravit",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globálně",
     "install": "Instalovat",
@@ -502,6 +503,8 @@
   },
   "library": "Knihovna",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Odznaky",
@@ -523,6 +526,7 @@
         "completed": "Dokončeno",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Staženo",
+        "genres": "Genres",
         "started": "Zahájeno",
         "unread": "Nepřečteno"
       },
