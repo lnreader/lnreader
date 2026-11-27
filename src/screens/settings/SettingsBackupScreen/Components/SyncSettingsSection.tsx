@@ -55,6 +55,7 @@ export const SyncSettingsSection: React.FC<SyncSettingsSectionProps> = ({
       }
 
       setAppSettings({ driveSyncEnabled: true });
+      driveSyncManager.notifySyncDirty();
       void driveSyncManager.triggerStartupPull();
     } else {
       setAppSettings({ driveSyncEnabled: false });

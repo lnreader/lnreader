@@ -26,6 +26,7 @@ export const chapter = sqliteTable(
     progress: integer('progress'),
     scanlator: text('scanlator'),
     timeSpent: integer('timeSpent').default(0),
+    syncUpdatedAt: text('syncUpdatedAt'),
   },
   table => [
     uniqueIndex('chapter_novel_path_unique').on(table.novelId, table.path),

@@ -1,9 +1,32 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react-native';
+import type { ReactNode } from 'react';
+import { fireEvent, render, screen, waitFor } from '@test-utils';
+
+jest.mock('@screens/novel/NovelContext', () => ({
+  NovelContextProvider: ({ children }: { children: ReactNode }) => children,
+}));
+
+jest.mock('@hooks/persisted/useTheme', () => ({
+  ThemeProvider: ({ children }: { children: ReactNode }) => children,
+  useTheme: () => mockTheme,
+}));
+
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = require('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 import { defaultTheme } from '@theme/md3/defaultTheme';
 import { SyncSettingsSection } from '../SyncSettingsSection';
 import { SyncStatus } from '@services/sync/types';
@@ -31,6 +54,7 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 
 const mockTriggerStartupPull = jest.fn();
 const mockSyncNow = jest.fn();
+const mockNotifySyncDirty = jest.fn();
 const mockGetStatus = jest.fn(() => SyncStatus.IDLE);
 const mockAddSyncStatusListener = jest.fn(
   (_cb?: (status: SyncStatus) => void) => () => {},
@@ -40,6 +64,7 @@ jest.mock('@services/sync/driveSyncManager', () => ({
   driveSyncManager: {
     getStatus: () => mockGetStatus(),
     addSyncStatusListener: (cb: any) => mockAddSyncStatusListener(cb),
+    notifySyncDirty: () => mockNotifySyncDirty(),
     triggerStartupPull: () => mockTriggerStartupPull(),
     syncNow: () => mockSyncNow(),
   },
@@ -127,6 +152,7 @@ describe('SyncSettingsSection', () => {
       });
     });
     expect(openGoogleDriveModal).not.toHaveBeenCalled();
+    expect(mockNotifySyncDirty).toHaveBeenCalledTimes(1);
     expect(mockTriggerStartupPull).toHaveBeenCalledTimes(1);
   });
 

@@ -35,10 +35,19 @@ jest.mock('@utils/mmkv/mmkv', () => ({
 }));
 
 const mockNetInfoFetch = jest.fn();
+let netInfoListener: ((state: any) => void) | null = null;
+const mockNetInfoUnsubscribe = jest.fn(() => {
+  netInfoListener = null;
+});
+const mockNetInfoAddEventListener = jest.fn((cb: (state: any) => void) => {
+  netInfoListener = cb;
+  return mockNetInfoUnsubscribe;
+});
 jest.mock('@react-native-community/netinfo', () => ({
   __esModule: true,
   default: {
     fetch: () => mockNetInfoFetch(),
+    addEventListener: (cb: any) => mockNetInfoAddEventListener(cb),
   },
 }));
 
@@ -483,6 +492,42 @@ describe('driveSyncManager', () => {
       expect(isSyncDirty()).toBe(false);
       expect(driveSyncManager.getStatus()).toBe(SyncStatus.IDLE);
     });
+  });
+
+  it('retries pending sync when network reconnects after being offline', async () => {
+    mockNetInfoFetch.mockResolvedValue({
+      isConnected: false,
+      type: 'none',
+    });
+    notifySyncDirty();
+
+    await flushPendingSync();
+
+    expect(driveSyncManager.getStatus()).toBe(SyncStatus.OFFLINE);
+    expect(isSyncDirty()).toBe(true);
+    expect(mockNetInfoAddEventListener).toHaveBeenCalledTimes(1);
+    expect(netInfoListener).not.toBeNull();
+
+    mockNetInfoFetch.mockResolvedValue({
+      isConnected: true,
+      type: 'wifi',
+    });
+    mockDriveList.mockResolvedValue({ files: [] });
+    mockDriveCreate.mockResolvedValue({ id: 'reconnected-file-id' });
+    mockDrivePatch.mockResolvedValue(undefined);
+
+    netInfoListener?.({ isConnected: true, type: 'wifi' });
+
+    await Promise.resolve();
+    await Promise.resolve();
+    await new Promise(resolve => {
+      jest.useRealTimers();
+      setTimeout(resolve, 20);
+    });
+
+    expect(mockDriveCreate).toHaveBeenCalledTimes(1);
+    expect(isSyncDirty()).toBe(false);
+    expect(driveSyncManager.getStatus()).toBe(SyncStatus.IDLE);
   });
 
   it('rejects syncNow when the Drive API request fails', async () => {

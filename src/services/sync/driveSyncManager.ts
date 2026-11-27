@@ -29,6 +29,39 @@ let isSyncing = false;
 let inFlightSync: Promise<void> | null = null;
 let lastSyncError: unknown;
 let scheduledSync: ReturnType<typeof setTimeout> | undefined;
+let netInfoUnsubscribe: (() => void) | null = null;
+
+const isNetworkAllowedForState = (
+  state: { isConnected?: boolean | null; type?: string },
+  wifiOnly: boolean,
+): boolean => {
+  if (!state.isConnected) return false;
+  if (wifiOnly && state.type !== 'wifi') return false;
+  return true;
+};
+
+const clearNetworkRetryListener = (): void => {
+  if (netInfoUnsubscribe) {
+    netInfoUnsubscribe();
+    netInfoUnsubscribe = null;
+  }
+};
+
+const ensureNetworkRetryListener = (): void => {
+  if (netInfoUnsubscribe) return;
+  if (typeof NetInfo.addEventListener !== 'function') return;
+  netInfoUnsubscribe = NetInfo.addEventListener(state => {
+    const { enabled, wifiOnly } = getSyncSettings();
+    if (!enabled || !isSyncDirty()) {
+      clearNetworkRetryListener();
+      return;
+    }
+    if (isNetworkAllowedForState(state, wifiOnly)) {
+      clearNetworkRetryListener();
+      void flushPendingSync();
+    }
+  });
+};
 
 const createDeviceId = (): string =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, character => {
@@ -241,10 +274,19 @@ export const flushPendingSync = async (): Promise<void> => {
   }
 
   const { enabled, wifiOnly } = getSyncSettings();
-  if (!enabled) return;
+  if (!enabled) {
+    clearNetworkRetryListener();
+    return;
+  }
 
   const allowed = await checkNetworkAllowsSync(wifiOnly);
-  if (!allowed) return;
+  if (!allowed) {
+    if (isSyncDirty()) {
+      ensureNetworkRetryListener();
+    }
+    return;
+  }
+  clearNetworkRetryListener();
 
   const authOk = await checkGoogleAuth();
   if (!authOk) return;
@@ -276,10 +318,19 @@ export const flushPendingSync = async (): Promise<void> => {
 
 export const triggerStartupPull = async (): Promise<void> => {
   const { enabled, wifiOnly } = getSyncSettings();
-  if (!enabled) return;
+  if (!enabled) {
+    clearNetworkRetryListener();
+    return;
+  }
 
   const allowed = await checkNetworkAllowsSync(wifiOnly);
-  if (!allowed) return;
+  if (!allowed) {
+    if (isSyncDirty()) {
+      ensureNetworkRetryListener();
+    }
+    return;
+  }
+  clearNetworkRetryListener();
 
   const authOk = await checkGoogleAuth();
   if (!authOk) return;
@@ -344,6 +395,10 @@ export const triggerStartupPull = async (): Promise<void> => {
       }
 
       if (isSyncDirty()) {
+        if (scheduledSync) {
+          clearTimeout(scheduledSync);
+          scheduledSync = undefined;
+        }
         await executeUpload();
       } else {
         setSyncStatus(SyncStatus.IDLE);

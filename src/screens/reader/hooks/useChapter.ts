@@ -539,7 +539,7 @@ export default function useChapter(
         return;
       }
       updateChapterProgress(target.id, progress);
-        driveSyncManager.notifySyncDirty();
+      driveSyncManager.notifySyncDirty();
 
       // Progress is reported repeatedly while reading the end of a chapter;
       // marking it read (and pushing it to the tracker, which is a network

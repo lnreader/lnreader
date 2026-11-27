@@ -20,6 +20,8 @@ export interface SyncChapterEntry {
   readTime: string | null; // ISO 8601 string
   bookmark: boolean;
   page?: string | null;
+  position?: number | null;
+  syncUpdatedAt?: string | null;
 }
 
 export interface SyncCategoryEntry {

@@ -59,6 +59,7 @@ const makeChapter = (
   position: id,
   scanlator: null,
   timeSpent: 0,
+  syncUpdatedAt: null,
   ...overrides,
   releaseTime: overrides.releaseTime ?? '2024-01-01',
 });

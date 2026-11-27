@@ -668,5 +668,229 @@ describe('SyncQueries', () => {
       expect(chAfterNewer?.readTime).toBe('2026-06-12T18:00:00.000Z');
       expect(chAfterNewer?.page).toBe('42');
     });
+
+    it('excludes local EPUB novels from queryActiveSyncEntities and ignores them on merge', async () => {
+      const testDb = getTestDb();
+
+      const localNovelId = await insertTestNovel(testDb, {
+        pluginId: 'local',
+        path: '/storage/emulated/0/book.epub',
+        name: 'Local EPUB',
+        inLibrary: true,
+        isLocal: true,
+      });
+      await insertTestChapter(testDb, localNovelId, {
+        path: '/storage/emulated/0/book.epub/ch1',
+        name: 'EPUB Chapter 1',
+        unread: false,
+        progress: 100,
+      });
+
+      const active = await queryActiveSyncEntities();
+      expect(active.novels).toHaveLength(0);
+      expect(active.chapters).toHaveLength(0);
+
+      await mergeRemoteSyncPayload({
+        version: 1,
+        deviceId: 'device-b',
+        lastUpdated: Date.now(),
+        novels: [
+          {
+            pluginId: 'local',
+            path: '/remote/book.epub',
+            name: 'Remote Local EPUB',
+            inLibrary: true,
+            categoryNames: [],
+          },
+        ],
+        chapters: [
+          {
+            novelPluginId: 'local',
+            novelPath: '/remote/book.epub',
+            chapterPath: '/remote/book.epub/ch1',
+            name: 'EPUB Chapter 1',
+            unread: false,
+            progress: 100,
+            bookmark: false,
+            readTime: null,
+          },
+        ],
+        categories: [],
+      });
+
+      const allNovels = await testDb.drizzleDb.select().from(novelSchema).all();
+      expect(allNovels).toHaveLength(1);
+      expect(allNovels[0].id).toBe(localNovelId);
+    });
+
+    it('preserves chapter position on export and import', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, {
+        pluginId: 'plugin-test',
+        path: '/novel-pos',
+        name: 'Position Novel',
+        inLibrary: true,
+      });
+      await insertTestChapter(testDb, novelId, {
+        path: '/ch-pos-5',
+        name: 'Chapter 5',
+        unread: false,
+        progress: 100,
+        position: 5,
+      });
+
+      const exported = await queryActiveSyncEntities();
+      expect(exported.chapters[0].position).toBe(5);
+
+      await mergeRemoteSyncPayload({
+        version: 1,
+        deviceId: 'device-b',
+        lastUpdated: Date.now(),
+        novels: [
+          {
+            pluginId: 'plugin-test',
+            path: '/novel-pos-remote',
+            name: 'Remote Position Novel',
+            inLibrary: true,
+            categoryNames: [],
+          },
+        ],
+        chapters: [
+          {
+            novelPluginId: 'plugin-test',
+            novelPath: '/novel-pos-remote',
+            chapterPath: '/ch-pos-12',
+            name: 'Chapter 12',
+            unread: false,
+            progress: 100,
+            bookmark: false,
+            readTime: null,
+            position: 12,
+          },
+        ],
+        categories: [],
+      });
+
+      const insertedNovel = await testDb.drizzleDb
+        .select()
+        .from(novelSchema)
+        .where(eq(novelSchema.path, '/novel-pos-remote'))
+        .get();
+      const insertedChapter = await testDb.drizzleDb
+        .select()
+        .from(chapterSchema)
+        .where(eq(chapterSchema.novelId, insertedNovel!.id))
+        .get();
+
+      expect(insertedChapter?.position).toBe(12);
+    });
+
+    it('lets newer explicit chapter edits (unread, reset progress, unbookmark) survive merge', async () => {
+      const testDb = getTestDb();
+
+      const novelId = await insertTestNovel(testDb, {
+        pluginId: 'plugin-test',
+        path: '/novel-edits',
+        name: 'Edits Novel',
+        inLibrary: true,
+      });
+
+      // Local chapter was explicitly marked unread, progress reset, unbookmarked at T2
+      const chId = await insertTestChapter(testDb, novelId, {
+        path: '/ch-edited',
+        name: 'Edited Chapter',
+        unread: true,
+        progress: 0,
+        bookmark: false,
+        readTime: null,
+        syncUpdatedAt: '2026-06-15T12:00:00.000Z',
+      });
+
+      // Export should still include it because syncUpdatedAt is set
+      const exported = await queryActiveSyncEntities();
+      expect(exported.chapters).toHaveLength(1);
+      expect(exported.chapters[0].syncUpdatedAt).toBe(
+        '2026-06-15T12:00:00.000Z',
+      );
+
+      // Older peer payload (T1) must NOT reverse local edits
+      await mergeRemoteSyncPayload({
+        version: 1,
+        deviceId: 'device-b',
+        lastUpdated: Date.now(),
+        novels: [
+          {
+            pluginId: 'plugin-test',
+            path: '/novel-edits',
+            name: 'Edits Novel',
+            inLibrary: true,
+            categoryNames: [],
+          },
+        ],
+        chapters: [
+          {
+            novelPluginId: 'plugin-test',
+            novelPath: '/novel-edits',
+            chapterPath: '/ch-edited',
+            name: 'Edited Chapter',
+            unread: false,
+            progress: 100,
+            bookmark: true,
+            readTime: '2026-06-14T10:00:00.000Z',
+            syncUpdatedAt: '2026-06-14T10:00:00.000Z',
+          },
+        ],
+        categories: [],
+      });
+
+      const afterOlder = await testDb.drizzleDb
+        .select()
+        .from(chapterSchema)
+        .where(eq(chapterSchema.id, chId))
+        .get();
+      expect(afterOlder?.unread).toBe(true);
+      expect(afterOlder?.progress).toBe(0);
+      expect(afterOlder?.bookmark).toBe(false);
+
+      // Newer remote explicit edit (T3) SHOULD overwrite local state
+      await mergeRemoteSyncPayload({
+        version: 1,
+        deviceId: 'device-b',
+        lastUpdated: Date.now(),
+        novels: [
+          {
+            pluginId: 'plugin-test',
+            path: '/novel-edits',
+            name: 'Edits Novel',
+            inLibrary: true,
+            categoryNames: [],
+          },
+        ],
+        chapters: [
+          {
+            novelPluginId: 'plugin-test',
+            novelPath: '/novel-edits',
+            chapterPath: '/ch-edited',
+            name: 'Edited Chapter',
+            unread: false,
+            progress: 50,
+            bookmark: true,
+            readTime: '2026-06-16T10:00:00.000Z',
+            syncUpdatedAt: '2026-06-16T10:00:00.000Z',
+          },
+        ],
+        categories: [],
+      });
+
+      const afterNewer = await testDb.drizzleDb
+        .select()
+        .from(chapterSchema)
+        .where(eq(chapterSchema.id, chId))
+        .get();
+      expect(afterNewer?.unread).toBe(false);
+      expect(afterNewer?.progress).toBe(50);
+      expect(afterNewer?.bookmark).toBe(true);
+    });
   });
 });

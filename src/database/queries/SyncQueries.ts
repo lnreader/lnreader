@@ -1,4 +1,4 @@
-import { eq, and, or, gt, isNotNull } from 'drizzle-orm';
+import { eq, and, or, gt, isNotNull, isNull, ne } from 'drizzle-orm';
 import { dbManager } from '@database/db';
 import {
   novelSchema,
@@ -29,10 +29,16 @@ export interface ActiveSyncEntities {
  */
 export const queryActiveSyncEntities =
   async (): Promise<ActiveSyncEntities> => {
+    const syncableNovelCondition = and(
+      eq(novelSchema.inLibrary, true),
+      or(eq(novelSchema.isLocal, false), isNull(novelSchema.isLocal)),
+      ne(novelSchema.pluginId, 'local'),
+    );
+
     const libraryNovels = await dbManager
       .select()
       .from(novelSchema)
-      .where(eq(novelSchema.inLibrary, true))
+      .where(syncableNovelCondition)
       .all();
 
     const categoryMap = new Map<number, string[]>();
@@ -47,7 +53,7 @@ export const queryActiveSyncEntities =
         eq(categorySchema.id, novelCategorySchema.categoryId),
       )
       .innerJoin(novelSchema, eq(novelSchema.id, novelCategorySchema.novelId))
-      .where(eq(novelSchema.inLibrary, true))
+      .where(syncableNovelCondition)
       .all();
 
     for (const row of novelCategories) {
@@ -72,6 +78,7 @@ export const queryActiveSyncEntities =
       gt(chapterSchema.progress, 0),
       eq(chapterSchema.bookmark, true),
       isNotNull(chapterSchema.readTime),
+      isNotNull(chapterSchema.syncUpdatedAt),
     );
 
     const activeChapters = await dbManager
@@ -86,10 +93,12 @@ export const queryActiveSyncEntities =
         readTime: chapterSchema.readTime,
         bookmark: chapterSchema.bookmark,
         page: chapterSchema.page,
+        position: chapterSchema.position,
+        syncUpdatedAt: chapterSchema.syncUpdatedAt,
       })
       .from(chapterSchema)
       .innerJoin(novelSchema, eq(chapterSchema.novelId, novelSchema.id))
-      .where(and(eq(novelSchema.inLibrary, true), activeCondition))
+      .where(and(syncableNovelCondition, activeCondition))
       .all();
 
     const chapters: SyncChapterEntry[] = activeChapters.map(ch => ({
@@ -103,6 +112,8 @@ export const queryActiveSyncEntities =
       readTime: ch.readTime ?? null,
       bookmark: Boolean(ch.bookmark),
       page: ch.page ?? null,
+      position: ch.position ?? 0,
+      syncUpdatedAt: ch.syncUpdatedAt ?? null,
     }));
 
     const uniqueCategoryNames = new Set<string>();
@@ -154,6 +165,9 @@ export const mergeRemoteSyncPayload = async (
     const novelIdMap = new Map<string, number>();
 
     for (const remoteNovel of payload.novels) {
+      if (remoteNovel.pluginId === 'local') {
+        continue;
+      }
       const key = `${remoteNovel.pluginId}:::${remoteNovel.path}`;
       const existingNovel = await tx
         .select()
@@ -272,6 +286,9 @@ export const mergeRemoteSyncPayload = async (
     // 2. Reconcile chapters
     const chaptersByNovelKey = new Map<string, SyncChapterEntry[]>();
     for (const remoteChapter of payload.chapters) {
+      if (remoteChapter.novelPluginId === 'local') {
+        continue;
+      }
       const key = `${remoteChapter.novelPluginId}:::${remoteChapter.novelPath}`;
       const list = chaptersByNovelKey.get(key) ?? [];
       list.push(remoteChapter);
@@ -332,15 +349,55 @@ export const mergeRemoteSyncPayload = async (
             readTime: remoteChapter.readTime ?? null,
             bookmark: Boolean(remoteChapter.bookmark),
             page: remoteChapter.page ?? '1',
+            position: remoteChapter.position ?? 0,
+            syncUpdatedAt: remoteChapter.syncUpdatedAt ?? null,
             isDownloaded: false,
           });
         } else {
-          const updatedUnread =
-            local.unread === false ? false : Boolean(remoteChapter.unread);
           const remoteProgress = sanitizeProgress(remoteChapter.progress);
-          const updatedProgress = Math.max(local.progress ?? 0, remoteProgress);
-          const updatedBookmark =
-            Boolean(local.bookmark) || Boolean(remoteChapter.bookmark);
+          const effectiveRemoteTime =
+            remoteChapter.syncUpdatedAt ?? remoteChapter.readTime;
+          const effectiveLocalTime = local.syncUpdatedAt ?? local.readTime;
+
+          const remoteHasExplicitEdit = Boolean(remoteChapter.syncUpdatedAt);
+          const localHasExplicitEdit = Boolean(local.syncUpdatedAt);
+          const remoteStateIsNewer = isTimestampNewer(
+            effectiveRemoteTime,
+            effectiveLocalTime,
+          );
+          const localStateIsNewer = isTimestampNewer(
+            effectiveLocalTime,
+            effectiveRemoteTime,
+          );
+
+          let updatedUnread: boolean;
+          let updatedProgress: number;
+          let updatedBookmark: boolean;
+          let updatedSyncUpdatedAt: string | null;
+
+          if (remoteHasExplicitEdit && remoteStateIsNewer) {
+            updatedUnread = Boolean(remoteChapter.unread);
+            updatedProgress = remoteProgress;
+            updatedBookmark = Boolean(remoteChapter.bookmark);
+            updatedSyncUpdatedAt = remoteChapter.syncUpdatedAt ?? null;
+          } else if (localHasExplicitEdit && localStateIsNewer) {
+            updatedUnread = Boolean(local.unread);
+            updatedProgress = local.progress ?? 0;
+            updatedBookmark = Boolean(local.bookmark);
+            updatedSyncUpdatedAt = local.syncUpdatedAt ?? null;
+          } else {
+            updatedUnread =
+              local.unread === false ? false : Boolean(remoteChapter.unread);
+            updatedProgress = Math.max(local.progress ?? 0, remoteProgress);
+            updatedBookmark =
+              Boolean(local.bookmark) || Boolean(remoteChapter.bookmark);
+            updatedSyncUpdatedAt = isTimestampNewer(
+              remoteChapter.syncUpdatedAt,
+              local.syncUpdatedAt,
+            )
+              ? remoteChapter.syncUpdatedAt ?? null
+              : local.syncUpdatedAt ?? null;
+          }
 
           const remoteIsNewer = isTimestampNewer(
             remoteChapter.readTime,
@@ -359,7 +416,8 @@ export const mergeRemoteSyncPayload = async (
             (local.progress ?? 0) !== updatedProgress ||
             Boolean(local.bookmark) !== updatedBookmark ||
             (local.readTime ?? null) !== (updatedReadTime ?? null) ||
-            (local.page ?? '1') !== (updatedPage ?? '1');
+            (local.page ?? '1') !== (updatedPage ?? '1') ||
+            (local.syncUpdatedAt ?? null) !== (updatedSyncUpdatedAt ?? null);
 
           if (hasChanged) {
             await tx
@@ -370,6 +428,7 @@ export const mergeRemoteSyncPayload = async (
                 bookmark: updatedBookmark,
                 readTime: updatedReadTime,
                 page: updatedPage,
+                syncUpdatedAt: updatedSyncUpdatedAt,
               })
               .where(eq(chapterSchema.id, local.id));
           }
