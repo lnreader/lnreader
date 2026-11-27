@@ -333,6 +333,7 @@
     "downloads": "Tải xuống",
     "edit": "Sửa",
     "example": "Ví dụ",
+    "excludedItem": "%{name}, excluded",
     "filter": "Bộ lọc",
     "globally": "toàn cầu",
     "install": "Tải về",
@@ -502,6 +503,8 @@
   },
   "library": "Thư viện",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Nhãn",
@@ -523,6 +526,7 @@
         "completed": "Đã hoàn thành",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Đã tải về",
+        "genres": "Genres",
         "started": "Đã bắt đầu",
         "unread": "Chưa đọc"
       },
