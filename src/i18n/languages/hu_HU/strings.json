@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "Szerkesztés",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "Szűrő",
     "globally": "globálisan",
     "install": "Telepítés",
@@ -502,6 +503,8 @@
   },
   "library": "Könyvtár",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Badges",
@@ -523,6 +526,7 @@
         "completed": "Befejezett",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Letöltött",
+        "genres": "Genres",
         "started": "Elkezdett",
         "unread": "Olvasatlan"
       },
