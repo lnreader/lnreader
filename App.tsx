@@ -17,7 +17,6 @@ import CrashRecoveryGate from '@components/AppErrorBoundary/CrashRecoveryGate';
 import HiddenWebViewHost from '@components/HiddenWebViewHost';
 
 import Main from './src/navigators/Main';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useInitDatabase } from '@database/db';
 import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
 import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
@@ -111,10 +110,8 @@ const Application = () => {
         <AppErrorBoundary>
           <SafeAreaProvider>
             <ThemedPaperProvider>
-              <BottomSheetModalProvider>
-                <Main />
-                <HiddenWebViewHost />
-              </BottomSheetModalProvider>
+              <Main />
+              <HiddenWebViewHost />
             </ThemedPaperProvider>
           </SafeAreaProvider>
         </AppErrorBoundary>
