@@ -15,6 +15,7 @@ import { getBatteryLevelSync } from 'react-native-device-info';
 import * as Speech from 'expo-speech';
 import { dummyHTML } from './dummies';
 import { useTheme } from '@hooks/persisted';
+import { buildReaderCustomScript } from '@screens/reader/utils/readerShell';
 
 type WebViewPostEvent = {
   type: string;
@@ -289,17 +290,7 @@ const SettingsWebView = () => {
                             <script src="${assetsUriPrefix}/js/core.js"></script>
                             <script src="${assetsUriPrefix}/js/index.js"></script>
                             <script>
-                              async function fn(){
-                                  let novelName = "${novel.name}";
-                                  let chapterName = "${chapter.name}";
-                                  let sourceId = "${novel.pluginId}";
-                                  let chapterId =${chapter.id};
-                                  let novelId =${chapter.novelId};
-                                  let html = document.getElementById("LNReader-chapter").innerHTML;
-                                  ${customJS}
-                                  document.getElementById("LNReader-chapter").innerHTML = html;
-                                }
-                                document.addEventListener("DOMContentLoaded", fn);
+                              ${buildReaderCustomScript(customJS)}
                             </script>
             </html>
             `,

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { JSDOM, VirtualConsole } from 'jsdom';
+import { buildReaderCustomScript } from '../readerShell';
 
 /**
  * Loads the real reader page scripts into jsdom. jsdom has no layout engine,
@@ -85,7 +86,7 @@ const loadReader = async ({
             TTSEnable: true,
             verticalSeekbar: true,
           },
-          novel: { id: 1, name: 'Novel' },
+          novel: { id: 1, name: 'Novel', pluginId: 'test-plugin' },
           chapter,
           batteryLevel: 1,
           autoSaveInterval: 2222,
@@ -170,7 +171,7 @@ const loadReader = async ({
   ) => {
     window.reader.setChapter({
       chapter: makeChapter(id, progress),
-      novel: { id: 1, name: 'Novel' },
+      novel: { id: 1, name: 'Novel', pluginId: 'test-plugin' },
       html,
       strings: { ...strings, finished: `Finished: Chapter ${id}` },
       nextChapterScreenVisible,
@@ -407,6 +408,36 @@ describe('reader.setChapter', () => {
 
     expect(page.chapterElement().innerHTML).toBe('<p>Second CHAPTER</p>');
     expect(page.window.reader.rawHTML).toBe('<p>Second chapter</p>');
+    page.close();
+  });
+
+  it('uses the target chapter metadata on open, append, and swap', async () => {
+    const page = await loadReader({
+      customJS: buildReaderCustomScript(
+        'html = [novelName, chapterName, sourceId, chapterId, novelId, html].join("|");',
+      ),
+    });
+    const { continuousScroll, document } = page.window as ReaderWindow & {
+      continuousScroll: any;
+    };
+    expect(page.chapterElement().innerHTML).toBe(
+      'Novel|Chapter 1|test-plugin|1|1|<p>First chapter</p>',
+    );
+
+    continuousScroll.status.val = 'loading';
+    continuousScroll.append({
+      afterChapterId: 1,
+      chapter: makeChapter(2, 0),
+      html: '<p>Appended chapter</p>',
+    });
+    expect(
+      document.querySelector('.LNReader-chapter-continued')?.innerHTML,
+    ).toBe('Novel|Chapter 2|test-plugin|2|1|<p>Appended chapter</p>');
+
+    await page.setChapter(3, 0, '<p>Swapped chapter</p>');
+    expect(page.chapterElement().innerHTML).toBe(
+      'Novel|Chapter 3|test-plugin|3|1|<p>Swapped chapter</p>',
+    );
     page.close();
   });
 
