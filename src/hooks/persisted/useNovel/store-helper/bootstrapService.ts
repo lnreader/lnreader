@@ -179,7 +179,7 @@ export const createBootstrapService = (
       novelPath,
     );
 
-    if ((!chapterCount || isPartialSync) && settingsFilter.length === 0) {
+    if (isPartialSync || (!chapterCount && settingsFilter.length === 0)) {
       try {
         const sourcePage = await deps.fetchPage(pluginId, novelPath, page);
         const sourceChapters = sourcePage.chapters.map(ch => {
