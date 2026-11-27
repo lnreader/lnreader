@@ -128,7 +128,7 @@ const NovelInfoHeader = ({
 
   const handleTitlePress = useCallback(
     () =>
-      navigation.replace('GlobalSearchScreen', {
+      navigation.push('GlobalSearchScreen', {
         searchText: novel.name,
       }),
     [navigation, novel.name],
