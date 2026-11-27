@@ -333,6 +333,7 @@
     "downloads": "Завантаження",
     "edit": "Редагувати",
     "example": "Приклад",
+    "excludedItem": "%{name}, excluded",
     "filter": "Фільтр",
     "globally": "глобально",
     "install": "Встановити",
@@ -502,6 +503,8 @@
   },
   "library": "Бібліотека",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Мітки",
@@ -523,6 +526,7 @@
         "completed": "Завершено",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Завантажено",
+        "genres": "Genres",
         "started": "Почато",
         "unread": "Не прочитано"
       },
