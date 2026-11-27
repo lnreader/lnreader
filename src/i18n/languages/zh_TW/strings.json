@@ -333,6 +333,7 @@
     "downloads": "Downloads",
     "edit": "編輯",
     "example": "Example",
+    "excludedItem": "%{name}, excluded",
     "filter": "筛选",
     "globally": "全球",
     "install": "安裝",
@@ -502,6 +503,8 @@
   },
   "library": "书库",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "徽章",
@@ -523,6 +526,7 @@
         "completed": "已完成",
         "customUpdateFrequency": "Customized update frequency",
         "downloaded": "已下载",
+        "genres": "Genres",
         "started": "已啟動",
         "unread": "未读"
       },
