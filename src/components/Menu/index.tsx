@@ -24,6 +24,7 @@ import {
 } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMeasureInWindow } from '@components/BottomSheet/measureInWindow';
 import { getAvailableMenuWidth, getMenuPosition } from './layout';
 
 const MAX_MENU_WIDTH = 280;
@@ -104,11 +105,13 @@ const MenuPopup = ({
     height: 0,
   });
 
+  const measureInWindow = useMeasureInWindow();
+
   const measureAnchor = useCallback(() => {
-    anchorRef.current?.measureInWindow((x, y, width, height) => {
+    measureInWindow(anchorRef.current, (x, y, width, height) => {
       setAnchorLayout({ x, y, width, height });
     });
-  }, [anchorRef]);
+  }, [anchorRef, measureInWindow]);
 
   useLayoutEffect(() => {
     measureAnchor();

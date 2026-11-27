@@ -416,9 +416,9 @@ describe('NovelScreenList (task 12 context boundary cutover)', () => {
 
     fireEvent.press(screen.getByTestId('continue-reading-fab'));
 
-    expect(navigation.navigate).toHaveBeenCalledWith('ReaderStack', {
-      screen: 'Chapter',
-      params: { novel: baseNovel, chapter: lastRead },
+    expect(navigation.navigate).toHaveBeenCalledWith('Chapter', {
+      novel: baseNovel,
+      chapter: lastRead,
     });
   });
 });
@@ -652,9 +652,9 @@ describe('NovelScreenList native chapter list', () => {
 
     expect(getChapter).toHaveBeenCalledWith(2500);
     await waitFor(() =>
-      expect(navigation.navigate).toHaveBeenCalledWith('ReaderStack', {
-        screen: 'Chapter',
-        params: { novel: baseNovel, chapter: stale },
+      expect(navigation.navigate).toHaveBeenCalledWith('Chapter', {
+        novel: baseNovel,
+        chapter: stale,
       }),
     );
   });
@@ -667,18 +667,15 @@ describe('NovelScreenList native chapter list', () => {
     expect(list.props.scrollEventThresholds).toEqual([expect.any(Number)]);
   });
 
-  it('opens a chapter on press', () => {
+  it('opens a chapter inside ReaderStack without replacing its novel params', () => {
     const store = createStore({ chapters: makeChapters(2) });
     const { list } = renderWithStore(store);
 
     fire(list, 'chapterPress', { id: 2, position: 1 });
 
-    expect(navigation.navigate).toHaveBeenCalledWith('ReaderStack', {
-      screen: 'Chapter',
-      params: {
-        novel: baseNovel,
-        chapter: expect.objectContaining({ id: 2 }),
-      },
+    expect(navigation.navigate).toHaveBeenCalledWith('Chapter', {
+      novel: baseNovel,
+      chapter: expect.objectContaining({ id: 2 }),
     });
   });
 

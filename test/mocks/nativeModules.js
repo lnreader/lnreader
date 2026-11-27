@@ -138,3 +138,7 @@ jest.mock('@react-native-community/netinfo', () => {
     },
   };
 });
+
+jest.mock('@lodev09/react-native-true-sheet', () =>
+  jest.requireActual('@lodev09/react-native-true-sheet/mock'),
+);

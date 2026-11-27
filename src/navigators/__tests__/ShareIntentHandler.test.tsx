@@ -41,10 +41,6 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('@gorhom/bottom-sheet', () => ({
-  BottomSheetModalProvider: ({ children }: { children: ReactNode }) => children,
-}));
-
 jest.mock('@screens/novel/NovelContext', () => ({
   NovelContextProvider: ({ children }: { children: ReactNode }) => children,
 }));

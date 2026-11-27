@@ -43,4 +43,25 @@ describe('getLoadingColors', () => {
   ])('increases static contrast for the %s theme', (_, theme, expected) => {
     expect(getLoadingColors(theme, true)).toEqual(expected);
   });
+
+  it.each([
+    [false, ['#292A30', '#24242A']],
+    [true, ['#292A30', '#27282E']],
+  ])(
+    'tints the dark palette with animations disabled=%s',
+    (disabled, expected) => {
+      const theme = createTheme('#1b1b1f', '#e4e2e6');
+
+      expect(getLoadingColors(theme, disabled, '#b1c5ff')).toEqual(expected);
+    },
+  );
+
+  it('keeps a dark accent visible on a pure black surface', () => {
+    const theme = createTheme('#000000', '#ffffff');
+
+    expect(getLoadingColors(theme, false, '#000000')).toEqual([
+      '#0A0A0A',
+      '#060606',
+    ]);
+  });
 });

@@ -1,6 +1,10 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Ref } from 'react';
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  type ScrollViewInstance,
+} from 'react-native';
 import { useTheme, useChapterReaderSettings } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import ReaderTextSize from '../ReaderTextSize';
@@ -12,7 +16,11 @@ import { Portal } from 'react-native-paper';
 import FontPickerModal from '../Modals/FontPickerModal';
 import { readerFonts } from '@utils/constants/readerConstants';
 
-const DisplayTab: React.FC = () => {
+interface DisplayTabProps {
+  scrollRef?: Ref<ScrollViewInstance>;
+}
+
+const DisplayTab = ({ scrollRef }: DisplayTabProps) => {
   const theme = useTheme();
   const readerSettings = useChapterReaderSettings();
   const readerFontPickerModal = useBoolean();
@@ -25,7 +33,8 @@ const DisplayTab: React.FC = () => {
 
   return (
     <>
-      <BottomSheetScrollView
+      <ScrollView
+        ref={scrollRef}
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
@@ -57,7 +66,7 @@ const DisplayTab: React.FC = () => {
         </View>
 
         <View style={styles.bottomSpacing} />
-      </BottomSheetScrollView>
+      </ScrollView>
 
       <Portal>
         <FontPickerModal

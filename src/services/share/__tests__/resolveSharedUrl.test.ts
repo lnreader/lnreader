@@ -1,6 +1,7 @@
 import type { PluginItem } from '@plugins/types';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
-import { resolveSharedUrl } from '../resolveSharedUrl';
+import { getNovelByPathPrefix } from '@database/queries/NovelQueries';
+import { resolveNovelLink, resolveSharedUrl } from '../resolveSharedUrl';
 
 jest.mock('@plugins/pluginManager', () => ({
   INSTALLED_PLUGINS_KEY: 'INSTALL_PLUGINS',
@@ -27,11 +28,19 @@ const testSource = createPlugin(
   'Test Source',
 );
 const plain = createPlugin('plain', 'https://example.com');
+const royalRoad = createPlugin(
+  'royalroad',
+  'https://www.royalroad.com/',
+  'Royal Road',
+);
+const subPath = createPlugin('sub-path', 'https://example.com/novels/');
 
 const mockGetMMKVObject = getMMKVObject as jest.Mock;
+const mockGetNovelByPathPrefix = getNovelByPathPrefix as jest.Mock;
 
 beforeEach(() => {
   mockGetMMKVObject.mockReturnValue([testSource]);
+  mockGetNovelByPathPrefix.mockReturnValue(undefined);
 });
 
 describe('resolveSharedUrl', () => {
@@ -128,5 +137,131 @@ describe('resolveSharedUrl', () => {
       kind: 'search',
       searchText: 'https://testsource.example.com/fiction/21220/x',
     });
+  });
+});
+
+describe('resolveSharedUrl with a novel path rule', () => {
+  beforeEach(() => {
+    mockGetMMKVObject.mockReturnValue([royalRoad]);
+  });
+
+  it('opens the novel under the path its browse results use', () => {
+    expect(
+      resolveSharedUrl(
+        'https://www.royalroad.com/fiction/21220/mother-of-learning',
+      ),
+    ).toEqual({ kind: 'novel', pluginId: 'royalroad', path: 'fiction/21220' });
+  });
+
+  it('reuses a novel already stored under the long form', () => {
+    mockGetNovelByPathPrefix.mockReturnValue({
+      path: 'fiction/21220/mother-of-learning',
+    });
+
+    expect(
+      resolveSharedUrl('https://www.royalroad.com/fiction/21220/chapter/1'),
+    ).toEqual({
+      kind: 'novel',
+      pluginId: 'royalroad',
+      path: 'fiction/21220/mother-of-learning',
+    });
+    expect(mockGetNovelByPathPrefix).toHaveBeenCalledWith(
+      'fiction/21220',
+      'royalroad',
+    );
+  });
+
+  it('falls back to search for a page that is not a novel', () => {
+    expect(resolveSharedUrl('https://www.royalroad.com/profile/1')).toEqual({
+      kind: 'search',
+      searchText: 'https://www.royalroad.com/profile/1',
+    });
+  });
+});
+
+describe('resolveSharedUrl with a plugin site below the host root', () => {
+  beforeEach(() => {
+    mockGetMMKVObject.mockReturnValue([subPath]);
+  });
+
+  it('takes the path below the site path', () => {
+    expect(resolveSharedUrl('https://example.com/novels/n/1/')).toEqual({
+      kind: 'novel',
+      pluginId: 'sub-path',
+      path: 'n/1',
+    });
+  });
+
+  it('does not match a sibling path that only starts with the site path', () => {
+    expect(resolveSharedUrl('https://example.com/novelsx/n/1')).toEqual({
+      kind: 'search',
+      searchText: 'https://example.com/novelsx/n/1',
+    });
+  });
+});
+
+describe('resolveNovelLink', () => {
+  beforeEach(() => {
+    mockGetMMKVObject.mockReturnValue([royalRoad, testSource]);
+  });
+
+  it.each([
+    'https://www.royalroad.com/fiction/21220/mother-of-learning',
+    'https://www.royalroad.com/fiction/21220',
+    'https://www.royalroad.com/fiction/21220/mother-of-learning/chapter/301778/1-good-morning-brother',
+    'https://www.royalroad.com/fiction/21220/chapter/301778',
+    'https://www.royalroad.com/fiction/21220/mother-of-learning/reviews?page=2#review',
+    'https://royalroad.com/fiction/21220/mother-of-learning?ref=note',
+    'http://www.royalroad.com/fiction/21220/#reviews',
+    'http://royalroad.com/fiction/21220',
+  ])('resolves %s to the novel', href => {
+    expect(resolveNovelLink(href)).toEqual({
+      pluginId: 'royalroad',
+      path: 'fiction/21220',
+    });
+  });
+
+  it.each([
+    'https://www.royalroad.com/',
+    'https://www.royalroad.com/profile/12345',
+    'https://www.royalroad.com/forums/thread/123',
+    'https://www.royalroad.com/fictions/best-rated',
+    'https://www.royalroad.com/fictions/search?title=hello',
+    'https://www.royalroad.com/fiction/chapter/301778',
+    'https://www.royalroad.com.evil.com/fiction/21220',
+    'https://www.patreon.com/fiction/21220',
+    'https://www.scribblehub.com/series/123/title',
+    // A downloaded chapter has no web base URL, so its relative links do not
+    // reach the app as Royal Road URLs.
+    '/fiction/21220',
+    'about:blank/fiction/21220',
+    'royalroad.com/fiction/21220',
+    'javascript:void(0)',
+    'mailto:author@example.com',
+    'not a url',
+  ])('leaves %s to the WebView', href => {
+    expect(resolveNovelLink(href)).toBeUndefined();
+  });
+
+  it('reuses a novel already stored under the long form', () => {
+    mockGetNovelByPathPrefix.mockReturnValue({ path: 'fiction/21220/x' });
+
+    expect(resolveNovelLink('https://www.royalroad.com/fiction/21220')).toEqual(
+      { pluginId: 'royalroad', path: 'fiction/21220/x' },
+    );
+  });
+
+  it('leaves links on a plugin site without a novel path rule to the WebView', () => {
+    expect(
+      resolveNovelLink('https://testsource.example.com/fiction/21220/x'),
+    ).toBeUndefined();
+  });
+
+  it('does not resolve links when the plugin is not installed', () => {
+    mockGetMMKVObject.mockReturnValue([testSource]);
+
+    expect(
+      resolveNovelLink('https://www.royalroad.com/fiction/21220'),
+    ).toBeUndefined();
   });
 });

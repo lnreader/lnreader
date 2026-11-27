@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import {
+  getLibraryNovelKeysFromDb,
   getLibraryNovelsFromDb,
   getLibraryNovelsQuery,
 } from '@database/queries/LibraryQueries';
@@ -17,7 +18,7 @@ import { useLibrary } from '../useLibrary';
 
 jest.mock('@hooks/persisted', () => ({
   useLibrarySettings: jest.fn(() => ({
-    filter: undefined,
+    filters: {},
     sortOrder: 'name ASC',
     downloadedOnlyMode: false,
   })),
@@ -26,6 +27,8 @@ jest.mock('@hooks/persisted', () => ({
 jest.mock('@database/queries/LibraryQueries', () => ({
   getLibraryNovelsFromDb: jest.fn().mockResolvedValue([]),
   getLibraryNovelsQuery: jest.fn(() => ({ query: 'library' })),
+  getLibraryNovelKeysFromDb: jest.fn().mockResolvedValue([]),
+  getLibraryNovelKeysQuery: jest.fn(() => ({ query: 'keys' })),
 }));
 
 jest.mock('@database/queries/CategoryQueries', () => ({
@@ -65,6 +68,10 @@ const mockUseLiveQuery = useLiveQuery as jest.MockedFunction<
 >;
 const mockGetLibraryNovelsFromDb =
   getLibraryNovelsFromDb as jest.MockedFunction<typeof getLibraryNovelsFromDb>;
+const mockGetLibraryNovelKeysFromDb =
+  getLibraryNovelKeysFromDb as jest.MockedFunction<
+    typeof getLibraryNovelKeysFromDb
+  >;
 const mockGetCategoriesFromDb = getCategoriesFromDb as jest.MockedFunction<
   typeof getCategoriesFromDb
 >;
@@ -82,16 +89,29 @@ const mockSwitchNovelToLibraryQuery =
     typeof switchNovelToLibraryQuery
   >;
 
+const captureLiveQueries = () => {
+  const callbacks: Record<string, (rows: unknown[]) => void> = {};
+  mockUseLiveQuery.mockImplementation((query, fireOn, callback) => {
+    expect(fireOn).toEqual([{ table: 'Novel' }]);
+    callbacks[(query as unknown as { query: string }).query] = callback as (
+      rows: unknown[],
+    ) => void;
+    return [];
+  });
+  return callbacks;
+};
+
 describe('useLibrary', () => {
   beforeEach(() => {
     mockGetNovelByPath.mockClear();
     mockSwitchNovelToLibraryQuery.mockClear();
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
     } as ReturnType<typeof useLibrarySettings>);
     mockGetLibraryNovelsFromDb.mockResolvedValue([]);
+    mockGetLibraryNovelKeysFromDb.mockResolvedValue([]);
     mockGetCategoriesFromDb.mockResolvedValue([]);
     mockGetNovelByPath.mockReturnValue(undefined);
     mockSwitchNovelToLibraryQuery.mockResolvedValue({
@@ -101,12 +121,7 @@ describe('useLibrary', () => {
   });
 
   it('updates the library when the reactive Novel query changes', () => {
-    let onLibraryChange: ((novels: NovelInfo[]) => void) | undefined;
-    mockUseLiveQuery.mockImplementation((_query, fireOn, callback) => {
-      expect(fireOn).toEqual([{ table: 'Novel' }]);
-      onLibraryChange = callback as (novels: NovelInfo[]) => void;
-      return [];
-    });
+    const liveQueries = captureLiveQueries();
 
     const { result } = renderHook(useLibrary);
     const updatedNovel = {
@@ -117,15 +132,94 @@ describe('useLibrary', () => {
       chaptersDownloaded: 0,
     } as NovelInfo;
 
-    act(() => onLibraryChange?.([updatedNovel]));
+    act(() => liveQueries.library([updatedNovel]));
 
     expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
       'name ASC',
-      undefined,
+      {},
       '',
       false,
     );
     expect(result.current.library).toEqual([updatedNovel]);
+  });
+
+  it('passes the saved filters to the query and narrows the library by genre', () => {
+    const filters = { downloaded: 'include', completed: 'exclude' } as const;
+    mockUseLibrarySettings.mockReturnValue({
+      filters,
+      includedGenres: ['horror'],
+      excludedGenres: ['harem'],
+      sortOrder: 'name ASC',
+      downloadedOnlyMode: false,
+    } as unknown as ReturnType<typeof useLibrarySettings>);
+    const liveQueries = captureLiveQueries();
+
+    const { result } = renderHook(useLibrary);
+    const novel = (id: number, genres: string | null) =>
+      ({ id, name: `Novel ${id}`, genres } as NovelInfo);
+
+    act(() =>
+      liveQueries.library([
+        novel(1, 'Horror, Mystery'),
+        novel(2, ' horror ,Harem'),
+        novel(3, 'Psychological Horror'),
+        novel(4, null),
+      ]),
+    );
+
+    expect(mockGetLibraryNovelsQuery).toHaveBeenCalledWith(
+      'name ASC',
+      filters,
+      '',
+      false,
+    );
+    expect(result.current.library.map(n => n.id)).toEqual([1]);
+  });
+
+  it('keeps saved novels hidden by filters reading as in the library', async () => {
+    mockUseLibrarySettings.mockReturnValue({
+      filters: { completed: 'exclude' },
+      excludedGenres: ['harem'],
+      sortOrder: 'name ASC',
+      downloadedOnlyMode: false,
+    } as unknown as ReturnType<typeof useLibrarySettings>);
+    const genreHidden = {
+      id: 1,
+      pluginId: 'test-plugin',
+      path: '/genre-hidden',
+      genres: 'Harem',
+    } as NovelInfo;
+    const statusHidden = { pluginId: 'test-plugin', path: '/status-hidden' };
+    const saved = [genreHidden, statusHidden];
+    const liveQueries = captureLiveQueries();
+    mockGetLibraryNovelsFromDb.mockResolvedValue([genreHidden] as Awaited<
+      ReturnType<typeof getLibraryNovelsFromDb>
+    >);
+    mockGetLibraryNovelKeysFromDb.mockResolvedValue(
+      saved as Awaited<ReturnType<typeof getLibraryNovelKeysFromDb>>,
+    );
+    const { result } = renderHook(useLibrary);
+    const inLibrary = () =>
+      saved.map(n => result.current.novelInLibrary(n.pluginId, n.path));
+
+    act(() => {
+      liveQueries.library([genreHidden]);
+      liveQueries.keys(saved);
+    });
+
+    expect(result.current.library).toEqual([]);
+    expect(inLibrary()).toEqual([true, true]);
+
+    act(() => liveQueries.keys([]));
+    expect(inLibrary()).toEqual([false, false]);
+
+    await act(() => result.current.refetchLibrary());
+
+    expect(result.current.library).toEqual([]);
+    expect(inLibrary()).toEqual([true, true]);
+    expect(result.current.novelInLibrary('other-plugin', '/genre-hidden')).toBe(
+      false,
+    );
   });
 
   it('stops loading and exposes database errors', async () => {
@@ -152,7 +246,7 @@ describe('useLibrary', () => {
 
   it('waits for category selection before adding a novel', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       defaultCategoryId: 3,
@@ -188,7 +282,7 @@ describe('useLibrary', () => {
 
   it('only confirms a pending library addition once', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       promptForCategoryOnAdd: true,
@@ -219,7 +313,7 @@ describe('useLibrary', () => {
 
   it('does not add a novel when category selection is cancelled', async () => {
     mockUseLibrarySettings.mockReturnValue({
-      filter: undefined,
+      filters: {},
       sortOrder: 'name ASC',
       downloadedOnlyMode: false,
       promptForCategoryOnAdd: true,

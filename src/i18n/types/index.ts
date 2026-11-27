@@ -301,6 +301,7 @@ export interface StringMap {
   'common.downloads': 'string';
   'common.edit': 'string';
   'common.example': 'string';
+  'common.excludedItem': 'string';
   'common.filter': 'string';
   'common.globally': 'string';
   'common.install': 'string';
@@ -450,6 +451,8 @@ export interface StringMap {
   'historyScreen.resetAllChapters': 'string';
   'historyScreen.searchbar': 'string';
   'library': 'string';
+  'libraryScreen.removeSelectedTitle': 'string';
+  'libraryScreen.removeSelectedMessage': 'string';
   'libraryScreen.bottomSheet.display.badges': 'string';
   'libraryScreen.bottomSheet.display.comfortable': 'string';
   'libraryScreen.bottomSheet.display.compact': 'string';
@@ -467,6 +470,7 @@ export interface StringMap {
   'libraryScreen.bottomSheet.filters.completed': 'string';
   'libraryScreen.bottomSheet.filters.customUpdateFrequency': 'string';
   'libraryScreen.bottomSheet.filters.downloaded': 'string';
+  'libraryScreen.bottomSheet.filters.genres': 'string';
   'libraryScreen.bottomSheet.filters.started': 'string';
   'libraryScreen.bottomSheet.filters.unread': 'string';
   'libraryScreen.bottomSheet.sortOrders.alphabetically': 'string';

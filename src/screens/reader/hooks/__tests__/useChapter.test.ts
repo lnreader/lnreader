@@ -53,6 +53,11 @@ jest.mock('@hooks', () => ({
   useFullscreenMode: () => mockUseFullscreenMode(),
 }));
 
+let mockIsFocused = true;
+jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => mockIsFocused,
+}));
+
 jest.mock('@database/queries/ChapterQueries', () => ({
   getChapter: (...args: unknown[]) => mockGetDbChapter(...args),
   getChapterCount: (...args: unknown[]) => mockGetChapterCount(...args),
@@ -173,6 +178,7 @@ describe('useChapter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsFocused = true;
     (NativeFile.exists as jest.Mock).mockReturnValue(false);
     // The native module rejects when the chapter is not downloaded.
     (NativeFile.readFile as jest.Mock).mockRejectedValue(
@@ -756,6 +762,88 @@ describe('useChapter', () => {
     expect(mockInjectJavaScript).toHaveBeenCalledWith(
       expect.stringContaining('window.scrollBy'),
     );
+  });
+
+  it('leaves the volume buttons to the reader in front', async () => {
+    mockUseNovelActions.mockReturnValue(createStore().state);
+    mockUseChapterGeneralSettings.mockReturnValue({
+      ...mockUseChapterGeneralSettings(),
+      useVolumeButtons: true,
+    });
+    const setActive = NativeVolumeButtonListener.setActive as jest.Mock;
+    const mockInjectJavaScript = jest.fn();
+    const { result: firstReader, rerender: rerenderFirst } = renderHook(() =>
+      useChapter(
+        { current: { injectJavaScript: mockInjectJavaScript } as any },
+        initialChapter,
+        novel,
+      ),
+    );
+    await waitFor(() =>
+      expect(firstReader.current.chapterContext.loading).toBe(false),
+    );
+    expect(setActive).toHaveBeenLastCalledWith(true);
+    const volumeUp = (
+      NativeVolumeButtonListener.addListener as jest.Mock
+    ).mock.calls.find(([event]) => event === 'VolumeUp')[1];
+
+    // A novel link covers the first reader, and the linked novel opens a
+    // chapter in a second reader.
+    mockIsFocused = false;
+    rerenderFirst({});
+    expect(setActive).toHaveBeenLastCalledWith(false);
+    mockIsFocused = true;
+    const { result: secondReader, unmount: closeSecond } = renderHook(() =>
+      useChapter({ current: null }, nextChapter, novel),
+    );
+    await waitFor(() =>
+      expect(secondReader.current.chapterContext.loading).toBe(false),
+    );
+
+    volumeUp();
+    expect(mockInjectJavaScript).not.toHaveBeenCalledWith(
+      expect.stringContaining('window.scrollBy'),
+    );
+
+    // Back focuses the first reader before the second one unmounts.
+    rerenderFirst({});
+    closeSecond();
+    expect(setActive).toHaveBeenLastCalledWith(true);
+  });
+
+  it('stops auto-scrolling while another screen covers the reader', async () => {
+    jest.useFakeTimers();
+    try {
+      mockUseNovelActions.mockReturnValue(createStore().state);
+      mockUseChapterGeneralSettings.mockReturnValue({
+        ...mockUseChapterGeneralSettings(),
+        autoScroll: true,
+      });
+      const mockInjectJavaScript = jest.fn();
+      const { result, rerender } = renderHook(() =>
+        useChapter(
+          { current: { injectJavaScript: mockInjectJavaScript } as any },
+          initialChapter,
+          novel,
+        ),
+      );
+      await waitFor(() =>
+        expect(result.current.chapterContext.loading).toBe(false),
+      );
+      act(() => jest.advanceTimersByTime(1000));
+      expect(mockInjectJavaScript).toHaveBeenCalledWith(
+        expect.stringContaining('window.scrollBy'),
+      );
+
+      mockIsFocused = false;
+      rerender({});
+      mockInjectJavaScript.mockClear();
+      act(() => jest.advanceTimersByTime(3000));
+
+      expect(mockInjectJavaScript).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('inverts volume button directions in paged mode when pageReaderInvertVolumeButtons is enabled', async () => {

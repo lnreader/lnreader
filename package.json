@@ -36,8 +36,9 @@
     "nix:emulator": "nix develop .#emulator --extra-experimental-features nix-command --extra-experimental-features flakes"
   },
   "dependencies": {
-    "@gorhom/bottom-sheet": "^5.2.14",
+    "@expo/ui": "~58.0.29",
     "@legendapp/list": "^3.7.3",
+    "@lodev09/react-native-true-sheet": "4.1.2",
     "@noble/ciphers": "^2.2.0",
     "@op-engineering/op-sqlite": "^15.2.14",
     "@pchmn/expo-material3-theme": "^1.4.0",
