@@ -25,8 +25,8 @@ describe('useKeyboardHeight', () => {
   });
 
   beforeEach(() => {
-    showCallback = () => { };
-    hideCallback = () => { };
+    showCallback = () => {};
+    hideCallback = () => {};
     mockShowRemove.mockClear();
     mockHideRemove.mockClear();
     mockAddListener.mockClear();
