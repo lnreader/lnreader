@@ -25,6 +25,7 @@ import {
   QueuedBackgroundTask,
 } from '@services/backgroundTasks';
 import { useBackgroundTasks } from '@hooks/persisted/useBackgroundTasks';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 const getAllDownloadsProgressKey = (tasks: QueuedBackgroundTask[]) =>
   getDownloadProgressKey(tasks);
@@ -143,6 +144,12 @@ export const useLibrary = (): UseLibraryReturnType => {
     setCategories(filteredCategories);
   }, []);
 
+  useEffect(() => {
+    return driveSyncManager.addDataMergedListener(() => {
+      void refreshCategories();
+    });
+  }, [refreshCategories]);
+
   const getLibrary = useCallback(async () => {
     const requestId = ++loadRequestIdRef.current;
     if (!hasLoadedRef.current || hasErrorRef.current || searchText) {
@@ -203,6 +210,8 @@ export const useLibrary = (): UseLibraryReturnType => {
         pluginId,
         categoryIds,
       );
+
+      driveSyncManager.notifySyncDirty();
 
       // Important to get correct chapters count
       // Count is set by sql trigger

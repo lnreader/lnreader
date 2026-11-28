@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { History } from '@database/types';
@@ -10,6 +10,8 @@ import {
   getHistoryFromDb,
 } from '@database/queries/HistoryQueries';
 import { parseChapterNumber } from '@utils/parseChapterNumber';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
+import { SyncStatus } from '@services/sync/types';
 
 const useHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +60,16 @@ const useHistory = () => {
     useCallback(() => {
       void getHistory();
     }, [getHistory]),
+  );
+
+  useEffect(
+    () =>
+      driveSyncManager.addSyncStatusListener(status => {
+        if (status === SyncStatus.IDLE) {
+          void getHistory();
+        }
+      }),
+    [getHistory],
   );
 
   return {

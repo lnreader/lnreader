@@ -322,9 +322,6 @@ export default function GoogleDriveModal({
   const [backupModal, setBackupModal] = useState(BackupModal.UNAUTHORIZED);
   const [user, setUser] = useState<User | null | undefined>(null);
   useEffect(() => {
-    GoogleSignin.configure({
-      scopes: [DRIVE_SCOPE],
-    });
     const isSignedIn = GoogleSignin.hasPreviousSignIn();
     if (isSignedIn) {
       const localUser = GoogleSignin.getCurrentUser();

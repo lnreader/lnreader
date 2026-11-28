@@ -78,8 +78,10 @@ export const create = async (
 
   const params: DriveRequestParams = {
     fields: FILE_FIELDS,
-    uploadType: 'multipart',
   };
+  if (data.content) {
+    params.uploadType = 'multipart';
+  }
   const url =
     (data.content ? MEDIA_UPLOAD_URL : BASE_URL) + '?' + buildParams(params);
   let body: any;
@@ -184,4 +186,36 @@ export const download = async (file: DriveFile, distDirPath: string) => {
   const headers = await getAuthHeaders();
   const url = BASE_URL + '/' + file.id + '?alt=media';
   return NativeZipArchive.remoteUnzip(distDirPath, url, headers);
+};
+
+export const getMedia = async <T = unknown>(fileId: string): Promise<T> => {
+  const { accessToken } = await GoogleSignin.getTokens();
+  const url = `${BASE_URL}/${fileId}?alt=media`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Drive getMedia error: ${response.status}`);
+  }
+  return response.json();
+};
+
+export const patch = async (fileId: string, body: unknown): Promise<void> => {
+  const { accessToken } = await GoogleSignin.getTokens();
+  const url = `${MEDIA_UPLOAD_URL}/${fileId}?uploadType=media`;
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`Drive patch error: ${response.status}`);
+  }
 };

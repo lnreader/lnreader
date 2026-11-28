@@ -30,6 +30,7 @@ import { ChapterFilterKey, ChapterOrderKey } from '@database/constants';
 import { chapterFilterToSQL, chapterOrderToSQL } from '@database/utils/parser';
 import { castInt } from '@database/manager/manager';
 import { createNovelTriggerQueryUpdate } from '@database/queryStrings/triggers';
+import { notifyChapterStateChanged } from '@services/sync/syncDirtyNotifier';
 
 const CHAPTER_ID_BATCH_SIZE = 500;
 const chunkChapterIds = (chapterIds: number[]) =>
@@ -172,35 +173,39 @@ export const markChapterRead = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: false })
+      .set({ unread: false, syncUpdatedAt: new Date().toISOString() })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markChaptersRead = async (chapterIds: number[]): Promise<void> => {
   if (!chapterIds.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await dbManager.write(async tx => {
     for (const ids of chunkChapterIds(chapterIds)) {
       await tx
         .update(chapterSchema)
-        .set({ unread: false })
+        .set({ unread: false, syncUpdatedAt })
         .where(inArray(chapterSchema.id, ids))
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const markChapterUnread = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: true })
+      .set({ unread: true, syncUpdatedAt: new Date().toISOString() })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markChaptersUnread = async (
@@ -209,15 +214,17 @@ export const markChaptersUnread = async (
   if (!chapterIds.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await dbManager.write(async tx => {
     for (const ids of chunkChapterIds(chapterIds)) {
       await tx
         .update(chapterSchema)
-        .set({ unread: true })
+        .set({ unread: true, syncUpdatedAt })
         .where(inArray(chapterSchema.id, ids))
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 /**
@@ -260,16 +267,20 @@ export const markAllChaptersRead = async (
   if (!ids.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await withoutChapterUpdateTrigger(async tx => {
     await tx.execute(
-      `UPDATE Chapter SET unread = 0 WHERE novelId IN (${placeholders(ids)})`,
-      ids,
+      `UPDATE Chapter SET unread = 0, syncUpdatedAt = ? WHERE novelId IN (${placeholders(
+        ids,
+      )})`,
+      [syncUpdatedAt, ...ids],
     );
     await tx.execute(
       `UPDATE Novel SET chaptersUnread = 0 WHERE id IN (${placeholders(ids)})`,
       ids,
     );
   });
+  notifyChapterStateChanged();
 };
 
 export const markAllChaptersUnread = async (
@@ -279,12 +290,13 @@ export const markAllChaptersUnread = async (
   if (!ids.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await withoutChapterUpdateTrigger(async tx => {
     await tx.execute(
-      `UPDATE Chapter SET unread = 1, progress = 0 WHERE novelId IN (${placeholders(
+      `UPDATE Chapter SET unread = 1, progress = 0, syncUpdatedAt = ? WHERE novelId IN (${placeholders(
         ids,
       )})`,
-      ids,
+      [syncUpdatedAt, ...ids],
     );
     await tx.execute(
       `UPDATE Novel
@@ -293,6 +305,7 @@ export const markAllChaptersUnread = async (
       ids,
     );
   });
+  notifyChapterStateChanged();
 };
 
 const deleteDownloadedFiles = async (
@@ -417,10 +430,11 @@ export const updateChapterProgress = async (
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ progress })
+      .set({ progress, syncUpdatedAt: new Date().toISOString() })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const updateChapterProgressByIds = async (
@@ -430,40 +444,51 @@ export const updateChapterProgressByIds = async (
   if (!chapterIds.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await dbManager.write(async tx => {
     for (const ids of chunkChapterIds(chapterIds)) {
       await tx
         .update(chapterSchema)
-        .set({ progress })
+        .set({ progress, syncUpdatedAt })
         .where(inArray(chapterSchema.id, ids))
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const bookmarkChapter = async (chapterId: number): Promise<void> => {
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ bookmark: sql`NOT ${chapterSchema.bookmark}` })
+      .set({
+        bookmark: sql`NOT ${chapterSchema.bookmark}`,
+        syncUpdatedAt: new Date().toISOString(),
+      })
       .where(eq(chapterSchema.id, chapterId))
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const bookmarkChapters = async (chapterIds: number[]): Promise<void> => {
   if (!chapterIds.length) {
     return;
   }
+  const syncUpdatedAt = new Date().toISOString();
   await dbManager.write(async tx => {
     for (const ids of chunkChapterIds(chapterIds)) {
       await tx
         .update(chapterSchema)
-        .set({ bookmark: sql`NOT ${chapterSchema.bookmark}` })
+        .set({
+          bookmark: sql`NOT ${chapterSchema.bookmark}`,
+          syncUpdatedAt,
+        })
         .where(inArray(chapterSchema.id, ids))
         .run();
     }
   });
+  notifyChapterStateChanged();
 };
 
 export const markPreviuschaptersRead = async (
@@ -473,7 +498,7 @@ export const markPreviuschaptersRead = async (
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: false })
+      .set({ unread: false, syncUpdatedAt: new Date().toISOString() })
       .where(
         and(
           lte(chapterSchema.id, chapterId),
@@ -482,6 +507,7 @@ export const markPreviuschaptersRead = async (
       )
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const markPreviousChaptersUnread = async (
@@ -491,7 +517,11 @@ export const markPreviousChaptersUnread = async (
   await dbManager.write(async tx => {
     await tx
       .update(chapterSchema)
-      .set({ unread: true, progress: 0 })
+      .set({
+        unread: true,
+        progress: 0,
+        syncUpdatedAt: new Date().toISOString(),
+      })
       .where(
         and(
           lte(chapterSchema.id, chapterId),
@@ -500,6 +530,7 @@ export const markPreviousChaptersUnread = async (
       )
       .run();
   });
+  notifyChapterStateChanged();
 };
 
 export const clearUpdates = async (): Promise<void> => {

@@ -21,6 +21,7 @@ import {
   fetchPage as defaultFetchPage,
 } from '@services/plugin/fetch';
 import { getString as defaultGetString } from '@i18n/translations';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 import { BatchInfo, CHAPTER_BATCH_SIZE } from '../types';
 
 export interface ChapterLoadResult {
@@ -173,7 +174,56 @@ export const createBootstrapService = (
       settingsFilter,
       excludedScanlators,
     );
-    if (chapterCount) {
+    const isPartialSync = driveSyncManager.isPartialSyncedNovel(
+      pluginId,
+      novelPath,
+    );
+
+    if (isPartialSync || (!chapterCount && settingsFilter.length === 0)) {
+      try {
+        const sourcePage = await deps.fetchPage(pluginId, novelPath, page);
+        const sourceChapters = sourcePage.chapters.map(ch => {
+          return {
+            ...ch,
+            page,
+          };
+        });
+        await deps.insertChapters(novel.id, sourceChapters);
+        if (isPartialSync) {
+          driveSyncManager.clearPartialSyncedNovel(pluginId, novelPath);
+        }
+        newChapters = await deps.getPageChapters(
+          novel.id,
+          settingsSort,
+          settingsFilter,
+          page,
+          undefined,
+          undefined,
+          excludedScanlators,
+        );
+        chapterCount = await deps.getChapterCount(
+          novel.id,
+          page,
+          settingsFilter,
+          excludedScanlators,
+        );
+      } catch (error) {
+        if (!chapterCount && (!isPartialSync || settingsFilter.length === 0)) {
+          throw error;
+        }
+        if (chapterCount) {
+          newChapters =
+            (await deps.getPageChaptersBatched(
+              novel.id,
+              settingsSort,
+              settingsFilter,
+              page,
+              0,
+              excludedScanlators,
+            )) || [];
+        }
+      }
+    } else if (chapterCount) {
       newChapters =
         (await deps.getPageChaptersBatched(
           novel.id,
@@ -183,30 +233,6 @@ export const createBootstrapService = (
           0,
           excludedScanlators,
         )) || [];
-    } else if (settingsFilter.length === 0) {
-      const sourcePage = await deps.fetchPage(pluginId, novelPath, page);
-      const sourceChapters = sourcePage.chapters.map(ch => {
-        return {
-          ...ch,
-          page,
-        };
-      });
-      await deps.insertChapters(novel.id, sourceChapters);
-      newChapters = await deps.getPageChapters(
-        novel.id,
-        settingsSort,
-        settingsFilter,
-        page,
-        undefined,
-        undefined,
-        excludedScanlators,
-      );
-      chapterCount = await deps.getChapterCount(
-        novel.id,
-        page,
-        settingsFilter,
-        excludedScanlators,
-      );
     }
 
     const batchInformation: BatchInfo = {

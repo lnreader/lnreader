@@ -28,7 +28,11 @@ class MyLogger implements Logger {
 }
 
 const DB_NAME = 'lnreader.db';
-const _db = open({ name: DB_NAME, location: '../files/SQLite' });
+const _db = open(
+  process.env.NODE_ENV === 'test'
+    ? { name: ':memory:' }
+    : { name: DB_NAME, location: '../files/SQLite' },
+);
 
 const INITIAL_MIGRATION_NAME = '20251222152612_past_mandrill';
 const INITIAL_MIGRATION_CREATED_AT = 1766417172000;

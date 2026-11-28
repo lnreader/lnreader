@@ -16,6 +16,7 @@ import { showToast } from '@utils/showToast';
 import { MaterialDesignIconName } from '@type/icon';
 
 import { useNovelActions } from '../NovelContext';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 type SelectionAction = {
   icon: MaterialDesignIconName;
@@ -148,7 +149,10 @@ export const useNovelScreenActions = ({
 
     actions.push({
       icon: 'bookmark-outline',
-      onPress: finish(() => bookmarkChapters(selectedIds)),
+      onPress: finish(() => {
+        bookmarkChapters(selectedIds);
+        driveSyncManager.notifySyncDirty();
+      }),
     });
 
     if (
@@ -157,7 +161,10 @@ export const useNovelScreenActions = ({
     ) {
       actions.push({
         icon: 'check',
-        onPress: finish(() => markChaptersRead(selectedIds)),
+        onPress: finish(() => {
+          markChaptersRead(selectedIds);
+          driveSyncManager.notifySyncDirty();
+        }),
       });
     }
 
@@ -169,6 +176,7 @@ export const useNovelScreenActions = ({
         icon: 'check-outline',
         onPress: finish(() => {
           void markChaptersUnreadAndResetProgress(selectedIds);
+          driveSyncManager.notifySyncDirty();
         }),
       });
     }
@@ -183,6 +191,7 @@ export const useNovelScreenActions = ({
           } else {
             markPreviousChaptersUnread(selectedChapter.id);
           }
+          driveSyncManager.notifySyncDirty();
         }),
       });
     }

@@ -29,6 +29,9 @@ importers:
       '@preeternal/react-native-cookie-manager':
         specifier: ^6.3.3
         version: 6.3.3(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)
+      '@react-native-community/netinfo':
+        specifier: ^11.5.2
+        version: 11.5.2(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)
       '@react-native-google-signin/google-signin':
         specifier: ^16.1.2
         version: 16.1.2(expo@58.0.26)(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)
@@ -159,7 +162,7 @@ importers:
         specifier: ^5.15.3
         version: 5.15.3(react-native-safe-area-context@5.11.1(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)
       react-native-reanimated:
-        specifier: ^4.7.1
+        specifier: ~4.7.1
         version: 4.7.1(react-native-worklets@0.13.0(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)(supports-color@9.4.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)
       react-native-safe-area-context:
         specifier: ^5.11.1
@@ -1927,6 +1930,12 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
+
+  '@react-native-community/netinfo@11.5.2':
+    resolution: {integrity: sha512-/g0m65BtX9HU+bPiCH2517bOHpEIUsGrWFXDzi1a5nNKn5KujQgm04WhL7/OSXWKHyrT8VVtUoJA0XKRxueBpQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '>=0.59'
 
   '@react-native-google-signin/google-signin@16.1.2':
     resolution: {integrity: sha512-1hf4pRmpnS5t0dHtqU72Q1FmWzsCZR2Sm3uVQbbfMKeNPl5TKjpAsP6F8QTZ9L+Q6Cnn9tL9BXpDCb1nyutdCQ==}
@@ -8686,6 +8695,11 @@ snapshots:
   '@pkgr/core@0.3.6': {}
 
   '@preeternal/react-native-cookie-manager@6.3.3(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
+      react-native: 0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0)
+
+  '@react-native-community/netinfo@11.5.2(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)':
     dependencies:
       react: 19.3.0
       react-native: 0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0)

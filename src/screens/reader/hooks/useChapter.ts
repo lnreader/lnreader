@@ -39,6 +39,7 @@ import NativeFile from '@modules/native-file';
 import { useNovelActions, useNovelValue } from '@screens/novel/NovelContext';
 import useTimeTracking from './useTimeTracking';
 import { useEventListener } from 'expo';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 import { useIsFocused } from '@react-navigation/native';
 
 type AdjacentChapters = [
@@ -505,6 +506,17 @@ export default function useChapter(
    * necessarily the current one: infinite scrolling reports a chapter as read
    * as the reader scrolls out of it.
    */
+  const incognitoModeRef = useRef(incognitoMode);
+  incognitoModeRef.current = incognitoMode;
+
+  useEffect(() => {
+    return () => {
+      if (!incognitoModeRef.current && driveSyncManager.isSyncDirty()) {
+        void driveSyncManager.flushPendingSync();
+      }
+    };
+  }, []);
+
   const saveProgress = useCallback(
     (percentage: number, chapterId?: number) => {
       const target =
@@ -527,6 +539,7 @@ export default function useChapter(
         return;
       }
       updateChapterProgress(target.id, progress);
+        driveSyncManager.notifySyncDirty();
 
       // Progress is reported repeatedly while reading the end of a chapter;
       // marking it read (and pushing it to the tracker, which is a network

@@ -50,11 +50,21 @@ import { UpdateContextProvider } from '@components/Context/UpdateContext';
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
 import { hideSplashScreen, whenSplashScreenHidden } from '@utils/splashScreen';
 import HideSplashWhenLibraryReady from './HideSplashWhenLibraryReady';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
+
+GoogleSignin.configure({
+  scopes: [
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.appdata',
+  ],
+});
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const MainNavigator = () => {
   const theme = useTheme();
-  const { updateLibraryOnLaunch } = useAppSettings();
+  const { updateLibraryOnLaunch, driveSyncEnabled } = useAppSettings();
   const { refreshPlugins } = usePluginActions();
   const [isOnboarded] = useMMKVBoolean('IS_ONBOARDED');
 
@@ -85,8 +95,11 @@ const MainNavigator = () => {
     if (isOnboarded) {
       // hack this helps app has enough time to initialize database;
       refreshPlugins();
+      if (driveSyncEnabled) {
+        void driveSyncManager.triggerStartupPull();
+      }
     }
-  }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch]);
+  }, [isOnboarded, refreshPlugins, updateLibraryOnLaunch, driveSyncEnabled]);
 
   // Enable React Navigation DevTools in development
   useReactNavigationDevTools({ ref: navigationRef });

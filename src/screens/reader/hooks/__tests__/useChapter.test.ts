@@ -24,6 +24,18 @@ const mockParseChapterNumber = jest.fn();
 
 const mockUseNovelValue = jest.fn();
 
+const mockDriveSyncNotifyDirty = jest.fn();
+const mockDriveSyncFlush = jest.fn();
+const mockDriveSyncIsDirty = jest.fn();
+
+jest.mock('@services/sync/driveSyncManager', () => ({
+  driveSyncManager: {
+    notifySyncDirty: () => mockDriveSyncNotifyDirty(),
+    flushPendingSync: () => mockDriveSyncFlush(),
+    isSyncDirty: () => mockDriveSyncIsDirty(),
+  },
+}));
+
 jest.mock('@screens/novel/NovelContext', () => ({
   useNovelActions: () => mockUseNovelActions(),
   useNovelValue: (key: string) => mockUseNovelValue(key),
@@ -184,6 +196,7 @@ describe('useChapter', () => {
       pageReaderDisableAnimation: false,
     });
     mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
+    mockDriveSyncIsDirty.mockReturnValue(false);
     mockUseAppSettings.mockReturnValue({
       timeTrackingEnabled: true,
       inactivityTimeoutMs: 60000,
@@ -906,5 +919,49 @@ describe('useChapter', () => {
         'window.pageReader.movePage((window.pageReader.page?.val ?? 0) + 1)',
       ),
     );
+  });
+
+  describe('unmount sync lifecycle', () => {
+    it('does not flush sync on unmount when incognitoMode is enabled', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: true });
+      mockDriveSyncIsDirty.mockReturnValue(true);
+
+      const { unmount } = renderHook(() => useFlatChapter(initialChapter));
+
+      unmount();
+
+      expect(mockDriveSyncFlush).not.toHaveBeenCalled();
+      expect(mockDriveSyncNotifyDirty).not.toHaveBeenCalled();
+    });
+
+    it('does not flush sync on unmount when 0 progress was made and sync is not dirty', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
+      mockDriveSyncIsDirty.mockReturnValue(false);
+
+      const { unmount } = renderHook(() => useFlatChapter(initialChapter));
+
+      unmount();
+
+      expect(mockDriveSyncFlush).not.toHaveBeenCalled();
+      expect(mockDriveSyncNotifyDirty).not.toHaveBeenCalled();
+    });
+
+    it('flushes pending sync on unmount without duplicate notifySyncDirty when sync is dirty and incognitoMode is disabled', async () => {
+      const store = createStore();
+      mockUseNovelActions.mockReturnValue(store.state);
+      mockUseLibrarySettings.mockReturnValue({ incognitoMode: false });
+      mockDriveSyncIsDirty.mockReturnValue(true);
+
+      const { unmount } = renderHook(() => useFlatChapter(initialChapter));
+
+      unmount();
+
+      expect(mockDriveSyncFlush).toHaveBeenCalledTimes(1);
+      expect(mockDriveSyncNotifyDirty).not.toHaveBeenCalled();
+    });
   });
 });

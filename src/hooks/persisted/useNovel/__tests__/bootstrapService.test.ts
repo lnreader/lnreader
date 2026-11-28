@@ -19,6 +19,7 @@ import {
 } from '@database/queries/NovelQueries';
 import { fetchNovel, fetchPage } from '@services/plugin/fetch';
 import { createBootstrapService } from '../store-helper/bootstrapService';
+import { driveSyncManager } from '@services/sync/driveSyncManager';
 
 const PLUGIN_ID = 'test-plugin';
 const NOVEL_PATH = '/novels/test';
@@ -59,6 +60,7 @@ const makeChapter = (
   position: id,
   scanlator: null,
   timeSpent: 0,
+  syncUpdatedAt: null,
   ...overrides,
   releaseTime: overrides.releaseTime ?? '2024-01-01',
 });
@@ -536,5 +538,35 @@ describe('bootstrapService', () => {
       1000,
       ['Scan A'],
     );
+  });
+
+  it('returns empty filtered list while keeping partial flag when offline for partial synced novel', async () => {
+    const isPartialSpy = jest
+      .spyOn(driveSyncManager, 'isPartialSyncedNovel')
+      .mockReturnValue(true);
+    const clearPartialSpy = jest.spyOn(
+      driveSyncManager,
+      'clearPartialSyncedNovel',
+    );
+    mockGetChapterCount.mockResolvedValue(0);
+    mockFetchPage.mockRejectedValue(new Error('Offline'));
+
+    const service = createBootstrapService();
+    const result = await service.getChaptersForPage({
+      novel: mockNovel,
+      novelPath: NOVEL_PATH,
+      pluginId: PLUGIN_ID,
+      pages: ['1'],
+      pageIndex: 0,
+      settingsSort,
+      settingsFilter: ['not-read'],
+    });
+
+    expect(result.chapters).toEqual([]);
+    expect(result.batchInformation.totalChapters).toBe(0);
+    expect(clearPartialSpy).not.toHaveBeenCalled();
+
+    isPartialSpy.mockRestore();
+    clearPartialSpy.mockRestore();
   });
 });

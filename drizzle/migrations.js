@@ -7,6 +7,7 @@ import m0003 from './20260727081855_calm_chimera/migration.sql';
 import m0004 from './20260811071655_parched_human_torch/migration.sql';
 import m0005 from './20261122113536_ancient_darkhawk/migration.sql';
 import m0006 from './20261122122157_open_dexter_bennett/migration.sql';
+import m0007 from './20261127101323_pink_scream/migration.sql';
 
 export default {
   migrations: {
@@ -17,5 +18,7 @@ export default {
     '20260811071655_parched_human_torch': m0004,
     '20261122113536_ancient_darkhawk': m0005,
     '20261122122157_open_dexter_bennett': m0006,
+    '20261127101323_pink_scream': m0007,
   },
 };
+  

@@ -75,3 +75,12 @@ jest.mock('@database/queries/StatsQueries', () => ({
   getNovelGenresFromDb: jest.fn(),
   getNovelStatusFromDb: jest.fn(),
 }));
+
+jest.mock('@database/queries/SyncQueries', () => ({
+  queryActiveSyncEntities: jest.fn().mockResolvedValue({
+    novels: [],
+    chapters: [],
+    categories: [],
+  }),
+  mergeRemoteSyncPayload: jest.fn().mockResolvedValue(undefined),
+}));

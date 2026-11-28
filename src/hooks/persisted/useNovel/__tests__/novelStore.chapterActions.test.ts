@@ -74,6 +74,7 @@ const makeChapter = (
   progress: 0,
   position: id - 1,
   timeSpent: 0,
+  syncUpdatedAt: null,
   ...overrides,
   scanlator: overrides.scanlator ?? null,
 });

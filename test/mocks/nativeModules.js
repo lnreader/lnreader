@@ -107,6 +107,38 @@ jest.mock('@modules/native-zip-archive', () => ({
   },
 }));
 
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPreviousSignIn: jest.fn().mockResolvedValue(false),
+    getCurrentUser: jest.fn().mockResolvedValue(null),
+    signIn: jest.fn().mockResolvedValue(null),
+    signOut: jest.fn().mockResolvedValue(null),
+    getTokens: jest.fn().mockResolvedValue({ accessToken: '' }),
+  },
+}));
+
+jest.mock('@react-native-community/netinfo', () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValue({ isConnected: true, type: 'wifi' });
+  const addEventListener = jest.fn(() => jest.fn());
+  const useNetInfo = jest
+    .fn()
+    .mockReturnValue({ isConnected: true, type: 'wifi' });
+  return {
+    __esModule: true,
+    fetch,
+    addEventListener,
+    useNetInfo,
+    default: {
+      fetch,
+      addEventListener,
+      useNetInfo,
+    },
+  };
+});
+
 jest.mock('@lodev09/react-native-true-sheet', () =>
   jest.requireActual('@lodev09/react-native-true-sheet/mock'),
 );

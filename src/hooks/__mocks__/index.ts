@@ -19,7 +19,10 @@ jest.mock('@utils/Storages', () => ({
 jest.mock('@utils/mmkv/mmkv', () => ({
   MMKVStorage: {
     getString: jest.fn(),
+    getNumber: jest.fn(),
+    getBoolean: jest.fn(),
     set: jest.fn(),
+    delete: jest.fn(),
   },
 }));
 
