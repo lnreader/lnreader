@@ -2,14 +2,16 @@ import * as LocalAuthentication from 'expo-local-authentication';
 
 import { getString } from '@i18n/translations';
 
-let authenticating = false;
+export type DeviceAuthResult = 'success' | 'cancelled' | 'unavailable';
+
+let pendingAuth: Promise<DeviceAuthResult> | null = null;
 
 /**
  * Showing the device-credential (PIN/pattern) screen pauses the activity, so
- * the app briefly reports `background` → `active`. The app lock checks this to
- * avoid locking itself again because of its own prompt.
+ * the app briefly reports `background` → `active`. The app lock uses this to
+ * tell its own prompt apart from the user actually leaving the app.
  */
-export const isDeviceAuthInProgress = () => authenticating;
+export const getPendingDeviceAuth = () => pendingAuth;
 
 export const canUseDeviceAuth = async (): Promise<boolean> => {
   try {
@@ -20,21 +22,15 @@ export const canUseDeviceAuth = async (): Promise<boolean> => {
   }
 };
 
-export type DeviceAuthResult = 'success' | 'cancelled' | 'unavailable';
-
 const UNAVAILABLE_ERRORS = new Set([
   'not_enrolled',
   'not_available',
   'passcode_not_set',
 ]);
 
-export const authenticateDevice = async (
-  promptMessage = getString('appLock.unlockPrompt'),
+const runAuthentication = async (
+  promptMessage: string,
 ): Promise<DeviceAuthResult> => {
-  if (authenticating) {
-    return 'cancelled';
-  }
-  authenticating = true;
   try {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage,
@@ -46,7 +42,20 @@ export const authenticateDevice = async (
     return UNAVAILABLE_ERRORS.has(result.error) ? 'unavailable' : 'cancelled';
   } catch {
     return 'cancelled';
+  }
+};
+
+export const authenticateDevice = async (
+  promptMessage = getString('appLock.unlockPrompt'),
+): Promise<DeviceAuthResult> => {
+  if (pendingAuth) {
+    return 'cancelled';
+  }
+  const auth = runAuthentication(promptMessage);
+  pendingAuth = auth;
+  try {
+    return await auth;
   } finally {
-    authenticating = false;
+    pendingAuth = null;
   }
 };

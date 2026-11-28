@@ -1,17 +1,40 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { ReactNode } from 'react';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { AppState, AppStateStatus, Text } from 'react-native';
 
+import { render } from '@test-utils';
 import AppLockGate from '../AppLockGate';
 
 const mockAuthenticateDevice = jest.fn();
-let mockAuthInProgress = false;
+let mockPendingAuth: Promise<string> | null = null;
 const mockSetAppSettings = jest.fn();
 let mockSettings: Record<string, unknown> = {};
 
 jest.mock('@utils/deviceAuth', () => ({
   authenticateDevice: () => mockAuthenticateDevice(),
-  isDeviceAuthInProgress: () => mockAuthInProgress,
+  getPendingDeviceAuth: () => mockPendingAuth,
 }));
+
+jest.mock('@screens/novel/NovelContext', () => ({
+  NovelContextProvider: ({ children }: { children: ReactNode }) => children,
+}));
+
+jest.mock('react-native-safe-area-context', () => {
+  const ReactModule = require('react');
+  const { View } = jest.requireActual('react-native');
+  const frame = { height: 800, width: 400, x: 0, y: 0 };
+  const insets = { bottom: 0, left: 0, right: 0, top: 0 };
+  return {
+    SafeAreaFrameContext: ReactModule.createContext(frame),
+    SafeAreaInsetsContext: ReactModule.createContext(insets),
+    SafeAreaProvider: ({ children }: { children: ReactNode }) => children,
+    SafeAreaView: ({ children, ...props }: { children: ReactNode }) =>
+      ReactModule.createElement(View, props, children),
+    initialWindowMetrics: { frame, insets },
+    useSafeAreaFrame: () => frame,
+    useSafeAreaInsets: () => insets,
+  };
+});
 
 jest.mock('@utils/showToast', () => ({ showToast: jest.fn() }));
 
@@ -38,7 +61,9 @@ jest.mock('@components', () => {
   };
 });
 
-let appStateHandler: (state: AppStateStatus) => void;
+let appStateHandlers: ((state: AppStateStatus) => void)[] = [];
+const appStateHandler = (state: AppStateStatus) =>
+  appStateHandlers.forEach(handler => handler(state));
 
 const flush = () => act(() => Promise.resolve());
 
@@ -61,7 +86,8 @@ const leaveAppFor = async (ms: number) => {
 describe('AppLockGate', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockAuthInProgress = false;
+    mockPendingAuth = null;
+    appStateHandlers = [];
     mockSettings = { appLockEnabled: true, appLockDelayMs: 60_000 };
     mockAuthenticateDevice.mockReset().mockResolvedValue('cancelled');
     mockSetAppSettings.mockReset();
@@ -69,7 +95,7 @@ describe('AppLockGate', () => {
     jest
       .spyOn(AppState, 'addEventListener')
       .mockImplementation((_event, handler) => {
-        appStateHandler = handler;
+        appStateHandlers.push(handler);
         return { remove: jest.fn() };
       });
   });
@@ -139,17 +165,28 @@ describe('AppLockGate', () => {
       expect(screen.queryByTestId('app-lock-screen')).toBeNull();
     });
 
-    it('ignores leaving the app for its own credential prompt', async () => {
-      mockSettings = { appLockEnabled: true, appLockDelayMs: 0 };
-      await renderGate();
-
-      mockAuthInProgress = true;
+    const leaveDuringPrompt = async (result: string, ms: number) => {
+      mockPendingAuth = Promise.resolve(result);
       act(() => appStateHandler('background'));
-      mockAuthInProgress = false;
+      mockPendingAuth = null;
+      jest.advanceTimersByTime(ms);
       act(() => appStateHandler('active'));
       await flush();
+    };
+
+    it('ignores leaving the app for a prompt that succeeds', async () => {
+      mockSettings = { appLockEnabled: true, appLockDelayMs: 0 };
+      await renderGate();
+      await leaveDuringPrompt('success', 5_000);
 
       expect(screen.queryByTestId('app-lock-screen')).toBeNull();
+    });
+
+    it('locks when the app was left during a prompt that was cancelled', async () => {
+      await renderGate();
+      await leaveDuringPrompt('cancelled', 60_000);
+
+      expect(screen.getByTestId('app-lock-screen')).toBeTruthy();
     });
   });
 });

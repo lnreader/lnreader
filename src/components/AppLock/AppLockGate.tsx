@@ -22,7 +22,11 @@ import {
 } from '@hooks/persisted/useSettings';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
-import { authenticateDevice, isDeviceAuthInProgress } from '@utils/deviceAuth';
+import {
+  authenticateDevice,
+  DeviceAuthResult,
+  getPendingDeviceAuth,
+} from '@utils/deviceAuth';
 import { showToast } from '@utils/showToast';
 
 export const shouldRelock = (
@@ -75,26 +79,42 @@ const AppLockGate = ({ children }: PropsWithChildren) => {
     if (!appLockEnabled) {
       return;
     }
-    const subscription = AppState.addEventListener('change', state => {
+    let leftDuringAuth: Promise<DeviceAuthResult> | null = null;
+    const subscription = AppState.addEventListener('change', async state => {
       if (state === 'background') {
-        if (backgroundedAt.current === null && !isDeviceAuthInProgress()) {
+        if (backgroundedAt.current === null) {
           backgroundedAt.current = Date.now();
+          leftDuringAuth = getPendingDeviceAuth();
         }
-      } else if (state === 'active') {
-        const leftAt = backgroundedAt.current;
-        backgroundedAt.current = null;
-        // Returning from the device-credential screen never recorded a
-        // background time; re-prompting then would trap the user in a loop.
-        if (leftAt === null) {
-          return;
-        }
-        if (
-          lockedRef.current ||
-          shouldRelock(leftAt, Date.now(), appLockDelayMs)
-        ) {
-          setLocked(true);
+        return;
+      }
+      if (state !== 'active') {
+        return;
+      }
+      const leftAt = backgroundedAt.current;
+      const pendingAuth = leftDuringAuth;
+      backgroundedAt.current = null;
+      leftDuringAuth = null;
+      if (leftAt === null) {
+        return;
+      }
+      const returnedAt = Date.now();
+      if (lockedRef.current) {
+        // A prompt that was already showing settles the lock itself;
+        // prompting again after it is cancelled would trap the user in a loop.
+        if (!pendingAuth) {
           unlock();
         }
+        return;
+      }
+      // Time spent on the device-credential screen only counts as being
+      // away if the user did not actually authenticate there.
+      if (pendingAuth && (await pendingAuth) === 'success') {
+        return;
+      }
+      if (shouldRelock(leftAt, returnedAt, appLockDelayMs)) {
+        setLocked(true);
+        unlock();
       }
     });
     return () => subscription.remove();
