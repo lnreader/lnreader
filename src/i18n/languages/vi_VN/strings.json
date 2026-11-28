@@ -32,7 +32,7 @@
     "importStaticFiles": "Nhập Tập tin Tĩnh",
     "novelInsertFailed": "lỗi khi thêm truyện",
     "networking": "Mạng",
-    "useFAB": "Sử dụng nút nổi",
+    "useFAB": "Floating reading button",
     "userAgent": "Tác nhân Người dùng",
     "recreateDBIndexes": "Tạo lại index DB",
     "recreateDBIndexesToast": "Đã tạo lại index DB",
@@ -54,11 +54,20 @@
     },
     "appLanguageDefault": "Mặc định",
     "appTheme": "Chủ đề",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "Màu tối",
     "dateFormat": "Định dạng thời gian",
     "dateFormatDefault": "Mặc định (%{date})",
     "dynamicColors": "Linh hoạt",
-    "hideBackdrop": "Ẩn bóng",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Màu sáng",
     "navbar": "Thanh điều hướng",
     "novelInfo": "Thông tin truyện",
@@ -67,6 +76,7 @@
     "relativeTimestampsDescription": "\"Hôm nay\" thay vì \"%{date}\"",
     "showHistoryInTheNav": "Hiển thị mục lịch sử",
     "showUpdatesInTheNav": "Hiển thị mục cập nhật",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Chế độ chủ đề",
     "themeModeLight": "Sáng",
     "themeModeDark": "Tối",
@@ -82,7 +92,8 @@
       "turquoise": "Ngọc lam",
       "yotsuba": "Cỏ bốn lá",
       "catppuccin": "Catpuccin",
-      "yinyang": "Âm Dương"
+      "yinyang": "Âm Dương",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +106,8 @@
     "automaticBackupEvery2Days": "Mỗi 2 ngày",
     "automaticBackupWeekly": "Hằng tuần",
     "automaticBackupLocation": "Vị trí sao lưu tự động",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Sao lưu tự động cuối cùng lúc: %{time}",
     "backupName": "Tên sao lưu",
     "backupCreated": "Sao lưu thành công",
@@ -163,13 +176,18 @@
       "backup": "Sao lưu qua Drive",
       "backupInterruped": "Sao lưu Drive Bị ngắt ngang",
       "googleDriveBackup": "Sao lưu qua Google Drive",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Khôi phục qua Drive",
-      "restoreInterruped": "Khôi phục Drive Bị ngắt ngang"
+      "restoreInterruped": "Khôi phục Drive Bị ngắt ngang",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Sao lưu vào Google Drive của bạn",
     "invalidBackupFolder": "Thư mục sao lưu không hợp lệ",
     "localBackup": "Sao lưu Cục bộ",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "Không tìm thấy sao lưu",
     "options": {
       "title": "Sao lưu nội dung",
@@ -249,6 +267,8 @@
     "plugins": "Plugin",
     "removeFromLibrary": "Đã xóa khỏi thư viện",
     "repositories": "Nguồn lưu trữ",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Tìm nguồn truyện",
     "searchResults": "Kết quả tìm kiếm",
     "selectNovel": "Chọn truyện",
@@ -317,6 +337,7 @@
     "downloads": "Tải xuống",
     "edit": "Sửa",
     "example": "Ví dụ",
+    "excludedItem": "%{name}, excluded",
     "filter": "Bộ lọc",
     "globally": "toàn cầu",
     "install": "Tải về",
@@ -420,6 +441,8 @@
     "desc": "(Giảm dần)",
     "disableLoadingAnimations": "Vô hiệu hoá hoạt ảnh chờ",
     "disableLoadingAnimationsDesc": "Có thể cải thiện hiệu năng ở máy yếu",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "Tắt phản hồi xúc giác",
     "disableHapticFeedbackDescription": "Tắt rung khi chạm.",
     "chapterDownloadCooldown": "Quãng nghỉ tải xuống chương",
@@ -449,6 +472,7 @@
     "refreshMetadataDescription": "Kiểm tra ảnh bìa và mô tả khi cập nhật thự viện",
     "smartUpdate": "Cập nhật thông minh",
     "smartUpdateSkipCompleted": "Bỏ qua các mục có trạng thái \"Đã hoàn thành\"",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Bỏ qua các mục chưa bắt đầu",
     "smartUpdateSkipWithUnread": "Bỏ qua các mục với chương chưa đọc",
     "sortOrder": "Thứ tự sắp xếp",
@@ -483,6 +507,8 @@
   },
   "library": "Thư viện",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Nhãn",
@@ -502,7 +528,9 @@
       },
       "filters": {
         "completed": "Đã hoàn thành",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Đã tải về",
+        "genres": "Genres",
         "started": "Đã bắt đầu",
         "unread": "Chưa đọc"
       },
@@ -553,6 +581,9 @@
       }
     },
     "chapterChapnum": "Chương %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "chương",
     "continueReading": "Tiếp tục đọc",
     "exportEpubModal": {
@@ -607,6 +638,14 @@
       "title": "Tiêu đề: %{title}"
     },
     "inLibaray": "Trong thư viện",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Tên Chương",
       "chapterNumber": "Chương Số",
@@ -668,10 +707,12 @@
       "padding": "Khoảng đệm",
       "pageReader": "Đọc phân trang (Thử nghiệm)",
       "pageReaderDescription": "Phân chương ra thành trang thay vì cuộn. Thử nghiệm - có thể làm hỏng format một số truyện",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Đảo nút âm lượng",
       "invertVolumeButtonsDescription": "Đảo nút tăng và giảm âm lượng cho trang trước và sau",
-      "disablePageTransitions": "Tắt hoạt hình chuyển trạng thái trang",
-      "disablePageTransitionsDescription": "Chuyển trang ngay lập tức mà không dùng hoạt hình trượt",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "Xóa khoảng trắng dư thừa",
       "removeExtraSpacingDescription": "Thu gọn khoảng trắng dư thừa giữa các đoạn văn",
       "scrollAmount": "Khoảng cuộn (chiều cao màn hình theo mặc định)",
@@ -700,11 +741,26 @@
     },
     "emptyChapterMessage": "<h2>Chương không tải được</h2><p>Không có nội dung đọc được tìm thấy. Kiểm tra chương trong WebView; nếu tải được ở đấy, <a href='%{reportUrl}'>báo cáo vấn đề plugin</a>.</p><p><a href='%{refreshUrl}'>Tải lại chương</a></p><p>Plugin: %{pluginId}<br>Truyện: %{novelName}<br>Chương: %{chapterName}</p>",
     "finished": "Đã xong",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "Tiếp: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Không có chương kế tiếp",
     "noPreviousChapter": "Không có chương kế tiếp",
     "searchMinLength": "Nhập ít nhất %{count} chương để tìm kiếm",
-    "searchPlaceholder": "Tìm chương"
+    "searchPlaceholder": "Tìm chương",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Chapters",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "chapterCount": "Number of chapters",
+      "start": "Start timer",
+      "cancelTimer": "Cancel timer",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Enter between 1 and 999 chapters.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "Khoảng cuộn (giây)",
@@ -713,6 +769,7 @@
     "backgroundColorModal": "Màu nền",
     "clearCustomCSS": "Đặt lại CSS tùy chỉnh của bạn?",
     "clearCustomJS": "Đặt lại JS tùy chỉnh của bạn?",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "Áp dụng cho các nguồn nhất định dùng #sourceId-[SOURCEID] trong selector của bạn",
     "customCSS": "CSS Tùy chỉnh",
     "customJS": "JS Tùy chỉnh",
@@ -777,13 +834,31 @@
     "newChapters": "chương mới",
     "novelsUpdated": "%{num} truyện được cập nhật",
     "searchbar": "Tìm kiếm bản cập nhật",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Không thể lấy được truyện",
     "updatesLower": "cập nhập",
-    "updatingLibrary": "Đang cập nhật thư viện"
+    "updatingLibrary": "Đang cập nhật thư viện",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Xin chào",
     "pickATheme": "Hãy chọn chủ đề",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "Sáng",
     "dark": "Tối",
     "system": "Hệ thống",
@@ -801,6 +876,7 @@
     "LOCAL_RESTORE": "Khôi phục Cục bộ",
     "MIGRATE_NOVEL": "Chuyển Truyện",
     "DOWNLOAD_CHAPTER": "Chương Tải xuống",
+    "chapterDownloadFailed": "Chapter download failed for %{novelName}",
     "taskQueued": "%{task} vào hàng đợi",
     "taskCompleted": "Đã hoàn thành",
     "taskFailed": "Thất bại: %{error}"
@@ -909,5 +985,31 @@
     "normalizationValuePlaceholder": "ví dụ Sci-Fi",
     "noCategories": "Chưa có nhóm thể loại nào hết",
     "noNormalization": "Không có quy tắc chuẩn hóa được cài đặt"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }

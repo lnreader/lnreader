@@ -32,7 +32,7 @@
     "importStaticFiles": "Импорт файлов статики",
     "novelInsertFailed": "ошибка вставки главы",
     "networking": "Сеть",
-    "useFAB": "Использовать плавающую кнопку действия вместо основной кнопки",
+    "useFAB": "Floating reading button",
     "userAgent": "User Agent",
     "recreateDBIndexes": "Пересоздать индексы базы данных",
     "recreateDBIndexesToast": "Индексы базы данных пересозданы",
@@ -54,11 +54,20 @@
     },
     "appLanguageDefault": "По умолчанию",
     "appTheme": "Тема приложения",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "Тёмная тема",
     "dateFormat": "Формат даты",
     "dateFormatDefault": "По умолчанию (%{date})",
     "dynamicColors": "Динамически",
-    "hideBackdrop": "Скрыть фон",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Светлая тема",
     "navbar": "Панель навигации",
     "novelInfo": "Информация о новелле",
@@ -67,6 +76,7 @@
     "relativeTimestampsDescription": "\"Сегодня\" вместо \"%{date}\"",
     "showHistoryInTheNav": "Показать историю в навигации",
     "showUpdatesInTheNav": "Показать историю в навигации",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Тема оформления",
     "themeModeLight": "Светлая",
     "themeModeDark": "Тёмная",
@@ -82,7 +92,8 @@
       "turquoise": "Бирюзовый",
       "yotsuba": "Ёцуба",
       "catppuccin": "Катппучини",
-      "yinyang": "Инь и ян"
+      "yinyang": "Инь и ян",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +106,8 @@
     "automaticBackupEvery2Days": "Каждые 2 дня",
     "automaticBackupWeekly": "Еженедельно",
     "automaticBackupLocation": "Место сохранения резервных копий",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Последнее автоматическое резервное копирование: %{time}",
     "backupName": "Имя резервной копии",
     "backupCreated": "Резервная копия успешно создана",
@@ -163,13 +176,18 @@
       "backup": "Резервная копия диска",
       "backupInterruped": "Резервная копия диска прервана",
       "googleDriveBackup": "Резервное копирование на Google Диск",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Восстановление диска",
-      "restoreInterruped": "Восстановление диска прервано"
+      "restoreInterruped": "Восстановление диска прервано",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Резервное копирование на Google Диск",
     "invalidBackupFolder": "Неверная папка резервной копии",
     "localBackup": "Локальное резервное копирование",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "Резервные копии не найдены",
     "options": {
       "title": "Содержимое резервной копии",
@@ -249,6 +267,8 @@
     "plugins": "Расширения",
     "removeFromLibrary": "Удалено из библиотеки",
     "repositories": "Репозитории",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Поиск источника",
     "searchResults": "Результаты поиска",
     "selectNovel": "Выбрать новеллу",
@@ -317,6 +337,7 @@
     "downloads": "Загрузки",
     "edit": "Изменить",
     "example": "Образец",
+    "excludedItem": "%{name}, excluded",
     "filter": "Фильтр",
     "globally": "глобально",
     "install": "Установить",
@@ -420,6 +441,8 @@
     "desc": "(По убыванию)",
     "disableLoadingAnimations": "Отключить анимацию загрузки",
     "disableLoadingAnimationsDesc": "Может повысить производительность на медленных устройствах",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "Отключить виброотклик",
     "disableHapticFeedbackDescription": "Выключает вибрации для взаимодействия с касаниями.",
     "chapterDownloadCooldown": "Пауза между загрузками глав",
@@ -449,6 +472,7 @@
     "refreshMetadataDescription": "Проверять наличие новой обложки и описания при обновлении библиотеки",
     "smartUpdate": "Умное обновление",
     "smartUpdateSkipCompleted": "Пропускать завершённые серии",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Пропускать не начатые серии",
     "smartUpdateSkipWithUnread": "Пропускать серии с непрочитанными главами",
     "sortOrder": "Порядок сортировки",
@@ -483,6 +507,8 @@
   },
   "library": "Библиотека",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Значки",
@@ -502,7 +528,9 @@
       },
       "filters": {
         "completed": "Завершено",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Загружено",
+        "genres": "Genres",
         "started": "Начато",
         "unread": "Не прочитано"
       },
@@ -553,6 +581,9 @@
       }
     },
     "chapterChapnum": "Глава: %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "главы",
     "continueReading": "Продолжить чтение",
     "exportEpubModal": {
@@ -607,6 +638,14 @@
       "title": "Название: %{title}"
     },
     "inLibaray": "В библиотеке",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Название главы",
       "chapterNumber": "Номер главы",
@@ -668,10 +707,12 @@
       "padding": "Отступ",
       "pageReader": "Постраничное чтение (экспериментально)",
       "pageReaderDescription": "Разделить главу на страницы вместо прокрутки. Экспериментальная — может разбить форматирование в некоторых романах",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Инвертировать кнопки громкости",
       "invertVolumeButtonsDescription": "Поменять кнопки громкости вверх и вниз на предыдущую и следующую страницу",
-      "disablePageTransitions": "Отключить анимацию перехода между страницами",
-      "disablePageTransitionsDescription": "Показывать страницы мгновенно без анимации слайда",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "Удалить лишние пробелы",
       "removeExtraSpacingDescription": "Свернуть дополнительные пустые строки между параграфами",
       "scrollAmount": "Смещение автопрокрутки (высота экрана по умолчанию)",
@@ -700,11 +741,26 @@
     },
     "emptyChapterMessage": "<h2>Глава не может быть загружена</h2><p>Не было найдено доступного контента для чтения. Проверьте главу в WebView; если она загружается там, <a href='%{reportUrl}'>сообщите об ошибке плагина</a>.</p><p><a href='%{refreshUrl}'>Refresh chapter</a></p><p>Plugin: %{pluginId}<br>Novel: %{novelName}<br>Chapter: %{chapterName}</p>",
     "finished": "Завершено",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "%{name}Следующий: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Следующей главы нет",
     "noPreviousChapter": "Предыдущей главы нет",
     "searchMinLength": "Введите не менее %{count} символов для поиска",
-    "searchPlaceholder": "Поиск глав"
+    "searchPlaceholder": "Поиск глав",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Главы",
+      "hours": "Часы",
+      "minutes": "Минуты",
+      "chapterCount": "Количество глав",
+      "start": "Старт таймера",
+      "cancelTimer": "Отменить таймер",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Введите от 1 главы до 999 главы.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "Интервал прокрутки (секунды)",
@@ -713,6 +769,7 @@
     "backgroundColorModal": "Цвет фона",
     "clearCustomCSS": "Сбросить пользовательские CSS?",
     "clearCustomJS": "Сбросить ваши пользовательские JS?",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "Нацеливайтесь на конкретные источники, используя #sourceId-[SOURCEID] в своих селекторах",
     "customCSS": "Пользовательские CSS",
     "customJS": "Пользовательский JS",
@@ -746,8 +803,8 @@
     "statusDistribution": "Распределение по статусам",
     "title": "Статистика",
     "readingTime": "Время чтения",
-    "noNovelReadingTime": "No reading time recorded for novels.",
-    "noCategoryReadingTime": "No reading time recorded for categories.",
+    "noNovelReadingTime": "Не зафиксировано время чтения романов",
+    "noCategoryReadingTime": "Не зафиксировано время чтения для категорий",
     "chaptersInLibrary": "глав в библиотеке",
     "customizeGenres": "Настроить",
     "titlesInLibrary": "Названия в библиотеке",
@@ -777,13 +834,31 @@
     "newChapters": "новые главы",
     "novelsUpdated": "%{num} Новеллы обновлены",
     "searchbar": "Поиск в обновлениях",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Невозможно получить новеллу",
     "updatesLower": "обновлено",
-    "updatingLibrary": "Обновление библиотеки"
+    "updatingLibrary": "Обновление библиотеки",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Добро пожаловать",
     "pickATheme": "Выберите тему",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "Светлая",
     "dark": "Тёмная",
     "system": "Система",
@@ -801,6 +876,7 @@
     "LOCAL_RESTORE": "Локальное восстановление",
     "MIGRATE_NOVEL": "Миграция новелл",
     "DOWNLOAD_CHAPTER": "Загруженные главы",
+    "chapterDownloadFailed": "Не удалось скачать главу %{novelName}",
     "taskQueued": "Задача %{task} добавлена в очередь",
     "taskCompleted": "Завершено",
     "taskFailed": "Ошибка: %{error}"
@@ -909,5 +985,31 @@
     "normalizationValuePlaceholder": "например, Научная фантастика",
     "noCategories": "Групп жанров пока нет",
     "noNormalization": "Правила нормализации не настроены"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }

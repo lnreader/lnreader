@@ -32,7 +32,7 @@
     "importStaticFiles": "Importera statiska filer",
     "novelInsertFailed": "boken infogade inte",
     "networking": "Nätverk",
-    "useFAB": "Använd FAB istället för knapp",
+    "useFAB": "Floating reading button",
     "userAgent": "Webbläsare",
     "recreateDBIndexes": "Återskapa DB-index",
     "recreateDBIndexesToast": "Omarbetade DB-index",
@@ -54,11 +54,20 @@
     },
     "appLanguageDefault": "Standard",
     "appTheme": "App-tema",
+    "ePaperApplyTitle": "Also apply E-paper optimizations?",
+    "ePaperApplyDescription": "Use black-and-white pages, paged reading, and page buttons; turn off auto-scroll, reader transitions, and animated placeholders; reduce interface motion. Your current settings will be saved.",
+    "ePaperThemeOnly": "Theme only",
+    "ePaperApply": "Apply optimizations",
+    "ePaperLeaveTitle": "Disable E-paper optimizations?",
+    "ePaperLeaveDescription": "The preset enabled black-and-white pages, paged reading, and page buttons; stopped auto-scroll, reader transitions, and animated placeholders; and reduced interface motion. Keep these changes or restore your saved settings.",
+    "ePaperKeep": "Keep optimizations",
+    "ePaperRestore": "Disable and restore",
     "darkTheme": "Mörkt Tema",
     "dateFormat": "Datumformat",
     "dateFormatDefault": "Standard (%{date})",
     "dynamicColors": "Dynamisk",
-    "hideBackdrop": "Dölj bakgrund",
+    "hideBackdrop": "Hide header background",
+    "hideBackdropDescription": "Hide the cover art behind the novel details.",
     "lightTheme": "Ljust tema",
     "navbar": "Navigeringsfält",
     "novelInfo": "Roman info",
@@ -67,6 +76,7 @@
     "relativeTimestampsDescription": "\"Idag\" istället för \"%{date}\"",
     "showHistoryInTheNav": "Visa historik i navigatorn",
     "showUpdatesInTheNav": "Visa uppdateringar i navigatorn",
+    "useFABDescription": "Show a floating button to start or resume reading.",
     "themeMode": "Temaläge",
     "themeModeLight": "Ljust",
     "themeModeDark": "Mörkt",
@@ -82,7 +92,8 @@
       "turquoise": "Turkos",
       "yotsuba": "Yotsuba",
       "catppuccin": "Catppuccin",
-      "yinyang": "Yin & Yang"
+      "yinyang": "Yin & Yang",
+      "ePaperDisplay": "E-paper display"
     }
   },
   "backupScreen": {
@@ -95,6 +106,8 @@
     "automaticBackupEvery2Days": "Varannan dag",
     "automaticBackupWeekly": "Varje vecka",
     "automaticBackupLocation": "Automatisk plats för säkerhetskopiering",
+    "automaticBackupContents": "Automatic backup contents",
+    "automaticBackupContentsDescription": "Choose what to include in scheduled backups.",
     "lastAutomaticBackup": "Senast automatiskt säkerhetskopierat: %{time}",
     "backupName": "Säkerhetskopians namn",
     "backupCreated": "Säkerhetskopia skapades",
@@ -163,13 +176,18 @@
       "backup": "Drive säkerhetskopia",
       "backupInterruped": "Drive Återställning Avbruten",
       "googleDriveBackup": "Säkerhetskopiering till Google Drive",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Drive Återställ",
-      "restoreInterruped": "Drive Återställning Avbruten"
+      "restoreInterruped": "Drive Återställning Avbruten",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Säkerhetskopiera till din Google Drive",
     "invalidBackupFolder": "Ogiltig säkerhetskopieringsmapp",
     "localBackup": "Lokal säkerhetskopia",
+    "unsupportedBackupFormat": "This backup was made by a newer or unsupported version of LNReader and cannot be restored.",
     "noBackupFound": "Ingen säkerhetskopia hittades",
     "options": {
       "title": "Säkerhetskopiera innehåll",
@@ -249,6 +267,8 @@
     "plugins": "Tillägg",
     "removeFromLibrary": "Borttaget från biblioteket",
     "repositories": "Utvecklingskataloger",
+    "repositoriesUnreachable": "Couldn't reach plugin repositories",
+    "repositoriesUnreachableCached": "Couldn't reach plugin repositories. Showing cached plugins.",
     "searchbar": "Sök källor och plugins",
     "searchResults": "Sökresultat",
     "selectNovel": "Välj roman",
@@ -317,6 +337,7 @@
     "downloads": "Nedladdningar",
     "edit": "Redigera",
     "example": "Exempel",
+    "excludedItem": "%{name}, excluded",
     "filter": "Filter",
     "globally": "globalt",
     "install": "Installera",
@@ -420,6 +441,8 @@
     "desc": "(Fallande)",
     "disableLoadingAnimations": "Inaktivera laddningsanimationer",
     "disableLoadingAnimationsDesc": "Kan förbättra prestanda på långsammare enheter",
+    "reduceAppAnimations": "Disable interface animations",
+    "reduceAppAnimationsDesc": "Stop screen transitions and motion in buttons, panels, and other controls",
     "disableHapticFeedback": "Inaktivera haptisk feedback",
     "disableHapticFeedbackDescription": "Stäng av vibrationer för beröringsinteraktioner.",
     "chapterDownloadCooldown": "Kapitel nedladdningens nedkylning",
@@ -449,6 +472,7 @@
     "refreshMetadataDescription": "Sök efter nya omslag och detaljer vid uppdatering av bibliotek",
     "smartUpdate": "Smart uppdatering",
     "smartUpdateSkipCompleted": "Hoppa över romaner med \"Avslutad\" status",
+    "smartUpdateSkipNotDue": "Predict next release time",
     "smartUpdateSkipUnstarted": "Hoppa över opåbörjade romaner",
     "smartUpdateSkipWithUnread": "Hoppa över romaner med olästa kapitel",
     "sortOrder": "Sorteringsordning",
@@ -483,6 +507,8 @@
   },
   "library": "Bibliotek",
   "libraryScreen": {
+    "removeSelectedTitle": "Remove from library?",
+    "removeSelectedMessage": "Selected entries: %{count}",
     "bottomSheet": {
       "display": {
         "badges": "Märken",
@@ -502,7 +528,9 @@
       },
       "filters": {
         "completed": "Slutförd",
+        "customUpdateFrequency": "Customized update frequency",
         "downloaded": "Nerladdat",
+        "genres": "Genres",
         "started": "Påbörjad",
         "unread": "Olästa"
       },
@@ -553,6 +581,9 @@
       }
     },
     "chapterChapnum": "Kapitel: %{num}",
+    "chapterDownloadA11y": "Download chapter",
+    "chapterDeleteA11y": "Delete downloaded chapter",
+    "chapterDownloadingA11y": "Downloading chapter",
     "chapters": "kapitel",
     "continueReading": "Fortsätt läsa",
     "exportEpubModal": {
@@ -607,6 +638,14 @@
       "title": "Titel: %{title}"
     },
     "inLibaray": "I bibliotek",
+    "nextUpdate": {
+      "customInterval": "Custom update frequency:",
+      "default": "Default",
+      "expected": "New chapters predicted to be released in around %{nextUpdate}, checking around every %{interval}.",
+      "expectedNull": "This novel is either completed, or there is no predicted release date.",
+      "notApplicable": "N/A",
+      "soon": "Soon"
+    },
     "jumpToChapterModal": {
       "chapterName": "Kapitel namn",
       "chapterNumber": "Kapitel nummer",
@@ -668,10 +707,12 @@
       "padding": "Stoppning",
       "pageReader": "Sidvis läsning (Experimentell)",
       "pageReaderDescription": "Dela upp kapitlet i sidor i stället för skrollning. Experimentellt — kan bryta formatering i vissa romaner",
+      "infiniteScroll": "Infinite scrolling",
+      "infiniteScrollDescription": "Load the next chapter automatically at the end of a chapter and keep scrolling into it",
       "invertVolumeButtons": "Invert volume buttons",
       "invertVolumeButtonsDescription": "Swap volume up and down buttons for previous and next page",
-      "disablePageTransitions": "Disable page transition animation",
-      "disablePageTransitionsDescription": "Turn pages instantly without slide animation",
+      "disableReaderAnimations": "Disable reader animations",
+      "disableReaderAnimationsDescription": "Turn pages and scroll instantly without animation",
       "removeExtraSpacing": "Ta bort extra avstånd",
       "removeExtraSpacingDescription": "Fäll ihop extra tomma rader mellan paragraferna",
       "scrollAmount": "Skroll belopp (skärmens höjd som standard)",
@@ -700,11 +741,26 @@
     },
     "emptyChapterMessage": "<h2>Kapitel kunde inte laddas</h2><p>Inget läsbart innehåll hittades. Kontrollera kapitlet i WebVy; om det laddas där, <a href='%{reportUrl}'>rapportera tilläggets problem</a>.</p><p><a href='%{refreshUrl}'>Uppdatera kapitlet</a></p><p>Tillägg: %{pluginId}<br>Roman: %{novelName}<br>Kapitel: %chapterName}</p>",
     "finished": "Slutförd",
+    "loadingNextChapter": "Loading the next chapter…",
     "nextChapter": "Nästa: %{name}",
+    "nextChapterLoadFailed": "Couldn't load the next chapter",
     "noNextChapter": "Det finns inget nästa kapitel",
     "noPreviousChapter": "Det finns inget föregående kapitel",
     "searchMinLength": "Ange minst %{count} tecken för att söka",
-    "searchPlaceholder": "Sök ikapitel"
+    "searchPlaceholder": "Sök ikapitel",
+    "ttsSleepTimer": {
+      "title": "TTS sleep timer",
+      "duration": "Time",
+      "chapters": "Chapters",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "chapterCount": "Number of chapters",
+      "start": "Start timer",
+      "cancelTimer": "Cancel timer",
+      "invalidDuration": "Enter a duration between 1 minute and 23 hours 59 minutes.",
+      "invalidChapters": "Enter between 1 and 999 chapters.",
+      "autoAdvanceRequired": "Multiple chapters are read only when Auto Page Advance is enabled."
+    }
   },
   "readerSettings": {
     "autoScrollInterval": "Skrollningsintervall (sekunder)",
@@ -713,6 +769,7 @@
     "backgroundColorModal": "Bakgrundsfärg",
     "clearCustomCSS": "Återställ din anpassade CSS?",
     "clearCustomJS": "Återställ din anpassade JS?",
+    "confirmRemoveText": "Matching text will be hidden in all chapters.",
     "cssHint": "Rikta in dig på specifika källor med hjälp av #sourceId-[SOURCEID] i dina väljare.",
     "customCSS": "Anpassad CSS",
     "customJS": "Anpassad JS",
@@ -777,13 +834,31 @@
     "newChapters": "nya kapitel",
     "novelsUpdated": "%{num} romaner uppdaterade",
     "searchbar": "Sök uppdateringar",
+    "skippedNotInReleasePeriod": {
+      "one": "%{count} novel skipped because no release was expected today",
+      "other": "%{count} novels skipped because no release was expected today"
+    },
     "unableToGetNovel": "Det går inte att hämta romanen",
     "updatesLower": "uppdateringar",
-    "updatingLibrary": "Uppdaterar bibliotek"
+    "updatingLibrary": "Uppdaterar bibliotek",
+    "viewUpcoming": "View Upcoming Updates"
+  },
+  "upcomingScreen": {
+    "categoriesDescription": "Titles in excluded categories are not shown, even if they are also in any of the included categories.",
+    "emptyView": "No upcoming updates predicted. Predictions build up as your library updates.",
+    "nextMonth": "Next Month",
+    "previousMonth": "Previous Month",
+    "relativeTime": {
+      "one": "Tomorrow",
+      "other": "In %{count} days"
+    },
+    "title": "Upcoming",
+    "today": "Today"
   },
   "onboardingScreen": {
     "welcome": "Välkommen",
     "pickATheme": "Välj ett tema",
+    "ePaperOptimizationsDescription": "Black-and-white pages, paged reading, page buttons, reduced motion, and no auto-scroll.",
     "light": "Ljust",
     "dark": "Mörkt",
     "system": "System",
@@ -801,6 +876,7 @@
     "LOCAL_RESTORE": "Lokal återställning",
     "MIGRATE_NOVEL": "Migrerande roman",
     "DOWNLOAD_CHAPTER": "Nedladdade kapitel",
+    "chapterDownloadFailed": "Chapter download failed for %{novelName}",
     "taskQueued": "%{task} i kö",
     "taskCompleted": "Slutförd",
     "taskFailed": "Misslyckades: %{error}"
@@ -909,5 +985,31 @@
     "normalizationValuePlaceholder": "t.ex. Sci-Fi",
     "noCategories": "No genre groups yet",
     "noNormalization": "Inga normaliseringsregler är konfigurerade"
+  },
+  "widgets": {
+    "continueReading": "Continue Reading",
+    "newChapters": "New Chapters",
+    "resume": "Resume",
+    "chapter": "Ch. %{number}",
+    "chapterProgress": "Ch. %{number} of %{total} · %{percent}%",
+    "chapterPercent": "Ch. %{number} · %{percent}%",
+    "more": "+%{remaining} more",
+    "updating": "Updating",
+    "updatingProgress": "Updating · %{done}/%{total}",
+    "update": "Update",
+    "search": "Search",
+    "random": "Random",
+    "downloads": "Downloads",
+    "chaptersThisWeek": "Chapters this week",
+    "streak": "%{days}-day streak",
+    "nothingRead": "Nothing read yet",
+    "nothingReadDesc": "Find a novel to start reading",
+    "browse": "Browse",
+    "caughtUp": "You're all caught up",
+    "caughtUpDesc": "No new chapters in your library",
+    "openLibrary": "Open Library",
+    "noChaptersThisWeek": "No chapters read this week",
+    "incognito": "Incognito mode is on",
+    "incognitoDesc": "Reading history is hidden"
   }
 }
