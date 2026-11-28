@@ -16,17 +16,26 @@ export function formatTimeSpent(totalMs: number | undefined) {
 
   if (asDays >= 1) {
     return hours > 0
-      ? `${getString('time.days', { count: asDays })} ${getString('time.hours', { count: hours })}`
+      ? `${getString('time.days', { count: asDays })} ${getString(
+          'time.hours',
+          { count: hours },
+        )}`
       : getString('time.days', { count: asDays });
   }
   if (asHours >= 1) {
     return minutes > 0
-      ? `${getString('time.hours', { count: asHours })} ${getString('time.minutes', { count: minutes })}`
+      ? `${getString('time.hours', { count: asHours })} ${getString(
+          'time.minutes',
+          { count: minutes },
+        )}`
       : getString('time.hours', { count: asHours });
   }
   if (asMinutes >= 1) {
     return seconds > 0
-      ? `${getString('time.minutes', { count: asMinutes })} ${getString('time.seconds', { count: seconds })}`
+      ? `${getString('time.minutes', { count: asMinutes })} ${getString(
+          'time.seconds',
+          { count: seconds },
+        )}`
       : getString('time.minutes', { count: asMinutes });
   }
   return getString('time.seconds', { count: asSeconds });

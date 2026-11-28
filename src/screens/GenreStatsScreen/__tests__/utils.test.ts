@@ -50,12 +50,13 @@ describe('buildGenreTree', () => {
 
   it('bundles children under a category whose parent genre is absent', () => {
     const tree = buildGenreTree(
+      [novel(1, 'Female Lead'), novel(2, 'Male Lead'), novel(3, 'Adventure')],
       [
-        novel(1, 'Female Lead'),
-        novel(2, 'Male Lead'),
-        novel(3, 'Adventure'),
+        {
+          parent: 'Lead',
+          children: ['Female Lead', 'Male Lead', 'Anti-Hero Lead'],
+        },
       ],
-      [{ parent: 'Lead', children: ['Female Lead', 'Male Lead', 'Anti-Hero Lead'] }],
     );
 
     const category = tree.find(n => n.name === 'Lead');
