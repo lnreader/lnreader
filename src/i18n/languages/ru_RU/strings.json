@@ -176,8 +176,12 @@
       "backup": "Резервная копия диска",
       "backupInterruped": "Резервная копия диска прервана",
       "googleDriveBackup": "Резервное копирование на Google Диск",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Восстановление диска",
-      "restoreInterruped": "Восстановление диска прервано"
+      "restoreInterruped": "Восстановление диска прервано",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Резервное копирование на Google Диск",
