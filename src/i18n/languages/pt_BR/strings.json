@@ -176,8 +176,12 @@
       "backup": "Salvar no Drive",
       "backupInterruped": "Backup do Drive interrompido",
       "googleDriveBackup": "Google Drive Backup",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Drive Restore",
-      "restoreInterruped": "Restauração do Drive interrompida"
+      "restoreInterruped": "Restauração do Drive interrompida",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Fazer backup no Google Drive",
