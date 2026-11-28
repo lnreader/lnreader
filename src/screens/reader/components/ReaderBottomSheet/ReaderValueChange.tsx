@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TextStyle, View } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { Slider } from '@components';
@@ -35,6 +35,7 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
 }) => {
   const theme = useTheme();
   const { setChapterReaderSettings, ...settings } = useChapterReaderSettings();
+  const [dragValue, setDragValue] = useState<number>();
 
   return (
     <View style={styles.container}>
@@ -43,7 +44,7 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
           {label}
         </Text>
         <Text style={[styles.value, { color: theme.onSurface }]}>
-          {`${((settings[valueKey] * 10) / 10).toFixed(decimals)}${unit}`}
+          {`${(dragValue ?? settings[valueKey]).toFixed(decimals)}${unit}`}
         </Text>
       </View>
       <Slider
@@ -52,12 +53,12 @@ const ReaderValueChange: React.FC<ReaderValueChangeProps> = ({
         max={max}
         step={valueChange}
         showStops
-        showValueIndicator
-        formatValue={value => `${value.toFixed(decimals)}${unit}`}
         accessibilityLabel={label}
-        onSlidingComplete={value =>
-          setChapterReaderSettings({ [valueKey]: value })
-        }
+        onValueChange={setDragValue}
+        onSlidingComplete={value => {
+          setDragValue(undefined);
+          setChapterReaderSettings({ [valueKey]: value });
+        }}
       />
     </View>
   );

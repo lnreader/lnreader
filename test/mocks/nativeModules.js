@@ -118,5 +118,7 @@ jest.mock('@expo/ui/jetpack-compose', () => {
     Host: ({ children }) => React.createElement(View, null, children),
     TriStateCheckbox: ({ state }) =>
       React.createElement(View, { testID: `checkbox-${state}` }),
+    Slider: props =>
+      React.createElement(View, { testID: 'native-slider', ...props }),
   };
 });
