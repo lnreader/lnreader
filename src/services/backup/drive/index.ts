@@ -1,6 +1,6 @@
 import { DriveFile } from '@api/drive/types';
 import { sleep } from '@utils/sleep';
-import { exists } from '@api/drive';
+import { exists, findFiles } from '@api/drive';
 import { getString } from '@i18n/translations';
 import {
   CACHE_DIR_PATH,
@@ -14,7 +14,12 @@ import {
   getRestoreCompletionText,
 } from '../restoreResult';
 import { getBackupCompletionText } from '../backupResult';
-import { download, updateMetadata, uploadMedia } from '@api/drive/request';
+import {
+  deleteFile,
+  download,
+  updateMetadata,
+  uploadMedia,
+} from '@api/drive/request';
 import { ZipBackupName } from '../types';
 import type {
   DriveBackupData,
@@ -38,14 +43,32 @@ const uploadBackupSection = async (
   backupFolder: DriveFile,
 ) => {
   const file = await uploadMedia(sourcePath);
-  await updateMetadata(
-    file.id,
-    {
-      name,
-      mimeType: 'application/zip',
-      parents: [backupFolder.id],
-    },
-    file.parents[0],
+  try {
+    await updateMetadata(
+      file.id,
+      {
+        name,
+        mimeType: 'application/zip',
+        parents: [backupFolder.id],
+      },
+      file.parents?.[0],
+    );
+  } catch (error) {
+    // The upload landed in the Drive root as "Untitled"; don't leave it there.
+    await deleteFile(file.id).catch(() => undefined);
+    throw error;
+  }
+
+  // Re-using a backup name used to pile up copies of each archive. The new
+  // one is in place, so older copies can go; restore picks the newest anyway
+  // if a delete fails.
+  const previousCopies = await findFiles(name, false, backupFolder.id).catch(
+    () => [],
+  );
+  await Promise.all(
+    previousCopies
+      .filter(previous => previous.id !== file.id)
+      .map(previous => deleteFile(previous.id).catch(() => undefined)),
   );
 };
 
