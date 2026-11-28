@@ -7,6 +7,7 @@ import {
   resolveLibraryFilters,
 } from '@screens/library/constants/constants';
 import { TtsEngine, TtsVoice } from '@modules/nitro-tts';
+import type { TtsControllerPosition } from '@screens/reader/utils/ttsControllerPosition';
 import { useMMKVObject } from 'react-native-mmkv';
 import { useEffect, useMemo } from 'react';
 import { getMMKVObject } from '@utils/mmkv/mmkv';
@@ -249,6 +250,12 @@ export interface ChapterReaderSettings {
     pitch?: number;
     autoPageAdvance?: boolean;
     scrollToTop?: boolean;
+    /**
+     * Relocated floating TTS button position as viewport fractions.
+     * Restored whenever a chapter opens; absent until the user first drags
+     * the button, in which case the CSS default applies.
+     */
+    controllerPosition?: TtsControllerPosition;
   };
   epubLocation: string;
   epubUseAppTheme: boolean;

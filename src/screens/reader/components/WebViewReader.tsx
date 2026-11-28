@@ -21,7 +21,7 @@ import { getString } from '@i18n/translations';
 
 import { INSTALLED_PLUGINS_KEY, getPlugin } from '@plugins/pluginManager';
 import type { Plugin, PluginItem } from '@plugins/types';
-import { MMKVStorage, getMMKVObject } from '@utils/mmkv/mmkv';
+import { MMKVStorage, getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
 import {
   CHAPTER_GENERAL_SETTINGS,
   CHAPTER_READER_SETTINGS,
@@ -56,6 +56,11 @@ import {
   serializeForScript,
   shouldReloadShell,
 } from '../utils/readerShell';
+import {
+  TTS_CONTROLLER_POSITION_MESSAGE,
+  normalizeTtsControllerPosition,
+  withTtsControllerPosition,
+} from '../utils/ttsControllerPosition';
 import { buildReaderChromeScript } from '../utils/buildReaderChromeScript';
 import { createReaderLinkHandlers } from '../utils/handleReaderLink';
 
@@ -973,6 +978,22 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 toNativeTtsSettings(readerSettingsRef.current.tts),
                 readerSettingsRef.current.tts?.autoPageAdvance === true,
               );
+              break;
+            }
+            case TTS_CONTROLLER_POSITION_MESSAGE: {
+              // The floating TTS button was relocated. Persist the position
+              // so the page can restore it, including after it is reloaded.
+              const position = normalizeTtsControllerPosition(event.data);
+              if (position) {
+                const current =
+                  getMMKVObject<ChapterReaderSettings>(
+                    CHAPTER_READER_SETTINGS,
+                  ) ?? initialChapterReaderSettings;
+                setMMKVObject(
+                  CHAPTER_READER_SETTINGS,
+                  withTtsControllerPosition(current, position),
+                );
+              }
               break;
             }
             case 'tts-command': {
