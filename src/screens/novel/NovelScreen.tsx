@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, StatusBar, Text } from 'react-native';
+import { StyleSheet, View, StatusBar } from 'react-native';
 import Animated, {
   SlideInUp,
   SlideOutUp,
@@ -114,10 +114,6 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
   );
   const hideEditInfoModal = useCallback(() => showEditInfoModal(false), []);
   const snackbarTheme = useMemo(() => ({ colors: theme }), [theme]);
-  const snackbarTextStyle = useMemo(
-    () => ({ color: theme.onSurface }),
-    [theme.onSurface],
-  );
   const titleStyle = useMemo(
     () => ({ color: theme.onSurface }),
     [theme.onSurface],
@@ -233,9 +229,7 @@ const Novel = ({ route, navigation }: NovelScreenProps) => {
             theme={snackbarTheme}
             style={styles.snackbar}
           >
-            <Text style={snackbarTextStyle}>
-              {getString('novelScreen.deleteMessage')}
-            </Text>
+            {getString('novelScreen.deleteMessage')}
           </Snackbar>
         </Portal>
         <Portal>
@@ -292,6 +286,6 @@ function createStyles(theme: ThemeColors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
-    snackbar: { backgroundColor: theme.surface, marginBottom: 32 },
+    snackbar: { marginBottom: 32 },
   });
 }

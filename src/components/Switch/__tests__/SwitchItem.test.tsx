@@ -2,22 +2,6 @@ import './mocks';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import SwitchItem from '../SwitchItem';
 
-// Mock reanimated — setUpTests in global setup may have failed.
-jest.mock('react-native-reanimated', () => {
-  const { View } = require('react-native');
-  return {
-    useSharedValue: (init: unknown) => ({ value: init }),
-    useAnimatedStyle: (fn: () => Record<string, unknown>) => fn(),
-    useDerivedValue: (fn: () => unknown) => fn(),
-    withTiming: (val: unknown) => val,
-    withSpring: (val: unknown) => val,
-    interpolateColor: () => 'transparent',
-    createAnimatedComponent: (c: unknown) => c,
-    default: { View },
-    __esModule: true,
-  };
-});
-
 const mockUseTheme = jest.fn();
 
 jest.mock('@hooks/persisted', () => ({

@@ -120,5 +120,11 @@ jest.mock('@expo/ui/jetpack-compose', () => {
       React.createElement(View, { testID: `checkbox-${state}` }),
     Slider: props =>
       React.createElement(View, { testID: 'native-slider', ...props }),
+    Switch: ({ value }) =>
+      React.createElement(View, { testID: `switch-${value ? 'on' : 'off'}` }),
+    RadioButton: ({ selected }) =>
+      React.createElement(View, {
+        testID: `radio-${selected ? 'selected' : 'unselected'}`,
+      }),
   };
 });
