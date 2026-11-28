@@ -176,8 +176,12 @@
       "backup": "نسخ احتياطي للدرايف",
       "backupInterruped": "انقطع النسخ الاحتياطي للدرايف",
       "googleDriveBackup": "نسخ احتياطي لجوجل درايف",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "استعادة من الدرايف",
-      "restoreInterruped": "انقطعت الاستعادة من الدرايف"
+      "restoreInterruped": "انقطعت الاستعادة من الدرايف",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "نسخ احتياطي إلى جوجل درايف الخاص بك",
