@@ -176,8 +176,12 @@
       "backup": "Sao lưu qua Drive",
       "backupInterruped": "Sao lưu Drive Bị ngắt ngang",
       "googleDriveBackup": "Sao lưu qua Google Drive",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Khôi phục qua Drive",
-      "restoreInterruped": "Khôi phục Drive Bị ngắt ngang"
+      "restoreInterruped": "Khôi phục Drive Bị ngắt ngang",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Sao lưu vào Google Drive của bạn",
