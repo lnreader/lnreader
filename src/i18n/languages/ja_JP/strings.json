@@ -176,8 +176,12 @@
       "backup": "ドライブへのバックアップ",
       "backupInterruped": "ドライブへのバックアップが中断されました",
       "googleDriveBackup": "Google ドライブへのバックアップ",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "ドライブから復元",
-      "restoreInterruped": "ドライブからの復元が中断されました"
+      "restoreInterruped": "ドライブからの復元が中断されました",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google ドライブ",
     "googeDriveDesc": "Google ドライブにバックアップ",
