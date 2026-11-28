@@ -15,10 +15,12 @@ import AppErrorBoundary, {
 } from '@components/AppErrorBoundary/AppErrorBoundary';
 import CrashRecoveryGate from '@components/AppErrorBoundary/CrashRecoveryGate';
 import HiddenWebViewHost from '@components/HiddenWebViewHost';
+import AppLockGate from '@components/AppLock/AppLockGate';
 
 import Main from './src/navigators/Main';
 import { useInitDatabase } from '@database/db';
 import { useInitializeAppServices } from '@hooks/common/useInitializeAppServices';
+import { useSecureScreen } from '@hooks/common/useSecureScreen';
 import { opSqliteAdapter } from './src/rozenite/opSqliteAdapter';
 import { useRozeniteSqlitePlugin } from '@rozenite/sqlite-plugin';
 import { ThemeProvider, useTheme } from '@hooks/persisted/useTheme';
@@ -75,6 +77,7 @@ const ThemedPaperProvider = ({ children }: PropsWithChildren) => {
 const Application = () => {
   const { reduceAppAnimations = false } = useAppSettings();
   useRozeniteSqlitePlugin({ adapters: sqliteAdapters });
+  useSecureScreen();
   const { success: databaseReady, error: databaseError } = useInitDatabase();
   const { ready: servicesReady, error: servicesError } =
     useInitializeAppServices(Boolean(databaseReady));
@@ -110,7 +113,9 @@ const Application = () => {
         <AppErrorBoundary>
           <SafeAreaProvider>
             <ThemedPaperProvider>
-              <Main />
+              <AppLockGate>
+                <Main />
+              </AppLockGate>
               <HiddenWebViewHost />
             </ThemedPaperProvider>
           </SafeAreaProvider>

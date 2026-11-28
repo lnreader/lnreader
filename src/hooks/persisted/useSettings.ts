@@ -37,6 +37,8 @@ export const getChapterDownloadCooldownMs = (): number => {
     ? ms
     : DEFAULT_CHAPTER_DOWNLOAD_COOLDOWN_MS;
 };
+export const APP_LOCK_ON_LAUNCH_ONLY = -1;
+
 export const BROWSE_SETTINGS = 'BROWSE_SETTINGS';
 export const LIBRARY_SETTINGS = 'LIBRARY_SETTINGS';
 export const CHAPTER_GENERAL_SETTINGS = 'CHAPTER_GENERAL_SETTINGS';
@@ -122,6 +124,19 @@ export interface AppSettings {
   timeTrackingEnabled: boolean;
   /** The timeout after which to consider the user inactive and not track time */
   inactivityTimeoutMs?: number;
+
+  /**
+   * Security settings
+   */
+  /** Require device authentication (biometrics or screen lock) to open the app */
+  appLockEnabled?: boolean;
+  /**
+   * How long the app may stay in the background before it locks again.
+   * `0` locks as soon as it is left, `APP_LOCK_ON_LAUNCH_ONLY` only on launch.
+   */
+  appLockDelayMs?: number;
+  /** Hide content in recent apps and block screenshots/screen recording */
+  secureScreen?: boolean;
 }
 
 export interface BrowseSettings {
@@ -326,6 +341,13 @@ const initialAppSettings: AppSettings = {
    */
   timeTrackingEnabled: true,
   inactivityTimeoutMs: 5 * 60 * 1000, // 5 minutes
+
+  /**
+   * Security settings
+   */
+  appLockEnabled: false,
+  appLockDelayMs: 0,
+  secureScreen: false,
 };
 
 const initialBrowseSettings: BrowseSettings = {

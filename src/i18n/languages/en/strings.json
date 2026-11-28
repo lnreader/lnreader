@@ -486,7 +486,20 @@
     "enableTimeTrackingDesc": "Tracks time spent reading and displays it in the statistics screen",
     "inactivityTimeout": "Inactivity Timeout",
     "inactivityTimeoutNever": "Never",
-    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity"
+    "inactivityTimeoutDesc": "Automatically pause time tracking after a period of inactivity",
+    "security": "Security",
+    "appLock": "Require unlock",
+    "appLockDesc": "Use your fingerprint, face, or screen lock to open the app",
+    "appLockDelay": "Lock when idle",
+    "appLockDelayDesc": "How long the app can stay in the background before it asks you to unlock it again",
+    "appLockDelayImmediately": "Always",
+    "appLockDelayOnLaunch": "Only when the app is opened",
+    "appLockDelayAfter": "After %{duration}",
+    "appLockNoDeviceLock": "Set up a screen lock on your device to use this",
+    "appLockEnablePrompt": "Confirm to turn on app lock",
+    "appLockDisablePrompt": "Confirm to turn off app lock",
+    "secureScreen": "Secure screen",
+    "secureScreenDesc": "Hide app content in recent apps and block screenshots and screen recordings"
   },
   "globalSearch": {
     "allSources": "all sources",
@@ -1011,5 +1024,11 @@
     "noChaptersThisWeek": "No chapters read this week",
     "incognito": "Incognito mode is on",
     "incognitoDesc": "Reading history is hidden"
+  },
+  "appLock": {
+    "locked": "LNReader is locked",
+    "unlock": "Unlock",
+    "unlockPrompt": "Unlock LNReader",
+    "disabledNoDeviceLock": "App lock was turned off because your device no longer has a screen lock"
   }
 }

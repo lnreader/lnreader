@@ -95,12 +95,18 @@ importers:
       expo-linking:
         specifier: ~58.0.17
         version: 58.0.17(expo@58.0.26)(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)(supports-color@9.4.0)(typescript@6.0.3)
+      expo-local-authentication:
+        specifier: ~58.0.3
+        version: 58.0.3(expo@58.0.26)
       expo-localization:
         specifier: ~58.0.5
         version: 58.0.5(expo@58.0.26)(react@19.3.0)
       expo-navigation-bar:
         specifier: ~58.0.4
         version: 58.0.4(expo@58.0.26)(react-native@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0))(react@19.3.0)(supports-color@9.4.0)
+      expo-screen-capture:
+        specifier: ~58.0.6
+        version: 58.0.6(expo@58.0.26)(react@19.3.0)
       expo-speech:
         specifier: ~58.0.4
         version: 58.0.4(expo@58.0.26)
@@ -3841,6 +3847,11 @@ packages:
       react: '*'
       react-native: '*'
 
+  expo-local-authentication@58.0.3:
+    resolution: {integrity: sha512-noeEnLGIjzawKsNF1mdzx6hUTihaD89AsiWdZGhZFfktwFU9P0dCEn9ed3D3E8WmEGNoejWnNUfImEB3HwIznQ==}
+    peerDependencies:
+      expo: '*'
+
   expo-localization@58.0.5:
     resolution: {integrity: sha512-2wyZl/5wn95l38AAtdaUAq2VMJWbGbgQQDEuIEkkemmsA/BZ8gS21Nq+7I2X9hDfL5Z+4hlyLVdPtDIH0vvt1A==}
     peerDependencies:
@@ -3885,6 +3896,12 @@ packages:
       expo: '*'
       react: '*'
       react-native: '*'
+
+  expo-screen-capture@58.0.6:
+    resolution: {integrity: sha512-mJLGEyoP0TiQjxL/+x0pmvx9/QXVzGa4vywVLeH2InEPUTGsqWm5AYW6fQghauch5RmafkMr6oyoxy8RZu/zoA==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
 
   expo-server@58.1.0:
     resolution: {integrity: sha512-jo7I6uHnP5OQYKx3+7lbpdVVnOEwFj2ryDkQdauUQSwgh2HuMUkiFXWUIVe01ts6DLRoff5U0Tv+uNb3CMq/kw==}
@@ -10901,6 +10918,11 @@ snapshots:
       - supports-color
       - typescript
 
+  expo-local-authentication@58.0.3(expo@58.0.26):
+    dependencies:
+      expo: 58.0.26(af6de26fd6a09cbd451909dc737baba7)
+      invariant: 2.2.4
+
   expo-localization@58.0.5(expo@58.0.26)(react@19.3.0):
     dependencies:
       expo: 58.0.26(af6de26fd6a09cbd451909dc737baba7)
@@ -10957,6 +10979,11 @@ snapshots:
       react-native: 0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0))(@types/react@19.3.0)(react@19.3.0)(supports-color@9.4.0)
     transitivePeerDependencies:
       - supports-color
+
+  expo-screen-capture@58.0.6(expo@58.0.26)(react@19.3.0):
+    dependencies:
+      expo: 58.0.26(af6de26fd6a09cbd451909dc737baba7)
+      react: 19.3.0
 
   expo-server@58.1.0: {}
 
