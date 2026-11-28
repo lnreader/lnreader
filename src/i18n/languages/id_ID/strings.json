@@ -176,8 +176,12 @@
       "backup": "Cadangan Drive",
       "backupInterruped": "Cadangan Drive Terhenti",
       "googleDriveBackup": "Cadangan Google Drive",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Pemulihan Drive",
-      "restoreInterruped": "Pemulihan Drive Terinterupsi"
+      "restoreInterruped": "Pemulihan Drive Terinterupsi",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Cadangkan ke Google Drive Anda",
