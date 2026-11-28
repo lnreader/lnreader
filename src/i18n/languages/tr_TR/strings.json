@@ -176,8 +176,12 @@
       "backup": "Bulut Yedeği",
       "backupInterruped": "Drive Backup Interrupted",
       "googleDriveBackup": "Google Drive Yedeği",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Bulut geri yükleme",
-      "restoreInterruped": "Drive Restore Interrupted"
+      "restoreInterruped": "Drive Restore Interrupted",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Google Drive'a yedekle",
