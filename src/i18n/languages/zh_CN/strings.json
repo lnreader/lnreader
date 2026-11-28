@@ -176,8 +176,12 @@
       "backup": "云端硬盘备份",
       "backupInterruped": "云端硬盘备份中断",
       "googleDriveBackup": "Google 云端硬盘备份",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "云端硬盘恢复",
-      "restoreInterruped": "云端硬盘恢复中断"
+      "restoreInterruped": "云端硬盘恢复中断",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "备份到您的 Google 云端硬盘",
