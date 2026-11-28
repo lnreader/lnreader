@@ -48,7 +48,7 @@ const SettingsStack = () => {
         component={RespositorySettings}
       />
       <Stack.Screen name="LibrarySettings" component={LibrarySettings} />
-<Stack.Screen name="CustomCode" component={SettingsCustomCode} />
+      <Stack.Screen name="CustomCode" component={SettingsCustomCode} />
       <Stack.Screen name="CodeSnippets" component={CodeSnippetsScreen} />
       <Stack.Screen name="GenreTaxonomy" component={GenreTaxonomyScreen} />
     </Stack.Navigator>

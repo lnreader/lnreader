@@ -309,6 +309,8 @@ const TTSTab = ({ scrollRef }: TTSTabProps) => {
   const [voices, setVoices] = useState<TtsVoice[]>([]);
   const [engineModalVisible, setEngineModalVisible] = useState(false);
   const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+  const [dragRate, setDragRate] = useState<number>();
+  const [dragPitch, setDragPitch] = useState<number>();
 
   // Android only; resolves empty on iOS, which hides the Engine row below.
   useEffect(() => {
@@ -383,37 +385,37 @@ const TTSTab = ({ scrollRef }: TTSTabProps) => {
 
               <View style={styles.sliderSection}>
                 <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Speed: {tts?.rate?.toFixed(1) || '1.0'}x
+                  Speed: {(dragRate ?? tts?.rate ?? 1).toFixed(1)}x
                 </Text>
                 <Slider
                   value={tts?.rate || 1}
                   min={0.1}
                   max={5}
                   step={0.1}
-                  showValueIndicator
-                  formatValue={value => `${value.toFixed(1)}x`}
                   accessibilityLabel="Text to speech speed"
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, rate: value } })
-                  }
+                  onValueChange={setDragRate}
+                  onSlidingComplete={value => {
+                    setDragRate(undefined);
+                    setChapterReaderSettings({ tts: { ...tts, rate: value } });
+                  }}
                 />
               </View>
 
               <View style={styles.sliderSection}>
                 <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
-                  Pitch: {tts?.pitch?.toFixed(1) || '1.0'}
+                  Pitch: {(dragPitch ?? tts?.pitch ?? 1).toFixed(1)}
                 </Text>
                 <Slider
                   value={tts?.pitch || 1}
                   min={0.1}
                   max={5}
                   step={0.1}
-                  showValueIndicator
-                  formatValue={value => value.toFixed(1)}
                   accessibilityLabel="Text to speech pitch"
-                  onSlidingComplete={value =>
-                    setChapterReaderSettings({ tts: { ...tts, pitch: value } })
-                  }
+                  onValueChange={setDragPitch}
+                  onSlidingComplete={value => {
+                    setDragPitch(undefined);
+                    setChapterReaderSettings({ tts: { ...tts, pitch: value } });
+                  }}
                 />
               </View>
 

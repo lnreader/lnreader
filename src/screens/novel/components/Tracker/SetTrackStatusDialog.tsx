@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { StyleSheet } from 'react-native';
 
-import { Dialog } from '@components';
-import { RadioButton, RadioButtonGroup } from '@components/RadioButton';
+import { Dialog, RadioButton } from '@components';
 import { useTheme } from '@hooks/persisted';
 import { getString } from '@i18n/translations';
 import { UserListStatus } from '@services/Trackers';
@@ -21,22 +21,23 @@ const SetTrackStatusDialogContent: React.FC<
     onDismiss();
   };
 
-  const handleValueChange = (value: string) => {
-    setSelectedStatus(value as UserListStatus);
-  };
-
   return (
     <Dialog.Root visible onDismiss={onDismiss}>
       <Dialog.Title>Status</Dialog.Title>
       <Dialog.List>
-        <RadioButtonGroup
-          onValueChange={handleValueChange}
-          value={selectedStatus}
-        >
-          {Object.entries(STATUS_LABELS).map(([key, label]) => (
-            <RadioButton key={key} value={key} label={label} theme={theme} />
-          ))}
-        </RadioButtonGroup>
+        {(Object.entries(STATUS_LABELS) as [UserListStatus, string][]).map(
+          ([key, label]) => (
+            <RadioButton
+              key={key}
+              label={label}
+              status={selectedStatus === key}
+              onPress={() => setSelectedStatus(key)}
+              style={styles.radio}
+              labelStyle={styles.radioLabel}
+              theme={theme}
+            />
+          ),
+        )}
       </Dialog.List>
       <Dialog.Actions>
         <Dialog.Action onPress={onDismiss}>
@@ -56,3 +57,13 @@ const SetTrackStatusDialog: React.FC<TrackStatusDialogProps> = ({
 }) => (visible ? <SetTrackStatusDialogContent {...props} /> : null);
 
 export default SetTrackStatusDialog;
+
+const styles = StyleSheet.create({
+  radio: {
+    paddingHorizontal: 24,
+    paddingVertical: 2,
+  },
+  radioLabel: {
+    fontSize: 16,
+  },
+});

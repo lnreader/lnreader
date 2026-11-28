@@ -23,10 +23,7 @@ const RuleCard = memo(
 
     return (
       <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.secondaryContainer },
-        ]}
+        style={[styles.card, { backgroundColor: theme.secondaryContainer }]}
       >
         <View style={styles.cardContent}>
           <View

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TextStyle, View } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { Slider } from '@components';
@@ -12,6 +12,7 @@ interface ReaderTextSizeProps {
 const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
   const theme = useTheme();
   const { textSize, setChapterReaderSettings } = useChapterReaderSettings();
+  const [dragValue, setDragValue] = useState<number>();
 
   return (
     <View style={styles.container}>
@@ -20,7 +21,7 @@ const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
           {getString('readerScreen.bottomSheet.textSize')}
         </Text>
         <Text style={[styles.value, { color: theme.onSurface }]}>
-          {textSize}px
+          {dragValue ?? textSize}px
         </Text>
       </View>
       <Slider
@@ -29,12 +30,12 @@ const ReaderTextSize: React.FC<ReaderTextSizeProps> = ({ labelStyle }) => {
         max={50}
         step={1}
         showStops
-        showValueIndicator
-        formatValue={value => `${value}px`}
         accessibilityLabel={getString('readerScreen.bottomSheet.textSize')}
-        onSlidingComplete={value =>
-          setChapterReaderSettings({ textSize: value })
-        }
+        onValueChange={setDragValue}
+        onSlidingComplete={value => {
+          setDragValue(undefined);
+          setChapterReaderSettings({ textSize: value });
+        }}
       />
     </View>
   );
