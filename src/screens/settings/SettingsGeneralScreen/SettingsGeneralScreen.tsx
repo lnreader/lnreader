@@ -10,6 +10,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SettingSwitch from '../components/SettingSwitch';
 import DownloadCooldownModal from './modals/DownloadCooldownModal';
 import InactivityTimeoutModal from './modals/InactivityTimeoutModal';
+import AppLockDelayModal, {
+  getAppLockDelayLabel,
+} from './modals/AppLockDelayModal';
+import { authenticateDevice, canUseDeviceAuth } from '@utils/deviceAuth';
+import { showToast } from '@utils/showToast';
 
 type GeneralSettingsProps = NativeStackScreenProps<
   SettingsStackParamList,
@@ -19,17 +24,44 @@ type GeneralSettingsProps = NativeStackScreenProps<
 const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
   const theme = useTheme();
   const {
+    appLockDelayMs = 0,
+    appLockEnabled = false,
     chapterDownloadCooldownMs,
     disableHapticFeedback,
     disableLoadingAnimations,
     reduceAppAnimations = false,
     inactivityTimeoutMs,
+    secureScreen = false,
     setAppSettings,
     timeTrackingEnabled,
   } = useAppSettings();
 
   const downloadCooldownModal = useBoolean();
   const inactivityTimeoutModal = useBoolean();
+  const appLockDelayModal = useBoolean();
+
+  const toggleAppLock = async () => {
+    if (!appLockEnabled && !(await canUseDeviceAuth())) {
+      showToast(getString('generalSettingsScreen.appLockNoDeviceLock'));
+      return;
+    }
+    const result = await authenticateDevice(
+      getString(
+        appLockEnabled
+          ? 'generalSettingsScreen.appLockDisablePrompt'
+          : 'generalSettingsScreen.appLockEnablePrompt',
+      ),
+    );
+    if (result === 'success') {
+      setAppSettings({ appLockEnabled: !appLockEnabled });
+    } else if (result === 'unavailable') {
+      if (appLockEnabled) {
+        setAppSettings({ appLockEnabled: false });
+      } else {
+        showToast(getString('generalSettingsScreen.appLockNoDeviceLock'));
+      }
+    }
+  };
 
   return (
     <SafeAreaView excludeTop>
@@ -65,6 +97,31 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
                   })
             }
             onPress={inactivityTimeoutModal.setTrue}
+            theme={theme}
+          />
+          <List.SubHeader theme={theme}>
+            {getString('generalSettingsScreen.security')}
+          </List.SubHeader>
+          <SettingSwitch
+            label={getString('generalSettingsScreen.appLock')}
+            description={getString('generalSettingsScreen.appLockDesc')}
+            value={appLockEnabled}
+            onPress={toggleAppLock}
+            theme={theme}
+          />
+          {appLockEnabled ? (
+            <List.Item
+              title={getString('generalSettingsScreen.appLockDelay')}
+              description={getAppLockDelayLabel(appLockDelayMs)}
+              onPress={appLockDelayModal.setTrue}
+              theme={theme}
+            />
+          ) : null}
+          <SettingSwitch
+            label={getString('generalSettingsScreen.secureScreen')}
+            description={getString('generalSettingsScreen.secureScreenDesc')}
+            value={secureScreen}
+            onPress={() => setAppSettings({ secureScreen: !secureScreen })}
             theme={theme}
           />
           <List.SubHeader theme={theme}>
@@ -124,6 +181,12 @@ const GeneralSettings = ({ navigation }: GeneralSettingsProps) => {
         inactivityTimeoutMs={inactivityTimeoutMs}
         modalVisible={inactivityTimeoutModal.value}
         hideModal={inactivityTimeoutModal.setFalse}
+        theme={theme}
+      />
+      <AppLockDelayModal
+        appLockDelayMs={appLockDelayMs}
+        visible={appLockDelayModal.value}
+        hideModal={appLockDelayModal.setFalse}
         theme={theme}
       />
     </SafeAreaView>

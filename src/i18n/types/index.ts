@@ -430,6 +430,19 @@ export interface StringMap {
   'generalSettingsScreen.inactivityTimeout': 'string';
   'generalSettingsScreen.inactivityTimeoutNever': 'string';
   'generalSettingsScreen.inactivityTimeoutDesc': 'string';
+  'generalSettingsScreen.security': 'string';
+  'generalSettingsScreen.appLock': 'string';
+  'generalSettingsScreen.appLockDesc': 'string';
+  'generalSettingsScreen.appLockDelay': 'string';
+  'generalSettingsScreen.appLockDelayDesc': 'string';
+  'generalSettingsScreen.appLockDelayImmediately': 'string';
+  'generalSettingsScreen.appLockDelayOnLaunch': 'string';
+  'generalSettingsScreen.appLockDelayAfter': 'string';
+  'generalSettingsScreen.appLockNoDeviceLock': 'string';
+  'generalSettingsScreen.appLockEnablePrompt': 'string';
+  'generalSettingsScreen.appLockDisablePrompt': 'string';
+  'generalSettingsScreen.secureScreen': 'string';
+  'generalSettingsScreen.secureScreenDesc': 'string';
   'globalSearch.allSources': 'string';
   'globalSearch.searchIn': 'string';
   'globalSearch.openNovel': 'string';
@@ -856,4 +869,8 @@ export interface StringMap {
   'widgets.noChaptersThisWeek': 'string';
   'widgets.incognito': 'string';
   'widgets.incognitoDesc': 'string';
+  'appLock.locked': 'string';
+  'appLock.unlock': 'string';
+  'appLock.unlockPrompt': 'string';
+  'appLock.disabledNoDeviceLock': 'string';
 }
