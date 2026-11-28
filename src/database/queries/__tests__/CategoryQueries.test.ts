@@ -24,6 +24,7 @@ import {
   deleteCategoryById,
   updateCategoryOrderInDb,
   getAllNovelCategories,
+  hasUserCategories,
   _restoreCategory,
 } from '../CategoryQueries';
 import { showToast } from '@utils/showToast';
@@ -54,6 +55,16 @@ describe('CategoryQueries', () => {
       const testCat = result.find(c => c.id === categoryId);
       expect(testCat).toBeDefined();
       expect(testCat?.novelIds).toBe(String(novelId));
+    });
+  });
+
+  describe('hasUserCategories', () => {
+    it('ignores the built-in Default and Local categories', async () => {
+      expect(await hasUserCategories()).toBe(false);
+
+      await insertTestCategory(getTestDb(), { name: 'Reading' });
+
+      expect(await hasUserCategories()).toBe(true);
     });
   });
 

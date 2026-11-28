@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { getCategoriesFromDb } from '@database/queries/CategoryQueries';
+import {
+  getCategoriesFromDb,
+  hasUserCategories,
+} from '@database/queries/CategoryQueries';
 import {
   getLibraryNovelKeysFromDb,
   getLibraryNovelKeysQuery,
@@ -230,6 +233,12 @@ export const useLibrary = (): UseLibraryReturnType => {
       if (promptForCategoryOnAdd) {
         const novel = await getNovelByPath(novelPath, pluginId);
         if (!novel?.inLibrary) {
+          // With only the built-in categories, every choice ends up in
+          // Default (local novels also always get Local), so don't ask.
+          if (!(await hasUserCategories())) {
+            return performLibrarySwitch(novelPath, pluginId, []);
+          }
+
           return new Promise<boolean>(resolve => {
             pendingLibraryAdditionRef.current?.resolve(false);
             pendingLibraryAdditionRef.current = {

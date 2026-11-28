@@ -1,4 +1,4 @@
-import { eq, sql, inArray, and, ne, count } from 'drizzle-orm';
+import { eq, sql, inArray, and, ne, count, notInArray } from 'drizzle-orm';
 import { BackupCategory, Category, NovelCategory, CCategory } from '../types';
 import { showToast } from '@utils/showToast';
 import { getString } from '@i18n/translations';
@@ -43,6 +43,16 @@ export const getCategoriesFromDb = async (): Promise<
     .groupBy(categorySchema.id, categorySchema.name, categorySchema.sort)
     .orderBy(categorySchema.sort)
     .all();
+};
+
+export const hasUserCategories = async (): Promise<boolean> => {
+  const category = await dbManager
+    .select({ id: categorySchema.id })
+    .from(categorySchema)
+    .where(notInArray(categorySchema.id, Object.values(BUILT_IN_CATEGORY_IDS)))
+    .limit(1)
+    .get();
+  return category !== undefined;
 };
 
 /**

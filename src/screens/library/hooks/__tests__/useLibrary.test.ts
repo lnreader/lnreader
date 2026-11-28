@@ -6,7 +6,10 @@ import {
   getLibraryNovelsFromDb,
   getLibraryNovelsQuery,
 } from '@database/queries/LibraryQueries';
-import { getCategoriesFromDb } from '@database/queries/CategoryQueries';
+import {
+  getCategoriesFromDb,
+  hasUserCategories,
+} from '@database/queries/CategoryQueries';
 import { NovelInfo } from '@database/types';
 import { useLiveQuery } from '@database/manager/liveQuery';
 import { useLibrarySettings } from '@hooks/persisted';
@@ -33,6 +36,7 @@ jest.mock('@database/queries/LibraryQueries', () => ({
 
 jest.mock('@database/queries/CategoryQueries', () => ({
   getCategoriesFromDb: jest.fn().mockResolvedValue([]),
+  hasUserCategories: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock('@database/queries/NovelQueries', () => ({
@@ -72,6 +76,9 @@ const mockGetLibraryNovelKeysFromDb =
   getLibraryNovelKeysFromDb as jest.MockedFunction<
     typeof getLibraryNovelKeysFromDb
   >;
+const mockHasUserCategories = hasUserCategories as jest.MockedFunction<
+  typeof hasUserCategories
+>;
 const mockGetCategoriesFromDb = getCategoriesFromDb as jest.MockedFunction<
   typeof getCategoriesFromDb
 >;
@@ -113,6 +120,7 @@ describe('useLibrary', () => {
     mockGetLibraryNovelsFromDb.mockResolvedValue([]);
     mockGetLibraryNovelKeysFromDb.mockResolvedValue([]);
     mockGetCategoriesFromDb.mockResolvedValue([]);
+    mockHasUserCategories.mockResolvedValue(true);
     mockGetNovelByPath.mockReturnValue(undefined);
     mockSwitchNovelToLibraryQuery.mockResolvedValue({
       id: 1,
@@ -331,5 +339,32 @@ describe('useLibrary', () => {
 
     await expect(completion).resolves.toBe(false);
     expect(mockSwitchNovelToLibraryQuery).not.toHaveBeenCalled();
+  });
+
+  it('adds to Default without asking when only built-in categories exist', async () => {
+    mockUseLibrarySettings.mockReturnValue({
+      filters: {},
+      sortOrder: 'name ASC',
+      downloadedOnlyMode: false,
+      promptForCategoryOnAdd: true,
+    } as ReturnType<typeof useLibrarySettings>);
+    mockHasUserCategories.mockResolvedValue(false);
+    const { result } = renderHook(useLibrary);
+
+    let completion: Promise<boolean> | undefined;
+    await act(async () => {
+      completion = result.current.switchNovelToLibrary(
+        '/test/novel',
+        'test-plugin',
+      );
+    });
+
+    await expect(completion).resolves.toBe(true);
+    expect(result.current.pendingLibraryAddition).toBeUndefined();
+    expect(mockSwitchNovelToLibraryQuery).toHaveBeenCalledWith(
+      '/test/novel',
+      'test-plugin',
+      [],
+    );
   });
 });
