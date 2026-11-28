@@ -1,19 +1,61 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-import { RadioButton, RadioButtonGroup } from '@components/RadioButton';
+import { RadioButton } from '@components';
 import { useTheme } from '@hooks/persisted';
 import {
   getAniListScoreFormatting,
   getKitsuScoreFormatting,
   getMyAnimeListScoreLabel,
 } from './constants';
+import { ThemeColors } from '@theme/types';
 import {
   AniListScoreSelectorProps,
   ScoreFormat,
   ScoreSelectorProps,
 } from './types';
+
+interface ScoreRadioListProps {
+  count: number;
+  label: (score: number) => string;
+  selected: number;
+  onSelect: (score: number) => void;
+  theme: ThemeColors;
+}
+
+// Virtualized so long scales (AniList's 101 points) don't mount a native
+// radio for every row at once.
+const ScoreRadioList: React.FC<ScoreRadioListProps> = ({
+  count,
+  label,
+  selected,
+  onSelect,
+  theme,
+}) => {
+  const scores = useMemo(
+    () => Array.from({ length: count }, (_, i) => i),
+    [count],
+  );
+
+  return (
+    <FlatList
+      data={scores}
+      extraData={selected}
+      keyExtractor={String}
+      renderItem={({ item: score }) => (
+        <RadioButton
+          label={label(score)}
+          status={selected === score}
+          onPress={() => onSelect(score)}
+          style={styles.radio}
+          labelStyle={styles.radioLabel}
+          theme={theme}
+        />
+      )}
+    />
+  );
+};
 
 export const MyAnimeListScoreSelector: React.FC<ScoreSelectorProps> = ({
   trackItem,
@@ -22,21 +64,20 @@ export const MyAnimeListScoreSelector: React.FC<ScoreSelectorProps> = ({
   const theme = useTheme();
   const scores = Array.from({ length: 11 }, (_, i) => i);
 
-  const handleValueChange = (value: string) => {
-    onUpdateScore(Number(value));
-  };
-
   return (
-    <RadioButtonGroup onValueChange={handleValueChange} value={trackItem.score}>
+    <View style={styles.list}>
       {scores.map(score => (
         <RadioButton
           key={score}
-          value={score}
           label={getMyAnimeListScoreLabel(score)}
+          status={trackItem.score === score}
+          onPress={() => onUpdateScore(score)}
+          style={styles.radio}
+          labelStyle={styles.radioLabel}
           theme={theme}
         />
       ))}
-    </RadioButtonGroup>
+    </View>
   );
 };
 
@@ -112,28 +153,14 @@ export const AniListScoreSelector: React.FC<AniListScoreSelectorProps> = ({
 }) => {
   const theme = useTheme();
   const formatting = getAniListScoreFormatting(scoreFormat as ScoreFormat);
-  const scores = Array.from({ length: formatting.count }, (_, i) => i);
-
-  const handleValueChange = (value: string) => {
-    onUpdateScore(Number(value));
-  };
-
   return (
-    <ScrollView>
-      <RadioButtonGroup
-        onValueChange={handleValueChange}
-        value={trackItem.score}
-      >
-        {scores.map(score => (
-          <RadioButton
-            key={score}
-            value={score}
-            label={formatting.label(score)}
-            theme={theme}
-          />
-        ))}
-      </RadioButtonGroup>
-    </ScrollView>
+    <ScoreRadioList
+      count={formatting.count}
+      label={formatting.label}
+      selected={trackItem.score}
+      onSelect={onUpdateScore}
+      theme={theme}
+    />
   );
 };
 
@@ -147,28 +174,14 @@ export const KitsuScoreSelector: React.FC<ScoreSelectorProps> = ({
 }) => {
   const theme = useTheme();
   const formatting = getKitsuScoreFormatting();
-  const scores = Array.from({ length: formatting.count }, (_, i) => i);
-
-  const handleValueChange = (value: string) => {
-    onUpdateScore(Number(value));
-  };
-
   return (
-    <ScrollView>
-      <RadioButtonGroup
-        onValueChange={handleValueChange}
-        value={trackItem.score}
-      >
-        {scores.map(score => (
-          <RadioButton
-            key={score}
-            value={score}
-            label={formatting.label(score)}
-            theme={theme}
-          />
-        ))}
-      </RadioButtonGroup>
-    </ScrollView>
+    <ScoreRadioList
+      count={formatting.count}
+      label={formatting.label}
+      selected={trackItem.score}
+      onSelect={onUpdateScore}
+      theme={theme}
+    />
   );
 };
 
@@ -185,6 +198,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 500,
     marginBottom: 8,
+  },
+  list: {
+    marginHorizontal: -24,
+  },
+  radio: {
+    paddingHorizontal: 24,
+    paddingVertical: 2,
+  },
+  radioLabel: {
+    fontSize: 16,
   },
   helperText: {
     fontSize: 13,
