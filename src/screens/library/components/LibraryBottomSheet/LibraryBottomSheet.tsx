@@ -39,12 +39,11 @@ import {
 import { getNovelsWithGenresFromDb } from '@database/queries/StatsQueries';
 import { showToast } from '@utils/showToast';
 import { getErrorMessage } from '@utils/error';
-import { RadioButton } from '@components/RadioButton/RadioButton';
 import BottomSheet, {
   BottomSheetRef,
   useTabScrollables,
 } from '@components/BottomSheet/BottomSheet';
-import { TopTabBar } from '@components';
+import { RadioButton, TopTabBar } from '@components';
 import { LegendList, LegendListRef } from '@legendapp/list/react-native';
 
 interface LibraryBottomSheetProps {
