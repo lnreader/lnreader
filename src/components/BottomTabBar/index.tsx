@@ -29,7 +29,10 @@ function CustomBottomTabBar({
   renderIcon,
 }: CustomBottomTabBarProps) {
   const { reduceAppAnimations = false } = useAppSettings();
-  const transparentBg = Color(theme.primaryContainer).fade(1).rgb().toString();
+  const transparentBg = Color(theme.secondaryContainer)
+    .fade(1)
+    .rgb()
+    .toString();
   const getLabelText = useCallback(
     (route: any) => {
       if (!showLabelsInNav && route.name !== state.routeNames[state.index]) {
@@ -84,7 +87,7 @@ function CustomBottomTabBar({
         };
 
         const iconColor = isFocused
-          ? theme.onPrimaryContainer
+          ? theme.onSecondaryContainer
           : theme.onSurfaceVariant;
 
         return (
@@ -114,7 +117,7 @@ function CustomBottomTabBar({
                     transitionTimingFunction: 'ease-in-out',
                     transform: [{ scaleX: isFocused ? 1 : 0.5 }],
                     backgroundColor: isFocused
-                      ? theme.primaryContainer
+                      ? theme.secondaryContainer
                       : transparentBg,
                   },
                 ]}
