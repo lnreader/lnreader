@@ -176,8 +176,12 @@
       "backup": "Drive säkerhetskopia",
       "backupInterruped": "Drive Återställning Avbruten",
       "googleDriveBackup": "Säkerhetskopiering till Google Drive",
+      "loadBackupsFailed": "Couldn't load backups: %{error}",
+      "permissionRequired": "Google Drive access is required. Sign in again and allow LNReader to access its Drive files.",
+      "prepareFailed": "Couldn't create the backup folder: %{error}",
       "restore": "Drive Återställ",
-      "restoreInterruped": "Drive Återställning Avbruten"
+      "restoreInterruped": "Drive Återställning Avbruten",
+      "signInFailed": "Google sign-in failed: %{error}"
     },
     "googeDrive": "Google Drive",
     "googeDriveDesc": "Säkerhetskopiera till din Google Drive",
