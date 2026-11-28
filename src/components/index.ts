@@ -36,4 +36,4 @@ export { default as Menu } from './Menu';
 export { default as AnimatedIconButton } from './IconButtonV2/AnimatedIconButton';
 export { default as TextInput } from './TextInput';
 export { default as Slider } from './Slider/Slider';
-export type { SliderProps, SliderSize } from './Slider/Slider';
+export type { SliderProps } from './Slider/Slider';
