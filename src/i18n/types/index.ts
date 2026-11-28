@@ -154,8 +154,12 @@ export interface StringMap {
   'backupScreen.drive.backup': 'string';
   'backupScreen.drive.backupInterruped': 'string';
   'backupScreen.drive.googleDriveBackup': 'string';
+  'backupScreen.drive.loadBackupsFailed': 'string';
+  'backupScreen.drive.permissionRequired': 'string';
+  'backupScreen.drive.prepareFailed': 'string';
   'backupScreen.drive.restore': 'string';
   'backupScreen.drive.restoreInterruped': 'string';
+  'backupScreen.drive.signInFailed': 'string';
   'backupScreen.googeDrive': 'string';
   'backupScreen.googeDriveDesc': 'string';
   'backupScreen.invalidBackupFolder': 'string';
